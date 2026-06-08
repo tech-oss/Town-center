@@ -10,7 +10,7 @@ export const header = {
     { label: "Eat & Drink", href: "#eat-drink" },
     { label: "Shop", href: "#shop" },
     { label: "Live", href: "#live" },
-    { label: "Work", href: "#work" },
+    { label: "Work", href: "/work" },
     { label: "Explore", href: "#explore" },
   ],
   utilityLinks: [

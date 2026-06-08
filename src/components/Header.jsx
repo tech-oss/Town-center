@@ -1,5 +1,5 @@
 import { useState, useEffect, forwardRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { header } from "../Data/content";
 import { menus } from "../Data/pages";
 import { liveMenu } from "../Data/live";
@@ -11,6 +11,7 @@ const Header = forwardRef(function Header(_, ref) {
   const [openDropdown, setOpenDropdown] = useState(null); // desktop hover
   const [mobileExpanded, setMobileExpanded] = useState(null); // mobile accordion
   const [scrolled, setScrolled] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
@@ -95,6 +96,21 @@ const Header = forwardRef(function Header(_, ref) {
                     </svg>
                   </Link>
                 </div>
+              );
+            }
+            if (nav.href?.startsWith("/")) {
+              const active = pathname === nav.href || pathname.startsWith(nav.href + "/");
+              return (
+                <Link
+                  key={nav.label}
+                  to={nav.href}
+                  className="text-sm font-medium tracking-wide transition-colors duration-150"
+                  style={{ color: active ? "var(--sage)" : "rgba(255,255,255,0.85)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = active ? "var(--sage)" : "rgba(255,255,255,0.85)")}
+                >
+                  {nav.label}
+                </Link>
               );
             }
             return (
@@ -197,6 +213,19 @@ const Header = forwardRef(function Header(_, ref) {
                     </div>
                   )}
                 </div>
+              );
+            }
+            if (nav.href?.startsWith("/")) {
+              return (
+                <Link
+                  key={nav.label}
+                  to={nav.href}
+                  className="py-3 text-sm font-medium"
+                  style={{ color: "rgba(255,255,255,0.85)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+                  onClick={closeAll}
+                >
+                  {nav.label}
+                </Link>
               );
             }
             return (
