@@ -1,0 +1,74 @@
+import { useLayoutEffect, useRef, useState, useEffect } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import './App.css'
+import Header from './components/Header'
+import HomePage from './components/HomePage'
+import CategoryPage from './components/CategoryPage'
+import DetailPage from './components/DetailPage'
+import ArticlePage from './components/ArticlePage'
+import LivePage from './components/LivePage'
+import PropertySearch from './components/PropertySearch'
+import PropertyPage from './components/PropertyPage'
+import BuildingPage from './components/BuildingPage'
+import EnquirePage from './components/EnquirePage'
+import AttractionPage from './components/AttractionPage'
+import Footer from './components/Footer'
+import NewsletterModal from './components/NewsletterModal'
+import { newsletterModal } from './Data/content'
+
+function App() {
+  const headerRef = useRef(null)
+  const [headerHeight, setHeaderHeight] = useState(0)
+
+  // Newsletter popup — auto-opens once per session (React state only, no storage)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalShown, setModalShown] = useState(false)
+
+  useEffect(() => {
+    if (modalShown) return
+    const t = setTimeout(() => {
+      setModalOpen(true)
+      setModalShown(true) // mark as shown so it never auto-opens again this session
+    }, newsletterModal.openDelay)
+    return () => clearTimeout(t)
+  }, [modalShown])
+
+  // useLayoutEffect fires synchronously BEFORE the browser paints,
+  // so the correct height is used on the very first frame — no flash/gap.
+  useLayoutEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+    setHeaderHeight(el.offsetHeight)
+    const ro = new ResizeObserver(() => setHeaderHeight(el.offsetHeight))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  return (
+    <>
+      <Header ref={headerRef} />
+      <main style={{ paddingTop: headerHeight || undefined }}>
+        <Routes>
+          <Route path="/" element={<HomePage headerHeight={headerHeight} />} />
+          <Route path="/news/:articleSlug" element={<ArticlePage />} />
+          <Route path="/attraction/:slug" element={<AttractionPage />} />
+          {/* Live (residential) section */}
+          <Route path="/live" element={<LivePage />} />
+          <Route path="/live/overview" element={<PropertySearch mode="overview" />} />
+          <Route path="/live/for-sale" element={<PropertySearch mode="sale" />} />
+          <Route path="/live/for-rent" element={<PropertySearch mode="rent" />} />
+          <Route path="/live/enquire" element={<EnquirePage />} />
+          <Route path="/live/building/:slug" element={<BuildingPage />} />
+          <Route path="/live/property/:slug" element={<PropertyPage />} />
+          <Route path="/:section" element={<CategoryPage />} />
+          <Route path="/:section/category/:category" element={<CategoryPage />} />
+          <Route path="/:section/place/:slug" element={<DetailPage />} />
+        </Routes>
+      </main>
+      <Footer />
+      <NewsletterModal open={modalOpen} onClose={() => setModalOpen(false)} />
+    </>
+  )
+}
+
+export default App

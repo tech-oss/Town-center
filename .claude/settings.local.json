@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netlify logout *)",
+      "Bash(netlify unlink *)",
+      "Bash(netlify login *)"
+    ]
+  }
+}
