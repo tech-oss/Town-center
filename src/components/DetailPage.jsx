@@ -17,7 +17,11 @@ export default function DetailPage() {
   const sec = sections[item.section];
 
   // Related items from the same category (excluding this one)
-  const related = sec.items.filter((i) => i.category === item.category && i.slug !== item.slug).slice(0, 3);
+  // Prefer same-category venues, then top up with others from the section so
+  // "You might also like" always shows a full set of relevant listings.
+  const sameCat = sec.items.filter((i) => i.category === item.category && i.slug !== item.slug);
+  const others = sec.items.filter((i) => i.category !== item.category && i.slug !== item.slug);
+  const related = [...sameCat, ...others].slice(0, 3);
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>

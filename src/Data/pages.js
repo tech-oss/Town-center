@@ -129,7 +129,7 @@ const cocobaNews = [
     date: "While stocks last",
     title: "End of Season Sale — While Stocks Last",
     excerpt: "Stock up on handcrafted COCOBA chocolates at reduced prices — a perfect chance to discover new favourites or pick up a gift.",
-    image: "/images/cocoba/dessert.jpg",
+    image: "/images/cocoba/truffles.jpg",
     body: [
       "There's never been a better time to treat yourself (or someone else) at COCOBA Maidenhead. Our End of Season Sale is now on in store, with a selection of handcrafted chocolates, gift boxes and seasonal treats available at reduced prices.",
       "Every piece is made with premium chocolate crafted at COCOBA's dedicated Kent chocolate factory, so it's a genuine chance to enjoy artisan quality for less.",
@@ -143,7 +143,7 @@ const cocobaNews = [
     date: "All year round",
     title: "Meet the Hot Chocolate Bombes",
     excerpt: "Drop one into warm milk and watch it melt into a rich, real-chocolate hot drink — one of COCOBA's signature treats.",
-    image: "/images/cocoba/dessert.jpg",
+    image: "/images/cocoba/bombes.jpg",
     body: [
       "If you haven't tried a COCOBA Hot Chocolate Bombe yet, you're in for something special. Drop one into a mug of warm milk and watch it melt away to reveal a rich, indulgent, real-chocolate hot drink.",
       "Available in a range of flavours and made with the same premium chocolate as everything else on our menu, they're a firm favourite with guests — and they make a lovely gift to take home, too.",
