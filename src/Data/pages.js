@@ -120,6 +120,52 @@ const coppaNews = [
   },
 ];
 
+// Real News & Offers for COCOBA Chocolate Café, Maidenhead (sub-pages at /news/:slug)
+const cocobaNews = [
+  {
+    id: "cocoba-end-of-season-sale",
+    slug: "cocoba-end-of-season-sale",
+    category: "Offer",
+    date: "While stocks last",
+    title: "End of Season Sale — While Stocks Last",
+    excerpt: "Stock up on handcrafted COCOBA chocolates at reduced prices — a perfect chance to discover new favourites or pick up a gift.",
+    image: "/images/cocoba/dessert.jpg",
+    body: [
+      "There's never been a better time to treat yourself (or someone else) at COCOBA Maidenhead. Our End of Season Sale is now on in store, with a selection of handcrafted chocolates, gift boxes and seasonal treats available at reduced prices.",
+      "Every piece is made with premium chocolate crafted at COCOBA's dedicated Kent chocolate factory, so it's a genuine chance to enjoy artisan quality for less.",
+      "Stock is limited and selling fast — pop in to the café on the High Street while it lasts.",
+    ],
+  },
+  {
+    id: "cocoba-hot-chocolate-bombes",
+    slug: "cocoba-hot-chocolate-bombes",
+    category: "Featured",
+    date: "All year round",
+    title: "Meet the Hot Chocolate Bombes",
+    excerpt: "Drop one into warm milk and watch it melt into a rich, real-chocolate hot drink — one of COCOBA's signature treats.",
+    image: "/images/cocoba/dessert.jpg",
+    body: [
+      "If you haven't tried a COCOBA Hot Chocolate Bombe yet, you're in for something special. Drop one into a mug of warm milk and watch it melt away to reveal a rich, indulgent, real-chocolate hot drink.",
+      "Available in a range of flavours and made with the same premium chocolate as everything else on our menu, they're a firm favourite with guests — and they make a lovely gift to take home, too.",
+      "Ask the team in store to point you to the current flavours and bestsellers.",
+    ],
+  },
+  {
+    id: "cocoba-cafe-experience",
+    slug: "cocoba-cafe-experience",
+    category: "News",
+    date: "Now open",
+    title: "A Chocolate Café in the Heart of Maidenhead",
+    excerpt: "From barista coffee and luxurious real-chocolate hot drinks to waffles, cakes and brunch — discover the full COCOBA café experience.",
+    image: "/images/cocoba/storefront.jpg",
+    body: [
+      "Since opening in October 2024, COCOBA Maidenhead has become a much-loved spot for coffee and chocolate lovers alike. Owners Viv and Shashank have created a warm, welcoming café in the heart of the High Street.",
+      "Alongside expertly prepared barista coffee and luxurious real-chocolate hot drinks, you'll find freshly made cakes, waffles, desserts, light lunches and brunch favourites — all served in a stylish, comfortable setting.",
+      "Whether you're meeting friends, working, enjoying family time or simply treating yourself, there's always a reason to drop by.",
+    ],
+  },
+];
+
 function item(slug, name, section, category, tag, blurb) {
   return {
     slug,
@@ -196,7 +242,33 @@ const eatItems = [
   item("bombay-story", "Bombay Story", "eat-drink", "indian", "Indian"),
   item("the-lock-bar", "The Lock Bar", "eat-drink", "bars", "Bars"),
   item("riverside-tap", "Riverside Tap", "eat-drink", "bars", "Bars"),
-  item("cocoba", "Cocoba", "eat-drink", "cafes", "Cafés"),
+  {
+    // ── Real content: COCOBA Chocolate Café, Maidenhead ──
+    ...item("cocoba", "COCOBA Chocolate Café", "eat-drink", "cafes", "Cafés"),
+    image: "/images/cocoba/storefront.jpg",
+    gallery: [
+      "/images/cocoba/storefront.jpg",
+      "/images/cocoba/dessert.jpg",
+      "/images/cocoba/interior.jpg",
+    ],
+    paragraphs: [
+      "Nestled in the heart of Maidenhead, COCOBA Chocolate Café is more than just a coffee shop—it's a destination for chocolate lovers, coffee enthusiasts, and anyone looking to relax and indulge.",
+      "Opened in October 2024, COCOBA Maidenhead combines the warmth of a welcoming neighbourhood café with the craftsmanship of an artisan chocolate maker. Every hot chocolate, dessert, and chocolate treat is created using premium chocolate crafted at COCOBA's dedicated Kent chocolate factory, delivering a truly authentic chocolate experience.",
+      "Guests can enjoy expertly prepared barista coffee, luxurious real-chocolate hot drinks, freshly made cakes, waffles, desserts, light lunches, and brunch favourites in a stylish and comfortable setting. Whether you're catching up with friends, holding an informal meeting, enjoying family time, or simply treating yourself, COCOBA provides the perfect atmosphere to unwind.",
+      "Beyond the café experience, visitors can browse an extensive selection of handcrafted chocolates, gift boxes, hampers, and seasonal treats, making every visit an opportunity to take a little chocolate magic home.",
+      "With its friendly service, premium products, and inviting atmosphere, COCOBA Chocolate Café Maidenhead has quickly become one of the town's most enjoyable destinations for coffee, chocolate, and memorable moments.",
+    ],
+    hours: [
+      { day: "Monday – Tuesday", time: "7:30am – 6pm" },
+      { day: "Wednesday – Saturday", time: "7:30am – 9:30pm" },
+      { day: "Sunday", time: "9am – 5pm" },
+    ],
+    address: "2B High Street, Maidenhead SL6 1QJ",
+    phone: "—",
+    email: "maidenhead@cocobachocolate.com",
+    website: "www.cocobachocolate.com",
+    news: cocobaNews,
+  },
   item("pret-a-manger", "Pret A Manger", "eat-drink", "grab-go", "Grab & Go"),
   item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
   item("thai-river", "Thai River", "eat-drink", "thai", "Thai"),

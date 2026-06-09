@@ -69,13 +69,23 @@ export default function DetailPage() {
               <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "var(--forest)" }}>
                 {item.name}
               </h1>
-              <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>
-                {item.description}
-              </p>
-              {item.description2 && (
-                <p className="text-base leading-relaxed mt-5" style={{ color: "var(--ink)", opacity: 0.82 }}>
-                  {item.description2}
-                </p>
+              {item.paragraphs ? (
+                <div className="flex flex-col gap-5">
+                  {item.paragraphs.map((p, i) => (
+                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>
+                    {item.description}
+                  </p>
+                  {item.description2 && (
+                    <p className="text-base leading-relaxed mt-5" style={{ color: "var(--ink)", opacity: 0.82 }}>
+                      {item.description2}
+                    </p>
+                  )}
+                </>
               )}
 
               {/* Share row */}
@@ -115,9 +125,11 @@ export default function DetailPage() {
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
                   <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--ink)", opacity: 0.8 }}>{item.address}</p>
-                  <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
-                    <span className="font-semibold" style={{ color: "var(--forest)" }}>Tel:</span> {item.phone}
-                  </p>
+                  {item.phone && item.phone !== "—" && (
+                    <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
+                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Tel:</span> {item.phone}
+                    </p>
+                  )}
                   {item.email && (
                     <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
                       <span className="font-semibold" style={{ color: "var(--forest)" }}>Email:</span> {item.email}
