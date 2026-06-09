@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { header } from "../Data/content";
 import { menus } from "../Data/pages";
@@ -12,6 +12,19 @@ const Header = forwardRef(function Header(_, ref) {
   const [mobileExpanded, setMobileExpanded] = useState(null); // mobile accordion
   const [scrolled, setScrolled] = useState(false);
   const { pathname } = useLocation();
+  const closeTimer = useRef(null);
+
+  // Open immediately on hover; close with a short grace delay so the cursor
+  // can travel from the nav item down into the open panel without it shutting.
+  const openMenu = (label) => {
+    clearTimeout(closeTimer.current);
+    setOpenDropdown(label);
+  };
+  const scheduleClose = () => {
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpenDropdown(null), 120);
+  };
+  const cancelClose = () => clearTimeout(closeTimer.current);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
@@ -42,7 +55,6 @@ const Header = forwardRef(function Header(_, ref) {
       ref={ref}
       className={`fixed top-0 inset-x-0 z-50 transition-shadow duration-200 ${scrolled ? "shadow-lg" : ""}`}
       style={{ backgroundColor: "var(--forest)" }}
-      onMouseLeave={() => setOpenDropdown(null)}
     >
       {/* Utility bar */}
       <div
@@ -83,7 +95,7 @@ const Header = forwardRef(function Header(_, ref) {
             if (menu) {
               const isOpen = openDropdown === menu.label;
               return (
-                <div key={nav.label} className="relative" onMouseEnter={() => setOpenDropdown(menu.label)}>
+                <div key={nav.label} className="relative" onMouseEnter={() => openMenu(menu.label)} onMouseLeave={scheduleClose}>
                   <Link
                     to={menu.path}
                     onClick={() => setOpenDropdown(null)}
@@ -143,7 +155,7 @@ const Header = forwardRef(function Header(_, ref) {
 
       {/* Desktop mega-menu dropdown */}
       {openDropdown && menusByLabel[openDropdown] && (
-        <div className="hidden md:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }}>
+        <div className="hidden md:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
           <div className="max-w-6xl mx-auto px-8 py-8 grid grid-cols-3 gap-10">
             {menusByLabel[openDropdown].columns.map((col) => (
               <div key={col.heading}>
