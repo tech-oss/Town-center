@@ -66,9 +66,10 @@ export default function BlogCards() {
                     loading="lazy"
                     className="w-full h-full md:h-44 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   />
+                  {/* Desktop: frosted chip overlaid on the image (transparent so the photo shows through) */}
                   <span
-                    className="absolute top-2 left-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}
+                    className="hidden md:inline-block absolute top-2 left-2 text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full whitespace-nowrap"
+                    style={{ backgroundColor: "rgba(255,255,255,0.55)", backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)", color: "var(--forest)" }}
                   >
                     {post.category}
                   </span>
@@ -76,6 +77,13 @@ export default function BlogCards() {
 
                 {/* Body */}
                 <div className="flex flex-col flex-1 min-w-0 md:p-3 md:pt-4">
+                  {/* Mobile: category shown in the body (cleaner than overlaying the small thumbnail) */}
+                  <span
+                    className="md:hidden self-start text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full mb-1.5"
+                    style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+                  >
+                    {post.category}
+                  </span>
                   <p className="text-[11px] font-medium mb-1.5" style={{ color: "var(--ink)", opacity: 0.5 }}>
                     {post.date}
                   </p>

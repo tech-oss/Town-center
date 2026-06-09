@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState, useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import './App.css'
 import Header from './components/Header'
+import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
 import CategoryPage from './components/CategoryPage'
 import DetailPage from './components/DetailPage'
@@ -48,6 +49,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Header ref={headerRef} />
       <main style={{ paddingTop: headerHeight || undefined }}>
         <Routes>
