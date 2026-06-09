@@ -38,7 +38,7 @@ export default function Footer() {
                 <a
                   key={s.label}
                   href={s.href}
-                  className="text-xs text-white/40 hover:text-white transition-colors duration-150"
+                  className="text-xs text-white hover:text-white transition-colors duration-150"
                 >
                   {s.label}
                 </a>
@@ -49,7 +49,7 @@ export default function Footer() {
           {/* Link columns */}
           {footer.columns.map((col) => (
             <div key={col.heading} className="flex flex-col gap-3">
-              <p className="text-xs font-semibold tracking-widest uppercase text-white/40">
+              <p className="text-xs font-semibold tracking-widest uppercase text-white">
                 {col.heading}
               </p>
               <ul className="flex flex-col gap-2">
@@ -57,7 +57,7 @@ export default function Footer() {
                   <li key={link.label}>
                     <a
                       href={link.href}
-                      className="text-sm text-white/60 hover:text-white transition-colors duration-150"
+                      className="text-sm text-white hover:text-white transition-colors duration-150"
                     >
                       {link.label}
                     </a>
@@ -69,7 +69,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 pt-6">
-          <p className="text-xs text-white/30">{footer.legal}</p>
+          <p className="text-xs text-white">{footer.legal}</p>
         </div>
       </div>
     </footer>
