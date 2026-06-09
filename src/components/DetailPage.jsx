@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { itemBySlug, sections } from "../Data/pages";
 import NewsOffers from "./NewsOffers";
+import LocationMap from "./LocationMap";
 
 export default function DetailPage() {
   const { section, slug } = useParams();
@@ -22,6 +23,9 @@ export default function DetailPage() {
   const sameCat = sec.items.filter((i) => i.category === item.category && i.slug !== item.slug);
   const others = sec.items.filter((i) => i.category !== item.category && i.slug !== item.slug);
   const related = [...sameCat, ...others].slice(0, 3);
+
+  // Map / directions target — prefer an explicit query, else the business name + town
+  const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
@@ -146,7 +150,9 @@ export default function DetailPage() {
 
                 {/* Actions */}
                 <a
-                  href="#maps"
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
                   style={{ backgroundColor: "var(--leaf)" }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
@@ -161,6 +167,13 @@ export default function DetailPage() {
             </aside>
           </div>
 
+        </div>
+      </section>
+
+      {/* ── Location map ── */}
+      <section className="pb-16 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto">
+          <LocationMap heading="Location" note={item.address} query={mapQuery} />
         </div>
       </section>
 

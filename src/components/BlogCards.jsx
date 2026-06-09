@@ -1,4 +1,11 @@
+import { Link } from "react-router-dom";
 import { blogCards } from "../Data/content";
+
+// Use SPA navigation for internal routes, plain anchor for hash links
+function CardLink({ href, className, style, children }) {
+  if (href?.startsWith("/")) return <Link to={href} className={className} style={style}>{children}</Link>;
+  return <a href={href} className={className} style={style}>{children}</a>;
+}
 
 export default function BlogCards() {
   return (
@@ -34,7 +41,7 @@ export default function BlogCards() {
           {blogCards.posts.map((post, i) => {
             const featured = i === 1; // middle card glows
             return (
-              <a
+              <CardLink
                 key={post.id}
                 href={post.href}
                 className="group relative flex flex-row md:flex-col rounded-2xl overflow-hidden p-3 gap-3 md:gap-0
@@ -92,7 +99,7 @@ export default function BlogCards() {
                     <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                   </span>
                 </div>
-              </a>
+              </CardLink>
             );
           })}
         </div>

@@ -165,39 +165,36 @@ export const blogCards = {
   posts: [
     {
       id: 1,
-      category: "Food & Drink",
-      title: "Five Dishes You Have to Try This Autumn",
+      category: "COCOBA · Offer",
+      title: "End of Season Sale — While Stocks Last",
       excerpt:
-        "From slow-braised short rib to spiced pumpkin tart, our restaurants are cooking up something special.",
-      // TODO: replace with actual Maidenhead restaurant / food photo
-      imageSrc: "https://picsum.photos/id/292/600/400",
-      imageAlt: "Autumn dishes at Maidenhead",
-      href: "#post-1",
-      date: "12 Nov 2025",
+        "Stock up on handcrafted COCOBA chocolates at reduced prices — a perfect chance to discover new favourites or pick up a gift.",
+      imageSrc: "/images/cocoba/truffles.jpg",
+      imageAlt: "COCOBA handcrafted chocolates",
+      href: "/news/cocoba-end-of-season-sale",
+      date: "While stocks last",
     },
     {
       id: 2,
-      category: "Shopping",
-      title: "New Arrivals: Independent Brands Worth Knowing",
+      category: "Coppa Club · Offer",
+      title: "Champagne & Sparkling Tasting Evening",
       excerpt:
-        "Three new independent retailers have just opened their doors — here's what makes each one worth a visit.",
-      // TODO: replace with actual Maidenhead shopping / high street photo
-      imageSrc: "https://picsum.photos/id/1068/600/400",
-      imageAlt: "New shop opening at Maidenhead",
-      href: "#post-2",
-      date: "5 Nov 2025",
+        "An evening led by Coppa Club's in-house expert, exploring Champagne alongside a curated selection of sparkling wines.",
+      imageSrc: "/images/coppa/champagne.jpg",
+      imageAlt: "Champagne tasting at Coppa Club",
+      href: "/news/coppa-champagne-tasting",
+      date: "Monthly · 6:30pm",
     },
     {
       id: 3,
-      category: "Community",
-      title: "How the Saturday Market Became a Local Institution",
+      category: "COCOBA · Featured",
+      title: "Meet the Hot Chocolate Bombes",
       excerpt:
-        "Fifteen years, two hundred stalls, and one very dedicated market manager. The story of how it all started.",
-      // TODO: replace with actual Maidenhead market / community photo
-      imageSrc: "https://picsum.photos/id/351/600/400",
-      imageAlt: "Saturday market at Maidenhead",
-      href: "#post-3",
-      date: "28 Oct 2025",
+        "Drop one into warm milk and watch it melt into a rich, real-chocolate hot drink — one of COCOBA's signature treats.",
+      imageSrc: "/images/cocoba/bombes.jpg",
+      imageAlt: "COCOBA hot chocolate bombes",
+      href: "/news/cocoba-hot-chocolate-bombes",
+      date: "All year round",
     },
   ],
 };
@@ -281,8 +278,8 @@ export const brandGrid = {
   brands: [
     { id: 1, name: "bakedd", category: "Bakery", logo: "/images/logos/bakedd.png" },
     { id: 2, name: "Bombay Story", category: "Indian Kitchen", logo: "/images/logos/bombay.png" },
-    { id: 3, name: "Cocoba", category: "Chocolate Café", logo: "/images/logos/cocoba.jpg" },
-    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", logo: "/images/logos/coppa-club.png" },
+    { id: 3, name: "Cocoba", category: "Chocolate Café", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba" },
+    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club" },
     { id: 5, name: "El Cerdo", category: "Tapas Bar", logo: "/images/logos/el-cerdo.png" },
     { id: 6, name: "Nando's", category: "Flame-Grilled", logo: "/images/logos/nandos.png" },
     { id: 7, name: "Pret A Manger", category: "Coffee & Food", logo: "/images/logos/pret.png" },
