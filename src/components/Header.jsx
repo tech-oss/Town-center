@@ -208,6 +208,25 @@ const Header = forwardRef(function Header(_, ref) {
       {/* Mobile drawer */}
       {menuOpen && (
         <nav className="md:hidden px-6 pb-5 flex flex-col gap-1 max-h-[75vh] overflow-y-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }} aria-label="Mobile primary">
+          {/* Search */}
+          <form
+            onSubmit={(e) => e.preventDefault()}
+            className="flex items-center gap-2.5 rounded-full px-4 py-2.5 mt-4 mb-3"
+            style={{ backgroundColor: "rgba(255,255,255,0.12)" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ color: "var(--mint)" }}>
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search"
+              aria-label="Search the site"
+              className="flex-1 bg-transparent outline-none text-sm placeholder:text-white/45 text-white"
+            />
+          </form>
           {header.navItems.map((nav) => {
             const menu = menusByLabel[nav.label];
             if (menu) {
