@@ -197,6 +197,35 @@ export default function DetailPage() {
                 >
                   Get Directions
                 </a>
+
+                {/* Share this page */}
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: "var(--leaf)" }}>Share this page</p>
+                  <div className="flex items-center gap-2.5">
+                    {[
+                      { icon: "facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, label: "Share on Facebook" },
+                      { icon: "x", href: `https://twitter.com/intent/tweet?url=${u}&text=${t}`, label: "Share on X" },
+                      { icon: "whatsapp", href: waShare, label: "Share on WhatsApp" },
+                      { icon: "email", href: `mailto:?subject=${t}&body=${u}`, label: "Share by email" },
+                    ].map((sl) => (
+                      <a
+                        key={sl.icon}
+                        href={sl.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={sl.label}
+                        title={sl.label}
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+                        style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
+                      >
+                        <ShareIcon name={sl.icon} />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+
                 <a href="#app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>
                   Get the App
                 </a>
