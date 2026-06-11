@@ -12,6 +12,7 @@ const Header = forwardRef(function Header(_, ref) {
   const [openDropdown, setOpenDropdown] = useState(null); // desktop hover
   const [mobileExpanded, setMobileExpanded] = useState(null); // mobile accordion
   const [scrolled, setScrolled] = useState(false);
+  const [search, setSearch] = useState("");
   const { pathname } = useLocation();
   const closeTimer = useRef(null);
 
@@ -57,23 +58,44 @@ const Header = forwardRef(function Header(_, ref) {
       className={`fixed top-0 inset-x-0 z-50 transition-shadow duration-200 ${scrolled ? "shadow-lg" : ""}`}
       style={{ backgroundColor: "var(--forest)" }}
     >
-      {/* Utility bar */}
+      {/* Utility bar — links on the left, search on the right */}
       <div
-        className="hidden md:flex justify-end items-center gap-5 px-8 py-1.5 text-xs font-medium"
+        className="hidden md:flex justify-between items-center gap-5 px-8 py-1.5 text-xs font-medium"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
       >
-        {header.utilityLinks.map((link) => (
-          <a
-            key={link.label}
-            href={link.href}
-            className="transition-colors duration-150"
-            style={{ color: "var(--mint)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--mint)")}
-          >
-            {link.label}
-          </a>
-        ))}
+        <div className="flex items-center gap-5">
+          {header.utilityLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="transition-colors duration-150"
+              style={{ color: "var(--mint)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--mint)")}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="flex items-center gap-2 rounded-full px-3.5 py-1.5 w-56 lg:w-64"
+          style={{ backgroundColor: "rgba(255,255,255,0.12)" }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ color: "var(--mint)" }}>
+            <circle cx="11" cy="11" r="7" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search"
+            aria-label="Search the site"
+            className="flex-1 bg-transparent outline-none text-xs placeholder:text-white/45 text-white"
+          />
+        </form>
       </div>
 
       {/* Main nav bar */}
