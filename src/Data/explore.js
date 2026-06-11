@@ -63,7 +63,7 @@ export const explore = {
       id: "green-connected",
       eyebrow: "Greener & Better Connected",
       heading: "Green Spaces & Easy Streets",
-      image: "/images/explore/market.jpg",
+      image: "/images/explore/green-streets.jpg",
       body: [
         "Green spaces, tree-lined streets and extensive landscaping will play a major role in shaping the new quarter.",
         "New public squares, enhanced pedestrian routes and improved connections across the town centre will make Maidenhead easier to navigate and more enjoyable to experience on foot.",
