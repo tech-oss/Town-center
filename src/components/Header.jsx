@@ -3,8 +3,9 @@ import { Link, useLocation } from "react-router-dom";
 import { header } from "../Data/content";
 import { menus } from "../Data/pages";
 import { liveMenu } from "../Data/live";
+import { exploreMenu } from "../Data/explore";
 
-const menusByLabel = Object.fromEntries([...menus, liveMenu].map((m) => [m.label, m]));
+const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu].map((m) => [m.label, m]));
 
 const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
