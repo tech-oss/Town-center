@@ -270,6 +270,7 @@ export default function DetailPage() {
             {/* Share options */}
             {[
               { label: "Email", icon: "email", href: `mailto:?subject=${t}&body=${u}` },
+              { label: "WhatsApp", icon: "whatsapp", href: waShare },
               { label: "Facebook", icon: "facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
               { label: "X", icon: "x", href: `https://twitter.com/intent/tweet?url=${u}&text=${t}` },
               { label: "Instagram", icon: "instagram", href: "https://www.instagram.com/" },
