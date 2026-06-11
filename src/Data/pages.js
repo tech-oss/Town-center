@@ -236,6 +236,12 @@ const eatItems = [
     mapQuery: "Coppa Club, Maidenhead SL6 1RR",
     phone: "01628 951108",
     email: "maidenhead@coppaclub.co.uk",
+    social: {
+      instagram: "https://www.instagram.com/coppaclub",
+      facebook: "https://www.facebook.com/share/1BYPndXk8G/?mibextid=wwXIfr",
+      // X / Twitter not available for Coppa Club
+      whatsappPhone: "441628951108",
+    },
     website: "www.coppaclub.co.uk/maidenhead",
     news: coppaNews,
   },
@@ -268,6 +274,12 @@ const eatItems = [
     mapQuery: "COCOBA Chocolate Cafe, High Street, Maidenhead SL6 1QJ",
     phone: "—",
     email: "maidenhead@cocobachocolate.com",
+    social: {
+      instagram: "https://www.instagram.com/cocobachocolatecafe_maidenhead",
+      facebook: "https://www.facebook.com/CocobaChocolate/",
+      x: "https://x.com/cocobachocolate",
+      // no public WhatsApp number — falls back to a "share via WhatsApp" link
+    },
     website: "www.cocobachocolate.com",
     news: cocobaNews,
   },
