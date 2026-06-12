@@ -262,7 +262,7 @@ export const liveMenu = {
       heading: "Living in Maidenhead",
       links: [
         { label: "Why Live Here", to: "/live" },
-        { label: "Apartments Overview", to: "/live/overview" },
+        { label: "The Future", to: "/explore/the-future" },
       ],
     },
     {
