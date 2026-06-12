@@ -16,6 +16,7 @@ import AttractionPage from './components/AttractionPage'
 import WorkPage from './components/WorkPage'
 import WorkCategoryPage from './components/WorkCategoryPage'
 import ExploreFuturePage from './components/ExploreFuturePage'
+import OurStoryPage from './components/OurStoryPage'
 import Footer from './components/Footer'
 import NewsletterModal from './components/NewsletterModal'
 import { newsletterModal } from './Data/content'
@@ -62,6 +63,8 @@ function App() {
           <Route path="/work/:category" element={<WorkCategoryPage />} />
           {/* Explore */}
           <Route path="/explore/the-future" element={<ExploreFuturePage />} />
+          {/* About */}
+          <Route path="/about" element={<OurStoryPage />} />
           {/* Live (residential) section */}
           <Route path="/live" element={<LivePage />} />
           <Route path="/live/overview" element={<PropertySearch mode="overview" />} />

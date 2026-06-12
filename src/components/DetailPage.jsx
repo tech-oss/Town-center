@@ -42,7 +42,6 @@ export default function DetailPage() {
         s.instagram && { icon: "instagram", href: s.instagram, label: "Instagram" },
         s.facebook && { icon: "facebook", href: s.facebook, label: "Facebook" },
         s.x && { icon: "x", href: s.x, label: "X" },
-        { icon: "whatsapp", href: s.whatsappPhone ? `https://wa.me/${s.whatsappPhone}` : waShare, label: "WhatsApp" },
         item.email && { icon: "email", href: `mailto:${item.email}`, label: "Email" },
       ].filter(Boolean)
     : [

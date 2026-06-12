@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { footer, header } from "../Data/content";
 
 export default function Footer() {
@@ -55,12 +56,21 @@ export default function Footer() {
               <ul className="flex flex-col gap-2">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-white hover:text-white transition-colors duration-150"
-                    >
-                      {link.label}
-                    </a>
+                    {link.href?.startsWith("/") ? (
+                      <Link
+                        to={link.href}
+                        className="text-sm text-white hover:text-white transition-colors duration-150"
+                      >
+                        {link.label}
+                      </Link>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="text-sm text-white hover:text-white transition-colors duration-150"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>
