@@ -287,6 +287,7 @@ const eatItems = [
     // ── Esquires Coffee — "free plan +" listing (2-image header, description, website) ──
     ...item("esquires-coffee", "Esquires Coffee", "eat-drink", "cafes", "Café"),
     freePlan: true,
+    containHero: true,
     image: "/images/esquires/hero-2.png",
     gallery: ["/images/esquires/hero-2.png", "/images/esquires/hero-1.png"],
     description:

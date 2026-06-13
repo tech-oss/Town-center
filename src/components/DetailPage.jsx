@@ -84,7 +84,7 @@ export default function DetailPage() {
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-6xl mx-auto">
           <div className="relative rounded-3xl overflow-hidden aspect-[16/9] bg-black shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
-            <img src={item.gallery[active]} alt={item.name} className="w-full h-full object-cover" />
+            <img src={item.gallery[active]} alt={item.name} className={`w-full h-full ${item.containHero ? "object-contain" : "object-cover"}`} />
           </div>
           {/* Thumbnails */}
           {item.gallery.length > 1 && (
