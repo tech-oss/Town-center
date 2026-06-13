@@ -270,7 +270,7 @@ export const eventsGrid = {
 
 // ─── BrandGrid ────────────────────────────────────────────────────────────────
 export const brandGrid = {
-  eyebrow: "Independent at Heart",
+  eyebrow: "Curated for Work and Wellbeing",
   heading: "Our Traders",
   subheading:
     "A vibrant collection of shops, restaurants, and services — all surrounded by green spaces and riverside tranquility.",
