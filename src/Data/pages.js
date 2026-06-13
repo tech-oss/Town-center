@@ -280,7 +280,7 @@ const eatItems = [
       x: "https://x.com/cocobachocolate",
       // no public WhatsApp number — falls back to a "share via WhatsApp" link
     },
-    website: "www.cocobachocolate.com",
+    website: "www.cocobachocolate.com/pages/cocoba-chocolate-cafe-maidenhead",
     news: cocobaNews,
   },
   {
