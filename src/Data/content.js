@@ -276,7 +276,7 @@ export const brandGrid = {
     "Over 80 independent shops, restaurants, and services — all in one place.",
   cta: { label: "Browse All Traders", href: "#shop" },
   brands: [
-    { id: 1, name: "bakedd", category: "Bakery", logo: "/images/logos/bakedd.png" },
+    { id: 1, name: "bakedd", category: "Bakery", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd" },
     { id: 2, name: "Bombay Story", category: "Indian Kitchen", logo: "/images/logos/bombay.png" },
     { id: 3, name: "Cocoba", category: "Chocolate Café", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba" },
     { id: 4, name: "Coppa Club", category: "Restaurant & Bar", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club" },

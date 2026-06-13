@@ -61,9 +61,26 @@ export default function DetailPage() {
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* ── Gallery hero ── */}
-      {/* Contained 16:9 frame matching the photos' native ratio, so cover photos
-          display in full with no corner/edge cropping on web or mobile. */}
+      {/* ── Free-plan header: logo only, no photography ── */}
+      {item.freePlan ? (
+        <section className="px-6 md:px-12 pt-6 md:pt-10">
+          <div className="max-w-6xl mx-auto">
+            <div
+              className="relative rounded-3xl overflow-hidden aspect-[16/9] sm:aspect-[21/9] flex items-center justify-center"
+              style={{ backgroundColor: "var(--mint)" }}
+            >
+              <img
+                src={item.logo}
+                alt={item.name}
+                className="max-h-[55%] max-w-[70%] w-auto object-contain"
+              />
+            </div>
+          </div>
+        </section>
+      ) : (
+      /* ── Gallery hero ── */
+      /* Contained 16:9 frame matching the photos' native ratio, so cover photos
+          display in full with no corner/edge cropping on web or mobile. */
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-6xl mx-auto">
           <div className="relative rounded-3xl overflow-hidden aspect-[16/9] bg-black shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
@@ -87,6 +104,7 @@ export default function DetailPage() {
           )}
         </div>
       </section>
+      )}
 
       {/* ── Body ── */}
       <section className="py-12 md:py-16 px-6 md:px-12">

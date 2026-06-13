@@ -284,7 +284,25 @@ const eatItems = [
     news: cocobaNews,
   },
   item("pret-a-manger", "Pret A Manger", "eat-drink", "grab-go", "Grab & Go"),
-  item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
+  {
+    // ── Real content: Bakedd, Maidenhead — "free plan" listing (logo-only header) ──
+    ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
+    freePlan: true,
+    logo: "/images/logos/bakedd.png",
+    paragraphs: [
+      "Bakedd is an artisan bakery where every visit feels like coming home. Everything is freshly handcrafted on-site each day, using honest ingredients and time-honoured traditions with an innovative twist.",
+      "From freshly baked breads and pastries to cakes, coffee and light bites, Bakedd brings a warm, welcoming corner of craft baking to the heart of Maidenhead's High Street — the perfect spot to pause, treat yourself or pick something up to take home.",
+    ],
+    hours: [
+      { day: "Monday – Saturday", time: "7:30am – 5pm" },
+      { day: "Sunday", time: "Closed" },
+    ],
+    address: "1A High Street, Maidenhead SL6 1NJ",
+    mapQuery: "Bakedd, 1A High Street, Maidenhead SL6 1NJ",
+    phone: "01628 299 303",
+    email: "hello@bakedd.co.uk",
+    website: "www.bakedd.co.uk",
+  },
   item("thai-river", "Thai River", "eat-drink", "thai", "Thai"),
   item("sakura", "Sakura", "eat-drink", "japanese", "Japanese"),
   item("la-cucina", "La Cucina", "eat-drink", "italian", "Italian"),
@@ -402,10 +420,10 @@ export const sections = {
         heading: "New To Maidenhead",
         links: [
           { label: "Coppa Club", to: "/eat-drink/place/coppa-club" },
+          { label: "Bakedd", to: "/eat-drink/place/bakedd" },
           { label: "El Cerdo Tapas & Bar", to: "/eat-drink/place/el-cerdo" },
           { label: "Bombay Story", to: "/eat-drink/place/bombay-story" },
           { label: "La Cucina", to: "/eat-drink/place/la-cucina" },
-          { label: "Sakura", to: "/eat-drink/place/sakura" },
         ],
       },
     ],
