@@ -286,7 +286,7 @@ const eatItems = [
   item("pret-a-manger", "Pret A Manger", "eat-drink", "grab-go", "Grab & Go"),
   {
     // ── Real content: Bakedd, Maidenhead — "free plan" listing (logo-only header) ──
-    ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
+    ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery & Café"),
     // Listed under both Bakery and Cafés in the Eat & Drink menu
     categories: ["bakery", "cafes"],
     freePlan: true,
