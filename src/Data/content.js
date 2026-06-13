@@ -33,7 +33,7 @@ export const hero = {
       headline: "Maidenhead",
       subheadline:
         "A fast-growing riverside town set on the banks of the Thames, with excellent Elizabeth Line links into central London.",
-      primaryCta: { label: "Explore What's On", href: "/see-do" },
+      primaryCta: { label: "Live", href: "/live" },
       secondaryCta: { label: "Plan Your Visit", href: "/getting-here" },
       featureCard: {
         image: "/images/card-lock.jpg",
