@@ -273,7 +273,7 @@ export const brandGrid = {
   eyebrow: "Independent at Heart",
   heading: "Our Traders",
   subheading:
-    "Over 80 independent shops, restaurants, and services — all in one place.",
+    "A vibrant collection of shops, restaurants, and services — all surrounded by green spaces and riverside tranquility.",
   ctas: [
     { label: "Browse Eat & Drink", href: "/eat-drink" },
     { label: "Browse Shops", href: "/shop" },
