@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { eventsGrid } from "../Data/content";
+import SmartLink from "./SmartLink";
 
 const tagColors = {
   Market:   { bg: "#D8F3DC", text: "#1B4332" },
@@ -74,15 +75,15 @@ export default function EventsGrid() {
               {eventsGrid.heading}
             </h2>
           </div>
-          <a
-            href={eventsGrid.cta.href}
+          <SmartLink
+            to={eventsGrid.cta.href}
             className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold whitespace-nowrap mt-2 shrink-0"
             style={{ color: "var(--forest)" }}
           >
             <span className="hidden sm:inline">View full calendar</span>
             <span className="sm:hidden">Calendar</span>
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-          </a>
+          </SmartLink>
         </div>
 
         {/* ── Filter tabs ── */}
@@ -113,9 +114,9 @@ export default function EventsGrid() {
             className="flex gap-5 overflow-x-auto pb-2 scroll-smooth snap-x scrollbar-none"
           >
             {events.map((event) => (
-              <a
+              <SmartLink
                 key={event.id}
-                href={event.href}
+                to={event.href}
                 className="group shrink-0 w-[280px] snap-start bg-white rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
                 style={{ boxShadow: "0 6px 24px -12px rgba(28,46,56,0.3)" }}
               >
@@ -140,7 +141,7 @@ export default function EventsGrid() {
                     <PinIcon /> {event.location}
                   </p>
                 </div>
-              </a>
+              </SmartLink>
             ))}
           </div>
 
@@ -170,9 +171,9 @@ export default function EventsGrid() {
         {/* ═══════════ MOBILE: vertical list of horizontal cards ═══════════ */}
         <div className="md:hidden flex flex-col gap-4">
           {events.map((event) => (
-            <a
+            <SmartLink
               key={event.id}
-              href={event.href}
+              to={event.href}
               className="flex bg-white rounded-2xl overflow-hidden shadow-sm active:scale-[0.99] transition-transform"
             >
               {/* Image + date block */}
@@ -199,7 +200,7 @@ export default function EventsGrid() {
                 </div>
                 <span className="shrink-0 text-xl" style={{ color: "var(--forest)", opacity: 0.4 }}>›</span>
               </div>
-            </a>
+            </SmartLink>
           ))}
         </div>
 

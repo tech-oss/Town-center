@@ -1,5 +1,6 @@
 import { planVisit } from "../Data/content";
 import WeatherWidget from "./WeatherWidget";
+import SmartLink from "./SmartLink";
 
 const { getAround } = planVisit;
 
@@ -72,9 +73,9 @@ export default function PlanVisit() {
           {/* Left — Parking / Transport / Maps */}
           <div className="flex flex-col">
             {getAround.options.map((opt, i) => (
-              <a
+              <SmartLink
                 key={opt.id}
-                href={opt.href}
+                to={opt.href}
                 className="group flex items-center gap-5 py-6 transition-colors duration-200"
                 style={{
                   borderTop: "1px solid rgba(28,46,56,0.14)",
@@ -102,7 +103,7 @@ export default function PlanVisit() {
                 >
                   →
                 </span>
-              </a>
+              </SmartLink>
             ))}
           </div>
 

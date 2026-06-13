@@ -1,6 +1,7 @@
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { hero } from "../Data/content";
+import SmartLink from "./SmartLink";
 
 // Feature-card wrapper: SPA <Link> for internal routes (cta.to), <a> for hash anchors
 function CardLink({ cta, className, children }) {
@@ -154,19 +155,19 @@ export default function Hero({ headerHeight = 141 }) {
                   {s.subheadline}
                 </p>
                 <div className="flex gap-3">
-                  <a
-                    href={s.primaryCta.href}
+                  <SmartLink
+                    to={s.primaryCta.href}
                     className="inline-block px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90"
                     style={{ backgroundColor: "var(--sage)" }}
                   >
                     {s.primaryCta.label}
-                  </a>
-                  <a
-                    href={s.secondaryCta.href}
+                  </SmartLink>
+                  <SmartLink
+                    to={s.secondaryCta.href}
                     className="inline-block px-8 py-3.5 rounded-full text-sm font-semibold border border-white/50 text-white transition-colors duration-150 hover:bg-white/10"
                   >
                     {s.secondaryCta.label}
-                  </a>
+                  </SmartLink>
                 </div>
               </div>
 
@@ -256,19 +257,19 @@ export default function Hero({ headerHeight = 141 }) {
                 {s.subheadline}
               </p>
               <div className="flex flex-col gap-3">
-                <a
-                  href={s.primaryCta.href}
+                <SmartLink
+                  to={s.primaryCta.href}
                   className="block w-full py-3.5 rounded-full text-sm font-semibold text-white text-center transition-opacity duration-150 hover:opacity-90"
                   style={{ backgroundColor: "var(--sage)" }}
                 >
                   {s.primaryCta.label}
-                </a>
-                <a
-                  href={s.secondaryCta.href}
+                </SmartLink>
+                <SmartLink
+                  to={s.secondaryCta.href}
                   className="block w-full py-3.5 rounded-full text-sm font-semibold text-center border border-white/40 text-white transition-colors duration-150 hover:bg-white/10"
                 >
                   {s.secondaryCta.label}
-                </a>
+                </SmartLink>
               </div>
 
               {/* Mobile dots + counter */}

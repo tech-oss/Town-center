@@ -17,6 +17,9 @@ import WorkPage from './components/WorkPage'
 import WorkCategoryPage from './components/WorkCategoryPage'
 import ExploreFuturePage from './components/ExploreFuturePage'
 import OurStoryPage from './components/OurStoryPage'
+import GettingHerePage from './components/GettingHerePage'
+import NewsIndexPage from './components/NewsIndexPage'
+import PressPage from './components/PressPage'
 import Footer from './components/Footer'
 import NewsletterModal from './components/NewsletterModal'
 import { newsletterModal } from './Data/content'
@@ -56,6 +59,11 @@ function App() {
       <main style={{ paddingTop: headerHeight || undefined }}>
         <Routes>
           <Route path="/" element={<HomePage headerHeight={headerHeight} />} />
+          {/* Plan your visit / info pages */}
+          <Route path="/getting-here" element={<GettingHerePage />} />
+          <Route path="/press" element={<PressPage />} />
+          {/* Journal */}
+          <Route path="/news" element={<NewsIndexPage />} />
           <Route path="/news/:articleSlug" element={<ArticlePage />} />
           <Route path="/attraction/:slug" element={<AttractionPage />} />
           {/* Work section */}

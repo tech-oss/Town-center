@@ -27,13 +27,13 @@ export default function BlogCards() {
               {blogCards.heading}
             </h2>
           </div>
-          <a
+          <CardLink
             href={blogCards.cta.href}
             className="group inline-flex items-center gap-2 text-sm font-semibold self-start sm:self-auto text-white/90 hover:text-white transition-colors"
           >
             {blogCards.cta.label}
             <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
-          </a>
+          </CardLink>
         </div>
 
         {/* ── Cards ── */}

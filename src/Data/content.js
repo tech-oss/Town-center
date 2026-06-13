@@ -14,9 +14,9 @@ export const header = {
     { label: "Explore", href: "#explore" },
   ],
   utilityLinks: [
-    { label: "Maps", href: "#maps" },
+    { label: "Maps", href: "/getting-here#maps" },
     { label: "Get the App", href: "#app" },
-    { label: "Newsletter", href: "#newsletter" },
+    { label: "Newsletter", href: "/#newsletter" },
   ],
 };
 
@@ -33,8 +33,8 @@ export const hero = {
       headline: "Maidenhead",
       subheadline:
         "A fast-growing riverside town set on the banks of the Thames, with excellent Elizabeth Line links into central London.",
-      primaryCta: { label: "Explore What's On", href: "#see-do" },
-      secondaryCta: { label: "Plan Your Visit", href: "#plan-visit" },
+      primaryCta: { label: "Explore What's On", href: "/see-do" },
+      secondaryCta: { label: "Plan Your Visit", href: "/getting-here" },
       featureCard: {
         image: "/images/card-lock.jpg",
         label: "On the River",
@@ -51,8 +51,8 @@ export const hero = {
       headline: "A Town Reborn",
       subheadline:
         "Modern waterfront living, independent restaurants and vibrant new spaces reshaping the town centre.",
-      primaryCta: { label: "See & Do", href: "#see-do" },
-      secondaryCta: { label: "Browse Shops", href: "#shop" },
+      primaryCta: { label: "See & Do", href: "/see-do" },
+      secondaryCta: { label: "Browse Shops", href: "/shop" },
       featureCard: {
         image: "/images/card-cafe.jpg",
         label: "Eat & Drink",
@@ -69,8 +69,8 @@ export const hero = {
       headline: "Waterfront Dining",
       subheadline:
         "From riverside terraces to independent restaurants — soak up the Thames views with great food and drink to match.",
-      primaryCta: { label: "Eat & Drink", href: "#eat-drink" },
-      secondaryCta: { label: "Plan Your Visit", href: "#plan-visit" },
+      primaryCta: { label: "Eat & Drink", href: "/eat-drink" },
+      secondaryCta: { label: "Plan Your Visit", href: "/getting-here" },
       featureCard: {
         image: "/images/card-taplow.jpg",
         label: "Featured Venue",
@@ -88,32 +88,32 @@ export const quickLinks = {
   items: [
     {
       label: "Eat & Drink",
-      href: "#eat-drink",
+      href: "/eat-drink",
       image: "/images/ql-food.jpg", // restaurant table — swap for a real Maidenhead venue later
     },
     {
       label: "Shop",
-      href: "#shop",
+      href: "/shop",
       image: "/images/ql-shop.jpg", // high-street boutique
     },
     {
       label: "See & Do",
-      href: "#see-do",
+      href: "/see-do",
       image: "/images/ql-see.jpg", // theatre / live performance
     },
     {
       label: "Green Spaces",
-      href: "#explore",
+      href: "/see-do/category/community",
       image: "/images/ql-green.jpg", // riverside park
     },
     {
       label: "Wellness",
-      href: "#wellness",
+      href: "/see-do/category/sport-wellness",
       image: "/images/ql-wellness.jpg", // padel court / active wellness
     },
     {
       label: "Getting Here",
-      href: "#maps",
+      href: "/getting-here",
       image: "/images/ql-transport.jpg", // railway station platform
     },
   ],
@@ -139,19 +139,19 @@ export const planVisit = {
         id: "parking",
         title: "Parking",
         subtitle: "Car parks, Blue Badge bays & rates",
-        href: "#parking",
+        href: "/getting-here#parking",
       },
       {
         id: "transport",
         title: "Transport",
         subtitle: "Elizabeth Line, GWR, buses & cycle routes",
-        href: "#transport",
+        href: "/getting-here#transport",
       },
       {
         id: "maps",
         title: "Maps",
         subtitle: "Find your way around the town centre",
-        href: "#maps",
+        href: "/getting-here#maps",
       },
     ],
   },
@@ -161,7 +161,7 @@ export const planVisit = {
 export const blogCards = {
   eyebrow: "From the Journal",
   heading: "In the Spotlight",
-  cta: { label: "See All Stories", href: "#blog" },
+  cta: { label: "See All Stories", href: "/news" },
   posts: [
     {
       id: 1,
@@ -203,7 +203,7 @@ export const blogCards = {
 export const eventsGrid = {
   eyebrow: "Upcoming",
   heading: "What's On",
-  cta: { label: "View full calendar", href: "#events" },
+  cta: { label: "View full calendar", href: "/see-do/category/events" },
   events: [
     {
       id: 1,
@@ -213,7 +213,7 @@ export const eventsGrid = {
       location: "The Green",
       tag: "Market",
       image: "/images/events/market.jpg",
-      href: "#event-1",
+      href: "/see-do/category/events",
     },
     {
       id: 2,
@@ -223,7 +223,7 @@ export const eventsGrid = {
       location: "All Shops",
       tag: "Shopping",
       image: "/images/events/shopping.jpg",
-      href: "#event-2",
+      href: "/see-do/category/events",
     },
     {
       id: 3,
@@ -233,7 +233,7 @@ export const eventsGrid = {
       location: "Community Room",
       tag: "Family",
       image: "/images/events/family.jpg",
-      href: "#event-3",
+      href: "/see-do/category/events",
     },
     {
       id: 4,
@@ -243,7 +243,7 @@ export const eventsGrid = {
       location: "The Atrium",
       tag: "Music",
       image: "/images/events/music.jpg",
-      href: "#event-4",
+      href: "/see-do/category/events",
     },
     {
       id: 5,
@@ -253,7 +253,7 @@ export const eventsGrid = {
       location: "Upper Mall",
       tag: "Shopping",
       image: "/images/events/popup.jpg",
-      href: "#event-5",
+      href: "/see-do/category/events",
     },
     {
       id: 6,
@@ -263,7 +263,7 @@ export const eventsGrid = {
       location: "The Green",
       tag: "Festive",
       image: "/images/events/festive.jpg",
-      href: "#event-6",
+      href: "/see-do/category/events",
     },
   ],
 };
@@ -274,16 +274,16 @@ export const brandGrid = {
   heading: "Our Traders",
   subheading:
     "Over 80 independent shops, restaurants, and services — all in one place.",
-  cta: { label: "Browse All Traders", href: "#shop" },
+  cta: { label: "Browse All Traders", href: "/eat-drink" },
   brands: [
     { id: 1, name: "bakedd", category: "Bakery", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd" },
-    { id: 2, name: "Bombay Story", category: "Indian Kitchen", logo: "/images/logos/bombay.png" },
+    { id: 2, name: "Bombay Story", category: "Indian Kitchen", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story" },
     { id: 3, name: "Cocoba", category: "Chocolate Café", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba" },
     { id: 4, name: "Coppa Club", category: "Restaurant & Bar", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club" },
-    { id: 5, name: "El Cerdo", category: "Tapas Bar", logo: "/images/logos/el-cerdo.png" },
-    { id: 6, name: "Nando's", category: "Flame-Grilled", logo: "/images/logos/nandos.png" },
-    { id: 7, name: "Pret A Manger", category: "Coffee & Food", logo: "/images/logos/pret.png" },
-    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", logo: "/images/logos/hall-woodhouse.jpg" },
+    { id: 5, name: "El Cerdo", category: "Tapas Bar", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo" },
+    { id: 6, name: "Nando's", category: "Flame-Grilled", logo: "/images/logos/nandos.png", to: "/eat-drink/category/restaurants" },
+    { id: 7, name: "Pret A Manger", category: "Coffee & Food", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger" },
+    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse" },
   ],
 };
 
@@ -295,7 +295,7 @@ export const featureBlocks = {
       eyebrow: "Eat & Drink",
       heading: "Thirty Places to Eat. Zero Chains.",
       body: "From third-wave coffee and wood-fired sourdough to small-plates wine bars and proper Sunday roasts — every single one independently owned.",
-      cta: { label: "Explore Eat & Drink", href: "#eat-drink" },
+      cta: { label: "Explore Eat & Drink", href: "/eat-drink" },
       // TODO: replace with actual Maidenhead restaurant / dining scene
       imageSrc: "https://picsum.photos/id/493/800/600",
       imageAlt: "Restaurants and cafes at Maidenhead",
@@ -306,7 +306,7 @@ export const featureBlocks = {
       eyebrow: "The Green",
       heading: "A Park at the Heart of It All",
       body: "Two acres of managed green space, a weekend farmers' market, and a summer events programme that runs June through September.",
-      cta: { label: "See What's On the Green", href: "#explore" },
+      cta: { label: "See What's On the Green", href: "/see-do" },
       // TODO: replace with actual Thames riverside / Maidenhead waterfront photo
       imageSrc: "https://picsum.photos/id/1002/800/600",
       imageAlt: "The Green park at Maidenhead",
@@ -373,35 +373,35 @@ export const footer = {
     {
       heading: "Visit",
       links: [
-        { label: "Getting Here", href: "#maps" },
-        { label: "Parking", href: "#maps" },
-        { label: "Accessibility", href: "#plan-visit" },
-        { label: "Opening Hours", href: "#plan-visit" },
+        { label: "Getting Here", href: "/getting-here" },
+        { label: "Parking", href: "/getting-here#parking" },
+        { label: "Accessibility", href: "/getting-here#accessibility" },
+        { label: "Opening Hours", href: "/getting-here#opening-hours" },
       ],
     },
     {
       heading: "Discover",
       links: [
-        { label: "Eat & Drink", href: "#eat-drink" },
-        { label: "Shop", href: "#shop" },
-        { label: "See & Do", href: "#see-do" },
-        { label: "Events", href: "#events" },
+        { label: "Eat & Drink", href: "/eat-drink" },
+        { label: "Shop", href: "/shop" },
+        { label: "See & Do", href: "/see-do" },
+        { label: "Events", href: "/see-do/category/events" },
       ],
     },
     {
       heading: "About",
       links: [
         { label: "Our Story", href: "/about" },
-        { label: "Traders", href: "#shop" },
-        { label: "Work With Us", href: "#work" },
-        { label: "Press", href: "#press" },
+        { label: "Traders", href: "/eat-drink" },
+        { label: "Work With Us", href: "/work" },
+        { label: "Press", href: "/press" },
       ],
     },
   ],
   social: [
-    { label: "Instagram", href: "#instagram" },
-    { label: "Facebook", href: "#facebook" },
-    { label: "X / Twitter", href: "#twitter" },
+    { label: "Instagram", href: "https://www.instagram.com" },
+    { label: "Facebook", href: "https://www.facebook.com" },
+    { label: "X / Twitter", href: "https://x.com" },
   ],
   legal: "© 2025 Maidenhead. All rights reserved.",
 };

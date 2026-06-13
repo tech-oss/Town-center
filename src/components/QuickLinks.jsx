@@ -1,4 +1,5 @@
 import { quickLinks } from "../Data/content";
+import SmartLink from "./SmartLink";
 
 export default function QuickLinks() {
   return (
@@ -33,8 +34,8 @@ export default function QuickLinks() {
         <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 lg:gap-8">
           {quickLinks.items.map((item) => (
             <li key={item.label}>
-              <a
-                href={item.href}
+              <SmartLink
+                to={item.href}
                 className="group flex flex-col items-center gap-3 focus:outline-none"
                 // Accessible focus ring on the whole tile
                 style={{ borderRadius: "9999px" }}
@@ -87,7 +88,7 @@ export default function QuickLinks() {
                 >
                   {item.label}
                 </span>
-              </a>
+              </SmartLink>
             </li>
           ))}
         </ul>

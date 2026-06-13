@@ -1,4 +1,5 @@
 import { featureBlocks } from "../Data/content";
+import SmartLink from "./SmartLink";
 
 export default function FeatureBlocks() {
   return (
@@ -37,14 +38,14 @@ export default function FeatureBlocks() {
               <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: "var(--ink)", opacity: 0.75 }}>
                 {block.body}
               </p>
-              <a
-                href={block.cta.href}
+              <SmartLink
+                to={block.cta.href}
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
                 style={{ backgroundColor: "var(--sage)" }}
               >
                 {block.cta.label}
                 <span>→</span>
-              </a>
+              </SmartLink>
             </div>
           </div>
         ))}

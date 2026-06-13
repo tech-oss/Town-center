@@ -4,6 +4,7 @@ import { header } from "../Data/content";
 import { menus } from "../Data/pages";
 import { liveMenu } from "../Data/live";
 import { exploreMenu } from "../Data/explore";
+import SmartLink from "./SmartLink";
 
 const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu].map((m) => [m.label, m]));
 
@@ -65,16 +66,16 @@ const Header = forwardRef(function Header(_, ref) {
       >
         <div className="flex items-center gap-5">
           {header.utilityLinks.map((link) => (
-            <a
+            <SmartLink
               key={link.label}
-              href={link.href}
+              to={link.href}
               className="transition-colors duration-150"
               style={{ color: "var(--mint)" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "var(--mint)")}
             >
               {link.label}
-            </a>
+            </SmartLink>
           ))}
         </div>
 
@@ -296,9 +297,9 @@ const Header = forwardRef(function Header(_, ref) {
           })}
           <div className="mt-3 flex flex-col gap-1">
             {header.utilityLinks.map((link) => (
-              <a key={link.label} href={link.href} className="py-2 text-xs font-medium" style={{ color: "var(--sage)" }} onClick={closeAll}>
+              <SmartLink key={link.label} to={link.href} className="py-2 text-xs font-medium" style={{ color: "var(--sage)" }} onClick={closeAll}>
                 {link.label}
-              </a>
+              </SmartLink>
             ))}
           </div>
         </nav>
