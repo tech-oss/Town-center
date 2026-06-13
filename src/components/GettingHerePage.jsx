@@ -1,6 +1,5 @@
-import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 // ── Authentic Maidenhead travel / good-to-know content ──
 const sections = [
@@ -8,20 +7,21 @@ const sections = [
     id: "transport",
     eyebrow: "By Train & Bus",
     heading: "Public Transport",
+    image: "/images/getting-here.jpg",
     intro:
       "Maidenhead is one of the best-connected towns in the Thames Valley, sitting on the Elizabeth Line with direct, frequent services into central London and out towards Reading.",
     blocks: [
       {
         title: "Elizabeth Line",
-        body: "Direct trains run from Maidenhead station to London Paddington in around 25–30 minutes, continuing across central London to Liverpool Street, Canary Wharf and Abbey Wood without changing. Westbound services run to Twyford and Reading.",
+        body: "Direct trains to London Paddington in around 25–30 minutes, continuing across central London to Liverpool Street, Canary Wharf and Abbey Wood without changing. Westbound services run to Twyford and Reading.",
       },
       {
-        title: "Great Western Railway (GWR)",
-        body: "GWR services also call at Maidenhead, with connections towards Reading and the West, and the branch line to Furze Platt, Cookham, Bourne End and Marlow (the Marlow Line).",
+        title: "Great Western Railway",
+        body: "GWR services also call at Maidenhead, with connections towards Reading and the West, plus the branch line to Furze Platt, Cookham, Bourne End and Marlow.",
       },
       {
         title: "Buses",
-        body: "Local bus services link the town centre with surrounding neighbourhoods, Maidenhead station and nearby towns. The main stops are a short walk from the High Street and Nicholsons Quarter.",
+        body: "Local bus services link the town centre with surrounding neighbourhoods, the station and nearby towns. Main stops are a short walk from the High Street.",
       },
     ],
   },
@@ -29,20 +29,21 @@ const sections = [
     id: "driving",
     eyebrow: "By Car",
     heading: "Driving & Roads",
+    image: "/images/card-bridge.jpg",
     intro:
       "Maidenhead is easily reached from the motorway and trunk-road network, making it a simple drive from London, Reading, Heathrow and the wider Thames Valley.",
     blocks: [
       {
         title: "From the M4",
-        body: "Leave the M4 at Junction 8/9 (Maidenhead) and follow the A404(M) and A308(M) towards the town centre. Junction 7 (Slough West) also gives access via the A4.",
+        body: "Leave at Junction 8/9 (Maidenhead) and follow the A404(M) and A308(M) into the town centre. Junction 7 (Slough West) also gives access via the A4.",
       },
       {
         title: "From the M40 & A404",
-        body: "From the M40, the A404 links down through Marlow to Maidenhead, connecting to the M4 — a convenient route from High Wycombe and the north.",
+        body: "The A404 links down through Marlow to Maidenhead and the M4 — a convenient route from High Wycombe and the north.",
       },
       {
         title: "Main routes",
-        body: "The A4 (Bath Road), A308 (towards Windsor and the M4) and A4094 (towards Cookham) all feed directly into the town centre.",
+        body: "The A4 (Bath Road), A308 (towards Windsor) and A4094 (towards Cookham) all feed directly into the town centre.",
       },
     ],
   },
@@ -50,8 +51,9 @@ const sections = [
     id: "parking",
     eyebrow: "Where to Park",
     heading: "Parking",
+    image: "/images/ql-parking.jpg",
     intro:
-      "There are several town-centre car parks within a short walk of the shops, restaurants and the waterway — most are operated by the Royal Borough of Windsor & Maidenhead.",
+      "There are several town-centre car parks within a short walk of the shops, restaurants and the waterway — most operated by the Royal Borough of Windsor & Maidenhead.",
     blocks: [
       {
         title: "Nicholsons Car Park",
@@ -59,11 +61,11 @@ const sections = [
       },
       {
         title: "Vicus Way & Hines Meadow",
-        body: "Large multi-storey car parks close to Maidenhead station — ideal for commuters and for longer visits to the town centre.",
+        body: "Large multi-storey car parks close to the station — ideal for commuters and longer visits to the town centre.",
       },
       {
         title: "Broadway, West Street & Stafferton Way",
-        body: "Additional surface and multi-storey parking around the town centre, with short-stay options handy for a quick shop or coffee.",
+        body: "Additional surface and multi-storey parking, with short-stay options handy for a quick shop or coffee.",
       },
     ],
     note:
@@ -73,8 +75,9 @@ const sections = [
     id: "cycling",
     eyebrow: "On Foot & By Bike",
     heading: "Walking & Cycling",
+    image: "/images/slide-river.jpg",
     intro:
-      "Maidenhead town centre is compact and flat, making it easy to get around on foot, and there's a growing network of cycle routes linking the town with the river and surrounding villages.",
+      "The town centre is compact and flat, making it easy to get around on foot, with a growing network of cycle routes linking the town with the river and surrounding villages.",
     blocks: [
       {
         title: "Cycle routes",
@@ -82,10 +85,17 @@ const sections = [
       },
       {
         title: "The riverside",
-        body: "The Thames Path runs alongside the river just east of the town, offering a scenic, traffic-free walking and cycling route towards Boulter's Lock, Ray Mill Island and beyond.",
+        body: "The Thames Path runs alongside the river just east of the town — a scenic, traffic-free walking and cycling route towards Boulter's Lock, Ray Mill Island and beyond.",
       },
     ],
   },
+];
+
+const stats = [
+  { value: "~25 min", label: "To London Paddington" },
+  { value: "Elizabeth", label: "Line & GWR services" },
+  { value: "6+", label: "Town-centre car parks" },
+  { value: "M4 J8/9", label: "Direct motorway access" },
 ];
 
 const goodToKnow = [
@@ -97,13 +107,21 @@ const goodToKnow = [
   {
     id: "accessibility",
     title: "Accessibility",
-    body: "Maidenhead station offers step-free access to all platforms, and the town centre is largely pedestrianised and level. Accessible parking bays, dropped kerbs and accessible toilets are available throughout the town centre. Many venues offer step-free entry — check individual business pages for details.",
+    body: "Maidenhead station offers step-free access to all platforms, and the town centre is largely pedestrianised and level. Accessible parking bays, dropped kerbs and accessible toilets are available throughout. Many venues offer step-free entry — check individual business pages for details.",
   },
   {
     id: "maps",
     title: "Maps & Finding Your Way",
     body: "The town centre is easy to navigate on foot, with the High Street, Nicholsons Quarter and the regenerated waterway all within a few minutes' walk of one another. Use the Get Directions link on any business page to open turn-by-turn directions in your maps app.",
   },
+];
+
+const quickNav = [
+  { label: "Public Transport", href: "#transport" },
+  { label: "Driving", href: "#driving" },
+  { label: "Parking", href: "#parking" },
+  { label: "Walking & Cycling", href: "#cycling" },
+  { label: "Good to Know", href: "#good-to-know" },
 ];
 
 export default function GettingHerePage() {
@@ -121,85 +139,126 @@ export default function GettingHerePage() {
     window.scrollTo(0, 0);
   }, [hash]);
 
+  const scrollTo = (e, href) => {
+    e.preventDefault();
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
-      {/* Hero band */}
-      <section
-        className="relative flex flex-col items-center justify-center text-center px-6 py-24 md:py-32 overflow-hidden"
-        style={{ backgroundColor: "var(--forest)" }}
-      >
+    <div style={{ backgroundColor: "var(--sand)" }}>
+      {/* ── Hero ── */}
+      <section className="relative w-full overflow-hidden" style={{ minHeight: "62vh" }}>
+        <img src="/images/getting-here.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
-          }}
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 45%, rgba(20,33,42,0.9) 100%)" }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--sage)" }}>
-          Plan Your Visit
-        </span>
-        <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
-          Getting Here & Good to Know
-        </h1>
-        <p className="relative text-base md:text-lg max-w-2xl leading-relaxed" style={{ color: "var(--mint)" }}>
-          By rail, road, bus or bicycle, getting to and around Maidenhead is easy — with the Elizabeth
-          Line putting central London just 25 minutes away.
-        </p>
+        <div
+          className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end"
+          style={{ minHeight: "62vh", paddingTop: "6rem", paddingBottom: "3rem" }}
+        >
+          <nav className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--sage)" }}>
+            <Link to="/" className="hover:text-white">Home</Link>
+            <span className="mx-2 opacity-50">/</span>
+            <span className="text-white">Getting Here</span>
+          </nav>
+          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>
+            Plan Your Visit
+          </p>
+          <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">
+            Getting Here & Good to Know
+          </h1>
+          <p className="text-base md:text-lg text-white/80 mt-4 max-w-2xl leading-relaxed">
+            By rail, road, bus or bicycle, getting to and around Maidenhead is easy — with the Elizabeth
+            Line putting central London just 25 minutes away.
+          </p>
+        </div>
       </section>
 
-      {/* Body */}
-      <section className="py-16 md:py-20 px-6 md:px-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="mb-12 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
-            <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <span>Getting Here</span>
-          </nav>
+      {/* ── Quick nav ── */}
+      <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid rgba(28,46,56,0.08)" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-12 flex gap-2.5 overflow-x-auto py-3.5 scrollbar-none">
+          {quickNav.map((q) => (
+            <a
+              key={q.href}
+              href={q.href}
+              onClick={(e) => scrollTo(e, q.href)}
+              className="shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-colors"
+              style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
+            >
+              {q.label}
+            </a>
+          ))}
+        </div>
+      </div>
 
-          <div className="flex flex-col gap-16">
-            {sections.map((sec) => (
-              <div key={sec.id} id={sec.id} className="scroll-mt-28">
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>
-                  {sec.eyebrow}
-                </span>
-                <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-4 leading-tight" style={{ color: "var(--forest)" }}>
-                  {sec.heading}
-                </h2>
-                <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: "var(--ink)", opacity: 0.82 }}>
-                  {sec.intro}
-                </p>
-                <div className="grid sm:grid-cols-2 gap-5">
+      {/* ── Travel stats band ── */}
+      <section className="px-6 md:px-12 pt-12 md:pt-16">
+        <div className="max-w-6xl mx-auto rounded-3xl px-6 py-10 md:py-12" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {stats.map((s) => (
+              <div key={s.label}>
+                <p className="text-2xl md:text-4xl font-bold text-white leading-none">{s.value}</p>
+                <p className="text-sm mt-3 leading-snug" style={{ color: "rgba(255,255,255,0.78)" }}>{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Alternating feature blocks ── */}
+      <section className="px-6 md:px-12 pt-16 md:pt-24">
+        <div className="max-w-6xl mx-auto flex flex-col gap-16 md:gap-24">
+          {sections.map((sec, i) => (
+            <div
+              key={sec.id}
+              id={sec.id}
+              className={`scroll-mt-24 grid md:grid-cols-2 gap-8 md:gap-14 items-center ${i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}
+            >
+              <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+                <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
+                <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>{sec.heading}</h2>
+                <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.82 }}>{sec.intro}</p>
+                <div className="flex flex-col divide-y" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
                   {sec.blocks.map((b) => (
-                    <div key={b.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
-                      <h3 className="font-bold text-lg mb-2" style={{ color: "var(--forest)" }}>{b.title}</h3>
-                      <p className="text-sm leading-relaxed" style={{ color: "var(--ink)", opacity: 0.78 }}>{b.body}</p>
+                    <div key={b.title} className="py-3.5">
+                      <h3 className="font-bold text-base mb-1" style={{ color: "var(--forest)" }}>{b.title}</h3>
+                      <p className="text-sm leading-relaxed" style={{ color: "var(--ink)", opacity: 0.72 }}>{b.body}</p>
                     </div>
                   ))}
                 </div>
                 {sec.note && (
-                  <p className="text-sm leading-relaxed mt-5 italic" style={{ color: "var(--forest)" }}>{sec.note}</p>
+                  <p className="text-sm leading-relaxed mt-4 italic" style={{ color: "var(--forest)" }}>{sec.note}</p>
                 )}
               </div>
-            ))}
-
-            {/* Good to know */}
-            <div className="scroll-mt-28">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>
-                Good to Know
-              </span>
-              <h2 className="text-2xl md:text-4xl font-bold mt-2 mb-8 leading-tight" style={{ color: "var(--forest)" }}>
-                Before You Visit
-              </h2>
-              <div className="flex flex-col gap-5">
-                {goodToKnow.map((g) => (
-                  <div key={g.id} id={g.id} className="scroll-mt-28 bg-white rounded-2xl p-6 md:p-7" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
-                    <h3 className="font-bold text-lg mb-2" style={{ color: "var(--forest)" }}>{g.title}</h3>
-                    <p className="text-sm md:text-base leading-relaxed" style={{ color: "var(--ink)", opacity: 0.8 }}>{g.body}</p>
-                  </div>
-                ))}
-              </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Good to know ── */}
+      <section id="good-to-know" className="scroll-mt-24 px-6 md:px-12 pt-20 pb-24 mt-20" style={{ backgroundColor: "var(--mint)" }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mb-10">
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>Before You Visit</h2>
+            <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>
+              A few practical things worth knowing before you head into the town centre.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {goodToKnow.map((g) => (
+              <div key={g.id} id={g.id} className="scroll-mt-24 bg-white rounded-3xl p-7" style={{ boxShadow: "0 10px 40px -20px rgba(28,46,56,0.3)" }}>
+                <h3 className="font-bold text-lg mb-3" style={{ color: "var(--forest)" }}>{g.title}</h3>
+                <p className="text-sm md:text-base leading-relaxed" style={{ color: "var(--ink)", opacity: 0.78 }}>{g.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
