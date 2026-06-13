@@ -49,14 +49,19 @@ export default function BrandGrid() {
           })}
         </div>
 
-        <SmartLink
-          to={brandGrid.cta.href}
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
-          style={{ backgroundColor: "var(--sage)" }}
-        >
-          {brandGrid.cta.label}
-          <span>→</span>
-        </SmartLink>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          {brandGrid.ctas.map((cta) => (
+            <SmartLink
+              key={cta.href}
+              to={cta.href}
+              className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+              style={{ backgroundColor: "var(--sage)" }}
+            >
+              {cta.label}
+              <span>→</span>
+            </SmartLink>
+          ))}
+        </div>
       </div>
     </section>
   );

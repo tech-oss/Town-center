@@ -274,7 +274,10 @@ export const brandGrid = {
   heading: "Our Traders",
   subheading:
     "Over 80 independent shops, restaurants, and services — all in one place.",
-  cta: { label: "Browse All Traders", href: "/eat-drink" },
+  ctas: [
+    { label: "Browse Eat & Drink", href: "/eat-drink" },
+    { label: "Browse Shops", href: "/shop" },
+  ],
   brands: [
     { id: 1, name: "bakedd", category: "Bakery", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd" },
     { id: 2, name: "Bombay Story", category: "Indian Kitchen", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story" },
