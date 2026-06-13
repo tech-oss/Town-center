@@ -288,7 +288,7 @@ const eatItems = [
     ...item("esquires-coffee", "Esquires Coffee", "eat-drink", "cafes", "Café"),
     freePlan: true,
     containHero: true,
-    image: "/images/esquires/hero-2.png",
+    image: "/images/esquires/hero-1.png",
     gallery: ["/images/esquires/hero-2.png", "/images/esquires/hero-1.png"],
     description:
       "Esquires Coffee is an ethical coffeehouse brand known for serving organic, Fairtrade coffee in welcoming, community-focused cafés.",
