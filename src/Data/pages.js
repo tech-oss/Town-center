@@ -283,6 +283,24 @@ const eatItems = [
     website: "www.cocobachocolate.com",
     news: cocobaNews,
   },
+  {
+    // ── Esquires Coffee — "free plan +" listing (2-image header, description, website) ──
+    ...item("esquires-coffee", "Esquires Coffee", "eat-drink", "cafes", "Café"),
+    freePlan: true,
+    image: "/images/esquires/cafe-1.jpg",
+    gallery: ["/images/esquires/cafe-1.jpg", "/images/esquires/cafe-2.jpg"],
+    description:
+      "Esquires Coffee is an ethical coffeehouse brand known for serving organic, Fairtrade coffee in welcoming, community-focused cafés.",
+    hours: [
+      { day: "Monday – Friday", time: "7:30am – 5:30pm" },
+      { day: "Saturday", time: "8am – 5:30pm" },
+      { day: "Sunday", time: "9am – 4pm" },
+    ],
+    address: "High Street, Maidenhead SL6",
+    mapQuery: "Esquires Coffee, Maidenhead",
+    phone: "01628 000 000",
+    website: "www.esquirescoffee.co.uk",
+  },
   item("pret-a-manger", "Pret A Manger", "eat-drink", "grab-go", "Grab & Go"),
   {
     // ── Real content: Bakedd, Maidenhead — "free plan" listing (logo-only header) ──
@@ -290,6 +308,9 @@ const eatItems = [
     // Listed under both Bakery and Cafés in the Eat & Drink menu
     categories: ["bakery", "cafes"],
     freePlan: true,
+    logoHeader: true,
+    hideDescription: true,
+    hideWeb: true,
     logo: "/images/logos/bakedd.png",
     paragraphs: [
       "Bakedd is an artisan bakery where every visit feels like coming home. Everything is freshly handcrafted on-site each day, using honest ingredients and time-honoured traditions with an innovative twist.",
@@ -423,6 +444,7 @@ export const sections = {
         links: [
           { label: "Coppa Club", to: "/eat-drink/place/coppa-club" },
           { label: "Bakedd", to: "/eat-drink/place/bakedd" },
+          { label: "Esquires Coffee", to: "/eat-drink/place/esquires-coffee" },
           { label: "El Cerdo Tapas & Bar", to: "/eat-drink/place/el-cerdo" },
           { label: "Bombay Story", to: "/eat-drink/place/bombay-story" },
           { label: "La Cucina", to: "/eat-drink/place/la-cucina" },

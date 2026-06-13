@@ -62,7 +62,7 @@ export default function DetailPage() {
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
       {/* ── Free-plan header: logo only, no photography ── */}
-      {item.freePlan ? (
+      {item.logoHeader ? (
         <section className="px-6 md:px-12 pt-6 md:pt-10">
           <div className="max-w-6xl mx-auto">
             <div
@@ -127,7 +127,7 @@ export default function DetailPage() {
               <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "var(--forest)" }}>
                 {item.name}
               </h1>
-              {item.freePlan ? null : item.paragraphs ? (
+              {item.hideDescription ? null : item.paragraphs ? (
                 <div className="flex flex-col gap-5">
                   {item.paragraphs.map((p, i) => (
                     <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
@@ -179,9 +179,18 @@ export default function DetailPage() {
                       <span className="font-semibold" style={{ color: "var(--forest)" }}>Email:</span> {item.email}
                     </p>
                   )}
-                  {!item.freePlan && (
+                  {item.website && !item.hideWeb && (
                     <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
-                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Web:</span> {item.website}
+                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Web:</span>{" "}
+                      <a
+                        href={`https://${item.website.replace(/^https?:\/\//, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:opacity-70 transition-opacity"
+                        style={{ color: "var(--leaf)" }}
+                      >
+                        {item.website}
+                      </a>
                     </p>
                   )}
                 </div>
