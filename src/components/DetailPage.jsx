@@ -127,7 +127,7 @@ export default function DetailPage() {
               <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "var(--forest)" }}>
                 {item.name}
               </h1>
-              {item.paragraphs ? (
+              {item.freePlan ? null : item.paragraphs ? (
                 <div className="flex flex-col gap-5">
                   {item.paragraphs.map((p, i) => (
                     <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
@@ -185,6 +185,7 @@ export default function DetailPage() {
                 </div>
 
                 {/* Social icons — above the actions */}
+                {!item.freePlan && (
                 <div className="flex items-center gap-2.5">
                   {socialItems.map((sl) => (
                     <a
@@ -203,8 +204,10 @@ export default function DetailPage() {
                     </a>
                   ))}
                 </div>
+                )}
 
                 {/* Actions */}
+                {!item.freePlan && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`}
                   target="_blank"
@@ -216,6 +219,7 @@ export default function DetailPage() {
                 >
                   Get Directions
                 </a>
+                )}
 
                 <a href="#app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>
                   Get the App
@@ -241,11 +245,13 @@ export default function DetailPage() {
       </section>
 
       {/* ── Location map ── */}
-      <section className="pb-16 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Location" note={item.address} query={mapQuery} />
-        </div>
-      </section>
+      {!item.freePlan && (
+        <section className="pb-16 px-6 md:px-12">
+          <div className="max-w-6xl mx-auto">
+            <LocationMap heading="Location" note={item.address} query={mapQuery} />
+          </div>
+        </section>
+      )}
 
       {/* ── Per-business News & Offers (unique to this place) ── */}
       {/* Free-plan listings don't include news & offers */}
