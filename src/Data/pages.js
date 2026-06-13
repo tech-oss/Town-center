@@ -287,6 +287,8 @@ const eatItems = [
   {
     // ── Real content: Bakedd, Maidenhead — "free plan" listing (logo-only header) ──
     ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
+    // Listed under both Bakery and Cafés in the Eat & Drink menu
+    categories: ["bakery", "cafes"],
     freePlan: true,
     logo: "/images/logos/bakedd.png",
     paragraphs: [

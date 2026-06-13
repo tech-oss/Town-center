@@ -13,7 +13,10 @@ export default function CategoryPage() {
 
   if (!sec) return <Navigate to="/" replace />;
 
-  const items = category ? sec.items.filter((i) => i.category === category) : sec.items;
+  // An item appears under its primary `category` plus any extra `categories`.
+  const items = category
+    ? sec.items.filter((i) => i.category === category || i.categories?.includes(category))
+    : sec.items;
   const isCategory = Boolean(category);
   const title = isCategory ? categoryTitles[category] ?? sec.label : sec.landing.title;
   const intro = isCategory
@@ -77,8 +80,12 @@ export default function CategoryPage() {
                   className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="relative aspect-[4/3] overflow-hidden" style={it.logo ? { backgroundColor: "var(--mint)" } : undefined}>
+                    {it.logo ? (
+                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-10 transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    )}
                   </div>
                   <div className="flex flex-col gap-2 p-6">
                     <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>
