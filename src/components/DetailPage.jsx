@@ -174,14 +174,16 @@ export default function DetailPage() {
                       <span className="font-semibold" style={{ color: "var(--forest)" }}>Tel:</span> {item.phone}
                     </p>
                   )}
-                  {item.email && (
+                  {item.email && !item.freePlan && (
                     <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
                       <span className="font-semibold" style={{ color: "var(--forest)" }}>Email:</span> {item.email}
                     </p>
                   )}
-                  <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
-                    <span className="font-semibold" style={{ color: "var(--forest)" }}>Web:</span> {item.website}
-                  </p>
+                  {!item.freePlan && (
+                    <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
+                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Web:</span> {item.website}
+                    </p>
+                  )}
                 </div>
 
                 {/* Social icons — above the actions */}
@@ -226,6 +228,7 @@ export default function DetailPage() {
                 </a>
 
                 {/* Share button */}
+                {!item.freePlan && (
                 <button
                   onClick={() => setShareOpen(true)}
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-full font-semibold transition-colors border"
@@ -237,6 +240,7 @@ export default function DetailPage() {
                   </svg>
                   Share
                 </button>
+                )}
               </div>
             </aside>
           </div>
