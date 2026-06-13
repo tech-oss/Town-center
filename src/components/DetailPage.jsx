@@ -248,7 +248,8 @@ export default function DetailPage() {
       </section>
 
       {/* ── Per-business News & Offers (unique to this place) ── */}
-      <NewsOffers item={item} />
+      {/* Free-plan listings don't include news & offers */}
+      {!item.freePlan && <NewsOffers item={item} />}
 
       {/* ── Share modal ── */}
       {shareOpen && (
