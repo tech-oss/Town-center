@@ -395,9 +395,9 @@ export const footer = {
       heading: "About",
       links: [
         { label: "Our Story", href: "/about" },
-        { label: "Traders", href: "/eat-drink" },
+        { label: "Traders", href: "/traders" },
         { label: "Work With Us", href: "/work" },
-        { label: "Press", href: "/press" },
+        { label: "Work with us & enquiries", href: "/work-with-us" },
       ],
     },
   ],

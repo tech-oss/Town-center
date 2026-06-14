@@ -40,9 +40,9 @@ export default function PressPage() {
           }}
         />
         <span className="relative text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--sage)" }}>
-          Press & Media
+          Get Involved
         </span>
-        <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">Press</h1>
+        <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">Work With Us &amp; Enquiries</h1>
         <p className="relative text-base md:text-lg max-w-xl leading-relaxed" style={{ color: "var(--mint)" }}>
           Working on a story about Maidenhead? We're here to help.
         </p>
@@ -53,7 +53,7 @@ export default function PressPage() {
           <nav className="mb-10 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
-            <span>Press</span>
+            <span>Work With Us &amp; Enquiries</span>
           </nav>
 
           <div className="flex flex-col gap-6 mb-12">

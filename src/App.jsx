@@ -20,6 +20,7 @@ import OurStoryPage from './components/OurStoryPage'
 import GettingHerePage from './components/GettingHerePage'
 import NewsIndexPage from './components/NewsIndexPage'
 import PressPage from './components/PressPage'
+import TradersPage from './components/TradersPage'
 import Footer from './components/Footer'
 import NewsletterModal from './components/NewsletterModal'
 import { newsletterModal } from './Data/content'
@@ -61,6 +62,9 @@ function App() {
           <Route path="/" element={<HomePage headerHeight={headerHeight} />} />
           {/* Plan your visit / info pages */}
           <Route path="/getting-here" element={<GettingHerePage />} />
+          <Route path="/traders" element={<TradersPage />} />
+          <Route path="/work-with-us" element={<PressPage />} />
+          {/* legacy alias */}
           <Route path="/press" element={<PressPage />} />
           {/* Journal */}
           <Route path="/news" element={<NewsIndexPage />} />
