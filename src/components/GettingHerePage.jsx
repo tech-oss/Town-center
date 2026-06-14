@@ -240,6 +240,34 @@ export default function GettingHerePage() {
                     Open full transport map →
                   </a>
                 </div>
+              ) : sec.id === "driving" ? (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+                    {/* Free, no-API-key interactive road map (OpenStreetMap) centred on
+                        Maidenhead town centre — pan & zoom enabled. */}
+                    <iframe
+                      title="Maidenhead town centre — interactive location map"
+                      src="https://www.openstreetmap.org/export/embed.html?bbox=-0.8000%2C51.4820%2C-0.6400%2C51.5600&layer=mapnik&marker=51.5217%2C-0.7177"
+                      loading="lazy"
+                      className="w-full h-full border-0"
+                    />
+                  </div>
+                  <a
+                    href="https://www.google.com/maps/dir/?api=1&destination=Maidenhead+Town+Centre%2C+Maidenhead"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 self-start px-6 py-3 rounded-full text-sm font-semibold text-white transition-colors"
+                    style={{ backgroundColor: "var(--leaf)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    Get Directions
+                  </a>
+                </div>
               ) : (
                 <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                   <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
