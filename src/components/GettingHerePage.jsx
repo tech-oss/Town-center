@@ -312,6 +312,28 @@ export default function GettingHerePage() {
                     </div>
                   </div>
                 </div>
+              ) : sec.id === "cycling" ? (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+                    {/* Free, no-API-key interactive cycle map (OpenStreetMap / OpenCycleMap)
+                        showing cycle routes and paths around Maidenhead — pan & zoom enabled. */}
+                    <iframe
+                      title="Maidenhead cycle routes — interactive map"
+                      src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7820%2C51.4880%2C-0.6560%2C51.5520&layer=cyclemap&marker=51.5217%2C-0.7177"
+                      loading="lazy"
+                      className="w-full h-full border-0"
+                    />
+                  </div>
+                  <a
+                    href="https://www.openstreetmap.org/#map=14/51.5217/-0.7177&layers=C"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="self-start text-xs font-semibold hover:opacity-70 transition-opacity"
+                    style={{ color: "var(--leaf)" }}
+                  >
+                    Open full cycle map →
+                  </a>
+                </div>
               ) : (
                 <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                   <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
