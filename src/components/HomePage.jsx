@@ -14,8 +14,8 @@ export default function HomePage({ headerHeight }) {
       <Hero headerHeight={headerHeight} />
       <QuickLinks />
       <BlogCards />
-      <AppCta />
       <BrandGrid />
+      <AppCta />
       <FeatureBlocks />
       <EventsGrid />
       <PlanVisit />
