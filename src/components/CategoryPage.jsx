@@ -103,7 +103,8 @@ export default function CategoryPage() {
                         <span className="line-clamp-1">{it.address}</span>
                       </span>
                     )}
-                    {(it.paragraphs?.[0] || it.description) && (
+                    {/* Only show a snippet if the detail page actually shows a description */}
+                    {!it.hideDescription && (it.paragraphs?.[0] || it.description) && (
                       <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "var(--ink)", opacity: 0.72 }}>
                         {it.paragraphs?.[0] || it.description}
                       </p>
