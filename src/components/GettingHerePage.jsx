@@ -339,7 +339,9 @@ export default function GettingHerePage() {
                   <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
                 </div>
               )}
-              <div>
+              {/* On mobile the heading/intro comes first so each map sits with its
+                  own section; desktop keeps the alternating left/right layout. */}
+              <div className="order-first md:order-none">
                 <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>{sec.heading}</h2>
                 <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.82 }}>{sec.intro}</p>
