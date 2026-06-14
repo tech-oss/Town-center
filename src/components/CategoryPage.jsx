@@ -94,6 +94,20 @@ export default function CategoryPage() {
                     <h3 className="font-bold text-xl leading-snug" style={{ color: "var(--forest)" }}>
                       {it.name}
                     </h3>
+                    {it.address && (
+                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span className="line-clamp-1">{it.address}</span>
+                      </span>
+                    )}
+                    {(it.paragraphs?.[0] || it.description) && (
+                      <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "var(--ink)", opacity: 0.72 }}>
+                        {it.paragraphs?.[0] || it.description}
+                      </p>
+                    )}
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "var(--forest)" }}>
                       Read more
                       <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
