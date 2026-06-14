@@ -1,6 +1,35 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, Fragment } from "react";
 import { featureBySlug, features } from "../Data/features";
+
+// Renders a body block's text (heading + paragraphs + optional bullets).
+function BlockText({ block }) {
+  return (
+    <div className="flex flex-col gap-4">
+      {block.heading && (
+        <h2 className="text-2xl md:text-3xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
+          {block.heading}
+        </h2>
+      )}
+      {block.paras?.map((p, pi) => (
+        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
+      ))}
+      {block.bullets && (
+        <ul className="flex flex-col gap-2 pl-1">
+          {block.bullets.map((b) => (
+            <li key={b} className="flex items-start gap-3 text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>
+              <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />
+              {b}
+            </li>
+          ))}
+        </ul>
+      )}
+      {block.parasAfter?.map((p, pi) => (
+        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
+      ))}
+    </div>
+  );
+}
 
 export default function FeatureArticlePage() {
   const { slug } = useParams();
@@ -14,6 +43,23 @@ export default function FeatureArticlePage() {
 
   const more = features.filter((f) => f.slug !== story.slug);
   const websiteUrl = `https://${story.website.replace(/^https?:\/\//, "")}`;
+
+  // Weave gallery images through the body: pair each image with a substantial
+  // section (skip the short intro block), alternating image left/right.
+  const imageForBlock = {};
+  const gallery = story.gallery ?? [];
+  const startIdx = story.body[0]?.heading ? 0 : 1; // skip headless intro block
+  const candidates = story.body
+    .map((b, i) => i)
+    .filter((i) => i >= startIdx);
+  if (candidates.length > 0) {
+    gallery.forEach((src, gi) => {
+      // spread images evenly across the eligible blocks
+      const pos = Math.floor(((gi + 0.5) / gallery.length) * candidates.length);
+      const blockIdx = candidates[Math.min(pos, candidates.length - 1)];
+      imageForBlock[blockIdx] = { src, side: gi % 2 === 0 ? "right" : "left" };
+    });
+  }
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
@@ -50,53 +96,38 @@ export default function FeatureArticlePage() {
 
       {/* ── Body ── */}
       <section className="py-12 md:py-16 px-6 md:px-12">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Standfirst */}
-          <p className="text-lg md:text-xl leading-relaxed mb-10 font-medium" style={{ color: "var(--forest)" }}>
+          <p className="max-w-3xl mx-auto text-lg md:text-2xl leading-relaxed mb-14 font-medium text-center" style={{ color: "var(--forest)" }}>
             {story.standfirst}
           </p>
 
-          <article className="flex flex-col gap-8">
-            {story.body.map((block, i) => (
-              <div key={i} className="flex flex-col gap-4">
-                {block.heading && (
-                  <h2 className="text-2xl md:text-3xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
-                    {block.heading}
-                  </h2>
-                )}
-                {block.paras?.map((p, pi) => (
-                  <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
-                ))}
-                {block.bullets && (
-                  <ul className="flex flex-col gap-2 pl-1">
-                    {block.bullets.map((b) => (
-                      <li key={b} className="flex items-start gap-3 text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>
-                        <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />
-                        {b}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {block.parasAfter?.map((p, pi) => (
-                  <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
-                ))}
-              </div>
-            ))}
+          <article className="flex flex-col gap-12 md:gap-16">
+            {story.body.map((block, i) => {
+              const img = imageForBlock[i];
+              if (img) {
+                const imageRight = img.side === "right";
+                return (
+                  <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                    <div className={imageRight ? "md:order-2" : ""}>
+                      <div className="rounded-3xl overflow-hidden bg-black h-72 md:h-full md:min-h-[24rem] shadow-[0_24px_60px_-30px_rgba(28,46,56,0.55)]">
+                        <img src={img.src} alt={block.heading || story.title} loading="lazy" className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                    <BlockText block={block} />
+                  </div>
+                );
+              }
+              return (
+                <div key={i} className="max-w-3xl mx-auto w-full">
+                  <BlockText block={block} />
+                </div>
+              );
+            })}
           </article>
 
-          {/* Gallery */}
-          {story.gallery?.length > 0 && (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mt-12">
-              {story.gallery.map((g, i) => (
-                <div key={i} className="rounded-2xl overflow-hidden aspect-[4/3] bg-black shadow-[0_10px_40px_-20px_rgba(28,46,56,0.4)]">
-                  <img src={g} alt={`${story.title} ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* CTA */}
-          <div className="mt-12 rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
+          <div className="mt-16 rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
             <div className="flex-1">
               <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--sage)" }}>{story.eyebrow}</p>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>{story.location}</p>
