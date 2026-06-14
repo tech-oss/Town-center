@@ -25,8 +25,8 @@ export default function AppCta() {
               — download the Maidenhead app and never miss a thing.
             </p>
           </div>
-          <div className="shrink-0">
-            <AppBadges />
+          <div className="shrink-0 w-full md:w-auto">
+            <AppBadges className="flex-col sm:flex-row w-full md:w-auto" />
           </div>
         </div>
       </div>
