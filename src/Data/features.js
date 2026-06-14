@@ -141,9 +141,9 @@ export const features = [
       },
     ],
     gallery: [
-      "/images/fatduck/food-2.jpg",
-      "/images/fatduck/sandwich.jpg",
-      "/images/fatduck/heston.jpg",
+      "/images/fatduck/food-3.jpg",
+      "/images/fatduck/madhatter.jpg",
+      "/images/fatduck/icecream.jpg",
     ],
   },
 ];
