@@ -5,6 +5,7 @@ import BrandGrid from "./BrandGrid";
 import FeatureBlocks from "./FeatureBlocks";
 import EventsGrid from "./EventsGrid";
 import PlanVisit from "./PlanVisit";
+import AppCta from "./AppCta";
 import Newsletter from "./Newsletter";
 
 export default function HomePage({ headerHeight }) {
@@ -17,6 +18,7 @@ export default function HomePage({ headerHeight }) {
       <FeatureBlocks />
       <EventsGrid />
       <PlanVisit />
+      <AppCta />
       <Newsletter />
     </>
   );

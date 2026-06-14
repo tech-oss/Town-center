@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { footer, header } from "../Data/content";
+import AppBadges from "./AppBadges";
 
 export default function Footer() {
   return (
@@ -44,6 +45,14 @@ export default function Footer() {
                   {s.label}
                 </a>
               ))}
+            </div>
+
+            {/* App download badges */}
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--sage)" }}>
+                Get the App
+              </p>
+              <AppBadges />
             </div>
           </div>
 
