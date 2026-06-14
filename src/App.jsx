@@ -21,6 +21,7 @@ import GettingHerePage from './components/GettingHerePage'
 import NewsIndexPage from './components/NewsIndexPage'
 import PressPage from './components/PressPage'
 import TradersPage from './components/TradersPage'
+import FeatureArticlePage from './components/FeatureArticlePage'
 import Footer from './components/Footer'
 import NewsletterModal from './components/NewsletterModal'
 import { newsletterModal } from './Data/content'
@@ -69,6 +70,8 @@ function App() {
           {/* Journal */}
           <Route path="/news" element={<NewsIndexPage />} />
           <Route path="/news/:articleSlug" element={<ArticlePage />} />
+          {/* Featured stories */}
+          <Route path="/story/:slug" element={<FeatureArticlePage />} />
           <Route path="/attraction/:slug" element={<AttractionPage />} />
           {/* Work section */}
           <Route path="/work" element={<WorkPage />} />
