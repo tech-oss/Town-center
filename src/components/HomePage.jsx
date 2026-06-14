@@ -14,11 +14,11 @@ export default function HomePage({ headerHeight }) {
       <Hero headerHeight={headerHeight} />
       <QuickLinks />
       <BlogCards />
+      <AppCta />
       <BrandGrid />
       <FeatureBlocks />
       <EventsGrid />
       <PlanVisit />
-      <AppCta />
       <Newsletter />
     </>
   );

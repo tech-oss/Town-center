@@ -52,7 +52,7 @@ export default function Footer() {
               <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--sage)" }}>
                 Get the App
               </p>
-              <AppBadges />
+              <AppBadges size="sm" />
             </div>
           </div>
 
