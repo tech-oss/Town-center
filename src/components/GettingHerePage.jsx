@@ -268,6 +268,50 @@ export default function GettingHerePage() {
                     Get Directions
                   </a>
                 </div>
+              ) : sec.id === "parking" ? (
+                <div className="flex flex-col gap-3">
+                  <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+                    {/* Free, no-API-key interactive map (OpenStreetMap) zoomed to the
+                        town-centre car-park area; the chips below open turn-by-turn
+                        directions to each car park from the visitor's location. */}
+                    <iframe
+                      title="Maidenhead town-centre car parks — interactive map"
+                      src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7320%2C51.5140%2C-0.7060%2C51.5290&layer=mapnik&marker=51.5208%2C-0.7200"
+                      loading="lazy"
+                      className="w-full h-full border-0"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold mb-2" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                      Navigate from your location:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { label: "Nicholsons", q: "Nicholsons Car Park, Maidenhead" },
+                        { label: "Vicus Way", q: "Vicus Way Car Park, Maidenhead" },
+                        { label: "Hines Meadow", q: "Hines Meadow Car Park, Maidenhead" },
+                        { label: "Stafferton Way", q: "Stafferton Way Car Park, Maidenhead" },
+                      ].map((p) => (
+                        <a
+                          key={p.label}
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.q)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-colors"
+                          style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
+                        >
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          {p.label}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                   <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
