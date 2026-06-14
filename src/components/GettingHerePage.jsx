@@ -283,7 +283,7 @@ export default function GettingHerePage() {
                   </div>
                   <div>
                     <p className="text-xs font-semibold mb-2" style={{ color: "var(--ink)", opacity: 0.6 }}>
-                      Navigate from your location:
+                      Navigate to the following car parks from your location:
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {[
