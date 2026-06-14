@@ -218,9 +218,33 @@ export default function GettingHerePage() {
               id={sec.id}
               className={`scroll-mt-24 grid md:grid-cols-2 gap-8 md:gap-14 items-center ${i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}
             >
-              <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
-                <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
-              </div>
+              {sec.id === "transport" ? (
+                <div className="flex flex-col gap-2">
+                  <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+                    {/* Free, no-API-key interactive public-transport map (OpenStreetMap / ÖPNVKarte)
+                        showing Maidenhead's rail and bus routes — pan & zoom enabled. */}
+                    <iframe
+                      title="Maidenhead train & bus routes — interactive map"
+                      src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7820%2C51.4880%2C-0.6560%2C51.5520&layer=transportmap&marker=51.5217%2C-0.7177"
+                      loading="lazy"
+                      className="w-full h-full border-0"
+                    />
+                  </div>
+                  <a
+                    href="https://www.openstreetmap.org/?mlat=51.5217&mlon=-0.7177#map=14/51.5217/-0.7177&layers=T"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="self-start text-xs font-semibold hover:opacity-70 transition-opacity"
+                    style={{ color: "var(--leaf)" }}
+                  >
+                    Open full transport map →
+                  </a>
+                </div>
+              ) : (
+                <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+                  <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
+                </div>
+              )}
               <div>
                 <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>{sec.heading}</h2>
