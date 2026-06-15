@@ -6,14 +6,25 @@
 //  Detail pages live at /event/:slug.
 // ════════════════════════════════════════════════════════════════════════════
 
-// Category → coloured dot (matches the pill style on cards & detail pages)
-export const categoryColors = {
-  Music: "#2F8C8C",
-  Family: "#E8A33D",
-  Market: "#4C9A2A",
-  Festive: "#C0392B",
-  Theatre: "#8E44AD",
+// ─── Category definitions ─────────────────────────────────────────────────────
+// Single source of truth for all event categories.
+// Each entry maps to a backend enum value when the CMS is connected.
+// color   → dot/pill on cards and detail pages
+// filter  → slug used in ?category= URL param under /see-do
+export const categories = {
+  Music:   { label: "Music",   color: "#2F8C8C", filter: "music"   },
+  Family:  { label: "Family",  color: "#E8A33D", filter: "family"  },
+  Market:  { label: "Market",  color: "#4C9A2A", filter: "market"  },
+  Festive: { label: "Festive", color: "#C0392B", filter: "festive" },
+  Theatre: { label: "Theatre", color: "#8E44AD", filter: "theatre" },
+  Sport:   { label: "Sport",   color: "#1A6FA8", filter: "sport"   },
+  Community: { label: "Community", color: "#6B7280", filter: "community" },
 };
+
+// Convenience alias used by existing components (categoryColors[e.category])
+export const categoryColors = Object.fromEntries(
+  Object.entries(categories).map(([k, v]) => [k, v.color])
+);
 
 export const events = [
   {
@@ -41,6 +52,7 @@ export const events = [
     title: "Maidenhead Farmers' Market",
     date: "2nd Sunday of each month",
     recurringWeekday: 0,
+    nthWeekday: 2,
     time: "9:30am – 1pm",
     location: "Grove Road Car Park, Maidenhead SL6 1SQ",
     tickets: "Free entry",

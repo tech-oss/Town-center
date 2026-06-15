@@ -1,6 +1,53 @@
 import { Link } from "react-router-dom";
 import { events, categoryColors } from "../Data/events";
 
+// Returns the next occurrence of a given weekday (0=Sun … 6=Sat) on or after today.
+function nextWeekday(weekday) {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const diff = (weekday - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+// Returns the Nth (1-based) occurrence of `weekday` in the given month/year.
+function nthWeekdayOfMonth(n, weekday, year, month) {
+  const d = new Date(year, month, 1);
+  const firstOccurrence = (weekday - d.getDay() + 7) % 7;
+  d.setDate(1 + firstOccurrence + (n - 1) * 7);
+  return d;
+}
+
+// Compute the sort-date for an event:
+// - one-off events: their iso date
+// - recurring (recurringWeekday): next occurrence, respecting nthWeekday if set
+function sortDate(e) {
+  if (e.iso) return new Date(e.iso);
+  if (e.recurringWeekday !== undefined) {
+    if (e.nthWeekday) {
+      // e.g. { recurringWeekday: 0, nthWeekday: 2 } = 2nd Sunday each month
+      const now = new Date();
+      const candidate = nthWeekdayOfMonth(e.nthWeekday, e.recurringWeekday, now.getFullYear(), now.getMonth());
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (candidate >= today) return candidate;
+      // next month
+      const nm = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
+      const ny = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
+      return nthWeekdayOfMonth(e.nthWeekday, e.recurringWeekday, ny, nm);
+    }
+    return nextWeekday(e.recurringWeekday);
+  }
+  return new Date(8640000000000000); // no date → sort last
+}
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+// Only show upcoming events: future one-offs + all recurring events.
+const upcomingEvents = events
+  .filter(e => e.recurringWeekday !== undefined || !e.iso || new Date(e.iso) >= today)
+  .sort((a, b) => sortDate(a) - sortDate(b));
+
 function CalendarIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
@@ -42,7 +89,7 @@ export default function EventsGrid() {
 
         {/* Cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {events.map((e) => (
+          {upcomingEvents.map((e) => (
             <Link
               key={e.slug}
               to={`/event/${e.slug}`}
