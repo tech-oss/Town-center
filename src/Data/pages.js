@@ -469,10 +469,6 @@ export const sections = {
     },
     columns: [
       {
-        heading: "What's On",
-        links: [{ label: "See All Events", to: "/see-do/category/events" }],
-      },
-      {
         heading: "Browse By Interest",
         links: [
           { label: "See All Activities", to: "/see-do" },
