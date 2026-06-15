@@ -35,7 +35,7 @@ function Badge({ href, icon, top, bottom, sm }) {
       className={`flex-1 sm:flex-none min-w-0 inline-flex items-center justify-center sm:justify-start rounded-xl transition-transform duration-200 hover:-translate-y-0.5 ${
         sm ? "gap-2 px-3 py-2" : "gap-3 px-4 py-2.5"
       }`}
-      style={{ backgroundColor: "#000", color: "#fff", border: "1px solid rgba(255,255,255,0.18)" }}
+      style={{ backgroundColor: "#fff", color: "#000", border: "1px solid rgba(0,0,0,0.12)" }}
     >
       <span className="shrink-0">{icon}</span>
       <span className="flex flex-col leading-none text-left">
