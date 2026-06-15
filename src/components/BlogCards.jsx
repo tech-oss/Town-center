@@ -19,36 +19,46 @@ function Badge({ label }) {
   );
 }
 
-// ── Featured (large) card ──────────────────────────────────────────────────
+// ── Featured (large) card — full-bleed hero overlay ───────────────────────
 function FeaturedCard({ post }) {
   return (
     <CardLink
       href={post.href}
-      className="group flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1"
-      style={{ borderRadius: card.radius, boxShadow: card.shadow, backgroundColor: "rgba(240,250,250,0.72)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.5)" }}
+      className="group relative overflow-hidden flex flex-col min-h-[340px] md:min-h-0 transition-all duration-300 hover:-translate-y-1"
+      style={{ borderRadius: card.radius, boxShadow: card.shadow }}
     >
-      {/* Image — taller on the featured card */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: "16/10", borderRadius: `${card.radius} ${card.radius} 0 0` }}>
-        <img
-          src={post.imageSrc}
-          alt={post.imageAlt}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-        />
-        <span className="absolute top-3 left-3">
-          <Badge label={post.category} />
-        </span>
-      </div>
-      {/* Body */}
-      <div className="flex flex-col flex-1 p-6 gap-3">
-        <p className="text-[11px] font-medium" style={{ color: "var(--ink)", opacity: 0.5 }}>{post.date}</p>
-        <h3 className="text-2xl leading-snug" style={{ color: "var(--forest)", fontFamily: "var(--font-heading)", fontWeight: 700 }}>
+      {/* Full-bleed image */}
+      <img
+        src={post.imageSrc}
+        alt={post.imageAlt}
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+      />
+
+      {/* Category badge — top left */}
+      <span className="absolute top-4 left-4 z-10">
+        <Badge label={post.category} />
+      </span>
+
+      {/* Gradient overlay — bottom half fades to near-black */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: "linear-gradient(to top, rgba(13,42,51,0.92) 0%, rgba(13,42,51,0.55) 45%, transparent 75%)" }}
+      />
+
+      {/* Text pinned to bottom over the gradient */}
+      <div className="relative z-10 mt-auto p-6 flex flex-col gap-2">
+        <p className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>{post.date}</p>
+        <h3
+          className="text-2xl leading-snug text-white"
+          style={{ fontFamily: "var(--font-heading)", fontWeight: 700, textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}
+        >
           {post.title}
         </h3>
-        <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "var(--ink)", opacity: 0.72 }}>
+        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "rgba(255,255,255,0.78)" }}>
           {post.excerpt}
         </p>
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-1" style={{ color: "var(--leaf)" }}>
+        <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "var(--sage)" }}>
           Read more
           <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
         </span>
