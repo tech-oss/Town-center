@@ -1,6 +1,30 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { eventBySlug, events, categoryColors } from "../Data/events";
+import { itemBySlug } from "../Data/pages";
+
+// Map a See & Do activity (from pages.js) onto the shared event shape so every
+// See & Do detail page uses the same layout as the What's On events.
+function asEvent(slug) {
+  if (eventBySlug[slug]) return eventBySlug[slug];
+  const it = itemBySlug[slug];
+  if (!it || it.section !== "see-do") return null;
+  const body = it.paragraphs
+    ? it.paragraphs.map((p) => ({ text: p }))
+    : it.description
+    ? [{ text: it.description }]
+    : [];
+  return {
+    slug: it.slug,
+    category: it.tag || "What's On",
+    title: it.name,
+    location: it.address,
+    image: it.image,
+    gallery: it.gallery?.length ? it.gallery : [it.image],
+    standfirst: it.description,
+    body,
+  };
+}
 
 function CalendarIcon() {
   return (
@@ -26,7 +50,7 @@ function TicketIcon() {
 
 export default function EventPage() {
   const { slug } = useParams();
-  const event = eventBySlug[slug];
+  const event = asEvent(slug);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -103,14 +127,18 @@ export default function EventPage() {
 
           {/* Meta rows */}
           <div className="flex flex-col gap-3 mb-8">
-            <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
-              <span style={{ color: "var(--forest)" }}><CalendarIcon /></span>
-              <span>{event.date}{event.time ? ` · ${event.time}` : ""}</span>
-            </div>
-            <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
-              <span style={{ color: "var(--forest)" }}><PinIcon /></span>
-              <span>{event.location}</span>
-            </div>
+            {event.date && (
+              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
+                <span style={{ color: "var(--forest)" }}><CalendarIcon /></span>
+                <span>{event.date}{event.time ? ` · ${event.time}` : ""}</span>
+              </div>
+            )}
+            {event.location && (
+              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
+                <span style={{ color: "var(--forest)" }}><PinIcon /></span>
+                <span>{event.location}</span>
+              </div>
+            )}
             {event.tickets && (
               <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
                 <span style={{ color: "var(--forest)" }}><TicketIcon /></span>
@@ -120,22 +148,26 @@ export default function EventPage() {
           </div>
 
           {/* Get Directions */}
-          <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors mb-8"
-            style={{ backgroundColor: "var(--leaf)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
-          >
-            <PinIcon /> Get Directions
-          </a>
+          {event.location ? (
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors mb-8"
+              style={{ backgroundColor: "var(--leaf)" }}
+              onMouseEnter={(ev) => { ev.currentTarget.style.backgroundColor = "var(--sage)"; }}
+              onMouseLeave={(ev) => { ev.currentTarget.style.backgroundColor = "var(--leaf)"; }}
+            >
+              <PinIcon /> Get Directions
+            </a>
+          ) : null}
 
           {/* Standfirst */}
-          <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.8 }}>
-            {event.standfirst}
-          </p>
+          {event.standfirst && (
+            <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.8 }}>
+              {event.standfirst}
+            </p>
+          )}
 
           <div className="h-px mb-6" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
 

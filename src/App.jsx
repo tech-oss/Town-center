@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams } from 'react-router-dom'
 import './App.css'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
@@ -28,6 +28,12 @@ import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
 import NewsletterModal from './components/NewsletterModal'
 import { newsletterModal } from './Data/content'
+
+// See & Do place links now use the shared event layout at /event/:slug.
+function SeeDoPlaceRedirect() {
+  const { slug } = useParams()
+  return <Navigate to={`/event/${slug}`} replace />
+}
 
 function App() {
   const headerRef = useRef(null)
@@ -95,6 +101,7 @@ function App() {
           <Route path="/live/enquire" element={<EnquirePage />} />
           <Route path="/live/building/:slug" element={<BuildingPage />} />
           <Route path="/live/property/:slug" element={<PropertyPage />} />
+          <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
           <Route path="/:section" element={<CategoryPage />} />
           <Route path="/:section/category/:category" element={<CategoryPage />} />
           <Route path="/:section/place/:slug" element={<DetailPage />} />

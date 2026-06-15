@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { sections, categoryTitles } from "../Data/pages";
 import { events as whatsOnEvents } from "../Data/events";
+import EventsCalendar from "./EventsCalendar";
 
 // The real What's On events (from events.js) surfaced as See & Do cards that
 // link to the shared /event/:slug detail page — keeps one source of truth.
@@ -33,13 +34,19 @@ export default function CategoryPage() {
     ? sec.items.filter((i) => i.category === category || i.categories?.includes(category))
     : sec.items;
 
-  // See & Do: use the real What's On events for the "events" category, and on
-  // the landing show them first (replacing the placeholder event listings).
+  // See & Do: real What's On events for the "events" category; on the landing
+  // show events first, then activities. All See & Do cards link to the shared
+  // /event/:slug detail page so every listing uses the same layout.
   if (section === "see-do") {
     if (category === "events") {
       items = eventCards;
     } else if (!category) {
-      items = [...eventCards, ...sec.items.filter((i) => i.category !== "events")];
+      const activities = sec.items
+        .filter((i) => i.category !== "events")
+        .map((i) => ({ ...i, to: `/event/${i.slug}` }));
+      items = [...eventCards, ...activities];
+    } else {
+      items = items.map((i) => ({ ...i, to: `/event/${i.slug}` }));
     }
   }
   const isCategory = Boolean(category);
@@ -79,6 +86,14 @@ export default function CategoryPage() {
           <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "var(--ink)", opacity: 0.8 }}>
             {intro}
           </p>
+
+          {/* See & Do landing: interactive events calendar */}
+          {section === "see-do" && !isCategory && (
+            <div className="mb-14">
+              <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: "var(--forest)" }}>Events Calendar</h2>
+              <EventsCalendar />
+            </div>
+          )}
 
           {/* Category filter chips */}
           <div className="flex gap-2.5 overflow-x-auto pb-3 mb-10 -mx-1 px-1 scrollbar-none">
