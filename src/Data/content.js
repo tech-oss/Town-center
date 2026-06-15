@@ -301,40 +301,45 @@ export const newsletterModal = {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 export const footer = {
-  logo: "MAIDENHEAD",
-  tagline: "Your urban village.",
+  blurb: "Maidenhead is a vibrant riverside town, where history, community and opportunity come together.",
   columns: [
     {
       heading: "Visit",
       links: [
-        { label: "Getting Here", href: "/getting-here" },
-        { label: "Parking", href: "/getting-here#parking" },
-        { label: "Accessibility", href: "/getting-here#accessibility" },
-        { label: "Opening Hours", href: "/getting-here#opening-hours" },
+        { label: "Getting Here",   href: "/getting-here" },
+        { label: "Parking",        href: "/getting-here#parking" },
+        { label: "Accessibility",  href: "/getting-here#accessibility" },
+        { label: "Opening Hours",  href: "/getting-here#opening-hours" },
       ],
     },
     {
       heading: "Discover",
       links: [
         { label: "Eat & Drink", href: "/eat-drink" },
-        { label: "Shop", href: "/shop" },
-        { label: "See & Do", href: "/see-do" },
-        { label: "Events", href: "/see-do?category=events" },
+        { label: "Shop",        href: "/shop" },
+        { label: "See & Do",    href: "/see-do" },
+        { label: "Events",      href: "/see-do?category=events" },
       ],
     },
     {
       heading: "About",
       links: [
-        { label: "Our Story", href: "/about" },
-        { label: "Traders", href: "/traders" },
-        { label: "Work with us & enquiries", href: "/work-with-us" },
+        { label: "Our Story",    href: "/about" },
+        { label: "Traders",      href: "/traders" },
+        { label: "Work With Us", href: "/work-with-us" },
+        { label: "Enquiries",    href: "/work-with-us" },
       ],
     },
   ],
   social: [
-    { label: "Instagram", href: "https://www.instagram.com" },
-    { label: "Facebook", href: "https://www.facebook.com" },
-    { label: "X / Twitter", href: "https://x.com" },
+    { label: "Instagram", icon: "instagram", href: "https://www.instagram.com" },
+    { label: "Facebook",  icon: "facebook",  href: "https://www.facebook.com" },
+    { label: "X",         icon: "x",         href: "https://x.com" },
+    { label: "LinkedIn",  icon: "linkedin",   href: "https://www.linkedin.com" },
   ],
+  app: {
+    heading: "Get the Maidenhead App",
+    body: "Your guide to everything in Maidenhead.",
+  },
   legal: "© 2025 Maidenhead. All rights reserved.",
 };
