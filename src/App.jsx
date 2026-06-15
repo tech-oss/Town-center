@@ -46,18 +46,17 @@ function App() {
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
 
-  // Newsletter popup — auto-opens once per session (React state only, no storage)
-  const [modalOpen, setModalOpen] = useState(false)
-  const [modalShown, setModalShown] = useState(false)
-
-  useEffect(() => {
-    if (modalShown) return
-    const t = setTimeout(() => {
-      setModalOpen(true)
-      setModalShown(true) // mark as shown so it never auto-opens again this session
-    }, newsletterModal.openDelay)
-    return () => clearTimeout(t)
-  }, [modalShown])
+  // Newsletter popup — disabled for now, re-enable by uncommenting the block below
+  // const [modalOpen, setModalOpen] = useState(false)
+  // const [modalShown, setModalShown] = useState(false)
+  // useEffect(() => {
+  //   if (modalShown) return
+  //   const t = setTimeout(() => {
+  //     setModalOpen(true)
+  //     setModalShown(true)
+  //   }, newsletterModal.openDelay)
+  //   return () => clearTimeout(t)
+  // }, [modalShown])
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.
@@ -116,7 +115,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      <NewsletterModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      {/* <NewsletterModal open={modalOpen} onClose={() => setModalOpen(false)} /> */}
     </>
   )
 }
