@@ -25,7 +25,7 @@ export const events = [
     time: "12pm – 5pm",
     location: "Ray Mill Island, Maidenhead",
     tickets: "Free entry",
-    image: "/images/events/family.jpg",
+    image: "/images/events/duck-derby.jpg",
     excerpt: "A family-favourite afternoon of duck racing, games and riverside fun on Ray Mill Island.",
     standfirst:
       "A family-favourite afternoon of duck racing, games and riverside fun in one of Maidenhead's prettiest spots.",
@@ -33,7 +33,7 @@ export const events = [
       { lead: "A day out for all the family", text: "The much-loved Duck Derby returns to Ray Mill Island with a packed programme of family activities, stalls and games throughout the afternoon." },
       { text: "Cheer on your duck as it races along the river, then enjoy the relaxed riverside atmosphere with food, refreshments and plenty to keep all ages entertained." },
     ],
-    gallery: ["/images/events/family.jpg", "/images/events/market.jpg", "/images/events/popup.jpg"],
+    gallery: ["/images/events/duck-derby.jpg", "/images/events/market.jpg", "/images/events/popup.jpg"],
   },
   {
     slug: "maidenhead-farmers-market",
