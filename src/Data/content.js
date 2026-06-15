@@ -101,12 +101,12 @@ export const quickLinks = {
     },
     {
       label: "Green Spaces",
-      href: "/see-do/category/community",
+      href: "/see-do?category=community",
       image: "/images/ql-green.jpg", // riverside park
     },
     {
       label: "Wellness",
-      href: "/see-do/category/sport-wellness",
+      href: "/see-do?category=sport-wellness",
       image: "/images/ql-wellness.jpg", // padel court / active wellness
     },
     {
@@ -201,7 +201,7 @@ export const blogCards = {
 export const eventsGrid = {
   eyebrow: "Upcoming",
   heading: "What's On",
-  cta: { label: "View full calendar", href: "/see-do/category/events" },
+  cta: { label: "View full calendar", href: "/see-do?category=events" },
   events: [
     {
       id: 1,
@@ -211,7 +211,7 @@ export const eventsGrid = {
       location: "The Green",
       tag: "Market",
       image: "/images/events/market.jpg",
-      href: "/see-do/category/events",
+      href: "/see-do?category=events",
     },
     {
       id: 2,
@@ -221,7 +221,7 @@ export const eventsGrid = {
       location: "All Shops",
       tag: "Shopping",
       image: "/images/events/shopping.jpg",
-      href: "/see-do/category/events",
+      href: "/see-do?category=events",
     },
     {
       id: 3,
@@ -231,7 +231,7 @@ export const eventsGrid = {
       location: "Community Room",
       tag: "Family",
       image: "/images/events/family.jpg",
-      href: "/see-do/category/events",
+      href: "/see-do?category=events",
     },
     {
       id: 4,
@@ -241,7 +241,7 @@ export const eventsGrid = {
       location: "The Atrium",
       tag: "Music",
       image: "/images/events/music.jpg",
-      href: "/see-do/category/events",
+      href: "/see-do?category=events",
     },
     {
       id: 5,
@@ -251,7 +251,7 @@ export const eventsGrid = {
       location: "Upper Mall",
       tag: "Shopping",
       image: "/images/events/popup.jpg",
-      href: "/see-do/category/events",
+      href: "/see-do?category=events",
     },
     {
       id: 6,
@@ -261,7 +261,7 @@ export const eventsGrid = {
       location: "The Green",
       tag: "Festive",
       image: "/images/events/festive.jpg",
-      href: "/see-do/category/events",
+      href: "/see-do?category=events",
     },
   ],
 };
@@ -282,7 +282,7 @@ export const brandGrid = {
     { id: 3, name: "Cocoba", category: "Chocolate Café", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba" },
     { id: 4, name: "Coppa Club", category: "Restaurant & Bar", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club" },
     { id: 5, name: "El Cerdo", category: "Tapas Bar", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo" },
-    { id: 6, name: "Nando's", category: "Flame-Grilled", logo: "/images/logos/nandos.png", to: "/eat-drink/category/restaurants" },
+    { id: 6, name: "Nando's", category: "Flame-Grilled", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants" },
     { id: 7, name: "Pret A Manger", category: "Coffee & Food", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger" },
     { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse" },
   ],
@@ -386,7 +386,7 @@ export const footer = {
         { label: "Eat & Drink", href: "/eat-drink" },
         { label: "Shop", href: "/shop" },
         { label: "See & Do", href: "/see-do" },
-        { label: "Events", href: "/see-do/category/events" },
+        { label: "Events", href: "/see-do?category=events" },
       ],
     },
     {

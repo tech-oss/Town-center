@@ -73,7 +73,7 @@ export default function EventPage() {
           <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
-            <Link to="/see-do/category/events" className="hover:opacity-70 transition-opacity">What's On</Link>
+            <Link to="/see-do?category=events" className="hover:opacity-70 transition-opacity">What's On</Link>
           </nav>
 
           {/* Carousel */}

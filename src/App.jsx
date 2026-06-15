@@ -36,6 +36,12 @@ function SeeDoPlaceRedirect() {
   return <Navigate to={`/event/${slug}`} replace />
 }
 
+// Old /section/category/:cat URLs redirect to /section?category=cat
+function SectionCategoryRedirect() {
+  const { section, category } = useParams()
+  return <Navigate to={`/${section}?category=${category}`} replace />
+}
+
 function App() {
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
@@ -105,7 +111,7 @@ function App() {
           <Route path="/live/property/:slug" element={<PropertyPage />} />
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
           <Route path="/:section" element={<CategoryPage />} />
-          <Route path="/:section/category/:category" element={<CategoryPage />} />
+          <Route path="/:section/category/:category" element={<SectionCategoryRedirect />} />
           <Route path="/:section/place/:slug" element={<DetailPage />} />
         </Routes>
       </main>

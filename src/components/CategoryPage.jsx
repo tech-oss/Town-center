@@ -1,4 +1,4 @@
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { sections, categoryTitles } from "../Data/pages";
 import { events as whatsOnEvents } from "../Data/events";
 import EventsCalendar from "./EventsCalendar";
@@ -19,7 +19,9 @@ const eventCards = whatsOnEvents.map((e) => ({
 }));
 
 export default function CategoryPage() {
-  const { section, category } = useParams();
+  const { section } = useParams();
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get("category") || undefined;
   const sec = sections[section];
 
   // Scroll handling is delegated to <ScrollToTop>, which preserves the scroll
@@ -100,9 +102,9 @@ export default function CategoryPage() {
               const seen = new Set();
               return sec.columns
                 .flatMap((c) => c.links)
-                .filter((l) => l.to.includes("/category/") && !seen.has(l.to) && seen.add(l.to))
+                .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
                 .map((l) => {
-                  const cat = l.to.split("/category/")[1];
+                  const cat = l.to.split("?category=")[1];
                   return <FilterChip key={l.to} to={l.to} active={category === cat} label={l.label} />;
                 });
             })()}
@@ -178,6 +180,7 @@ function FilterChip({ to, active, label }) {
   return (
     <Link
       to={to}
+      replace
       className="shrink-0 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200 whitespace-nowrap"
       style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "#fff", color: "var(--forest)" }}
     >

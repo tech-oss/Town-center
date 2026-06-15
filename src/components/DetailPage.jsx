@@ -118,7 +118,7 @@ export default function DetailPage() {
             <span className="mx-2 opacity-40">/</span>
             <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
             <span className="mx-2 opacity-40">/</span>
-            <Link to={`/${item.section}/category/${item.category}`} className="hover:opacity-70 transition-opacity">{item.tag}</Link>
+            <Link to={`/${item.section}?category=${item.category}`} className="hover:opacity-70 transition-opacity">{item.tag}</Link>
           </nav>
 
           <div className="grid lg:grid-cols-[1fr_360px] gap-10 lg:gap-14">

@@ -1,25 +1,14 @@
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-// Listing sections whose category switches should preserve scroll position.
-const LISTING_RE = /^\/(see-do|shop|eat-drink)(\/category\/[^/]+)?\/?$/;
-
-// Scrolls to the top on route change — except when the user is just switching
-// category within the same listing section (e.g. /see-do → /see-do/category/film),
-// where the page should stay where it is.
+// Scrolls to the top whenever the pathname changes.
+// Category switches within listing sections use ?category= search params,
+// so the pathname stays the same and this never fires for those.
 export default function ScrollToTop() {
   const { pathname } = useLocation();
-  const prev = useRef(pathname);
 
   useLayoutEffect(() => {
-    const from = prev.current;
-    const sameSectionFilter =
-      LISTING_RE.test(pathname) &&
-      LISTING_RE.test(from) &&
-      pathname.split("/")[1] === from.split("/")[1];
-
-    if (!sameSectionFilter) window.scrollTo(0, 0);
-    prev.current = pathname;
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   return null;
