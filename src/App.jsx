@@ -23,6 +23,7 @@ import PressPage from './components/PressPage'
 import TradersPage from './components/TradersPage'
 import FeatureArticlePage from './components/FeatureArticlePage'
 import EventPage from './components/EventPage'
+import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
 import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
@@ -73,6 +74,7 @@ function App() {
           {/* Plan your visit / info pages */}
           <Route path="/getting-here" element={<GettingHerePage />} />
           <Route path="/traders" element={<TradersPage />} />
+          <Route path="/get-the-app" element={<GetAppPage />} />
           <Route path="/work-with-us" element={<PressPage />} />
           {/* legacy alias */}
           <Route path="/press" element={<PressPage />} />

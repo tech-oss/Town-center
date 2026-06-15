@@ -14,7 +14,7 @@ export const header = {
     { label: "Explore", href: "#explore" },
   ],
   utilityLinks: [
-    { label: "Get the App", href: "#app" },
+    { label: "Get the App", href: "/get-the-app" },
   ],
 };
 

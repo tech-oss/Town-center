@@ -235,9 +235,9 @@ export default function DetailPage() {
                 </a>
                 )}
 
-                <a href="#app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>
+                <Link to="/get-the-app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>
                   Get the App
-                </a>
+                </Link>
 
                 {/* Share button */}
                 {!item.freePlan && (
