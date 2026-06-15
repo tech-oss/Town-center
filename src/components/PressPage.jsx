@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 
-const paragraphs = [
+const introParagraphs = [
   "Maidenhead.com is an independent platform celebrating everything happening across Maidenhead town centre — from local businesses, restaurants and shops to events, activities and the town's ongoing regeneration.",
   "We welcome enquiries from journalists, bloggers, content creators and local media. Whether you're writing about Maidenhead's independent businesses, the Nicholson Quarter regeneration, or the town's growing food, retail and events scene, we're happy to help with information, interviews and introductions.",
 ];
@@ -15,10 +15,15 @@ const cards = [
     title: "Partnerships",
     body: "We collaborate with local organisations, event organisers and businesses to promote the best of Maidenhead. If you'd like to work with us, we'd love to hear your ideas.",
   },
-  {
-    title: "Imagery & Assets",
-    body: "Logos, photography and brand assets are available to accredited press on request. Please tell us a little about your publication and how you intend to use them.",
-  },
+];
+
+const visibilityParagraphs = [
+  "This platform with its web and app, helps connect local businesses, organisations, community groups and stakeholders with people who live, work and visit the area.",
+  "By creating a profile, you can showcase your services, opening hours, contact details, events and key information in one easy-to-find place. This gives residents and visitors a simple way to discover what you offer and stay connected with what's happening locally.",
+  "For organisations looking for greater visibility, enhanced profile options are available. These can include featured listings, business spotlights, news updates, special offers, featured articles and other promotional opportunities designed to help you reach a wider audience.",
+  "Businesses can also benefit from in-app notifications, allowing important updates, events, offers and announcements to be delivered directly to users who are interested in local information and activities.",
+  "Our aim is to provide a useful platform that helps strengthen connections between local businesses, community organisations and the people they serve.",
+  "If you would like to learn more about creating a profile or the additional visibility options available, please contact us for further details.",
 ];
 
 export default function PressPage() {
@@ -57,12 +62,12 @@ export default function PressPage() {
           </nav>
 
           <div className="flex flex-col gap-6 mb-12">
-            {paragraphs.map((p, i) => (
+            {introParagraphs.map((p, i) => (
               <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
             ))}
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-5 mb-14">
+          <div className="grid sm:grid-cols-2 gap-5 mb-14">
             {cards.map((c) => (
               <div key={c.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
                 <h3 className="font-bold text-lg mb-2" style={{ color: "var(--forest)" }}>{c.title}</h3>
@@ -71,15 +76,27 @@ export default function PressPage() {
             ))}
           </div>
 
+          {/* Grow your presence section */}
+          <div className="mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>
+              For businesses to grow your presence and visibility
+            </h2>
+            <div className="flex flex-col gap-5">
+              {visibilityParagraphs.map((p, i) => (
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
+              ))}
+            </div>
+          </div>
+
           {/* Contact CTA */}
           <div
             className="rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6"
             style={{ backgroundColor: "var(--forest)", color: "white" }}
           >
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Get in touch with our press team</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-2">Get in touch</h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
-                Email us with your enquiry and a few details about your deadline, and we'll get back to you.
+                Email us with your enquiry and a few details, and we'll get back to you.
               </p>
             </div>
             <a
