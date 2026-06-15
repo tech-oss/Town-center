@@ -1,3 +1,4 @@
+import { useRef, useLayoutEffect } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { sections, categoryTitles } from "../Data/pages";
 import { events as whatsOnEvents } from "../Data/events";
@@ -24,8 +25,25 @@ export default function CategoryPage() {
   const category = searchParams.get("category") || undefined;
   const sec = sections[section];
 
-  // Scroll handling is delegated to <ScrollToTop>, which preserves the scroll
-  // position when switching category within the same listing section.
+  // When the user switches filter, scroll the chip row to a consistent spot
+  // just under the header. Because the page height differs between views (the
+  // events calendar only shows on the "All" landing), preserving the raw scroll
+  // offset would land you in a different place each time — so we re-anchor.
+  // Skips the first render so navigating *into* the page still lands at the top
+  // (handled by <ScrollToTop>).
+  const chipsRef = useRef(null);
+  const firstRun = useRef(true);
+  useLayoutEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    const el = chipsRef.current;
+    if (!el) return;
+    const headerH = document.querySelector("header")?.offsetHeight ?? 0;
+    const y = el.getBoundingClientRect().top + window.scrollY - headerH - 16;
+    window.scrollTo(0, Math.max(0, y));
+  }, [category]);
 
   if (!sec) return <Navigate to="/" replace />;
 
@@ -96,7 +114,7 @@ export default function CategoryPage() {
           )}
 
           {/* Category filter chips */}
-          <div className="flex gap-2.5 overflow-x-auto pb-3 mb-10 -mx-1 px-1 scrollbar-none">
+          <div ref={chipsRef} className="flex gap-2.5 overflow-x-auto pb-3 mb-10 -mx-1 px-1 scrollbar-none">
             <FilterChip to={sec.path} active={!isCategory} label="All" />
             {(() => {
               const seen = new Set();
