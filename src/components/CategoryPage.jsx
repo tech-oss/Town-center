@@ -13,6 +13,7 @@ const eventCards = whatsOnEvents.map((e) => ({
   section: "see-do",
   category: "events",
   image: e.image,
+  date: e.date,
   address: e.location,
   description: e.excerpt,
   to: `/event/${e.slug}`,
@@ -134,6 +135,14 @@ export default function CategoryPage() {
                     <h3 className="font-bold text-xl leading-snug" style={{ color: "var(--forest)" }}>
                       {it.name}
                     </h3>
+                    {it.date && (
+                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                          <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+                        </svg>
+                        <span className="line-clamp-1">{it.date}</span>
+                      </span>
+                    )}
                     {it.address && (
                       <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "var(--ink)", opacity: 0.6 }}>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
