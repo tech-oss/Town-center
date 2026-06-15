@@ -70,7 +70,8 @@ export const events = [
     time: "From 2pm",
     location: "Maidenhead Town Centre",
     tickets: "Free, non-ticketed",
-    image: "/images/events/music.jpg",
+    website: "https://mheadfestival.weebly.com/battle-of-the-choirs.html",
+    image: "/images/events/choirs-1.jpg",
     excerpt: "Local choirs go head-to-head with bold arrangements, big voices and an electric atmosphere.",
     standfirst:
       "Think Battle of the Bands, but for choirs — local choirs go head-to-head in a celebration of big voices and bold arrangements.",
@@ -79,7 +80,7 @@ export const events = [
       { text: "With an electric atmosphere and a friendly competitive spirit, it's a wonderful showcase of the singing talent that thrives across Maidenhead and the surrounding area." },
       { text: "Part of Maidenhead Festival — organised for the community, by the community." },
     ],
-    gallery: ["/images/events/music.jpg", "/images/events/popup.jpg", "/images/events/shopping.jpg"],
+    gallery: ["/images/events/choirs-1.jpg", "/images/events/choirs-2.jpg"],
   },
   {
     slug: "live-and-local-summer-sounds",
@@ -90,7 +91,8 @@ export const events = [
     time: "Afternoon",
     location: "Maidenhead Town Centre",
     tickets: "Free, non-ticketed",
-    image: "/images/events/popup.jpg",
+    website: "https://mheadfestival.weebly.com/live-and-local.html",
+    image: "/images/events/summer-1.jpg",
     excerpt: "A relaxed afternoon of live, local acoustic music in the heart of the town centre.",
     standfirst:
       "A relaxed afternoon of live, local music in the heart of the town centre.",
@@ -98,7 +100,7 @@ export const events = [
       { lead: "Live & Local", text: "Summer Sounds brings local acoustic artists to the town centre for a casual, free-to-attend afternoon of music." },
       { text: "Grab a refreshment, find a spot in the sun and enjoy the relaxed atmosphere as performers fill the streets with the sounds of summer." },
     ],
-    gallery: ["/images/events/popup.jpg", "/images/events/music.jpg", "/images/events/family.jpg"],
+    gallery: ["/images/events/summer-1.jpg", "/images/events/summer-2.jpg", "/images/events/summer-3.jpg", "/images/events/summer-4.jpg"],
   },
   {
     slug: "battle-of-the-bands",
@@ -109,7 +111,8 @@ export const events = [
     time: "Evening",
     location: "Maidenhead Town Centre",
     tickets: "Free, non-ticketed",
-    image: "/images/events/shopping.jpg",
+    website: "https://mheadfestival.weebly.com/battle-of-the-bands.html",
+    image: "/images/events/bands-hero.jpg",
     excerpt: "Emerging artists compete across indie, rock, electronic and acoustic — and the audience decides the winner.",
     standfirst:
       "Emerging artists go head-to-head across indie, rock, electronic and acoustic — and the audience decides the winner.",
@@ -117,7 +120,7 @@ export const events = [
       { lead: "The crowd picks the champion", text: "Battle of the Bands showcases some of the area's most exciting emerging artists across a range of genres, all competing for your vote." },
       { text: "Expect a high-energy evening of live music, standout performances and a real sense of community spirit as the town centre comes alive after dark." },
     ],
-    gallery: ["/images/events/shopping.jpg", "/images/events/music.jpg", "/images/events/popup.jpg"],
+    gallery: ["/images/events/bands-hero.jpg", "/images/events/bands-1.jpg", "/images/events/bands-2.jpg", "/images/events/bands-3.jpg"],
   },
   {
     slug: "christmas-lights-switch-on",
