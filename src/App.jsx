@@ -22,6 +22,7 @@ import NewsIndexPage from './components/NewsIndexPage'
 import PressPage from './components/PressPage'
 import TradersPage from './components/TradersPage'
 import FeatureArticlePage from './components/FeatureArticlePage'
+import EventPage from './components/EventPage'
 import Footer from './components/Footer'
 import NewsletterModal from './components/NewsletterModal'
 import { newsletterModal } from './Data/content'
@@ -72,6 +73,8 @@ function App() {
           <Route path="/news/:articleSlug" element={<ArticlePage />} />
           {/* Featured stories */}
           <Route path="/story/:slug" element={<FeatureArticlePage />} />
+          {/* What's On events */}
+          <Route path="/event/:slug" element={<EventPage />} />
           <Route path="/attraction/:slug" element={<AttractionPage />} />
           {/* Work section */}
           <Route path="/work" element={<WorkPage />} />
