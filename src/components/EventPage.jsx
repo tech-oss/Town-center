@@ -47,6 +47,13 @@ function TicketIcon() {
     </svg>
   );
 }
+function GlobeIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+    </svg>
+  );
+}
 
 export default function EventPage() {
   const { slug } = useParams();
@@ -145,22 +152,45 @@ export default function EventPage() {
                 <span>{event.tickets}</span>
               </div>
             )}
+            {event.website && (
+              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
+                <span style={{ color: "var(--forest)" }}><GlobeIcon /></span>
+                <a href={event.website} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:opacity-70 transition-opacity" style={{ color: "var(--forest)" }}>
+                  {event.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+                </a>
+              </div>
+            )}
           </div>
 
-          {/* Get Directions */}
-          {event.location ? (
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors mb-8"
-              style={{ backgroundColor: "var(--leaf)" }}
-              onMouseEnter={(ev) => { ev.currentTarget.style.backgroundColor = "var(--sage)"; }}
-              onMouseLeave={(ev) => { ev.currentTarget.style.backgroundColor = "var(--leaf)"; }}
-            >
-              <PinIcon /> Get Directions
-            </a>
-          ) : null}
+          {/* Action buttons */}
+          <div className="flex flex-wrap gap-3 mb-8">
+            {event.location ? (
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors"
+                style={{ backgroundColor: "var(--leaf)" }}
+                onMouseEnter={(ev) => { ev.currentTarget.style.backgroundColor = "var(--sage)"; }}
+                onMouseLeave={(ev) => { ev.currentTarget.style.backgroundColor = "var(--leaf)"; }}
+              >
+                <PinIcon /> Get Directions
+              </a>
+            ) : null}
+            {event.website ? (
+              <a
+                href={event.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors"
+                style={{ backgroundColor: "var(--sand)", color: "var(--forest)", border: "2px solid var(--forest)" }}
+                onMouseEnter={(ev) => { ev.currentTarget.style.backgroundColor = "var(--forest)"; ev.currentTarget.style.color = "#fff"; }}
+                onMouseLeave={(ev) => { ev.currentTarget.style.backgroundColor = "var(--sand)"; ev.currentTarget.style.color = "var(--forest)"; }}
+              >
+                <GlobeIcon /> Visit Website
+              </a>
+            ) : null}
+          </div>
 
           {/* Standfirst */}
           {event.standfirst && (
