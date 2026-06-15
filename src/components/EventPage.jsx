@@ -119,6 +119,19 @@ export default function EventPage() {
             )}
           </div>
 
+          {/* Get Directions */}
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors mb-8"
+            style={{ backgroundColor: "var(--leaf)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+          >
+            <PinIcon /> Get Directions
+          </a>
+
           {/* Standfirst */}
           <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.8 }}>
             {event.standfirst}

@@ -31,7 +31,7 @@ export default function EventsGrid() {
             </h2>
           </div>
           <Link
-            to="/see-do/category/events"
+            to="/whats-on"
             className="group hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap shrink-0"
             style={{ color: "var(--forest)" }}
           >
@@ -80,10 +80,15 @@ export default function EventsGrid() {
           ))}
         </div>
 
-        {/* Mobile view-all */}
-        <div className="sm:hidden mt-8 text-center">
-          <Link to="/see-do/category/events" className="inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--forest)" }}>
-            View full calendar →
+        {/* View all events */}
+        <div className="mt-10 flex justify-center">
+          <Link
+            to="/events"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+            style={{ backgroundColor: "var(--forest)" }}
+          >
+            View All Events
+            <span>→</span>
           </Link>
         </div>
       </div>
