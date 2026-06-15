@@ -1,6 +1,21 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { sections, categoryTitles } from "../Data/pages";
+import { events as whatsOnEvents } from "../Data/events";
+
+// The real What's On events (from events.js) surfaced as See & Do cards that
+// link to the shared /event/:slug detail page — keeps one source of truth.
+const eventCards = whatsOnEvents.map((e) => ({
+  slug: e.slug,
+  name: e.title,
+  tag: "What's On",
+  section: "see-do",
+  category: "events",
+  image: e.image,
+  address: e.location,
+  description: e.excerpt,
+  to: `/event/${e.slug}`,
+}));
 
 export default function CategoryPage() {
   const { section, category } = useParams();
@@ -14,9 +29,19 @@ export default function CategoryPage() {
   if (!sec) return <Navigate to="/" replace />;
 
   // An item appears under its primary `category` plus any extra `categories`.
-  const items = category
+  let items = category
     ? sec.items.filter((i) => i.category === category || i.categories?.includes(category))
     : sec.items;
+
+  // See & Do: use the real What's On events for the "events" category, and on
+  // the landing show them first (replacing the placeholder event listings).
+  if (section === "see-do") {
+    if (category === "events") {
+      items = eventCards;
+    } else if (!category) {
+      items = [...eventCards, ...sec.items.filter((i) => i.category !== "events")];
+    }
+  }
   const isCategory = Boolean(category);
   const title = isCategory ? categoryTitles[category] ?? sec.label : sec.landing.title;
   const intro = isCategory
@@ -76,7 +101,7 @@ export default function CategoryPage() {
               {items.map((it) => (
                 <Link
                   key={it.slug}
-                  to={`/${it.section}/place/${it.slug}`}
+                  to={it.to ?? `/${it.section}/place/${it.slug}`}
                   className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
