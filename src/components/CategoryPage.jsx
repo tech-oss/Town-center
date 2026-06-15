@@ -1,5 +1,4 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect } from "react";
 import { sections, categoryTitles } from "../Data/pages";
 import { events as whatsOnEvents } from "../Data/events";
 import EventsCalendar from "./EventsCalendar";
@@ -23,10 +22,8 @@ export default function CategoryPage() {
   const { section, category } = useParams();
   const sec = sections[section];
 
-  // Scroll to top whenever the page (or category) changes
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [section, category]);
+  // Scroll handling is delegated to <ScrollToTop>, which preserves the scroll
+  // position when switching category within the same listing section.
 
   if (!sec) return <Navigate to="/" replace />;
 
