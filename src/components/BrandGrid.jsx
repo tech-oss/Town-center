@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { brandGrid } from "../Data/content";
 import SmartLink from "./SmartLink";
+import { card } from "../utils/design";
 
 export default function BrandGrid() {
   return (
@@ -24,11 +25,11 @@ export default function BrandGrid() {
               <Tile
                 key={brand.id}
                 {...tileProps}
-                className="group bg-white rounded-3xl p-6 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_20px_45px_-16px_rgba(28,46,56,0.28)]"
-                style={{ boxShadow: "0 4px 18px -10px rgba(28,46,56,0.14)" }}
+                className="group bg-white p-5 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 ease-out hover:-translate-y-1"
+                style={{ borderRadius: card.radius, boxShadow: card.shadow }}
               >
                 {/* Logo tile — white background, logo contained & centered */}
-                <div className="w-full h-24 rounded-2xl flex items-center justify-center overflow-hidden bg-white">
+                <div className="w-full h-24 flex items-center justify-center overflow-hidden bg-white" style={{ borderRadius: card.radius }}>
                   <img
                     src={brand.logo}
                     alt={`${brand.name} logo`}

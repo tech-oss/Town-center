@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { events, categoryColors } from "../Data/events";
+import { card, pill } from "../utils/design";
 
 // Returns the next occurrence of a given weekday (0=Sun … 6=Sat) on or after today.
 function nextWeekday(weekday) {
@@ -88,54 +89,51 @@ export default function EventsGrid() {
         </div>
 
         {/* Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {upcomingEvents.map((e) => (
             <Link
               key={e.slug}
               to={`/event/${e.slug}`}
-              className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-              style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
+              className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
+              style={{ borderRadius: card.radius, boxShadow: card.shadow }}
             >
-              <div className="relative aspect-[16/10] overflow-hidden">
+              <div className="relative aspect-[16/10] overflow-hidden" style={{ borderRadius: `${card.radius} ${card.radius} 0 0` }}>
                 <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.95)", color: "var(--forest)" }}>
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
+                <span
+                  className={pill.className + " absolute top-3 left-3"}
+                  style={{ backgroundColor: "rgba(255,255,255,0.95)", color: categoryColors[e.category] || "var(--forest)" }}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
                   {e.category}
                 </span>
               </div>
-              <div className="flex flex-col gap-2 p-6">
-                <h3 className="font-bold text-xl leading-snug" style={{ color: "var(--forest)" }}>{e.title}</h3>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.7 }}>
-                  <span style={{ color: "var(--forest)" }}><CalendarIcon /></span>
-                  {e.date}
+              <div className="flex flex-col gap-2 p-5">
+                <h3 className="font-bold text-lg leading-snug" style={{ color: "var(--forest)", fontFamily: "var(--font-heading)" }}>{e.title}</h3>
+                <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.65 }}>
+                  <CalendarIcon />{e.date}
                 </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.7 }}>
-                  <span style={{ color: "var(--forest)" }}><PinIcon /></span>
-                  {e.location}
+                <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.65 }}>
+                  <PinIcon />{e.location}
                 </div>
                 <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "var(--ink)", opacity: 0.72 }}>
                   {e.excerpt}
                 </p>
-                <span
-                  className="mt-3 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white w-max transition-colors"
-                  style={{ backgroundColor: "var(--forest)" }}
-                >
-                  Read more
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-2" style={{ color: "var(--forest)" }}>
+                  Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </span>
               </div>
             </Link>
           ))}
         </div>
 
-        {/* View all events */}
+        {/* View all — primary pill button */}
         <div className="mt-10 flex justify-center">
           <Link
             to="/see-do"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-px"
             style={{ backgroundColor: "var(--forest)" }}
           >
-            View All Events
-            <span>→</span>
+            View All Events <span>→</span>
           </Link>
         </div>
       </div>
