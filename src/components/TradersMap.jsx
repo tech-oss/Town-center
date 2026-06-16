@@ -215,28 +215,6 @@ const FILTERS = [
   { key: "health-beauty", label: "Health & Beauty" },
 ];
 
-// Selected business card pinned to the top of the directory
-function SelectedCard({ brand, onClose, onReadMore, onNavigate }) {
-  return (
-    <div className="flex items-start gap-3 px-4 py-4" style={{ background: "linear-gradient(135deg, #1a3a42 0%, #2f8c8c 100%)", borderBottom: "2px solid rgba(47,140,140,0.4)" }}>
-      <div className="shrink-0 w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden" style={{ border: "2px solid rgba(255,255,255,0.2)" }}>
-        <img src={brand.logo} alt={brand.name} className="w-10 h-10 object-contain" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-sm text-white leading-snug truncate">{brand.name}</p>
-        <p className="text-[11px] mt-0.5 truncate" style={{ color: "rgba(255,255,255,0.7)" }}>{brand.category}</p>
-        <div className="flex gap-2 mt-2">
-          <button onClick={() => onReadMore(brand)} className="text-[11px] font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.18)", color: "#fff" }}>Read more →</button>
-          <button onClick={() => onNavigate(brand)} className="text-[11px] font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "#fff", border: "1px solid rgba(255,255,255,0.25)" }}>Directions</button>
-        </div>
-      </div>
-      <button onClick={onClose} className="shrink-0 mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-  );
-}
-
 export default function TradersMap() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
@@ -326,9 +304,6 @@ export default function TradersMap() {
 
             {/* Directory */}
             <div className="w-full md:w-72 lg:w-80 flex-shrink-0 flex flex-col" style={{ borderLeft: "1px solid rgba(0,0,0,0.07)", maxHeight: "460px" }}>
-              {activeBrand && (
-                <SelectedCard brand={activeBrand} onClose={handleDeselect} onReadMore={handleReadMore} onNavigate={handleNavigate} />
-              )}
               <div className="overflow-y-auto flex-1">
                 {filtered.length === 0 ? (
                   <p className="text-sm text-center py-10" style={{ color: "var(--ink)", opacity: 0.5 }}>No traders in this category yet.</p>
