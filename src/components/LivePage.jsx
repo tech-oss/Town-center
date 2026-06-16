@@ -4,6 +4,7 @@ import { live, buildings } from "../Data/live";
 import LocationMap from "./LocationMap";
 import LifestyleBento from "./LifestyleBento";
 import DesignedAroundYou from "./DesignedAroundYou";
+import { FeaturedProperties } from "./PropertySearch";
 
 export default function LivePage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -71,16 +72,8 @@ export default function LivePage() {
         </div>
       </section>
 
-      {/* Book a Viewing CTA */}
-      <section className="pb-24 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto rounded-3xl p-8 md:p-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
-          <div>
-            <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">Book a viewing</h2>
-            <p className="text-white/80 max-w-xl">Speak to the Maidenhead Residential team to arrange a viewing or find out more about availability.</p>
-          </div>
-          <Link to="/live/enquire" className="shrink-0 text-center px-8 py-4 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>Enquire Now</Link>
-        </div>
-      </section>
+      {/* Featured listings — In the Spotlight */}
+      <FeaturedProperties />
     </div>
   );
 }

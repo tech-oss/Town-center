@@ -278,7 +278,7 @@ export default function PropertySearch({ mode }) {
 }
 
 // ─── Featured properties spotlight (1 large + 2 compact, like the homepage) ───
-function FeaturedProperties() {
+export function FeaturedProperties() {
   const featured = FEATURED_SLUGS
     .map((slug) => properties.find((p) => p.slug === slug))
     .filter(Boolean);
