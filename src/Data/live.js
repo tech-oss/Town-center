@@ -95,6 +95,7 @@ function prop(slug, buildingSlug, status, beds, bedLabel, price, baths, sqft, fl
     floor,
     image: gallery[0],
     gallery,
+    propertyType: "flat",
     description:
       `A beautifully presented ${bedLabel.toLowerCase()} property at ${b.name}, finished to a high specification throughout. Bright open-plan living space, a contemporary fitted kitchen and a private outdoor space make this a standout home in one of Maidenhead's most sought-after addresses.`,
     features: [
