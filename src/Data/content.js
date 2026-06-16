@@ -210,15 +210,15 @@ export const brandGrid = {
     { label: "Browse Shops", href: "/shop" },
   ],
   brands: [
-    // Coordinates verified against live Maidenhead locations
-    { id: 1, name: "bakedd", category: "Bakery", section: "food-drink", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd", lat: 51.5236, lng: -0.7192 },
-    { id: 2, name: "Bombay Story", category: "Indian Kitchen", section: "food-drink", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story", lat: 51.5231, lng: -0.7193 },
-    { id: 3, name: "Cocoba", category: "Chocolate Café", section: "food-drink", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba", lat: 51.5240, lng: -0.7186 },
-    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", section: "food-drink", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club", lat: 51.5205, lng: -0.7228 },
-    { id: 5, name: "El Cerdo", category: "Tapas Bar", section: "food-drink", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo", lat: 51.5208, lng: -0.7224 },
-    { id: 6, name: "Nando's", category: "Flame-Grilled", section: "food-drink", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants", lat: 51.5227, lng: -0.7202 },
-    { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", lat: 51.5234, lng: -0.7199 },
-    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", lat: 51.5218, lng: -0.7213 },
+    // Coordinates verified from live postcodes via postcodes.io (June 2026)
+    { id: 1, name: "bakedd", category: "Bakery", section: "food-drink", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd", address: "1a High Street, Maidenhead SL6 1JN", lat: 51.522851, lng: -0.71774 },
+    { id: 2, name: "Bombay Story", category: "Indian Kitchen", section: "food-drink", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story", address: "The Colonnade, Waterside Quarter, Maidenhead SL6 1QG", lat: 51.523680, lng: -0.717180 },
+    { id: 3, name: "Cocoba", category: "Chocolate Café", section: "food-drink", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba", address: "2B High Street, Waterside Quarter, Maidenhead SL6 1QJ", lat: 51.523201, lng: -0.7176 },
+    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", section: "food-drink", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club", address: "The Arches, Bridge Avenue, Maidenhead SL6 1RR", lat: 51.521889, lng: -0.716051 },
+    { id: 5, name: "El Cerdo", category: "Tapas Bar", section: "food-drink", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo", address: "The Colonnade, Waterside Quarter, Maidenhead SL6 1QG", lat: 51.523480, lng: -0.717620 },
+    { id: 6, name: "Nando's", category: "Flame-Grilled", section: "food-drink", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants", address: "57 King Street, Maidenhead SL6 1JR", lat: 51.520859, lng: -0.722249 },
+    { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", address: "Unit D, 7 Garden Boulevard, Maidenhead SL6 1QQ", lat: 51.520813, lng: -0.721299 },
+    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", address: "Mill Lane, Taplow, Maidenhead SL6 0AA", lat: 51.526859, lng: -0.700343 },
   ],
 };
 

@@ -8,7 +8,7 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { brandGrid } from "../Data/content";
 import { card } from "../utils/design";
 
-const CENTRE = { lat: 51.5220, lng: -0.7208 };
+const CENTRE = { lat: 51.5235, lng: -0.7125 };
 const EIGHT_MILES_M = 12875;
 
 function haversineM(a, b) {
@@ -58,6 +58,7 @@ function popupHtml(b) {
       <div>
         <div style="font-weight:700;font-size:13px;color:#1a3a42;line-height:1.3">${b.name}</div>
         <div style="font-size:11px;color:#666;margin-top:2px">${b.category}</div>
+        ${b.address ? `<div style="font-size:10px;color:#999;margin-top:3px;line-height:1.3">${b.address}</div>` : ""}
       </div>
       <div style="display:flex;flex-direction:column;gap:5px;width:100%">
         <a href="${b.to}" style="display:block;background:#1a3a42;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;text-decoration:none;text-align:center">Read more →</a>
@@ -67,16 +68,29 @@ function popupHtml(b) {
 }
 
 // Inner map component — has access to the Leaflet map instance
-function ClusteredMarkers({ brands, activeBrand, onSelectBrand, userPos, onNavigate, clusterRef, markersRef }) {
+function ClusteredMarkers({ brands, activeBrand, onSelectBrand, userPos, onNavigate, clusterRef, markersRef, mapRef }) {
   const map = useMap();
   const userMarkerRef = useRef(null);
 
-  // Rebuild cluster whenever brands or active selection changes
+  // Expose the live Leaflet map instance to the parent for imperative control
+  useEffect(() => { mapRef.current = map; }, [map, mapRef]);
+
+  // Keep latest callbacks in refs so marker handlers stay valid
+  // WITHOUT forcing a full cluster rebuild when they change.
+  const selectRef = useRef(onSelectBrand);
+  const navRef = useRef(onNavigate);
+  selectRef.current = onSelectBrand;
+  navRef.current = onNavigate;
+
+  // Stable key for the current brand set — only rebuild when it actually changes
+  const brandKey = brands.map((b) => b.id).join(",");
+
+  // Build the cluster + markers once per brand-set (e.g. on filter change)
   useEffect(() => {
     if (clusterRef.current) map.removeLayer(clusterRef.current);
 
     const cluster = L.markerClusterGroup({
-      maxClusterRadius: 60,
+      maxClusterRadius: 55,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
       iconCreateFunction(c) {
@@ -93,23 +107,15 @@ function ClusteredMarkers({ brands, activeBrand, onSelectBrand, userPos, onNavig
     markersRef.current = {};
 
     brands.forEach((b) => {
-      const isActive = activeBrand?.id === b.id;
-      const marker = L.marker([b.lat, b.lng], { icon: makePin(isActive) });
-
-      marker.bindPopup(popupHtml(b), { maxWidth: 190, minWidth: 160, closeButton: true });
-
-      marker.on("click", () => {
-        onSelectBrand(b);
-      });
-
+      const marker = L.marker([b.lat, b.lng], { icon: makePin(false) });
+      marker.bindPopup(popupHtml(b), { maxWidth: 200, minWidth: 168, closeButton: true });
+      marker.on("click", () => selectRef.current(b));
       marker.on("popupopen", () => {
-        // Wire the Get Directions button inside the popup
         setTimeout(() => {
           const btn = document.querySelector(`[data-nav-id="${b.id}"]`);
-          if (btn) btn.onclick = (e) => { e.preventDefault(); onNavigate(b); };
+          if (btn) btn.onclick = (e) => { e.preventDefault(); navRef.current(b); };
         }, 50);
       });
-
       cluster.addLayer(marker);
       markersRef.current[b.id] = marker;
     });
@@ -118,7 +124,18 @@ function ClusteredMarkers({ brands, activeBrand, onSelectBrand, userPos, onNavig
     clusterRef.current = cluster;
 
     return () => { if (clusterRef.current) map.removeLayer(clusterRef.current); };
-  }, [brands, activeBrand, map, onSelectBrand, onNavigate, clusterRef, markersRef]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandKey, map]);
+
+  // Highlight the active pin (idempotent — safe to run on every render).
+  // Flying + opening the popup is handled imperatively in the click handler,
+  // so it runs exactly once per user action instead of on every re-render.
+  useEffect(() => {
+    Object.values(markersRef.current).forEach((m) => m.setIcon(makePin(false)));
+    if (activeBrand && markersRef.current[activeBrand.id]) {
+      markersRef.current[activeBrand.id].setIcon(makePin(true));
+    }
+  }, [activeBrand?.id, markersRef]);
 
   // User location marker
   useEffect(() => {
@@ -220,20 +237,18 @@ export default function TradersMap() {
     window.open(`${base}${origin}&destination=${dest}&travelmode=walking`, "_blank");
   }, [userPos]);
 
-  // Select a brand: update state, fly map, expand cluster, open popup
+  // Select a brand. Fly + open popup imperatively (once per click — event
+  // handlers don't double-fire), then update state for the highlight + list card.
   const handleSelectBrand = useCallback((b) => {
-    setActiveBrand(b);
-
     const map = mapRef.current;
-    const cluster = clusterRef.current;
-    const marker = markersRef.current[b.id];
-    if (!map || !cluster || !marker) return;
-
-    // zoomToShowLayer expands any enclosing cluster, then fires the callback
-    cluster.zoomToShowLayer(marker, () => {
-      map.flyTo([b.lat, b.lng], 17, { duration: 0.7 });
-      setTimeout(() => marker.openPopup(), 400);
-    });
+    const m = markersRef.current[b.id];
+    if (map && m) {
+      // Instant setView reliably moves + declusters the pin; small timeout
+      // lets markercluster finish declustering before we open the popup.
+      map.setView([b.lat, b.lng], 17, { animate: false });
+      setTimeout(() => { if (m._map) m.openPopup(); }, 80);
+    }
+    setActiveBrand(b);
   }, []);
 
   function handleDeselect() {
@@ -290,13 +305,16 @@ export default function TradersMap() {
             <div className="relative flex-1 min-h-[320px] md:min-h-0" style={{ zIndex: 0, isolation: "isolate" }}>
               <MapContainer
                 center={[CENTRE.lat, CENTRE.lng]}
-                zoom={15}
+                zoom={14}
                 scrollWheelZoom={false}
                 attributionControl={false}
                 style={{ width: "100%", height: "100%", minHeight: "320px" }}
                 ref={mapRef}
               >
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  maxZoom={20}
+                />
                 <ClusteredMarkers
                   brands={filtered}
                   activeBrand={activeBrand}
@@ -305,6 +323,7 @@ export default function TradersMap() {
                   onNavigate={handleNavigate}
                   clusterRef={clusterRef}
                   markersRef={markersRef}
+                  mapRef={mapRef}
                 />
               </MapContainer>
             </div>
