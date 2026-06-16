@@ -1,6 +1,10 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { properties, buildings, fmtPrice } from "../Data/live";
+import { card } from "../utils/design";
+
+// Three featured listings shown in the spotlight section (any selection for now)
+const FEATURED_SLUGS = ["ws-penthouse-9", "ws-2bed-apt-4", "bp-studio-1"];
 
 // ─── Filter data ──────────────────────────────────────────────────────────────
 
@@ -267,18 +271,92 @@ export default function PropertySearch({ mode }) {
         )}
       </section>
 
-      {/* Enquire CTA */}
-      <section className="max-w-6xl mx-auto px-6 md:px-12 pb-20">
-        <div className="rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
+      {/* Featured listings — spotlight (mirrors the homepage In the Spotlight) */}
+      <FeaturedProperties />
+    </div>
+  );
+}
+
+// ─── Featured properties spotlight (1 large + 2 compact, like the homepage) ───
+function FeaturedProperties() {
+  const featured = FEATURED_SLUGS
+    .map((slug) => properties.find((p) => p.slug === slug))
+    .filter(Boolean);
+  if (featured.length === 0) return null;
+  const [hero, ...rest] = featured;
+
+  const statusBadge = (p) => (
+    <span className="absolute top-4 left-4 z-10 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
+      {p.status === "rent" ? "To Rent" : "For Sale"}
+    </span>
+  );
+
+  return (
+    <section
+      className="relative py-20 px-6 md:px-12 mt-4 overflow-hidden"
+      style={{ background: "radial-gradient(ellipse 70% 55% at 50% 48%, rgba(150,215,211,0.22) 0%, transparent 70%), linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+    >
+      <div className="relative max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Can't find the right home?</h2>
-            <p className="text-white/80 max-w-xl">Speak to the Maidenhead Residential team and we'll help you find the perfect property.</p>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>Featured Homes</p>
+            <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
           </div>
-          <Link to="/live/enquire" className="shrink-0 text-center px-7 py-3.5 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
-            Enquire Now
+          <Link to="/live/overview" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
+            View all properties
+            <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
           </Link>
         </div>
-      </section>
-    </div>
+
+        {/* Asymmetric grid: 1 large + 2 compact */}
+        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-5">
+          {/* Large featured card */}
+          <Link
+            to={`/live/property/${hero.slug}`}
+            className="group relative overflow-hidden flex flex-col min-h-[340px] transition-all duration-300 hover:-translate-y-1"
+            style={{ borderRadius: card.radius, boxShadow: card.shadow }}
+          >
+            <img src={hero.image} alt={`${hero.bedLabel} at ${hero.building}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+            {statusBadge(hero)}
+            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(13,42,51,0.92) 0%, rgba(13,42,51,0.55) 45%, transparent 75%)" }} />
+            <div className="relative z-10 mt-auto p-6 flex flex-col gap-1.5">
+              <p className="text-2xl font-bold text-white" style={{ textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}>{fmtPrice(hero.price, hero.status)}</p>
+              <p className="text-base font-semibold" style={{ color: "var(--sage)" }}>{hero.bedLabel} · {hero.building}</p>
+              <p className="text-sm" style={{ color: "rgba(255,255,255,0.78)" }}>{hero.location}</p>
+              <div className="flex items-center gap-4 mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.7)" }}>
+                <span>🛏 {hero.beds === 0 ? "Studio" : hero.beds === 99 ? "PH" : hero.beds}</span>
+                <span>🛁 {hero.baths}</span>
+                <span>📐 {hero.sqft} sq ft</span>
+              </div>
+            </div>
+          </Link>
+
+          {/* Two compact cards */}
+          <div className="flex flex-col gap-5">
+            {rest.map((p) => (
+              <Link
+                key={p.slug}
+                to={`/live/property/${p.slug}`}
+                className="group flex flex-row overflow-hidden transition-all duration-300 hover:-translate-y-1 bg-white"
+                style={{ borderRadius: card.radius, boxShadow: card.shadow }}
+              >
+                <div className="relative shrink-0 w-32 overflow-hidden" style={{ aspectRatio: "1/1" }}>
+                  <img src={p.image} alt={`${p.bedLabel} at ${p.building}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" />
+                </div>
+                <div className="flex flex-col flex-1 p-4 gap-1 justify-center">
+                  <span className="text-[10px] font-bold uppercase tracking-wide w-fit px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "rent" ? "rgba(30,95,95,0.12)" : "rgba(47,140,140,0.13)", color: "var(--teal-deep, #1e5f5f)" }}>
+                    {p.status === "rent" ? "To Rent" : "For Sale"}
+                  </span>
+                  <p className="text-lg font-bold mt-0.5" style={{ color: "var(--forest)" }}>{fmtPrice(p.price, p.status)}</p>
+                  <p className="text-sm font-semibold leading-snug" style={{ color: "var(--leaf)" }}>{p.bedLabel} · {p.building}</p>
+                  <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>{p.location}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }

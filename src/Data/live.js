@@ -256,7 +256,6 @@ export const liveMenu = {
       links: [
         { label: "Properties For Sale", to: "/live/for-sale" },
         { label: "Properties For Rent", to: "/live/for-rent" },
-        { label: "Enquire", to: "/live/enquire" },
       ],
     },
     {
