@@ -307,20 +307,14 @@ export default function PropertySearch({ mode }) {
                 className="group flex flex-col p-6 transition-all duration-300 hover:-translate-y-1"
                 style={{ borderRadius: card.radius, backgroundColor: "#fff", boxShadow: "0 10px 40px -20px rgba(0,0,0,0.5)" }}
               >
-                {/* Logo (falls back to a coloured initials badge) + name */}
+                {/* Logo placeholder + name */}
                 <div className="flex items-center gap-3 mb-4">
-                  {a.logo ? (
-                    <div className="shrink-0 w-12 h-12 rounded-xl bg-white flex items-center justify-center overflow-hidden" style={{ border: "1px solid rgba(0,0,0,0.08)" }}>
-                      <img src={a.logo} alt={a.name} className="w-11 h-11 object-contain" />
-                    </div>
-                  ) : (
-                    <div
-                      className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold"
-                      style={{ backgroundColor: a.accent }}
-                    >
-                      {a.initials}
-                    </div>
-                  )}
+                  <div
+                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold"
+                    style={{ backgroundColor: a.accent }}
+                  >
+                    {a.initials}
+                  </div>
                   <div className="min-w-0">
                     <p className="font-bold text-lg leading-tight truncate" style={{ color: "var(--forest)" }}>{a.name}</p>
                     <p className="text-[11px] font-semibold uppercase tracking-wide truncate" style={{ color: "var(--leaf)" }}>{a.tagline}</p>

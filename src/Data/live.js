@@ -154,9 +154,6 @@ export const estateAgents = {
   heading: "Featured Estate Agents",
   subheading:
     "Work with Maidenhead's trusted local agents to find, buy, sell or let your next home.",
-  // To show a real logo, drop the image in /public/images/agents/ and set
-  // `logo` to its path (e.g. "/images/agents/romans.png"). If `logo` is empty,
-  // the card falls back to a coloured badge with the agent's initials.
   agents: [
     {
       id: "romans",
@@ -167,7 +164,6 @@ export const estateAgents = {
       website: "https://www.romans.co.uk/branches/maidenhead/",
       accent: "#1e5f5f",
       initials: "R",
-      logo: "", // e.g. "/images/agents/romans.png"
     },
     {
       id: "hamptons",
@@ -178,7 +174,6 @@ export const estateAgents = {
       website: "https://www.hamptons.co.uk/estate-agents/maidenhead/",
       accent: "#2F8C8C",
       initials: "H",
-      logo: "", // e.g. "/images/agents/hamptons.png"
     },
     {
       id: "braxton",
@@ -189,7 +184,6 @@ export const estateAgents = {
       website: "https://www.braxtons.co.uk/",
       accent: "#4C9A2A",
       initials: "B",
-      logo: "", // e.g. "/images/agents/braxton.png"
     },
   ],
   cta: { label: "Advertise your agency", href: "/work-with-us" },
