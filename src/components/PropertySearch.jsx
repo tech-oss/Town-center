@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { properties, buildings, fmtPrice } from "../Data/live";
+import { properties, buildings, fmtPrice, estateAgents } from "../Data/live";
+import { card } from "../utils/design";
 
 // ─── Filter data ──────────────────────────────────────────────────────────────
 
@@ -267,16 +268,75 @@ export default function PropertySearch({ mode }) {
         )}
       </section>
 
-      {/* Enquire CTA */}
-      <section className="max-w-6xl mx-auto px-6 md:px-12 pb-20">
-        <div className="rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Can't find the right home?</h2>
-            <p className="text-white/80 max-w-xl">Speak to the Maidenhead Residential team and we'll help you find the perfect property.</p>
+      {/* Featured Estate Agents — local advertising slots */}
+      <section
+        className="relative py-20 px-6 md:px-12 mt-4 overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+      >
+        <div className="relative max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+            <div>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>
+                {estateAgents.eyebrow}
+              </p>
+              <h2 className="text-3xl md:text-4xl font-bold leading-tight text-white">
+                {estateAgents.heading}
+              </h2>
+              <p className="text-sm md:text-base mt-3 max-w-xl" style={{ color: "rgba(255,255,255,0.72)" }}>
+                {estateAgents.subheading}
+              </p>
+            </div>
+            <Link
+              to={estateAgents.cta.href}
+              className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4"
+            >
+              {estateAgents.cta.label}
+              <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
+            </Link>
           </div>
-          <Link to="/live/enquire" className="shrink-0 text-center px-7 py-3.5 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
-            Enquire Now
-          </Link>
+
+          {/* Agent cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {estateAgents.agents.map((a) => (
+              <a
+                key={a.id}
+                href={a.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col p-6 transition-all duration-300 hover:-translate-y-1"
+                style={{ borderRadius: card.radius, backgroundColor: "#fff", boxShadow: "0 10px 40px -20px rgba(0,0,0,0.5)" }}
+              >
+                {/* Logo placeholder + name */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div
+                    className="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-bold"
+                    style={{ backgroundColor: a.accent }}
+                  >
+                    {a.initials}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-lg leading-tight truncate" style={{ color: "var(--forest)" }}>{a.name}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide truncate" style={{ color: "var(--leaf)" }}>{a.tagline}</p>
+                  </div>
+                </div>
+
+                <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--ink)", opacity: 0.72 }}>{a.blurb}</p>
+
+                {/* Contact row */}
+                <div className="flex items-center justify-between mt-5 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.08)" }}>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--forest)" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    {a.phone}
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
+                    Visit
+                    <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                  </span>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     </div>
