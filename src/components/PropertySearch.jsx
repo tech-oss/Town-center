@@ -104,7 +104,6 @@ export default function PropertySearch({ mode }) {
   const isRent = status === "rent";
 
   // Filter state
-  const [building,     setBuilding]     = useState("all");
   const [propType,     setPropType]     = useState("any");
   const [priceMin,     setPriceMin]     = useState("any");
   const [priceMax,     setPriceMax]     = useState("any");
@@ -122,7 +121,6 @@ export default function PropertySearch({ mode }) {
 
   const results = useMemo(() => {
     let list = properties.filter((p) => (isOverview ? true : p.status === status));
-    if (building !== "all") list = list.filter((p) => p.buildingSlug === building);
     if (propType !== "any") list = list.filter((p) => p.propertyType === propType);
     if (priceMin !== "any") list = list.filter((p) => p.price >= Number(priceMin));
     if (priceMax !== "any") list = list.filter((p) => p.price <= Number(priceMax));
@@ -132,7 +130,7 @@ export default function PropertySearch({ mode }) {
     if (bMax !== null) list = list.filter((p) => (bedsMax === "5" ? p.beds >= 5 : p.beds <= bMax));
     list = [...list].sort((a, b) => (sort === "price-asc" ? a.price - b.price : b.price - a.price));
     return list;
-  }, [building, propType, priceMin, priceMax, bedsMin, bedsMax, sort, status, isOverview]);
+  }, [propType, priceMin, priceMax, bedsMin, bedsMax, sort, status, isOverview]);
 
   const title = isOverview ? "Properties Overview" : isRent ? "Properties For Rent" : "Properties For Sale";
   const intro = isOverview
@@ -183,13 +181,8 @@ export default function PropertySearch({ mode }) {
 
         <div className="rounded-3xl p-5 md:p-7 flex flex-col gap-5" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -24px rgba(28,46,56,0.3)" }}>
 
-          {/* Row 1: Building · Property type · Sort */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Sel label="Building" value={building} onChange={setBuilding}>
-              <option value="all">All buildings</option>
-              {buildings.map((b) => <option key={b.slug} value={b.slug}>{b.name}</option>)}
-            </Sel>
-
+          {/* Row 1: Property type · Sort */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Sel label="Property type" value={propType} onChange={setPropType}>
               {PROPERTY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </Sel>
