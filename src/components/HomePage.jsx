@@ -1,7 +1,7 @@
 import Hero from "./Hero";
 import QuickLinks from "./QuickLinks";
 import BlogCards from "./BlogCards";
-import BrandGrid from "./BrandGrid";
+import TradersMap from "./TradersMap";
 import FeatureBlocks from "./FeatureBlocks";
 import EventsGrid from "./EventsGrid";
 import PlanVisit from "./PlanVisit";
@@ -14,7 +14,7 @@ export default function HomePage({ headerHeight }) {
       <Hero headerHeight={headerHeight} />
       <QuickLinks />
       <BlogCards />
-      <BrandGrid />
+      <TradersMap />
       <AppCta />
       <FeatureBlocks />
       <EventsGrid />
