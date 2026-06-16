@@ -327,7 +327,6 @@ export const footer = {
         { label: "Our Story",    href: "/about" },
         { label: "Traders",      href: "/traders" },
         { label: "Work With Us", href: "/work-with-us" },
-        { label: "Enquiries",    href: "/work-with-us" },
       ],
     },
   ],
