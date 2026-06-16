@@ -146,49 +146,6 @@ export const bedroomOptions = [
 export const salePrices = [100000, 250000, 350000, 450000, 550000, 750000, 1000000];
 export const rentPrices = [1000, 1250, 1500, 1750, 2000, 2500, 3000];
 
-// ─── Featured estate agents (advertising slots on the search pages) ───────────
-// Local agents can advertise their details here. Placeholder logos/contacts —
-// swap for real agent branding and links when partnerships are confirmed.
-export const estateAgents = {
-  eyebrow: "Local Experts",
-  heading: "Featured Estate Agents",
-  subheading:
-    "Work with Maidenhead's trusted local agents to find, buy, sell or let your next home.",
-  agents: [
-    {
-      id: "romans",
-      name: "Romans",
-      tagline: "Sales · Lettings · New Homes",
-      blurb: "One of the Thames Valley's largest independent agents, with deep local knowledge across Maidenhead and Berkshire.",
-      phone: "01628 320 320",
-      website: "https://www.romans.co.uk/branches/maidenhead/",
-      accent: "#1e5f5f",
-      initials: "R",
-    },
-    {
-      id: "hamptons",
-      name: "Hamptons",
-      tagline: "Premium Sales & Lettings",
-      blurb: "Award-winning service with a strong presence in riverside and town-centre developments across Maidenhead.",
-      phone: "01628 075 015",
-      website: "https://www.hamptons.co.uk/estate-agents/maidenhead/",
-      accent: "#2F8C8C",
-      initials: "H",
-    },
-    {
-      id: "braxton",
-      name: "Braxton",
-      tagline: "Independent · Local · Trusted",
-      blurb: "A friendly independent agent specialising in Maidenhead, Cookham and the surrounding villages.",
-      phone: "01628 674 234",
-      website: "https://www.braxtons.co.uk/",
-      accent: "#4C9A2A",
-      initials: "B",
-    },
-  ],
-  cta: { label: "Advertise your agency", href: "/work-with-us" },
-};
-
 // ─── "Why Live Here" lifestyle content ───────────────────────────────────────
 export const live = {
   hero: {
