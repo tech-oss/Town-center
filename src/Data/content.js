@@ -210,14 +210,15 @@ export const brandGrid = {
     { label: "Browse Shops", href: "/shop" },
   ],
   brands: [
-    { id: 1, name: "bakedd", category: "Bakery", section: "food-drink", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd", lat: 51.5222, lng: -0.7219 },
-    { id: 2, name: "Bombay Story", category: "Indian Kitchen", section: "food-drink", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story", lat: 51.5219, lng: -0.7204 },
-    { id: 3, name: "Cocoba", category: "Chocolate Café", section: "food-drink", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba", lat: 51.5228, lng: -0.7211 },
-    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", section: "food-drink", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club", lat: 51.5234, lng: -0.7197 },
-    { id: 5, name: "El Cerdo", category: "Tapas Bar", section: "food-drink", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo", lat: 51.5217, lng: -0.7208 },
-    { id: 6, name: "Nando's", category: "Flame-Grilled", section: "food-drink", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants", lat: 51.5226, lng: -0.7216 },
-    { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", lat: 51.5224, lng: -0.7207 },
-    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", lat: 51.5236, lng: -0.7193 },
+    // Coordinates verified against live Maidenhead locations
+    { id: 1, name: "bakedd", category: "Bakery", section: "food-drink", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd", lat: 51.5236, lng: -0.7192 },
+    { id: 2, name: "Bombay Story", category: "Indian Kitchen", section: "food-drink", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story", lat: 51.5231, lng: -0.7193 },
+    { id: 3, name: "Cocoba", category: "Chocolate Café", section: "food-drink", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba", lat: 51.5240, lng: -0.7186 },
+    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", section: "food-drink", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club", lat: 51.5205, lng: -0.7228 },
+    { id: 5, name: "El Cerdo", category: "Tapas Bar", section: "food-drink", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo", lat: 51.5208, lng: -0.7224 },
+    { id: 6, name: "Nando's", category: "Flame-Grilled", section: "food-drink", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants", lat: 51.5227, lng: -0.7202 },
+    { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", lat: 51.5234, lng: -0.7199 },
+    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", lat: 51.5218, lng: -0.7213 },
   ],
 };
 
