@@ -19,8 +19,8 @@ export default function LivePage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{live.hero.title}</h1>
           <p className="text-lg text-white/85 mt-4 max-w-2xl leading-relaxed">{live.hero.intro}</p>
           <div className="flex flex-wrap gap-3 mt-7">
-            <Link to="/live/for-sale" className="px-6 py-3 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>Apartments For Sale</Link>
-            <Link to="/live/for-rent" className="px-6 py-3 rounded-full font-semibold text-white transition-colors" style={{ border: "1.5px solid rgba(255,255,255,0.6)" }}>Apartments For Rent</Link>
+            <Link to="/live/for-sale" className="px-6 py-3 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>Properties For Sale</Link>
+            <Link to="/live/for-rent" className="px-6 py-3 rounded-full font-semibold text-white transition-colors" style={{ border: "1.5px solid rgba(255,255,255,0.6)" }}>Properties For Rent</Link>
           </div>
         </div>
       </section>

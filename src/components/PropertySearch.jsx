@@ -56,12 +56,12 @@ export default function PropertySearch({ mode }) {
     return list;
   }, [building, bedrooms, priceFrom, priceTo, sort, status, isOverview]);
 
-  const title = isOverview ? "Apartments Overview" : status === "rent" ? "Apartments For Rent" : "Apartments For Sale";
+  const title = isOverview ? "Properties Overview" : status === "rent" ? "Properties For Rent" : "Properties For Sale";
   const intro = isOverview
     ? "Browse every available home across our Maidenhead developments, or filter to find the perfect fit."
     : status === "rent"
-    ? "Modern apartments to rent across Maidenhead's most sought-after riverside developments."
-    : "Brand-new and resale apartments for sale across Maidenhead's leading developments.";
+    ? "Modern properties to rent across Maidenhead's most sought-after riverside developments."
+    : "Brand-new and resale properties for sale across Maidenhead's leading developments.";
 
   const selectCls = "w-full rounded-xl px-4 py-3 text-sm outline-none";
   const selectStyle = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.15)", color: "var(--ink)" };
@@ -162,7 +162,7 @@ export default function PropertySearch({ mode }) {
         <div className="rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Can't find the right home?</h2>
-            <p className="text-white/80 max-w-xl">Speak to the Maidenhead Residential team and we'll help you find the perfect apartment.</p>
+            <p className="text-white/80 max-w-xl">Speak to the Maidenhead Residential team and we'll help you find the perfect property.</p>
           </div>
           <Link to="/live/enquire" className="shrink-0 text-center px-7 py-3.5 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
             Enquire Now

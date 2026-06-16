@@ -52,7 +52,7 @@ export default function PropertyPage() {
           {/* Main */}
           <div>
             <p className="text-3xl md:text-4xl font-bold" style={{ color: "var(--forest)" }}>{fmtPrice(p.price, p.status)}</p>
-            <h1 className="text-xl md:text-2xl font-semibold mt-1 mb-1" style={{ color: "var(--leaf)" }}>{p.bedLabel} apartment · {p.building}</h1>
+            <h1 className="text-xl md:text-2xl font-semibold mt-1 mb-1" style={{ color: "var(--leaf)" }}>{p.bedLabel} property · {p.building}</h1>
             <p className="text-sm mb-6" style={{ color: "var(--ink)", opacity: 0.6 }}>{p.location}</p>
 
             {/* Key facts */}

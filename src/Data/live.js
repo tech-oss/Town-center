@@ -9,17 +9,17 @@
 //
 //  Routes:
 //   /live                       → Why Live Here
-//   /live/overview              → Apartments Overview (Find an Apartment)
-//   /live/for-sale              → Apartments For Sale (search + grid)
-//   /live/for-rent              → Apartments For Rent (search + grid)
+//   /live/overview              → Properties Overview (Find an Apartment)
+//   /live/for-sale              → Properties For Sale (search + grid)
+//   /live/for-rent              → Properties For Rent (search + grid)
 //   /live/enquire               → Enquire form
-//   /live/building/:slug        → Building detail + its apartments
+//   /live/building/:slug        → Building detail + its properties
 //   /live/property/:slug        → Apartment detail + Book a Viewing
 // ════════════════════════════════════════════════════════════════════════════
 
 const img = (seed) => `https://picsum.photos/seed/${seed}/1200/800`;
 
-// ─── Real (free-licensed) apartment photography ──────────────────────────────
+// ─── Real (free-licensed) property photography ──────────────────────────────
 const PIC = {
   extWaterside: "/images/live/ext-waterside.jpg",
   extBrunel: "/images/live/ext-brunel.jpg",
@@ -43,7 +43,7 @@ export const buildings = [
     image: PIC.extWaterside,
     hero: PIC.extWaterside,
     description:
-      "Waterside Quarter is a landmark collection of high-specification apartments set right on Maidenhead's regenerated waterways. With independent restaurants, cafés and shops on the doorstep — and Maidenhead station on the Elizabeth Line just a short walk away — it brings together modern riverside living and effortless connectivity.",
+      "Waterside Quarter is a landmark collection of high-specification properties set right on Maidenhead's regenerated waterways. With independent restaurants, cafés and shops on the doorstep — and Maidenhead station on the Elizabeth Line just a short walk away — it brings together modern riverside living and effortless connectivity.",
     amenities: ["Waterside setting", "Concierge", "Landscaped courtyards", "Secure parking", "Elizabeth Line · 5 min walk", "Restaurants on your doorstep"],
   },
   {
@@ -55,19 +55,19 @@ export const buildings = [
     image: PIC.extBrunel,
     hero: PIC.extBrunel,
     description:
-      "Brunel Place is an intimate collection of just 26 brand-new studio, one and two-bedroom apartments arranged around a beautiful residents' podium garden. Maidenhead station is around half a mile away, with direct Elizabeth Line trains to London Paddington in as little as 18 minutes.",
+      "Brunel Place is an intimate collection of just 26 brand-new studio, one and two-bedroom properties arranged around a beautiful residents' podium garden. Maidenhead station is around half a mile away, with direct Elizabeth Line trains to London Paddington in as little as 18 minutes.",
     amenities: ["Residents' podium garden", "Studio – 2 beds", "Bike storage", "Video entry", "0.5 mi to station", "18 min to Paddington"],
   },
   {
     slug: "cooper-square",
     name: "Cooper Square",
     developer: "Countryside",
-    tagline: "Contemporary 1, 2 & 3-bedroom apartments",
+    tagline: "Contemporary 1, 2 & 3-bedroom properties",
     location: "Town Centre, Maidenhead",
     image: PIC.extCooper,
     hero: PIC.extCooper,
     description:
-      "Cooper Square is a contemporary development of one, two and three-bedroom apartments close to excellent local amenities and handy transport routes. Thoughtfully designed interiors and generous open-plan layouts make it a natural choice for first-time buyers, downsizers and families alike.",
+      "Cooper Square is a contemporary development of one, two and three-bedroom properties close to excellent local amenities and handy transport routes. Thoughtfully designed interiors and generous open-plan layouts make it a natural choice for first-time buyers, downsizers and families alike.",
     amenities: ["1 – 3 beds", "Open-plan living", "Private balconies", "Allocated parking", "Town-centre location", "10-year warranty"],
   },
 ];
@@ -96,9 +96,9 @@ function prop(slug, buildingSlug, status, beds, bedLabel, price, baths, sqft, fl
     image: gallery[0],
     gallery,
     description:
-      `A beautifully presented ${bedLabel.toLowerCase()} apartment at ${b.name}, finished to a high specification throughout. Bright open-plan living space, a contemporary fitted kitchen and a private outdoor space make this a standout home in one of Maidenhead's most sought-after addresses.`,
+      `A beautifully presented ${bedLabel.toLowerCase()} property at ${b.name}, finished to a high specification throughout. Bright open-plan living space, a contemporary fitted kitchen and a private outdoor space make this a standout home in one of Maidenhead's most sought-after addresses.`,
     features: [
-      `${bedLabel} apartment`,
+      `${bedLabel} property`,
       `${baths} bathroom${baths > 1 ? "s" : ""}`,
       `${sqft} sq ft`,
       floor,
@@ -253,8 +253,8 @@ export const liveMenu = {
     {
       heading: "For Sale & Rent",
       links: [
-        { label: "Apartments For Sale", to: "/live/for-sale" },
-        { label: "Apartments For Rent", to: "/live/for-rent" },
+        { label: "Properties For Sale", to: "/live/for-sale" },
+        { label: "Properties For Rent", to: "/live/for-rent" },
         { label: "Enquire", to: "/live/enquire" },
       ],
     },

@@ -46,7 +46,7 @@ export const hero = {
       // Maidenhead regeneration — El Cerdo / Chapel Arches waterfront development
       imageSrc: "/images/slide-river.jpg",
       imagePosition: "center 55%",
-      imageAlt: "Maidenhead's regenerated waterfront with restaurants and modern apartments",
+      imageAlt: "Maidenhead's regenerated waterfront with restaurants and modern properties",
       eyebrow: "Live · Work · Explore",
       headline: "A Town Reborn",
       subheadline:
