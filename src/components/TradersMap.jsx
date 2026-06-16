@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, Polyline } from "react-leaflet";
 import L from "leaflet";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { brandGrid } from "../Data/content";
 import { card } from "../utils/design";
 
-// Maidenhead town centre
 const CENTRE = { lat: 51.5225, lng: -0.7208 };
 const EIGHT_MILES_M = 12875;
 
@@ -46,17 +48,111 @@ function makeUserPin() {
   });
 }
 
-// Recenter map when CENTRE changes (no-op here but good pattern)
-function MapController({ activeBrand }) {
+function popupHtml(b) {
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 2px;min-width:140px;text-align:center;">
+      <img src="${b.logo}" alt="${b.name}" style="width:48px;height:48px;object-fit:contain;border-radius:8px;border:1px solid rgba(0,0,0,0.08)"/>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:#1a3a42;line-height:1.3">${b.name}</div>
+        <div style="font-size:11px;color:#555;margin-top:2px">${b.category}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:100%">
+        <a href="${b.to}" style="display:block;background:#1a3a42;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;text-decoration:none;text-align:center">Read more</a>
+        <button data-navigate="${b.id}" style="display:block;background:transparent;border:1.5px solid #1a3a42;color:#1a3a42;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;width:100%">Navigate to here</button>
+      </div>
+    </div>
+  `;
+}
+
+// Handles clustering, markers, user pin, navigation line
+function ClusteredMarkers({ brands, activeBrand, onSelectBrand, userPos, navRoute, onNavigate }) {
   const map = useMap();
+  const clusterRef = useRef(null);
+  const userMarkerRef = useRef(null);
+
+  // Build / rebuild cluster when brands or activeBrand changes
+  useEffect(() => {
+    if (clusterRef.current) {
+      map.removeLayer(clusterRef.current);
+    }
+
+    const cluster = L.markerClusterGroup({
+      maxClusterRadius: 50,
+      showCoverageOnHover: false,
+      iconCreateFunction(c) {
+        const n = c.getChildCount();
+        return L.divIcon({
+          html: `<div style="background:#1a3a42;color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.25);border:2px solid #fff">${n}</div>`,
+          className: "",
+          iconSize: [36, 36],
+          iconAnchor: [18, 18],
+        });
+      },
+    });
+
+    brands.forEach((b) => {
+      const isActive = activeBrand?.id === b.id;
+      const marker = L.marker([b.lat, b.lng], {
+        icon: makeBusinessPin(isActive ? "#2f8c8c" : "#1a3a42"),
+      });
+
+      marker.bindPopup(popupHtml(b), { maxWidth: 180, minWidth: 160 });
+
+      marker.on("click", () => {
+        onSelectBrand(b);
+        marker.openPopup();
+      });
+
+      // Wire up popup buttons after popup opens
+      marker.on("popupopen", () => {
+        const navBtn = document.querySelector(`[data-navigate="${b.id}"]`);
+        if (navBtn) {
+          navBtn.onclick = (e) => {
+            e.preventDefault();
+            onNavigate(b);
+          };
+        }
+      });
+
+      cluster.addLayer(marker);
+    });
+
+    cluster.addTo(map);
+    clusterRef.current = cluster;
+
+    return () => {
+      if (clusterRef.current) map.removeLayer(clusterRef.current);
+    };
+  }, [brands, activeBrand, map, onSelectBrand, onNavigate]);
+
+  // Fly to active brand
   useEffect(() => {
     if (activeBrand) {
       map.flyTo([activeBrand.lat, activeBrand.lng], 16, { duration: 0.8 });
-    } else {
-      map.flyTo([CENTRE.lat, CENTRE.lng], 15, { duration: 0.8 });
     }
   }, [activeBrand, map]);
-  return null;
+
+  // User location marker
+  useEffect(() => {
+    if (userMarkerRef.current) {
+      map.removeLayer(userMarkerRef.current);
+      userMarkerRef.current = null;
+    }
+    if (userPos) {
+      const m = L.marker([userPos.lat, userPos.lng], { icon: makeUserPin() }).addTo(map);
+      userMarkerRef.current = m;
+    }
+    return () => {
+      if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
+    };
+  }, [userPos, map]);
+
+  return navRoute ? (
+    <Polyline
+      positions={navRoute}
+      pathOptions={{ color: "#1a6fdb", weight: 3, dashArray: "6 8", opacity: 0.85 }}
+    />
+  ) : null;
 }
 
 const FILTERS = [
@@ -67,27 +163,18 @@ const FILTERS = [
   { key: "health-beauty", label: "Health & Beauty" },
 ];
 
-const businessPin = makeBusinessPin();
-const activePinColor = makeBusinessPin("#2f8c8c");
-const userPin = makeUserPin();
-
 export default function TradersMap() {
   const [filter, setFilter] = useState("all");
-  const [userPos, setUserPos] = useState(null); // null = unknown, false = denied/far
+  const [userPos, setUserPos] = useState(null);
   const [activeBrand, setActiveBrand] = useState(null);
-  const markersRef = useRef({});
+  const [navRoute, setNavRoute] = useState(null); // [[lat,lng],[lat,lng]]
 
-  // Geolocation — only show marker if within 8 miles
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const p = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        if (haversineM(p, CENTRE) <= EIGHT_MILES_M) {
-          setUserPos(p);
-        } else {
-          setUserPos(false);
-        }
+        setUserPos(haversineM(p, CENTRE) <= EIGHT_MILES_M ? p : false);
       },
       () => setUserPos(false),
       { timeout: 8000 }
@@ -98,6 +185,23 @@ export default function TradersMap() {
     filter === "all"
       ? brandGrid.brands
       : brandGrid.brands.filter((b) => b.section === filter);
+
+  function handleNavigate(b) {
+    if (userPos) {
+      setNavRoute([[userPos.lat, userPos.lng], [b.lat, b.lng]]);
+    } else {
+      // No geolocation — open Google Maps in new tab
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`,
+        "_blank"
+      );
+    }
+  }
+
+  function handleSelectBrand(b) {
+    setActiveBrand((prev) => (prev?.id === b.id ? prev : b));
+    setNavRoute(null);
+  }
 
   return (
     <section className="py-24 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
@@ -128,7 +232,7 @@ export default function TradersMap() {
             {FILTERS.map((f) => (
               <button
                 key={f.key}
-                onClick={() => { setFilter(f.key); setActiveBrand(null); }}
+                onClick={() => { setFilter(f.key); setActiveBrand(null); setNavRoute(null); }}
                 className="shrink-0 px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 whitespace-nowrap"
                 style={
                   filter === f.key
@@ -143,44 +247,28 @@ export default function TradersMap() {
 
           {/* Map + Directory */}
           <div className="flex flex-col md:flex-row" style={{ minHeight: "420px" }}>
-            {/* Map */}
-            <div className="relative flex-1 min-h-[300px] md:min-h-0">
+            {/* Map — isolate stacking context so Leaflet z-indexes don't bleed above the fixed header */}
+            <div
+              className="relative flex-1 min-h-[300px] md:min-h-0"
+              style={{ position: "relative", zIndex: 0, isolation: "isolate" }}
+            >
               <MapContainer
                 center={[CENTRE.lat, CENTRE.lng]}
                 zoom={15}
-                zoomControl={false}
+                zoomControl={true}
                 scrollWheelZoom={false}
                 style={{ width: "100%", height: "100%", minHeight: "300px" }}
                 attributionControl={false}
               >
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
-                <MapController activeBrand={activeBrand} />
-
-                {/* Business pins */}
-                {filtered.map((b) => (
-                  <Marker
-                    key={b.id}
-                    position={[b.lat, b.lng]}
-                    icon={activeBrand?.id === b.id ? activePinColor : businessPin}
-                    eventHandlers={{ click: () => setActiveBrand(b) }}
-                    ref={(r) => { if (r) markersRef.current[b.id] = r; }}
-                  >
-                    <Popup offset={[0, -32]}>
-                      <div className="flex items-center gap-2 py-0.5">
-                        <img src={b.logo} alt={b.name} className="w-8 h-8 object-contain rounded" />
-                        <div>
-                          <p className="font-bold text-sm leading-tight" style={{ color: "var(--forest)" }}>{b.name}</p>
-                          <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>{b.category}</p>
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
-
-                {/* You Are Here */}
-                {userPos && (
-                  <Marker position={[userPos.lat, userPos.lng]} icon={userPin} />
-                )}
+                <ClusteredMarkers
+                  brands={filtered}
+                  activeBrand={activeBrand}
+                  onSelectBrand={handleSelectBrand}
+                  userPos={userPos}
+                  navRoute={navRoute}
+                  onNavigate={handleNavigate}
+                />
               </MapContainer>
             </div>
 
@@ -194,39 +282,55 @@ export default function TradersMap() {
                   No traders in this category yet.
                 </p>
               ) : (
-                filtered.map((b) => (
-                  <Link
-                    key={b.id}
-                    to={b.to}
-                    onClick={() => setActiveBrand(b)}
-                    className="flex items-center gap-3 px-4 py-3.5 transition-colors duration-150 hover:bg-[rgba(0,0,0,0.03)]"
-                    style={{
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                      backgroundColor: activeBrand?.id === b.id ? "rgba(47,140,140,0.07)" : undefined,
-                    }}
-                  >
-                    {/* Logo */}
+                filtered.map((b) => {
+                  const isActive = activeBrand?.id === b.id;
+                  return (
                     <div
-                      className="shrink-0 w-11 h-11 rounded-lg bg-white flex items-center justify-center overflow-hidden"
-                      style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+                      key={b.id}
+                      onClick={() => handleSelectBrand(b)}
+                      className="flex items-center gap-3 px-4 py-3.5 cursor-pointer transition-colors duration-150 hover:bg-[rgba(0,0,0,0.03)]"
+                      style={{
+                        borderBottom: "1px solid rgba(0,0,0,0.06)",
+                        backgroundColor: isActive ? "rgba(47,140,140,0.07)" : undefined,
+                      }}
                     >
-                      <img src={b.logo} alt={b.name} className="w-9 h-9 object-contain" />
+                      {/* Logo */}
+                      <div
+                        className="shrink-0 w-11 h-11 rounded-lg bg-white flex items-center justify-center overflow-hidden"
+                        style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+                      >
+                        <img src={b.logo} alt={b.name} className="w-9 h-9 object-contain" />
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm leading-snug truncate" style={{ color: "var(--forest)" }}>
+                          {b.name}
+                        </p>
+                        <p className="text-xs mt-0.5 truncate" style={{ color: "var(--ink)", opacity: 0.55 }}>
+                          {b.category}
+                        </p>
+                        {isActive && (
+                          <Link
+                            to={b.to}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-block mt-1.5 text-[11px] font-semibold px-3 py-0.5 rounded-full"
+                            style={{ backgroundColor: "var(--forest)", color: "#fff" }}
+                          >
+                            Read more →
+                          </Link>
+                        )}
+                      </div>
+
+                      {/* Chevron (hidden when active) */}
+                      {!isActive && (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-30">
+                          <path d="M9 18l6-6-6-6" />
+                        </svg>
+                      )}
                     </div>
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm leading-snug truncate" style={{ color: "var(--forest)" }}>
-                        {b.name}
-                      </p>
-                      <p className="text-xs mt-0.5 truncate" style={{ color: "var(--ink)", opacity: 0.55 }}>
-                        {b.category}
-                      </p>
-                    </div>
-                    {/* Chevron */}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-30">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </Link>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
