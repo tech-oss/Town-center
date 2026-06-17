@@ -243,11 +243,26 @@ export default function TradersMap() {
   const q = searchQuery.trim().toLowerCase();
   const searchActive = q.length > 0;
   const searchResults = searchActive
-    ? brandGrid.brands.filter(
-        (b) =>
-          b.name.toLowerCase().includes(q) ||
-          b.category.toLowerCase().includes(q)
-      )
+    ? brandGrid.brands
+        .filter(
+          (b) =>
+            b.name.toLowerCase().includes(q) ||
+            b.category.toLowerCase().includes(q)
+        )
+        .sort((a, b) => {
+          const an = a.name.toLowerCase();
+          const bn = b.name.toLowerCase();
+          // Exact name match first
+          if (an === q && bn !== q) return -1;
+          if (bn === q && an !== q) return 1;
+          // Name starts with query next
+          const aStarts = an.startsWith(q);
+          const bStarts = bn.startsWith(q);
+          if (aStarts && !bStarts) return -1;
+          if (bStarts && !aStarts) return 1;
+          // Then alphabetical
+          return an.localeCompare(bn);
+        })
     : null;
 
   const handleNavigate = useCallback((b) => {
