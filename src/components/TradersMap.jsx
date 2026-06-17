@@ -61,7 +61,7 @@ function popupHtml(b) {
         ${b.address ? `<div style="font-size:10px;color:#999;margin-top:3px;line-height:1.3">${b.address}</div>` : ""}
       </div>
       <div style="display:flex;flex-direction:column;gap:5px;width:100%">
-        <button data-read-id="${b.id}" style="display:block;background:#1a3a42;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;border:none;cursor:pointer;text-align:center;width:100%">Read more →</button>
+        ${b.to ? `<button data-read-id="${b.id}" style="display:block;background:#1a3a42;color:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:20px;border:none;cursor:pointer;text-align:center;width:100%">Read more →</button>` : ""}
         <button data-nav-id="${b.id}" style="display:block;background:transparent;border:1.5px solid #1a3a42;color:#1a3a42;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;width:100%;text-align:center">Get Directions</button>
       </div>
     </div>`;

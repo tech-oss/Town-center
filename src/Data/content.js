@@ -199,6 +199,68 @@ export const blogCards = {
   ],
 };
 
+// ─── Extra traders (TEMP load-test set) ───────────────────────────────────────
+// ~40 real Maidenhead town-centre businesses added purely to preview how the
+// homepage map + directory behave with ~50 pins (clustering, density, list).
+// One placeholder picture each (picsum), no detail pages. Remove when done.
+// Tuple: [name, category, section, lat, lng]
+const extraTraders = [
+  ["Costa Coffee", "Coffee Shop", "food-drink", 51.52210, -0.71880],
+  ["Caffè Nero", "Coffee Shop", "food-drink", 51.52185, -0.71930],
+  ["Starbucks", "Coffee Shop", "food-drink", 51.52240, -0.71990],
+  ["Greggs", "Bakery", "food-drink", 51.52160, -0.71960],
+  ["McDonald's", "Fast Food", "food-drink", 51.52090, -0.72050],
+  ["Burger King", "Fast Food", "food-drink", 51.52050, -0.72110],
+  ["KFC", "Fast Food", "food-drink", 51.52030, -0.72180],
+  ["Subway", "Sandwiches", "food-drink", 51.52120, -0.72020],
+  ["Pizza Express", "Italian", "food-drink", 51.52260, -0.71850],
+  ["Prezzo", "Italian", "food-drink", 51.52280, -0.71910],
+  ["Wagamama", "Asian", "food-drink", 51.52015, -0.72240],
+  ["Bill's", "Restaurant", "food-drink", 51.52310, -0.71880],
+  ["The Bear", "Pub", "food-drink", 51.52175, -0.71845],
+  ["The Greyhound", "Pub", "food-drink", 51.52330, -0.71800],
+  ["Boots", "Pharmacy", "health-beauty", 51.52195, -0.71905],
+  ["Superdrug", "Health & Beauty", "health-beauty", 51.52150, -0.71930],
+  ["Holland & Barrett", "Health Foods", "health-beauty", 51.52175, -0.71975],
+  ["Specsavers", "Opticians", "health-beauty", 51.52205, -0.71955],
+  ["Vision Express", "Opticians", "health-beauty", 51.52225, -0.71925],
+  ["Toni & Guy", "Hair Salon", "health-beauty", 51.52145, -0.71990],
+  ["Pure Gym", "Gym", "health-beauty", 51.52000, -0.72190],
+  ["Nuffield Health", "Gym & Spa", "health-beauty", 51.51975, -0.72090],
+  ["The Beauty Rooms", "Beauty Salon", "health-beauty", 51.52120, -0.72085],
+  ["Marks & Spencer", "Department Store", "shopping", 51.52210, -0.71990],
+  ["WHSmith", "Books & Stationery", "shopping", 51.52185, -0.72010],
+  ["Waterstones", "Bookshop", "shopping", 51.52230, -0.71965],
+  ["TK Maxx", "Fashion", "shopping", 51.52165, -0.72060],
+  ["Card Factory", "Cards & Gifts", "shopping", 51.52150, -0.71910],
+  ["The Body Shop", "Cosmetics", "shopping", 51.52200, -0.71945],
+  ["Clarks", "Footwear", "shopping", 51.52175, -0.72035],
+  ["Pandora", "Jewellery", "shopping", 51.52195, -0.71980],
+  ["H Samuel", "Jewellery", "shopping", 51.52160, -0.71995],
+  ["Mountain Warehouse", "Outdoor", "shopping", 51.52135, -0.72050],
+  ["Sports Direct", "Sportswear", "shopping", 51.52110, -0.72095],
+  ["Poundland", "Discount Store", "shopping", 51.52100, -0.72020],
+  ["Trespass", "Outdoor", "shopping", 51.52125, -0.71930],
+  ["Barclays", "Bank", "services", 51.52215, -0.71870],
+  ["NatWest", "Bank", "services", 51.52190, -0.71855],
+  ["Lloyds Bank", "Bank", "services", 51.52165, -0.71865],
+  ["HSBC", "Bank", "services", 51.52235, -0.71840],
+  ["Santander", "Bank", "services", 51.52145, -0.71880],
+  ["Post Office", "Postal Services", "services", 51.52125, -0.71840],
+  ["Timpson", "Key Cutting & Repairs", "services", 51.52105, -0.71905],
+  ["Maidenhead Library", "Library", "services", 51.52055, -0.71810],
+];
+
+const extraBrands = extraTraders.map(([name, category, section, lat, lng], i) => ({
+  id: 100 + i,
+  name,
+  category,
+  section,
+  logo: `https://picsum.photos/seed/mh${100 + i}/240/240`,
+  lat,
+  lng,
+}));
+
 // ─── BrandGrid ────────────────────────────────────────────────────────────────
 export const brandGrid = {
   eyebrow: "Curated for Work and Wellbeing",
@@ -219,6 +281,7 @@ export const brandGrid = {
     { id: 6, name: "Nando's", category: "Flame-Grilled", section: "food-drink", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants", address: "57 King Street, Maidenhead SL6 1JR", lat: 51.520859, lng: -0.722249 },
     { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", address: "Unit D, 7 Garden Boulevard, Maidenhead SL6 1QQ", lat: 51.520813, lng: -0.721299 },
     { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", address: "Mill Lane, Taplow, Maidenhead SL6 0AA", lat: 51.526859, lng: -0.700343 },
+    ...extraBrands,
   ],
 };
 
