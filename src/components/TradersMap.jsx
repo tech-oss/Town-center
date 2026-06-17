@@ -220,6 +220,7 @@ export default function TradersMap() {
   const [filter, setFilter] = useState("all");
   const [userPos, setUserPos] = useState(null);
   const [activeBrand, setActiveBrand] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const apiRef = useRef(null); // imperative map API from MapLayer
 
   useEffect(() => {
@@ -237,6 +238,17 @@ export default function TradersMap() {
   const filtered = filter === "all"
     ? brandGrid.brands
     : brandGrid.brands.filter((b) => b.section === filter);
+
+  // Search across ALL brands regardless of category chip
+  const q = searchQuery.trim().toLowerCase();
+  const searchActive = q.length > 0;
+  const searchResults = searchActive
+    ? brandGrid.brands.filter(
+        (b) =>
+          b.name.toLowerCase().includes(q) ||
+          b.category.toLowerCase().includes(q)
+      )
+    : null;
 
   const handleNavigate = useCallback((b) => {
     const origin = userPos ? `&origin=${userPos.lat},${userPos.lng}` : "";
@@ -259,6 +271,18 @@ export default function TradersMap() {
   const sortedFiltered = activeBrand
     ? [activeBrand, ...filtered.filter((b) => b.id !== activeBrand.id)]
     : filtered;
+
+  // The list shown in the directory panel
+  const directoryList = searchActive ? searchResults : sortedFiltered;
+
+  const handleSearchKeyDown = useCallback((e) => {
+    if (e.key === "Enter" && searchResults && searchResults.length > 0) {
+      const top = searchResults[0];
+      setSearchQuery("");
+      handleSelect(top);
+    }
+    if (e.key === "Escape") setSearchQuery("");
+  }, [searchResults, handleSelect]);
 
   return (
     <section className="py-24 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
@@ -304,11 +328,37 @@ export default function TradersMap() {
 
             {/* Directory */}
             <div className="w-full md:w-72 lg:w-80 flex-shrink-0 flex flex-col" style={{ borderLeft: "1px solid rgba(0,0,0,0.07)", maxHeight: "460px" }}>
+              {/* Search bar */}
+              <div className="px-3 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(0,0,0,0.05)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--forest)", opacity: 0.5, flexShrink: 0 }}>
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search businesses…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={handleSearchKeyDown}
+                    className="flex-1 bg-transparent text-sm outline-none"
+                    style={{ color: "var(--forest)", minWidth: 0 }}
+                  />
+                  {searchActive && (
+                    <button onClick={() => setSearchQuery("")} style={{ color: "var(--forest)", opacity: 0.4, flexShrink: 0, lineHeight: 1, fontSize: 16 }}>✕</button>
+                  )}
+                </div>
+                {searchActive && (
+                  <p className="text-[11px] mt-1.5 px-1" style={{ color: "var(--ink)", opacity: 0.5 }}>
+                    {searchResults.length === 0 ? "No results" : `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""} — press Enter to select top match`}
+                  </p>
+                )}
+              </div>
+
               <div className="overflow-y-auto flex-1">
-                {filtered.length === 0 ? (
-                  <p className="text-sm text-center py-10" style={{ color: "var(--ink)", opacity: 0.5 }}>No traders in this category yet.</p>
+                {directoryList.length === 0 ? (
+                  <p className="text-sm text-center py-10" style={{ color: "var(--ink)", opacity: 0.5 }}>{searchActive ? "No businesses match your search." : "No traders in this category yet."}</p>
                 ) : (
-                  sortedFiltered.map((b) => {
+                  directoryList.map((b) => {
                     const isActive = activeBrand?.id === b.id;
                     return (
                       <div
