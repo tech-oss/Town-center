@@ -96,7 +96,8 @@ function App() {
           <Route path="/attraction/:slug" element={<AttractionPage />} />
           {/* Work section */}
           <Route path="/work" element={<WorkPage />} />
-          <Route path="/work/developments" element={<WorkplaceDevelopmentsPage />} />
+          <Route path="/work/developments" element={<Navigate to="/work/developments/one-maidenhead" replace />} />
+          <Route path="/work/developments/:slug" element={<WorkplaceDevelopmentsPage />} />
           <Route path="/work/:category" element={<WorkCategoryPage />} />
           {/* Explore */}
           <Route path="/explore/the-future" element={<ExploreFuturePage />} />

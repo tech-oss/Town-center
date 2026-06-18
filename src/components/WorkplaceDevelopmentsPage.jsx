@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { workplaceBuildings } from "../Data/work";
+import { Link, useParams, Navigate } from "react-router-dom";
+import { workplaceBuildings, workplaceBySlug } from "../Data/work";
 import LocationMap from "./LocationMap";
 
 const modeIcon = (mode) =>
@@ -177,53 +177,57 @@ function DevelopmentCard({ b }) {
 }
 
 export default function WorkplaceDevelopmentsPage() {
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  const { slug } = useParams();
+  const b = workplaceBySlug[slug];
+
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
+  if (!b) return <Navigate to="/work" replace />;
+
+  const others = workplaceBuildings.filter((x) => x.slug !== b.slug);
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* Page header */}
-      <section className="py-16 md:py-24 px-6 md:px-12" style={{ backgroundColor: "var(--forest)" }}>
-        <div className="max-w-6xl mx-auto">
-          <nav className="mb-6 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <Link to="/work" className="hover:text-white transition-colors">Work</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <span className="text-white">Workplace Developments</span>
-          </nav>
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>Work in Maidenhead</p>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl mb-4">
-            Workplace Developments
-          </h1>
-          <p className="text-lg text-white/80 max-w-2xl leading-relaxed">
-            Discover Maidenhead's leading commercial and workspace developments — from landmark town-centre mixed-use schemes to affordable managed offices for growing businesses.
-          </p>
-        </div>
-      </section>
+      {/* Breadcrumb bar */}
+      <div className="px-6 md:px-12 pt-6" style={{ backgroundColor: "var(--sand)" }}>
+        <nav className="max-w-6xl mx-auto text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
+          <span className="mx-2 opacity-40">/</span>
+          <Link to="/work" className="hover:opacity-70 transition-opacity">Work</Link>
+          <span className="mx-2 opacity-40">/</span>
+          <span style={{ color: "var(--forest)" }}>{b.name}</span>
+        </nav>
+      </div>
 
-      {/* Development listings */}
-      {workplaceBuildings.map((b, i) => (
-        <div key={b.slug}>
-          {i > 0 && <div style={{ height: "2px", backgroundColor: "rgba(28,46,56,0.08)" }} />}
-          <DevelopmentCard b={b} />
-        </div>
-      ))}
+      {/* The development */}
+      <DevelopmentCard b={b} />
 
-      {/* CTA footer */}
-      <section className="py-16 px-6 md:px-12" style={{ backgroundColor: "var(--forest)" }}>
-        <div className="max-w-6xl mx-auto text-center">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>Work in Maidenhead</p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Looking for something else?</h2>
-          <p className="text-white/75 mb-8 max-w-xl mx-auto">
-            Browse jobs, freelance projects, business networking and more in the Work section.
-          </p>
-          <Link to="/work"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-semibold transition-all hover:scale-105"
-            style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
-            Explore Work in Maidenhead →
-          </Link>
-        </div>
-      </section>
+      {/* Other workplace developments */}
+      {others.length > 0 && (
+        <section className="pb-20 px-6 md:px-12">
+          <div className="max-w-6xl mx-auto">
+            <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>Explore more</p>
+            <h3 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>Other workplace developments</h3>
+            <div className="grid sm:grid-cols-2 gap-5">
+              {others.map((x) => (
+                <Link key={x.slug} to={`/work/developments/${x.slug}`}
+                  className="group relative rounded-3xl overflow-hidden block aspect-[16/9]"
+                  style={{ boxShadow: "0 10px 40px -18px rgba(28,46,56,0.4)" }}>
+                  <img src={x.image} alt={x.name} loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 35%, rgba(28,46,56,0.88) 100%)" }} />
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest mb-0.5" style={{ color: "var(--sage)" }}>{x.developer}</p>
+                    <h4 className="text-lg font-bold text-white leading-snug">{x.name}</h4>
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/80 mt-2">
+                      Explore <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
