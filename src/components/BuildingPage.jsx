@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { buildingBySlug, buildings, properties } from "../Data/live";
-import { PropertyCard } from "./PropertySearch";
+import { buildingBySlug, buildings } from "../Data/live";
 import LocationMap from "./LocationMap";
 
 const FIFTEEN_MIN = [
@@ -24,13 +23,11 @@ export default function BuildingPage() {
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [sent, setSent] = useState(false);
-  const homesRef   = useRef(null);
   const contactRef = useRef(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
   if (!b) return <Navigate to="/live" replace />;
 
-  const homes = properties.filter((p) => p.buildingSlug === b.slug);
   const otherBuildings = buildings.filter((x) => x.slug !== b.slug);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -73,50 +70,19 @@ export default function BuildingPage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{b.name}</h1>
           <p className="text-lg text-white/85 mt-3 max-w-2xl leading-relaxed">{b.tagline}</p>
 
-          {/* Status pill */}
-          <div className="flex items-center gap-3 mt-5">
-            <span
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest"
-              style={{
-                backgroundColor: b.status === "Coming Soon" ? "rgba(255,180,0,0.2)" : "rgba(47,140,140,0.25)",
-                color: b.status === "Coming Soon" ? "#f5c842" : "var(--sage)",
-                border: `1px solid ${b.status === "Coming Soon" ? "rgba(255,200,0,0.4)" : "rgba(47,140,140,0.5)"}`,
-              }}
-            >
-              <span style={{ fontSize: 8 }}>●</span> {b.status}
-            </span>
-          </div>
-
-          {/* CTA row */}
-          <div className="flex flex-wrap gap-3 mt-6">
-            {homes.length > 0 && (
-              <button
-                onClick={() => scrollTo(homesRef)}
-                className="px-7 py-3 rounded-full font-semibold transition-all hover:scale-105 hover:opacity-95"
-                style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}
-              >
-                View Homes
-              </button>
-            )}
-            <button
-              onClick={() => scrollTo(contactRef)}
-              className="px-7 py-3 rounded-full font-semibold text-white transition-colors hover:bg-white/20"
-              style={{ border: "1.5px solid rgba(255,255,255,0.65)" }}
-            >
-              {b.status === "Coming Soon" ? "Register Interest" : "Enquire Now"}
-            </button>
-            {b.website && (
+          {b.website && (
+            <div className="mt-6">
               <a
                 href={b.website}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-7 py-3 rounded-full font-semibold transition-colors hover:bg-white/10"
-                style={{ border: "1.5px solid rgba(255,255,255,0.35)", color: "rgba(255,255,255,0.8)" }}
+                style={{ border: "1.5px solid rgba(255,255,255,0.55)", color: "rgba(255,255,255,0.9)" }}
               >
                 Developer site ↗
               </a>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -151,15 +117,6 @@ export default function BuildingPage() {
                 {para}
               </p>
             ))}
-            {b.phone && (
-              <a
-                href={`tel:${b.phone.replace(/\s/g, "")}`}
-                className="inline-flex items-center gap-2 mt-1 mb-3 text-sm font-semibold"
-                style={{ color: "var(--forest)" }}
-              >
-                <span className="text-base">📞</span> {b.phone}
-              </a>
-            )}
             {b.website && (
               <div className="mt-3">
                 <a
@@ -202,7 +159,7 @@ export default function BuildingPage() {
             Specification
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "var(--forest)" }}>
-            What's included
+            Features
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {b.amenities.map((a) => {
@@ -220,44 +177,6 @@ export default function BuildingPage() {
               );
             })}
           </div>
-        </div>
-      </section>
-
-      {/* ── 5. AVAILABLE HOMES ──────────────────────────────────────────────── */}
-      <section ref={homesRef} className="py-16 px-6 md:px-12" style={{ scrollMarginTop: "80px" }}>
-        <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
-            {homes.length > 0 ? "Available now" : b.status}
-          </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>
-            Homes at {b.name}
-          </h2>
-
-          {homes.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {homes.map((p) => <PropertyCard key={p.slug} p={p} />)}
-            </div>
-          ) : (
-            <div
-              className="rounded-3xl p-10 md:p-14 text-center"
-              style={{ backgroundColor: "#fff", boxShadow: "0 8px 30px -18px rgba(28,46,56,0.2)" }}
-            >
-              <p className="text-4xl mb-4">🏡</p>
-              <h3 className="font-bold text-xl mb-2" style={{ color: "var(--forest)" }}>
-                Launching Soon
-              </h3>
-              <p className="text-sm max-w-md mx-auto mb-6" style={{ color: "var(--ink)", opacity: 0.7 }}>
-                Homes at {b.name} have not yet been released. Register your interest below and be first to hear when properties become available — including exclusive pre-launch pricing.
-              </p>
-              <button
-                onClick={() => scrollTo(contactRef)}
-                className="px-8 py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--leaf)" }}
-              >
-                Register Interest
-              </button>
-            </div>
-          )}
         </div>
       </section>
 
@@ -354,15 +273,6 @@ export default function BuildingPage() {
               })}
             </ul>
 
-            {b.phone && (
-              <a
-                href={`tel:${b.phone.replace(/\s/g, "")}`}
-                className="flex items-center gap-3 mb-4 text-base font-bold transition-opacity hover:opacity-75"
-                style={{ color: "var(--forest)" }}
-              >
-                <span className="text-xl">📞</span> {b.phone}
-              </a>
-            )}
             {b.website && (
               <a
                 href={b.website}
