@@ -475,7 +475,7 @@ export const liveMenu = {
       ],
     },
     {
-      heading: "Our Buildings",
+      heading: "Developments",
       links: buildings.map((b) => ({ label: b.name, to: `/live/building/${b.slug}` })),
     },
   ],
