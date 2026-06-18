@@ -15,6 +15,7 @@ import EnquirePage from './components/EnquirePage'
 import AttractionPage from './components/AttractionPage'
 import WorkPage from './components/WorkPage'
 import WorkCategoryPage from './components/WorkCategoryPage'
+import WorkplaceDevelopmentsPage from './components/WorkplaceDevelopmentsPage'
 import ExploreFuturePage from './components/ExploreFuturePage'
 import OurStoryPage from './components/OurStoryPage'
 import GettingHerePage from './components/GettingHerePage'
@@ -95,6 +96,7 @@ function App() {
           <Route path="/attraction/:slug" element={<AttractionPage />} />
           {/* Work section */}
           <Route path="/work" element={<WorkPage />} />
+          <Route path="/work/developments" element={<WorkplaceDevelopmentsPage />} />
           <Route path="/work/:category" element={<WorkCategoryPage />} />
           {/* Explore */}
           <Route path="/explore/the-future" element={<ExploreFuturePage />} />

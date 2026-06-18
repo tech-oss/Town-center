@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { buildingBySlug, buildings } from "../Data/live";
 import LocationMap from "./LocationMap";
@@ -13,27 +13,14 @@ const FIFTEEN_MIN = [
 const modeIcon = (mode) =>
   ({ walk: "🚶", train: "🚂", car: "🚗" }[mode] ?? "📍");
 
-// Input / textarea base style
-const fieldCls = "w-full px-4 py-3 rounded-xl text-sm outline-none border transition-colors focus:border-[var(--leaf)]";
-const fieldStyle = { background: "var(--sand)", color: "var(--forest)", border: "1.5px solid transparent" };
-
 export default function BuildingPage() {
   const { slug } = useParams();
   const b = buildingBySlug[slug];
-
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
-  const [sent, setSent] = useState(false);
-  const contactRef = useRef(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
   if (!b) return <Navigate to="/live" replace />;
 
   const otherBuildings = buildings.filter((x) => x.slug !== b.slug);
-
-  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const handleSubmit = (e) => { e.preventDefault(); setSent(true); };
-
-  const scrollTo = (ref) => ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
@@ -50,7 +37,6 @@ export default function BuildingPage() {
           style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.15) 0%, rgba(28,46,56,0.88) 100%)" }}
         />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-14">
-          {/* Breadcrumb */}
           <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <span className="mx-2 opacity-50">/</span>
@@ -58,18 +44,14 @@ export default function BuildingPage() {
             <span className="mx-2 opacity-50">/</span>
             <span className="text-white">{b.name}</span>
           </nav>
-
-          {/* Developer badge */}
           <span
             className="self-start inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
             style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
           >
             {b.developer}
           </span>
-
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{b.name}</h1>
           <p className="text-lg text-white/85 mt-3 max-w-2xl leading-relaxed">{b.tagline}</p>
-
           {b.website && (
             <div className="mt-6">
               <a
@@ -104,7 +86,6 @@ export default function BuildingPage() {
       {/* ── 3. ABOUT + PHOTO GALLERY ────────────────────────────────────────── */}
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Text */}
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
               About the development
@@ -118,21 +99,17 @@ export default function BuildingPage() {
               </p>
             ))}
             {b.website && (
-              <div className="mt-3">
-                <a
-                  href={b.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-semibold transition-opacity hover:opacity-75"
-                  style={{ color: "var(--leaf)" }}
-                >
-                  Visit {b.developer} website →
-                </a>
-              </div>
+              <a
+                href={b.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold transition-opacity hover:opacity-75"
+                style={{ color: "var(--leaf)" }}
+              >
+                Visit {b.developer} website →
+              </a>
             )}
           </div>
-
-          {/* Photo mosaic: 1 wide + 3 small */}
           <div className="grid grid-cols-2 gap-3">
             {(b.gallery ?? [b.hero, b.hero, b.hero, b.hero]).slice(0, 4).map((src, i) => (
               <div
@@ -152,7 +129,7 @@ export default function BuildingPage() {
         </div>
       </section>
 
-      {/* ── 4. KEY FEATURES GRID ────────────────────────────────────────────── */}
+      {/* ── 4. FEATURES GRID ────────────────────────────────────────────────── */}
       <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
@@ -180,9 +157,9 @@ export default function BuildingPage() {
         </div>
       </section>
 
-      {/* ── 6. GETTING AROUND ───────────────────────────────────────────────── */}
+      {/* ── 5. GETTING AROUND ───────────────────────────────────────────────── */}
       {b.nearbyPlaces && b.nearbyPlaces.length > 0 && (
-        <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
+        <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
               Connectivity
@@ -195,7 +172,7 @@ export default function BuildingPage() {
                 <div
                   key={place.name}
                   className="flex items-center gap-4 p-4 rounded-2xl"
-                  style={{ backgroundColor: "var(--sand)" }}
+                  style={{ backgroundColor: "#fff" }}
                 >
                   <span className="text-2xl shrink-0 leading-none">{modeIcon(place.mode)}</span>
                   <div className="min-w-0">
@@ -213,7 +190,7 @@ export default function BuildingPage() {
         </section>
       )}
 
-      {/* ── 7. YOUR 15-MINUTE TOWN ──────────────────────────────────────────── */}
+      {/* ── 6. YOUR 15-MINUTE TOWN ──────────────────────────────────────────── */}
       <section className="py-14 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
@@ -244,132 +221,65 @@ export default function BuildingPage() {
         </div>
       </section>
 
-      {/* ── 8. DEVELOPER CONTACT ────────────────────────────────────────────── */}
-      <section ref={contactRef} className="py-16 px-6 md:px-12" style={{ backgroundColor: "#fff", scrollMarginTop: "80px" }}>
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-
-          {/* Developer info panel */}
-          <div>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
-              Developer
-            </p>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>
-              {b.developer}
-            </h2>
-            <p className="text-base leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.8 }}>
-              For more information about {b.name} — including pricing, availability and upcoming releases — get in touch with the {b.developer} team directly.
-            </p>
-
-            {/* Feature highlights */}
-            <ul className="flex flex-col gap-3 mb-8">
-              {(b.amenities ?? []).slice(0, 4).map((a) => {
-                const icon = typeof a === "object" ? a.icon : "✓";
-                const text = typeof a === "object" ? a.text : a;
-                return (
-                  <li key={text} className="flex items-center gap-3 text-sm" style={{ color: "var(--ink)", opacity: 0.82 }}>
-                    <span className="text-base">{icon}</span> {text}
-                  </li>
-                );
-              })}
-            </ul>
-
+      {/* ── 7. DEVELOPER CONTACT ────────────────────────────────────────────── */}
+      <section className="py-16 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
+        <div className="max-w-6xl mx-auto">
+          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+            Developer
+          </p>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "var(--forest)" }}>
+            Contact {b.developer}
+          </h2>
+          <p className="text-base mb-8 max-w-2xl" style={{ color: "var(--ink)", opacity: 0.7 }}>
+            For pricing, availability and upcoming releases, contact the {b.developer} team directly.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4">
             {b.website && (
               <a
                 href={b.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--forest)" }}
+                className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
+                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
               >
-                Visit {b.developer} site →
+                <span className="text-3xl shrink-0">🌐</span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Website</p>
+                  <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "var(--forest)" }}>Visit developer site ↗</p>
+                </div>
+              </a>
+            )}
+            {b.email && (
+              <a
+                href={`mailto:${b.email}`}
+                className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
+                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
+              >
+                <span className="text-3xl shrink-0">✉️</span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Email</p>
+                  <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "var(--forest)" }}>{b.email}</p>
+                </div>
+              </a>
+            )}
+            {b.phone && (
+              <a
+                href={`tel:${b.phone.replace(/\s/g, "")}`}
+                className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
+                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
+              >
+                <span className="text-3xl shrink-0">📞</span>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Telephone</p>
+                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "var(--forest)" }}>{b.phone}</p>
+                </div>
               </a>
             )}
           </div>
-
-          {/* Enquiry form */}
-          {sent ? (
-            <div
-              className="rounded-3xl p-10 flex flex-col items-center justify-center text-center gap-4"
-              style={{ backgroundColor: "var(--sand)", minHeight: "320px", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.15)" }}
-            >
-              <div
-                className="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
-                style={{ backgroundColor: "rgba(47,140,140,0.15)", color: "#2f8c8c" }}
-              >
-                ✓
-              </div>
-              <h3 className="text-xl font-bold" style={{ color: "var(--forest)" }}>Enquiry received!</h3>
-              <p className="text-sm max-w-xs leading-relaxed" style={{ color: "var(--ink)", opacity: 0.7 }}>
-                Thank you for your interest in {b.name}. We'll pass your details to the {b.developer} team and be in touch shortly.
-              </p>
-            </div>
-          ) : (
-            <form
-              onSubmit={handleSubmit}
-              className="rounded-3xl p-7 md:p-8 flex flex-col gap-4"
-              style={{ backgroundColor: "var(--sand)", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.15)" }}
-            >
-              <div>
-                <h3 className="text-lg font-bold mb-1" style={{ color: "var(--forest)" }}>
-                  {b.status === "Coming Soon" ? "Register your interest" : "Enquire about this development"}
-                </h3>
-                <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>
-                  We'll respond within one working day.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  required
-                  type="text"
-                  placeholder="Your name"
-                  value={form.name}
-                  onChange={set("name")}
-                  className={fieldCls}
-                  style={fieldStyle}
-                />
-                <input
-                  required
-                  type="email"
-                  placeholder="Email address"
-                  value={form.email}
-                  onChange={set("email")}
-                  className={fieldCls}
-                  style={fieldStyle}
-                />
-              </div>
-              <input
-                type="tel"
-                placeholder="Phone number (optional)"
-                value={form.phone}
-                onChange={set("phone")}
-                className={fieldCls}
-                style={fieldStyle}
-              />
-              <textarea
-                rows={4}
-                placeholder={`Tell us about your interest in ${b.name}…`}
-                value={form.message}
-                onChange={set("message")}
-                className={fieldCls + " resize-none"}
-                style={fieldStyle}
-              />
-              <button
-                type="submit"
-                className="py-3.5 rounded-full font-semibold text-white transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--leaf)" }}
-              >
-                Send Enquiry
-              </button>
-              <p className="text-[11px] text-center" style={{ color: "var(--ink)", opacity: 0.45 }}>
-                Your information is treated in accordance with our privacy policy and will not be shared with third parties without consent.
-              </p>
-            </form>
-          )}
         </div>
       </section>
 
-      {/* ── 9. LOCATION MAP ─────────────────────────────────────────────────── */}
+      {/* ── 8. LOCATION MAP ─────────────────────────────────────────────────── */}
       <section className="py-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <LocationMap
@@ -380,7 +290,7 @@ export default function BuildingPage() {
         </div>
       </section>
 
-      {/* ── 10. OTHER BUILDINGS ─────────────────────────────────────────────── */}
+      {/* ── 9. OTHER DEVELOPMENTS ───────────────────────────────────────────── */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
@@ -407,7 +317,6 @@ export default function BuildingPage() {
                   className="absolute inset-0"
                   style={{ background: "linear-gradient(180deg, transparent 35%, rgba(28,46,56,0.88) 100%)" }}
                 />
-                {/* Status badge */}
                 {x.status && (
                   <span
                     className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"

@@ -4,9 +4,10 @@ import { header } from "../Data/content";
 import { menus } from "../Data/pages";
 import { liveMenu } from "../Data/live";
 import { exploreMenu } from "../Data/explore";
+import { workMenu } from "../Data/work";
 import SmartLink from "./SmartLink";
 
-const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu].map((m) => [m.label, m]));
+const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
 const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
