@@ -60,10 +60,13 @@ export default function EventPage() {
   const { slug } = useParams();
   const event = asEvent(slug);
   const [active, setActive] = useState(0);
+  // Reset the carousel to the first image when navigating to a different item
+  // (adjusting state during render — no extra paint).
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setActive(0);
   }, [slug]);
 
   if (!event) return <Navigate to="/" replace />;

@@ -1,19 +1,22 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { itemBySlug, sections } from "../Data/pages";
 import NewsOffers from "./NewsOffers";
 import LocationMap from "./LocationMap";
 
 export default function DetailPage() {
-  const { section, slug } = useParams();
+  const { slug } = useParams();
   const item = itemBySlug[slug];
   const [active, setActive] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Reset the gallery to the first image when navigating to a different item
+  // (adjusting state during render — no extra paint).
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setActive(0);
   }, [slug]);
 
   if (!item) return <Navigate to="/" replace />;

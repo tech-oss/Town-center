@@ -1,6 +1,5 @@
-import { useLayoutEffect, useRef, useState, useEffect } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
-import './App.css'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
@@ -28,8 +27,6 @@ import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
 import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
-import NewsletterModal from './components/NewsletterModal'
-import { newsletterModal } from './Data/content'
 
 // See & Do place links now use the shared event layout at /event/:slug.
 function SeeDoPlaceRedirect() {
@@ -46,18 +43,6 @@ function SectionCategoryRedirect() {
 function App() {
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
-
-  // Newsletter popup — disabled for now, re-enable by uncommenting the block below
-  // const [modalOpen, setModalOpen] = useState(false)
-  // const [modalShown, setModalShown] = useState(false)
-  // useEffect(() => {
-  //   if (modalShown) return
-  //   const t = setTimeout(() => {
-  //     setModalOpen(true)
-  //     setModalShown(true)
-  //   }, newsletterModal.openDelay)
-  //   return () => clearTimeout(t)
-  // }, [modalShown])
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.
@@ -76,7 +61,7 @@ function App() {
       <Header ref={headerRef} />
       <main style={{ paddingTop: headerHeight || undefined }}>
         <Routes>
-          <Route path="/" element={<HomePage headerHeight={headerHeight} />} />
+          <Route path="/" element={<HomePage />} />
           {/* Plan your visit / info pages */}
           <Route path="/getting-here" element={<GettingHerePage />} />
           <Route path="/traders" element={<TradersPage />} />
@@ -118,7 +103,6 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      {/* <NewsletterModal open={modalOpen} onClose={() => setModalOpen(false)} /> */}
     </>
   )
 }

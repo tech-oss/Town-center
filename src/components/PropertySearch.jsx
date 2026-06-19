@@ -41,7 +41,7 @@ const BED_OPTIONS = [
   { value: "5",      label: "5+" },
 ];
 
-function fmtPriceOpt(n, isRent) {
+function fmtPriceOpt(n) {
   if (n >= 1000000) return `£${(n / 1000000).toFixed(n % 1000000 === 0 ? 0 : 2)}m`;
   if (n >= 1000) return `£${(n / 1000).toLocaleString()}k`;
   return `£${n.toLocaleString()}`;
@@ -210,7 +210,7 @@ export default function PropertySearch({ mode }) {
                 <select className={selCls} style={selStyle} value={priceMin} onChange={(e) => setPriceMin(e.target.value)}>
                   <option value="any">No min</option>
                   {priceTiers.map((p) => (
-                    <option key={p} value={p}>{fmtPriceOpt(p, isRent)}</option>
+                    <option key={p} value={p}>{fmtPriceOpt(p)}</option>
                   ))}
                 </select>
                 <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-40" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
@@ -220,7 +220,7 @@ export default function PropertySearch({ mode }) {
                 <select className={selCls} style={selStyle} value={priceMax} onChange={(e) => setPriceMax(e.target.value)}>
                   <option value="any">No max</option>
                   {priceTiers.map((p) => (
-                    <option key={p} value={p}>{fmtPriceOpt(p, isRent)}</option>
+                    <option key={p} value={p}>{fmtPriceOpt(p)}</option>
                   ))}
                 </select>
                 <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-40" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>

@@ -9,8 +9,12 @@ export default function PropertyPage() {
   const { slug } = useParams();
   const p = propertyBySlug[slug];
   const [active, setActive] = useState(0);
+  // Reset the gallery to the first image when navigating to a different property
+  // (adjusting state during render — no extra paint).
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
-  useEffect(() => { window.scrollTo(0, 0); setActive(0); }, [slug]);
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
   if (!p) return <Navigate to="/live/for-sale" replace />;
   const b = buildingBySlug[p.buildingSlug];

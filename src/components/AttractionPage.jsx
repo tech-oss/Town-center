@@ -8,8 +8,12 @@ export default function AttractionPage() {
   const { slug } = useParams();
   const a = attractionBySlug[slug];
   const [active, setActive] = useState(0);
+  // Reset the gallery to the first image when navigating to a different item
+  // (adjusting state during render — no extra paint, see react.dev "you might not need an effect").
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
-  useEffect(() => { window.scrollTo(0, 0); setActive(0); }, [slug]);
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
   if (!a) return <Navigate to="/" replace />;
 
   const gallery = a.gallery?.length ? a.gallery : [a.hero];

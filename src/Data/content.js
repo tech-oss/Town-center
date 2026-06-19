@@ -334,34 +334,6 @@ export const brandGrid = {
   ],
 };
 
-// ─── FeatureBlocks ────────────────────────────────────────────────────────────
-export const featureBlocks = {
-  blocks: [
-    {
-      id: 1,
-      eyebrow: "Eat & Drink",
-      heading: "Thirty Places to Eat. Zero Chains.",
-      body: "From third-wave coffee and wood-fired sourdough to small-plates wine bars and proper Sunday roasts — every single one independently owned.",
-      cta: { label: "Explore Eat & Drink", href: "/eat-drink" },
-      // TODO: replace with actual Maidenhead restaurant / dining scene
-      imageSrc: "https://picsum.photos/id/493/800/600",
-      imageAlt: "Restaurants and cafes at Maidenhead",
-      imageLeft: false,
-    },
-    {
-      id: 2,
-      eyebrow: "The Green",
-      heading: "A Park at the Heart of It All",
-      body: "Two acres of managed green space, a weekend farmers' market, and a summer events programme that runs June through September.",
-      cta: { label: "See What's On the Green", href: "/see-do" },
-      // TODO: replace with actual Thames riverside / Maidenhead waterfront photo
-      imageSrc: "https://picsum.photos/id/1002/800/600",
-      imageAlt: "The Green park at Maidenhead",
-      imageLeft: true,
-    },
-  ],
-};
-
 // ─── Newsletter ───────────────────────────────────────────────────────────────
 export const newsletter = {
   eyebrow: "Newsletter",

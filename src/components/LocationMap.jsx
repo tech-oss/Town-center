@@ -33,15 +33,25 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    // If coords are hardcoded, skip geocoding entirely
-    if (lat && lng) { setPos({ lat, lng }); return; }
-    if (!query) return;
-    setPos(null);
+  // When the target changes, reset state during render (no extra paint). Hardcoded
+  // coords resolve immediately; otherwise the effect below geocodes the query.
+  const [seenTarget, setSeenTarget] = useState(`${query}|${lat}|${lng}`);
+  const target = `${query}|${lat}|${lng}`;
+  if (target !== seenTarget) {
+    setSeenTarget(target);
+    setPos(lat && lng ? { lat, lng } : null);
     setError(false);
+  }
+
+  useEffect(() => {
+    // Hardcoded coords skip geocoding entirely (handled at render-time above).
+    if (lat && lng) return;
+    if (!query) return;
+    let alive = true;
     geocode(query)
-      .then((p) => { if (p) setPos(p); else setError(true); })
-      .catch(() => setError(true));
+      .then((p) => { if (alive) (p ? setPos(p) : setError(true)); })
+      .catch(() => { if (alive) setError(true); });
+    return () => { alive = false; };
   }, [query, lat, lng]);
 
   return (

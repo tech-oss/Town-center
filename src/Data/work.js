@@ -80,7 +80,6 @@ export const work = {
 };
 
 // ─── Workplace developments ───────────────────────────────────────────────────
-const _img = (seed, w = 1200, h = 800) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
 
 export const workplaceBuildings = [
   {

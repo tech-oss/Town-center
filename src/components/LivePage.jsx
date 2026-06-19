@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { live, buildings } from "../Data/live";
 import LocationMap from "./LocationMap";
 import LifestyleBento from "./LifestyleBento";

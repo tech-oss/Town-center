@@ -75,15 +75,19 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
   const userMarkerRef = useRef(null);
   const popupRef = useRef(null);
 
-  // Latest callbacks via refs so marker handlers never go stale (no rebuilds)
+  // Latest callbacks via refs so marker handlers never go stale (no rebuilds).
+  // Assigned in an effect (after commit) rather than during render; marker click
+  // handlers read `.current` at event time, so behaviour is identical.
   const selectRef = useRef(onSelectBrand);
   const readRef = useRef(onReadMore);
   const navRef = useRef(onNavigate);
   const deselectRef = useRef(onDeselect);
-  selectRef.current = onSelectBrand;
-  readRef.current = onReadMore;
-  navRef.current = onNavigate;
-  deselectRef.current = onDeselect;
+  useEffect(() => {
+    selectRef.current = onSelectBrand;
+    readRef.current = onReadMore;
+    navRef.current = onNavigate;
+    deselectRef.current = onDeselect;
+  });
 
   const brandKey = brands.map((b) => b.id).join(",");
 

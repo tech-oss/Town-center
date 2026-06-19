@@ -8,10 +8,10 @@ import PlanVisit from "./PlanVisit";
 import AppCta from "./AppCta";
 import Newsletter from "./Newsletter";
 
-export default function HomePage({ headerHeight }) {
+export default function HomePage() {
   return (
     <>
-      <Hero headerHeight={headerHeight} />
+      <Hero />
       <QuickLinks />
       <BlogCards />
       <TradersMap />
