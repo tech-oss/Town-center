@@ -148,6 +148,23 @@ export default function DetailPage() {
                   )}
                 </>
               )}
+
+              {/* Website CTA — shown in main column so it's visible on all screen sizes */}
+              {item.website && !item.hideWeb && (
+                <div className="mt-8">
+                  <a
+                    href={`https://${item.website.replace(/^https?:\/\//, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-white transition-colors"
+                    style={{ backgroundColor: "var(--forest)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
+                  >
+                    Visit Website ↗
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Info sidebar */}
@@ -221,15 +238,29 @@ export default function DetailPage() {
                 )}
 
                 {/* Actions */}
+                {item.website && !item.hideWeb && (
+                <a
+                  href={`https://${item.website.replace(/^https?:\/\//, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
+                  style={{ backgroundColor: "var(--forest)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
+                >
+                  Visit Website ↗
+                </a>
+                )}
+
                 {!item.freePlan && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
-                  style={{ backgroundColor: "var(--leaf)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                  className="block text-center py-3 rounded-full font-semibold transition-colors"
+                  style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--forest)"; }}
                 >
                   Get Directions
                 </a>
@@ -264,7 +295,7 @@ export default function DetailPage() {
       {!item.freePlan && (
         <section className="pb-16 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <LocationMap heading="Location" note={item.address} query={mapQuery} />
+            <LocationMap heading="Location" note={item.address} query={mapQuery} lat={item.lat} lng={item.lng} />
           </div>
         </section>
       )}

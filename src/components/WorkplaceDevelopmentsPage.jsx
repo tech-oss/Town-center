@@ -15,6 +15,13 @@ function DevelopmentCard({ b }) {
         <img src={b.hero} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.12) 0%, rgba(28,46,56,0.88) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
+          <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
+            <Link to="/" className="hover:text-white transition-colors">Home</Link>
+            <span className="mx-2 opacity-50">/</span>
+            <Link to="/work" className="hover:text-white transition-colors">Work</Link>
+            <span className="mx-2 opacity-50">/</span>
+            <span className="text-white">{b.name}</span>
+          </nav>
           <span
             className="self-start inline-flex items-center mb-3 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
             style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
@@ -169,7 +176,7 @@ function DevelopmentCard({ b }) {
       {/* Map */}
       <section className="py-12 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Location" note={`${b.name} — ${b.location}`} query={`${b.name}, Maidenhead`} />
+          <LocationMap heading="Location" note={`${b.name} — ${b.location}`} query={b.location} lat={b.lat} lng={b.lng} />
         </div>
       </section>
     </div>
@@ -187,17 +194,6 @@ export default function WorkplaceDevelopmentsPage() {
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* Breadcrumb bar */}
-      <div className="px-6 md:px-12 pt-6" style={{ backgroundColor: "var(--sand)" }}>
-        <nav className="max-w-6xl mx-auto text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
-          <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
-          <span className="mx-2 opacity-40">/</span>
-          <Link to="/work" className="hover:opacity-70 transition-opacity">Work</Link>
-          <span className="mx-2 opacity-40">/</span>
-          <span style={{ color: "var(--forest)" }}>{b.name}</span>
-        </nav>
-      </div>
-
       {/* The development */}
       <DevelopmentCard b={b} />
 

@@ -51,7 +51,7 @@ export default function EnquirePage() {
       {/* Map */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Find us" note="The Colonnade, High Street, Maidenhead SL6 1QJ" query="Maidenhead town centre, Berkshire" />
+          <LocationMap heading="Find us" note="The Colonnade, High Street, Maidenhead SL6 1QJ" lat={51.5234} lng={-0.7205} query="Maidenhead, Berkshire" />
         </div>
       </section>
     </div>

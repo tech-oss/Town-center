@@ -347,6 +347,32 @@ const seeItems = [
   item("kids-craft-club", "Kids' Craft Club", "see-do", "family", "Family"),
   item("style-edit-evening", "Style Edit Evening", "see-do", "fashion-beauty", "Fashion & Beauty"),
   item("riverside-film-nights", "Riverside Film Nights", "see-do", "film", "Film"),
+  {
+    ...item("odeon-luxe-maidenhead", "ODEON Luxe Maidenhead", "see-do", "film", "Film"),
+    image: "/images/cinema.png",
+    gallery: [
+      "/images/cinema.png",
+      "/images/cinema.png",
+      "/images/cinema.png",
+    ],
+    paragraphs: [
+      "Located in the heart of Maidenhead town centre, ODEON Luxe Maidenhead is a popular entertainment venue that serves both the local community and visitors to the area. Offering the latest blockbuster films, family favourites, live screenings, and special cinematic events, it provides a modern and welcoming destination for people of all ages.",
+      "Following a major refurbishment, the cinema now features luxury reclining seats, state-of-the-art screens, and immersive sound technology, ensuring a comfortable and enjoyable viewing experience. Its central location on King Street makes it a convenient stop for visitors exploring the town's shops, restaurants, and attractions, while also serving as a valued social and leisure hub for local residents.",
+      "Whether you're enjoying a family day out, meeting friends for an evening film, or visiting Maidenhead as part of a wider trip to the Thames Valley, ODEON Luxe offers a relaxing and memorable cinema experience. With a variety of dining options nearby and excellent transport links, including easy access from Maidenhead railway station, it remains one of the town's most popular destinations for entertainment and community gatherings.",
+      "As a key part of Maidenhead's leisure offering, ODEON Luxe continues to bring people together through the shared experience of cinema, contributing to the town's vibrant cultural and social life.",
+    ],
+    hours: [
+      { day: "Monday – Thursday", time: "10am – 11pm" },
+      { day: "Friday – Saturday", time: "10am – 11:30pm" },
+      { day: "Sunday", time: "10am – 10:30pm" },
+    ],
+    address: "King Street, Maidenhead SL6 1DT",
+    mapQuery: "ODEON Maidenhead, King Street, Maidenhead SL6 1DT",
+    lat: 51.5232, lng: -0.7199,
+    phone: "0333 006 7777",
+    website: "www.odeon.co.uk/cinemas/maidenhead/",
+    tag: "Film",
+  },
   item("retro-arcade-takeover", "Retro Arcade Takeover", "see-do", "gaming", "Gaming"),
   item("thames-life-drawing", "Thames Life Drawing", "see-do", "learning", "Learning"),
   item("parkrun-maidenhead", "Maidenhead parkrun", "see-do", "sport-wellness", "Sport & Wellness"),
@@ -466,6 +492,9 @@ export const sections = {
       intro:
         "Whatever you're into, there's always something happening in Maidenhead — events, culture, family days out, sport and more, right on the river.",
       hero: "/images/ql-see.jpg",
+    },
+    categoryHeroes: {
+      film: { src: "/images/cinema.png", fit: "contain", bg: "#0a0a0f" },
     },
     columns: [
       {

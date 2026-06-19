@@ -4,6 +4,7 @@ import { live, buildings } from "../Data/live";
 import LocationMap from "./LocationMap";
 import LifestyleBento from "./LifestyleBento";
 import DesignedAroundYou from "./DesignedAroundYou";
+import ConnectivitySection from "./ConnectivitySection";
 import { FeaturedProperties } from "./PropertySearch";
 
 export default function LivePage() {
@@ -12,7 +13,7 @@ export default function LivePage() {
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
       {/* Hero */}
-      <section className="relative h-[58vh] min-h-[400px] w-full overflow-hidden">
+      <section className="relative h-[75vh] min-h-[560px] md:h-[58vh] md:min-h-[400px] w-full overflow-hidden">
         <img src={live.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.3) 0%, rgba(28,46,56,0.8) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-14">
@@ -39,6 +40,9 @@ export default function LivePage() {
 
       {/* Designed Around You */}
       <DesignedAroundYou />
+
+      {/* Connectivity — Elizabeth line + car/train times */}
+      <ConnectivitySection />
 
       {/* Our Buildings */}
       <section className="pb-20 px-6 md:px-12">
@@ -68,7 +72,7 @@ export default function LivePage() {
       {/* Location map */}
       <section className="pb-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Where you'll live" note="Maidenhead, Berkshire — on the Elizabeth Line, 18 minutes from London Paddington." query="Maidenhead, Berkshire" />
+          <LocationMap heading="Where you'll live" note="Maidenhead, Berkshire — on the Elizabeth Line, 18 minutes from London Paddington." lat={51.5236} lng={-0.7197} query="Maidenhead, Berkshire" />
         </div>
       </section>
 

@@ -99,7 +99,7 @@ export default function PropertyPage() {
       {/* Location map */}
       <section className="pb-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Location" note={`${p.building}, ${p.location}`} query={`${p.building}, Maidenhead`} />
+          <LocationMap heading="Location" note={`${p.building}, ${p.location}`} query={p.location} />
         </div>
       </section>
 

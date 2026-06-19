@@ -285,7 +285,7 @@ export default function BuildingPage() {
           <LocationMap
             heading="Location"
             note={`${b.name} — ${b.location}`}
-            query={`${b.name}, Maidenhead`}
+            query={b.location}
           />
         </div>
       </section>

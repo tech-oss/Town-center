@@ -19,6 +19,7 @@ function asEvent(slug) {
     category: it.tag || "What's On",
     title: it.name,
     location: it.address,
+    website: it.website ? `https://${it.website.replace(/^https?:\/\//, "")}` : undefined,
     image: it.image,
     gallery: it.gallery?.length ? it.gallery : [it.image],
     standfirst: it.description,

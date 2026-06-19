@@ -74,11 +74,16 @@ export default function CategoryPage() {
     ? `Browse ${categoryTitles[category]?.toLowerCase() ?? "places"} across Maidenhead town centre.`
     : sec.landing.intro;
 
+  const catHero = category && sec.categoryHeroes?.[category];
+  const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero;
+  const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
+  const heroBg  = typeof catHero === "object" ? catHero.bg  : undefined;
+
   return (
     <div>
       {/* ── Hero banner ── */}
-      <section className="relative h-[42vh] min-h-[300px] w-full overflow-hidden">
-        <img src={sec.landing.hero} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <section className="relative h-[42vh] min-h-[300px] w-full overflow-hidden" style={heroBg ? { backgroundColor: heroBg } : undefined}>
+        <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           {/* Breadcrumb */}
