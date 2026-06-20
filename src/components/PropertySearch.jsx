@@ -1,7 +1,11 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { properties, buildings, fmtPrice } from "../Data/live";
+import { fmtPrice } from "../Data/live";
+import { getProperties, getBuildings } from "../api";
+import useFetch from "../hooks/useFetch";
 import { card } from "../utils/design";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 // Three featured listings shown in the spotlight section (any selection for now)
 const FEATURED_SLUGS = ["ws-penthouse-9", "ws-2bed-apt-4", "bp-studio-1"];
@@ -102,6 +106,9 @@ export default function PropertySearch({ mode }) {
   const location = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [location.pathname]);
 
+  const { data: allProperties, loading: loadingProperties, error } = useFetch(getProperties, []);
+  const { data: buildings, loading: loadingBuildings } = useFetch(getBuildings, []);
+
   const isOverview = mode === "overview";
   const status = mode === "rent" ? "rent" : "sale";
   const priceTiers = status === "rent" ? RENT_PRICES : SALE_PRICES;
@@ -124,7 +131,7 @@ export default function PropertySearch({ mode }) {
   }
 
   const results = useMemo(() => {
-    let list = properties.filter((p) => (isOverview ? true : p.status === status));
+    let list = (allProperties ?? []).filter((p) => (isOverview ? true : p.status === status));
     if (propType !== "any") list = list.filter((p) => p.propertyType === propType);
     if (priceMin !== "any") list = list.filter((p) => p.price >= Number(priceMin));
     if (priceMax !== "any") list = list.filter((p) => p.price <= Number(priceMax));
@@ -134,7 +141,7 @@ export default function PropertySearch({ mode }) {
     if (bMax !== null) list = list.filter((p) => (bedsMax === "5" ? p.beds >= 5 : p.beds <= bMax));
     list = [...list].sort((a, b) => (sort === "price-asc" ? a.price - b.price : b.price - a.price));
     return list;
-  }, [propType, priceMin, priceMax, bedsMin, bedsMax, sort, status, isOverview]);
+  }, [allProperties, propType, priceMin, priceMax, bedsMin, bedsMax, sort, status, isOverview]);
 
   const title = isOverview ? "Properties Overview" : isRent ? "Properties For Rent" : "Properties For Sale";
   const intro = isOverview
@@ -142,6 +149,9 @@ export default function PropertySearch({ mode }) {
     : isRent
     ? "Modern properties to rent across Maidenhead's most sought-after riverside developments."
     : "Brand-new and resale properties for sale across Maidenhead's leading developments.";
+
+  if (loadingProperties || loadingBuildings) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
@@ -279,9 +289,11 @@ export default function PropertySearch({ mode }) {
 
 // ─── Featured properties spotlight (1 large + 2 compact, like the homepage) ───
 export function FeaturedProperties() {
+  const { data: properties } = useFetch(getProperties, []);
   const featured = FEATURED_SLUGS
-    .map((slug) => properties.find((p) => p.slug === slug))
+    .map((slug) => (properties ?? []).find((p) => p.slug === slug))
     .filter(Boolean);
+  // Empty while the request is in flight; the section simply appears once ready.
   if (featured.length === 0) return null;
   const [hero, ...rest] = featured;
 

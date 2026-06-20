@@ -1,13 +1,19 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { propertyBySlug, buildingBySlug, properties, fmtPrice } from "../Data/live";
+import { fmtPrice } from "../Data/live";
+import { getPropertyBySlug, getBuildings, getProperties } from "../api";
+import useFetch from "../hooks/useFetch";
 import { PropertyCard } from "./PropertySearch";
 import BookingForm from "./BookingForm";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 export default function PropertyPage() {
   const { slug } = useParams();
-  const p = propertyBySlug[slug];
+  const { data: p, loading: loadingProperty, error } = useFetch(() => getPropertyBySlug(slug), [slug]);
+  const { data: buildings, loading: loadingBuildings } = useFetch(getBuildings, []);
+  const { data: allProperties, loading: loadingList } = useFetch(getProperties, []);
   const [active, setActive] = useState(0);
   // Reset the gallery to the first image when navigating to a different property
   // (adjusting state during render — no extra paint).
@@ -16,9 +22,11 @@ export default function PropertyPage() {
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
+  if (loadingProperty || loadingBuildings || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!p) return <Navigate to="/live/for-sale" replace />;
-  const b = buildingBySlug[p.buildingSlug];
-  const similar = properties.filter((x) => x.status === p.status && x.slug !== p.slug).slice(0, 3);
+  const b = buildings.find((x) => x.slug === p.buildingSlug);
+  const similar = allProperties.filter((x) => x.status === p.status && x.slug !== p.slug).slice(0, 3);
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
