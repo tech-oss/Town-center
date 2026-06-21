@@ -1,13 +1,15 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { eventBySlug, events, categoryColors } from "../Data/events";
-import { itemBySlug } from "../Data/pages";
+import { categoryColors } from "../Data/events";
+import { getEventBySlug, getEvents, getBusinessBySlug } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
-// Map a See & Do activity (from pages.js) onto the shared event shape so every
-// See & Do detail page uses the same layout as the What's On events.
-function asEvent(slug) {
-  if (eventBySlug[slug]) return eventBySlug[slug];
-  const it = itemBySlug[slug];
+// Map a What's On event, or a See & Do business (from the businesses resource),
+// onto the shared event shape so every See & Do detail page uses the same layout.
+function asEvent(rawEvent, it) {
+  if (rawEvent) return rawEvent;
   if (!it || it.section !== "see-do") return null;
   const body = it.paragraphs
     ? it.paragraphs.map((p) => ({ text: p }))
@@ -19,6 +21,7 @@ function asEvent(slug) {
     category: it.tag || "What's On",
     title: it.name,
     location: it.address,
+    website: it.website ? `https://${it.website.replace(/^https?:\/\//, "")}` : undefined,
     image: it.image,
     gallery: it.gallery?.length ? it.gallery : [it.image],
     standfirst: it.description,
@@ -57,14 +60,24 @@ function GlobeIcon() {
 
 export default function EventPage() {
   const { slug } = useParams();
-  const event = asEvent(slug);
+  // The slug can be either a What's On event or a See & Do business; fetch both
+  // and let asEvent() pick the right one.
+  const { data: rawEvent, loading: loadingEvent, error } = useFetch(() => getEventBySlug(slug), [slug]);
+  const { data: business, loading: loadingBusiness } = useFetch(() => getBusinessBySlug(slug), [slug]);
+  const { data: allEvents, loading: loadingList } = useFetch(getEvents, []);
   const [active, setActive] = useState(0);
+  // Reset the carousel to the first image when navigating to a different item
+  // (adjusting state during render — no extra paint).
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setActive(0);
   }, [slug]);
 
+  if (loadingEvent || loadingBusiness || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
+  const event = asEvent(rawEvent, business);
   if (!event) return <Navigate to="/" replace />;
 
   const gallery = event.gallery?.length ? event.gallery : [event.image];
@@ -218,7 +231,7 @@ export default function EventPage() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>More What's On</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.filter((e) => e.slug !== event.slug).slice(0, 3).map((e) => (
+            {allEvents.filter((e) => e.slug !== event.slug).slice(0, 3).map((e) => (
               <Link
                 key={e.slug}
                 to={`/event/${e.slug}`}

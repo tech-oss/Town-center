@@ -57,7 +57,7 @@ export const events = [
     location: "Grove Road Car Park, Maidenhead SL6 1SQ",
     tickets: "Free entry",
     website: "https://www.maidenheadfarmersmarket.org.uk/",
-    image: "/images/events/farmers-market-2.jpg",
+    image: "/images/events/farmers-market-3.jpg",
     excerpt: "Fresh, local produce from independent growers and makers — 2nd Sunday of each month in the town centre.",
     standfirst:
       "Buy direct from local farmers, growers and dedicated small artisan producers — right in the heart of Maidenhead, every second Sunday.",
@@ -67,9 +67,9 @@ export const events = [
       { text: "It's the perfect Sunday morning outing — support local producers, discover seasonal ingredients and pick up something special for the week ahead." },
     ],
     gallery: [
+      "/images/events/farmers-market-3.jpg",
       "/images/events/farmers-market-2.jpg",
       "/images/events/farmers-market-1.jpg",
-      "/images/events/farmers-market-3.jpg",
       "/images/events/farmers-market-4.jpg",
     ],
   },
@@ -124,7 +124,7 @@ export const events = [
     location: "Maidenhead Town Centre",
     tickets: "Free, non-ticketed",
     website: "https://mheadfestival.weebly.com/battle-of-the-bands.html",
-    image: "/images/events/bands-hero.jpg",
+    image: "/images/events/bands-1.jpg",
     excerpt: "Emerging artists compete across indie, rock, electronic and acoustic — and the audience decides the winner.",
     standfirst:
       "Emerging artists go head-to-head across indie, rock, electronic and acoustic — and the audience decides the winner.",
@@ -132,7 +132,7 @@ export const events = [
       { lead: "The crowd picks the champion", text: "Battle of the Bands showcases some of the area's most exciting emerging artists across a range of genres, all competing for your vote." },
       { text: "Expect a high-energy evening of live music, standout performances and a real sense of community spirit as the town centre comes alive after dark." },
     ],
-    gallery: ["/images/events/bands-hero.jpg", "/images/events/bands-1.jpg", "/images/events/bands-2.jpg", "/images/events/bands-3.jpg"],
+    gallery: ["/images/events/bands-1.jpg", "/images/events/bands-hero.jpg", "/images/events/bands-2.jpg", "/images/events/bands-3.jpg"],
   },
   {
     slug: "christmas-lights-switch-on",

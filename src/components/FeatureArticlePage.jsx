@@ -1,6 +1,9 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, Fragment } from "react";
-import { featureBySlug, features } from "../Data/features";
+import { useEffect } from "react";
+import { getStoryBySlug, getStories } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 // Renders a body block's text (heading + paragraphs + optional bullets).
 function BlockText({ block }) {
@@ -33,15 +36,18 @@ function BlockText({ block }) {
 
 export default function FeatureArticlePage() {
   const { slug } = useParams();
-  const story = featureBySlug[slug];
+  const { data: story, loading, error } = useFetch(() => getStoryBySlug(slug), [slug]);
+  const { data: stories, loading: loadingList } = useFetch(getStories, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
 
+  if (loading || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!story) return <Navigate to="/" replace />;
 
-  const more = features.filter((f) => f.slug !== story.slug);
+  const more = stories.filter((f) => f.slug !== story.slug);
   const websiteUrl = `https://${story.website.replace(/^https?:\/\//, "")}`;
 
   // Weave gallery images through the body: pair each image with a substantial

@@ -1,12 +1,14 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { allArticles } from "../Data/pages";
-
-// Show the hand-written, real stories (Coppa Club, COCOBA, …) rather than the
-// auto-generated per-business placeholders (which end in -offer / -news / -event).
-const stories = allArticles.filter((a) => !/-(offer|news|event)$/.test(a.slug));
+import { getArticles } from "../api";
+import useFetch from "../hooks/useFetch";
 
 export default function NewsIndexPage() {
+  const { data: articles } = useFetch(getArticles, []);
+  // Show the hand-written, real stories (Coppa Club, COCOBA, …) rather than the
+  // auto-generated per-business placeholders (which end in -offer / -news / -event).
+  const stories = (articles ?? []).filter((a) => !/-(offer|news|event)$/.test(a.slug));
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);

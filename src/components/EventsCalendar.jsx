@@ -1,12 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { events, categoryColors } from "../Data/events";
+import { categoryColors } from "../Data/events";
+import { getEvents } from "../api";
+import useFetch from "../hooks/useFetch";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const pad = (n) => String(n).padStart(2, "0");
 
-function eventsForDay(y, m, day) {
+function eventsForDay(events, y, m, day) {
   const d = new Date(y, m, day);
   const iso = `${y}-${pad(m + 1)}-${pad(day)}`;
   return events.filter(
@@ -17,6 +19,7 @@ function eventsForDay(y, m, day) {
 // Reusable interactive month calendar (used on the See & Do hub and /whats-on).
 export default function EventsCalendar() {
   const navigate = useNavigate();
+  const { data: events } = useFetch(getEvents, []);
   const today = new Date();
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
 
@@ -34,11 +37,12 @@ export default function EventsCalendar() {
 
   const monthEvents = useMemo(() => {
     const list = [];
+    if (!events) return list;
     for (let d = 1; d <= daysInMonth; d++) {
-      eventsForDay(y, m, d).forEach((e) => list.push({ day: d, e }));
+      eventsForDay(events, y, m, d).forEach((e) => list.push({ day: d, e }));
     }
     return list;
-  }, [y, m, daysInMonth]);
+  }, [events, y, m, daysInMonth]);
 
   const prevMonth = () => setView((v) => (v.m === 0 ? { y: v.y - 1, m: 11 } : { y: v.y, m: v.m - 1 }));
   const nextMonth = () => setView((v) => (v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 }));
@@ -62,7 +66,7 @@ export default function EventsCalendar() {
         </div>
         <div className="grid grid-cols-7 gap-1 md:gap-2">
           {cells.map((d, i) => {
-            const dayEvents = d ? eventsForDay(y, m, d) : [];
+            const dayEvents = d ? eventsForDay(events ?? [], y, m, d) : [];
             return (
               <div
                 key={i}

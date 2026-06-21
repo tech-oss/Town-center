@@ -1,29 +1,40 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
-import { itemBySlug, sections } from "../Data/pages";
+import { useEffect, useState } from "react";
+import { sections } from "../Data/pages";
+import { getBusinessBySlug, getBusinesses } from "../api";
+import useFetch from "../hooks/useFetch";
 import NewsOffers from "./NewsOffers";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 export default function DetailPage() {
-  const { section, slug } = useParams();
-  const item = itemBySlug[slug];
+  const { slug } = useParams();
+  const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
+  const { data: allBusinesses, loading: loadingList } = useFetch(getBusinesses, []);
   const [active, setActive] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  // Reset the gallery to the first image when navigating to a different item
+  // (adjusting state during render — no extra paint).
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setActive(0);
   }, [slug]);
 
+  if (loading || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!item) return <Navigate to="/" replace />;
   const sec = sections[item.section];
 
-  // Related items from the same category (excluding this one)
+  // Related items from the same section/category (excluding this one).
   // Prefer same-category venues, then top up with others from the section so
   // "You might also like" always shows a full set of relevant listings.
-  const sameCat = sec.items.filter((i) => i.category === item.category && i.slug !== item.slug);
-  const others = sec.items.filter((i) => i.category !== item.category && i.slug !== item.slug);
+  const sectionItems = allBusinesses.filter((i) => i.section === item.section);
+  const sameCat = sectionItems.filter((i) => i.category === item.category && i.slug !== item.slug);
+  const others = sectionItems.filter((i) => i.category !== item.category && i.slug !== item.slug);
   const related = [...sameCat, ...others].slice(0, 3);
 
   // Map / directions target — prefer an explicit query, else the business name + town
@@ -148,6 +159,23 @@ export default function DetailPage() {
                   )}
                 </>
               )}
+
+              {/* Website CTA — shown in main column so it's visible on all screen sizes */}
+              {item.website && !item.hideWeb && (
+                <div className="mt-8">
+                  <a
+                    href={`https://${item.website.replace(/^https?:\/\//, "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-white transition-colors"
+                    style={{ backgroundColor: "var(--forest)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
+                  >
+                    Visit Website ↗
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Info sidebar */}
@@ -221,15 +249,29 @@ export default function DetailPage() {
                 )}
 
                 {/* Actions */}
+                {item.website && !item.hideWeb && (
+                <a
+                  href={`https://${item.website.replace(/^https?:\/\//, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
+                  style={{ backgroundColor: "var(--forest)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
+                >
+                  Visit Website ↗
+                </a>
+                )}
+
                 {!item.freePlan && (
                 <a
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
-                  style={{ backgroundColor: "var(--leaf)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                  className="block text-center py-3 rounded-full font-semibold transition-colors"
+                  style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--forest)"; }}
                 >
                   Get Directions
                 </a>
@@ -264,7 +306,7 @@ export default function DetailPage() {
       {!item.freePlan && (
         <section className="pb-16 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <LocationMap heading="Location" note={item.address} query={mapQuery} />
+            <LocationMap heading="Location" note={item.address} query={mapQuery} lat={item.lat} lng={item.lng} />
           </div>
         </section>
       )}

@@ -1,20 +1,32 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { propertyBySlug, buildingBySlug, properties, fmtPrice } from "../Data/live";
+import { fmtPrice } from "../Data/live";
+import { getPropertyBySlug, getBuildings, getProperties } from "../api";
+import useFetch from "../hooks/useFetch";
 import { PropertyCard } from "./PropertySearch";
 import BookingForm from "./BookingForm";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 export default function PropertyPage() {
   const { slug } = useParams();
-  const p = propertyBySlug[slug];
+  const { data: p, loading: loadingProperty, error } = useFetch(() => getPropertyBySlug(slug), [slug]);
+  const { data: buildings, loading: loadingBuildings } = useFetch(getBuildings, []);
+  const { data: allProperties, loading: loadingList } = useFetch(getProperties, []);
   const [active, setActive] = useState(0);
+  // Reset the gallery to the first image when navigating to a different property
+  // (adjusting state during render — no extra paint).
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
-  useEffect(() => { window.scrollTo(0, 0); setActive(0); }, [slug]);
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
+  if (loadingProperty || loadingBuildings || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!p) return <Navigate to="/live/for-sale" replace />;
-  const b = buildingBySlug[p.buildingSlug];
-  const similar = properties.filter((x) => x.status === p.status && x.slug !== p.slug).slice(0, 3);
+  const b = buildings.find((x) => x.slug === p.buildingSlug);
+  const similar = allProperties.filter((x) => x.status === p.status && x.slug !== p.slug).slice(0, 3);
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
@@ -52,7 +64,7 @@ export default function PropertyPage() {
           {/* Main */}
           <div>
             <p className="text-3xl md:text-4xl font-bold" style={{ color: "var(--forest)" }}>{fmtPrice(p.price, p.status)}</p>
-            <h1 className="text-xl md:text-2xl font-semibold mt-1 mb-1" style={{ color: "var(--leaf)" }}>{p.bedLabel} apartment · {p.building}</h1>
+            <h1 className="text-xl md:text-2xl font-semibold mt-1 mb-1" style={{ color: "var(--leaf)" }}>{p.bedLabel} property · {p.building}</h1>
             <p className="text-sm mb-6" style={{ color: "var(--ink)", opacity: 0.6 }}>{p.location}</p>
 
             {/* Key facts */}
@@ -99,7 +111,7 @@ export default function PropertyPage() {
       {/* Location map */}
       <section className="pb-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Location" note={`${p.building}, ${p.location}`} query={`${p.building}, Maidenhead`} />
+          <LocationMap heading="Location" note={`${p.building}, ${p.location}`} query={p.location} />
         </div>
       </section>
 

@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { events, categoryColors } from "../Data/events";
+import { categoryColors } from "../Data/events";
+import { getEvents } from "../api";
+import useFetch from "../hooks/useFetch";
 
 function CalendarIcon() {
   return (
@@ -18,6 +20,7 @@ function PinIcon() {
 }
 
 export default function EventsListPage() {
+  const { data: events } = useFetch(getEvents, []);
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
@@ -45,7 +48,7 @@ export default function EventsListPage() {
           </nav>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {events.map((e) => (
+            {(events ?? []).map((e) => (
               <Link
                 key={e.slug}
                 to={`/event/${e.slug}`}

@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
-import { features } from "../Data/features";
+import { getStories } from "../api";
+import useFetch from "../hooks/useFetch";
 
 export default function FeatureBlocks() {
+  const { data: features } = useFetch(getStories, []);
   return (
     <section className="py-24 px-6 md:px-12 bg-white">
       <div className="max-w-6xl mx-auto">
@@ -16,7 +18,7 @@ export default function FeatureBlocks() {
         </div>
 
         <div className="flex flex-col gap-20 md:gap-28">
-          {features.map((f, i) => (
+          {(features ?? []).map((f, i) => (
             <div
               key={f.slug}
               className={`grid md:grid-cols-2 gap-8 md:gap-14 items-center ${

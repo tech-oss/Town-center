@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import { events, categoryColors } from "../Data/events";
+import { categoryColors } from "../Data/events";
+import { getEvents } from "../api";
+import useFetch from "../hooks/useFetch";
 import { card, pill } from "../utils/design";
 
 // Returns the next occurrence of a given weekday (0=Sun … 6=Sat) on or after today.
@@ -45,9 +47,11 @@ const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 // Only show upcoming events: future one-offs + all recurring events.
-const upcomingEvents = events
-  .filter(e => e.recurringWeekday !== undefined || !e.iso || new Date(e.iso) >= today)
-  .sort((a, b) => sortDate(a) - sortDate(b));
+function upcomingFrom(events) {
+  return events
+    .filter(e => e.recurringWeekday !== undefined || !e.iso || new Date(e.iso) >= today)
+    .sort((a, b) => sortDate(a) - sortDate(b));
+}
 
 function CalendarIcon() {
   return (
@@ -65,6 +69,8 @@ function PinIcon() {
 }
 
 export default function EventsGrid() {
+  const { data: events } = useFetch(getEvents, []);
+  const upcomingEvents = upcomingFrom(events ?? []);
   return (
     <section id="events" className="py-20 md:py-24 px-6 md:px-12" style={{ backgroundColor: "var(--mint)" }}>
       <div className="max-w-6xl mx-auto">

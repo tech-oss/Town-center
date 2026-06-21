@@ -4,9 +4,10 @@ import { header } from "../Data/content";
 import { menus } from "../Data/pages";
 import { liveMenu } from "../Data/live";
 import { exploreMenu } from "../Data/explore";
+import { workMenu } from "../Data/work";
 import SmartLink from "./SmartLink";
 
-const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu].map((m) => [m.label, m]));
+const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
 const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
@@ -247,10 +248,6 @@ const Header = forwardRef(function Header(_, ref) {
                   </button>
                   {expanded && (
                     <div className="pb-3 flex flex-col gap-4">
-                      {/* Quick link to the section landing */}
-                      <Link to={menu.path} onClick={closeAll} className="text-sm font-semibold" style={{ color: "var(--sage)" }}>
-                        View all {menu.label} →
-                      </Link>
                       {menu.columns.map((col) => (
                         <div key={col.heading}>
                           <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--sage)" }}>{col.heading}</p>

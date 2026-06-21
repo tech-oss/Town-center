@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Field from "./ui/Field";
 
 // Reusable enquiry / "Book a Viewing" form.
 // Session-only React state — it does NOT submit anywhere; on submit it simply
@@ -34,11 +35,6 @@ export default function BookingForm({ title = "Book a Viewing", subtitle, proper
     );
   }
 
-  const inputCls = "w-full rounded-xl px-4 py-3 text-sm outline-none transition-shadow focus:ring-2";
-  const inputStyle = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.15)", color: "var(--ink)" };
-  const labelCls = "block text-xs font-semibold mb-1.5";
-  const labelStyle = { color: "var(--forest)" };
-
   return (
     <form onSubmit={onSubmit} className={`rounded-3xl ${compact ? "p-6" : "p-7 md:p-8"}`} style={{ backgroundColor: "#fff", boxShadow: "0 14px 50px -26px rgba(28,46,56,0.4)" }}>
       <h3 className="text-xl md:text-2xl font-bold" style={{ color: "var(--forest)" }}>{title}</h3>
@@ -46,42 +42,28 @@ export default function BookingForm({ title = "Book a Viewing", subtitle, proper
       {!subtitle && <div className="mb-5" />}
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelCls} style={labelStyle}>First name</label>
-          <input required className={inputCls} style={inputStyle} value={form.firstName} onChange={set("firstName")} />
-        </div>
-        <div>
-          <label className={labelCls} style={labelStyle}>Last name</label>
-          <input required className={inputCls} style={inputStyle} value={form.lastName} onChange={set("lastName")} />
-        </div>
-        <div>
-          <label className={labelCls} style={labelStyle}>Email address</label>
-          <input required type="email" className={inputCls} style={inputStyle} value={form.email} onChange={set("email")} />
-        </div>
-        <div>
-          <label className={labelCls} style={labelStyle}>Phone</label>
-          <input required type="tel" className={inputCls} style={inputStyle} value={form.phone} onChange={set("phone")} />
-        </div>
-        <div>
-          <label className={labelCls} style={labelStyle}>Preferred date</label>
-          <input type="date" className={inputCls} style={inputStyle} value={form.date} onChange={set("date")} />
-        </div>
-        <div>
-          <label className={labelCls} style={labelStyle}>Enquiry type</label>
-          <select className={inputCls} style={inputStyle} value={form.enquiryType} onChange={set("enquiryType")}>
-            <option>Viewing</option>
-            <option>For Sale</option>
-            <option>For Rent</option>
-            <option>General enquiry</option>
-          </select>
-        </div>
+        <Field label="First name" required value={form.firstName} onChange={set("firstName")} />
+        <Field label="Last name" required value={form.lastName} onChange={set("lastName")} />
+        <Field label="Email address" required type="email" value={form.email} onChange={set("email")} />
+        <Field label="Phone" required type="tel" value={form.phone} onChange={set("phone")} />
+        <Field label="Preferred date" type="date" value={form.date} onChange={set("date")} />
+        <Field label="Enquiry type" as="select" value={form.enquiryType} onChange={set("enquiryType")}>
+          <option>Viewing</option>
+          <option>For Sale</option>
+          <option>For Rent</option>
+          <option>General enquiry</option>
+        </Field>
       </div>
 
-      <div className="mt-4">
-        <label className={labelCls} style={labelStyle}>Message</label>
-        <textarea rows={compact ? 3 : 4} className={inputCls} style={inputStyle} value={form.message} onChange={set("message")}
-          placeholder={propertyName ? `I'd like to arrange a viewing of ${propertyName}…` : "How can we help?"} />
-      </div>
+      <Field
+        className="mt-4"
+        label="Message"
+        as="textarea"
+        rows={compact ? 3 : 4}
+        value={form.message}
+        onChange={set("message")}
+        placeholder={propertyName ? `I'd like to arrange a viewing of ${propertyName}…` : "How can we help?"}
+      />
 
       <button
         type="submit"

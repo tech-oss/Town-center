@@ -1,19 +1,28 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { attractionBySlug } from "../Data/attractions";
-import { itemBySlug } from "../Data/pages";
+import { getAttractionBySlug, getBusinesses } from "../api";
+import useFetch from "../hooks/useFetch";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 export default function AttractionPage() {
   const { slug } = useParams();
-  const a = attractionBySlug[slug];
+  const { data: a, loading, error } = useFetch(() => getAttractionBySlug(slug), [slug]);
+  const { data: businesses, loading: loadingBiz } = useFetch(getBusinesses, []);
   const [active, setActive] = useState(0);
+  // Reset the gallery to the first image when navigating to a different item
+  // (adjusting state during render — no extra paint, see react.dev "you might not need an effect").
+  const [seenSlug, setSeenSlug] = useState(slug);
+  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
-  useEffect(() => { window.scrollTo(0, 0); setActive(0); }, [slug]);
+  useEffect(() => { window.scrollTo(0, 0); }, [slug]);
+  if (loading || loadingBiz) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!a) return <Navigate to="/" replace />;
 
   const gallery = a.gallery?.length ? a.gallery : [a.hero];
-  const related = (a.related || []).map((s) => itemBySlug[s]).filter(Boolean);
+  const related = (a.related || []).map((s) => businesses.find((x) => x.slug === s)).filter(Boolean);
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(a.mapQuery)}`;
 
   return (

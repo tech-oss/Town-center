@@ -9,9 +9,6 @@ const paragraphs = [
   "Thanks for visiting — and welcome to Maidenhead.",
 ];
 
-const disclaimer =
-  "This website is not affiliated with, endorsed by, or operated by the Royal Borough of Windsor & Maidenhead Council.";
-
 export default function OurStoryPage() {
   return (
     <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>

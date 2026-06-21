@@ -19,9 +19,10 @@ const GRAD_BOTTOM =
 const GRAD_LEFT =
   "linear-gradient(to right, rgba(28,46,56,0.55) 0%, rgba(28,46,56,0.10) 45%, rgba(28,46,56,0) 70%)";
 
-export default function Hero({ headerHeight = 141 }) {
+export default function Hero() {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
+  // Autoplay pauses while `paused` is true; currently always false (no pause trigger wired).
+  const [paused] = useState(false);
 
   // ── Mobile section height lock ────────────────────────────────────────────
   // Measures the TOTAL HEIGHT of every slide (image + card + copy — everything)

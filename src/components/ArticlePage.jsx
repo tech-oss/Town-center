@@ -1,15 +1,21 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { articleBySlug, sections } from "../Data/pages";
+import { sections } from "../Data/pages";
+import { getArticleBySlug } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 export default function ArticlePage() {
   const { articleSlug } = useParams();
-  const article = articleBySlug[articleSlug];
+  const { data: article, loading, error } = useFetch(() => getArticleBySlug(articleSlug), [articleSlug]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [articleSlug]);
 
+  if (loading) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!article) return <Navigate to="/" replace />;
 
   const biz = article.business;
