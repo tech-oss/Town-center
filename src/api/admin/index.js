@@ -1,5 +1,6 @@
 export * from "./users";
 export * from "./approvals";
+export * from "./newsOffers";
 
 export * from "./listings";
 export * from "./adminProperties";

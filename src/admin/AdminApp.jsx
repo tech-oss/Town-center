@@ -12,6 +12,7 @@ import EventsNewsPage from "./pages/EventsNewsPage";
 import SubscriptionsPage, { SubscriptionDetailPage } from "./pages/SubscriptionsPage";
 import ReportingPage from "./pages/ReportingPage";
 import SettingsPage from "./pages/SettingsPage";
+import NewsOffersPage from "./pages/NewsOffersPage";
 import useFetch from "../hooks/useFetch";
 import { getApprovals } from "../api/admin";
 
@@ -33,6 +34,7 @@ export default function AdminApp() {
         <Route path="events-news" element={<EventsNewsPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
+        <Route path="news-offers" element={<NewsOffersPage />} />
         <Route path="reporting" element={<ReportingPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>

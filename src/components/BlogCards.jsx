@@ -1,6 +1,11 @@
 import { Link } from "react-router-dom";
-import { blogCards } from "../Data/content";
 import { card, pill, btn } from "../utils/design";
+import useFetch from "../hooks/useFetch";
+import { getSpotlightPosts } from "../api/spotlight";
+
+const EYEBROW = "From the Journal";
+const HEADING = "In the Spotlight";
+const CTA = { label: "See All Stories", href: "/news" };
 
 function CardLink({ href, className, style, children }) {
   if (href?.startsWith("/")) return <Link to={href} className={className} style={style}>{children}</Link>;
@@ -109,7 +114,11 @@ function CompactCard({ post }) {
 
 // ── Section ────────────────────────────────────────────────────────────────
 export default function BlogCards() {
-  const [featured, ...rest] = blogCards.posts;
+  const { data: posts } = useFetch(getSpotlightPosts, []);
+  const [featured, ...rest] = posts ?? [];
+
+  // Don't render the section until we have at least one post
+  if (!featured) return null;
 
   return (
     <section
@@ -124,28 +133,24 @@ export default function BlogCards() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>
-              {blogCards.eyebrow}
+              {EYEBROW}
             </p>
             <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">
-              {blogCards.heading}
+              {HEADING}
             </h2>
           </div>
-          {/* Text link — not a button */}
           <CardLink
-            href={blogCards.cta.href}
+            href={CTA.href}
             className={btn.text.className + " text-white/80 decoration-white/40"}
           >
-            {blogCards.cta.label}
+            {CTA.label}
             <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
           </CardLink>
         </div>
 
         {/* Asymmetric editorial grid */}
         <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-5">
-          {/* Large featured card */}
           <FeaturedCard post={featured} />
-
-          {/* Two compact cards stacked */}
           <div className="flex flex-col gap-5">
             {rest.map((post) => (
               <CompactCard key={post.id} post={post} />
