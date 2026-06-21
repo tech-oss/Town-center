@@ -16,6 +16,7 @@ const NAV = [
     group: true,
     children: [
       { to: "/admin/news-offers", label: "In the Spotlight", icon: "★" },
+      { to: "/admin/featured-stories", label: "Featured Stories", icon: "📰" },
     ],
   },
   { to: "/admin/subscriptions", label: "Subscriptions", icon: "💳" },

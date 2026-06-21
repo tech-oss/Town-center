@@ -13,6 +13,7 @@ import SubscriptionsPage, { SubscriptionDetailPage } from "./pages/Subscriptions
 import ReportingPage from "./pages/ReportingPage";
 import SettingsPage from "./pages/SettingsPage";
 import NewsOffersPage from "./pages/NewsOffersPage";
+import FeaturedStoriesPage from "./pages/FeaturedStoriesPage";
 import useFetch from "../hooks/useFetch";
 import { getApprovals } from "../api/admin";
 
@@ -35,6 +36,7 @@ export default function AdminApp() {
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="news-offers" element={<NewsOffersPage />} />
+        <Route path="featured-stories" element={<FeaturedStoriesPage />} />
         <Route path="reporting" element={<ReportingPage />} />
         <Route path="settings" element={<SettingsPage />} />
       </Route>
