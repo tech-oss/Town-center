@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import AdminApp from './admin/AdminApp'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
@@ -40,12 +41,10 @@ function SectionCategoryRedirect() {
   return <Navigate to={`/${section}?category=${category}`} replace />
 }
 
-function App() {
+function PublicSite() {
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
 
-  // useLayoutEffect fires synchronously BEFORE the browser paints,
-  // so the correct height is used on the very first frame — no flash/gap.
   useLayoutEffect(() => {
     const el = headerRef.current
     if (!el) return
@@ -104,6 +103,15 @@ function App() {
       </main>
       <Footer />
     </>
+  )
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/admin/*" element={<AdminApp />} />
+      <Route path="*" element={<PublicSite />} />
+    </Routes>
   )
 }
 
