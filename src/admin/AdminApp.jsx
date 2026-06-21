@@ -4,6 +4,7 @@ import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import UserDetailPage from "./pages/UserDetailPage";
 import ApprovalQueuePage from "./pages/ApprovalQueuePage";
+import ApprovalDetailPage from "./pages/ApprovalDetailPage";
 import ListingsPage from "./pages/ListingsPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import ProjectsPage from "./pages/ProjectsPage";
@@ -25,6 +26,7 @@ export default function AdminApp() {
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:id" element={<UserDetailPage />} />
         <Route path="approvals" element={<ApprovalQueuePage />} />
+        <Route path="approvals/:id" element={<ApprovalDetailPage />} />
         <Route path="listings" element={<ListingsPage />} />
         <Route path="properties" element={<PropertiesPage />} />
         <Route path="projects" element={<ProjectsPage />} />

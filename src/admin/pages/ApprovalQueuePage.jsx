@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import { getApprovals } from "../../api/admin";
 import ApprovalActionBar from "../components/ApprovalActionBar";
@@ -83,6 +84,13 @@ export default function ApprovalQueuePage() {
                   </div>
                 )}
               </div>
+              <Link
+                to={`/admin/approvals/${item.id}`}
+                className="shrink-0 self-start px-4 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-px whitespace-nowrap"
+                style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.15)" }}
+              >
+                View details →
+              </Link>
             </div>
             {item.status === "Pending" && (
               <ApprovalActionBar item={item} onApprove={handleApprove} onReject={handleReject} />
