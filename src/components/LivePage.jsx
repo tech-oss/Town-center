@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { live, buildings } from "../Data/live";
+import { live } from "../Data/live";
+import { getBuildings } from "../api";
+import useFetch from "../hooks/useFetch";
 import LocationMap from "./LocationMap";
 import LifestyleBento from "./LifestyleBento";
 import DesignedAroundYou from "./DesignedAroundYou";
@@ -8,6 +10,7 @@ import ConnectivitySection from "./ConnectivitySection";
 import { FeaturedProperties } from "./PropertySearch";
 
 export default function LivePage() {
+  const { data: buildings } = useFetch(getBuildings, []);
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
@@ -50,7 +53,7 @@ export default function LivePage() {
           <h2 className="text-3xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "var(--forest)" }}>Developments</h2>
           <p className="text-base mb-10 max-w-2xl" style={{ color: "var(--ink)", opacity: 0.7 }}>Explore Maidenhead's leading residential developments.</p>
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {buildings.map((b) => (
+            {(buildings ?? []).map((b) => (
               <Link key={b.slug} to={`/live/building/${b.slug}`} className="group relative rounded-3xl overflow-hidden block aspect-[3/4]"
                 style={{ boxShadow: "0 10px 40px -18px rgba(28,46,56,0.4)" }}>
                 <img src={b.image} alt={b.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />

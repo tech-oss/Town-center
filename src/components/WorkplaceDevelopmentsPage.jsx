@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
-import { workplaceBuildings, workplaceBySlug } from "../Data/work";
+import { getWorkplaceDevelopments, getWorkplaceDevelopmentBySlug } from "../api";
+import useFetch from "../hooks/useFetch";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 const modeIcon = (mode) =>
   ({ walk: "🚶", train: "🚂", car: "🚗" }[mode] ?? "📍");
@@ -185,12 +188,15 @@ function DevelopmentCard({ b }) {
 
 export default function WorkplaceDevelopmentsPage() {
   const { slug } = useParams();
-  const b = workplaceBySlug[slug];
+  const { data: b, loading, error } = useFetch(() => getWorkplaceDevelopmentBySlug(slug), [slug]);
+  const { data: developments, loading: loadingList } = useFetch(getWorkplaceDevelopments, []);
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
+  if (loading || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!b) return <Navigate to="/work" replace />;
 
-  const others = workplaceBuildings.filter((x) => x.slug !== b.slug);
+  const others = developments.filter((x) => x.slug !== b.slug);
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>

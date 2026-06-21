@@ -2,12 +2,13 @@ import { useRef, useLayoutEffect } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
-import { events as whatsOnEvents } from "../Data/events";
+import { getBusinesses, getEvents } from "../api";
+import useFetch from "../hooks/useFetch";
 import EventsCalendar from "./EventsCalendar";
 
-// The real What's On events (from events.js) surfaced as See & Do cards that
-// link to the shared /event/:slug detail page — keeps one source of truth.
-const eventCards = whatsOnEvents.map((e) => ({
+// The real What's On events surfaced as See & Do cards that link to the shared
+// /event/:slug detail page — keeps one source of truth.
+const toEventCard = (e) => ({
   slug: e.slug,
   name: e.title,
   tag: "What's On",
@@ -18,13 +19,18 @@ const eventCards = whatsOnEvents.map((e) => ({
   address: e.location,
   description: e.excerpt,
   to: `/event/${e.slug}`,
-}));
+});
 
 export default function CategoryPage() {
   const { section } = useParams();
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || undefined;
   const sec = sections[section];
+
+  // `sections` provides the page config (hero, columns, chips); the listed
+  // items come from the businesses resource, events from the events resource.
+  const { data: sectionItems } = useFetch(() => getBusinesses({ section }), [section]);
+  const { data: whatsOnEvents } = useFetch(getEvents, []);
 
   // When the user switches filter, scroll the chip row to a consistent spot
   // just under the header. Because the page height differs between views (the
@@ -48,10 +54,13 @@ export default function CategoryPage() {
 
   if (!sec) return <Navigate to="/" replace />;
 
+  const baseItems = sectionItems ?? [];
+  const eventCards = (whatsOnEvents ?? []).map(toEventCard);
+
   // An item appears under its primary `category` plus any extra `categories`.
   let items = category
-    ? sec.items.filter((i) => i.category === category || i.categories?.includes(category))
-    : sec.items;
+    ? baseItems.filter((i) => i.category === category || i.categories?.includes(category))
+    : baseItems;
 
   // See & Do: real What's On events for the "events" category; on the landing
   // show events first, then activities. All See & Do cards link to the shared
@@ -60,7 +69,7 @@ export default function CategoryPage() {
     if (category === "events") {
       items = eventCards;
     } else if (!category) {
-      const activities = sec.items
+      const activities = baseItems
         .filter((i) => i.category !== "events")
         .map((i) => ({ ...i, to: `/event/${i.slug}` }));
       items = [...eventCards, ...activities];

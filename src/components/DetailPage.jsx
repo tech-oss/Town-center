@@ -1,12 +1,17 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { itemBySlug, sections } from "../Data/pages";
+import { sections } from "../Data/pages";
+import { getBusinessBySlug, getBusinesses } from "../api";
+import useFetch from "../hooks/useFetch";
 import NewsOffers from "./NewsOffers";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 export default function DetailPage() {
   const { slug } = useParams();
-  const item = itemBySlug[slug];
+  const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
+  const { data: allBusinesses, loading: loadingList } = useFetch(getBusinesses, []);
   const [active, setActive] = useState(0);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -19,14 +24,17 @@ export default function DetailPage() {
     window.scrollTo(0, 0);
   }, [slug]);
 
+  if (loading || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!item) return <Navigate to="/" replace />;
   const sec = sections[item.section];
 
-  // Related items from the same category (excluding this one)
+  // Related items from the same section/category (excluding this one).
   // Prefer same-category venues, then top up with others from the section so
   // "You might also like" always shows a full set of relevant listings.
-  const sameCat = sec.items.filter((i) => i.category === item.category && i.slug !== item.slug);
-  const others = sec.items.filter((i) => i.category !== item.category && i.slug !== item.slug);
+  const sectionItems = allBusinesses.filter((i) => i.section === item.section);
+  const sameCat = sectionItems.filter((i) => i.category === item.category && i.slug !== item.slug);
+  const others = sectionItems.filter((i) => i.category !== item.category && i.slug !== item.slug);
   const related = [...sameCat, ...others].slice(0, 3);
 
   // Map / directions target — prefer an explicit query, else the business name + town

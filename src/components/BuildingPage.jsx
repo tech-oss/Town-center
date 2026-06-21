@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { buildingBySlug, buildings } from "../Data/live";
+import { getBuildingBySlug, getBuildings } from "../api";
+import useFetch from "../hooks/useFetch";
 import LocationMap from "./LocationMap";
+import Loading from "./ui/Loading";
+import ErrorState from "./ui/ErrorState";
 
 const FIFTEEN_MIN = [
   { label: "Eat & Drink", to: "/eat-drink", icon: "🍽" },
@@ -15,9 +18,12 @@ const modeIcon = (mode) =>
 
 export default function BuildingPage() {
   const { slug } = useParams();
-  const b = buildingBySlug[slug];
+  const { data: b, loading, error } = useFetch(() => getBuildingBySlug(slug), [slug]);
+  const { data: buildings, loading: loadingList } = useFetch(getBuildings, []);
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
+  if (loading || loadingList) return <Loading minHeight="70vh" />;
+  if (error) return <ErrorState minHeight="70vh" />;
   if (!b) return <Navigate to="/live" replace />;
 
   const otherBuildings = buildings.filter((x) => x.slug !== b.slug);
