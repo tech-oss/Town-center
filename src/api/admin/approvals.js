@@ -239,3 +239,11 @@ export function approveItem(id) {
 export function rejectItem(id, reason) {
   return mock({ id, status: "Rejected", rejectionReason: reason });
 }
+
+export function deleteItem(id) {
+  return mock({ id, deleted: true });
+}
+
+export function deleteItems(ids) {
+  return mock({ ids, deleted: true });
+}
