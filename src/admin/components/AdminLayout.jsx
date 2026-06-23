@@ -8,9 +8,6 @@ const NAV = [
   { to: "/admin/businesses", label: "Business Registrations", icon: "🏢" },
   { to: "/admin/approvals", label: "Approval Queue", icon: "✅", badge: "pending" },
   { to: "/admin/listings", label: "Listings (Directory)", icon: "🏪" },
-  { to: "/admin/properties", label: "Properties", icon: "🏠" },
-  { to: "/admin/projects", label: "Explore (Projects)", icon: "🗺" },
-  { to: "/admin/events-news", label: "Events", icon: "📅" },
   {
     label: "Home Page Featured",
     icon: "🏠",
@@ -20,8 +17,12 @@ const NAV = [
       { to: "/admin/featured-stories", label: "Featured Stories", icon: "📰" },
     ],
   },
+  { to: "/admin/events-news", label: "Events", icon: "📅" },
+  { to: "/admin/properties", label: "Properties", icon: "🏠" },
+  { to: "/admin/projects", label: "Explore (Projects)", icon: "🗺" },
   { to: "/admin/subscriptions", label: "Subscriptions", icon: "💳" },
   { to: "/admin/reporting", label: "Reporting", icon: "📊" },
+  { to: "/admin/push-notifications", label: "Push Notifications", icon: "🔔" },
   { to: "/admin/settings", label: "Settings", icon: "⚙" },
 ];
 
