@@ -43,6 +43,7 @@ export function SubscriptionDetailPage() {
         <div className="grid grid-cols-2 gap-4">
           {[
             ["Monthly Fee", sub.monthlyFee > 0 ? `£${sub.monthlyFee}` : "Free"],
+            ["Start Date", sub.startDate],
             ["Renewal Date", sub.renewal],
             ["Payment Status", sub.paymentStatus],
             ["Subscription ID", sub.id],
@@ -101,6 +102,7 @@ export default function SubscriptionsPage() {
       <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: `${TIER_COLOURS[v] ?? "#9CA3AF"}20`, color: TIER_COLOURS[v] ?? "#9CA3AF" }}>{v}</span>
     )},
     { key: "status", label: "Status", render: (v) => <StatusTag status={v} /> },
+    { key: "startDate", label: "Start Date", muted: true },
     { key: "renewal", label: "Renewal", muted: true },
     { key: "monthlyFee", label: "Fee", render: (v) => v > 0 ? `£${v}/mo` : <span style={{ color: "#9CA3AF" }}>Free</span> },
     { key: "paymentStatus", label: "Payment", render: (v) => <StatusTag status={v} /> },
