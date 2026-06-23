@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { getArticles } from "../api";
 import useFetch from "../hooks/useFetch";
 
-// Display order for the category groups.
+// Category filter options, in display order.
 const CATEGORY_ORDER = ["News", "Offer", "What's On", "Featured"];
 
 function StoryCard({ story }) {
@@ -45,6 +45,7 @@ function StoryCard({ story }) {
 export default function NewsIndexPage() {
   const { data: articles } = useFetch(getArticles, []);
   const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
 
   // Show the hand-written, real stories (Coppa Club, COCOBA, …) rather than the
   // auto-generated per-business placeholders (which end in -offer / -news / -event).
@@ -57,26 +58,23 @@ export default function NewsIndexPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // Free-text search by business name.
+  // Category options actually present in the data (keeps chips relevant).
+  const categories = useMemo(() => {
+    const present = new Set(stories.map((s) => s.category).filter(Boolean));
+    const known = CATEGORY_ORDER.filter((c) => present.has(c));
+    const extras = [...present].filter((c) => !CATEGORY_ORDER.includes(c)).sort();
+    return ["All", ...known, ...extras];
+  }, [stories]);
+
+  // Filter by selected category + free-text business name search.
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return stories;
-    return stories.filter((s) => (s.business?.name ?? "").toLowerCase().includes(q));
-  }, [stories, query]);
-
-  // Group by category, in the defined display order. Any unknown category is
-  // appended after the known ones, alphabetically.
-  const grouped = useMemo(() => {
-    const byCat = new Map();
-    for (const s of filtered) {
-      const cat = s.category ?? "Other";
-      if (!byCat.has(cat)) byCat.set(cat, []);
-      byCat.get(cat).push(s);
-    }
-    const knownOrder = CATEGORY_ORDER.filter((c) => byCat.has(c));
-    const extras = [...byCat.keys()].filter((c) => !CATEGORY_ORDER.includes(c)).sort();
-    return [...knownOrder, ...extras].map((cat) => [cat, byCat.get(cat)]);
-  }, [filtered]);
+    return stories.filter((s) => {
+      if (category !== "All" && s.category !== category) return false;
+      if (q && !(s.business?.name ?? "").toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [stories, query, category]);
 
   return (
     <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
@@ -114,62 +112,71 @@ export default function NewsIndexPage() {
             <span>Journal</span>
           </nav>
 
-          {/* Search by business name */}
-          <div className="mb-12 max-w-md">
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base" style={{ color: "var(--leaf)", opacity: 0.6 }}>🔍</span>
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by business name…"
-                className="w-full rounded-full pl-11 pr-10 py-3.5 text-sm outline-none transition-shadow focus:shadow-md"
-                style={{ border: "1.5px solid rgba(27,67,50,0.2)", backgroundColor: "#fff", color: "var(--forest)" }}
-              />
-              {query && (
-                <button
-                  onClick={() => setQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-sm transition-opacity hover:opacity-70"
-                  style={{ backgroundColor: "rgba(27,67,50,0.08)", color: "var(--forest)" }}
-                  aria-label="Clear search"
-                >
-                  ✕
-                </button>
-              )}
+          {/* Controls: search + category filter */}
+          <div className="mb-10 flex flex-col gap-5">
+            {/* Search by business name */}
+            <div className="max-w-md">
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base" style={{ color: "var(--leaf)", opacity: 0.6 }}>🔍</span>
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search by business name…"
+                  className="w-full rounded-full pl-11 pr-10 py-3.5 text-sm outline-none transition-shadow focus:shadow-md"
+                  style={{ border: "1.5px solid rgba(27,67,50,0.2)", backgroundColor: "#fff", color: "var(--forest)" }}
+                />
+                {query && (
+                  <button
+                    onClick={() => setQuery("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-sm transition-opacity hover:opacity-70"
+                    style={{ backgroundColor: "rgba(27,67,50,0.08)", color: "var(--forest)" }}
+                    aria-label="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
             </div>
-            {query && (
-              <p className="mt-2 text-xs px-1" style={{ color: "var(--ink)", opacity: 0.6 }}>
-                {filtered.length} result{filtered.length !== 1 ? "s" : ""} for "{query}"
-              </p>
-            )}
+
+            {/* Category filter chips */}
+            <div className="flex gap-2 flex-wrap items-center">
+              <span className="text-xs font-semibold uppercase tracking-wide mr-1" style={{ color: "var(--ink)", opacity: 0.5 }}>Category:</span>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setCategory(c)}
+                  className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
+                  style={category === c
+                    ? { backgroundColor: "var(--forest)", color: "#fff" }
+                    : { backgroundColor: "#fff", color: "var(--forest)", border: "1.5px solid rgba(27,67,50,0.2)" }
+                  }
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* Result count */}
+            <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>
+              Showing {filtered.length} stor{filtered.length !== 1 ? "ies" : "y"}
+              {category !== "All" ? ` in ${category}` : ""}
+              {query ? ` matching "${query}"` : ""}
+            </p>
           </div>
 
-          {/* Empty state */}
+          {/* Stories grid */}
           {filtered.length === 0 ? (
             <div className="py-20 text-center">
               <p className="text-5xl mb-4">🔍</p>
               <p className="font-bold text-lg" style={{ color: "var(--forest)" }}>No stories found</p>
               <p className="text-sm mt-1" style={{ color: "var(--ink)", opacity: 0.6 }}>
-                No businesses match "{query}". Try a different name.
+                Try a different category or business name.
               </p>
             </div>
           ) : (
-            /* Grouped by category */
-            <div className="flex flex-col gap-16">
-              {grouped.map(([category, items]) => (
-                <div key={category}>
-                  <div className="flex items-center gap-4 mb-7">
-                    <h2 className="text-2xl md:text-3xl font-bold" style={{ color: "var(--forest)" }}>{category}</h2>
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(27,67,50,0.08)", color: "var(--leaf)" }}>
-                      {items.length}
-                    </span>
-                    <span className="flex-1 h-px" style={{ backgroundColor: "rgba(27,67,50,0.12)" }} />
-                  </div>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {items.map((story) => (
-                      <StoryCard key={story.slug} story={story} />
-                    ))}
-                  </div>
-                </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {filtered.map((story) => (
+                <StoryCard key={story.slug} story={story} />
               ))}
             </div>
           )}
