@@ -112,57 +112,70 @@ export default function NewsIndexPage() {
             <span>Journal</span>
           </nav>
 
-          {/* Controls: search + category filter */}
-          <div className="mb-10 flex flex-col gap-5">
+          {/* Controls: unified toolbar — search + category filter */}
+          <div
+            className="mb-6 rounded-2xl bg-white p-3 flex flex-col lg:flex-row lg:items-center gap-3 lg:gap-4"
+            style={{ boxShadow: "0 8px 30px -18px rgba(28,46,56,0.35)", border: "1px solid rgba(27,67,50,0.08)" }}
+          >
             {/* Search by business name */}
-            <div className="max-w-md">
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base" style={{ color: "var(--leaf)", opacity: 0.6 }}>🔍</span>
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by business name…"
-                  className="w-full rounded-full pl-11 pr-10 py-3.5 text-sm outline-none transition-shadow focus:shadow-md"
-                  style={{ border: "1.5px solid rgba(27,67,50,0.2)", backgroundColor: "#fff", color: "var(--forest)" }}
-                />
-                {query && (
-                  <button
-                    onClick={() => setQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center text-sm transition-opacity hover:opacity-70"
-                    style={{ backgroundColor: "rgba(27,67,50,0.08)", color: "var(--forest)" }}
-                    aria-label="Clear search"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
+            <div className="relative lg:w-72 shrink-0">
+              <svg
+                className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+                style={{ color: "var(--leaf)", opacity: 0.7 }}
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search by business name…"
+                className="w-full rounded-xl pl-11 pr-9 py-2.5 text-sm outline-none transition-all focus:ring-2"
+                style={{ border: "1.5px solid rgba(27,67,50,0.15)", backgroundColor: "var(--sand)", color: "var(--forest)" }}
+                onFocus={(e) => { e.target.style.backgroundColor = "#fff"; e.target.style.borderColor = "var(--sage)"; }}
+                onBlur={(e) => { e.target.style.backgroundColor = "var(--sand)"; e.target.style.borderColor = "rgba(27,67,50,0.15)"; }}
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full flex items-center justify-center text-[11px] transition-opacity hover:opacity-70"
+                  style={{ backgroundColor: "rgba(27,67,50,0.1)", color: "var(--forest)" }}
+                  aria-label="Clear search"
+                >
+                  ✕
+                </button>
+              )}
             </div>
 
-            {/* Category filter chips */}
-            <div className="flex gap-2 flex-wrap items-center">
-              <span className="text-xs font-semibold uppercase tracking-wide mr-1" style={{ color: "var(--ink)", opacity: 0.5 }}>Category:</span>
+            {/* Divider */}
+            <span className="hidden lg:block w-px self-stretch my-1" style={{ backgroundColor: "rgba(27,67,50,0.1)" }} />
+
+            {/* Category segmented filter */}
+            <div className="flex-1 flex gap-1 overflow-x-auto rounded-xl p-1" style={{ backgroundColor: "var(--sand)" }}>
               {categories.map((c) => (
                 <button
                   key={c}
                   onClick={() => setCategory(c)}
-                  className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
+                  className="px-4 py-1.5 rounded-lg text-[13px] font-semibold whitespace-nowrap transition-all duration-200"
                   style={category === c
-                    ? { backgroundColor: "var(--forest)", color: "#fff" }
-                    : { backgroundColor: "#fff", color: "var(--forest)", border: "1.5px solid rgba(27,67,50,0.2)" }
+                    ? { backgroundColor: "var(--forest)", color: "#fff", boxShadow: "0 2px 8px -2px rgba(27,67,50,0.4)" }
+                    : { backgroundColor: "transparent", color: "var(--ink)", opacity: 0.75 }
                   }
                 >
                   {c}
                 </button>
               ))}
             </div>
-
-            {/* Result count */}
-            <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>
-              Showing {filtered.length} stor{filtered.length !== 1 ? "ies" : "y"}
-              {category !== "All" ? ` in ${category}` : ""}
-              {query ? ` matching "${query}"` : ""}
-            </p>
           </div>
+
+          {/* Result count */}
+          <p className="mb-8 text-xs font-medium px-1" style={{ color: "var(--ink)", opacity: 0.55 }}>
+            Showing {filtered.length} stor{filtered.length !== 1 ? "ies" : "y"}
+            {category !== "All" ? ` in ${category}` : ""}
+            {query ? ` matching "${query}"` : ""}
+          </p>
 
           {/* Stories grid */}
           {filtered.length === 0 ? (
