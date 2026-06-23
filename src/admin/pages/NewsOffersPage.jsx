@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getNewsOffers,
@@ -13,6 +13,80 @@ import EmptyState from "../components/EmptyState";
 
 const CATEGORIES = ["News", "Offer", "What's On", "Featured"];
 const TYPES = ["news", "offer"];
+
+// ─── UK-time schedule helpers ─────────────────────────────────────────────────
+// Format a YYYY-MM-DD date string for display in UK locale.
+function formatUkDate(d) {
+  if (!d) return null;
+  return new Date(d + "T00:00:00").toLocaleDateString("en-GB", {
+    day: "numeric", month: "short", year: "numeric",
+  });
+}
+
+// Returns the live status of a featured window based on UK time.
+function getScheduleStatus(startDate, endDate) {
+  if (!startDate && !endDate) return null;
+  const now = new Date();
+  const start = startDate ? new Date(startDate + "T00:00:00") : null;
+  // End date is inclusive — runs until the end of that day.
+  const end = endDate ? new Date(endDate + "T23:59:59") : null;
+
+  if (start && now < start) {
+    return { state: "scheduled", label: "Scheduled", target: start, prefix: "Starts in" };
+  }
+  if (end && now > end) {
+    return { state: "expired", label: "Expired", target: null };
+  }
+  return { state: "active", label: "Active", target: end, prefix: "Ends in" };
+}
+
+// Human-readable countdown between now and a target date.
+function countdownText(target) {
+  if (!target) return "no end date";
+  const ms = target - new Date();
+  if (ms <= 0) return "now";
+  const days = Math.floor(ms / 86400000);
+  const hours = Math.floor((ms % 86400000) / 3600000);
+  const mins = Math.floor((ms % 3600000) / 60000);
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
+
+// ─── Live schedule / active-timer badge shown on each post ────────────────────
+function SpotlightSchedule({ startDate, endDate }) {
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick((n) => n + 1), 60000); // refresh every minute
+    return () => clearInterval(id);
+  }, []);
+
+  const status = getScheduleStatus(startDate, endDate);
+  if (!status) return null;
+
+  const colors = {
+    active: { bg: "rgba(45,106,79,0.12)", fg: "#2D6A4F", dot: "#2D6A4F" },
+    scheduled: { bg: "rgba(232,163,61,0.15)", fg: "#92400E", dot: "#E8A33D" },
+    expired: { bg: "rgba(107,114,128,0.12)", fg: "#6B7280", dot: "#9CA3AF" },
+  }[status.state];
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap mt-1.5">
+      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: colors.bg, color: colors.fg }}>
+        <span className="w-1.5 h-1.5 rounded-full inline-block" style={{ backgroundColor: colors.dot }} />
+        {status.label}
+      </span>
+      <span className="text-[11px]" style={{ color: "#6B7280" }}>
+        🗓 {formatUkDate(startDate) ?? "—"} → {formatUkDate(endDate) ?? "—"} <span style={{ color: "#9CA3AF" }}>(UK)</span>
+      </span>
+      {status.state !== "expired" && (
+        <span className="text-[11px] font-semibold" style={{ color: colors.fg }}>
+          ⏱ {status.prefix} {countdownText(status.target)}
+        </span>
+      )}
+    </div>
+  );
+}
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ message, error, onDismiss }) {
@@ -55,11 +129,21 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
     body: "",
     image: "",
     date: "",
+    startDate: "",
+    endDate: "",
     status: "Published",
     featuredOnHome: false,
   };
   const [form, setForm] = useState(initial ?? blank);
   const [saving, setSaving] = useState(false);
+
+  // Read an uploaded image file and store it as a data URL for preview (UI only).
+  function handleImageUpload(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => set("image", reader.result);
+    reader.readAsDataURL(file);
+  }
 
   function set(k, v) {
     setForm((f) => {
@@ -157,22 +241,40 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
           />
         </label>
 
-        {/* Image URL */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Image URL</span>
-          <input
-            value={form.image}
-            onChange={(e) => set("image", e.target.value)}
-            placeholder="/images/..."
-            className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332" }}
-          />
-          {form.image && (
-            <img src={form.image} alt="" className="mt-1.5 w-24 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(27,67,50,0.1)" }} />
-          )}
+        {/* Image upload */}
+        <label className="flex flex-col gap-1 sm:col-span-2">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Image</span>
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.2)" }}>
+              <span>⬆</span> {form.image ? "Change Image" : "Upload Image"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e.target.files?.[0])}
+                className="hidden"
+              />
+            </label>
+            {form.image && (
+              <div className="relative">
+                <img src={form.image} alt="" className="w-24 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(27,67,50,0.1)" }} />
+                <button
+                  type="button"
+                  onClick={() => set("image", "")}
+                  className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center"
+                  style={{ backgroundColor: "#991B1B" }}
+                  title="Remove image"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            {!form.image && (
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>PNG or JPG, recommended 800×500px</span>
+            )}
+          </div>
         </label>
 
-        {/* Date */}
+        {/* Date / validity text */}
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Date / validity text</span>
           <input
@@ -219,6 +321,43 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
         </div>
       </div>
 
+      {/* Homepage featured schedule — only relevant when featured */}
+      {form.featuredOnHome && (
+        <div className="rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(232,163,61,0.07)", border: "1.5px solid rgba(232,163,61,0.25)" }}>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold" style={{ color: "#92400E" }}>★ Homepage Spotlight schedule</span>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(232,163,61,0.2)", color: "#92400E" }}>UK time</span>
+          </div>
+          <p className="text-xs -mt-1" style={{ color: "#92400E", opacity: 0.8 }}>Set when this post appears in the "In the Spotlight" section. Leave end date empty to run indefinitely.</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Start date</span>
+              <input
+                type="date"
+                value={form.startDate}
+                onChange={(e) => set("startDate", e.target.value)}
+                className="rounded-xl px-3 py-2.5 text-sm outline-none"
+                style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>End date</span>
+              <input
+                type="date"
+                value={form.endDate}
+                min={form.startDate || undefined}
+                onChange={(e) => set("endDate", e.target.value)}
+                className="rounded-xl px-3 py-2.5 text-sm outline-none"
+                style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+              />
+            </label>
+          </div>
+          {(form.startDate || form.endDate) && (
+            <SpotlightSchedule startDate={form.startDate} endDate={form.endDate} />
+          )}
+        </div>
+      )}
+
       <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(27,67,50,0.1)" }}>
         <button
           onClick={handleSave}
@@ -252,6 +391,9 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
         <p className="text-xs font-semibold mb-1" style={{ color: "#2D6A4F" }}>{item.businessName} · {item.category}</p>
         <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.excerpt}</p>
         {item.date && <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{item.date}</p>}
+        {item.featuredOnHome && (item.startDate || item.endDate) && (
+          <SpotlightSchedule startDate={item.startDate} endDate={item.endDate} />
+        )}
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
         <button

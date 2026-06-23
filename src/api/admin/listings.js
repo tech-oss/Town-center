@@ -1,20 +1,22 @@
 import { mock } from "../client";
 
 const LISTINGS = [
-  { id: "l1", name: "Bloom Florist", section: "Shop", category: "Flowers", owner: "Sarah Mitchell", status: "Active", tier: "Premium", lastUpdated: "2026-06-20" },
-  { id: "l2", name: "James's Kitchen", section: "Eat & Drink", category: "Cafe", owner: "James Okafor", status: "Active", tier: "Standard", lastUpdated: "2026-06-18" },
-  { id: "l3", name: "The Clubhouse", section: "See & Do", category: "Sports", owner: "Patrick Dunn", status: "Active", tier: "Premium", lastUpdated: "2026-06-19" },
-  { id: "l4", name: "Maidenhead Gifts", section: "Shop", category: "Gifts", owner: "Linda Forsythe", status: "Lapsed", tier: "Basic", lastUpdated: "2025-12-01" },
-  { id: "l5", name: "Spice Garden", section: "Eat & Drink", category: "Restaurant", owner: "Anita Sharma", status: "Pending", tier: "Standard", lastUpdated: "2026-06-10" },
-  { id: "l6", name: "ODEON Luxe Maidenhead", section: "See & Do", category: "Film", owner: "Admin", status: "Active", tier: "Premium", lastUpdated: "2026-06-01" },
-  { id: "l7", name: "Gourmet Kitchen", section: "Eat & Drink", category: "Restaurant", owner: "Anita Sharma", status: "Active", tier: "Standard", lastUpdated: "2026-05-15" },
-  { id: "l8", name: "Thames Valley Yoga", section: "See & Do", category: "Wellness", owner: "Emma Clarke", status: "Active", tier: "Basic", lastUpdated: "2026-04-20" },
+  { id: "l1", name: "Bloom Florist", section: "Shop", category: "Flowers", owner: "Sarah Mitchell", status: "Active", tier: "Premium", created: "2025-03-12", lastUpdated: "2026-06-20" },
+  { id: "l2", name: "James's Kitchen", section: "Eat & Drink", category: "Cafe", owner: "James Okafor", status: "Active", tier: "Standard", created: "2025-06-01", lastUpdated: "2026-06-18" },
+  { id: "l3", name: "The Clubhouse", section: "See & Do", category: "Sports", owner: "Patrick Dunn", status: "Active", tier: "Premium", created: "2025-01-07", lastUpdated: "2026-06-19" },
+  { id: "l4", name: "Maidenhead Gifts", section: "Shop", category: "Gifts", owner: "Linda Forsythe", status: "Lapsed", tier: "Basic", created: "2024-08-01", lastUpdated: "2025-12-01" },
+  { id: "l5", name: "Spice Garden", section: "Eat & Drink", category: "Restaurant", owner: "Anita Sharma", status: "Pending", tier: "Standard", created: "2026-06-10", lastUpdated: "2026-06-10" },
+  { id: "l6", name: "ODEON Luxe Maidenhead", section: "See & Do", category: "Film", owner: "Admin", status: "Active", tier: "Premium", created: "2024-05-20", lastUpdated: "2026-06-01" },
+  { id: "l7", name: "Gourmet Kitchen", section: "Eat & Drink", category: "Restaurant", owner: "Anita Sharma", status: "Active", tier: "Standard", created: "2025-09-03", lastUpdated: "2026-05-15" },
+  { id: "l8", name: "Thames Valley Yoga", section: "See & Do", category: "Wellness", owner: "Emma Clarke", status: "Active", tier: "Basic", created: "2025-11-18", lastUpdated: "2026-04-20" },
 ];
 
 export function getListings({ section, status } = {}) {
   let list = LISTINGS;
   if (section) list = list.filter((l) => l.section === section);
   if (status) list = list.filter((l) => l.status === status);
+  // Business names listed in alphabetical order
+  list = [...list].sort((a, b) => a.name.localeCompare(b.name));
   return mock(list);
 }
 

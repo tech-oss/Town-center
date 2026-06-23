@@ -23,6 +23,7 @@ export default function ListingsPage() {
       <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: v === "Premium" ? "rgba(82,183,136,0.2)" : "rgba(27,67,50,0.08)", color: "#1B4332" }}>{v}</span>
     )},
     { key: "status", label: "Status", render: (v) => <StatusTag status={v} /> },
+    { key: "created", label: "Date Created", muted: true },
     { key: "lastUpdated", label: "Last Updated", muted: true },
   ];
 

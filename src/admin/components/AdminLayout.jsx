@@ -10,7 +10,7 @@ const NAV = [
   { to: "/admin/listings", label: "Listings (Directory)", icon: "🏪" },
   { to: "/admin/properties", label: "Properties", icon: "🏠" },
   { to: "/admin/projects", label: "Explore (Projects)", icon: "🗺" },
-  { to: "/admin/events-news", label: "Events & News", icon: "📅" },
+  { to: "/admin/events-news", label: "Events", icon: "📅" },
   {
     label: "Home Page Featured",
     icon: "🏠",
