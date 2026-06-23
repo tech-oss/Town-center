@@ -96,8 +96,7 @@ export default function DashboardPage() {
       {/* Quick actions */}
       <div>
         <h2 className="font-bold text-base mb-4" style={{ color: "#1B4332" }}>Quick Actions</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-          <QuickAction icon="✅" label="Review Queue" to="/admin/approvals" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <QuickAction icon="➕" label="Add Listing" to="/admin/listings" />
           <QuickAction icon="📅" label="Add Event" to="/admin/events-news" />
           <QuickAction icon="🗺" label="Add Project" to="/admin/projects" />

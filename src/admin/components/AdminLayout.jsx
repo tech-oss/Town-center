@@ -5,6 +5,7 @@ import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 const NAV = [
   { to: "/admin", label: "Dashboard", icon: "⊞", end: true },
   { to: "/admin/users", label: "Users & Businesses", icon: "👥" },
+  { to: "/admin/businesses", label: "Business Registrations", icon: "🏢" },
   { to: "/admin/approvals", label: "Approval Queue", icon: "✅", badge: "pending" },
   { to: "/admin/listings", label: "Listings (Directory)", icon: "🏪" },
   { to: "/admin/properties", label: "Properties", icon: "🏠" },

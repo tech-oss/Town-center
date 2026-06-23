@@ -3,6 +3,7 @@ import AdminLayout from "./components/AdminLayout";
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import UserDetailPage from "./pages/UserDetailPage";
+import BusinessesPage from "./pages/BusinessesPage";
 import ApprovalQueuePage from "./pages/ApprovalQueuePage";
 import ApprovalDetailPage from "./pages/ApprovalDetailPage";
 import ListingsPage from "./pages/ListingsPage";
@@ -27,6 +28,7 @@ export default function AdminApp() {
         <Route index element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:id" element={<UserDetailPage />} />
+        <Route path="businesses" element={<BusinessesPage />} />
         <Route path="approvals" element={<ApprovalQueuePage />} />
         <Route path="approvals/:id" element={<ApprovalDetailPage />} />
         <Route path="listings" element={<ListingsPage />} />
