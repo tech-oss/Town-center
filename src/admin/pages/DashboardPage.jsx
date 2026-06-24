@@ -180,6 +180,8 @@ function PlanDistributionChart() {
   const { data: plans } = useFetch(getPlanDistribution, []);
   const rows = plans ?? [];
   const total = rows.reduce((s, d) => s + d.count, 0);
+  const [active, setActive] = useState(null);
+  const hovered = active != null ? rows[active] : null;
 
   return (
     <div className="bg-white rounded-xl p-6 flex flex-col h-full" style={CARD}>
@@ -198,18 +200,30 @@ function PlanDistributionChart() {
               </radialGradient>
             ))}
           </defs>
-          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} stroke="rgba(255,255,255,0.55)" strokeWidth={1} isAnimationActive={false}>
-            {rows.map((_, i) => <Cell key={i} fill={`url(#pieMetal${i % PIE_COLOURS.length})`} />)}
+          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} stroke="rgba(255,255,255,0.55)" strokeWidth={1} isAnimationActive={false}
+            onMouseEnter={(_, i) => setActive(i)} onMouseLeave={() => setActive(null)}>
+            {rows.map((_, i) => (
+              <Cell key={i} fill={`url(#pieMetal${i % PIE_COLOURS.length})`}
+                opacity={active == null || active === i ? 1 : 0.45}
+                style={{ transition: "opacity 0.15s ease", cursor: "pointer" }} />
+            ))}
           </Pie>
-          <Tooltip formatter={(v, n) => [`${v} businesses`, n]}
-            contentStyle={{ borderRadius: 8, border: `1px solid ${BORDER}`, boxShadow: "0 4px 16px rgba(10,25,47,0.1)", fontSize: 12 }} />
         </PieChart>
         {/* glossy highlight sweep */}
         <div className="absolute inset-0 rounded-full pointer-events-none"
           style={{ background: "radial-gradient(60% 45% at 36% 28%, rgba(255,255,255,0.45), rgba(255,255,255,0) 60%)" }} />
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-2xl font-bold" style={{ color: NAVY, fontFamily: CINZEL }}>{total}</span>
-          <span className="text-xs font-medium mt-0.5" style={{ color: MUTED }}>Total</span>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6 text-center">
+          {hovered ? (
+            <>
+              <span className="text-2xl font-bold leading-none" style={{ color: NAVY, fontFamily: CINZEL }}>{hovered.count}</span>
+              <span className="text-[11px] font-semibold mt-1" style={{ color: PIE_COLOURS[active % PIE_COLOURS.length] }}>{hovered.plan}</span>
+            </>
+          ) : (
+            <>
+              <span className="text-2xl font-bold leading-none" style={{ color: NAVY, fontFamily: CINZEL }}>{total}</span>
+              <span className="text-xs font-medium mt-1" style={{ color: MUTED }}>Total</span>
+            </>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-2.5 mt-5">
