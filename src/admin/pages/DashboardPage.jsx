@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AreaChart, Area, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import useFetch from "../../hooks/useFetch";
-import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend, getSignupTrend, getPlanDistribution } from "../../api/admin";
+import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend, getSignupTrend, getPlanDistribution, getTopCategories } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import StatusTag from "../components/StatusTag";
 
@@ -186,6 +186,42 @@ function SignupChart() {
   );
 }
 
+function TopCategoriesCard() {
+  const { data: cats } = useFetch(getTopCategories, []);
+  const rows = cats ?? [];
+  const max = Math.max(...rows.map((r) => r.count), 1);
+
+  return (
+    <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-1.5">
+          <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Top Performing Categories</h2>
+          <span className="text-xs rounded-full px-1.5 py-0.5" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#6B7280" }}>ⓘ</span>
+        </div>
+        <Link to="/admin/listings" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View All</Link>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {rows.map((r) => (
+          <div key={r.category} className="flex items-center gap-3">
+            <span className="text-xl w-8 text-center shrink-0">{r.icon}</span>
+            <span className="text-sm font-semibold w-36 shrink-0" style={{ color: "#1B4332" }}>{r.category}</span>
+            <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(27,67,50,0.08)" }}>
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${(r.count / max) * 100}%`, backgroundColor: r.colour }}
+              />
+            </div>
+            <span className="text-xs font-semibold w-20 text-right shrink-0" style={{ color: "#6B7280" }}>
+              {r.pct}% ({r.count})
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PlanDistributionChart() {
   const { data: plans } = useFetch(getPlanDistribution, []);
   const rows = plans ?? [];
@@ -293,6 +329,8 @@ export default function DashboardPage() {
           <PlanDistributionChart />
         </div>
       </div>
+
+      <TopCategoriesCard />
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Pending content approvals */}

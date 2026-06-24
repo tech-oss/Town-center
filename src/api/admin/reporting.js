@@ -163,6 +163,19 @@ export function getSignupTrend({ days = 30 } = {}) {
   return mock(DAILY_SIGNUPS_30.slice(-days));
 }
 
+// ─── Top performing categories ────────────────────────────────────────────────
+export function getTopCategories() {
+  const data = [
+    { category: "Eat & Drink",       icon: "🍽", count: 18, colour: "#2D6A4F" },
+    { category: "Shopping",          icon: "🛍", count: 14, colour: "#1B4332" },
+    { category: "Fitness & Wellbeing", icon: "💪", count: 10, colour: "#52B788" },
+    { category: "Health & Services", icon: "🏥", count: 8,  colour: "#E8A33D" },
+    { category: "Arts & Culture",    icon: "🎭", count: 5,  colour: "#74C69D" },
+  ];
+  const total = data.reduce((s, d) => s + d.count, 0);
+  return mock(data.map((d) => ({ ...d, pct: Math.round((d.count / total) * 100) })));
+}
+
 // ─── Plan distribution (all-time) ─────────────────────────────────────────────
 export function getPlanDistribution() {
   const data = [
