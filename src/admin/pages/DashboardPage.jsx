@@ -27,6 +27,15 @@ const CARD    = {
 const MUTED   = "#6B7280";
 const BORDER  = "rgba(10,25,47,0.08)";
 
+// Refined pastel palette — distinct hues that sit gracefully with navy + brass.
+const PASTELS = [
+  "#C9A96E", // soft brass / gold
+  "#9DBE9C", // sage green
+  "#9BB4D4", // dusty blue
+  "#C9A6BE", // soft mauve
+  "#E2B79A", // warm blush
+];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function timeAgo(iso) {
   const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
@@ -161,8 +170,8 @@ function RevenueChart() {
 }
 
 // ─── Plan distribution ────────────────────────────────────────────────────────
-// Metallic brass/bronze palette for the donut segments
-const PIE_COLOURS = ["#B39258", "#8B6F3E", "#C9A96E", "#6B5230"];
+// Distinct pastel palette for the donut segments
+const PIE_COLOURS = PASTELS;
 
 function PlanDistributionChart() {
   const { data: plans } = useFetch(getPlanDistribution, []);
@@ -221,7 +230,7 @@ function PlanDistributionChart() {
 
 // ─── Platform overview ────────────────────────────────────────────────────────
 const PLAN_COLOURS = {
-  Free: BRASS, "Plan 1": BRASS3, "Plan 2": NAVY, "Plan 3": BRASS2,
+  Free: PASTELS[0], "Plan 1": PASTELS[1], "Plan 2": PASTELS[2], "Plan 3": PASTELS[3],
 };
 const PLAN_KEYS = ["Free", "Plan 1", "Plan 2", "Plan 3"];
 
@@ -265,7 +274,7 @@ function SignupChart() {
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }}
             formatter={(v) => <span style={{ color: MUTED }}>{v}</span>} />
           {PLAN_KEYS.map((k) => (
-            <Line key={k} type="monotone" dataKey={k} stroke={PLAN_COLOURS[k]} strokeWidth={2}
+            <Line key={k} type="monotone" dataKey={k} stroke={PLAN_COLOURS[k]} strokeWidth={2.5}
               dot={{ r: 3, fill: PLAN_COLOURS[k], strokeWidth: 0 }} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
           ))}
         </LineChart>
@@ -276,7 +285,7 @@ function SignupChart() {
 }
 
 // ─── Top categories ───────────────────────────────────────────────────────────
-const CAT_COLOURS = [BRASS, BRASS3, BRASS2, BRASS4, "#A89070"];
+const CAT_COLOURS = PASTELS;
 
 function TopCategoriesCard() {
   const { data: cats } = useFetch(getTopCategories, []);
