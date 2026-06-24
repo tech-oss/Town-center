@@ -25,6 +25,18 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
+/* ─── Admin panel — Mayfair Concierge theme ──────────────────────────────────
+   Scoped overrides so the admin uses Cinzel headings + Montserrat body
+   (the public site keeps Playfair + Montserrat). */
+.admin-root {
+  font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+  letter-spacing: 0.01em;
+}
+.admin-root h1, .admin-root h2, .admin-root h3, .admin-root h4, .admin-root h5, .admin-root h6 {
+  font-family: "Cinzel", Georgia, serif;
+  letter-spacing: 0.02em;
+}
+
 /* ─── Hero slider animations ─────────────────────────────────────────────── */
 /* fill-mode `both` holds the 0% state during the delay and the 100% state
    afterwards. Elements default to opacity:1, so text stays visible even if

@@ -65,7 +65,7 @@ function SpotlightSchedule({ startDate, endDate }) {
   if (!status) return null;
 
   const colors = {
-    active: { bg: "rgba(45,106,79,0.12)", fg: "#2D6A4F", dot: "#2D6A4F" },
+    active: { bg: "rgba(10,25,47,0.12)", fg: "#0A192F", dot: "#0A192F" },
     scheduled: { bg: "rgba(232,163,61,0.15)", fg: "#92400E", dot: "#E8A33D" },
     expired: { bg: "rgba(107,114,128,0.12)", fg: "#6B7280", dot: "#9CA3AF" },
   }[status.state];
@@ -94,7 +94,7 @@ function Toast({ message, error, onDismiss }) {
   return (
     <div
       className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-3 max-w-sm"
-      style={{ backgroundColor: error ? "#991B1B" : "#1B4332", color: "#fff" }}
+      style={{ backgroundColor: error ? "#991B1B" : "#0A192F", color: "#fff" }}
     >
       <span className="flex-1">{message}</span>
       <button onClick={onDismiss} className="opacity-60 hover:opacity-100 text-lg leading-none">✕</button>
@@ -109,7 +109,7 @@ function SpotlightBadge({ active }) {
       className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap"
       style={active
         ? { backgroundColor: "rgba(232,163,61,0.18)", color: "#92400E" }
-        : { backgroundColor: "rgba(27,67,50,0.07)", color: "#9CA3AF" }
+        : { backgroundColor: "rgba(10,25,47,0.07)", color: "#9CA3AF" }
       }
     >
       {active ? "★ On Homepage" : "Not featured"}
@@ -169,8 +169,8 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
   const canFeature = form.featuredOnHome || featuredCount < 3;
 
   return (
-    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 4px 24px rgba(13,42,51,0.1)", border: "1.5px solid rgba(27,67,50,0.12)" }}>
-      <h3 className="font-bold text-base" style={{ color: "#1B4332" }}>
+    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 4px 24px rgba(13,42,51,0.1)", border: "1.5px solid rgba(10,25,47,0.12)" }}>
+      <h3 className="font-bold text-base" style={{ color: "#0A192F" }}>
         {initial?.id ? "Edit News / Offer" : "Create News / Offer"}
       </h3>
 
@@ -182,7 +182,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             value={form.businessId}
             onChange={(e) => set("businessId", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
           >
             {EAT_DRINK_BUSINESSES.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
@@ -197,7 +197,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             value={form.category}
             onChange={(e) => set("category", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
           >
             {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
           </select>
@@ -211,7 +211,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             onChange={(e) => set("title", e.target.value)}
             placeholder="e.g. Summer Cocktail Masterclass"
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
           />
         </label>
 
@@ -224,7 +224,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             rows={2}
             placeholder="One or two sentences that appear on the card and homepage spotlight…"
             className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
           />
         </label>
 
@@ -237,7 +237,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             rows={5}
             placeholder="Full text shown on the article detail page. Use blank lines to separate paragraphs."
             className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
           />
         </label>
 
@@ -245,7 +245,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
         <label className="flex flex-col gap-1 sm:col-span-2">
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Image</span>
           <div className="flex items-center gap-3 flex-wrap">
-            <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.2)" }}>
+            <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }}>
               <span>⬆</span> {form.image ? "Change Image" : "Upload Image"}
               <input
                 type="file"
@@ -256,7 +256,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             </label>
             {form.image && (
               <div className="relative">
-                <img src={form.image} alt="" className="w-24 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(27,67,50,0.1)" }} />
+                <img src={form.image} alt="" className="w-24 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(10,25,47,0.1)" }} />
                 <button
                   type="button"
                   onClick={() => set("image", "")}
@@ -282,7 +282,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             onChange={(e) => set("date", e.target.value)}
             placeholder="e.g. While stocks last · Monthly · 7pm"
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
           />
         </label>
 
@@ -293,7 +293,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             value={form.status}
             onChange={(e) => set("status", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
           >
             <option>Published</option>
             <option>Draft</option>
@@ -309,7 +309,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
               <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ transform: form.featuredOnHome ? "translateX(20px)" : "none" }} />
             </div>
             <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium" style={{ color: "#1B4332" }}>Feature in "In the Spotlight"</span>
+              <span className="text-sm font-medium" style={{ color: "#0A192F" }}>Feature in "In the Spotlight"</span>
               {!canFeature && !form.featuredOnHome && (
                 <span className="text-xs" style={{ color: "#E8A33D" }}>Max 3 items — remove one to add this</span>
               )}
@@ -337,7 +337,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
                 value={form.startDate}
                 onChange={(e) => set("startDate", e.target.value)}
                 className="rounded-xl px-3 py-2.5 text-sm outline-none"
-                style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+                style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -348,7 +348,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
                 min={form.startDate || undefined}
                 onChange={(e) => set("endDate", e.target.value)}
                 className="rounded-xl px-3 py-2.5 text-sm outline-none"
-                style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332", backgroundColor: "#fff" }}
+                style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
               />
             </label>
           </div>
@@ -358,12 +358,12 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
         </div>
       )}
 
-      <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(27,67,50,0.1)" }}>
+      <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(10,25,47,0.1)" }}>
         <button
           onClick={handleSave}
           disabled={saving || !form.title.trim() || !form.excerpt.trim()}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
-          style={{ backgroundColor: "#2D6A4F" }}
+          style={{ backgroundColor: "#0A192F" }}
         >
           {saving ? "Saving…" : "Save"}
         </button>
@@ -378,17 +378,17 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
 // ─── Single row card ──────────────────────────────────────────────────────────
 function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
   return (
-    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.06)", border: item.featuredOnHome ? "1.5px solid rgba(232,163,61,0.4)" : "1px solid rgba(27,67,50,0.08)" }}>
+    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.06)", border: item.featuredOnHome ? "1.5px solid rgba(232,163,61,0.4)" : "1px solid rgba(10,25,47,0.08)" }}>
       {item.image && (
         <img src={item.image} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />
       )}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
-          <span className="text-sm font-bold truncate" style={{ color: "#1B4332" }}>{item.title}</span>
+          <span className="text-sm font-bold truncate" style={{ color: "#0A192F" }}>{item.title}</span>
           <SpotlightBadge active={item.featuredOnHome} />
           <StatusTag status={item.status} />
         </div>
-        <p className="text-xs font-semibold mb-1" style={{ color: "#2D6A4F" }}>{item.businessName} · {item.category}</p>
+        <p className="text-xs font-semibold mb-1" style={{ color: "#0A192F" }}>{item.businessName} · {item.category}</p>
         <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.excerpt}</p>
         {item.date && <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{item.date}</p>}
         {item.featuredOnHome && (item.startDate || item.endDate) && (
@@ -401,13 +401,13 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
           className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
           style={item.featuredOnHome
             ? { backgroundColor: "rgba(232,163,61,0.15)", color: "#92400E", border: "1.5px solid rgba(232,163,61,0.4)" }
-            : { backgroundColor: "rgba(27,67,50,0.07)", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.15)" }
+            : { backgroundColor: "rgba(10,25,47,0.07)", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.15)" }
           }
         >
           {item.featuredOnHome ? "★ Remove from Homepage" : "☆ Add to Homepage"}
         </button>
         <div className="flex gap-2">
-          <button onClick={() => onEdit(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(27,67,50,0.2)", color: "#1B4332" }}>Edit</button>
+          <button onClick={() => onEdit(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}>Edit</button>
           <button onClick={() => onDelete(item.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
         </div>
       </div>
@@ -473,7 +473,7 @@ export default function NewsOffersPage() {
   if (editing !== null) {
     return (
       <div className="max-w-3xl flex flex-col gap-4">
-        <button onClick={() => setEditing(null)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>← Back to list</button>
+        <button onClick={() => setEditing(null)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: "#0A192F" }}>← Back to list</button>
         <NewsOfferForm
           initial={editing?.id ? editing : null}
           onSave={handleSave}
@@ -491,10 +491,10 @@ export default function NewsOffersPage() {
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#1B4332" }}>Business News & Offers</h1>
+          <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Business News & Offers</h1>
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage news and promotions for Eat & Drink businesses. Featured items appear in the homepage "In the Spotlight" section.</p>
         </div>
-        <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2D6A4F" }}>
+        <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#0A192F" }}>
           + Create News / Offer
         </button>
       </div>
@@ -537,14 +537,14 @@ export default function NewsOffersPage() {
       {/* Filters */}
       <div className="flex gap-3 flex-wrap items-center">
         <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setBizFilter("all")} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === "all" ? { backgroundColor: "#1B4332", color: "#fff" } : { backgroundColor: "#fff", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.2)" }}>All businesses</button>
+          <button onClick={() => setBizFilter("all")} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === "all" ? { backgroundColor: "#0A192F", color: "#fff" } : { backgroundColor: "#fff", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }}>All businesses</button>
           {EAT_DRINK_BUSINESSES.map((b) => (
-            <button key={b.id} onClick={() => setBizFilter(b.id)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === b.id ? { backgroundColor: "#1B4332", color: "#fff" } : { backgroundColor: "#fff", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.2)" }}>{b.name}</button>
+            <button key={b.id} onClick={() => setBizFilter(b.id)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === b.id ? { backgroundColor: "#0A192F", color: "#fff" } : { backgroundColor: "#fff", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }}>{b.name}</button>
           ))}
         </div>
         <div className="flex gap-2 ml-auto">
           {["all", "Published", "Draft"].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={statusFilter === s ? { backgroundColor: "#2D6A4F", color: "#fff" } : { backgroundColor: "#fff", color: "#374151", border: "1.5px solid rgba(27,67,50,0.15)" }}>{s === "all" ? "All statuses" : s}</button>
+            <button key={s} onClick={() => setStatusFilter(s)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={statusFilter === s ? { backgroundColor: "#0A192F", color: "#fff" } : { backgroundColor: "#fff", color: "#374151", border: "1.5px solid rgba(10,25,47,0.15)" }}>{s === "all" ? "All statuses" : s}</button>
           ))}
         </div>
       </div>

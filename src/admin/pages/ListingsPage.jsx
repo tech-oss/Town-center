@@ -20,7 +20,7 @@ export default function ListingsPage() {
     { key: "category", label: "Category", muted: true },
     { key: "owner", label: "Owner", muted: true },
     { key: "tier", label: "Tier", render: (v) => (
-      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: v === "Premium" ? "rgba(82,183,136,0.2)" : "rgba(27,67,50,0.08)", color: "#1B4332" }}>{v}</span>
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: v === "Premium" ? "rgba(179,146,88,0.2)" : "rgba(10,25,47,0.08)", color: "#0A192F" }}>{v}</span>
     )},
     { key: "status", label: "Status", render: (v) => <StatusTag status={v} /> },
     { key: "created", label: "Date Created", muted: true },
@@ -31,16 +31,16 @@ export default function ListingsPage() {
     <div className="flex flex-col gap-6 max-w-6xl">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#1B4332" }}>Listings (Business Directory)</h1>
+          <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Listings (Business Directory)</h1>
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>All business directory entries across the portal.</p>
         </div>
-        <button className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2D6A4F" }}>+ Add Listing</button>
+        <button className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#0A192F" }}>+ Add Listing</button>
       </div>
 
       <div className="flex gap-2 flex-wrap">
         {SECTION_FILTERS.map((s) => (
           <button key={s} onClick={() => setSection(s)} className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
-            style={section === s ? { backgroundColor: "#1B4332", color: "#fff" } : { backgroundColor: "#fff", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.2)" }}>
+            style={section === s ? { backgroundColor: "#0A192F", color: "#fff" } : { backgroundColor: "#fff", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }}>
             {s}
           </button>
         ))}

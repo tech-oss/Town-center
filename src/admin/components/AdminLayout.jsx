@@ -1,71 +1,87 @@
 import { useState } from "react";
 import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 
-// Nav items — use `children` for a collapsible group (no `to` on the parent)
+// ─── Brass SVG line icons ─────────────────────────────────────────────────────
+const I = {
+  dashboard:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+  users:         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  businesses:    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  approvals:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+  listings:      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+  featured:      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  spotlight:     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
+  stories:       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+  events:        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+  properties:    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
+  projects:      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>,
+  subscriptions: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+  reporting:     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+  notifications: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+  settings:      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  back:          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>,
+};
+
 const NAV = [
-  { to: "/admin", label: "Dashboard", icon: "⊞", end: true },
-  { to: "/admin/users", label: "Users & Businesses", icon: "👥" },
-  { to: "/admin/businesses", label: "Business Registrations", icon: "🏢" },
-  { to: "/admin/approvals", label: "Approval Queue", icon: "✅", badge: "pending" },
-  { to: "/admin/listings", label: "Listings (Directory)", icon: "🏪" },
+  { to: "/admin",                    label: "Dashboard",             icon: I.dashboard,      end: true },
+  { to: "/admin/users",              label: "Users & Businesses",    icon: I.users },
+  { to: "/admin/businesses",         label: "Business Registrations",icon: I.businesses },
+  { to: "/admin/approvals",          label: "Approval Queue",        icon: I.approvals,      badge: "pending" },
+  { to: "/admin/listings",           label: "Listings (Directory)",  icon: I.listings },
   {
-    label: "Home Page Featured",
-    icon: "🏠",
-    group: true,
+    label: "Home Page Featured", icon: I.featured, group: true,
     children: [
-      { to: "/admin/news-offers", label: "In the Spotlight", icon: "★" },
-      { to: "/admin/featured-stories", label: "Featured Stories", icon: "📰" },
+      { to: "/admin/news-offers",      label: "In the Spotlight", icon: I.spotlight },
+      { to: "/admin/featured-stories", label: "Featured Stories", icon: I.stories },
     ],
   },
-  { to: "/admin/events-news", label: "Events", icon: "📅" },
-  { to: "/admin/properties", label: "Properties", icon: "🏠" },
-  { to: "/admin/projects", label: "Explore (Projects)", icon: "🗺" },
-  { to: "/admin/subscriptions", label: "Subscriptions", icon: "💳" },
-  { to: "/admin/reporting", label: "Reporting", icon: "📊" },
-  { to: "/admin/push-notifications", label: "Push Notifications", icon: "🔔" },
-  { to: "/admin/settings", label: "Settings", icon: "⚙" },
+  { to: "/admin/events-news",        label: "Events",                icon: I.events },
+  { to: "/admin/properties",         label: "Properties",            icon: I.properties },
+  { to: "/admin/projects",           label: "Explore (Projects)",    icon: I.projects },
+  { to: "/admin/subscriptions",      label: "Subscriptions",         icon: I.subscriptions },
+  { to: "/admin/reporting",          label: "Reporting",             icon: I.reporting },
+  { to: "/admin/push-notifications", label: "Push Notifications",    icon: I.notifications },
+  { to: "/admin/settings",           label: "Settings",              icon: I.settings },
 ];
 
-function NavGroup({ item, pendingCount, closeSidebar }) {
+// ─── Theme ────────────────────────────────────────────────────────────────────
+const NAVY      = "#0A192F";
+const BRASS     = "#B39258";
+const BRASS_BG  = "rgba(179,146,88,0.1)";
+const BRASS_BDR = "rgba(179,146,88,0.25)";
+const TEXT_ON   = "rgba(244,246,249,0.85)";
+const TEXT_DIM  = "rgba(244,246,249,0.42)";
+const DIVIDER   = "rgba(179,146,88,0.18)";
+const CINZEL    = "'Cinzel', Georgia, serif";
+
+// ─── NavGroup ─────────────────────────────────────────────────────────────────
+function NavGroup({ item, closeSidebar }) {
   const location = useLocation();
-  const childPaths = item.children.map((c) => c.to);
-  const anyChildActive = childPaths.some((p) => location.pathname.startsWith(p));
-  const [open, setOpen] = useState(anyChildActive);
+  const anyActive = item.children.some((c) => location.pathname.startsWith(c.to));
+  const [open, setOpen] = useState(anyActive);
 
   return (
-    <div className="mb-0.5">
-      {/* Group header — clickable to toggle */}
+    <div>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
-        style={{ color: anyChildActive ? "#fff" : "rgba(255,255,255,0.65)", backgroundColor: anyChildActive ? "rgba(255,255,255,0.12)" : "transparent" }}
-        onMouseEnter={(e) => { if (!anyChildActive) e.currentTarget.style.color = "#fff"; e.currentTarget.style.backgroundColor = anyChildActive ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)"; }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = anyChildActive ? "#fff" : "rgba(255,255,255,0.65)"; e.currentTarget.style.backgroundColor = anyChildActive ? "rgba(255,255,255,0.12)" : "transparent"; }}
+        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150"
+        style={{ color: anyActive ? BRASS : TEXT_ON, backgroundColor: anyActive ? BRASS_BG : "transparent", borderLeft: `2px solid ${anyActive ? BRASS : "transparent"}` }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = BRASS; e.currentTarget.style.backgroundColor = BRASS_BG; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = anyActive ? BRASS : TEXT_ON; e.currentTarget.style.backgroundColor = anyActive ? BRASS_BG : "transparent"; }}
       >
-        <span className="text-base leading-none w-5 text-center shrink-0">{item.icon}</span>
-        <span className="flex-1 leading-snug text-left">{item.label}</span>
-        <span
-          className="text-xs transition-transform duration-200"
-          style={{ transform: open ? "rotate(90deg)" : "none", color: "rgba(255,255,255,0.45)" }}
-        >
-          ›
-        </span>
+        <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: BRASS }}>{item.icon}</span>
+        <span className="flex-1 text-left leading-snug">{item.label}</span>
+        <span className="text-xs transition-transform duration-200" style={{ transform: open ? "rotate(90deg)" : "none", color: TEXT_DIM }}>›</span>
       </button>
 
-      {/* Children — slide in/out */}
       {open && (
-        <div className="mt-0.5 ml-4 pl-3 flex flex-col gap-0.5" style={{ borderLeft: "1.5px solid rgba(255,255,255,0.12)" }}>
+        <div className="mt-0.5 ml-4 pl-3 flex flex-col gap-0.5" style={{ borderLeft: `1px solid ${DIVIDER}` }}>
           {item.children.map(({ to, label, icon }) => (
             <NavLink
-              key={to}
-              to={to}
-              onClick={closeSidebar}
-              className={({ isActive }) =>
-                `flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 ${isActive ? "text-white" : "text-white/60 hover:text-white hover:bg-white/8"}`
-              }
-              style={({ isActive }) => isActive ? { backgroundColor: "rgba(255,255,255,0.12)" } : undefined}
+              key={to} to={to} onClick={closeSidebar}
+              className={({ isActive }) => `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${isActive ? "font-medium" : ""}`}
+              style={({ isActive }) => ({ color: isActive ? BRASS : TEXT_DIM, backgroundColor: isActive ? BRASS_BG : "transparent" })}
             >
-              <span className="text-xs leading-none w-4 text-center shrink-0" style={{ color: "#E8A33D" }}>{icon}</span>
+              <span className="shrink-0" style={{ color: BRASS }}>{icon}</span>
               <span className="flex-1 leading-snug">{label}</span>
             </NavLink>
           ))}
@@ -75,95 +91,91 @@ function NavGroup({ item, pendingCount, closeSidebar }) {
   );
 }
 
+// ─── AdminLayout ──────────────────────────────────────────────────────────────
 export default function AdminLayout({ pendingCount = 0 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#F5F5F0", fontFamily: "system-ui, -apple-system, sans-serif" }}>
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-20 bg-black/40 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
+    <div className="admin-root min-h-screen flex" style={{ backgroundColor: "#F4F6F9", fontFamily: "'Montserrat', system-ui, -apple-system, sans-serif" }}>
+      {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside
         className={`fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 md:sticky md:top-0 md:h-screen md:z-auto md:!translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{
-          width: 240,
-          minWidth: 240,
-          backgroundColor: "#1B4332",
-        }}
+        style={{ width: 240, minWidth: 240, backgroundColor: NAVY }}
       >
         {/* Logo */}
-        <div className="px-5 py-5 border-b" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+        <div className="px-5 py-5" style={{ borderBottom: `1px solid ${DIVIDER}` }}>
           <Link to="/" className="flex flex-col gap-0.5">
-            <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: "#52B788" }}>Maidenhead</span>
-            <span className="text-sm font-bold text-white leading-tight">Town Centre</span>
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded mt-1 self-start" style={{ backgroundColor: "rgba(82,183,136,0.2)", color: "#52B788" }}>Admin</span>
+            <span style={{ fontFamily: CINZEL, color: BRASS, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 500 }}>
+              Maidenhead
+            </span>
+            <span style={{ fontFamily: CINZEL, color: "#F4F6F9", fontSize: 14, fontWeight: 400, lineHeight: 1.3 }}>
+              Town Centre
+            </span>
+            <span style={{ fontFamily: CINZEL, fontSize: 8, letterSpacing: "0.15em", textTransform: "uppercase", color: BRASS, backgroundColor: BRASS_BG, border: `1px solid ${BRASS_BDR}`, borderRadius: 4, padding: "2px 6px", alignSelf: "flex-start", marginTop: 4 }}>
+              Admin
+            </span>
           </Link>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-0.5">
           {NAV.map((item) => {
-            if (item.group) {
-              return (
-                <NavGroup
-                  key={item.label}
-                  item={item}
-                  pendingCount={pendingCount}
-                  closeSidebar={() => setSidebarOpen(false)}
-                />
-              );
-            }
+            if (item.group) return <NavGroup key={item.label} item={item} closeSidebar={() => setSidebarOpen(false)} />;
             const { to, label, icon, end, badge } = item;
             return (
               <NavLink
-                key={to}
-                to={to}
-                end={end}
+                key={to} to={to} end={end}
                 onClick={() => setSidebarOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium mb-0.5 transition-all duration-150 ${isActive ? "text-white" : "text-white/65 hover:text-white hover:bg-white/8"}`
-                }
-                style={({ isActive }) => isActive ? { backgroundColor: "rgba(255,255,255,0.12)" } : undefined}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150"
+                style={({ isActive }) => ({
+                  color: isActive ? BRASS : TEXT_ON,
+                  backgroundColor: isActive ? BRASS_BG : "transparent",
+                  borderLeft: `2px solid ${isActive ? BRASS : "transparent"}`,
+                  fontWeight: isActive ? 500 : 400,
+                })}
               >
-                <span className="text-base leading-none w-5 text-center shrink-0">{icon}</span>
+                <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: BRASS }}>{icon}</span>
                 <span className="flex-1 leading-snug">{label}</span>
                 {badge === "pending" && pendingCount > 0 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#E8A33D", color: "#fff" }}>{pendingCount}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 20, backgroundColor: BRASS, color: NAVY }}>
+                    {pendingCount}
+                  </span>
                 )}
               </NavLink>
             );
           })}
         </nav>
 
+        <div style={{ height: 1, backgroundColor: DIVIDER, margin: "0 20px" }} />
+
         {/* Footer */}
-        <div className="px-5 py-4 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-          <Link to="/" className="flex items-center gap-2 text-xs font-medium transition-opacity hover:opacity-80" style={{ color: "rgba(255,255,255,0.5)" }}>
-            <span>←</span> View public site
+        <div className="px-5 py-4">
+          <Link to="/" className="flex items-center gap-2 text-xs transition-opacity hover:opacity-80" style={{ color: TEXT_DIM }}>
+            <span style={{ color: BRASS }}>{I.back}</span>
+            View public site
           </Link>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-0">
-        {/* Top bar */}
-        <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-4" style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(27,67,50,0.1)", boxShadow: "0 1px 8px rgba(13,42,51,0.06)" }}>
-          {/* Mobile hamburger */}
-          <button className="md:hidden flex flex-col gap-1.5 w-6" onClick={() => setSidebarOpen((o) => !o)}>
-            <span className="h-0.5 w-full rounded" style={{ backgroundColor: "#1B4332" }} />
-            <span className="h-0.5 w-full rounded" style={{ backgroundColor: "#1B4332" }} />
-            <span className="h-0.5 w-full rounded" style={{ backgroundColor: "#1B4332" }} />
+      {/* ── Main ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-4"
+          style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(10,25,47,0.08)", boxShadow: "0 1px 12px rgba(10,25,47,0.05)" }}>
+          <button className="md:hidden flex flex-col gap-1.5 w-5" onClick={() => setSidebarOpen((o) => !o)}>
+            <span className="h-px w-full" style={{ backgroundColor: NAVY }} />
+            <span className="h-px w-full" style={{ backgroundColor: NAVY }} />
+            <span className="h-px w-full" style={{ backgroundColor: NAVY }} />
           </button>
           <div className="flex-1" />
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ backgroundColor: "#2D6A4F" }}>A</div>
-            <span className="text-sm font-medium hidden sm:block" style={{ color: "#1B4332" }}>Admin</span>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+              style={{ backgroundColor: NAVY, color: BRASS, fontFamily: CINZEL }}>A</div>
+            <span className="text-sm font-medium hidden sm:block" style={{ color: NAVY, fontFamily: CINZEL }}>Admin</span>
           </div>
         </header>
 
-        {/* Page content */}
         <main className="flex-1 p-6 md:p-8">
           <Outlet />
         </main>

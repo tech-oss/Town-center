@@ -57,14 +57,14 @@ export default function UsersPage() {
     <div className="flex flex-col gap-6 max-w-6xl">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#1B4332" }}>Users & Businesses</h1>
+          <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Users & Businesses</h1>
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>All registered business and agent accounts across the portal.</p>
         </div>
         <button
           onClick={() => exportUsersCsv(users ?? [])}
           disabled={!users?.length}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 shrink-0"
-          style={{ backgroundColor: "#2D6A4F" }}
+          style={{ backgroundColor: "#0A192F" }}
           title="Export all emails & contact details to CSV"
         >
           <span>⬇</span> Export Emails (CSV)
@@ -79,8 +79,8 @@ export default function UsersPage() {
             onClick={() => setRoleFilter(r)}
             className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
             style={roleFilter === r
-              ? { backgroundColor: "#1B4332", color: "#fff" }
-              : { backgroundColor: "#fff", color: "#1B4332", border: "1.5px solid rgba(27,67,50,0.2)" }
+              ? { backgroundColor: "#0A192F", color: "#fff" }
+              : { backgroundColor: "#fff", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }
             }
           >
             {r}

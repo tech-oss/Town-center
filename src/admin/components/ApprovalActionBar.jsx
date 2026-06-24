@@ -7,7 +7,7 @@ export default function ApprovalActionBar({ item, onApprove, onReject, onEdit })
   if (item.source === "xml") {
     return (
       <div className="flex items-center gap-2 mt-2">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: "rgba(59,130,246,0.1)", color: "#1D4ED8" }}>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: "rgba(179,146,88,0.1)", color: "#8B6F3E" }}>
           ⚡ Auto-published — no action required
         </span>
       </div>
@@ -23,7 +23,7 @@ export default function ApprovalActionBar({ item, onApprove, onReject, onEdit })
           placeholder="Reason for rejection (required)…"
           rows={2}
           className="w-full text-sm rounded-xl px-3 py-2 resize-none outline-none focus:ring-2"
-          style={{ border: "1.5px solid rgba(185,28,28,0.4)", color: "#1B4332", backgroundColor: "#fff" }}
+          style={{ border: "1.5px solid rgba(185,28,28,0.4)", color: "#0A192F", backgroundColor: "#fff" }}
         />
         <div className="flex gap-2">
           <button
@@ -44,7 +44,7 @@ export default function ApprovalActionBar({ item, onApprove, onReject, onEdit })
 
   return (
     <div className="flex items-center gap-2 mt-2 flex-wrap">
-      <button onClick={() => onApprove?.(item)} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2D6A4F" }}>
+      <button onClick={() => onApprove?.(item)} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#0A192F" }}>
         ✓ Approve
       </button>
       <button onClick={() => setRejecting(true)} className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: "#991B1B", border: "1.5px solid rgba(185,28,28,0.4)" }}>
