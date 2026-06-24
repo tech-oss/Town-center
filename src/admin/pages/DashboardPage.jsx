@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { AreaChart, Area, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import useFetch from "../../hooks/useFetch";
-import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend, getSignupTrend } from "../../api/admin";
+import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend, getSignupTrend, getPlanDistribution } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import StatusTag from "../components/StatusTag";
 
@@ -186,6 +186,81 @@ function SignupChart() {
   );
 }
 
+function PlanDistributionChart() {
+  const { data: plans } = useFetch(getPlanDistribution, []);
+  const rows = plans ?? [];
+  const total = rows.reduce((s, d) => s + d.count, 0);
+
+  return (
+    <div className="bg-white rounded-2xl p-6 flex flex-col" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
+      <div className="flex items-center gap-1.5 mb-4">
+        <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Plan Distribution</h2>
+        <span className="text-xs rounded-full px-1.5 py-0.5" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#6B7280" }}>ⓘ</span>
+      </div>
+
+      <div className="flex items-center gap-6 flex-1">
+        {/* Donut */}
+        <div className="relative shrink-0" style={{ width: 160, height: 160 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={rows}
+                dataKey="count"
+                nameKey="plan"
+                cx="50%"
+                cy="50%"
+                innerRadius={52}
+                outerRadius={76}
+                paddingAngle={3}
+                strokeWidth={0}
+              >
+                {rows.map((entry) => (
+                  <Cell key={entry.plan} fill={entry.colour} />
+                ))}
+              </Pie>
+              <Tooltip
+                formatter={(value, name) => [`${value} businesses`, name]}
+                contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)", fontSize: 12 }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+          {/* Centre label */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-2xl font-bold" style={{ color: "#1B4332" }}>{total.toLocaleString()}</span>
+            <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>Total</span>
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-col gap-3 flex-1 min-w-0">
+          {rows.map((d) => (
+            <div key={d.plan} className="flex items-center gap-2.5">
+              <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: d.colour }} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{d.plan}</span>
+                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: "#6B7280" }}>{d.pct}% ({d.count})</span>
+                </div>
+                <div className="mt-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(27,67,50,0.08)" }}>
+                  <div className="h-full rounded-full" style={{ width: `${d.pct}%`, backgroundColor: d.colour }} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Link
+        to="/admin/subscriptions"
+        className="mt-5 pt-4 text-center text-sm font-semibold transition-opacity hover:opacity-70"
+        style={{ color: "#2D6A4F", borderTop: "1px solid rgba(27,67,50,0.08)" }}
+      >
+        View All Plans
+      </Link>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { data: summary, loading: loadingSummary } = useFetch(getReportingSummary, []);
   const { data: approvals } = useFetch(() => getApprovals({ status: "Pending" }), []);
@@ -211,8 +286,15 @@ export default function DashboardPage() {
         <StatCard label="Total Users" value={s.totalUsers ?? "—"} sub={`+${s.newUsersThisMonth} this month`} accent="#2D6A4F" to="/admin/users" />
       </div>
 
-      <RevenueChart />
-      <SignupChart />
+      <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-start">
+        <div className="flex flex-col gap-6">
+          <RevenueChart />
+          <SignupChart />
+        </div>
+        <div style={{ width: 320 }}>
+          <PlanDistributionChart />
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Pending content approvals */}

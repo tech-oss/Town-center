@@ -163,6 +163,18 @@ export function getSignupTrend({ days = 30 } = {}) {
   return mock(DAILY_SIGNUPS_30.slice(-days));
 }
 
+// ─── Plan distribution (all-time) ─────────────────────────────────────────────
+export function getPlanDistribution() {
+  const data = [
+    { plan: "Free",    count: 18, colour: "#52B788" },
+    { plan: "Basic",   count: 8,  colour: "#2D6A4F" },
+    { plan: "Plan 1",  count: 19, colour: "#1B4332" },
+    { plan: "Plan 2",  count: 14, colour: "#E8A33D" },
+  ];
+  const total = data.reduce((s, d) => s + d.count, 0);
+  return mock(data.map((d) => ({ ...d, pct: Math.round((d.count / total) * 100) })));
+}
+
 // Listings by section — extra breakdown for the admin.
 export function getListingsBySection() {
   return mock([
