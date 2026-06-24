@@ -10,6 +10,7 @@ import {
   getRevenueTrend, getSignupTrend, getPlanDistribution, getTopCategories,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
+import InfoTip from "../components/InfoTip";
 
 // ─── Theme tokens ─────────────────────────────────────────────────────────────
 const NAVY    = "#0A192F";
@@ -142,7 +143,7 @@ function RevenueChart() {
       <div className="flex items-start justify-between gap-4 mb-1 flex-wrap gap-y-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Revenue Overview</h2>
-          <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
+          <InfoTip text="Total subscription revenue collected over the selected period. Each point is one day's takings; the large figure is the period total, with the percentage change versus the previous period." />
         </div>
         <PeriodSelector days={days} setDays={setDays} />
       </div>
@@ -184,7 +185,7 @@ function PlanDistributionChart() {
     <div className="bg-white rounded-xl p-6 flex flex-col h-full" style={CARD}>
       <div className="flex items-center gap-2 mb-4">
         <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Plan Distribution</h2>
-        <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
+        <InfoTip text="How all registered businesses are split across subscription plans. Each coloured segment is a plan, and the centre shows the total number of businesses." />
       </div>
       <div className="relative mx-auto" style={{ width: 170, height: 170, filter: "drop-shadow(0 8px 12px rgba(10,25,47,0.28))" }}>
         <PieChart width={170} height={170}>
@@ -262,7 +263,7 @@ function SignupChart() {
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap gap-y-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Platform Overview</h2>
-          <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
+          <InfoTip text="Cumulative business sign-ups over the selected period, with a separate line for each plan tier — Free, Plan 1, Plan 2 and Plan 3 — so you can compare growth across tiers." />
         </div>
         <PeriodSelector days={days} setDays={setDays} />
       </div>
@@ -299,7 +300,7 @@ function TopCategoriesCard() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Top Performing Categories</h2>
-          <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
+          <InfoTip text="Business categories ranked by number of active listings. Each bar and percentage show that category's share of all listings on the platform." />
         </div>
         <Link to="/admin/listings" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: BRASS }}>View All</Link>
       </div>

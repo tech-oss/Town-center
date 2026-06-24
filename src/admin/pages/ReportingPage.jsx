@@ -9,12 +9,16 @@ import {
 } from "../../api/admin";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import LoadingState from "../components/LoadingState";
+import InfoTip from "../components/InfoTip";
 
-function Card({ title, subtitle, children }) {
+function Card({ title, subtitle, info, children }) {
   return (
     <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
       <div className="mb-4">
-        <h3 className="font-bold text-sm" style={{ color: "#0A192F" }}>{title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold text-sm" style={{ color: "#0A192F" }}>{title}</h3>
+          {info && <InfoTip text={info} />}
+        </div>
         {subtitle && <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{subtitle}</p>}
       </div>
       {children}
@@ -119,7 +123,8 @@ export default function ReportingPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Revenue by tier */}
-        <Card title="Revenue by Tier" subtitle={`This month${tier !== "All" ? ` · ${tier}` : ""}`}>
+        <Card title="Revenue by Tier" subtitle={`This month${tier !== "All" ? ` · ${tier}` : ""}`} info="Monthly subscription revenue contributed by each plan tier. Taller bars earn more; use it to see which tiers drive income.">
+
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={revenueByTier} barSize={32}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(10,25,47,0.08)" />
@@ -132,7 +137,8 @@ export default function ReportingPage() {
         </Card>
 
         {/* Subscriptions by tier over time */}
-        <Card title="Subscriptions by Tier" subtitle={rangeLabel}>
+        <Card title="Subscriptions by Tier" subtitle={rangeLabel} info="Number of active subscriptions per plan tier over time. Each line is a tier, so you can track how each one grows or declines across the range.">
+
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={subTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(10,25,47,0.08)" />
@@ -148,7 +154,8 @@ export default function ReportingPage() {
         </Card>
 
         {/* Activity trend */}
-        <Card title="User Activity" subtitle={`Logins & new listings · ${rangeLabel}`}>
+        <Card title="User Activity" subtitle={`Logins & new listings · ${rangeLabel}`} info="Platform engagement over time: the navy line tracks user logins and the brass line tracks new listings created in each period.">
+
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={activityTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(10,25,47,0.08)" />
@@ -163,7 +170,8 @@ export default function ReportingPage() {
         </Card>
 
         {/* Listings by section */}
-        <Card title="Active Listings by Section" subtitle="Current directory breakdown">
+        <Card title="Active Listings by Section" subtitle="Current directory breakdown" info="How current live directory listings are distributed across site sections. Longer bars mean more active listings in that section.">
+
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={bySection ?? []} layout="vertical" barSize={26}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(10,25,47,0.08)" horizontal={false} />
@@ -178,7 +186,8 @@ export default function ReportingPage() {
 
       {/* Bottom row: tier breakdown + listings status */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <Card title="Tier Breakdown" subtitle="Accounts and monthly revenue per tier">
+        <Card title="Tier Breakdown" subtitle="Accounts and monthly revenue per tier" info="A per-tier summary table: how many accounts sit on each plan and the monthly revenue each tier generates.">
+
           <div className="flex flex-col gap-3">
             {(revenueByTier ?? []).map((t) => {
               const maxRevenue = Math.max(...(revenueByTier ?? []).map((x) => x.revenue), 1);
@@ -197,7 +206,8 @@ export default function ReportingPage() {
           </div>
         </Card>
 
-        <Card title="Listings by Status" subtitle="Health of the business directory">
+        <Card title="Listings by Status" subtitle="Health of the business directory" info="Breakdown of directory listings by status — active, pending and lapsed — to gauge the overall health of the business directory.">
+
           <div className="flex flex-col gap-3">
             {Object.entries(s.listingsByStatus ?? {}).map(([status, count], i) => {
               const total = Object.values(s.listingsByStatus ?? {}).reduce((a, b) => a + b, 0) || 1;
