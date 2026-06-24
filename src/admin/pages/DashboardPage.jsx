@@ -105,7 +105,7 @@ function RevenueChart() {
   const tickInterval = days === 7 ? 0 : days === 15 ? 2 : 4;
 
   return (
-    <div className="bg-white rounded-xl p-6" style={CARD}>
+    <div className="bg-white rounded-xl p-6 h-full flex flex-col" style={CARD}>
       <div className="flex items-start justify-between gap-4 mb-1 flex-wrap gap-y-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Revenue Overview</h2>
@@ -117,8 +117,9 @@ function RevenueChart() {
       <p className="text-sm mt-0.5 mb-5 font-medium" style={{ color: up ? BRASS3 : "#991B1B" }}>
         {up ? "+" : ""}{trend.change}% on previous {days} days
       </p>
-      <ResponsiveContainer width="100%" height={170}>
-        <AreaChart data={trend.data} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
+      <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart data={trend.data} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="brassGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%"  stopColor={BRASS}  stopOpacity={0.22} />
@@ -126,12 +127,13 @@ function RevenueChart() {
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} interval={tickInterval} />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} interval={tickInterval} padding={{ right: 12 }} />
           <YAxis tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} tickFormatter={(v) => `£${v}`} />
           <Tooltip content={<RevTooltip />} cursor={{ stroke: BORDER, strokeWidth: 1 }} />
           <Area type="monotone" dataKey="revenue" stroke={BRASS} strokeWidth={2} fill="url(#brassGrad)" dot={false} activeDot={{ r: 4, fill: BRASS, strokeWidth: 0 }} isAnimationActive={false} />
         </AreaChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -146,7 +148,7 @@ function PlanDistributionChart() {
   const total = rows.reduce((s, d) => s + d.count, 0);
 
   return (
-    <div className="bg-white rounded-xl p-6 flex flex-col" style={CARD}>
+    <div className="bg-white rounded-xl p-6 flex flex-col h-full" style={CARD}>
       <div className="flex items-center gap-2 mb-4">
         <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Plan Distribution</h2>
         <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
@@ -211,7 +213,7 @@ function SignupChart() {
   const tickInterval = days === 7 ? 0 : days === 15 ? 2 : 4;
 
   return (
-    <div className="bg-white rounded-xl p-6" style={CARD}>
+    <div className="bg-white rounded-xl p-6 h-full flex flex-col" style={CARD}>
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap gap-y-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Platform Overview</h2>
@@ -219,10 +221,11 @@ function SignupChart() {
         </div>
         <PeriodSelector days={days} setDays={setDays} />
       </div>
-      <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={rows ?? []} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+      <div className="flex-1 min-h-0" style={{ minHeight: 200 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={rows ?? []} margin={{ top: 4, right: 12, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} interval={tickInterval} />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} interval={tickInterval} padding={{ right: 12 }} />
           <YAxis tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} allowDecimals={false} />
           <Tooltip content={<SignupTooltip />} cursor={{ stroke: BORDER, strokeWidth: 1 }} />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 12 }}
@@ -233,6 +236,7 @@ function SignupChart() {
           ))}
         </LineChart>
       </ResponsiveContainer>
+      </div>
     </div>
   );
 }
@@ -246,7 +250,7 @@ function TopCategoriesCard() {
   const max = Math.max(...rows.map((r) => r.count), 1);
 
   return (
-    <div className="bg-white rounded-xl p-6" style={CARD}>
+    <div className="bg-white rounded-xl p-6 h-full flex flex-col" style={CARD}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Top Performing Categories</h2>
@@ -254,7 +258,7 @@ function TopCategoriesCard() {
         </div>
         <Link to="/admin/listings" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: BRASS }}>View All</Link>
       </div>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 flex-1 justify-center">
         {rows.map((r, i) => (
           <div key={r.category} className="flex items-center gap-3">
             <span className="text-base w-6 text-center shrink-0">{r.icon}</span>
@@ -340,15 +344,15 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Revenue + Plan distribution ── */}
-      <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-start">
-        <div className="min-w-0"><RevenueChart /></div>
-        <div className="min-w-0"><PlanDistributionChart /></div>
+      <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-stretch">
+        <div className="min-w-0 h-full"><RevenueChart /></div>
+        <div className="min-w-0 h-full"><PlanDistributionChart /></div>
       </div>
 
       {/* ── Platform + Top categories ── */}
-      <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-start">
-        <div className="min-w-0"><SignupChart /></div>
-        <div className="min-w-0"><TopCategoriesCard /></div>
+      <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-stretch">
+        <div className="min-w-0 h-full"><SignupChart /></div>
+        <div className="min-w-0 h-full"><TopCategoriesCard /></div>
       </div>
 
       {/* ── Pending content + Pending business ── */}
