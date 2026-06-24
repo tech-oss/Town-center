@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import useFetch from "../../hooks/useFetch";
-import { getReportingSummary, getApprovals, getBusinesses, getUsers } from "../../api/admin";
+import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import StatusTag from "../components/StatusTag";
 
@@ -21,6 +23,79 @@ function QuickAction({ icon, label, to }) {
       <span className="text-2xl">{icon}</span>
       <span className="text-xs font-semibold" style={{ color: "#1B4332" }}>{label}</span>
     </Link>
+  );
+}
+
+const PERIODS = [
+  { key: 7, label: "Last 7 Days" },
+  { key: 15, label: "Last 15 Days" },
+  { key: 30, label: "Last 30 Days" },
+];
+
+function CustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl px-3 py-2 text-sm shadow-lg" style={{ backgroundColor: "#1B4332", color: "#fff" }}>
+      <p className="font-semibold">£{payload[0].value.toLocaleString()}</p>
+      <p className="text-xs opacity-70">{label}</p>
+    </div>
+  );
+}
+
+function RevenueChart() {
+  const [days, setDays] = useState(7);
+  const { data } = useFetch(() => getRevenueTrend({ days }), [days]);
+
+  const trend = data ?? { data: [], total: 0, change: 0 };
+  const up = trend.change >= 0;
+
+  // Thin the x-axis labels so they don't crowd
+  const tickInterval = days === 7 ? 0 : days === 15 ? 2 : 4;
+
+  return (
+    <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
+      <div className="flex items-start justify-between gap-4 mb-1">
+        <div>
+          <div className="flex items-center gap-1.5">
+            <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Revenue Overview</h2>
+            <span className="text-xs rounded-full px-1.5 py-0.5" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#6B7280" }}>ⓘ</span>
+          </div>
+          <p className="text-3xl font-bold mt-1" style={{ color: "#1B4332" }}>£{trend.total.toLocaleString()}</p>
+          <p className="text-sm mt-0.5 font-medium" style={{ color: up ? "#2D6A4F" : "#991B1B" }}>
+            {up ? "↑" : "↓"} {Math.abs(trend.change)}% vs previous {days} days
+          </p>
+        </div>
+        {/* Period selector */}
+        <div className="flex gap-1 rounded-xl p-1 shrink-0" style={{ backgroundColor: "rgba(27,67,50,0.05)" }}>
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setDays(p.key)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all"
+              style={days === p.key ? { backgroundColor: "#1B4332", color: "#fff" } : { color: "#6B7280" }}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart data={trend.data} margin={{ top: 16, right: 0, left: -20, bottom: 0 }}>
+          <defs>
+            <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#2D6A4F" stopOpacity={0.18} />
+              <stop offset="95%" stopColor="#2D6A4F" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(27,67,50,0.07)" vertical={false} />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} interval={tickInterval} />
+          <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} tickFormatter={(v) => `£${v}`} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(27,67,50,0.15)", strokeWidth: 1 }} />
+          <Area type="monotone" dataKey="revenue" stroke="#2D6A4F" strokeWidth={2.5} fill="url(#revenueGrad)" dot={false} activeDot={{ r: 5, fill: "#2D6A4F", strokeWidth: 0 }} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   );
 }
 
@@ -48,6 +123,8 @@ export default function DashboardPage() {
         <StatCard label="Pending Approvals" value={approvals?.length ?? "—"} sub="Awaiting review" accent="#E8A33D" to="/admin/approvals" />
         <StatCard label="Total Users" value={s.totalUsers ?? "—"} sub={`+${s.newUsersThisMonth} this month`} accent="#2D6A4F" to="/admin/users" />
       </div>
+
+      <RevenueChart />
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Pending content approvals */}

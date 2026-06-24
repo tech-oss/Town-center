@@ -102,6 +102,29 @@ export function getActivityTrend({ range = "6m" } = {}) {
   return mock(sliceRange(ACTIVITY_12, range).map(({ month, logins, listings }) => ({ month, logins, listings })));
 }
 
+// ─── Daily revenue (last 30 days, trailing newest = today Jun 24) ─────────────
+const DAILY_REVENUE_30 = [
+  { date: "May 25", revenue: 38 }, { date: "May 26", revenue: 42 }, { date: "May 27", revenue: 39 },
+  { date: "May 28", revenue: 55 }, { date: "May 29", revenue: 61 }, { date: "May 30", revenue: 48 },
+  { date: "May 31", revenue: 52 }, { date: "Jun 1",  revenue: 79 }, { date: "Jun 2",  revenue: 84 },
+  { date: "Jun 3",  revenue: 71 }, { date: "Jun 4",  revenue: 66 }, { date: "Jun 5",  revenue: 90 },
+  { date: "Jun 6",  revenue: 95 }, { date: "Jun 7",  revenue: 88 }, { date: "Jun 8",  revenue: 102 },
+  { date: "Jun 9",  revenue: 97 }, { date: "Jun 10", revenue: 110 }, { date: "Jun 11", revenue: 118 },
+  { date: "Jun 12", revenue: 105 }, { date: "Jun 13", revenue: 99 }, { date: "Jun 14", revenue: 112 },
+  { date: "Jun 15", revenue: 126 }, { date: "Jun 16", revenue: 134 }, { date: "Jun 17", revenue: 121 },
+  { date: "Jun 18", revenue: 139 }, { date: "Jun 19", revenue: 148 }, { date: "Jun 20", revenue: 156 },
+  { date: "Jun 21", revenue: 143 }, { date: "Jun 22", revenue: 161 }, { date: "Jun 23", revenue: 168 },
+];
+
+export function getRevenueTrend({ days = 30 } = {}) {
+  const slice = DAILY_REVENUE_30.slice(-days);
+  const total = slice.reduce((s, d) => s + d.revenue, 0);
+  const prev = DAILY_REVENUE_30.slice(-days * 2, -days);
+  const prevTotal = prev.reduce((s, d) => s + d.revenue, 0) || total;
+  const change = Math.round(((total - prevTotal) / prevTotal) * 1000) / 10;
+  return mock({ data: slice, total, change });
+}
+
 // Listings by section — extra breakdown for the admin.
 export function getListingsBySection() {
   return mock([
