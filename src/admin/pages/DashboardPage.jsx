@@ -305,114 +305,148 @@ export default function DashboardPage() {
 
   const s = summary ?? {};
 
+  const card = { backgroundColor: "#fff", boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" };
+
   return (
-    <div className="flex flex-col gap-8 max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#1B4332" }}>Dashboard</h1>
-        <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Overview of the Maidenhead Town Centre Portal.</p>
-      </div>
+    <div className="flex flex-col gap-7 max-w-6xl">
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Revenue this Month" value={`£${(s.mrr ?? 0).toLocaleString()}`} sub={`${s.mrrChange > 0 ? "+" : ""}${s.mrrChange}% vs last month`} accent="#2D6A4F" to="/admin/subscriptions" />
-        <StatCard label="Active Subscriptions" value={s.activeSubscriptions ?? "—"} sub={`${s.subscriptionsChange > 0 ? "+" : ""}${s.subscriptionsChange} this month`} accent="#2D6A4F" to="/admin/subscriptions" />
-        <StatCard label="Pending Approvals" value={approvals?.length ?? "—"} sub="Awaiting review" accent="#E8A33D" to="/admin/approvals" />
-        <StatCard label="Total Users" value={s.totalUsers ?? "—"} sub={`+${s.newUsersThisMonth} this month`} accent="#2D6A4F" to="/admin/users" />
-      </div>
-
-      <div className="grid lg:grid-cols-[1fr_auto] gap-6 items-start">
-        <div className="flex flex-col gap-6">
-          <RevenueChart />
-          <SignupChart />
+      {/* ── Page header ───────────────────────────────────────────── */}
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: "#1B4332" }}>Dashboard</h1>
+          <p className="text-sm mt-0.5" style={{ color: "#6B7280" }}>Overview of the Maidenhead Town Centre Portal.</p>
         </div>
-        <div style={{ width: 380 }}>
-          <PlanDistributionChart />
-        </div>
+        <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>Today, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</span>
       </div>
 
-      <TopCategoriesCard />
+      {/* ── Row 1 · Business metrics ──────────────────────────────── */}
+      <section>
+        <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>Business Overview</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard label="Revenue this Month" value={`£${(s.mrr ?? 0).toLocaleString()}`} sub={`${s.mrrChange > 0 ? "+" : ""}${s.mrrChange}% vs last month`} accent="#2D6A4F" to="/admin/subscriptions" />
+          <StatCard label="Active Subscriptions" value={s.activeSubscriptions ?? "—"} sub={`${s.subscriptionsChange > 0 ? "+" : ""}${s.subscriptionsChange} this month`} accent="#2D6A4F" to="/admin/subscriptions" />
+          <StatCard label="Total Users" value={s.totalUsers ?? "—"} sub={`+${s.newUsersThisMonth} this month`} accent="#2D6A4F" to="/admin/users" />
+        </div>
+      </section>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Pending content approvals */}
-        <div className="lg:col-span-1 bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Pending Content</h2>
-            <Link to="/admin/approvals" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View all →</Link>
-          </div>
-          {(approvals ?? []).length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "#9CA3AF" }}>All clear — nothing pending. 🎉</p>
-          ) : (
-            <div className="flex flex-col divide-y" style={{ borderColor: "rgba(27,67,50,0.08)" }}>
-              {(approvals ?? []).slice(0, 5).map((a) => (
-                <Link key={a.id} to={`/admin/approvals/${a.id}`} className="py-3 flex items-start justify-between gap-3 hover:opacity-80 transition-opacity">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{a.business}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: "#6B7280" }}>{a.type} — {a.summary}</p>
-                  </div>
-                  <StatusTag status={a.status} />
-                </Link>
-              ))}
+      {/* ── Row 2 · Action items ──────────────────────────────────── */}
+      <section>
+        <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>Needs Your Attention</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { label: "Pending Content Approvals", value: approvals?.length ?? 0, sub: "Content submissions awaiting review", to: "/admin/approvals" },
+            { label: "Pending Business Approvals", value: pendingBusinesses?.length ?? 0, sub: "Business registrations awaiting approval", to: "/admin/businesses" },
+            { label: "Pending User Approvals", value: pendingUsers?.length ?? 0, sub: "User sign-ups awaiting activation", to: "/admin/users" },
+          ].map(({ label, value, sub, to }) => (
+            <Link key={label} to={to} className="rounded-2xl p-5 flex flex-col gap-1 transition-all hover:-translate-y-0.5" style={{ ...card, borderLeft: "4px solid #E8A33D" }}>
+              <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B7280" }}>{label}</span>
+              <span className="text-3xl font-bold" style={{ color: "#1B4332" }}>{value}</span>
+              <span className="text-xs font-medium" style={{ color: "#E8A33D" }}>{sub}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Row 3 · Revenue chart + Plan distribution ─────────────── */}
+      <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-start">
+        <div className="min-w-0"><RevenueChart /></div>
+        <div className="min-w-0"><PlanDistributionChart /></div>
+      </div>
+
+      {/* ── Row 4 · Platform chart + Top categories ───────────────── */}
+      <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-start">
+        <div className="min-w-0"><SignupChart /></div>
+        <div className="min-w-0"><TopCategoriesCard /></div>
+      </div>
+
+      {/* ── Row 5 · Pending work queues ───────────────────────────── */}
+      <section>
+        <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>Pending Queues</p>
+        <div className="grid lg:grid-cols-3 gap-6">
+
+          {/* Content approvals */}
+          <div className="bg-white rounded-2xl p-6" style={card}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-sm" style={{ color: "#1B4332" }}>Pending Content Approvals</h2>
+              <Link to="/admin/approvals" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View all →</Link>
             </div>
-          )}
-        </div>
-
-        {/* Pending business registrations */}
-        <div className="lg:col-span-1 bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Pending Businesses</h2>
-            <Link to="/admin/businesses" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View all →</Link>
+            {(approvals ?? []).length === 0 ? (
+              <p className="text-sm text-center py-6" style={{ color: "#9CA3AF" }}>All clear — nothing pending. 🎉</p>
+            ) : (
+              <div className="flex flex-col divide-y" style={{ borderColor: "rgba(27,67,50,0.08)" }}>
+                {(approvals ?? []).slice(0, 5).map((a) => (
+                  <Link key={a.id} to={`/admin/approvals/${a.id}`} className="py-3 flex items-start justify-between gap-3 hover:opacity-80 transition-opacity">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{a.business}</p>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#6B7280" }}>{a.type} — {a.summary}</p>
+                    </div>
+                    <StatusTag status={a.status} />
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-          {(pendingBusinesses ?? []).length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "#9CA3AF" }}>No pending business registrations.</p>
-          ) : (
-            <div className="flex flex-col divide-y" style={{ borderColor: "rgba(27,67,50,0.08)" }}>
-              {(pendingBusinesses ?? []).slice(0, 5).map((b) => (
-                <div key={b.id} className="py-3 flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{b.name}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: "#6B7280" }}>{b.category} · {b.plan}</p>
-                  </div>
-                  <StatusTag status={b.status} />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        {/* Pending user sign-ups */}
-        <div className="lg:col-span-1 bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Pending Sign-ups</h2>
-            <Link to="/admin/users" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View all →</Link>
+          {/* Business approvals */}
+          <div className="bg-white rounded-2xl p-6" style={card}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-sm" style={{ color: "#1B4332" }}>Pending Business Approvals</h2>
+              <Link to="/admin/businesses" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View all →</Link>
+            </div>
+            {(pendingBusinesses ?? []).length === 0 ? (
+              <p className="text-sm text-center py-6" style={{ color: "#9CA3AF" }}>No pending business registrations.</p>
+            ) : (
+              <div className="flex flex-col divide-y" style={{ borderColor: "rgba(27,67,50,0.08)" }}>
+                {(pendingBusinesses ?? []).slice(0, 5).map((b) => (
+                  <div key={b.id} className="py-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{b.name}</p>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#6B7280" }}>{b.category} · {b.plan}</p>
+                    </div>
+                    <StatusTag status={b.status} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          {(pendingUsers ?? []).length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "#9CA3AF" }}>No pending user sign-ups.</p>
-          ) : (
-            <div className="flex flex-col divide-y" style={{ borderColor: "rgba(27,67,50,0.08)" }}>
-              {(pendingUsers ?? []).slice(0, 5).map((u) => (
-                <Link key={u.id} to={`/admin/users/${u.id}`} className="py-3 flex items-start justify-between gap-3 hover:opacity-80 transition-opacity">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{u.name}</p>
-                    <p className="text-xs mt-0.5 truncate" style={{ color: "#6B7280" }}>{u.business} · {u.role}</p>
-                  </div>
-                  <StatusTag status={u.status} />
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
 
-      {/* Quick actions */}
-      <div>
-        <h2 className="font-bold text-base mb-4" style={{ color: "#1B4332" }}>Quick Actions</h2>
+          {/* User approvals */}
+          <div className="bg-white rounded-2xl p-6" style={card}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-sm" style={{ color: "#1B4332" }}>Pending User Approvals</h2>
+              <Link to="/admin/users" className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2D6A4F" }}>View all →</Link>
+            </div>
+            {(pendingUsers ?? []).length === 0 ? (
+              <p className="text-sm text-center py-6" style={{ color: "#9CA3AF" }}>No pending user sign-ups.</p>
+            ) : (
+              <div className="flex flex-col divide-y" style={{ borderColor: "rgba(27,67,50,0.08)" }}>
+                {(pendingUsers ?? []).slice(0, 5).map((u) => (
+                  <Link key={u.id} to={`/admin/users/${u.id}`} className="py-3 flex items-start justify-between gap-3 hover:opacity-80 transition-opacity">
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{u.name}</p>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#6B7280" }}>{u.business} · {u.role}</p>
+                    </div>
+                    <StatusTag status={u.status} />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── Row 6 · Quick actions ─────────────────────────────────── */}
+      <section>
+        <p className="text-[11px] font-bold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>Quick Actions</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <QuickAction icon="➕" label="Add Listing" to="/admin/listings" />
           <QuickAction icon="📅" label="Add Event" to="/admin/events-news" />
           <QuickAction icon="🗺" label="Add Project" to="/admin/projects" />
           <QuickAction icon="📊" label="View Reports" to="/admin/reporting" />
         </div>
-      </div>
+      </section>
+
     </div>
   );
 }
