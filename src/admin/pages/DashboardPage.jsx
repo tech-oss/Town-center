@@ -198,56 +198,54 @@ function PlanDistributionChart() {
         <span className="text-xs rounded-full px-1.5 py-0.5" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#6B7280" }}>ⓘ</span>
       </div>
 
-      <div className="flex items-center gap-6 flex-1">
-        {/* Donut */}
-        <div className="relative shrink-0" style={{ width: 160, height: 160 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={rows}
-                dataKey="count"
-                nameKey="plan"
-                cx="50%"
-                cy="50%"
-                innerRadius={52}
-                outerRadius={76}
-                paddingAngle={3}
-                strokeWidth={0}
-              >
-                {rows.map((entry) => (
-                  <Cell key={entry.plan} fill={entry.colour} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value, name) => [`${value} businesses`, name]}
-                contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)", fontSize: 12 }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          {/* Centre label */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-2xl font-bold" style={{ color: "#1B4332" }}>{total.toLocaleString()}</span>
-            <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>Total</span>
-          </div>
+      {/* Donut — centred */}
+      <div className="relative mx-auto" style={{ width: 180, height: 180 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={rows}
+              dataKey="count"
+              nameKey="plan"
+              cx="50%"
+              cy="50%"
+              innerRadius={58}
+              outerRadius={84}
+              paddingAngle={3}
+              strokeWidth={0}
+            >
+              {rows.map((entry) => (
+                <Cell key={entry.plan} fill={entry.colour} />
+              ))}
+            </Pie>
+            <Tooltip
+              formatter={(value, name) => [`${value} businesses`, name]}
+              contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)", fontSize: 12 }}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+        {/* Centre label */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-2xl font-bold" style={{ color: "#1B4332" }}>{total.toLocaleString()}</span>
+          <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>Total</span>
         </div>
+      </div>
 
-        {/* Legend */}
-        <div className="flex flex-col gap-3 flex-1 min-w-0">
-          {rows.map((d) => (
-            <div key={d.plan} className="flex items-center gap-2.5">
-              <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: d.colour }} />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-semibold truncate" style={{ color: "#1B4332" }}>{d.plan}</span>
-                  <span className="text-xs font-medium whitespace-nowrap" style={{ color: "#6B7280" }}>{d.pct}% ({d.count})</span>
-                </div>
-                <div className="mt-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(27,67,50,0.08)" }}>
-                  <div className="h-full rounded-full" style={{ width: `${d.pct}%`, backgroundColor: d.colour }} />
-                </div>
+      {/* Legend — full width below donut */}
+      <div className="flex flex-col gap-3 mt-5">
+        {rows.map((d) => (
+          <div key={d.plan} className="flex items-center gap-3">
+            <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: d.colour }} />
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold" style={{ color: "#1B4332" }}>{d.plan}</span>
+                <span className="text-xs font-medium" style={{ color: "#6B7280" }}>{d.pct}% ({d.count})</span>
+              </div>
+              <div className="mt-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(27,67,50,0.08)" }}>
+                <div className="h-full rounded-full" style={{ width: `${d.pct}%`, backgroundColor: d.colour }} />
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       <Link
@@ -291,7 +289,7 @@ export default function DashboardPage() {
           <RevenueChart />
           <SignupChart />
         </div>
-        <div style={{ width: 320 }}>
+        <div style={{ width: 380 }}>
           <PlanDistributionChart />
         </div>
       </div>
