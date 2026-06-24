@@ -125,6 +125,44 @@ export function getRevenueTrend({ days = 30 } = {}) {
   return mock({ data: slice, total, change });
 }
 
+// ─── Daily business sign-ups by plan (last 30 days, cumulative totals) ────────
+const DAILY_SIGNUPS_30 = [
+  { date: "May 25", Free: 12, "Plan 1": 5, "Plan 2": 3, "Plan 3": 1 },
+  { date: "May 26", Free: 13, "Plan 1": 5, "Plan 2": 3, "Plan 3": 1 },
+  { date: "May 27", Free: 13, "Plan 1": 6, "Plan 2": 3, "Plan 3": 1 },
+  { date: "May 28", Free: 14, "Plan 1": 6, "Plan 2": 4, "Plan 3": 1 },
+  { date: "May 29", Free: 15, "Plan 1": 6, "Plan 2": 4, "Plan 3": 2 },
+  { date: "May 30", Free: 15, "Plan 1": 7, "Plan 2": 4, "Plan 3": 2 },
+  { date: "May 31", Free: 16, "Plan 1": 7, "Plan 2": 5, "Plan 3": 2 },
+  { date: "Jun 1",  Free: 17, "Plan 1": 8, "Plan 2": 5, "Plan 3": 2 },
+  { date: "Jun 2",  Free: 18, "Plan 1": 8, "Plan 2": 5, "Plan 3": 2 },
+  { date: "Jun 3",  Free: 18, "Plan 1": 8, "Plan 2": 6, "Plan 3": 3 },
+  { date: "Jun 4",  Free: 19, "Plan 1": 9, "Plan 2": 6, "Plan 3": 3 },
+  { date: "Jun 5",  Free: 20, "Plan 1": 9, "Plan 2": 6, "Plan 3": 3 },
+  { date: "Jun 6",  Free: 21, "Plan 1": 10, "Plan 2": 7, "Plan 3": 3 },
+  { date: "Jun 7",  Free: 22, "Plan 1": 10, "Plan 2": 7, "Plan 3": 4 },
+  { date: "Jun 8",  Free: 23, "Plan 1": 11, "Plan 2": 7, "Plan 3": 4 },
+  { date: "Jun 9",  Free: 24, "Plan 1": 11, "Plan 2": 8, "Plan 3": 4 },
+  { date: "Jun 10", Free: 25, "Plan 1": 12, "Plan 2": 8, "Plan 3": 4 },
+  { date: "Jun 11", Free: 26, "Plan 1": 12, "Plan 2": 9, "Plan 3": 5 },
+  { date: "Jun 12", Free: 27, "Plan 1": 13, "Plan 2": 9, "Plan 3": 5 },
+  { date: "Jun 13", Free: 28, "Plan 1": 13, "Plan 2": 9, "Plan 3": 5 },
+  { date: "Jun 14", Free: 29, "Plan 1": 14, "Plan 2": 10, "Plan 3": 5 },
+  { date: "Jun 15", Free: 30, "Plan 1": 14, "Plan 2": 10, "Plan 3": 6 },
+  { date: "Jun 16", Free: 31, "Plan 1": 15, "Plan 2": 11, "Plan 3": 6 },
+  { date: "Jun 17", Free: 32, "Plan 1": 15, "Plan 2": 11, "Plan 3": 6 },
+  { date: "Jun 18", Free: 33, "Plan 1": 16, "Plan 2": 12, "Plan 3": 7 },
+  { date: "Jun 19", Free: 34, "Plan 1": 17, "Plan 2": 12, "Plan 3": 7 },
+  { date: "Jun 20", Free: 36, "Plan 1": 17, "Plan 2": 13, "Plan 3": 7 },
+  { date: "Jun 21", Free: 37, "Plan 1": 18, "Plan 2": 13, "Plan 3": 8 },
+  { date: "Jun 22", Free: 38, "Plan 1": 18, "Plan 2": 14, "Plan 3": 8 },
+  { date: "Jun 23", Free: 40, "Plan 1": 19, "Plan 2": 14, "Plan 3": 8 },
+];
+
+export function getSignupTrend({ days = 30 } = {}) {
+  return mock(DAILY_SIGNUPS_30.slice(-days));
+}
+
 // Listings by section — extra breakdown for the admin.
 export function getListingsBySection() {
   return mock([

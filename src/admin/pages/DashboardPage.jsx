@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import useFetch from "../../hooks/useFetch";
-import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend } from "../../api/admin";
+import { getReportingSummary, getApprovals, getBusinesses, getUsers, getRevenueTrend, getSignupTrend } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import StatusTag from "../components/StatusTag";
 
@@ -99,6 +99,93 @@ function RevenueChart() {
   );
 }
 
+const PLAN_COLOURS = {
+  Free: "#52B788",
+  "Plan 1": "#2D6A4F",
+  "Plan 2": "#1B4332",
+  "Plan 3": "#E8A33D",
+};
+
+const PLAN_KEYS = ["Free", "Plan 1", "Plan 2", "Plan 3"];
+
+function SignupCustomTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-xl px-3 py-2.5 text-xs shadow-lg flex flex-col gap-1" style={{ backgroundColor: "#fff", border: "1px solid rgba(27,67,50,0.12)" }}>
+      <p className="font-bold mb-1" style={{ color: "#1B4332" }}>{label}</p>
+      {payload.map((p) => (
+        <div key={p.dataKey} className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+          <span style={{ color: "#6B7280" }}>{p.dataKey}</span>
+          <span className="font-semibold ml-auto pl-3" style={{ color: "#1B4332" }}>{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SignupChart() {
+  const [days, setDays] = useState(7);
+  const { data: rows } = useFetch(() => getSignupTrend({ days }), [days]);
+  const tickInterval = days === 7 ? 0 : days === 15 ? 2 : 4;
+
+  return (
+    <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(27,67,50,0.08)" }}>
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-center gap-1.5">
+          <h2 className="font-bold text-base" style={{ color: "#1B4332" }}>Platform Overview</h2>
+          <span className="text-xs rounded-full px-1.5 py-0.5" style={{ backgroundColor: "rgba(27,67,50,0.07)", color: "#6B7280" }}>ⓘ</span>
+        </div>
+        {/* Period selector */}
+        <div className="flex gap-1 rounded-xl p-1 shrink-0" style={{ backgroundColor: "rgba(27,67,50,0.05)" }}>
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => setDays(p.key)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all"
+              style={days === p.key ? { backgroundColor: "#1B4332", color: "#fff" } : { color: "#6B7280" }}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={rows ?? []} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+          <defs>
+            {PLAN_KEYS.map((k) => (
+              <linearGradient key={k} id={`grad-${k}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={PLAN_COLOURS[k]} stopOpacity={0.12} />
+                <stop offset="95%" stopColor={PLAN_COLOURS[k]} stopOpacity={0} />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(27,67,50,0.07)" vertical={false} />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} interval={tickInterval} />
+          <YAxis tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <Tooltip content={<SignupCustomTooltip />} cursor={{ stroke: "rgba(27,67,50,0.1)", strokeWidth: 1 }} />
+          <Legend
+            wrapperStyle={{ fontSize: 12, paddingTop: 12 }}
+            formatter={(value) => <span style={{ color: "#6B7280" }}>{value}</span>}
+          />
+          {PLAN_KEYS.map((k) => (
+            <Line
+              key={k}
+              type="monotone"
+              dataKey={k}
+              stroke={PLAN_COLOURS[k]}
+              strokeWidth={2.5}
+              dot={{ r: 3, fill: PLAN_COLOURS[k], strokeWidth: 0 }}
+              activeDot={{ r: 5, strokeWidth: 0 }}
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { data: summary, loading: loadingSummary } = useFetch(getReportingSummary, []);
   const { data: approvals } = useFetch(() => getApprovals({ status: "Pending" }), []);
@@ -125,6 +212,7 @@ export default function DashboardPage() {
       </div>
 
       <RevenueChart />
+      <SignupChart />
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Pending content approvals */}
