@@ -85,13 +85,15 @@ function StatCard({ icon, label, value, sub, pending, to }) {
         </div>
       </div>
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1" style={{ color: MUTED }}>{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 leading-[1.35] flex items-end" style={{ color: MUTED, minHeight: "2.7em" }}>{label}</p>
         <p className="text-2xl font-bold" style={{ color: NAVY, fontFamily: CINZEL }}>{value}</p>
       </div>
-      {isPending
-        ? <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded self-start" style={{ backgroundColor: "rgba(179,146,88,0.12)", color: BRASS, border: `1px solid rgba(179,146,88,0.3)` }}>Pending</span>
-        : <p className="text-xs font-medium" style={{ color: BRASS3 }}>{sub}</p>
-      }
+      <div className="mt-auto pt-1">
+        {isPending
+          ? <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded inline-block" style={{ backgroundColor: "rgba(179,146,88,0.12)", color: BRASS, border: `1px solid rgba(179,146,88,0.3)` }}>Pending</span>
+          : <p className="text-xs font-medium" style={{ color: BRASS3 }}>{sub}</p>
+        }
+      </div>
     </div>
   );
   return to ? <Link to={to} className="block h-full">{inner}</Link> : inner;
