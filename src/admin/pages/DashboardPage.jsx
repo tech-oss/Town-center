@@ -129,7 +129,7 @@ function RevenueChart() {
           <XAxis dataKey="date" tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} interval={tickInterval} />
           <YAxis tick={{ fontSize: 11, fill: MUTED }} axisLine={false} tickLine={false} tickFormatter={(v) => `£${v}`} />
           <Tooltip content={<RevTooltip />} cursor={{ stroke: BORDER, strokeWidth: 1 }} />
-          <Area type="monotone" dataKey="revenue" stroke={BRASS} strokeWidth={2} fill="url(#brassGrad)" dot={false} activeDot={{ r: 4, fill: BRASS, strokeWidth: 0 }} />
+          <Area type="monotone" dataKey="revenue" stroke={BRASS} strokeWidth={2} fill="url(#brassGrad)" dot={false} activeDot={{ r: 4, fill: BRASS, strokeWidth: 0 }} isAnimationActive={false} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -152,15 +152,13 @@ function PlanDistributionChart() {
         <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
       </div>
       <div className="relative mx-auto" style={{ width: 170, height: 170 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie data={rows} dataKey="count" nameKey="plan" cx="50%" cy="50%" innerRadius={54} outerRadius={80} paddingAngle={2} strokeWidth={0}>
-              {rows.map((_, i) => <Cell key={i} fill={PIE_COLOURS[i % PIE_COLOURS.length]} />)}
-            </Pie>
-            <Tooltip formatter={(v, n) => [`${v} businesses`, n]}
-              contentStyle={{ borderRadius: 8, border: `1px solid ${BORDER}`, boxShadow: "0 4px 16px rgba(10,25,47,0.1)", fontSize: 12 }} />
-          </PieChart>
-        </ResponsiveContainer>
+        <PieChart width={170} height={170}>
+          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} strokeWidth={0} isAnimationActive={false}>
+            {rows.map((_, i) => <Cell key={i} fill={PIE_COLOURS[i % PIE_COLOURS.length]} />)}
+          </Pie>
+          <Tooltip formatter={(v, n) => [`${v} businesses`, n]}
+            contentStyle={{ borderRadius: 8, border: `1px solid ${BORDER}`, boxShadow: "0 4px 16px rgba(10,25,47,0.1)", fontSize: 12 }} />
+        </PieChart>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-2xl font-bold" style={{ color: NAVY, fontFamily: CINZEL }}>{total}</span>
           <span className="text-xs font-medium mt-0.5" style={{ color: MUTED }}>Total</span>
@@ -231,7 +229,7 @@ function SignupChart() {
             formatter={(v) => <span style={{ color: MUTED }}>{v}</span>} />
           {PLAN_KEYS.map((k) => (
             <Line key={k} type="monotone" dataKey={k} stroke={PLAN_COLOURS[k]} strokeWidth={2}
-              dot={{ r: 3, fill: PLAN_COLOURS[k], strokeWidth: 0 }} activeDot={{ r: 4, strokeWidth: 0 }} />
+              dot={{ r: 3, fill: PLAN_COLOURS[k], strokeWidth: 0 }} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
           ))}
         </LineChart>
       </ResponsiveContainer>

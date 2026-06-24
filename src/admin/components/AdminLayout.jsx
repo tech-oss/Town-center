@@ -106,16 +106,24 @@ export default function AdminLayout({ pendingCount = 0 }) {
       >
         {/* Logo */}
         <div className="px-5 py-5" style={{ borderBottom: `1px solid ${DIVIDER}` }}>
-          <Link to="/" className="flex flex-col gap-0.5">
-            <span style={{ fontFamily: CINZEL, color: BRASS, fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 500 }}>
-              Maidenhead
-            </span>
-            <span style={{ fontFamily: CINZEL, color: "#F4F6F9", fontSize: 14, fontWeight: 400, lineHeight: 1.3 }}>
-              Town Centre
-            </span>
-            <span style={{ fontFamily: CINZEL, fontSize: 8, letterSpacing: "0.15em", textTransform: "uppercase", color: BRASS, backgroundColor: BRASS_BG, border: `1px solid ${BRASS_BDR}`, borderRadius: 4, padding: "2px 6px", alignSelf: "flex-start", marginTop: 4 }}>
-              Admin
-            </span>
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/logo-mark.svg"
+              alt="Maidenhead"
+              className="shrink-0"
+              style={{ width: 44, height: 44, objectFit: "contain" }}
+            />
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span style={{ fontFamily: CINZEL, color: BRASS, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600, lineHeight: 1 }}>
+                Maidenhead
+              </span>
+              <span style={{ fontFamily: CINZEL, color: "#F4F6F9", fontSize: 13, fontWeight: 400, lineHeight: 1.2 }}>
+                Town Centre
+              </span>
+              <span style={{ fontFamily: CINZEL, fontSize: 8, letterSpacing: "0.15em", textTransform: "uppercase", color: BRASS, backgroundColor: BRASS_BG, border: `1px solid ${BRASS_BDR}`, borderRadius: 4, padding: "1px 6px", alignSelf: "flex-start", marginTop: 3 }}>
+                Admin
+              </span>
+            </div>
           </Link>
         </div>
 
