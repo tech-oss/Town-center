@@ -95,7 +95,7 @@ export default function PushNotificationsPage() {
 
       <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
         {/* Compose form */}
-        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
           <h2 className="font-bold text-base" style={{ color: "#0A192F" }}>Compose Notification</h2>
 
           <label className="flex flex-col gap-1">
@@ -167,7 +167,7 @@ export default function PushNotificationsPage() {
         </div>
 
         {/* Live preview */}
-        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
           <h2 className="font-bold text-base" style={{ color: "#0A192F" }}>Preview</h2>
           {form.mobile && <PushPreview title={form.title} body={form.body} channel="mobile" />}
           {form.web && <PushPreview title={form.title} body={form.body} channel="web" />}
@@ -178,7 +178,7 @@ export default function PushNotificationsPage() {
       </div>
 
       {/* Sent history */}
-      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         <h2 className="font-bold text-base mb-4" style={{ color: "#0A192F" }}>Recently Sent</h2>
         <div className="flex flex-col divide-y" style={{ borderColor: "rgba(10,25,47,0.08)" }}>
           {history.map((n) => (

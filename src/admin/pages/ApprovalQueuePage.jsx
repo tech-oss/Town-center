@@ -202,7 +202,7 @@ export default function ApprovalQueuePage() {
               key={item.id}
               className="bg-white rounded-2xl p-5"
               style={{
-                boxShadow: "0 2px 12px rgba(13,42,51,0.07)",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)",
                 border: isSelected
                   ? "1.5px solid #0A192F"
                   : item.source === "xml"

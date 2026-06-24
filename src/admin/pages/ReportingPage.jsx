@@ -12,7 +12,7 @@ import LoadingState from "../components/LoadingState";
 
 function Card({ title, subtitle, children }) {
   return (
-    <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+    <div className="bg-white rounded-2xl p-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
       <div className="mb-4">
         <h3 className="font-bold text-sm" style={{ color: "#0A192F" }}>{title}</h3>
         {subtitle && <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{subtitle}</p>}
@@ -69,7 +69,7 @@ export default function ReportingPage() {
       </div>
 
       {/* Filter toolbar */}
-      <div className="bg-white rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         <label className="flex items-center gap-2 shrink-0">
           <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Date range</span>
           <select

@@ -28,7 +28,7 @@ export function SubscriptionDetailPage() {
         <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(10,25,47,0.1)", color: "#0A192F" }}>{message}</div>
       )}
 
-      <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-xl font-bold" style={{ color: "#0A192F" }}>{sub.business}</h1>
@@ -70,7 +70,7 @@ export function SubscriptionDetailPage() {
       </div>
 
       {/* History timeline */}
-      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         <h2 className="font-bold text-base mb-5" style={{ color: "#0A192F" }}>Subscription History</h2>
         <div className="relative flex flex-col gap-0">
           {sub.history.map((h, i) => (

@@ -46,7 +46,7 @@ function RegisterBusinessForm({ onSave, onCancel }) {
   const field = { border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" };
 
   return (
-    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 4px 24px rgba(13,42,51,0.1)", border: "1.5px solid rgba(10,25,47,0.12)" }}>
+    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1.5px solid rgba(10,25,47,0.12)" }}>
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-base font-bold" style={{ color: "#0A192F" }}>Register New Business</h3>
         <button onClick={onCancel} className="text-lg leading-none opacity-40 hover:opacity-70" style={{ color: "#0A192F" }}>✕</button>
@@ -109,7 +109,7 @@ function RegisterBusinessForm({ onSave, onCancel }) {
 // ─── Business row ─────────────────────────────────────────────────────────────
 function BusinessRow({ biz, onApprove, onReject }) {
   return (
-    <div className="bg-white rounded-2xl p-5 flex items-start gap-4 flex-wrap" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.06)", border: "1px solid rgba(10,25,47,0.08)" }}>
+    <div className="bg-white rounded-2xl p-5 flex items-start gap-4 flex-wrap" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
       <div className="w-11 h-11 rounded-xl flex items-center justify-center text-base font-bold shrink-0" style={{ backgroundColor: "rgba(10,25,47,0.1)", color: "#0A192F" }}>
         {biz.name[0]}
       </div>
@@ -218,7 +218,7 @@ export default function BusinessesPage() {
           { label: "Approved", value: counts.Approved, accent: "#0A192F" },
           { label: "Rejected", value: counts.Rejected, accent: "#991B1B" },
         ].map(({ label, value, accent }) => (
-          <div key={label} className="bg-white rounded-2xl p-4 flex flex-col gap-1" style={{ boxShadow: "0 2px 10px rgba(13,42,51,0.06)", border: "1px solid rgba(10,25,47,0.08)" }}>
+          <div key={label} className="bg-white rounded-2xl p-4 flex flex-col gap-1" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
             <span className="text-2xl font-bold" style={{ color: accent }}>{value}</span>
             <span className="text-xs" style={{ color: "#9CA3AF" }}>{label}</span>
           </div>

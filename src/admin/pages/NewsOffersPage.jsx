@@ -169,7 +169,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
   const canFeature = form.featuredOnHome || featuredCount < 3;
 
   return (
-    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 4px 24px rgba(13,42,51,0.1)", border: "1.5px solid rgba(10,25,47,0.12)" }}>
+    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1.5px solid rgba(10,25,47,0.12)" }}>
       <h3 className="font-bold text-base" style={{ color: "#0A192F" }}>
         {initial?.id ? "Edit News / Offer" : "Create News / Offer"}
       </h3>
@@ -378,7 +378,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
 // ─── Single row card ──────────────────────────────────────────────────────────
 function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
   return (
-    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.06)", border: item.featuredOnHome ? "1.5px solid rgba(232,163,61,0.4)" : "1px solid rgba(10,25,47,0.08)" }}>
+    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: item.featuredOnHome ? "1.5px solid rgba(232,163,61,0.4)" : "1px solid rgba(10,25,47,0.08)" }}>
       {item.image && (
         <img src={item.image} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />
       )}

@@ -296,7 +296,7 @@ export default function ApprovalDetailPage() {
       </div>
 
       {/* Header card */}
-      <div className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: "rgba(10,25,47,0.08)" }}>
@@ -380,7 +380,7 @@ export default function ApprovalDetailPage() {
       </div>
 
       {/* Content detail card */}
-      <div className="bg-white rounded-2xl p-6 flex flex-col gap-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         <h2 className="font-bold text-base" style={{ color: "#0A192F" }}>Submission Content</h2>
         {(item.type === "Listing Edit") && <ListingEditDetail detail={item.detail} />}
         {(item.type === "New Listing") && <NewListingDetail detail={item.detail} />}

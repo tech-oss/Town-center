@@ -27,7 +27,7 @@ export default function UserDetailPage() {
         <Link to="/admin/users" className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: "#0A192F" }}>← Users</Link>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 flex flex-col gap-6" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
         {/* Header */}
         <div className="flex items-start gap-4">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold text-white shrink-0" style={{ backgroundColor: "#0A192F" }}>

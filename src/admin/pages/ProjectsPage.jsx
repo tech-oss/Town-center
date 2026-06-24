@@ -8,7 +8,7 @@ function ProjectEditor({ project, onSave, onCancel }) {
   const [form, setForm] = useState(project ?? { title: "", image: "", description: "", published: false });
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   return (
-    <div className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.12)" }}>
+    <div className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.12)" }}>
       <h3 className="font-bold text-base" style={{ color: "#0A192F" }}>{project?.id ? "Edit Project" : "New Project"}</h3>
       <label className="flex flex-col gap-1">
         <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Title</span>
@@ -75,7 +75,7 @@ export default function ProjectsPage() {
       {list.length === 0 && !editing && <EmptyState title="No projects yet" message="Create your first Explore project." />}
       <div className="flex flex-col gap-4">
         {list.map((p) => (
-          <div key={p.id} className="bg-white rounded-2xl overflow-hidden flex gap-4" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+          <div key={p.id} className="bg-white rounded-2xl overflow-hidden flex gap-4" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
             {p.image && <img src={p.image} alt={p.title} className="w-32 h-24 object-cover shrink-0 rounded-l-2xl" />}
             <div className="flex-1 min-w-0 p-4 flex flex-col gap-1 justify-center">
               <div className="flex items-center gap-2">

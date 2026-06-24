@@ -80,7 +80,7 @@ export default function PropertiesPage() {
       {view === "feeds" && (
         <div className="flex flex-col gap-4">
           {(feeds ?? []).map((feed) => (
-            <div key={feed.id} className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.08)" }}>
+            <div key={feed.id} className="bg-white rounded-2xl p-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
               <div className="flex items-start justify-between gap-4 flex-wrap mb-3">
                 <div>
                   <h3 className="font-bold text-sm" style={{ color: "#0A192F" }}>{feed.name}</h3>

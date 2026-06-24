@@ -19,7 +19,11 @@ const BRASS3  = "#8B6F3E";   // darker brass depth
 const BRASS4  = "#7A8C6E";   // muted olive-brass
 const OFF     = "#F4F6F9";
 const CINZEL  = "'Cinzel', Georgia, serif";
-const CARD    = { backgroundColor: "#fff", boxShadow: "0 2px 16px rgba(10,25,47,0.07)", border: "1px solid rgba(10,25,47,0.08)" };
+const CARD    = {
+  backgroundImage: "linear-gradient(180deg, #ffffff 0%, #f7f5f0 100%)",
+  border: "1px solid rgba(10,25,47,0.06)",
+  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)",
+};
 const MUTED   = "#6B7280";
 const BORDER  = "rgba(10,25,47,0.08)";
 
@@ -30,6 +34,17 @@ function timeAgo(iso) {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
 }
+
+// Lighten / darken a hex colour toward white / black by amount 0..1 (for metallic gradients).
+function mix(hex, amt, toward) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const t = toward === "white" ? 255 : 0;
+  const f = (c) => Math.round(c + (t - c) * amt);
+  return `rgb(${f(r)}, ${f(g)}, ${f(b)})`;
+}
+const lighten = (hex, amt) => mix(hex, amt, "white");
+const darken = (hex, amt) => mix(hex, amt, "black");
 
 // ─── SVG icons for stat cards ─────────────────────────────────────────────────
 const Icons = {
@@ -45,11 +60,18 @@ const Icons = {
 function StatCard({ icon, label, value, sub, pending, to }) {
   const isPending = !!pending;
   const inner = (
-    <div className="bg-white rounded-xl p-5 flex flex-col gap-3 h-full transition-all hover:-translate-y-0.5"
-      style={{ ...CARD, borderTop: `3px solid ${isPending ? BRASS : NAVY}` }}>
+    <div className="bg-white rounded-xl p-5 flex flex-col gap-3 h-full transition-all hover:-translate-y-0.5 relative overflow-hidden"
+      style={CARD}>
+      <span className="absolute top-0 left-0 right-0" style={{ height: 3, backgroundColor: isPending ? BRASS : NAVY }} />
       <div className="flex items-center justify-between">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: isPending ? "rgba(179,146,88,0.1)" : "rgba(10,25,47,0.06)" }}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center"
+          style={{
+            backgroundImage: isPending
+              ? "linear-gradient(145deg, rgba(179,146,88,0.22), rgba(179,146,88,0.06))"
+              : "linear-gradient(145deg, rgba(10,25,47,0.12), rgba(10,25,47,0.03))",
+            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -2px 3px rgba(10,25,47,0.08), 0 2px 4px rgba(10,25,47,0.1)",
+            border: "1px solid rgba(255,255,255,0.6)",
+          }}>
           {icon(isPending ? BRASS : NAVY)}
         </div>
       </div>
@@ -153,14 +175,26 @@ function PlanDistributionChart() {
         <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Plan Distribution</h2>
         <span className="text-[10px] w-4 h-4 flex items-center justify-center rounded-full" style={{ backgroundColor: "rgba(10,25,47,0.07)", color: MUTED }}>i</span>
       </div>
-      <div className="relative mx-auto" style={{ width: 170, height: 170 }}>
+      <div className="relative mx-auto" style={{ width: 170, height: 170, filter: "drop-shadow(0 8px 12px rgba(10,25,47,0.28))" }}>
         <PieChart width={170} height={170}>
-          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} strokeWidth={0} isAnimationActive={false}>
-            {rows.map((_, i) => <Cell key={i} fill={PIE_COLOURS[i % PIE_COLOURS.length]} />)}
+          <defs>
+            {PIE_COLOURS.map((c, i) => (
+              <radialGradient key={i} id={`pieMetal${i}`} cx="38%" cy="32%" r="75%">
+                <stop offset="0%"  stopColor={lighten(c, 0.5)} />
+                <stop offset="45%" stopColor={c} />
+                <stop offset="100%" stopColor={darken(c, 0.35)} />
+              </radialGradient>
+            ))}
+          </defs>
+          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} stroke="rgba(255,255,255,0.55)" strokeWidth={1} isAnimationActive={false}>
+            {rows.map((_, i) => <Cell key={i} fill={`url(#pieMetal${i % PIE_COLOURS.length})`} />)}
           </Pie>
           <Tooltip formatter={(v, n) => [`${v} businesses`, n]}
             contentStyle={{ borderRadius: 8, border: `1px solid ${BORDER}`, boxShadow: "0 4px 16px rgba(10,25,47,0.1)", fontSize: 12 }} />
         </PieChart>
+        {/* glossy highlight sweep */}
+        <div className="absolute inset-0 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(60% 45% at 36% 28%, rgba(255,255,255,0.45), rgba(255,255,255,0) 60%)" }} />
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
           <span className="text-2xl font-bold" style={{ color: NAVY, fontFamily: CINZEL }}>{total}</span>
           <span className="text-xs font-medium mt-0.5" style={{ color: MUTED }}>Total</span>
@@ -263,9 +297,9 @@ function TopCategoriesCard() {
           <div key={r.category} className="flex items-center gap-3">
             <span className="text-base w-6 text-center shrink-0">{r.icon}</span>
             <span className="text-sm font-medium w-32 shrink-0" style={{ color: NAVY }}>{r.category}</span>
-            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(10,25,47,0.07)" }}>
-              <div className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${(r.count / max) * 100}%`, backgroundColor: CAT_COLOURS[i % CAT_COLOURS.length] }} />
+            <div className="lux-track flex-1 rounded-full overflow-hidden" style={{ height: 8 }}>
+              <div className="lux-fill h-full rounded-full transition-all duration-500"
+                style={{ width: `${(r.count / max) * 100}%`, backgroundImage: `linear-gradient(180deg, ${lighten(CAT_COLOURS[i % CAT_COLOURS.length], 0.35)}, ${CAT_COLOURS[i % CAT_COLOURS.length]} 55%, ${darken(CAT_COLOURS[i % CAT_COLOURS.length], 0.2)})` }} />
             </div>
             <span className="text-xs font-medium w-16 text-right shrink-0" style={{ color: MUTED }}>
               {r.pct}% ({r.count})

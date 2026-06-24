@@ -75,7 +75,7 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
     <div
       className="bg-white rounded-2xl overflow-hidden flex flex-col sm:flex-row"
       style={{
-        boxShadow: "0 2px 16px rgba(13,42,51,0.07)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)",
         border: "1px solid rgba(10,25,47,0.09)",
       }}
     >
@@ -172,7 +172,7 @@ function PublicPreviewCard({ story }) {
   return (
     <div
       className="rounded-2xl overflow-hidden flex flex-col md:flex-row gap-0 bg-white"
-      style={{ boxShadow: "0 4px 24px rgba(13,42,51,0.1)", border: "1px solid rgba(10,25,47,0.08)" }}
+      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}
     >
       <div className="md:w-1/2 h-52 md:h-auto bg-gray-100 overflow-hidden">
         {story.image ? (
@@ -215,7 +215,7 @@ function StoryForm({ initial, onSave, onCancel }) {
   return (
     <div
       className="bg-white rounded-2xl p-6 flex flex-col gap-5"
-      style={{ boxShadow: "0 4px 24px rgba(13,42,51,0.1)", border: "1.5px solid rgba(10,25,47,0.12)" }}
+      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1.5px solid rgba(10,25,47,0.12)" }}
     >
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-base font-bold" style={{ color: "#0A192F" }}>
@@ -452,7 +452,7 @@ export default function FeaturedStoriesPage() {
             <div
               key={label}
               className="bg-white rounded-2xl p-4 flex flex-col gap-1"
-              style={{ boxShadow: "0 2px 10px rgba(13,42,51,0.06)", border: "1px solid rgba(10,25,47,0.08)" }}
+              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}
             >
               <span className="text-2xl font-bold" style={{ color: accent ? "#0A192F" : "#0A192F" }}>{value}</span>
               <span className="text-xs" style={{ color: "#9CA3AF" }}>{label}</span>

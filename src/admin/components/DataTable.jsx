@@ -52,7 +52,7 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl" style={{ boxShadow: "0 2px 12px rgba(13,42,51,0.07)", border: "1px solid rgba(10,25,47,0.09)" }}>
+      <div className="overflow-x-auto rounded-2xl" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.09)" }}>
         <table className="w-full min-w-[600px] text-sm border-collapse">
           <thead>
             <tr style={{ backgroundColor: "rgba(10,25,47,0.05)", borderBottom: "1px solid rgba(10,25,47,0.1)" }}>
