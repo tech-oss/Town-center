@@ -29,14 +29,20 @@ const CARD    = {
 const MUTED   = "#64748B";
 const BORDER  = "rgba(16,24,40,0.08)";
 
-// Modern-blue chart palette — blue family with a single amber accent.
-const PASTELS = [
-  "#2563EB", // blue
-  "#93C5FD", // light blue
-  "#F59E0B", // amber accent
-  "#3B82F6", // mid blue
-  "#60A5FA", // lighter blue
-];
+// Distinct colour palettes per chart — each series clearly differentiated.
+// Donut / pie segments
+const PIE_COLOURS  = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
+// Top-categories bars
+const CAT_COLOURS_LIST = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#06B6D4"];
+// Platform Overview line colours (one per plan tier)
+const PLAN_COLOURS_MAP = {
+  Free:    "#2563EB",   // blue
+  "Plan 1": "#10B981",  // emerald
+  "Plan 2": "#F59E0B",  // amber
+  "Plan 3": "#8B5CF6",  // purple
+};
+// kept for any remaining references
+const PASTELS = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function timeAgo(iso) {
@@ -157,8 +163,6 @@ function RevenueChart() {
 }
 
 // ─── Plan distribution ────────────────────────────────────────────────────────
-// Distinct pastel palette for the donut segments
-const PIE_COLOURS = PASTELS;
 
 function PlanDistributionChart() {
   const { data: plans } = useFetch(getPlanDistribution, []);
@@ -218,9 +222,7 @@ function PlanDistributionChart() {
 }
 
 // ─── Platform overview ────────────────────────────────────────────────────────
-const PLAN_COLOURS = {
-  Free: PASTELS[0], "Plan 1": PASTELS[1], "Plan 2": PASTELS[2], "Plan 3": PASTELS[3],
-};
+const PLAN_COLOURS = PLAN_COLOURS_MAP;
 const PLAN_KEYS = ["Free", "Plan 1", "Plan 2", "Plan 3"];
 
 function SignupTooltip({ active, payload, label }) {
@@ -274,7 +276,7 @@ function SignupChart() {
 }
 
 // ─── Top categories ───────────────────────────────────────────────────────────
-const CAT_COLOURS = PASTELS;
+const CAT_COLOURS = CAT_COLOURS_LIST;
 
 function TopCategoriesCard() {
   const { data: cats } = useFetch(getTopCategories, []);
