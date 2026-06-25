@@ -1,4 +1,4 @@
-import { useState, useCallback, Fragment } from "react";
+import { useState, useCallback, Fragment, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import { getUsers, approveUser, rejectUser, suspendUser } from "../../api/admin";
@@ -18,6 +18,18 @@ const TABS = [
   { key: "Suspended", label: "Suspended Users" },
 ];
 
+// Columns with their sort key (null = unsortable)
+const COLUMNS = [
+  { label: "Name",     key: "name" },
+  { label: "Email",    key: "email" },
+  { label: "Business", key: "business" },
+  { label: "Role",     key: "role" },
+  { label: "Tier",     key: "tier" },
+  { label: "Joined",   key: "joined" },
+  { label: "Status",   key: "status" },
+  { label: "Actions",  key: null },
+];
+
 function exportCsv(rows) {
   const headers = ["Name", "Email", "Business", "Role", "Tier", "Status", "Joined"];
   const esc = (v) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
@@ -28,17 +40,63 @@ function exportCsv(rows) {
   document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
+// Sort indicator SVG
+function SortIcon({ dir }) {
+  return (
+    <span className="inline-flex flex-col ml-1 gap-px" style={{ verticalAlign: "middle" }}>
+      <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
+        <path d="M4 0L8 5H0L4 0Z" fill={dir === "asc" ? BLUE : "rgba(100,116,139,0.35)"} />
+      </svg>
+      <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
+        <path d="M4 5L0 0H8L4 5Z" fill={dir === "desc" ? BLUE : "rgba(100,116,139,0.35)"} />
+      </svg>
+    </span>
+  );
+}
+
 export default function UsersPage() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("Pending");
-  const [busy, setBusy] = useState(null);
-  const [tick, setTick] = useState(0);
-  // rejectingId = id of user whose reject reason box is open; rejectNote = typed text
+  const [tab, setTab]           = useState("Pending");
+  const [busy, setBusy]         = useState(null);
+  const [tick, setTick]         = useState(0);
   const [rejectingId, setRejectingId] = useState(null);
-  const [rejectNote, setRejectNote] = useState("");
+  const [rejectNote, setRejectNote]   = useState("");
+  const [search, setSearch]     = useState("");
+  const [sortCol, setSortCol]   = useState(null);   // column key
+  const [sortDir, setSortDir]   = useState("asc");  // "asc" | "desc"
 
   const fetch = useCallback(() => getUsers({ status: tab }), [tab, tick]);
-  const { data: users, loading } = useFetch(fetch, [tab, tick]);
+  const { data: rawUsers, loading } = useFetch(fetch, [tab, tick]);
+
+  // Search + sort applied client-side after fetch
+  const users = useMemo(() => {
+    let list = rawUsers ?? [];
+    const q = search.trim().toLowerCase();
+    if (q) {
+      list = list.filter((u) =>
+        u.name?.toLowerCase().includes(q) ||
+        u.business?.toLowerCase().includes(q)
+      );
+    }
+    if (sortCol) {
+      list = [...list].sort((a, b) => {
+        const av = (a[sortCol] ?? "").toString().toLowerCase();
+        const bv = (b[sortCol] ?? "").toString().toLowerCase();
+        return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+    }
+    return list;
+  }, [rawUsers, search, sortCol, sortDir]);
+
+  function toggleSort(key) {
+    if (!key) return;
+    if (sortCol === key) {
+      setSortDir((d) => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortCol(key);
+      setSortDir("asc");
+    }
+  }
 
   async function action(fn, id, e, ...args) {
     e.stopPropagation();
@@ -74,8 +132,8 @@ export default function UsersPage() {
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage business and agent accounts — approve, reject or suspend access.</p>
         </div>
         <button
-          onClick={() => exportCsv(users ?? [])}
-          disabled={!users?.length}
+          onClick={() => exportCsv(users)}
+          disabled={!users.length}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 shrink-0"
           style={{ backgroundColor: BLUE }}
         >
@@ -88,7 +146,7 @@ export default function UsersPage() {
         {TABS.map((t) => (
           <button
             key={t.key}
-            onClick={() => { setTab(t.key); setRejectingId(null); }}
+            onClick={() => { setTab(t.key); setRejectingId(null); setSearch(""); setSortCol(null); }}
             className="px-4 py-2.5 text-sm font-medium transition-all"
             style={{
               color: tab === t.key ? BLUE : MUTED,
@@ -101,17 +159,51 @@ export default function UsersPage() {
         ))}
       </div>
 
+      {/* Search */}
+      <div className="relative max-w-sm">
+        <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="text"
+          placeholder="Search by name or business…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-9 pr-4 py-2 text-sm rounded-xl outline-none"
+          style={{ border: "1.5px solid rgba(16,24,40,0.15)", color: NAVY, backgroundColor: "#fff" }}
+        />
+        {search && (
+          <button
+            onClick={() => setSearch("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+            style={{ color: MUTED }}
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
       {/* Table */}
       {loading ? <LoadingState /> : (
         <div className="bg-white rounded-xl overflow-hidden" style={CARD}>
-          {!users?.length ? (
-            <p className="text-sm text-center py-12" style={{ color: MUTED }}>No {tab.toLowerCase()} users.</p>
+          {!users.length ? (
+            <p className="text-sm text-center py-12" style={{ color: MUTED }}>
+              {search ? `No results for "${search}"` : `No ${tab.toLowerCase()} users.`}
+            </p>
           ) : (
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
-                  {["Name", "Email", "Business", "Role", "Tier", "Joined", "Status", "Actions"].map((h) => (
-                    <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider" style={{ color: MUTED }}>{h}</th>
+                  {COLUMNS.map(({ label, key }) => (
+                    <th
+                      key={label}
+                      onClick={() => toggleSort(key)}
+                      className="text-left px-4 py-3 text-[11px] font-semibold uppercase tracking-wider select-none"
+                      style={{ color: sortCol === key ? BLUE : MUTED, cursor: key ? "pointer" : "default", whiteSpace: "nowrap" }}
+                    >
+                      {label}
+                      {key && <SortIcon dir={sortCol === key ? sortDir : null} />}
+                    </th>
                   ))}
                 </tr>
               </thead>
