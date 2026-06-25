@@ -23,7 +23,7 @@ let AUDIT_LOG = [
 
 let _logCounter = AUDIT_LOG.length + 1;
 
-function addLog(action, user, note = "") {
+export function addLog(action, user, note = "") {
   AUDIT_LOG = [
     {
       id: `log${_logCounter++}`,
