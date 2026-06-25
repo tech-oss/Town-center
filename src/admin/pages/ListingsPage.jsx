@@ -234,6 +234,30 @@ function OffersEditor({ bizId, offers, onRefresh }) {
           <Field label="Description" span2>
             <TextArea rows={3} value={form.body} onChange={e => setF("body", e.target.value)} placeholder="Details of the offer or news item…" />
           </Field>
+          <Field label="Image (optional)" span2>
+            <div className="flex items-center gap-4 mt-1">
+              {form.image && (
+                <div className="relative group shrink-0">
+                  <img src={form.image} alt="offer" className="w-24 h-16 rounded-xl object-cover" style={{ border: `1.5px solid ${BORDER}` }} />
+                  <button type="button" onClick={() => setF("image", null)}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ backgroundColor: "#DC2626" }}>✕</button>
+                </div>
+              )}
+              <label className="px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
+                style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+                {form.image ? "Change Image" : "Upload Image"}
+                <input type="file" accept="image/*" className="hidden" onChange={e => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = ev => setF("image", ev.target.result);
+                  reader.readAsDataURL(file);
+                }} />
+              </label>
+              <span className="text-[10px]" style={{ color: "#9CA3AF" }}>PNG, JPG · recommended 800×400px</span>
+            </div>
+          </Field>
         </div>
         <div className="flex gap-2">
           <button onClick={handleSave} disabled={saving || !form.title?.trim()}
@@ -260,13 +284,18 @@ function OffersEditor({ bizId, offers, onRefresh }) {
       )}
       {offers.map(o => (
         <div key={o.id} className="rounded-xl p-4 flex items-start gap-3" style={{ border: `1px solid ${BORDER}`, backgroundColor: "#fafafa" }}>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 mt-0.5"
-            style={o.type === "Offer"
-              ? { backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }
-              : { backgroundColor: "rgba(16,163,74,0.1)", color: "#15803D" }}>
-            {o.type}
-          </span>
+          {o.image && (
+            <img src={o.image} alt={o.title} className="w-20 h-14 rounded-lg object-cover shrink-0" style={{ border: `1px solid ${BORDER}` }} />
+          )}
           <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                style={o.type === "Offer"
+                  ? { backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }
+                  : { backgroundColor: "rgba(16,163,74,0.1)", color: "#15803D" }}>
+                {o.type}
+              </span>
+            </div>
             <p className="text-sm font-semibold" style={{ color: NAVY }}>{o.title}</p>
             {o.body && <p className="text-xs mt-0.5 line-clamp-2" style={{ color: MUTED }}>{o.body}</p>}
             {o.expiry && <p className="text-[10px] mt-1" style={{ color: "#9CA3AF" }}>Expires {o.expiry}</p>}
@@ -760,7 +789,7 @@ export default function ListingsPage() {
   const [activeTab, setActiveTab] = useState("see-do");
   const { data: allBusinesses, loading } = useFetch(getBusinesses, []);
 
-  const bySection = (section) => (allBusinesses ?? []).filter(b => b.section === section);
+  const bySection = (section) => (allBusinesses ?? []).filter(b => b.section === section && b.status === "Approved");
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
