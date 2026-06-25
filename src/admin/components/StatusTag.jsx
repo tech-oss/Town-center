@@ -1,6 +1,7 @@
 const COLOURS = {
-  Active:        { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
-  Approved:      { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
+  Active:        { bg: "rgba(22,163,74,0.14)",  text: "#15803D" },
+  Approved:      { bg: "rgba(22,163,74,0.14)",  text: "#15803D" },
+  Suspended:     { bg: "rgba(217,119,6,0.14)",  text: "#92400E" },
   Published:     { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
   Paid:          { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
   Pending:       { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },

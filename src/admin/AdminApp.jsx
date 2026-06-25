@@ -16,6 +16,7 @@ import SettingsPage from "./pages/SettingsPage";
 import NewsOffersPage from "./pages/NewsOffersPage";
 import FeaturedStoriesPage from "./pages/FeaturedStoriesPage";
 import PushNotificationsPage from "./pages/PushNotificationsPage";
+import AdminLogsPage from "./pages/AdminLogsPage";
 import useFetch from "../hooks/useFetch";
 import { getApprovals } from "../api/admin";
 
@@ -43,6 +44,7 @@ export default function AdminApp() {
         <Route path="reporting" element={<ReportingPage />} />
         <Route path="push-notifications" element={<PushNotificationsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="admin-logs" element={<AdminLogsPage />} />
       </Route>
     </Routes>
   );
