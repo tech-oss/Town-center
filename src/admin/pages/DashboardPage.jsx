@@ -369,8 +369,8 @@ export default function DashboardPage() {
 
       {/* ── 6 stat cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard icon={Icons.revenue}       label="Revenue This Month"   value={`£${(s.mrr ?? 0).toLocaleString()}`}  sub={`+${s.mrrChange}% on this month`}     to="/admin/subscriptions" />
-        <StatCard icon={Icons.subscriptions} label="Active Subscriptions" value={s.activeSubscriptions ?? "—"}          sub={`+${s.subscriptionsChange} this month`} to="/admin/subscriptions" />
+        <StatCard icon={Icons.revenue}       label="Total Revenue This Month"   value={`£${(s.mrr ?? 0).toLocaleString()}`}  sub={`+${s.mrrChange}% on this month`}     to="/admin/subscriptions" />
+        <StatCard icon={Icons.subscriptions} label="Active Paid Subscriptions" value={s.activeSubscriptions ?? "—"}          sub={`+${s.subscriptionsChange} this month`} to="/admin/subscriptions" />
         <StatCard icon={Icons.users}         label="Total Users"          value={s.totalUsers ?? "—"}                   sub={`+${s.newUsersThisMonth} this month`}   to="/admin/users" />
         <StatCard icon={Icons.content}       label="Content Approvals"    value={approvals?.length ?? 0}                pending to="/admin/approvals" />
         <StatCard icon={Icons.business}      label="Business Approvals"   value={pendingBusinesses?.length ?? 0}        pending to="/admin/businesses" />
