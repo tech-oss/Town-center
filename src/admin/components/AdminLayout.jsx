@@ -44,14 +44,14 @@ const NAV = [
 ];
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
-const NAVY      = "#0A192F";
-const BRASS     = "#B39258";
-const BRASS_BG  = "rgba(179,146,88,0.1)";
-const BRASS_BDR = "rgba(179,146,88,0.25)";
-const TEXT_ON   = "rgba(244,246,249,0.85)";
-const TEXT_DIM  = "rgba(244,246,249,0.42)";
-const DIVIDER   = "rgba(179,146,88,0.18)";
-const CINZEL    = "'Cinzel', Georgia, serif";
+const NAVY      = "#13213B";              // dark navy-blue sidebar / dark text
+const BRASS     = "#2563EB";              // primary blue accent / active
+const BRASS_BG  = "rgba(37,99,235,0.16)"; // soft blue tint
+const BRASS_BDR = "rgba(37,99,235,0.3)";
+const TEXT_ON   = "rgba(255,255,255,0.75)";
+const TEXT_DIM  = "rgba(255,255,255,0.45)";
+const DIVIDER   = "rgba(255,255,255,0.10)";
+const CINZEL    = "'Inter', system-ui, -apple-system, sans-serif";
 
 // ─── NavGroup ─────────────────────────────────────────────────────────────────
 function NavGroup({ item, closeSidebar }) {
@@ -64,11 +64,11 @@ function NavGroup({ item, closeSidebar }) {
       <button
         onClick={() => setOpen((o) => !o)}
         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150"
-        style={{ color: anyActive ? BRASS : TEXT_ON, backgroundColor: anyActive ? BRASS_BG : "transparent", borderLeft: `2px solid ${anyActive ? BRASS : "transparent"}` }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = BRASS; e.currentTarget.style.backgroundColor = BRASS_BG; }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = anyActive ? BRASS : TEXT_ON; e.currentTarget.style.backgroundColor = anyActive ? BRASS_BG : "transparent"; }}
+        style={{ color: anyActive ? "#fff" : TEXT_ON, backgroundColor: anyActive ? "rgba(255,255,255,0.06)" : "transparent" }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = "#fff"; e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.08)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = anyActive ? "#fff" : TEXT_ON; e.currentTarget.style.backgroundColor = anyActive ? "rgba(255,255,255,0.06)" : "transparent"; }}
       >
-        <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: BRASS }}>{item.icon}</span>
+        <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: "inherit" }}>{item.icon}</span>
         <span className="flex-1 text-left leading-snug">{item.label}</span>
         <span className="text-xs transition-transform duration-200" style={{ transform: open ? "rotate(90deg)" : "none", color: TEXT_DIM }}>›</span>
       </button>
@@ -79,9 +79,9 @@ function NavGroup({ item, closeSidebar }) {
             <NavLink
               key={to} to={to} onClick={closeSidebar}
               className={({ isActive }) => `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${isActive ? "font-medium" : ""}`}
-              style={({ isActive }) => ({ color: isActive ? BRASS : TEXT_DIM, backgroundColor: isActive ? BRASS_BG : "transparent" })}
+              style={({ isActive }) => ({ color: isActive ? "#fff" : TEXT_DIM, backgroundColor: isActive ? BRASS : "transparent" })}
             >
-              <span className="shrink-0" style={{ color: BRASS }}>{icon}</span>
+              <span className="shrink-0" style={{ color: "inherit" }}>{icon}</span>
               <span className="flex-1 leading-snug">{label}</span>
             </NavLink>
           ))}
@@ -96,7 +96,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="admin-root min-h-screen flex" style={{ backgroundColor: "#F4F6F9", fontFamily: "'Montserrat', system-ui, -apple-system, sans-serif" }}>
+    <div className="admin-root min-h-screen flex" style={{ backgroundColor: "#F5F7FB", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
       {/* ── Sidebar ── */}
@@ -114,13 +114,13 @@ export default function AdminLayout({ pendingCount = 0 }) {
               style={{ width: 44, height: 44, objectFit: "contain" }}
             />
             <div className="flex flex-col gap-0.5 min-w-0">
-              <span style={{ fontFamily: CINZEL, color: BRASS, fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 600, lineHeight: 1 }}>
+              <span style={{ fontFamily: CINZEL, color: "#fff", fontSize: 14, fontWeight: 700, lineHeight: 1.1, letterSpacing: "-0.01em" }}>
                 Maidenhead
               </span>
-              <span style={{ fontFamily: CINZEL, color: "#F4F6F9", fontSize: 13, fontWeight: 400, lineHeight: 1.2 }}>
+              <span style={{ fontFamily: CINZEL, color: TEXT_ON, fontSize: 12, fontWeight: 400, lineHeight: 1.2 }}>
                 Town Centre
               </span>
-              <span style={{ fontFamily: CINZEL, fontSize: 8, letterSpacing: "0.15em", textTransform: "uppercase", color: BRASS, backgroundColor: BRASS_BG, border: `1px solid ${BRASS_BDR}`, borderRadius: 4, padding: "1px 6px", alignSelf: "flex-start", marginTop: 3 }}>
+              <span style={{ fontFamily: CINZEL, fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "#fff", backgroundColor: BRASS, borderRadius: 4, padding: "2px 7px", alignSelf: "flex-start", marginTop: 4, fontWeight: 600 }}>
                 Admin
               </span>
             </div>
@@ -138,16 +138,15 @@ export default function AdminLayout({ pendingCount = 0 }) {
                 onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150"
                 style={({ isActive }) => ({
-                  color: isActive ? BRASS : TEXT_ON,
-                  backgroundColor: isActive ? BRASS_BG : "transparent",
-                  borderLeft: `2px solid ${isActive ? BRASS : "transparent"}`,
-                  fontWeight: isActive ? 500 : 400,
+                  color: isActive ? "#fff" : TEXT_ON,
+                  backgroundColor: isActive ? BRASS : "transparent",
+                  fontWeight: isActive ? 600 : 400,
                 })}
               >
-                <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: BRASS }}>{icon}</span>
+                <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: "inherit" }}>{icon}</span>
                 <span className="flex-1 leading-snug">{label}</span>
                 {badge === "pending" && pendingCount > 0 && (
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 20, backgroundColor: BRASS, color: NAVY }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 20, backgroundColor: BRASS, color: "#fff" }}>
                     {pendingCount}
                   </span>
                 )}
@@ -170,7 +169,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
       {/* ── Main ── */}
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-4"
-          style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(10,25,47,0.08)", boxShadow: "0 1px 12px rgba(10,25,47,0.05)" }}>
+          style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 12px rgba(16,24,40,0.05)" }}>
           <button className="md:hidden flex flex-col gap-1.5 w-5" onClick={() => setSidebarOpen((o) => !o)}>
             <span className="h-px w-full" style={{ backgroundColor: NAVY }} />
             <span className="h-px w-full" style={{ backgroundColor: NAVY }} />
@@ -179,7 +178,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
           <div className="flex-1" />
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ backgroundColor: NAVY, color: BRASS, fontFamily: CINZEL }}>A</div>
+              style={{ backgroundColor: BRASS, color: "#fff", fontFamily: CINZEL }}>A</div>
             <span className="text-sm font-medium hidden sm:block" style={{ color: NAVY, fontFamily: CINZEL }}>Admin</span>
           </div>
         </header>

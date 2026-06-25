@@ -17,7 +17,7 @@ const SENT_HISTORY = [
 function Toast({ message, onDismiss }) {
   if (!message) return null;
   return (
-    <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-3 max-w-sm" style={{ backgroundColor: "#0A192F", color: "#fff" }}>
+    <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-3 max-w-sm" style={{ backgroundColor: "#2563EB", color: "#fff" }}>
       <span className="flex-1">{message}</span>
       <button onClick={onDismiss} className="opacity-60 hover:opacity-100 text-lg leading-none">✕</button>
     </div>
@@ -32,17 +32,17 @@ function PushPreview({ title, body, channel }) {
       <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{isMobile ? "Mobile lock screen" : "Web / desktop"}</span>
       <div
         className="rounded-2xl p-3.5 flex items-start gap-3"
-        style={{ backgroundColor: isMobile ? "rgba(10,25,47,0.06)" : "#fff", border: "1px solid rgba(10,25,47,0.12)", boxShadow: "0 2px 10px rgba(13,42,51,0.08)" }}
+        style={{ backgroundColor: isMobile ? "rgba(16,24,40,0.06)" : "#fff", border: "1px solid rgba(16,24,40,0.12)", boxShadow: "0 2px 10px rgba(13,42,51,0.08)" }}
       >
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: "#0A192F" }}>
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: "#2563EB" }}>
           <span>🔔</span>
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold" style={{ color: "#0A192F" }}>Maidenhead Town Centre</span>
+            <span className="text-xs font-bold" style={{ color: "#1E293B" }}>Maidenhead Town Centre</span>
             <span className="text-[10px]" style={{ color: "#9CA3AF" }}>now</span>
           </div>
-          <p className="text-sm font-semibold mt-0.5 truncate" style={{ color: "#0A192F" }}>{title || "Notification title"}</p>
+          <p className="text-sm font-semibold mt-0.5 truncate" style={{ color: "#1E293B" }}>{title || "Notification title"}</p>
           <p className="text-xs mt-0.5 line-clamp-2" style={{ color: "#6B7280" }}>{body || "Your message will appear here…"}</p>
         </div>
       </div>
@@ -82,21 +82,21 @@ export default function PushNotificationsPage() {
     notify(`Notification sent to ${entry.audience} via ${entry.channels.join(" & ")}.`);
   }
 
-  const field = { border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" };
+  const field = { border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" };
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
       <Toast message={toast} onDismiss={() => setToast(null)} />
 
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Push Notifications</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Push Notifications</h1>
         <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Send custom push notifications to mobile and web users.</p>
       </div>
 
       <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
         {/* Compose form */}
-        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
-          <h2 className="font-bold text-base" style={{ color: "#0A192F" }}>Compose Notification</h2>
+        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+          <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Compose Notification</h2>
 
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Title *</span>
@@ -127,8 +127,8 @@ export default function PushNotificationsPage() {
                   onClick={() => set(key, !form[key])}
                   className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
                   style={form[key]
-                    ? { backgroundColor: "rgba(10,25,47,0.1)", color: "#0A192F", border: "1.5px solid #0A192F" }
-                    : { backgroundColor: "#fff", color: "#6B7280", border: "1.5px solid rgba(10,25,47,0.15)" }
+                    ? { backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B", border: "1.5px solid #1E293B" }
+                    : { backgroundColor: "#fff", color: "#6B7280", border: "1.5px solid rgba(16,24,40,0.15)" }
                   }
                 >
                   {form[key] ? "✓ " : ""}{label}
@@ -145,21 +145,21 @@ export default function PushNotificationsPage() {
             </select>
           </label>
 
-          <div className="flex items-center gap-3 pt-2 border-t" style={{ borderColor: "rgba(10,25,47,0.1)" }}>
+          <div className="flex items-center gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
             {!confirm ? (
               <button
                 type="button"
                 onClick={() => isValid && setConfirm(true)}
                 disabled={!isValid}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: "#0A192F" }}
+                style={{ backgroundColor: "#2563EB" }}
               >
                 Send Notification
               </button>
             ) : (
               <>
-                <span className="text-sm font-medium" style={{ color: "#0A192F" }}>Send to {AUDIENCES.find((a) => a.key === form.audience)?.label}?</span>
-                <button type="button" onClick={handleSend} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: "#0A192F" }}>Confirm Send</button>
+                <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Send to {AUDIENCES.find((a) => a.key === form.audience)?.label}?</span>
+                <button type="button" onClick={handleSend} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: "#2563EB" }}>Confirm Send</button>
                 <button type="button" onClick={() => setConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>Cancel</button>
               </>
             )}
@@ -167,8 +167,8 @@ export default function PushNotificationsPage() {
         </div>
 
         {/* Live preview */}
-        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
-          <h2 className="font-bold text-base" style={{ color: "#0A192F" }}>Preview</h2>
+        <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+          <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Preview</h2>
           {form.mobile && <PushPreview title={form.title} body={form.body} channel="mobile" />}
           {form.web && <PushPreview title={form.title} body={form.body} channel="web" />}
           {!form.mobile && !form.web && (
@@ -178,17 +178,17 @@ export default function PushNotificationsPage() {
       </div>
 
       {/* Sent history */}
-      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
-        <h2 className="font-bold text-base mb-4" style={{ color: "#0A192F" }}>Recently Sent</h2>
-        <div className="flex flex-col divide-y" style={{ borderColor: "rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+        <h2 className="font-bold text-base mb-4" style={{ color: "#1E293B" }}>Recently Sent</h2>
+        <div className="flex flex-col divide-y" style={{ borderColor: "rgba(16,24,40,0.08)" }}>
           {history.map((n) => (
             <div key={n.id} className="py-3.5 flex items-start justify-between gap-4 first:pt-0">
               <div className="min-w-0">
-                <p className="text-sm font-semibold" style={{ color: "#0A192F" }}>{n.title}</p>
+                <p className="text-sm font-semibold" style={{ color: "#1E293B" }}>{n.title}</p>
                 <p className="text-xs mt-0.5 line-clamp-1" style={{ color: "#6B7280" }}>{n.body}</p>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   {n.channels.map((c) => (
-                    <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(10,25,47,0.1)", color: "#0A192F" }}>{c}</span>
+                    <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B" }}>{c}</span>
                   ))}
                   <span className="text-[11px]" style={{ color: "#9CA3AF" }}>· {n.audience} · {n.reach.toLocaleString()} reached</span>
                 </div>

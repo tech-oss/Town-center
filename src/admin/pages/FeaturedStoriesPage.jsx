@@ -56,13 +56,13 @@ function StatusPill({ status }) {
       className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
       style={
         isPublished
-          ? { backgroundColor: "rgba(10,25,47,0.12)", color: "#0A192F" }
+          ? { backgroundColor: "rgba(16,24,40,0.12)", color: "#1E293B" }
           : { backgroundColor: "rgba(107,114,128,0.1)", color: "#6B7280" }
       }
     >
       <span
         className="w-1.5 h-1.5 rounded-full inline-block"
-        style={{ backgroundColor: isPublished ? "#0A192F" : "#9CA3AF" }}
+        style={{ backgroundColor: isPublished ? "#1E293B" : "#9CA3AF" }}
       />
       {status}
     </span>
@@ -75,8 +75,8 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
     <div
       className="bg-white rounded-2xl overflow-hidden flex flex-col sm:flex-row"
       style={{
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)",
-        border: "1px solid rgba(10,25,47,0.09)",
+        boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)",
+        border: "1px solid rgba(16,24,40,0.09)",
       }}
     >
       {/* Image */}
@@ -92,14 +92,14 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             onError={(e) => { e.currentTarget.style.display = "none"; }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl" style={{ backgroundColor: "rgba(10,25,47,0.06)" }}>
+          <div className="w-full h-full flex items-center justify-center text-3xl" style={{ backgroundColor: "rgba(16,24,40,0.06)" }}>
             🖼
           </div>
         )}
         {/* Order badge */}
         <div
           className="absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-          style={{ backgroundColor: "#0A192F" }}
+          style={{ backgroundColor: "#2563EB" }}
         >
           {story.order}
         </div>
@@ -108,12 +108,12 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       {/* Body */}
       <div className="flex-1 p-5 flex flex-col gap-2 min-w-0">
         <div className="flex items-start gap-2 flex-wrap">
-          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#0A192F" }}>
+          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#1E293B" }}>
             {story.category}
           </span>
           <StatusPill status={story.status} />
         </div>
-        <h3 className="text-base font-bold leading-snug" style={{ color: "#0A192F", fontFamily: "var(--font-heading, Georgia, serif)" }}>
+        <h3 className="text-base font-bold leading-snug" style={{ color: "#1E293B", fontFamily: "var(--font-heading, Georgia, serif)" }}>
           {story.title}
         </h3>
         <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "#6B7280" }}>
@@ -123,14 +123,14 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
       </div>
 
       {/* Actions */}
-      <div className="flex sm:flex-col items-center justify-end gap-2 p-4 border-t sm:border-t-0 sm:border-l" style={{ borderColor: "rgba(10,25,47,0.08)" }}>
+      <div className="flex sm:flex-col items-center justify-end gap-2 p-4 border-t sm:border-t-0 sm:border-l" style={{ borderColor: "rgba(16,24,40,0.08)" }}>
         {/* Reorder */}
         <div className="flex sm:flex-col gap-1">
           <button
             onClick={() => onMoveUp(story.id)}
             disabled={index === 0}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-opacity disabled:opacity-25 hover:opacity-70"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
             title="Move up"
           >
             ↑
@@ -139,7 +139,7 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
             onClick={() => onMoveDown(story.id)}
             disabled={index === total - 1}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-opacity disabled:opacity-25 hover:opacity-70"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
             title="Move down"
           >
             ↓
@@ -150,7 +150,7 @@ function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown
           <button
             onClick={() => onEdit(story)}
             className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-opacity hover:opacity-70"
-            style={{ border: "1.5px solid rgba(10,25,47,0.22)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.22)", color: "#1E293B" }}
           >
             Edit
           </button>
@@ -172,22 +172,22 @@ function PublicPreviewCard({ story }) {
   return (
     <div
       className="rounded-2xl overflow-hidden flex flex-col md:flex-row gap-0 bg-white"
-      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}
+      style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}
     >
       <div className="md:w-1/2 h-52 md:h-auto bg-gray-100 overflow-hidden">
         {story.image ? (
           <img src={story.image} alt={story.title} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl" style={{ backgroundColor: "rgba(10,25,47,0.05)" }}>🖼</div>
+          <div className="w-full h-full flex items-center justify-center text-4xl" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>🖼</div>
         )}
       </div>
       <div className="flex-1 p-8 flex flex-col justify-center gap-4">
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#0A192F" }}>{story.category}</p>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1E293B" }}>{story.category}</p>
         <h3 className="text-2xl font-bold leading-snug" style={{ color: "#0D2A33", fontFamily: "var(--font-heading, Georgia, serif)" }}>{story.title}</h3>
         <p className="text-sm leading-relaxed" style={{ color: "#4B5563" }}>{story.excerpt}</p>
         <button
           className="self-start px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#B39258" }}
+          style={{ backgroundColor: "#2563EB" }}
         >
           Read more →
         </button>
@@ -215,13 +215,13 @@ function StoryForm({ initial, onSave, onCancel }) {
   return (
     <div
       className="bg-white rounded-2xl p-6 flex flex-col gap-5"
-      style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1.5px solid rgba(10,25,47,0.12)" }}
+      style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1.5px solid rgba(16,24,40,0.12)" }}
     >
       <div className="flex items-center justify-between gap-4">
-        <h3 className="text-base font-bold" style={{ color: "#0A192F" }}>
+        <h3 className="text-base font-bold" style={{ color: "#1E293B" }}>
           {initial?.id ? "Edit Story" : "Add Featured Story"}
         </h3>
-        <button onClick={onCancel} className="text-lg leading-none opacity-40 hover:opacity-70" style={{ color: "#0A192F" }}>✕</button>
+        <button onClick={onCancel} className="text-lg leading-none opacity-40 hover:opacity-70" style={{ color: "#1E293B" }}>✕</button>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -232,7 +232,7 @@ function StoryForm({ initial, onSave, onCancel }) {
             value={form.category}
             onChange={(e) => set("category", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
           >
             {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
           </select>
@@ -245,7 +245,7 @@ function StoryForm({ initial, onSave, onCancel }) {
             value={form.status}
             onChange={(e) => set("status", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
           >
             <option>Published</option>
             <option>Draft</option>
@@ -260,7 +260,7 @@ function StoryForm({ initial, onSave, onCancel }) {
             onChange={(e) => set("title", e.target.value)}
             placeholder="e.g. Jetts Maidenhead: 24/7 Fitness in the Heart of Town"
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
           />
         </label>
 
@@ -273,7 +273,7 @@ function StoryForm({ initial, onSave, onCancel }) {
             rows={3}
             placeholder="Short description shown on the homepage card…"
             className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
           />
         </label>
 
@@ -285,10 +285,10 @@ function StoryForm({ initial, onSave, onCancel }) {
             onChange={(e) => set("image", e.target.value)}
             placeholder="/images/..."
             className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
           />
           {form.image && (
-            <img src={form.image} alt="" className="mt-1.5 w-28 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(10,25,47,0.1)" }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
+            <img src={form.image} alt="" className="mt-1.5 w-28 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(16,24,40,0.1)" }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
           )}
         </label>
 
@@ -300,7 +300,7 @@ function StoryForm({ initial, onSave, onCancel }) {
             onChange={(e) => set("href", e.target.value)}
             placeholder="/news/story-slug"
             className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
           />
         </label>
       </div>
@@ -313,12 +313,12 @@ function StoryForm({ initial, onSave, onCancel }) {
         </div>
       )}
 
-      <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(10,25,47,0.1)" }}>
+      <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
         <button
           onClick={() => onSave(form)}
           disabled={!isValid}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
-          style={{ backgroundColor: "#0A192F" }}
+          style={{ backgroundColor: "#2563EB" }}
         >
           {initial?.id ? "Save Changes" : "Add Story"}
         </button>
@@ -343,7 +343,7 @@ function DeleteModal({ story, onConfirm, onCancel }) {
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "rgba(185,28,28,0.1)" }}>🗑</div>
           <div>
-            <h3 className="font-bold text-sm mb-1" style={{ color: "#0A192F" }}>Remove Featured Story?</h3>
+            <h3 className="font-bold text-sm mb-1" style={{ color: "#1E293B" }}>Remove Featured Story?</h3>
             <p className="text-xs leading-relaxed" style={{ color: "#6B7280" }}>
               "<span className="font-semibold">{story.title}</span>" will be removed from the Featured Stories section on the homepage.
             </p>
@@ -417,7 +417,7 @@ export default function FeaturedStoriesPage() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Featured Stories</h1>
+            <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Featured Stories</h1>
             <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
               Manage the featured story cards shown on the Maidenhead homepage. Drag to reorder or use the arrows.
             </p>
@@ -426,7 +426,7 @@ export default function FeaturedStoriesPage() {
             <button
               onClick={() => setEditing({})}
               className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 shrink-0"
-              style={{ backgroundColor: "#0A192F" }}
+              style={{ backgroundColor: "#2563EB" }}
             >
               + Add Story
             </button>
@@ -452,9 +452,9 @@ export default function FeaturedStoriesPage() {
             <div
               key={label}
               className="bg-white rounded-2xl p-4 flex flex-col gap-1"
-              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}
+              style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}
             >
-              <span className="text-2xl font-bold" style={{ color: accent ? "#0A192F" : "#0A192F" }}>{value}</span>
+              <span className="text-2xl font-bold" style={{ color: accent ? "#1E293B" : "#1E293B" }}>{value}</span>
               <span className="text-xs" style={{ color: "#9CA3AF" }}>{label}</span>
             </div>
           ))}
@@ -464,10 +464,10 @@ export default function FeaturedStoriesPage() {
         {stories.length === 0 ? (
           <div
             className="bg-white rounded-2xl p-12 flex flex-col items-center gap-3 text-center"
-            style={{ border: "2px dashed rgba(10,25,47,0.15)" }}
+            style={{ border: "2px dashed rgba(16,24,40,0.15)" }}
           >
             <span className="text-4xl">📰</span>
-            <p className="font-semibold" style={{ color: "#0A192F" }}>No featured stories yet</p>
+            <p className="font-semibold" style={{ color: "#1E293B" }}>No featured stories yet</p>
             <p className="text-sm" style={{ color: "#9CA3AF" }}>Click "Add Story" to create the first one.</p>
           </div>
         ) : (
@@ -493,7 +493,7 @@ export default function FeaturedStoriesPage() {
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Homepage Preview</p>
-                <p className="text-sm font-semibold" style={{ color: "#0A192F" }}>How it looks on the public site</p>
+                <p className="text-sm font-semibold" style={{ color: "#1E293B" }}>How it looks on the public site</p>
               </div>
               <div className="flex gap-1.5 flex-wrap">
                 {stories.map((s) => (
@@ -503,8 +503,8 @@ export default function FeaturedStoriesPage() {
                     className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
                     style={
                       (previewId ?? stories[0].id) === s.id
-                        ? { backgroundColor: "#0A192F", color: "#fff" }
-                        : { backgroundColor: "#fff", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }
+                        ? { backgroundColor: "#2563EB", color: "#fff" }
+                        : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }
                     }
                   >
                     Story {s.order}

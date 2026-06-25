@@ -1,8 +1,8 @@
 const COLOURS = {
-  Active:        { bg: "rgba(179,146,88,0.16)", text: "#8B6F3E" },
-  Approved:      { bg: "rgba(179,146,88,0.16)", text: "#8B6F3E" },
-  Published:     { bg: "rgba(179,146,88,0.16)", text: "#8B6F3E" },
-  Paid:          { bg: "rgba(179,146,88,0.16)", text: "#8B6F3E" },
+  Active:        { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
+  Approved:      { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
+  Published:     { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
+  Paid:          { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
   Pending:       { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Trial:         { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Draft:         { bg: "rgba(107,114,128,0.13)", text: "#374151" },
@@ -10,7 +10,7 @@ const COLOURS = {
   Rejected:      { bg: "rgba(185,28,28,0.1)",   text: "#991B1B" },
   Failed:        { bg: "rgba(185,28,28,0.1)",   text: "#991B1B" },
   Downgraded:    { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
-  "Auto-published": { bg: "rgba(10,25,47,0.1)", text: "#0A192F" },
+  "Auto-published": { bg: "rgba(16,24,40,0.1)", text: "#1E293B" },
 };
 
 export default function StatusTag({ status }) {

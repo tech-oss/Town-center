@@ -21,10 +21,10 @@ export default function EventsNewsPage() {
     <div className="flex flex-col gap-6 max-w-5xl">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Events</h1>
+          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Events</h1>
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage What's On events across the portal.</p>
         </div>
-        <button className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#0A192F" }}>+ Create Event</button>
+        <button className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>+ Create Event</button>
       </div>
 
       {loading ? <LoadingState /> : (

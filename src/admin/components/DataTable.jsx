@@ -47,27 +47,27 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
           onChange={handleSearch}
           placeholder="Search…"
           className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border outline-none focus:ring-2 transition-all"
-          style={{ border: "1.5px solid rgba(10,25,47,0.18)", backgroundColor: "#fff", color: "#0A192F", focusRingColor: "#0A192F" }}
+          style={{ border: "1.5px solid rgba(16,24,40,0.18)", backgroundColor: "#fff", color: "#1E293B", focusRingColor: "#1E293B" }}
         />
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.09)" }}>
+      <div className="overflow-x-auto rounded-2xl" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.09)" }}>
         <table className="w-full min-w-[600px] text-sm border-collapse">
           <thead>
-            <tr style={{ backgroundColor: "rgba(10,25,47,0.05)", borderBottom: "1px solid rgba(10,25,47,0.1)" }}>
+            <tr style={{ backgroundColor: "rgba(16,24,40,0.05)", borderBottom: "1px solid rgba(16,24,40,0.1)" }}>
               {columns.map((c) => (
                 <th
                   key={c.key}
                   className="px-4 py-3 text-left font-semibold text-[11px] uppercase tracking-wider select-none"
-                  style={{ color: "#0A192F", cursor: c.sortable !== false ? "pointer" : "default", whiteSpace: "nowrap" }}
+                  style={{ color: "#1E293B", cursor: c.sortable !== false ? "pointer" : "default", whiteSpace: "nowrap" }}
                   onClick={() => c.sortable !== false && toggleSort(c.key)}
                 >
                   {c.label}
                   {sortKey === c.key && <span className="ml-1">{sortDir === "asc" ? "↑" : "↓"}</span>}
                 </th>
               ))}
-              {rowActions && <th className="px-4 py-3 text-right font-semibold text-[11px] uppercase tracking-wider" style={{ color: "#0A192F" }}>Actions</th>}
+              {rowActions && <th className="px-4 py-3 text-right font-semibold text-[11px] uppercase tracking-wider" style={{ color: "#1E293B" }}>Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -80,15 +80,15 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
                 onClick={() => onRowClick?.(row)}
                 className="transition-colors"
                 style={{
-                  borderBottom: i < paginated.length - 1 ? "1px solid rgba(10,25,47,0.07)" : "none",
+                  borderBottom: i < paginated.length - 1 ? "1px solid rgba(16,24,40,0.07)" : "none",
                   cursor: onRowClick ? "pointer" : "default",
                   backgroundColor: "white",
                 }}
-                onMouseEnter={(e) => { if (onRowClick) e.currentTarget.style.backgroundColor = "rgba(10,25,47,0.03)"; }}
+                onMouseEnter={(e) => { if (onRowClick) e.currentTarget.style.backgroundColor = "rgba(16,24,40,0.03)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "white"; }}
               >
                 {columns.map((c) => (
-                  <td key={c.key} className="px-4 py-3" style={{ color: c.muted ? "#6B7280" : "#0A192F", whiteSpace: c.wrap ? "normal" : "nowrap" }}>
+                  <td key={c.key} className="px-4 py-3" style={{ color: c.muted ? "#6B7280" : "#1E293B", whiteSpace: c.wrap ? "normal" : "nowrap" }}>
                     {c.render ? c.render(row[c.key], row) : (row[c.key] ?? "—")}
                   </td>
                 ))}
@@ -129,7 +129,7 @@ function PageBtn({ children, onClick, disabled, active }) {
       disabled={disabled}
       className="w-8 h-8 rounded-lg text-sm font-medium transition-colors flex items-center justify-center"
       style={{
-        backgroundColor: active ? "#0A192F" : "transparent",
+        backgroundColor: active ? "#1E293B" : "transparent",
         color: active ? "#fff" : disabled ? "#D1D5DB" : "#374151",
         cursor: disabled ? "not-allowed" : "pointer",
       }}
@@ -142,7 +142,7 @@ function PageBtn({ children, onClick, disabled, active }) {
 // Small action button used inside rowActions
 export function TableAction({ children, onClick, variant = "ghost" }) {
   const styles = {
-    ghost: { color: "#0A192F", backgroundColor: "transparent" },
+    ghost: { color: "#1E293B", backgroundColor: "transparent" },
     danger: { color: "#991B1B", backgroundColor: "transparent" },
   };
   return (

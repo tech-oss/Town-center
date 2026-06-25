@@ -25,7 +25,7 @@ function DeleteModal({ count, onConfirm, onCancel }) {
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "rgba(185,28,28,0.1)" }}>🗑</div>
           <div>
-            <h3 className="font-bold text-sm mb-1" style={{ color: "#0A192F" }}>Delete {count} item{count !== 1 ? "s" : ""}?</h3>
+            <h3 className="font-bold text-sm mb-1" style={{ color: "#1E293B" }}>Delete {count} item{count !== 1 ? "s" : ""}?</h3>
             <p className="text-xs leading-relaxed" style={{ color: "#6B7280" }}>
               {count === 1 ? "This item" : `These ${count} items`} will be permanently removed from the approval queue. This cannot be undone.
             </p>
@@ -116,7 +116,7 @@ export default function ApprovalQueuePage() {
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Content Approval Queue</h1>
+          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Content Approval Queue</h1>
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>{pendingCount} item{pendingCount !== 1 ? "s" : ""} awaiting review.</p>
         </div>
       </div>
@@ -130,7 +130,7 @@ export default function ApprovalQueuePage() {
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by business name…"
             className="w-full rounded-xl pl-9 pr-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
           />
         </div>
         <label className="flex items-center gap-2 shrink-0">
@@ -139,7 +139,7 @@ export default function ApprovalQueuePage() {
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
           >
             {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
           </select>
@@ -154,8 +154,8 @@ export default function ApprovalQueuePage() {
             onClick={() => setFilter(f)}
             className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all"
             style={filter === f
-              ? { backgroundColor: "#0A192F", color: "#fff" }
-              : { backgroundColor: "#fff", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.2)" }
+              ? { backgroundColor: "#2563EB", color: "#fff" }
+              : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }
             }
           >
             {f}
@@ -165,9 +165,9 @@ export default function ApprovalQueuePage() {
 
       {/* Bulk action bar */}
       {items.length > 0 && (
-        <div className="flex items-center gap-3 flex-wrap px-4 py-3 rounded-xl" style={{ backgroundColor: "rgba(10,25,47,0.04)", border: "1px solid rgba(10,25,47,0.08)" }}>
-          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold" style={{ color: "#0A192F" }}>
-            <input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-[#0A192F]" />
+        <div className="flex items-center gap-3 flex-wrap px-4 py-3 rounded-xl" style={{ backgroundColor: "rgba(16,24,40,0.04)", border: "1px solid rgba(16,24,40,0.08)" }}>
+          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold" style={{ color: "#1E293B" }}>
+            <input type="checkbox" checked={allVisibleSelected} onChange={toggleSelectAll} className="w-4 h-4 rounded accent-[#1E293B]" />
             Select all ({items.length})
           </label>
           {selected.length > 0 && (
@@ -202,12 +202,12 @@ export default function ApprovalQueuePage() {
               key={item.id}
               className="bg-white rounded-2xl p-5"
               style={{
-                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)",
+                boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)",
                 border: isSelected
-                  ? "1.5px solid #0A192F"
+                  ? "1.5px solid #1E293B"
                   : item.source === "xml"
-                    ? "1px solid rgba(179,146,88,0.25)"
-                    : "1px solid rgba(10,25,47,0.08)",
+                    ? "1px solid rgba(37,99,235,0.25)"
+                    : "1px solid rgba(16,24,40,0.08)",
               }}
             >
               <div className="flex items-start gap-3">
@@ -216,17 +216,17 @@ export default function ApprovalQueuePage() {
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleSelect(item.id)}
-                  className="mt-1 w-4 h-4 rounded shrink-0 accent-[#0A192F] cursor-pointer"
+                  className="mt-1 w-4 h-4 rounded shrink-0 accent-[#1E293B] cursor-pointer"
                 />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-sm font-bold" style={{ color: "#0A192F" }}>{item.business}</span>
+                        <span className="text-sm font-bold" style={{ color: "#1E293B" }}>{item.business}</span>
                         <StatusTag status={item.status} />
                         {item.source === "xml" && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(179,146,88,0.1)", color: "#8B6F3E" }}>XML Import</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>XML Import</span>
                         )}
                       </div>
                       <p className="text-xs font-medium" style={{ color: "#6B7280" }}>{item.type} · Submitted by {item.submittedBy} · {new Date(item.submittedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
@@ -241,7 +241,7 @@ export default function ApprovalQueuePage() {
                       <Link
                         to={`/admin/approvals/${item.id}`}
                         className="px-4 py-2 rounded-xl text-xs font-semibold transition-all hover:-translate-y-px whitespace-nowrap text-center"
-                        style={{ backgroundColor: "rgba(10,25,47,0.07)", color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.15)" }}
+                        style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}
                       >
                         View details →
                       </Link>

@@ -13,28 +13,29 @@ import LoadingState from "../components/LoadingState";
 import InfoTip from "../components/InfoTip";
 
 // ─── Theme tokens ─────────────────────────────────────────────────────────────
-const NAVY    = "#0A192F";
-const BRASS   = "#B39258";
-const BRASS2  = "#C9A96E";   // lighter brass highlight
-const BRASS3  = "#8B6F3E";   // darker brass depth
-const BRASS4  = "#7A8C6E";   // muted olive-brass
-const OFF     = "#F4F6F9";
-const CINZEL  = "'Cinzel', Georgia, serif";
+const NAVY    = "#1E293B";   // dark slate — headings & body text
+const BLUE    = "#2563EB";   // primary blue — actions, accents, active states
+const BRASS   = "#2563EB";   // (legacy alias) accent → blue
+const BRASS2  = "#60A5FA";   // lighter blue
+const BRASS3  = "#2563EB";   // accent text → blue
+const BRASS4  = "#3B82F6";   // mid blue
+const OFF     = "#F5F7FB";
+const CINZEL  = "'Inter', system-ui, -apple-system, sans-serif";
 const CARD    = {
-  backgroundImage: "linear-gradient(180deg, #ffffff 0%, #f7f5f0 100%)",
-  border: "1px solid rgba(10,25,47,0.06)",
-  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)",
+  backgroundColor: "#ffffff",
+  border: "1px solid #eef1f6",
+  boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)",
 };
-const MUTED   = "#6B7280";
-const BORDER  = "rgba(10,25,47,0.08)";
+const MUTED   = "#64748B";
+const BORDER  = "rgba(16,24,40,0.08)";
 
-// Refined pastel palette — distinct hues that sit gracefully with navy + brass.
+// Modern-blue chart palette — blue family with a single amber accent.
 const PASTELS = [
-  "#C9A96E", // soft brass / gold
-  "#9DBE9C", // sage green
-  "#9BB4D4", // dusty blue
-  "#C9A6BE", // soft mauve
-  "#E2B79A", // warm blush
+  "#2563EB", // blue
+  "#93C5FD", // light blue
+  "#F59E0B", // amber accent
+  "#3B82F6", // mid blue
+  "#60A5FA", // lighter blue
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -45,16 +46,6 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-// Lighten / darken a hex colour toward white / black by amount 0..1 (for metallic gradients).
-function mix(hex, amt, toward) {
-  const n = parseInt(hex.slice(1), 16);
-  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  const t = toward === "white" ? 255 : 0;
-  const f = (c) => Math.round(c + (t - c) * amt);
-  return `rgb(${f(r)}, ${f(g)}, ${f(b)})`;
-}
-const lighten = (hex, amt) => mix(hex, amt, "white");
-const darken = (hex, amt) => mix(hex, amt, "black");
 
 // ─── SVG icons for stat cards ─────────────────────────────────────────────────
 const Icons = {
@@ -70,29 +61,22 @@ const Icons = {
 function StatCard({ icon, label, value, sub, pending, to }) {
   const isPending = !!pending;
   const inner = (
-    <div className="bg-white rounded-xl p-5 flex flex-col gap-3 h-full transition-all hover:-translate-y-0.5 relative overflow-hidden"
+    <div className="bg-white rounded-xl p-5 flex flex-col gap-3 h-full transition-all hover:-translate-y-0.5"
       style={CARD}>
-      <span className="absolute top-0 left-0 right-0" style={{ height: 3, backgroundColor: isPending ? BRASS : NAVY }} />
       <div className="flex items-center justify-between">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center"
-          style={{
-            backgroundImage: isPending
-              ? "linear-gradient(145deg, rgba(179,146,88,0.22), rgba(179,146,88,0.06))"
-              : "linear-gradient(145deg, rgba(10,25,47,0.12), rgba(10,25,47,0.03))",
-            boxShadow: "inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -2px 3px rgba(10,25,47,0.08), 0 2px 4px rgba(10,25,47,0.1)",
-            border: "1px solid rgba(255,255,255,0.6)",
-          }}>
-          {icon(isPending ? BRASS : NAVY)}
+          style={{ backgroundColor: "rgba(37,99,235,0.1)" }}>
+          {icon(BLUE)}
         </div>
       </div>
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-widest mb-1 leading-[1.35] flex items-end" style={{ color: MUTED, minHeight: "2.7em" }}>{label}</p>
-        <p className="text-2xl font-bold" style={{ color: NAVY, fontFamily: CINZEL }}>{value}</p>
+        <p className="text-2xl font-bold" style={{ color: NAVY }}>{value}</p>
       </div>
       <div className="mt-auto pt-1">
         {isPending
-          ? <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded inline-block" style={{ backgroundColor: "rgba(179,146,88,0.12)", color: BRASS, border: `1px solid rgba(179,146,88,0.3)` }}>Pending</span>
-          : <p className="text-xs font-medium" style={{ color: BRASS3 }}>{sub}</p>
+          ? <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded inline-block" style={{ backgroundColor: "rgba(100,116,139,0.12)", color: MUTED, border: "1px solid rgba(100,116,139,0.25)" }}>Pending</span>
+          : <p className="text-xs font-medium" style={{ color: BLUE }}>{sub}</p>
         }
       </div>
     </div>
@@ -110,8 +94,8 @@ function PeriodSelector({ days, setDays }) {
         <button key={p.key} onClick={() => setDays(p.key)}
           className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
           style={days === p.key
-            ? { backgroundColor: NAVY, color: "#fff", border: `1px solid ${NAVY}` }
-            : { backgroundColor: "transparent", color: MUTED, border: "1px solid rgba(10,25,47,0.15)" }
+            ? { backgroundColor: BLUE, color: "#fff", border: `1px solid ${BLUE}` }
+            : { backgroundColor: "transparent", color: MUTED, border: "1px solid rgba(16,24,40,0.15)" }
           }>
           {p.label}
         </button>
@@ -189,29 +173,17 @@ function PlanDistributionChart() {
         <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Plan Distribution</h2>
         <InfoTip text="How all registered businesses are split across subscription plans. Each coloured segment is a plan, and the centre shows the total number of businesses." />
       </div>
-      <div className="relative mx-auto" style={{ width: 170, height: 170, filter: "drop-shadow(0 8px 12px rgba(10,25,47,0.28))" }}>
+      <div className="relative mx-auto" style={{ width: 170, height: 170 }}>
         <PieChart width={170} height={170}>
-          <defs>
-            {PIE_COLOURS.map((c, i) => (
-              <radialGradient key={i} id={`pieMetal${i}`} cx="38%" cy="32%" r="75%">
-                <stop offset="0%"  stopColor={lighten(c, 0.5)} />
-                <stop offset="45%" stopColor={c} />
-                <stop offset="100%" stopColor={darken(c, 0.35)} />
-              </radialGradient>
-            ))}
-          </defs>
-          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} stroke="rgba(255,255,255,0.55)" strokeWidth={1} isAnimationActive={false}
+          <Pie data={rows} dataKey="count" nameKey="plan" cx={85} cy={85} innerRadius={54} outerRadius={80} paddingAngle={2} stroke="#fff" strokeWidth={2} isAnimationActive={false}
             onMouseEnter={(_, i) => setActive(i)} onMouseLeave={() => setActive(null)}>
             {rows.map((_, i) => (
-              <Cell key={i} fill={`url(#pieMetal${i % PIE_COLOURS.length})`}
-                opacity={active == null || active === i ? 1 : 0.45}
+              <Cell key={i} fill={PIE_COLOURS[i % PIE_COLOURS.length]}
+                opacity={active == null || active === i ? 1 : 0.4}
                 style={{ transition: "opacity 0.15s ease", cursor: "pointer" }} />
             ))}
           </Pie>
         </PieChart>
-        {/* glossy highlight sweep */}
-        <div className="absolute inset-0 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(60% 45% at 36% 28%, rgba(255,255,255,0.45), rgba(255,255,255,0) 60%)" }} />
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-6 text-center">
           {hovered ? (
             <>
@@ -324,8 +296,8 @@ function TopCategoriesCard() {
             <span className="text-base w-6 text-center shrink-0">{r.icon}</span>
             <span className="text-sm font-medium w-32 shrink-0" style={{ color: NAVY }}>{r.category}</span>
             <div className="lux-track flex-1 rounded-full overflow-hidden" style={{ height: 8 }}>
-              <div className="lux-fill h-full rounded-full transition-all duration-500"
-                style={{ width: `${(r.count / max) * 100}%`, backgroundImage: `linear-gradient(180deg, ${lighten(CAT_COLOURS[i % CAT_COLOURS.length], 0.35)}, ${CAT_COLOURS[i % CAT_COLOURS.length]} 55%, ${darken(CAT_COLOURS[i % CAT_COLOURS.length], 0.2)})` }} />
+              <div className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${(r.count / max) * 100}%`, backgroundColor: CAT_COLOURS[i % CAT_COLOURS.length] }} />
             </div>
             <span className="text-xs font-medium w-16 text-right shrink-0" style={{ color: MUTED }}>
               {r.pct}% ({r.count})
@@ -341,7 +313,7 @@ function TopCategoriesCard() {
 function PendingBadge() {
   return (
     <span className="text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full whitespace-nowrap"
-      style={{ backgroundColor: "rgba(179,146,88,0.1)", color: BRASS, border: "1px solid rgba(179,146,88,0.3)" }}>
+      style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BRASS, border: "1px solid rgba(37,99,235,0.3)" }}>
       Pending
     </span>
   );

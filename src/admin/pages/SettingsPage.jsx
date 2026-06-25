@@ -10,7 +10,7 @@ function FormField({ label, type = "password", value, onChange, help, placeholde
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="rounded-xl px-3 py-2.5 text-sm outline-none transition-all"
-        style={{ border: "1.5px solid rgba(10,25,47,0.2)", color: "#0A192F", backgroundColor: "#fff" }}
+        style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
       />
       {help && <span className="text-[11px]" style={{ color: "#9CA3AF" }}>{help}</span>}
     </label>
@@ -48,13 +48,13 @@ export default function SettingsPage() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-6 max-w-xl">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Settings</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Settings</h1>
         <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage your admin account.</p>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
         <div>
-          <h2 className="font-bold text-base" style={{ color: "#0A192F" }}>Reset Password</h2>
+          <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Reset Password</h2>
           <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>Choose a strong password you don't use elsewhere.</p>
         </div>
 
@@ -67,8 +67,8 @@ export default function SettingsPage() {
         )}
 
         <div className="flex items-center gap-4 pt-1">
-          <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#0A192F" }}>Reset Password</button>
-          {saved && <span className="text-sm font-medium" style={{ color: "#0A192F" }}>✓ Password updated</span>}
+          <button type="submit" className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>Reset Password</button>
+          {saved && <span className="text-sm font-medium" style={{ color: "#1E293B" }}>✓ Password updated</span>}
         </div>
       </div>
     </form>

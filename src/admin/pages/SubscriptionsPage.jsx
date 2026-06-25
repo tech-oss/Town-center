@@ -7,7 +7,7 @@ import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
-const TIER_COLOURS = { Premium: "#0A192F", Standard: "#0A192F", Agent: "#374151", Basic: "#9CA3AF" };
+const TIER_COLOURS = { Premium: "#1E293B", Standard: "#1E293B", Agent: "#374151", Basic: "#9CA3AF" };
 
 export function SubscriptionDetailPage() {
   const { id } = useParams();
@@ -22,16 +22,16 @@ export function SubscriptionDetailPage() {
 
   return (
     <div className="max-w-2xl flex flex-col gap-6">
-      <Link to="/admin/subscriptions" className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: "#0A192F" }}>← Subscriptions</Link>
+      <Link to="/admin/subscriptions" className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: "#1E293B" }}>← Subscriptions</Link>
 
       {message && (
-        <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(10,25,47,0.1)", color: "#0A192F" }}>{message}</div>
+        <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B" }}>{message}</div>
       )}
 
-      <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-xl font-bold" style={{ color: "#0A192F" }}>{sub.business}</h1>
+            <h1 className="text-xl font-bold" style={{ color: "#1E293B" }}>{sub.business}</h1>
             <p className="text-sm" style={{ color: "#6B7280" }}>{sub.owner}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -50,7 +50,7 @@ export function SubscriptionDetailPage() {
           ].map(([l, v]) => (
             <div key={l} className="flex flex-col gap-0.5">
               <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{l}</span>
-              <span className="text-sm font-medium" style={{ color: "#0A192F" }}>{v}</span>
+              <span className="text-sm font-medium" style={{ color: "#1E293B" }}>{v}</span>
             </div>
           ))}
         </div>
@@ -62,25 +62,25 @@ export function SubscriptionDetailPage() {
         )}
 
         <div className="flex gap-3 flex-wrap">
-          <button onClick={handleGrantTrial} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#0A192F" }}>Grant 30-day Trial</button>
+          <button onClick={handleGrantTrial} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>Grant 30-day Trial</button>
           {sub.paymentStatus === "Failed" && (
-            <button onClick={handleResolve} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#0A192F", border: "1.5px solid rgba(10,25,47,0.3)" }}>Resolve Dispute</button>
+            <button onClick={handleResolve} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.3)" }}>Resolve Dispute</button>
           )}
         </div>
       </div>
 
       {/* History timeline */}
-      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -2px 5px rgba(10,25,47,0.035), 0 1px 2px rgba(10,25,47,0.06), 0 14px 30px -12px rgba(10,25,47,0.28)", border: "1px solid rgba(10,25,47,0.08)" }}>
-        <h2 className="font-bold text-base mb-5" style={{ color: "#0A192F" }}>Subscription History</h2>
+      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+        <h2 className="font-bold text-base mb-5" style={{ color: "#1E293B" }}>Subscription History</h2>
         <div className="relative flex flex-col gap-0">
           {sub.history.map((h, i) => (
             <div key={i} className="flex gap-3 pb-5 relative">
               <div className="flex flex-col items-center">
-                <div className="w-3 h-3 rounded-full mt-1 shrink-0" style={{ backgroundColor: h.type === "payment" ? "#0A192F" : h.type === "downgrade" ? "#E8A33D" : h.type === "warning" ? "#991B1B" : "#0A192F" }} />
-                {i < sub.history.length - 1 && <div className="w-px flex-1 mt-1" style={{ backgroundColor: "rgba(10,25,47,0.15)" }} />}
+                <div className="w-3 h-3 rounded-full mt-1 shrink-0" style={{ backgroundColor: h.type === "payment" ? "#1E293B" : h.type === "downgrade" ? "#E8A33D" : h.type === "warning" ? "#991B1B" : "#1E293B" }} />
+                {i < sub.history.length - 1 && <div className="w-px flex-1 mt-1" style={{ backgroundColor: "rgba(16,24,40,0.15)" }} />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium leading-snug" style={{ color: "#0A192F" }}>{h.event}</p>
+                <p className="text-sm font-medium leading-snug" style={{ color: "#1E293B" }}>{h.event}</p>
                 <p className="text-xs mt-0.5" style={{ color: "#9CA3AF" }}>{h.date}</p>
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function SubscriptionsPage() {
   return (
     <div className="flex flex-col gap-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#0A192F" }}>Subscriptions & Billing</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Subscriptions & Billing</h1>
         <p className="text-sm mt-1" style={{ color: "#6B7280" }}>All business subscription accounts and payment statuses.</p>
       </div>
       {loading ? <LoadingState /> : (

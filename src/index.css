@@ -25,50 +25,33 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
 
-/* ─── Admin panel — Mayfair Concierge theme ──────────────────────────────────
-   Scoped overrides so the admin uses Cinzel headings + Montserrat body
-   (the public site keeps Playfair + Montserrat). */
+/* ─── Admin panel — Modern Blue theme ────────────────────────────────────────
+   Clean, professional look: Inter throughout, flat white cards on a light
+   blue-grey canvas (the public site keeps Playfair + Montserrat). */
 .admin-root {
-  font-family: "Montserrat", system-ui, -apple-system, sans-serif;
-  letter-spacing: 0.01em;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  letter-spacing: 0;
+  background-color: #f5f7fb;
 }
 .admin-root h1, .admin-root h2, .admin-root h3, .admin-root h4, .admin-root h5, .admin-root h6 {
-  font-family: "Cinzel", Georgia, serif;
-  letter-spacing: 0.02em;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
 }
 
-/* ─── Mayfair 3D / embossed treatment ────────────────────────────────────────
-   Raised, beveled cards with highlight-and-shadow depth + a soft parchment
-   backdrop, applied site-wide across the admin. */
-.admin-root {
-  background-image:
-    radial-gradient(1200px 600px at 70% -10%, rgba(179,146,88,0.07), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(10,25,47,0.05), transparent 55%);
-  background-attachment: fixed;
-}
-
-/* Card-like surfaces: white + rounded-xl/2xl become raised 3D panels. */
+/* Card-like surfaces: clean white panels with a soft, subtle shadow. */
 .admin-root .bg-white.rounded-xl,
 .admin-root .bg-white.rounded-2xl {
-  background-image: linear-gradient(180deg, #ffffff 0%, #f7f5f0 100%);
-  border: 1px solid rgba(10, 25, 47, 0.06);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -2px 5px rgba(10, 25, 47, 0.035),
-    0 1px 2px rgba(10, 25, 47, 0.06),
-    0 14px 30px -12px rgba(10, 25, 47, 0.28);
-  transition: box-shadow 0.25s ease, transform 0.25s ease;
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .admin-root .bg-white.rounded-xl:hover,
 .admin-root .bg-white.rounded-2xl:hover {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -2px 5px rgba(10, 25, 47, 0.035),
-    0 2px 4px rgba(10, 25, 47, 0.07),
-    0 20px 40px -12px rgba(10, 25, 47, 0.34);
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.06), 0 6px 16px -6px rgba(16, 24, 40, 0.12);
 }
 
-/* Raised, pressable buttons & pills. */
+/* Subtle press feedback on buttons & pills. */
 .admin-root button,
 .admin-root a[class*="rounded-lg"],
 .admin-root a[class*="rounded-full"] {
@@ -78,27 +61,10 @@ h1, h2, h3, h4, h5, h6 {
   transform: translateY(1px);
 }
 
-/* Lift the chart curves off the surface for a dimensional feel. */
-.admin-root .recharts-area-curve {
-  filter: drop-shadow(0 3px 4px rgba(179, 146, 88, 0.4));
-}
-.admin-root .recharts-line-curve {
-  filter: drop-shadow(0 2px 3px rgba(10, 25, 47, 0.22));
-}
-.admin-root .recharts-dot {
-  filter: drop-shadow(0 1px 1.5px rgba(10, 25, 47, 0.3));
-}
-
-/* Inset, glossy progress tracks (Top Performing Categories, etc.). */
+/* Flat, light progress tracks (Top Performing Categories, etc.). */
 .admin-root .lux-track {
-  background-image: linear-gradient(180deg, rgba(10, 25, 47, 0.1), rgba(10, 25, 47, 0.04));
-  box-shadow: inset 0 1px 2px rgba(10, 25, 47, 0.18), inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+  background: #eef1f6;
 }
-.admin-root .lux-fill {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 3px rgba(0, 0, 0, 0.15);
-}
-
-/* Brass-tinted divider sheen used by section borders already; nothing to add. */
 
 /* ─── Hero slider animations ─────────────────────────────────────────────── */
 /* fill-mode `both` holds the 0% state during the delay and the 100% state
