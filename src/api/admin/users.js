@@ -64,11 +64,11 @@ export function approveUser(id) {
   return mock({ ok: true });
 }
 
-export function rejectUser(id) {
+export function rejectUser(id, note = "") {
   const u = USERS.find((x) => x.id === id);
   if (!u) return mock({ ok: false });
   u.status = "Rejected";
-  addLog("Rejected", u);
+  addLog("Rejected", u, note);
   return mock({ ok: true });
 }
 

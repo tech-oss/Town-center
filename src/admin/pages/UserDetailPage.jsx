@@ -21,22 +21,47 @@ function Field({ label, value }) {
   );
 }
 
+function ActionBtn({ color, children, disabled, onClick }) {
+  return (
+    <button
+      disabled={disabled}
+      onClick={onClick}
+      className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-40"
+      style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}40` }}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function UserDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [tick, setTick] = useState(0);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [showReject, setShowReject] = useState(false);
+  const [rejectNote, setRejectNote] = useState("");
 
   const { data: user, loading } = useFetch(() => getUserById(id), [id, tick]);
 
   if (loading) return <LoadingState />;
   if (!user) return <EmptyState title="User not found" message="This account may have been removed." />;
 
-  async function act(fn) {
+  async function act(fn, ...args) {
     setBusy(true);
-    await fn(id);
+    await fn(id, ...args);
     setBusy(false);
+    setTick((t) => t + 1);
+  }
+
+  async function handleRejectSubmit() {
+    if (!rejectNote.trim()) return;
+    setBusy(true);
+    await rejectUser(id, rejectNote.trim());
+    setBusy(false);
+    setShowReject(false);
+    setRejectNote("");
     setTick((t) => t + 1);
   }
 
@@ -77,13 +102,13 @@ export default function UserDetailPage() {
 
         {/* Fields */}
         <div className="grid grid-cols-2 gap-5">
-          <Field label="User ID"      value={user.id} />
-          <Field label="Business"     value={user.business} />
-          <Field label="Role"         value={user.role} />
-          <Field label="Tier"         value={user.tier ?? "N/A"} />
-          <Field label="Status"       value={user.status} />
-          <Field label="Joined"       value={user.joined} />
-          <Field label="Last Login"   value={user.lastLogin} />
+          <Field label="User ID"    value={user.id} />
+          <Field label="Business"   value={user.business} />
+          <Field label="Role"       value={user.role} />
+          <Field label="Tier"       value={user.tier ?? "N/A"} />
+          <Field label="Status"     value={user.status} />
+          <Field label="Joined"     value={user.joined} />
+          <Field label="Last Login" value={user.lastLogin} />
         </div>
 
         <hr style={{ borderColor: BORDER }} />
@@ -95,8 +120,8 @@ export default function UserDetailPage() {
             {(isPending || isRejected) && (
               <ActionBtn color="#16A34A" disabled={busy} onClick={() => act(approveUser)}>Approve</ActionBtn>
             )}
-            {isPending && (
-              <ActionBtn color="#DC2626" disabled={busy} onClick={() => act(rejectUser)}>Reject</ActionBtn>
+            {isPending && !showReject && (
+              <ActionBtn color="#DC2626" disabled={busy} onClick={() => { setShowReject(true); setRejectNote(""); }}>Reject</ActionBtn>
             )}
             {isApproved && (
               <ActionBtn color="#D97706" disabled={busy} onClick={() => act(suspendUser)}>Suspend Account</ActionBtn>
@@ -106,7 +131,40 @@ export default function UserDetailPage() {
             )}
           </div>
 
-          {/* Delete — separate danger zone */}
+          {/* Rejection reason form */}
+          {showReject && isPending && (
+            <div className="rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(220,38,38,0.04)", border: "1px solid rgba(220,38,38,0.2)" }}>
+              <p className="text-xs font-semibold" style={{ color: "#B91C1C" }}>Rejection reason (required)</p>
+              <textarea
+                autoFocus
+                rows={3}
+                placeholder="e.g. Incomplete business information, unable to verify registration, duplicate account…"
+                value={rejectNote}
+                onChange={(e) => setRejectNote(e.target.value)}
+                className="w-full text-sm rounded-lg px-3 py-2 resize-none outline-none"
+                style={{ border: "1px solid rgba(220,38,38,0.35)", color: NAVY, backgroundColor: "#fff" }}
+              />
+              <div className="flex gap-2">
+                <button
+                  disabled={busy || !rejectNote.trim()}
+                  onClick={handleRejectSubmit}
+                  className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: "#DC2626" }}
+                >
+                  Confirm Rejection
+                </button>
+                <button
+                  onClick={() => { setShowReject(false); setRejectNote(""); }}
+                  className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70"
+                  style={{ backgroundColor: "rgba(16,24,40,0.07)", color: NAVY }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Delete — danger zone */}
           <div className="rounded-xl p-4 flex items-center justify-between gap-4" style={{ backgroundColor: "rgba(185,28,28,0.04)", border: "1px solid rgba(185,28,28,0.15)" }}>
             <div>
               <p className="text-sm font-semibold" style={{ color: "#991B1B" }}>Delete User Account</p>
@@ -143,18 +201,5 @@ export default function UserDetailPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function ActionBtn({ color, children, disabled, onClick }) {
-  return (
-    <button
-      disabled={disabled}
-      onClick={onClick}
-      className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-40"
-      style={{ backgroundColor: `${color}18`, color, border: `1px solid ${color}40` }}
-    >
-      {children}
-    </button>
   );
 }
