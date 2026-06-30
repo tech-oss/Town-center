@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.maidenheadtowncentre.app",
+      "sha256_cert_fingerprints": [
+        "9F:5F:08:0D:E5:52:F6:02:A6:02:61:40:F1:0F:DE:DA:60:05:AD:B3:EB:C1:CF:E6:6F:E3:DC:95:41:E1:9A:65"
+      ]
+    }
+  }
+]
