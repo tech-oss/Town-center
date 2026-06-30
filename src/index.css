@@ -85,3 +85,63 @@ h1, h2, h3, h4, h5, h6 {
 .animate-fade-in-card {
   animation: fadeIn 0.5s ease 0.35s both;
 }
+
+/* ─── Mobile PWA demo (/mobile) ──────────────────────────────────────────────
+   Native-app shell. The root is pinned to the viewport so the document body
+   never rubber-band scrolls (which on a phone reveals a black gap at the top)
+   and the bottom tab bar never moves. Only the inner content region scrolls. */
+.mobile-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background-color: var(--forest);
+  font-family: var(--font-body);
+}
+.mobile-frame {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--forest);
+  overflow: hidden;
+  position: relative;
+}
+.mobile-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+/* Desktop demo: show a centred phone frame instead of full-bleed. */
+@media (min-width: 640px) {
+  .mobile-root {
+    position: static;
+    overflow: visible;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    background-color: #0c1418;
+  }
+  .mobile-frame {
+    width: 390px;
+    height: 844px;
+    max-height: calc(100vh - 4rem);
+    border-radius: 2.5rem;
+    border: 8px solid #000;
+  }
+}
+@keyframes mobileFadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.mobile-stagger > * { animation: mobileFadeUp 0.45s ease both; }
+.mobile-stagger > *:nth-child(2) { animation-delay: 0.05s; }
+.mobile-stagger > *:nth-child(3) { animation-delay: 0.1s; }
+.mobile-stagger > *:nth-child(4) { animation-delay: 0.15s; }
+.mobile-stagger > *:nth-child(5) { animation-delay: 0.2s; }
+.mobile-stagger > *:nth-child(6) { animation-delay: 0.25s; }
+.mobile-stagger > *:nth-child(7) { animation-delay: 0.3s; }

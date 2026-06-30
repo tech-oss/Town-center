@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import MobileApp from './mobile/MobileApp'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
@@ -40,7 +41,7 @@ function SectionCategoryRedirect() {
   return <Navigate to={`/${section}?category=${category}`} replace />
 }
 
-function App() {
+function PublicSite() {
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
 
@@ -104,6 +105,15 @@ function App() {
       </main>
       <Footer />
     </>
+  )
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/mobile/*" element={<MobileApp />} />
+      <Route path="*" element={<PublicSite />} />
+    </Routes>
   )
 }
 
