@@ -94,7 +94,8 @@ export const quickLinks = {
     {
       label: "Shop",
       href: "/shop",
-      image: "/images/ql-shop.jpg", // high-street boutique
+      image: "/images/ql-shop.jpg", // poster fallback while the video loads
+      video: "/videos/shops.mp4", // 720×1280 portrait loop
     },
     {
       label: "See & Do",
@@ -104,7 +105,8 @@ export const quickLinks = {
     {
       label: "Green Spaces",
       href: "/see-do?category=community",
-      image: "/images/ql-green.jpg", // riverside park
+      image: "/images/ql-green.jpg", // poster fallback while the video loads
+      video: "/videos/boats.mp4", // 720×1280 portrait loop
     },
     {
       label: "Wellness",

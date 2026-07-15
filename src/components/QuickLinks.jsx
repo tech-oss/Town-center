@@ -36,13 +36,29 @@ export default function QuickLinks() {
                 className="group relative block rounded-2xl overflow-hidden aspect-square lg:aspect-[3/4] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sage)]"
                 style={{ boxShadow: "0 10px 30px -12px rgba(28,46,56,0.45)" }}
               >
-                {/* Photo — gentle zoom on hover */}
-                <img
-                  src={item.image}
-                  alt={item.label}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                />
+                {/* Media — looping muted video when available, else photo.
+                    object-cover + object-center fills the card at any aspect
+                    ratio (portrait 9:16 clips cleanly into the square / 3:4 card). */}
+                {item.video ? (
+                  <video
+                    src={item.video}
+                    poster={item.image}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
+                    aria-label={item.label}
+                    className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
+                ) : (
+                  <img
+                    src={item.image}
+                    alt={item.label}
+                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
+                )}
 
                 {/* Dark gradient so the label reads clearly */}
                 <div
