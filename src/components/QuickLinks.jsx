@@ -5,7 +5,8 @@ export default function QuickLinks() {
   return (
     <section
       className="py-16 md:py-24 px-6 md:px-12"
-      style={{ backgroundColor: "#F4EFE3" }}
+      // Original brand background (mint → sand gradient)
+      style={{ background: "linear-gradient(160deg, var(--mint) 0%, var(--sand) 60%)" }}
     >
       <div className="max-w-7xl mx-auto">
 
@@ -13,7 +14,7 @@ export default function QuickLinks() {
         <div className="mb-8 md:mb-12">
           <p
             className="text-xs font-semibold tracking-[0.2em] uppercase mb-3"
-            style={{ color: "rgba(28,46,56,0.5)" }}
+            style={{ color: "var(--leaf)" }}
           >
             {quickLinks.eyebrow}
           </p>
