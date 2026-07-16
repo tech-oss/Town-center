@@ -72,7 +72,7 @@ export default function EventsGrid() {
   const { data: events } = useFetch(getEvents, []);
   const upcomingEvents = upcomingFrom(events ?? []);
   return (
-    <section id="events" className="py-20 md:py-24 px-6 md:px-12" style={{ backgroundColor: "var(--mint)" }}>
+    <section id="events" className="py-20 md:py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-end justify-between gap-4 mb-10">

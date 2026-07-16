@@ -114,26 +114,24 @@ export default function BlogCards() {
   return (
     <section
       className="relative py-24 px-6 md:px-12 overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse 70% 55% at 50% 48%, rgba(150,215,211,0.22) 0%, transparent 70%), linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)",
-      }}
+      style={{ backgroundColor: "#ffffff" }}
     >
       <div className="relative max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>
+            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
               {blogCards.eyebrow}
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">
+            <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
               {blogCards.heading}
             </h2>
           </div>
           {/* Text link — not a button */}
           <CardLink
             href={blogCards.cta.href}
-            className={btn.text.className + " text-white/80 decoration-white/40"}
+            className={btn.text.className}
+            style={{ color: "var(--forest)" }}
           >
             {blogCards.cta.label}
             <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>

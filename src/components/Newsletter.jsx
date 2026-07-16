@@ -14,16 +14,16 @@ export default function Newsletter() {
     <section
       id="newsletter"
       className="py-24 px-6 md:px-12"
-      style={{ backgroundColor: "var(--forest)" }}
+      style={{ backgroundColor: "#ffffff" }}
     >
       <div className="max-w-2xl mx-auto text-center">
-        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>
+        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
           {newsletter.eyebrow}
         </p>
-        <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+        <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>
           {newsletter.heading}
         </h2>
-        <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(255,255,255,0.65)" }}>
+        <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(26,26,26,0.65)" }}>
           {newsletter.body}
         </p>
 
@@ -42,7 +42,8 @@ export default function Newsletter() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder={newsletter.placeholder}
-              className="flex-1 max-w-sm px-5 py-3.5 rounded-full text-sm bg-white/10 text-white placeholder-white/40 border border-white/20 focus:outline-none focus:border-white/50 transition-colors duration-150"
+              className="flex-1 max-w-sm px-5 py-3.5 rounded-full text-sm border focus:outline-none transition-colors duration-150"
+              style={{ backgroundColor: "rgba(0,0,0,0.03)", color: "var(--forest)", borderColor: "rgba(0,0,0,0.12)" }}
             />
             <button
               type="submit"
@@ -54,7 +55,7 @@ export default function Newsletter() {
           </form>
         )}
 
-        <p className="text-xs mt-5" style={{ color: "rgba(255,255,255,0.35)" }}>
+        <p className="text-xs mt-5" style={{ color: "rgba(26,26,26,0.4)" }}>
           {newsletter.disclaimer}
         </p>
       </div>

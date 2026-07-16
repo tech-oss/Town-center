@@ -243,18 +243,18 @@ export default function Hero() {
             {/* ── Mobile copy block (solid navy bg, below the card) ── */}
             <div
               className="md:hidden px-5 pt-5 pb-8"
-              style={{ backgroundColor: "var(--forest)" }}
+              style={{ backgroundColor: "#ffffff" }}
             >
-              <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>
+              <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
                 {s.eyebrow}
               </p>
               <h1
-                className="text-4xl font-bold text-white mb-4 leading-tight"
-                style={{ fontFamily: "var(--font-heading)" }}
+                className="text-4xl font-bold mb-4 leading-tight"
+                style={{ fontFamily: "var(--font-heading)", color: "var(--forest)" }}
               >
                 {s.headline}
               </h1>
-              <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(255,255,255,0.78)" }}>
+              <p className="text-sm leading-relaxed mb-6" style={{ color: "rgba(26,26,26,0.7)" }}>
                 {s.subheadline}
               </p>
               <div className="flex flex-col gap-3">
@@ -267,7 +267,8 @@ export default function Hero() {
                 </SmartLink>
                 <SmartLink
                   to={s.secondaryCta.href}
-                  className="block w-full py-3.5 rounded-full text-sm font-semibold text-center border border-white/40 text-white transition-colors duration-150 hover:bg-white/10"
+                  className="block w-full py-3.5 rounded-full text-sm font-semibold text-center border transition-colors duration-150"
+                  style={{ borderColor: "rgba(28,46,56,0.3)", color: "var(--forest)" }}
                 >
                   {s.secondaryCta.label}
                 </SmartLink>
@@ -286,7 +287,7 @@ export default function Hero() {
                       style={{
                         width: di === current ? 20 : 8,
                         height: 8,
-                        backgroundColor: di === current ? "var(--sage)" : "rgba(255,255,255,0.35)",
+                        backgroundColor: di === current ? "var(--sage)" : "rgba(28,46,56,0.2)",
                       }}
                     />
                   ))}
@@ -296,18 +297,20 @@ export default function Hero() {
                   <button
                     onClick={prev}
                     aria-label="Previous slide"
-                    className="w-9 h-9 rounded-full border border-white/30 flex items-center justify-center text-white text-lg transition-colors hover:bg-white/20"
+                    className="w-9 h-9 rounded-full border flex items-center justify-center text-lg transition-colors"
+                    style={{ borderColor: "rgba(28,46,56,0.25)", color: "var(--forest)" }}
                   >
                     ‹
                   </button>
                   <button
                     onClick={next}
                     aria-label="Next slide"
-                    className="w-9 h-9 rounded-full border border-white/30 flex items-center justify-center text-white text-lg transition-colors hover:bg-white/20"
+                    className="w-9 h-9 rounded-full border flex items-center justify-center text-lg transition-colors"
+                    style={{ borderColor: "rgba(28,46,56,0.25)", color: "var(--forest)" }}
                   >
                     ›
                   </button>
-                  <span className="text-white/60 text-xs tabular-nums ml-1">
+                  <span className="text-xs tabular-nums ml-1" style={{ color: "rgba(28,46,56,0.5)" }}>
                     {String(current + 1).padStart(2, "0")}/{String(TOTAL).padStart(2, "0")}
                   </span>
                 </div>

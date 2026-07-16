@@ -49,7 +49,7 @@ export default function PlanVisit() {
     <section
       id="plan-visit"
       className="py-24 px-6 md:px-12"
-      style={{ background: "linear-gradient(160deg, var(--sand) 0%, var(--mint) 100%)" }}
+      style={{ backgroundColor: "#ffffff" }}
     >
       <div className="max-w-6xl mx-auto">
         {/* Header */}

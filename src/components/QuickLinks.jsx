@@ -5,8 +5,7 @@ export default function QuickLinks() {
   return (
     <section
       className="py-16 md:py-24 px-6 md:px-12"
-      // Original brand background (mint → sand gradient)
-      style={{ background: "linear-gradient(160deg, var(--mint) 0%, var(--sand) 60%)" }}
+      style={{ backgroundColor: "#ffffff" }}
     >
       <div className="max-w-7xl mx-auto">
 
