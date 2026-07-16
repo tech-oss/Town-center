@@ -89,7 +89,8 @@ export const quickLinks = {
     {
       label: "Eat & Drink",
       href: "/eat-drink",
-      image: "/images/ql-food.jpg", // restaurant table — swap for a real Maidenhead venue later
+      image: "/images/ql-food.jpg", // poster fallback while the video loads
+      video: "/videos/eat-drink.mp4", // 720×1280 portrait loop
     },
     {
       label: "Shop",
@@ -100,7 +101,8 @@ export const quickLinks = {
     {
       label: "See & Do",
       href: "/see-do",
-      image: "/images/ql-see.jpg", // theatre / live performance
+      image: "/images/ql-see.jpg", // poster fallback while the video loads
+      video: "/videos/see-do.mp4", // 720×1280 portrait loop
     },
     {
       label: "Green Spaces",
@@ -111,12 +113,14 @@ export const quickLinks = {
     {
       label: "Wellness",
       href: "/see-do?category=sport-wellness",
-      image: "/images/ql-wellness.jpg", // padel court / active wellness
+      image: "/images/ql-wellness.jpg", // poster fallback while the video loads
+      video: "/videos/wellness.mp4", // 720×1280 portrait loop
     },
     {
       label: "Getting Here",
       href: "/getting-here",
-      image: "/images/ql-transport.jpg", // railway station platform
+      image: "/images/ql-transport.jpg", // poster fallback while the video loads
+      video: "/videos/getting-here.mp4", // 720×1280 portrait loop
     },
   ],
 };
