@@ -144,16 +144,16 @@ export default function DetailPage() {
               {item.hideDescription ? null : item.paragraphs ? (
                 <div className="flex flex-col gap-5">
                   {item.paragraphs.map((p, i) => (
-                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>{p}</p>
+                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
                   ))}
                 </div>
               ) : (
                 <>
-                  <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>
+                  <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
                     {item.description}
                   </p>
                   {item.description2 && (
-                    <p className="text-base leading-relaxed mt-5" style={{ color: "#000000", opacity: 0.82 }}>
+                    <p className="text-base leading-relaxed mt-5" style={{ color: "#000000" }}>
                       {item.description2}
                     </p>
                   )}
@@ -187,7 +187,7 @@ export default function DetailPage() {
                   <ul className="flex flex-col gap-1.5">
                     {item.hours.map((h) => (
                       <li key={h.day} className="flex justify-between text-sm">
-                        <span style={{ color: "#000000", opacity: 0.7 }}>{h.day}</span>
+                        <span style={{ color: "#000000" }}>{h.day}</span>
                         <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
                       </li>
                     ))}
@@ -199,19 +199,19 @@ export default function DetailPage() {
                 {/* Location & contact */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
-                  <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000", opacity: 0.8 }}>{item.address}</p>
+                  <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{item.address}</p>
                   {item.phone && item.phone !== "—" && (
-                    <p className="text-sm" style={{ color: "#000000", opacity: 0.8 }}>
+                    <p className="text-sm" style={{ color: "#000000" }}>
                       <span className="font-semibold" style={{ color: "#000000" }}>Tel:</span> {item.phone}
                     </p>
                   )}
                   {item.email && !item.freePlan && (
-                    <p className="text-sm" style={{ color: "#000000", opacity: 0.8 }}>
+                    <p className="text-sm" style={{ color: "#000000" }}>
                       <span className="font-semibold" style={{ color: "#000000" }}>Email:</span> {item.email}
                     </p>
                   )}
                   {item.website && !item.hideWeb && (
-                    <p className="text-sm" style={{ color: "#000000", opacity: 0.8 }}>
+                    <p className="text-sm" style={{ color: "#000000" }}>
                       <span className="font-semibold" style={{ color: "#000000" }}>Web:</span>{" "}
                       <a
                         href={`https://${item.website.replace(/^https?:\/\//, "")}`}

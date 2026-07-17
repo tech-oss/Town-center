@@ -42,7 +42,7 @@ export default function FeatureBlocks() {
                 <h3 className="text-3xl md:text-5xl font-bold leading-tight mb-5" style={{ color: "#000000" }}>
                   {f.cardHeading}
                 </h3>
-                <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: "#000000", opacity: 0.75 }}>
+                <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: "#000000" }}>
                   {f.cardBody}
                 </p>
                 <Link

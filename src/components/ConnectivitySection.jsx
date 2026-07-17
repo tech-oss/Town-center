@@ -81,7 +81,7 @@ export default function ConnectivitySection() {
           <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>
             London in minutes.<br className="hidden md:block" /> The world on your doorstep.
           </h2>
-          <p className="mt-4 text-base leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>
+          <p className="mt-4 text-base leading-relaxed" style={{ color: "#000000" }}>
             Maidenhead sits on the Elizabeth line and the M4 corridor — giving you fast, direct access to London, Heathrow, Reading and beyond.
           </p>
         </div>

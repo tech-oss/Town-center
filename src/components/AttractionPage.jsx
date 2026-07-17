@@ -64,13 +64,13 @@ export default function AttractionPage() {
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{a.eyebrow}</span>
             <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-5 leading-tight" style={{ color: "#000000" }}>{a.title}</h1>
             {a.subtitle && (
-              <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "#000000", opacity: 0.7 }}>{a.subtitle}</p>
+              <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "#000000" }}>{a.subtitle}</p>
             )}
 
             {/* Intro paragraphs */}
             <div className="flex flex-col gap-5">
               {a.intro?.map((p, i) => (
-                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
               ))}
             </div>
 
@@ -85,7 +85,7 @@ export default function AttractionPage() {
                 )}
                 <div className="flex flex-col gap-5">
                   {sec.paras.map((p, pi) => (
-                    <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
+                    <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
                   ))}
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function AttractionPage() {
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--leaf)" }}>Highlights</h3>
                 <ul className="flex flex-col gap-2.5">
                   {a.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000", opacity: 0.82 }}>
+                    <li key={h} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000" }}>
                       <span style={{ color: "var(--sage)" }}>✓</span> {h}
                     </li>
                   ))}
@@ -108,7 +108,7 @@ export default function AttractionPage() {
             )}
             <div className="rounded-3xl p-7" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
               <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find It</h3>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: "#000000", opacity: 0.82 }}>{a.address}</p>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "#000000" }}>{a.address}</p>
               <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
                 className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
                 style={{ backgroundColor: "var(--leaf)" }}

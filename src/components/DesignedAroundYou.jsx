@@ -8,7 +8,7 @@ function Stat({ s }) {
     <div className="flex flex-col items-center text-center">
       <span className="w-10 h-10 rounded-full flex items-center justify-center text-lg mb-2" style={{ backgroundColor: "var(--mint)" }}>{s.icon}</span>
       <span className="text-xl font-bold leading-none" style={{ color: "#000000" }}>{s.value}</span>
-      <span className="text-[11px] mt-1 leading-tight" style={{ color: "#000000", opacity: 0.6 }}>{s.label}</span>
+      <span className="text-[11px] mt-1 leading-tight" style={{ color: "#000000" }}>{s.label}</span>
     </div>
   );
 }
@@ -23,7 +23,7 @@ export default function DesignedAroundYou() {
         {/* Heading */}
         <div className="mb-7">
           <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>Designed around you</h2>
-          <p className="text-base mt-2" style={{ color: "#000000", opacity: 0.7 }}>From nature to nightlife, everything is within easy reach.</p>
+          <p className="text-base mt-2" style={{ color: "#000000" }}>From nature to nightlife, everything is within easy reach.</p>
         </div>
 
         {/* Tabs */}
@@ -43,7 +43,7 @@ export default function DesignedAroundYou() {
           <div className="bg-white rounded-3xl p-9 flex flex-col justify-center overflow-hidden h-full" style={{ boxShadow: "0 12px 44px -24px rgba(28,46,56,0.3)" }}>
             <span className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-5" style={{ backgroundColor: "var(--mint)" }}>{t.stats[0].icon}</span>
             <h3 className="text-2xl font-bold mb-3" style={{ color: "#000000" }}>{t.title}</h3>
-            <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: "#000000", opacity: 0.78 }}>{t.body}</p>
+            <p className="text-base leading-relaxed mb-8 max-w-md" style={{ color: "#000000" }}>{t.body}</p>
             <div className="grid grid-cols-3 gap-4 pt-6" style={{ borderTop: "1px solid rgba(28,46,56,0.1)" }}>
               {t.stats.map((s) => <Stat key={s.label} s={s} />)}
             </div>
@@ -72,12 +72,12 @@ export default function DesignedAroundYou() {
             </div>
             <div className="flex-1 min-w-0 p-5">
               <h3 className="text-lg font-bold mb-1.5" style={{ color: "#000000" }}>{t.title}</h3>
-              <p className="text-xs leading-relaxed mb-4" style={{ color: "#000000", opacity: 0.72 }}>{t.body}</p>
+              <p className="text-xs leading-relaxed mb-4" style={{ color: "#000000" }}>{t.body}</p>
               <div className="flex gap-4">
                 {t.stats.map((s) => (
                   <div key={s.label} className="flex flex-col">
                     <span className="text-base font-bold leading-none" style={{ color: "#000000" }}>{s.value}</span>
-                    <span className="text-[10px] mt-1 leading-tight" style={{ color: "#000000", opacity: 0.6 }}>{s.label}</span>
+                    <span className="text-[10px] mt-1 leading-tight" style={{ color: "#000000" }}>{s.label}</span>
                   </div>
                 ))}
               </div>

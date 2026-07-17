@@ -45,14 +45,14 @@ function FeaturedCard({ post }) {
 
       {/* Text — mobile: normal flow below the image. Desktop: pinned to bottom, overlaid on the image. */}
       <div className="relative z-10 md:mt-auto p-6 flex flex-col gap-2">
-        <p className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.6)" }}>{post.date}</p>
+        <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{post.date}</p>
         <h3
           className="text-2xl leading-snug"
           style={{ fontFamily: "var(--font-heading)", fontWeight: 700, color: "#000" }}
         >
           {post.title}
         </h3>
-        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "rgba(0,0,0,0.78)" }}>
+        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "#000000" }}>
           {post.excerpt}
         </p>
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "var(--sage)" }}>
@@ -88,11 +88,11 @@ function CompactCard({ post }) {
       {/* Body */}
       <div className="flex flex-col flex-1 p-4 gap-2">
         <span className="sm:hidden"><Badge label={post.category} /></span>
-        <p className="text-[10px] font-medium" style={{ color: "#000000", opacity: 0.5 }}>{post.date}</p>
+        <p className="text-[10px] font-medium" style={{ color: "#000000" }}>{post.date}</p>
         <h3 className="text-base leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)", fontWeight: 700 }}>
           {post.title}
         </h3>
-        <p className="text-xs leading-relaxed line-clamp-2 hidden sm:block" style={{ color: "#000000", opacity: 0.7 }}>
+        <p className="text-xs leading-relaxed line-clamp-2 hidden sm:block" style={{ color: "#000000" }}>
           {post.excerpt}
         </p>
         <span className="inline-flex items-center gap-1 text-xs font-semibold mt-auto" style={{ color: "var(--leaf)" }}>

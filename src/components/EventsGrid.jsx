@@ -115,13 +115,13 @@ export default function EventsGrid() {
               </div>
               <div className="flex flex-col gap-2 p-5">
                 <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>{e.title}</h3>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.65 }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
                   <CalendarIcon />{e.date}
                 </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.65 }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
                   <PinIcon />{e.location}
                 </div>
-                <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000", opacity: 0.72 }}>
+                <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000" }}>
                   {e.excerpt}
                 </p>
                 <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-2" style={{ color: "#000000" }}>

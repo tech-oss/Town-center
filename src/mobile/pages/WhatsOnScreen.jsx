@@ -30,7 +30,7 @@ function Calendar({ year, month, onMonth, selected, onSelect, eventDates }) {
       </div>
       <div className="grid grid-cols-7 gap-y-1 mb-1">
         {DOW.map((d, i) => (
-          <span key={i} className="text-[10px] font-bold text-center" style={{ color: "rgba(0,0,0,0.4)" }}>{d}</span>
+          <span key={i} className="text-[10px] font-bold text-center" style={{ color: "#000000" }}>{d}</span>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-y-1">
@@ -134,8 +134,8 @@ export default function WhatsOnScreen() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{e.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.6)" }}>{e.time}</p>
-                  <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.45)" }}>{e.location}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#000000" }}>{e.time}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{e.location}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded-full shrink-0" style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "var(--leaf)" }}>{e.category}</span>
               </MobileCard>

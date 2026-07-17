@@ -44,13 +44,13 @@ export default function ArticlePage() {
             <span className="text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
               {article.category}
             </span>
-            <span className="text-sm" style={{ color: "#000000", opacity: 0.55 }}>{article.date}</span>
+            <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
           </div>
 
           <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-2" style={{ color: "#000000" }}>
             {article.title}
           </h1>
-          <p className="text-sm mb-7" style={{ color: "#000000", opacity: 0.6 }}>
+          <p className="text-sm mb-7" style={{ color: "#000000" }}>
             At <Link to={bizPath} className="font-semibold underline-offset-2 hover:underline" style={{ color: "var(--leaf)" }}>{biz.name}</Link> · {biz.tag}
           </p>
 
@@ -66,7 +66,7 @@ export default function ArticlePage() {
         <div className="max-w-4xl mx-auto">
           <article className="flex flex-col gap-5">
             {article.body.map((para, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>
+              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
                 {para}
               </p>
             ))}
@@ -79,7 +79,7 @@ export default function ArticlePage() {
               <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
                 <p className="font-bold text-lg leading-tight" style={{ color: "#000000" }}>{biz.name}</p>
-                <p className="text-sm truncate" style={{ color: "#000000", opacity: 0.6 }}>{biz.address}</p>
+                <p className="text-sm truncate" style={{ color: "#000000" }}>{biz.address}</p>
               </div>
             </div>
             <Link
@@ -115,7 +115,7 @@ export default function ArticlePage() {
                     </span>
                   </div>
                   <div className="flex flex-col gap-1.5 p-5">
-                    <span className="text-[11px]" style={{ color: "#000000", opacity: 0.5 }}>{a.date}</span>
+                    <span className="text-[11px]" style={{ color: "#000000" }}>{a.date}</span>
                     <h3 className="font-bold text-base leading-snug" style={{ color: "#000000" }}>{a.title}</h3>
                   </div>
                 </Link>

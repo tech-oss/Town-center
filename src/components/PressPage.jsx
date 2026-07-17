@@ -63,7 +63,7 @@ export default function PressPage() {
 
           <div className="flex flex-col gap-6 mb-12">
             {introParagraphs.map((p, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>{p}</p>
+              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
             ))}
           </div>
 
@@ -71,7 +71,7 @@ export default function PressPage() {
             {cards.map((c) => (
               <div key={c.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
                 <h3 className="font-bold text-lg mb-2" style={{ color: "#000000" }}>{c.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.78 }}>{c.body}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{c.body}</p>
               </div>
             ))}
           </div>
@@ -83,7 +83,7 @@ export default function PressPage() {
             </h2>
             <div className="flex flex-col gap-5">
               {visibilityParagraphs.map((p, i) => (
-                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>{p}</p>
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
               ))}
             </div>
           </div>

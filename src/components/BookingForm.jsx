@@ -27,7 +27,7 @@ export default function BookingForm({ title = "Book a Viewing", subtitle, proper
       <div className="rounded-3xl p-8 text-center" style={{ backgroundColor: "var(--mint)" }}>
         <div className="text-4xl mb-3" aria-hidden="true">🎉</div>
         <h3 className="text-xl font-bold mb-2" style={{ color: "#000000" }}>Thank you, {form.firstName || "there"}!</h3>
-        <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.8 }}>
+        <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>
           Your enquiry{propertyName ? ` about ${propertyName}` : ""} has been received. A member of the
           Maidenhead Residential team will be in touch shortly to confirm the details.
         </p>
@@ -38,7 +38,7 @@ export default function BookingForm({ title = "Book a Viewing", subtitle, proper
   return (
     <form onSubmit={onSubmit} className={`rounded-3xl ${compact ? "p-6" : "p-7 md:p-8"}`} style={{ backgroundColor: "#fff", boxShadow: "0 14px 50px -26px rgba(28,46,56,0.4)" }}>
       <h3 className="text-xl md:text-2xl font-bold" style={{ color: "#000000" }}>{title}</h3>
-      {subtitle && <p className="text-sm mt-1 mb-5" style={{ color: "#000000", opacity: 0.65 }}>{subtitle}</p>}
+      {subtitle && <p className="text-sm mt-1 mb-5" style={{ color: "#000000" }}>{subtitle}</p>}
       {!subtitle && <div className="mb-5" />}
 
       <div className="grid sm:grid-cols-2 gap-4">
@@ -74,7 +74,7 @@ export default function BookingForm({ title = "Book a Viewing", subtitle, proper
       >
         Submit Enquiry
       </button>
-      <p className="text-[11px] text-center mt-3" style={{ color: "#000000", opacity: 0.5 }}>
+      <p className="text-[11px] text-center mt-3" style={{ color: "#000000" }}>
         We care about your data. Read our Privacy Policy.
       </p>
     </form>

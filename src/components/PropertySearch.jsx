@@ -69,8 +69,8 @@ export function PropertyCard({ p }) {
       <div className="flex flex-col gap-1.5 p-5">
         <p className="text-xl font-bold" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>
         <p className="text-sm font-semibold" style={{ color: "var(--leaf)" }}>{p.bedLabel} · {p.building}</p>
-        <p className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>{p.location}</p>
-        <div className="flex items-center gap-4 mt-2 text-xs font-medium" style={{ color: "#000000", opacity: 0.75 }}>
+        <p className="text-xs" style={{ color: "#000000" }}>{p.location}</p>
+        <div className="flex items-center gap-4 mt-2 text-xs font-medium" style={{ color: "#000000" }}>
           <span>🛏 {p.beds === 0 ? "Studio" : p.beds === 99 ? "PH" : p.beds}</span>
           <span>🛁 {p.baths}</span>
           <span>📐 {p.sqft} sq ft</span>
@@ -191,7 +191,7 @@ export default function PropertySearch({ mode }) {
 
       {/* ── Filters ── */}
       <section className="max-w-6xl mx-auto px-6 md:px-12 pt-6">
-        <p className="text-base leading-relaxed max-w-3xl mb-5" style={{ color: "#000000", opacity: 0.8 }}>{intro}</p>
+        <p className="text-base leading-relaxed max-w-3xl mb-5" style={{ color: "#000000" }}>{intro}</p>
 
         <div className="rounded-3xl p-5 md:p-7 flex flex-col gap-5" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -24px rgba(28,46,56,0.3)" }}>
 
@@ -225,7 +225,7 @@ export default function PropertySearch({ mode }) {
                 </select>
                 <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-40" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </div>
-              <span className="text-sm font-medium shrink-0" style={{ color: "#000000", opacity: 0.4 }}>—</span>
+              <span className="text-sm font-medium shrink-0" style={{ color: "#000000" }}>—</span>
               <div className="flex-1 relative">
                 <select className={selCls} style={selStyle} value={priceMax} onChange={(e) => setPriceMax(e.target.value)}>
                   <option value="any">No max</option>
@@ -251,7 +251,7 @@ export default function PropertySearch({ mode }) {
                 </select>
                 <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-40" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </div>
-              <span className="text-sm font-medium shrink-0" style={{ color: "#000000", opacity: 0.4 }}>—</span>
+              <span className="text-sm font-medium shrink-0" style={{ color: "#000000" }}>—</span>
               <div className="flex-1 relative">
                 <select className={selCls} style={selStyle} value={bedsMax} onChange={(e) => setBedsMax(e.target.value)}>
                   <option value="any">No max</option>
@@ -275,7 +275,7 @@ export default function PropertySearch({ mode }) {
             {results.map((p) => <PropertyCard key={p.slug} p={p} />)}
           </div>
         ) : (
-          <p className="text-center py-12 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
+          <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>
             No homes match your filters right now — try widening your search.
           </p>
         )}
@@ -362,7 +362,7 @@ export function FeaturedProperties() {
                   </span>
                   <p className="text-lg font-bold mt-0.5" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>
                   <p className="text-sm font-semibold leading-snug" style={{ color: "var(--leaf)" }}>{p.bedLabel} · {p.building}</p>
-                  <p className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>{p.location}</p>
+                  <p className="text-xs" style={{ color: "#000000" }}>{p.location}</p>
                 </div>
               </Link>
             ))}

@@ -81,7 +81,7 @@ export default function WorkPage() {
                   <CategoryIcon name={c.icon} />
                 </span>
                 <span className="font-bold text-sm md:text-base leading-tight" style={{ color: "#000000" }}>{c.title}</span>
-                <span className="hidden md:block text-xs mt-1.5 leading-snug" style={{ color: "#000000", opacity: 0.6 }}>{c.desc}</span>
+                <span className="hidden md:block text-xs mt-1.5 leading-snug" style={{ color: "#000000" }}>{c.desc}</span>
               </Link>
             ))}
           </div>
@@ -109,7 +109,7 @@ export default function WorkPage() {
                   <h3 className="font-bold text-lg leading-snug mb-3" style={{ color: "#000000" }}>{f.title}</h3>
                   <ul className="flex flex-col gap-2 mt-auto">
                     {f.meta.map((m, mi) => (
-                      <li key={mi} className="flex items-center gap-2 text-xs" style={{ color: "#000000", opacity: 0.7 }}>
+                      <li key={mi} className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
                         <span style={{ color: "var(--leaf)" }}><MetaIcon name={m.icon} /></span> {m.label}
                       </li>
                     ))}

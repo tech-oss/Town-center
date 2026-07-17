@@ -66,7 +66,7 @@ export default function NewsOffers({ item }) {
 
                 {/* Body */}
                 <div className="flex flex-col flex-1 min-w-0 md:p-3 md:pt-4">
-                  <p className="text-[11px] font-medium mb-1.5" style={{ color: "#000000", opacity: 0.5 }}>
+                  <p className="text-[11px] font-medium mb-1.5" style={{ color: "#000000" }}>
                     {post.date}
                   </p>
                   <h3
@@ -75,7 +75,7 @@ export default function NewsOffers({ item }) {
                   >
                     {post.title}
                   </h3>
-                  <p className="text-xs md:text-sm leading-relaxed mb-3 line-clamp-3" style={{ color: "#000000", opacity: 0.72 }}>
+                  <p className="text-xs md:text-sm leading-relaxed mb-3 line-clamp-3" style={{ color: "#000000" }}>
                     {post.excerpt}
                   </p>
                   <span className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold mt-auto" style={{ color: "var(--leaf)" }}>

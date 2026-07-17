@@ -42,7 +42,7 @@ export default function SectionScreen({ sectionKey }) {
                 <img src={it.image} alt="" className="w-24 h-24 object-cover shrink-0" />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                   <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{it.name}</p>
-                  <p className="text-xs mt-1 leading-snug" style={{ color: "rgba(0,0,0,0.6)" }}>{it.blurb}</p>
+                  <p className="text-xs mt-1 leading-snug" style={{ color: "#000000" }}>{it.blurb}</p>
                   <span className="text-[10px] font-bold uppercase tracking-wide mt-1.5" style={{ color: "var(--leaf)" }}>{it.category}</span>
                 </div>
               </MobileCard>

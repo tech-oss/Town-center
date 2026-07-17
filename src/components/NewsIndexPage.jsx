@@ -67,9 +67,9 @@ export default function NewsIndexPage() {
                   </span>
                 </div>
                 <div className="flex flex-col gap-2 p-6 flex-1">
-                  <p className="text-[11px] font-medium" style={{ color: "#000000", opacity: 0.5 }}>{story.date}</p>
+                  <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{story.date}</p>
                   <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000" }}>{story.title}</h3>
-                  <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000", opacity: 0.72 }}>{story.excerpt}</p>
+                  <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{story.excerpt}</p>
                   <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
                     Read more
                     <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>

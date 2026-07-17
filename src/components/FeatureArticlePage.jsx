@@ -15,12 +15,12 @@ function BlockText({ block }) {
         </h2>
       )}
       {block.paras?.map((p, pi) => (
-        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
+        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
       ))}
       {block.bullets && (
         <ul className="flex flex-col gap-2 pl-1">
           {block.bullets.map((b) => (
-            <li key={b} className="flex items-start gap-3 text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>
+            <li key={b} className="flex items-start gap-3 text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
               <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />
               {b}
             </li>
@@ -28,7 +28,7 @@ function BlockText({ block }) {
         </ul>
       )}
       {block.parasAfter?.map((p, pi) => (
-        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
+        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
       ))}
     </div>
   );
@@ -86,7 +86,7 @@ export default function FeatureArticlePage() {
             <span className="text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
               {story.category}
             </span>
-            <span className="text-sm" style={{ color: "#000000", opacity: 0.55 }}>{story.date}</span>
+            <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
           </div>
 
           <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4" style={{ color: "#000000" }}>

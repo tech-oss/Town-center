@@ -64,13 +64,13 @@ export default function EventsListPage() {
                 </div>
                 <div className="flex flex-col gap-2 p-6">
                   <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{e.title}</h3>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.7 }}>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
                     <span style={{ color: "#000000" }}><CalendarIcon /></span>{e.date}
                   </div>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.7 }}>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
                     <span style={{ color: "#000000" }}><PinIcon /></span>{e.location}
                   </div>
-                  <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000", opacity: 0.72 }}>{e.excerpt}</p>
+                  <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000" }}>{e.excerpt}</p>
                   <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
                     Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                   </span>

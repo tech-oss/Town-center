@@ -65,7 +65,7 @@ export default function PropertyPage() {
           <div>
             <p className="text-3xl md:text-4xl font-bold" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>
             <h1 className="text-xl md:text-2xl font-semibold mt-1 mb-1" style={{ color: "var(--leaf)" }}>{p.bedLabel} property · {p.building}</h1>
-            <p className="text-sm mb-6" style={{ color: "#000000", opacity: 0.6 }}>{p.location}</p>
+            <p className="text-sm mb-6" style={{ color: "#000000" }}>{p.location}</p>
 
             {/* Key facts */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
@@ -78,12 +78,12 @@ export default function PropertyPage() {
             </div>
 
             <h2 className="text-xl font-bold mb-3" style={{ color: "#000000" }}>About this home</h2>
-            <p className="text-base leading-relaxed mb-8" style={{ color: "#000000", opacity: 0.82 }}>{p.description}</p>
+            <p className="text-base leading-relaxed mb-8" style={{ color: "#000000" }}>{p.description}</p>
 
             <h2 className="text-xl font-bold mb-3" style={{ color: "#000000" }}>Features</h2>
             <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5 mb-8">
               {p.features.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000", opacity: 0.82 }}>
+                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000" }}>
                   <span style={{ color: "var(--sage)" }}>✓</span> {f}
                 </li>
               ))}

@@ -67,7 +67,7 @@ function DevelopmentCard({ b }) {
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>About the development</p>
             <h3 className="text-2xl md:text-3xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>About {b.name}</h3>
             {(b.longDescription || [b.description]).map((para, i) => (
-              <p key={i} className="text-base leading-relaxed mb-4" style={{ color: "#000000", opacity: 0.82 }}>{para}</p>
+              <p key={i} className="text-base leading-relaxed mb-4" style={{ color: "#000000" }}>{para}</p>
             ))}
             {b.website && (
               <a href={b.website} target="_blank" rel="noopener noreferrer"
@@ -135,7 +135,7 @@ function DevelopmentCard({ b }) {
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>Contact</p>
           <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Get in touch</h3>
-          <p className="text-base mb-7 max-w-xl" style={{ color: "#000000", opacity: 0.7 }}>
+          <p className="text-base mb-7 max-w-xl" style={{ color: "#000000" }}>
             For availability, pricing and viewings contact the {b.developer} team directly.
           </p>
           <div className="flex flex-wrap gap-4">

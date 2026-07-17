@@ -8,7 +8,7 @@ export default function ErrorState({
   return (
     <div className="flex flex-col items-center justify-center gap-3 text-center px-6" style={{ minHeight }}>
       <p className="text-lg font-bold" style={{ color: "#000000" }}>{title}</p>
-      <p className="text-sm max-w-sm" style={{ color: "#000000", opacity: 0.6 }}>{message}</p>
+      <p className="text-sm max-w-sm" style={{ color: "#000000" }}>{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}

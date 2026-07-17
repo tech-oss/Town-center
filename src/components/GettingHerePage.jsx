@@ -282,7 +282,7 @@ export default function GettingHerePage() {
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold mb-2" style={{ color: "#000000", opacity: 0.6 }}>
+                    <p className="text-xs font-semibold mb-2" style={{ color: "#000000" }}>
                       Navigate to the following car parks from your location:
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -344,12 +344,12 @@ export default function GettingHerePage() {
               <div className="order-first md:order-none">
                 <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
-                <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000", opacity: 0.82 }}>{sec.intro}</p>
+                <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000" }}>{sec.intro}</p>
                 <div className="flex flex-col divide-y" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
                   {sec.blocks.map((b) => (
                     <div key={b.title} className="py-3.5">
                       <h3 className="font-bold text-base mb-1" style={{ color: "#000000" }}>{b.title}</h3>
-                      <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.72 }}>{b.body}</p>
+                      <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{b.body}</p>
                     </div>
                   ))}
                 </div>
@@ -368,7 +368,7 @@ export default function GettingHerePage() {
           <div className="max-w-2xl mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
-            <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>
+            <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
               A few practical things worth knowing before you head into the town centre.
             </p>
           </div>
@@ -376,7 +376,7 @@ export default function GettingHerePage() {
             {goodToKnow.map((g) => (
               <div key={g.id} id={g.id} className="scroll-mt-24 bg-white rounded-3xl p-7" style={{ boxShadow: "0 10px 40px -20px rgba(28,46,56,0.3)" }}>
                 <h3 className="font-bold text-lg mb-3" style={{ color: "#000000" }}>{g.title}</h3>
-                <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000", opacity: 0.78 }}>{g.body}</p>
+                <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000" }}>{g.body}</p>
               </div>
             ))}
           </div>

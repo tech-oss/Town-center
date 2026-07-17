@@ -116,7 +116,7 @@ export default function EventsCalendar() {
                 <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{e.category}</span>
               </div>
               <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
-              <p className="text-sm truncate" style={{ color: "#000000", opacity: 0.6 }}>{e.location}</p>
+              <p className="text-sm truncate" style={{ color: "#000000" }}>{e.location}</p>
             </div>
             <span className="shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
           </Link>

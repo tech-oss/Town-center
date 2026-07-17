@@ -33,7 +33,7 @@ export default function InfoScreen() {
           {page.blocks.map((b) => (
             <MobileCard key={b.heading} className="p-4">
               <p className="text-sm font-bold mb-1.5" style={{ color: "#000000" }}>{b.heading}</p>
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>{b.body}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{b.body}</p>
             </MobileCard>
           ))}
         </div>

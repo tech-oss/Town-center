@@ -100,7 +100,7 @@ export default function BuildingPage() {
               About {b.name}
             </h2>
             {(b.longDescription || [b.description]).map((para, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed mb-5" style={{ color: "#000000", opacity: 0.82 }}>
+              <p key={i} className="text-base md:text-lg leading-relaxed mb-5" style={{ color: "#000000" }}>
                 {para}
               </p>
             ))}
@@ -205,7 +205,7 @@ export default function BuildingPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>
             Your 15-minute town
           </h2>
-          <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000", opacity: 0.7 }}>
+          <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000" }}>
             Everything you need is right on your doorstep in Maidenhead.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -236,7 +236,7 @@ export default function BuildingPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>
             Contact {b.developer}
           </h2>
-          <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000", opacity: 0.7 }}>
+          <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000" }}>
             For pricing, availability and upcoming releases, contact the {b.developer} team directly.
           </p>
           <div className="grid sm:grid-cols-3 gap-4">

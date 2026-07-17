@@ -23,7 +23,7 @@ export default function Newsletter() {
         <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
           {newsletter.heading}
         </h2>
-        <p className="text-base leading-relaxed mb-10" style={{ color: "rgba(0,0,0,0.65)" }}>
+        <p className="text-base leading-relaxed mb-10" style={{ color: "#000000" }}>
           {newsletter.body}
         </p>
 
@@ -55,7 +55,7 @@ export default function Newsletter() {
           </form>
         )}
 
-        <p className="text-xs mt-5" style={{ color: "rgba(0,0,0,0.4)" }}>
+        <p className="text-xs mt-5" style={{ color: "#000000" }}>
           {newsletter.disclaimer}
         </p>
       </div>

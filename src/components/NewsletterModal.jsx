@@ -120,7 +120,7 @@ export default function NewsletterModal({ open, onClose }) {
             >
               {m.heading}
             </h2>
-            <p className="text-sm leading-relaxed mb-6" style={{ color: "#000000", opacity: 0.7 }}>
+            <p className="text-sm leading-relaxed mb-6" style={{ color: "#000000" }}>
               {m.subtext}
             </p>
 
@@ -194,7 +194,7 @@ export default function NewsletterModal({ open, onClose }) {
                   type="checkbox"
                   className="mt-0.5 w-4 h-4 shrink-0 rounded accent-[var(--leaf)] cursor-pointer"
                 />
-                <span className="text-xs leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>
+                <span className="text-xs leading-relaxed" style={{ color: "#000000" }}>
                   {m.consent}
                 </span>
               </label>
@@ -211,7 +211,7 @@ export default function NewsletterModal({ open, onClose }) {
               </button>
 
               {/* Privacy note */}
-              <p className="text-xs text-center mt-1" style={{ color: "#000000", opacity: 0.55 }}>
+              <p className="text-xs text-center mt-1" style={{ color: "#000000" }}>
                 {m.privacyNote}{" "}
                 <a href={m.privacyLinkHref} className="underline" style={{ color: "var(--leaf)" }}>
                   {m.privacyLinkLabel}

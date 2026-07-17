@@ -115,12 +115,12 @@ export default function MapScreen() {
               <div className="w-2 h-12 rounded-full shrink-0" style={{ backgroundColor: PIN_COLORS[active.type] }} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{active.name}</p>
-                <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{active.category}</p>
+                <p className="text-xs" style={{ color: "#000000" }}>{active.category}</p>
               </div>
               <Link to={active.to} className="text-xs font-bold px-3 py-2 rounded-xl shrink-0" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>
                 View
               </Link>
-              <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} aria-label="Close">✕</button>
+              <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "#000000" }} aria-label="Close">✕</button>
             </div>
           )}
         </div>

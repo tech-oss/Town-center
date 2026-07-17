@@ -148,25 +148,25 @@ export default function EventPage() {
           {/* Meta rows */}
           <div className="flex flex-col gap-3 mb-8">
             {event.date && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000" }}>
                 <span style={{ color: "#000000" }}><CalendarIcon /></span>
                 <span>{event.date}{event.time ? ` · ${event.time}` : ""}</span>
               </div>
             )}
             {event.location && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000" }}>
                 <span style={{ color: "#000000" }}><PinIcon /></span>
                 <span>{event.location}</span>
               </div>
             )}
             {event.tickets && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000" }}>
                 <span style={{ color: "#000000" }}><TicketIcon /></span>
                 <span>{event.tickets}</span>
               </div>
             )}
             {event.website && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000" }}>
                 <span style={{ color: "#000000" }}><GlobeIcon /></span>
                 <a href={event.website} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:opacity-70 transition-opacity" style={{ color: "#000000" }}>
                   {event.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
@@ -207,7 +207,7 @@ export default function EventPage() {
 
           {/* Standfirst */}
           {event.standfirst && (
-            <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "#000000", opacity: 0.8 }}>
+            <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "#000000" }}>
               {event.standfirst}
             </p>
           )}
@@ -217,7 +217,7 @@ export default function EventPage() {
           {/* Body */}
           <article className="flex flex-col gap-5">
             {event.body.map((b, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>
+              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
                 {b.lead && <strong style={{ color: "#000000" }}>{b.lead} </strong>}
                 {b.text}
               </p>
@@ -247,7 +247,7 @@ export default function EventPage() {
                 </div>
                 <div className="flex flex-col gap-1.5 p-5">
                   <h3 className="font-bold text-base leading-snug" style={{ color: "#000000" }}>{e.title}</h3>
-                  <p className="text-xs" style={{ color: "#000000", opacity: 0.55 }}>{e.date}</p>
+                  <p className="text-xs" style={{ color: "#000000" }}>{e.date}</p>
                 </div>
               </Link>
             ))}

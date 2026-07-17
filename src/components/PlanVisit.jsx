@@ -60,7 +60,7 @@ export default function PlanVisit() {
           <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
             {planVisit.heading}
           </h2>
-          <p className="text-base leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>
+          <p className="text-base leading-relaxed" style={{ color: "#000000" }}>
             {planVisit.intro}
           </p>
         </div>
@@ -92,7 +92,7 @@ export default function PlanVisit() {
                   <span className="block font-bold text-lg leading-snug" style={{ color: "#000000" }}>
                     {opt.title}
                   </span>
-                  <span className="block text-sm mt-0.5" style={{ color: "#000000", opacity: 0.6 }}>
+                  <span className="block text-sm mt-0.5" style={{ color: "#000000" }}>
                     {opt.subtitle}
                   </span>
                 </span>

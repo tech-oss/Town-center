@@ -51,7 +51,7 @@ export default function LivePage() {
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "#000000" }}>Developments</h2>
-          <p className="text-base mb-10 max-w-2xl" style={{ color: "#000000", opacity: 0.7 }}>Explore Maidenhead's leading residential developments.</p>
+          <p className="text-base mb-10 max-w-2xl" style={{ color: "#000000" }}>Explore Maidenhead's leading residential developments.</p>
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {(buildings ?? []).map((b) => (
               <Link key={b.slug} to={`/live/building/${b.slug}`} className="group relative rounded-3xl overflow-hidden block aspect-[3/4]"

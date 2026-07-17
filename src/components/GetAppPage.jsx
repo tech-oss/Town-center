@@ -84,7 +84,7 @@ export default function GetAppPage() {
             {features.map((f) => (
               <div key={f.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
                 <h3 className="font-bold text-lg mb-2" style={{ color: "#000000" }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>{f.text}</p>
+                <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{f.text}</p>
               </div>
             ))}
           </div>

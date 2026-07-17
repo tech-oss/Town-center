@@ -116,7 +116,7 @@ export default function CategoryPage() {
       {/* ── Intro + content ── */}
       <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000", opacity: 0.8 }}>
+          <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000" }}>
             {intro}
           </p>
 
@@ -173,7 +173,7 @@ export default function CategoryPage() {
                       {it.name}
                     </h3>
                     {it.date && (
-                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
+                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "#000000" }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
                         </svg>
@@ -181,7 +181,7 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {it.address && (
-                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
+                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "#000000" }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
                         </svg>
@@ -189,7 +189,7 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {!it.hideDescription && (it.paragraphs?.[0] || it.description) && (
-                      <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "#000000", opacity: 0.72 }}>
+                      <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "#000000" }}>
                         {it.paragraphs?.[0] || it.description}
                       </p>
                     )}
@@ -202,7 +202,7 @@ export default function CategoryPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center py-12 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
+            <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>
               Nothing listed here just yet — check back soon.
             </p>
           )}

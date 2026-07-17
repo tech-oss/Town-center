@@ -77,7 +77,7 @@ export default function WeatherWidget() {
       </div>
 
       {error ? (
-        <p className="text-sm text-center py-6" style={{ color: "#000000", opacity: 0.6 }}>
+        <p className="text-sm text-center py-6" style={{ color: "#000000" }}>
           Weather is unavailable right now — please check back soon.
         </p>
       ) : (
