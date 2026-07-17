@@ -16,7 +16,7 @@ export default function Hero() {
       aria-label="Hero"
       className="hero-section relative w-full"
     >
-      <div className="w-full">
+      <div className="w-full md:absolute md:inset-0">
         {/* ── Image ── */}
         {/* Mobile: natural 16:9 so the full landscape photo shows (no side crop).
             Desktop: full-bleed fill of the section. */}
