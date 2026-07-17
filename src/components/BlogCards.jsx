@@ -24,25 +24,27 @@ function FeaturedCard({ post }) {
   return (
     <CardLink
       href={post.href}
-      className="group relative overflow-hidden flex flex-col min-h-[340px] md:min-h-0 transition-all duration-300 hover:-translate-y-1"
+      className="group relative overflow-hidden flex flex-col md:min-h-0 transition-all duration-300 hover:-translate-y-1"
       style={{ borderRadius: card.radius, boxShadow: card.shadow }}
     >
-      {/* Full-bleed image */}
-      <img
-        src={post.imageSrc}
-        alt={post.imageAlt}
-        loading="lazy"
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-      />
+      {/* Image — mobile: own tall box, fully visible, text follows below.
+          Desktop: full-bleed overlay behind the text (unchanged). */}
+      <div className="relative w-full aspect-[4/3] md:absolute md:inset-0 md:aspect-auto md:h-full overflow-hidden">
+        <img
+          src={post.imageSrc}
+          alt={post.imageAlt}
+          loading="lazy"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+        />
 
-      {/* Category badge — top left */}
-      <span className="absolute top-4 left-4 z-10">
-        <Badge label={post.category} />
-      </span>
+        {/* Category badge — top left */}
+        <span className="absolute top-4 left-4 z-10">
+          <Badge label={post.category} />
+        </span>
+      </div>
 
-      {/* Text pinned to bottom — mobile gets a solid backing so it stays
-          readable over busy photos; desktop is untouched (transparent). */}
-      <div className="relative z-10 mt-auto p-6 flex flex-col gap-2 bg-white/90 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none">
+      {/* Text — mobile: normal flow below the image. Desktop: pinned to bottom, overlaid on the image. */}
+      <div className="relative z-10 md:mt-auto p-6 flex flex-col gap-2">
         <p className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.6)" }}>{post.date}</p>
         <h3
           className="text-2xl leading-snug"
