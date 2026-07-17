@@ -40,22 +40,16 @@ function FeaturedCard({ post }) {
         <Badge label={post.category} />
       </span>
 
-      {/* Gradient overlay — bottom half fades to near-black */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: "linear-gradient(to top, rgba(13,42,51,0.92) 0%, rgba(13,42,51,0.55) 45%, transparent 75%)" }}
-      />
-
-      {/* Text pinned to bottom over the gradient */}
+      {/* Text pinned to bottom */}
       <div className="relative z-10 mt-auto p-6 flex flex-col gap-2">
-        <p className="text-[11px] font-medium" style={{ color: "rgba(255,255,255,0.6)" }}>{post.date}</p>
+        <p className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.6)" }}>{post.date}</p>
         <h3
-          className="text-2xl leading-snug text-white"
-          style={{ fontFamily: "var(--font-heading)", fontWeight: 700, textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}
+          className="text-2xl leading-snug"
+          style={{ fontFamily: "var(--font-heading)", fontWeight: 700, color: "#000" }}
         >
           {post.title}
         </h3>
-        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "rgba(255,255,255,0.78)" }}>
+        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "rgba(0,0,0,0.78)" }}>
           {post.excerpt}
         </p>
         <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "var(--sage)" }}>
