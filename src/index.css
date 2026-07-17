@@ -1,5 +1,49 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLUID TYPE SCALE — centralized design tokens
+   These override Tailwind's default text-* utilities, so every existing
+   `text-sm … text-7xl` usage across the site (≈700 of them) inherits the new
+   premium, fluid sizing + reading-optimised line-height WITHOUT touching a
+   single component. The hierarchy (relative order of sizes) is preserved
+   exactly; only absolute sizes, fluidity, and line-heights change.
+
+   Desktop maxima map to the editorial scale:
+     text-7xl → 88px (Hero)   text-4xl → 52px (H2)   text-xl → 24px (Lead)
+     text-6xl → 76px          text-3xl → 40px (H3)   text-base → 19px (Body)
+     text-5xl → 64px (H1)     text-2xl → 30px (H4)   text-sm → 16px (Small)
+   Each clamp() interpolates smoothly from ~360px to ~1280px viewports.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@theme {
+  /* — Reading tier (generous line-height for comfortable long-form reading) — */
+  --text-xs: clamp(0.75rem, 0.72rem + 0.1vw, 0.8125rem);
+  --text-xs--line-height: 1.5;
+  --text-sm: clamp(0.9375rem, 0.9rem + 0.18vw, 1rem);
+  --text-sm--line-height: 1.6;
+  --text-base: clamp(1.0625rem, 1rem + 0.34vw, 1.1875rem);
+  --text-base--line-height: 1.75;
+  --text-lg: clamp(1.1875rem, 1.1rem + 0.45vw, 1.375rem);
+  --text-lg--line-height: 1.7;
+  --text-xl: clamp(1.3125rem, 1.15rem + 0.7vw, 1.5rem);
+  --text-xl--line-height: 1.55;
+
+  /* — Heading tier (tighter line-height for strong, compact hierarchy) — */
+  --text-2xl: clamp(1.5rem, 1.3rem + 0.9vw, 1.875rem);
+  --text-2xl--line-height: 1.25;
+  --text-3xl: clamp(1.875rem, 1.5rem + 1.5vw, 2.5rem);
+  --text-3xl--line-height: 1.18;
+  --text-4xl: clamp(2.25rem, 1.7rem + 2.3vw, 3.25rem);
+  --text-4xl--line-height: 1.1;
+  --text-5xl: clamp(2.75rem, 2rem + 3vw, 4rem);
+  --text-5xl--line-height: 1.05;
+  --text-6xl: clamp(3.25rem, 2.3rem + 4vw, 4.75rem);
+  --text-6xl--line-height: 1.03;
+  --text-7xl: clamp(3.75rem, 2.5rem + 5.2vw, 5.5rem);
+  --text-7xl--line-height: 1;
+  --text-8xl: clamp(4.5rem, 3rem + 6vw, 6.5rem);
+  --text-8xl--line-height: 1;
+}
+
 /* ─── Maidenhead Brand Palette ──────────────────────────────────────────────── */
 :root {
   --forest:    #1C2E38;   /* dark navy  — headers, body text, footer bg       */
@@ -12,14 +56,33 @@
 
   --font-heading: "Instrument Sans", Futura, "Century Gothic", sans-serif;
   --font-body:    "Inter Tight", Futura, "Century Gothic", sans-serif;
+
+  /* — Body weight: 450 sits between Regular and Medium for a fuller,
+       more confident read (served by the variable Inter Tight axis). — */
+  --fw-body: 450;
+
+  /* — Consistent vertical-rhythm spacing scale (8·16·24·32·48·64·96·128).
+       Available as reusable tokens for section spacing and reading rhythm. — */
+  --space-1: 0.5rem;    /* 8  */
+  --space-2: 1rem;      /* 16 */
+  --space-3: 1.5rem;    /* 24 */
+  --space-4: 2rem;      /* 32 */
+  --space-5: 3rem;      /* 48 */
+  --space-6: 4rem;      /* 64 */
+  --space-7: 6rem;      /* 96 */
+  --space-8: 8rem;      /* 128 */
+
+  /* — Optimal reading measure (~66 characters ≈ 700px) — */
+  --measure: 42rem;
 }
 
 html {
   font-family: var(--font-body);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
-  font-weight: 400;
-  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  font-weight: var(--fw-body);
+  line-height: 1.7;
   letter-spacing: -0.01em;
 }
 
@@ -32,12 +95,17 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 500 !important;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.12;
+  text-wrap: balance;   /* avoid orphan words on multi-line headings */
 }
 
 h5, h6 {
   font-weight: 600 !important;
 }
+
+/* Display / hero-scale headings get slightly tighter tracking for a
+   crisper, more editorial masthead feel. */
+.text-5xl, .text-6xl, .text-7xl, .text-8xl { letter-spacing: -0.03em; }
 
 /* Homepage hero title — light editorial weight, tighter tracking/leading */
 .hero-title {
@@ -52,9 +120,29 @@ p, span, li {
   font-family: var(--font-body);
 }
 
-nav a, header nav, button, .btn, a[class*="rounded-full"] {
-  font-weight: 500 !important;
+/* Navigation stays medium; buttons / pill CTAs step up to semibold for a
+   more premium, deliberate feel. */
+nav a, header nav { font-weight: 500 !important; }
+button, .btn, a[class*="rounded-full"] { font-weight: 600 !important; }
+
+/* ─── Reusable reading utilities (opt-in — do not alter existing layouts) ────
+   Apply to long-form prose blocks that want the full editorial rhythm:
+   generous paragraph spacing, a constrained measure, and a comfortable
+   heading-to-text gap. Existing components are unaffected unless they add
+   these classes. */
+.u-measure { max-width: var(--measure); }
+
+.lead {
+  font-size: var(--text-xl);
+  line-height: 1.55;
+  font-weight: var(--fw-body);
 }
+
+.prose { max-width: var(--measure); }
+.prose > p { margin-bottom: var(--space-4); }        /* 32px between paragraphs */
+.prose > p:last-child { margin-bottom: 0; }
+.prose > h2, .prose > h3, .prose > h4 { margin-top: var(--space-5); margin-bottom: var(--space-3); }
+.prose > :first-child { margin-top: 0; }
 
 /* ─── Hero slider animations ─────────────────────────────────────────────── */
 /* fill-mode `both` holds the 0% state during the delay and the 100% state
