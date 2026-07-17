@@ -13,12 +13,6 @@ const SLIDES = hero.slides;
 const TOTAL = SLIDES.length;
 const INTERVAL = hero.autoplayInterval;
 
-// ─── Desktop overlay gradient helpers ────────────────────────────────────────
-const GRAD_BOTTOM =
-  "linear-gradient(to top, rgba(28,46,56,0.92) 0%, rgba(28,46,56,0.55) 38%, rgba(28,46,56,0.20) 70%, rgba(28,46,56,0.10) 100%)";
-const GRAD_LEFT =
-  "linear-gradient(to right, rgba(28,46,56,0.55) 0%, rgba(28,46,56,0.10) 45%, rgba(28,46,56,0) 70%)";
-
 export default function Hero() {
   const [current, setCurrent] = useState(0);
   // Autoplay pauses while `paused` is true; currently always false (no pause trigger wired).
@@ -133,10 +127,6 @@ export default function Hero() {
                 className="w-full h-full object-cover"
                 style={{ objectPosition: s.imagePosition || "center" }}
               />
-
-              {/* Gradients — desktop only (mobile uses solid navy below) */}
-              <div className="hidden md:block absolute inset-0" style={{ background: GRAD_BOTTOM }} />
-              <div className="hidden md:block absolute inset-0" style={{ background: GRAD_LEFT }} />
 
               {/* ── Desktop copy (overlaid bottom-left) ── */}
               <div className="hidden md:block absolute left-0 bottom-0 w-3/5 px-14 pb-24 z-10">
