@@ -57,10 +57,10 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
   return (
     <div>
       {heading && (
-        <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "var(--forest)" }}>{heading}</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>{heading}</h2>
       )}
       {note && (
-        <p className="text-base mb-6" style={{ color: "var(--ink)", opacity: 0.7 }}>{note}</p>
+        <p className="text-base mb-6" style={{ color: "#000000", opacity: 0.7 }}>{note}</p>
       )}
       <div
         className={`relative overflow-hidden aspect-[16/9] md:aspect-[21/9] ${rounded ? "rounded-3xl" : ""}`}
@@ -80,7 +80,7 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
             </Marker>
           </MapContainer>
         ) : error ? (
-          <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ background: "var(--sand)", color: "var(--ink)", opacity: 0.5 }}>
+          <div className="absolute inset-0 flex items-center justify-center text-sm" style={{ background: "var(--sand)", color: "#000000", opacity: 0.5 }}>
             Map unavailable
           </div>
         ) : (

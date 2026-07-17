@@ -9,10 +9,10 @@ const CONTROL_CLASS =
 const CONTROL_STYLE = {
   backgroundColor: "#fff",
   border: "1px solid rgba(28,46,56,0.15)",
-  color: "var(--ink)",
+  color: "#000000",
 };
 const LABEL_CLASS = "block text-xs font-semibold mb-1.5";
-const LABEL_STYLE = { color: "var(--forest)" };
+const LABEL_STYLE = { color: "#000000" };
 
 export default function Field({ label, as = "input", className = "", children, ...props }) {
   const Control = as;

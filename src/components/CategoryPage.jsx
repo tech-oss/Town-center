@@ -116,14 +116,14 @@ export default function CategoryPage() {
       {/* ── Intro + content ── */}
       <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "var(--ink)", opacity: 0.8 }}>
+          <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000", opacity: 0.8 }}>
             {intro}
           </p>
 
           {/* See & Do landing: interactive events calendar */}
           {section === "see-do" && !isCategory && (
             <div className="mb-14">
-              <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: "var(--forest)" }}>Events Calendar</h2>
+              <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: "#000000" }}>Events Calendar</h2>
               <EventsCalendar />
             </div>
           )}
@@ -169,11 +169,11 @@ export default function CategoryPage() {
                         {it.tag}
                       </span>
                     )}
-                    <h3 className="font-bold text-lg leading-snug" style={{ color: "var(--forest)", fontFamily: "var(--font-heading)" }}>
+                    <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
                       {it.name}
                     </h3>
                     {it.date && (
-                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
                         </svg>
@@ -181,7 +181,7 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {it.address && (
-                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                      <span className="inline-flex items-center gap-1.5 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
                         </svg>
@@ -189,11 +189,11 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {!it.hideDescription && (it.paragraphs?.[0] || it.description) && (
-                      <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "var(--ink)", opacity: 0.72 }}>
+                      <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "#000000", opacity: 0.72 }}>
                         {it.paragraphs?.[0] || it.description}
                       </p>
                     )}
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "var(--forest)" }}>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "#000000" }}>
                       Read more
                       <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                     </span>
@@ -202,7 +202,7 @@ export default function CategoryPage() {
               ))}
             </div>
           ) : (
-            <p className="text-center py-12 text-sm" style={{ color: "var(--forest)", opacity: 0.6 }}>
+            <p className="text-center py-12 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
               Nothing listed here just yet — check back soon.
             </p>
           )}
@@ -220,7 +220,7 @@ function FilterChip({ to, active, label }) {
       className="shrink-0 px-4 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-[0.07em] transition-all duration-200 whitespace-nowrap"
       style={active
         ? { backgroundColor: "var(--forest)", color: "#fff", boxShadow: "0 2px 8px rgba(13,42,51,0.18)" }
-        : { backgroundColor: "#fff", color: "var(--forest)", boxShadow: "0 1px 4px rgba(13,42,51,0.07)" }}
+        : { backgroundColor: "#fff", color: "#000000", boxShadow: "0 1px 4px rgba(13,42,51,0.07)" }}
     >
       {label}
     </Link>

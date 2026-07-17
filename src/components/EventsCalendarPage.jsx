@@ -25,7 +25,7 @@ export default function EventsCalendarPage() {
               <span className="mx-2 opacity-40">/</span>
               <span>Calendar</span>
             </nav>
-            <Link to="/see-do" className="text-sm font-semibold" style={{ color: "var(--forest)" }}>See &amp; Do →</Link>
+            <Link to="/see-do" className="text-sm font-semibold" style={{ color: "#000000" }}>See &amp; Do →</Link>
           </div>
           <EventsCalendar />
         </div>

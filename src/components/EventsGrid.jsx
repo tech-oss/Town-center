@@ -80,14 +80,14 @@ export default function EventsGrid() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
               Upcoming Events
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
+            <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
               What's On
             </h2>
           </div>
           <Link
             to="/whats-on"
             className="group hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap shrink-0"
-            style={{ color: "var(--forest)" }}
+            style={{ color: "#000000" }}
           >
             View full calendar
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
@@ -114,17 +114,17 @@ export default function EventsGrid() {
                 </span>
               </div>
               <div className="flex flex-col gap-2 p-5">
-                <h3 className="font-bold text-lg leading-snug" style={{ color: "var(--forest)", fontFamily: "var(--font-heading)" }}>{e.title}</h3>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.65 }}>
+                <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>{e.title}</h3>
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.65 }}>
                   <CalendarIcon />{e.date}
                 </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.65 }}>
+                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.65 }}>
                   <PinIcon />{e.location}
                 </div>
-                <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "var(--ink)", opacity: 0.72 }}>
+                <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000", opacity: 0.72 }}>
                   {e.excerpt}
                 </p>
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-2" style={{ color: "var(--forest)" }}>
+                <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-2" style={{ color: "#000000" }}>
                   Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </span>
               </div>

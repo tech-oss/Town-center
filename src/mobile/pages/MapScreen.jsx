@@ -78,7 +78,7 @@ export default function MapScreen() {
               onClick={() => { setFilter(f.key); setActive(null); }}
               className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={filter === f.key
-                ? { backgroundColor: "var(--sage)", color: "var(--forest)" }
+                ? { backgroundColor: "var(--sage)", color: "#000000" }
                 : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)" }}
             >
               {f.label}
@@ -114,13 +114,13 @@ export default function MapScreen() {
             <div className="absolute left-3 right-3 bottom-3 z-[1000] rounded-2xl bg-white p-3 flex items-center gap-3" style={{ boxShadow: "0 8px 28px -6px rgba(0,0,0,0.45)" }}>
               <div className="w-2 h-12 rounded-full shrink-0" style={{ backgroundColor: PIN_COLORS[active.type] }} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate" style={{ color: "var(--forest)" }}>{active.name}</p>
-                <p className="text-xs" style={{ color: "rgba(26,26,26,0.55)" }}>{active.category}</p>
+                <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{active.name}</p>
+                <p className="text-xs" style={{ color: "rgba(0,0,0,0.55)" }}>{active.category}</p>
               </div>
-              <Link to={active.to} className="text-xs font-bold px-3 py-2 rounded-xl shrink-0" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
+              <Link to={active.to} className="text-xs font-bold px-3 py-2 rounded-xl shrink-0" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>
                 View
               </Link>
-              <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "rgba(26,26,26,0.4)" }} aria-label="Close">✕</button>
+              <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} aria-label="Close">✕</button>
             </div>
           )}
         </div>

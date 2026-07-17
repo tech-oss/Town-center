@@ -27,7 +27,7 @@ export default function AboutScreen() {
             ))}
           </div>
 
-          <Link to="/mobile/explore" className="w-full text-center py-3.5 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
+          <Link to="/mobile/explore" className="w-full text-center py-3.5 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>
             Explore Maidenhead
           </Link>
         </div>

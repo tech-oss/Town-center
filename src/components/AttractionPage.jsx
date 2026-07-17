@@ -58,26 +58,26 @@ export default function AttractionPage() {
               <span className="mx-2 opacity-40">/</span>
               <Link to="/see-do" className="hover:opacity-70">See &amp; Do</Link>
               <span className="mx-2 opacity-40">/</span>
-              <span style={{ color: "var(--forest)" }}>Boulter's Lock</span>
+              <span style={{ color: "#000000" }}>Boulter's Lock</span>
             </nav>
 
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{a.eyebrow}</span>
-            <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-5 leading-tight" style={{ color: "var(--forest)" }}>{a.title}</h1>
+            <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-5 leading-tight" style={{ color: "#000000" }}>{a.title}</h1>
             {a.subtitle && (
-              <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "var(--ink)", opacity: 0.7 }}>{a.subtitle}</p>
+              <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "#000000", opacity: 0.7 }}>{a.subtitle}</p>
             )}
 
             {/* Intro paragraphs */}
             <div className="flex flex-col gap-5">
               {a.intro?.map((p, i) => (
-                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
               ))}
             </div>
 
             {/* Sections (heading + optional image + paras) */}
             {a.sections?.map((sec, si) => (
               <div key={si} className="mt-12">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>{sec.heading}</h2>
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
                 {sec.image && (
                   <div className="rounded-3xl overflow-hidden aspect-[16/9] mb-6 shadow-[0_14px_50px_-26px_rgba(28,46,56,0.4)]">
                     <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
@@ -85,7 +85,7 @@ export default function AttractionPage() {
                 )}
                 <div className="flex flex-col gap-5">
                   {sec.paras.map((p, pi) => (
-                    <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
+                    <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
                   ))}
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function AttractionPage() {
                 <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--leaf)" }}>Highlights</h3>
                 <ul className="flex flex-col gap-2.5">
                   {a.highlights.map((h) => (
-                    <li key={h} className="flex items-start gap-2.5 text-sm" style={{ color: "var(--ink)", opacity: 0.82 }}>
+                    <li key={h} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000", opacity: 0.82 }}>
                       <span style={{ color: "var(--sage)" }}>✓</span> {h}
                     </li>
                   ))}
@@ -108,7 +108,7 @@ export default function AttractionPage() {
             )}
             <div className="rounded-3xl p-7" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
               <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find It</h3>
-              <p className="text-sm leading-relaxed mb-4" style={{ color: "var(--ink)", opacity: 0.82 }}>{a.address}</p>
+              <p className="text-sm leading-relaxed mb-4" style={{ color: "#000000", opacity: 0.82 }}>{a.address}</p>
               <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
                 className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
                 style={{ backgroundColor: "var(--leaf)" }}
@@ -132,7 +132,7 @@ export default function AttractionPage() {
       {related.length > 0 && (
         <section className="pb-20 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>You might like</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>You might like</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {related.map((it) => (
                 <Link key={it.slug} to={`/${it.section}/place/${it.slug}`}
@@ -143,8 +143,8 @@ export default function AttractionPage() {
                   </div>
                   <div className="flex flex-col gap-2 p-6">
                     <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{it.tag}</span>
-                    <h3 className="font-bold text-xl leading-snug" style={{ color: "var(--forest)" }}>{it.name}</h3>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "var(--forest)" }}>
+                    <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{it.name}</h3>
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "#000000" }}>
                       Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                     </span>
                   </div>

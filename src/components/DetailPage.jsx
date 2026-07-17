@@ -138,22 +138,22 @@ export default function DetailPage() {
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>
                 {item.tag}
               </span>
-              <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "var(--forest)" }}>
+              <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "#000000" }}>
                 {item.name}
               </h1>
               {item.hideDescription ? null : item.paragraphs ? (
                 <div className="flex flex-col gap-5">
                   {item.paragraphs.map((p, i) => (
-                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
+                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>{p}</p>
                   ))}
                 </div>
               ) : (
                 <>
-                  <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>
+                  <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>
                     {item.description}
                   </p>
                   {item.description2 && (
-                    <p className="text-base leading-relaxed mt-5" style={{ color: "var(--ink)", opacity: 0.82 }}>
+                    <p className="text-base leading-relaxed mt-5" style={{ color: "#000000", opacity: 0.82 }}>
                       {item.description2}
                     </p>
                   )}
@@ -187,8 +187,8 @@ export default function DetailPage() {
                   <ul className="flex flex-col gap-1.5">
                     {item.hours.map((h) => (
                       <li key={h.day} className="flex justify-between text-sm">
-                        <span style={{ color: "var(--ink)", opacity: 0.7 }}>{h.day}</span>
-                        <span className="font-semibold" style={{ color: "var(--forest)" }}>{h.time}</span>
+                        <span style={{ color: "#000000", opacity: 0.7 }}>{h.day}</span>
+                        <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
                       </li>
                     ))}
                   </ul>
@@ -199,20 +199,20 @@ export default function DetailPage() {
                 {/* Location & contact */}
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
-                  <p className="text-sm leading-relaxed mb-2" style={{ color: "var(--ink)", opacity: 0.8 }}>{item.address}</p>
+                  <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000", opacity: 0.8 }}>{item.address}</p>
                   {item.phone && item.phone !== "—" && (
-                    <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
-                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Tel:</span> {item.phone}
+                    <p className="text-sm" style={{ color: "#000000", opacity: 0.8 }}>
+                      <span className="font-semibold" style={{ color: "#000000" }}>Tel:</span> {item.phone}
                     </p>
                   )}
                   {item.email && !item.freePlan && (
-                    <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
-                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Email:</span> {item.email}
+                    <p className="text-sm" style={{ color: "#000000", opacity: 0.8 }}>
+                      <span className="font-semibold" style={{ color: "#000000" }}>Email:</span> {item.email}
                     </p>
                   )}
                   {item.website && !item.hideWeb && (
-                    <p className="text-sm" style={{ color: "var(--ink)", opacity: 0.8 }}>
-                      <span className="font-semibold" style={{ color: "var(--forest)" }}>Web:</span>{" "}
+                    <p className="text-sm" style={{ color: "#000000", opacity: 0.8 }}>
+                      <span className="font-semibold" style={{ color: "#000000" }}>Web:</span>{" "}
                       <a
                         href={`https://${item.website.replace(/^https?:\/\//, "")}`}
                         target="_blank"
@@ -238,7 +238,7 @@ export default function DetailPage() {
                       aria-label={sl.label}
                       title={sl.label}
                       className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                      style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+                      style={{ backgroundColor: "var(--mint)", color: "#000000" }}
                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
                     >
@@ -269,7 +269,7 @@ export default function DetailPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-center py-3 rounded-full font-semibold transition-colors"
-                  style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}
+                  style={{ border: "1.5px solid var(--forest)", color: "#000000" }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--forest)"; }}
                 >
@@ -277,7 +277,7 @@ export default function DetailPage() {
                 </a>
                 )}
 
-                <Link to="/get-the-app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>
+                <Link to="/get-the-app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "#000000" }}>
                   Get the App
                 </Link>
 
@@ -286,7 +286,7 @@ export default function DetailPage() {
                 <button
                   onClick={() => setShareOpen(true)}
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-full font-semibold transition-colors border"
-                  style={{ borderColor: "rgba(28,46,56,0.2)", color: "var(--forest)" }}
+                  style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
                 >
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -327,7 +327,7 @@ export default function DetailPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xl font-bold" style={{ color: "var(--forest)" }}>Share</h3>
+              <h3 className="text-xl font-bold" style={{ color: "#000000" }}>Share</h3>
               <button
                 onClick={() => setShareOpen(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm font-bold"
@@ -363,7 +363,7 @@ export default function DetailPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 w-full py-3.5 px-1 border-t text-sm font-medium"
-                style={{ borderColor: "rgba(28,46,56,0.1)", color: "var(--forest)" }}
+                style={{ borderColor: "rgba(28,46,56,0.1)", color: "#000000" }}
                 onClick={() => setShareOpen(false)}
               >
                 <span className="w-6 flex justify-center" style={{ color: "var(--leaf)" }}>
@@ -380,7 +380,7 @@ export default function DetailPage() {
       {related.length > 0 && (
         <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>You might also like</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>You might also like</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {related.map((it) => (
                 <Link
@@ -398,7 +398,7 @@ export default function DetailPage() {
                   </div>
                   <div className="flex flex-col gap-2 p-6">
                     <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{it.tag}</span>
-                    <h3 className="font-bold text-xl leading-snug" style={{ color: "var(--forest)" }}>{it.name}</h3>
+                    <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{it.name}</h3>
                   </div>
                 </Link>
               ))}

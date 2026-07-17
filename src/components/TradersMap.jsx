@@ -308,8 +308,8 @@ export default function TradersMap() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{brandGrid.eyebrow}</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>{brandGrid.heading}</h2>
-          <p className="text-base max-w-xl mx-auto leading-relaxed" style={{ color: "var(--ink)", opacity: 0.72 }}>{brandGrid.subheading}</p>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{brandGrid.heading}</h2>
+          <p className="text-base max-w-xl mx-auto leading-relaxed" style={{ color: "#000000", opacity: 0.72 }}>{brandGrid.subheading}</p>
         </div>
 
         <div className="overflow-hidden" style={{ borderRadius: card.radius, boxShadow: card.shadow, background: "#fff" }}>
@@ -320,7 +320,7 @@ export default function TradersMap() {
                 key={f.key}
                 onClick={() => { setFilter(f.key); handleDeselect(); }}
                 className="shrink-0 px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 whitespace-nowrap"
-                style={filter === f.key ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(0,0,0,0.05)", color: "var(--forest)" }}
+                style={filter === f.key ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(0,0,0,0.05)", color: "#000000" }}
               >
                 {f.label}
               </button>
@@ -350,7 +350,7 @@ export default function TradersMap() {
               {/* Search bar */}
               <div className="px-3 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(0,0,0,0.05)" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--forest)", opacity: 0.5, flexShrink: 0 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#000000", opacity: 0.5, flexShrink: 0 }}>
                     <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                   </svg>
                   <input
@@ -360,14 +360,14 @@ export default function TradersMap() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={handleSearchKeyDown}
                     className="flex-1 bg-transparent text-sm outline-none"
-                    style={{ color: "var(--forest)", minWidth: 0 }}
+                    style={{ color: "#000000", minWidth: 0 }}
                   />
                   {searchActive && (
-                    <button onClick={() => setSearchQuery("")} style={{ color: "var(--forest)", opacity: 0.4, flexShrink: 0, lineHeight: 1, fontSize: 16 }}>✕</button>
+                    <button onClick={() => setSearchQuery("")} style={{ color: "#000000", opacity: 0.4, flexShrink: 0, lineHeight: 1, fontSize: 16 }}>✕</button>
                   )}
                 </div>
                 {searchActive && (
-                  <p className="text-[11px] mt-1.5 px-1" style={{ color: "var(--ink)", opacity: 0.5 }}>
+                  <p className="text-[11px] mt-1.5 px-1" style={{ color: "#000000", opacity: 0.5 }}>
                     {searchResults.length === 0 ? "No results" : `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""} — press Enter to select top match`}
                   </p>
                 )}
@@ -375,7 +375,7 @@ export default function TradersMap() {
 
               <div className="overflow-y-auto flex-1">
                 {directoryList.length === 0 ? (
-                  <p className="text-sm text-center py-10" style={{ color: "var(--ink)", opacity: 0.5 }}>{searchActive ? "No businesses match your search." : "No traders in this category yet."}</p>
+                  <p className="text-sm text-center py-10" style={{ color: "#000000", opacity: 0.5 }}>{searchActive ? "No businesses match your search." : "No traders in this category yet."}</p>
                 ) : (
                   directoryList.map((b) => {
                     const isActive = activeBrand?.id === b.id;
@@ -394,7 +394,7 @@ export default function TradersMap() {
                             {b.name}
                             {isActive && <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: "#2f8c8c" }}>● Selected</span>}
                           </p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: "var(--ink)", opacity: 0.55 }}>{b.category}</p>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: "#000000", opacity: 0.55 }}>{b.category}</p>
                         </div>
                         {isActive ? (
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0" style={{ color: "#2f8c8c" }}><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>

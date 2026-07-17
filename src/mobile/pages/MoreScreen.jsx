@@ -53,8 +53,8 @@ export default function MoreScreen() {
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(82,199,182,0.12)" }}>
                 <Icon name={item.icon} />
               </div>
-              <span className="flex-1 text-left text-sm font-semibold" style={{ color: "var(--forest)" }}>{item.label}</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(26,26,26,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              <span className="flex-1 text-left text-sm font-semibold" style={{ color: "#000000" }}>{item.label}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           ))}
         </div>

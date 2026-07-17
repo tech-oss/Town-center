@@ -12,7 +12,7 @@ export default function QuickLinks() {
         {/* ── Intro copy (centered) ── */}
         <p
           className="max-w-3xl mx-auto text-center text-base md:text-lg leading-relaxed mb-10 md:mb-14"
-          style={{ color: "rgba(26,26,26,0.75)" }}
+          style={{ color: "rgba(0,0,0,0.75)" }}
         >
           {quickLinks.intro}
         </p>
@@ -27,7 +27,7 @@ export default function QuickLinks() {
           </p>
           <h2
             className="text-4xl md:text-5xl font-bold"
-            style={{ color: "var(--forest)" }}
+            style={{ color: "#000000" }}
           >
             {quickLinks.heading}
           </h2>

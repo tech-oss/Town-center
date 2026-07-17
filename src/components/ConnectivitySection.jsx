@@ -50,7 +50,7 @@ function TravelCard({ icon, title, rows }) {
         >
           {icon}
         </div>
-        <h3 className="text-lg font-bold" style={{ color: "var(--forest)" }}>{title}</h3>
+        <h3 className="text-lg font-bold" style={{ color: "#000000" }}>{title}</h3>
       </div>
       <div className="space-y-0">
         {rows.map(({ dest, time }, i) => (
@@ -61,7 +61,7 @@ function TravelCard({ icon, title, rows }) {
               borderBottom: i < rows.length - 1 ? "1px solid rgba(28,46,56,0.07)" : "none",
             }}
           >
-            <span className="text-sm font-medium" style={{ color: "var(--ink)" }}>{dest}</span>
+            <span className="text-sm font-medium" style={{ color: "#000000" }}>{dest}</span>
             <span className="text-sm font-bold" style={{ color: "var(--leaf)" }}>{time}</span>
           </div>
         ))}
@@ -78,10 +78,10 @@ export default function ConnectivitySection() {
         {/* Heading */}
         <div className="max-w-2xl mb-12">
           <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Connectivity</p>
-          <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
+          <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>
             London in minutes.<br className="hidden md:block" /> The world on your doorstep.
           </h2>
-          <p className="mt-4 text-base leading-relaxed" style={{ color: "var(--ink)", opacity: 0.75 }}>
+          <p className="mt-4 text-base leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>
             Maidenhead sits on the Elizabeth line and the M4 corridor — giving you fast, direct access to London, Heathrow, Reading and beyond.
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function ConnectivitySection() {
             >
               🚇
             </div>
-            <h3 className="text-lg font-bold" style={{ color: "var(--forest)" }}>Elizabeth line</h3>
+            <h3 className="text-lg font-bold" style={{ color: "#000000" }}>Elizabeth line</h3>
           </div>
 
           {/* Scrollable diagram — each station is one self-contained column */}

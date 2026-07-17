@@ -67,10 +67,10 @@ export function PropertyCard({ p }) {
         </span>
       </div>
       <div className="flex flex-col gap-1.5 p-5">
-        <p className="text-xl font-bold" style={{ color: "var(--forest)" }}>{fmtPrice(p.price, p.status)}</p>
+        <p className="text-xl font-bold" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>
         <p className="text-sm font-semibold" style={{ color: "var(--leaf)" }}>{p.bedLabel} · {p.building}</p>
-        <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>{p.location}</p>
-        <div className="flex items-center gap-4 mt-2 text-xs font-medium" style={{ color: "var(--ink)", opacity: 0.75 }}>
+        <p className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>{p.location}</p>
+        <div className="flex items-center gap-4 mt-2 text-xs font-medium" style={{ color: "#000000", opacity: 0.75 }}>
           <span>🛏 {p.beds === 0 ? "Studio" : p.beds === 99 ? "PH" : p.beds}</span>
           <span>🛁 {p.baths}</span>
           <span>📐 {p.sqft} sq ft</span>
@@ -83,7 +83,7 @@ export function PropertyCard({ p }) {
 // ─── Shared select style ──────────────────────────────────────────────────────
 
 const selCls = "w-full rounded-xl px-3 py-2.5 text-sm outline-none appearance-none";
-const selStyle = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.15)", color: "var(--ink)" };
+const selStyle = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.15)", color: "#000000" };
 
 function Sel({ label, value, onChange, children }) {
   return (
@@ -180,7 +180,7 @@ export default function PropertySearch({ mode }) {
                 key={key}
                 onClick={() => navigate(to)}
                 className="px-6 py-2 rounded-full text-sm font-semibold transition-colors"
-                style={status === key ? { backgroundColor: "var(--forest)", color: "#fff" } : { color: "var(--forest)" }}
+                style={status === key ? { backgroundColor: "var(--forest)", color: "#fff" } : { color: "#000000" }}
               >
                 {label}
               </button>
@@ -191,7 +191,7 @@ export default function PropertySearch({ mode }) {
 
       {/* ── Filters ── */}
       <section className="max-w-6xl mx-auto px-6 md:px-12 pt-6">
-        <p className="text-base leading-relaxed max-w-3xl mb-5" style={{ color: "var(--ink)", opacity: 0.8 }}>{intro}</p>
+        <p className="text-base leading-relaxed max-w-3xl mb-5" style={{ color: "#000000", opacity: 0.8 }}>{intro}</p>
 
         <div className="rounded-3xl p-5 md:p-7 flex flex-col gap-5" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -24px rgba(28,46,56,0.3)" }}>
 
@@ -225,7 +225,7 @@ export default function PropertySearch({ mode }) {
                 </select>
                 <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-40" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </div>
-              <span className="text-sm font-medium shrink-0" style={{ color: "var(--ink)", opacity: 0.4 }}>—</span>
+              <span className="text-sm font-medium shrink-0" style={{ color: "#000000", opacity: 0.4 }}>—</span>
               <div className="flex-1 relative">
                 <select className={selCls} style={selStyle} value={priceMax} onChange={(e) => setPriceMax(e.target.value)}>
                   <option value="any">No max</option>
@@ -251,7 +251,7 @@ export default function PropertySearch({ mode }) {
                 </select>
                 <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 opacity-40" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M6 9l6 6 6-6"/></svg>
               </div>
-              <span className="text-sm font-medium shrink-0" style={{ color: "var(--ink)", opacity: 0.4 }}>—</span>
+              <span className="text-sm font-medium shrink-0" style={{ color: "#000000", opacity: 0.4 }}>—</span>
               <div className="flex-1 relative">
                 <select className={selCls} style={selStyle} value={bedsMax} onChange={(e) => setBedsMax(e.target.value)}>
                   <option value="any">No max</option>
@@ -267,7 +267,7 @@ export default function PropertySearch({ mode }) {
 
       {/* Results */}
       <section className="max-w-6xl mx-auto px-6 md:px-12 py-12">
-        <p className="text-sm font-semibold mb-6" style={{ color: "var(--forest)" }}>
+        <p className="text-sm font-semibold mb-6" style={{ color: "#000000" }}>
           {results.length} {results.length === 1 ? "home" : "homes"} available
         </p>
         {results.length > 0 ? (
@@ -275,7 +275,7 @@ export default function PropertySearch({ mode }) {
             {results.map((p) => <PropertyCard key={p.slug} p={p} />)}
           </div>
         ) : (
-          <p className="text-center py-12 text-sm" style={{ color: "var(--forest)", opacity: 0.6 }}>
+          <p className="text-center py-12 text-sm" style={{ color: "#000000", opacity: 0.6 }}>
             No homes match your filters right now — try widening your search.
           </p>
         )}
@@ -360,9 +360,9 @@ export function FeaturedProperties() {
                   <span className="text-[10px] font-bold uppercase tracking-wide w-fit px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "rent" ? "rgba(30,95,95,0.12)" : "rgba(47,140,140,0.13)", color: "var(--teal-deep, #1e5f5f)" }}>
                     {p.status === "rent" ? "To Rent" : "For Sale"}
                   </span>
-                  <p className="text-lg font-bold mt-0.5" style={{ color: "var(--forest)" }}>{fmtPrice(p.price, p.status)}</p>
+                  <p className="text-lg font-bold mt-0.5" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>
                   <p className="text-sm font-semibold leading-snug" style={{ color: "var(--leaf)" }}>{p.bedLabel} · {p.building}</p>
-                  <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.6 }}>{p.location}</p>
+                  <p className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>{p.location}</p>
                 </div>
               </Link>
             ))}

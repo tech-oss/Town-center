@@ -10,17 +10,17 @@ function BlockText({ block }) {
   return (
     <div className="flex flex-col gap-4">
       {block.heading && (
-        <h2 className="text-2xl md:text-3xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
+        <h2 className="text-2xl md:text-3xl font-bold leading-tight" style={{ color: "#000000" }}>
           {block.heading}
         </h2>
       )}
       {block.paras?.map((p, pi) => (
-        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
+        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
       ))}
       {block.bullets && (
         <ul className="flex flex-col gap-2 pl-1">
           {block.bullets.map((b) => (
-            <li key={b} className="flex items-start gap-3 text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>
+            <li key={b} className="flex items-start gap-3 text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>
               <span className="mt-2 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />
               {b}
             </li>
@@ -28,7 +28,7 @@ function BlockText({ block }) {
         </ul>
       )}
       {block.parasAfter?.map((p, pi) => (
-        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>{p}</p>
+        <p key={pi} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>{p}</p>
       ))}
     </div>
   );
@@ -83,13 +83,13 @@ export default function FeatureArticlePage() {
 
           {/* Meta */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
+            <span className="text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
               {story.category}
             </span>
-            <span className="text-sm" style={{ color: "var(--ink)", opacity: 0.55 }}>{story.date}</span>
+            <span className="text-sm" style={{ color: "#000000", opacity: 0.55 }}>{story.date}</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4" style={{ color: "var(--forest)" }}>
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4" style={{ color: "#000000" }}>
             {story.title}
           </h1>
 
@@ -104,7 +104,7 @@ export default function FeatureArticlePage() {
       <section className="py-12 md:py-16 px-6 md:px-12">
         <div className="max-w-5xl mx-auto">
           {/* Standfirst */}
-          <p className="max-w-3xl mx-auto text-lg md:text-2xl leading-relaxed mb-14 font-medium text-center" style={{ color: "var(--forest)" }}>
+          <p className="max-w-3xl mx-auto text-lg md:text-2xl leading-relaxed mb-14 font-medium text-center" style={{ color: "#000000" }}>
             {story.standfirst}
           </p>
 
@@ -157,7 +157,7 @@ export default function FeatureArticlePage() {
       {more.length > 0 && (
         <section className="pb-20 px-6 md:px-12">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>More stories</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>More stories</h2>
             <div className="grid sm:grid-cols-2 gap-6">
               {more.map((f) => (
                 <Link
@@ -173,7 +173,7 @@ export default function FeatureArticlePage() {
                     </span>
                   </div>
                   <div className="flex flex-col gap-1.5 p-5">
-                    <h3 className="font-bold text-base leading-snug" style={{ color: "var(--forest)" }}>{f.cardHeading}</h3>
+                    <h3 className="font-bold text-base leading-snug" style={{ color: "#000000" }}>{f.cardHeading}</h3>
                   </div>
                 </Link>
               ))}

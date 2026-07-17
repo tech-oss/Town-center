@@ -26,7 +26,7 @@ export default function SectionScreen({ sectionKey }) {
               onClick={() => setFilter(f)}
               className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={filter === f
-                ? { backgroundColor: "var(--sage)", color: "var(--forest)" }
+                ? { backgroundColor: "var(--sage)", color: "#000000" }
                 : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)" }}
             >
               {f}
@@ -41,8 +41,8 @@ export default function SectionScreen({ sectionKey }) {
               <MobileCard className="flex items-stretch overflow-hidden active:opacity-90">
                 <img src={it.image} alt="" className="w-24 h-24 object-cover shrink-0" />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                  <p className="text-sm font-bold leading-snug" style={{ color: "var(--forest)" }}>{it.name}</p>
-                  <p className="text-xs mt-1 leading-snug" style={{ color: "rgba(26,26,26,0.6)" }}>{it.blurb}</p>
+                  <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{it.name}</p>
+                  <p className="text-xs mt-1 leading-snug" style={{ color: "rgba(0,0,0,0.6)" }}>{it.blurb}</p>
                   <span className="text-[10px] font-bold uppercase tracking-wide mt-1.5" style={{ color: "var(--leaf)" }}>{it.category}</span>
                 </div>
               </MobileCard>

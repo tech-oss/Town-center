@@ -54,7 +54,7 @@ export default function NewsletterModal({ open, onClose }) {
     "w-full px-4 py-3 rounded-xl text-sm bg-white border outline-none transition-all duration-150 focus:ring-2";
   const inputStyle = {
     borderColor: "rgba(28,46,56,0.15)",
-    color: "var(--ink)",
+    color: "#000000",
   };
   const onFocusRing = (e) => {
     e.currentTarget.style.borderColor = "var(--sage)";
@@ -87,7 +87,7 @@ export default function NewsletterModal({ open, onClose }) {
           onClick={onClose}
           aria-label="Close"
           className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center transition-colors duration-150 hover:bg-black/5"
-          style={{ color: "var(--forest)" }}
+          style={{ color: "#000000" }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <path d="M6 6l12 12M18 6L6 18" />
@@ -97,7 +97,7 @@ export default function NewsletterModal({ open, onClose }) {
         {submitted ? (
           /* ── Success state ── */
           <div className="text-center py-10 px-2">
-            <p className="text-lg md:text-xl font-medium leading-relaxed mb-8" style={{ color: "var(--forest)" }}>
+            <p className="text-lg md:text-xl font-medium leading-relaxed mb-8" style={{ color: "#000000" }}>
               {m.success}
             </p>
             <button
@@ -116,11 +116,11 @@ export default function NewsletterModal({ open, onClose }) {
             <h2
               id="newsletter-modal-title"
               className="text-2xl md:text-3xl font-bold mb-2 pr-8 leading-tight"
-              style={{ color: "var(--forest)" }}
+              style={{ color: "#000000" }}
             >
               {m.heading}
             </h2>
-            <p className="text-sm leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.7 }}>
+            <p className="text-sm leading-relaxed mb-6" style={{ color: "#000000", opacity: 0.7 }}>
               {m.subtext}
             </p>
 
@@ -134,7 +134,7 @@ export default function NewsletterModal({ open, onClose }) {
               {/* Name row — two columns on desktop */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--forest)" }}>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "#000000" }}>
                     {m.fields.firstName}
                   </label>
                   <input
@@ -147,7 +147,7 @@ export default function NewsletterModal({ open, onClose }) {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--forest)" }}>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "#000000" }}>
                     {m.fields.lastName}
                   </label>
                   <input type="text" className={inputClasses} style={inputStyle} onFocus={onFocusRing} onBlur={onBlurRing} />
@@ -156,7 +156,7 @@ export default function NewsletterModal({ open, onClose }) {
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--forest)" }}>
+                <label className="block text-xs font-semibold mb-1.5" style={{ color: "#000000" }}>
                   {m.fields.email}
                 </label>
                 <input type="email" className={inputClasses} style={inputStyle} onFocus={onFocusRing} onBlur={onBlurRing} />
@@ -165,7 +165,7 @@ export default function NewsletterModal({ open, onClose }) {
               {/* Dropdowns — two columns on desktop */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--forest)" }}>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "#000000" }}>
                     {m.visitReason.label}
                   </label>
                   <select className={inputClasses + " appearance-none cursor-pointer"} style={inputStyle} onFocus={onFocusRing} onBlur={onBlurRing} defaultValue="">
@@ -176,7 +176,7 @@ export default function NewsletterModal({ open, onClose }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "var(--forest)" }}>
+                  <label className="block text-xs font-semibold mb-1.5" style={{ color: "#000000" }}>
                     {m.hearAbout.label}
                   </label>
                   <select className={inputClasses + " appearance-none cursor-pointer"} style={inputStyle} onFocus={onFocusRing} onBlur={onBlurRing} defaultValue="">
@@ -194,7 +194,7 @@ export default function NewsletterModal({ open, onClose }) {
                   type="checkbox"
                   className="mt-0.5 w-4 h-4 shrink-0 rounded accent-[var(--leaf)] cursor-pointer"
                 />
-                <span className="text-xs leading-relaxed" style={{ color: "var(--ink)", opacity: 0.75 }}>
+                <span className="text-xs leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>
                   {m.consent}
                 </span>
               </label>
@@ -211,7 +211,7 @@ export default function NewsletterModal({ open, onClose }) {
               </button>
 
               {/* Privacy note */}
-              <p className="text-xs text-center mt-1" style={{ color: "var(--ink)", opacity: 0.55 }}>
+              <p className="text-xs text-center mt-1" style={{ color: "#000000", opacity: 0.55 }}>
                 {m.privacyNote}{" "}
                 <a href={m.privacyLinkHref} className="underline" style={{ color: "var(--leaf)" }}>
                   {m.privacyLinkLabel}

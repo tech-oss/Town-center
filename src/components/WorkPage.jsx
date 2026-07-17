@@ -51,13 +51,13 @@ export default function WorkPage() {
             <div className="flex items-center gap-2 flex-1 bg-white rounded-xl md:rounded-lg px-4 py-3">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8a90" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
               <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search jobs, projects, services..."
-                className="flex-1 outline-none text-sm bg-transparent" style={{ color: "var(--ink)" }} />
+                className="flex-1 outline-none text-sm bg-transparent" style={{ color: "#000000" }} />
             </div>
-            <select className="bg-white rounded-xl md:rounded-lg px-4 py-3 text-sm outline-none md:w-44" style={{ color: "var(--ink)" }} defaultValue="">
+            <select className="bg-white rounded-xl md:rounded-lg px-4 py-3 text-sm outline-none md:w-44" style={{ color: "#000000" }} defaultValue="">
               <option value="">All Categories</option>
               {work.categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
             </select>
-            <select className="bg-white rounded-xl md:rounded-lg px-4 py-3 text-sm outline-none md:w-44" style={{ color: "var(--ink)" }} defaultValue="Maidenhead">
+            <select className="bg-white rounded-xl md:rounded-lg px-4 py-3 text-sm outline-none md:w-44" style={{ color: "#000000" }} defaultValue="Maidenhead">
               {work.locations.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
             <button type="submit" className="rounded-xl md:rounded-lg px-7 py-3 font-semibold text-white transition-colors" style={{ backgroundColor: "var(--leaf)" }}
@@ -80,8 +80,8 @@ export default function WorkPage() {
                 <span className="mb-3 transition-transform duration-300 group-hover:scale-110" style={{ color: "var(--leaf)" }}>
                   <CategoryIcon name={c.icon} />
                 </span>
-                <span className="font-bold text-sm md:text-base leading-tight" style={{ color: "var(--forest)" }}>{c.title}</span>
-                <span className="hidden md:block text-xs mt-1.5 leading-snug" style={{ color: "var(--ink)", opacity: 0.6 }}>{c.desc}</span>
+                <span className="font-bold text-sm md:text-base leading-tight" style={{ color: "#000000" }}>{c.title}</span>
+                <span className="hidden md:block text-xs mt-1.5 leading-snug" style={{ color: "#000000", opacity: 0.6 }}>{c.desc}</span>
               </Link>
             ))}
           </div>
@@ -92,7 +92,7 @@ export default function WorkPage() {
       <section className="pb-14 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold" style={{ color: "var(--forest)" }}>Featured Opportunities</h2>
+            <h2 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>Featured Opportunities</h2>
             <Link to="/work/jobs" className="group inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
               View All <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>
@@ -106,10 +106,10 @@ export default function WorkPage() {
                   <span className="self-start text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>
                     {f.tag}
                   </span>
-                  <h3 className="font-bold text-lg leading-snug mb-3" style={{ color: "var(--forest)" }}>{f.title}</h3>
+                  <h3 className="font-bold text-lg leading-snug mb-3" style={{ color: "#000000" }}>{f.title}</h3>
                   <ul className="flex flex-col gap-2 mt-auto">
                     {f.meta.map((m, mi) => (
-                      <li key={mi} className="flex items-center gap-2 text-xs" style={{ color: "var(--ink)", opacity: 0.7 }}>
+                      <li key={mi} className="flex items-center gap-2 text-xs" style={{ color: "#000000", opacity: 0.7 }}>
                         <span style={{ color: "var(--leaf)" }}><MetaIcon name={m.icon} /></span> {m.label}
                       </li>
                     ))}

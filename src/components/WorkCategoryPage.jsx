@@ -29,14 +29,14 @@ export default function WorkCategoryPage() {
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-2xl mx-auto text-center rounded-3xl p-10 md:p-14 bg-white" style={{ boxShadow: "0 12px 44px -24px rgba(28,46,56,0.3)" }}>
           <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center text-2xl" style={{ backgroundColor: "var(--mint)" }}>🌱</div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "var(--forest)" }}>Coming soon</h2>
-          <p className="text-base leading-relaxed mb-7" style={{ color: "var(--ink)", opacity: 0.78 }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Coming soon</h2>
+          <p className="text-base leading-relaxed mb-7" style={{ color: "#000000", opacity: 0.78 }}>
             We're building Maidenhead's {cat.title.toLowerCase()} marketplace — a hyper-local, community-first place to connect.
             Want to be first to list or be notified when it goes live?
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="#newsletter" className="px-7 py-3.5 rounded-full font-semibold text-white transition-colors" style={{ backgroundColor: "var(--leaf)" }}>Register your interest</a>
-            <Link to="/work" className="px-7 py-3.5 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>Back to Work</Link>
+            <Link to="/work" className="px-7 py-3.5 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "#000000" }}>Back to Work</Link>
           </div>
         </div>
       </section>

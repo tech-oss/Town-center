@@ -57,20 +57,20 @@ export default function EventsListPage() {
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.95)", color: "var(--forest)" }}>
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.95)", color: "#000000" }}>
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
                     {e.category}
                   </span>
                 </div>
                 <div className="flex flex-col gap-2 p-6">
-                  <h3 className="font-bold text-xl leading-snug" style={{ color: "var(--forest)" }}>{e.title}</h3>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.7 }}>
-                    <span style={{ color: "var(--forest)" }}><CalendarIcon /></span>{e.date}
+                  <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{e.title}</h3>
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.7 }}>
+                    <span style={{ color: "#000000" }}><CalendarIcon /></span>{e.date}
                   </div>
-                  <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ink)", opacity: 0.7 }}>
-                    <span style={{ color: "var(--forest)" }}><PinIcon /></span>{e.location}
+                  <div className="flex items-center gap-2 text-sm" style={{ color: "#000000", opacity: 0.7 }}>
+                    <span style={{ color: "#000000" }}><PinIcon /></span>{e.location}
                   </div>
-                  <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "var(--ink)", opacity: 0.72 }}>{e.excerpt}</p>
+                  <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000", opacity: 0.72 }}>{e.excerpt}</p>
                   <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
                     Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                   </span>

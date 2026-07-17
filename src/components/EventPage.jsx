@@ -111,8 +111,8 @@ export default function EventPage() {
               <>
                 {/* Prev / next */}
                 <div className="absolute bottom-4 right-4 flex gap-2">
-                  <button onClick={prev} aria-label="Previous image" className="w-10 h-10 rounded-xl bg-white/90 flex items-center justify-center text-lg shadow" style={{ color: "var(--forest)" }}>‹</button>
-                  <button onClick={next} aria-label="Next image" className="w-10 h-10 rounded-xl bg-white/90 flex items-center justify-center text-lg shadow" style={{ color: "var(--forest)" }}>›</button>
+                  <button onClick={prev} aria-label="Previous image" className="w-10 h-10 rounded-xl bg-white/90 flex items-center justify-center text-lg shadow" style={{ color: "#000000" }}>‹</button>
+                  <button onClick={next} aria-label="Next image" className="w-10 h-10 rounded-xl bg-white/90 flex items-center justify-center text-lg shadow" style={{ color: "#000000" }}>›</button>
                 </div>
                 {/* Dots */}
                 <div className="absolute bottom-5 left-5 flex gap-2">
@@ -136,39 +136,39 @@ export default function EventPage() {
       <section className="py-10 md:py-14 px-6 md:px-12">
         <div className="max-w-4xl mx-auto">
           {/* Category pill */}
-          <span className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full mb-5" style={{ backgroundColor: "#fff", color: "var(--forest)", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}>
+          <span className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full mb-5" style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}>
             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dot }} />
             {event.category}
           </span>
 
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ color: "var(--forest)" }}>
+          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ color: "#000000" }}>
             {event.title}
           </h1>
 
           {/* Meta rows */}
           <div className="flex flex-col gap-3 mb-8">
             {event.date && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
-                <span style={{ color: "var(--forest)" }}><CalendarIcon /></span>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+                <span style={{ color: "#000000" }}><CalendarIcon /></span>
                 <span>{event.date}{event.time ? ` · ${event.time}` : ""}</span>
               </div>
             )}
             {event.location && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
-                <span style={{ color: "var(--forest)" }}><PinIcon /></span>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+                <span style={{ color: "#000000" }}><PinIcon /></span>
                 <span>{event.location}</span>
               </div>
             )}
             {event.tickets && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
-                <span style={{ color: "var(--forest)" }}><TicketIcon /></span>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+                <span style={{ color: "#000000" }}><TicketIcon /></span>
                 <span>{event.tickets}</span>
               </div>
             )}
             {event.website && (
-              <div className="flex items-center gap-3 text-base" style={{ color: "var(--ink)", opacity: 0.85 }}>
-                <span style={{ color: "var(--forest)" }}><GlobeIcon /></span>
-                <a href={event.website} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:opacity-70 transition-opacity" style={{ color: "var(--forest)" }}>
+              <div className="flex items-center gap-3 text-base" style={{ color: "#000000", opacity: 0.85 }}>
+                <span style={{ color: "#000000" }}><GlobeIcon /></span>
+                <a href={event.website} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:opacity-70 transition-opacity" style={{ color: "#000000" }}>
                   {event.website.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 </a>
               </div>
@@ -196,7 +196,7 @@ export default function EventPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors"
-                style={{ backgroundColor: "var(--sand)", color: "var(--forest)", border: "2px solid var(--forest)" }}
+                style={{ backgroundColor: "var(--sand)", color: "#000000", border: "2px solid var(--forest)" }}
                 onMouseEnter={(ev) => { ev.currentTarget.style.backgroundColor = "var(--forest)"; ev.currentTarget.style.color = "#fff"; }}
                 onMouseLeave={(ev) => { ev.currentTarget.style.backgroundColor = "var(--sand)"; ev.currentTarget.style.color = "var(--forest)"; }}
               >
@@ -207,7 +207,7 @@ export default function EventPage() {
 
           {/* Standfirst */}
           {event.standfirst && (
-            <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.8 }}>
+            <p className="text-lg md:text-xl italic leading-relaxed mb-6" style={{ color: "#000000", opacity: 0.8 }}>
               {event.standfirst}
             </p>
           )}
@@ -217,8 +217,8 @@ export default function EventPage() {
           {/* Body */}
           <article className="flex flex-col gap-5">
             {event.body.map((b, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.85 }}>
-                {b.lead && <strong style={{ color: "var(--forest)" }}>{b.lead} </strong>}
+              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.85 }}>
+                {b.lead && <strong style={{ color: "#000000" }}>{b.lead} </strong>}
                 {b.text}
               </p>
             ))}
@@ -229,7 +229,7 @@ export default function EventPage() {
       {/* More events */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>More What's On</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>More What's On</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {allEvents.filter((e) => e.slug !== event.slug).slice(0, 3).map((e) => (
               <Link
@@ -240,14 +240,14 @@ export default function EventPage() {
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--forest)" }}>
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}>
                     <span className="w-2 h-2 rounded-full" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
                     {e.category}
                   </span>
                 </div>
                 <div className="flex flex-col gap-1.5 p-5">
-                  <h3 className="font-bold text-base leading-snug" style={{ color: "var(--forest)" }}>{e.title}</h3>
-                  <p className="text-xs" style={{ color: "var(--ink)", opacity: 0.55 }}>{e.date}</p>
+                  <h3 className="font-bold text-base leading-snug" style={{ color: "#000000" }}>{e.title}</h3>
+                  <p className="text-xs" style={{ color: "#000000", opacity: 0.55 }}>{e.date}</p>
                 </div>
               </Link>
             ))}

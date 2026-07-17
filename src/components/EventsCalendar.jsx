@@ -52,9 +52,9 @@ export default function EventsCalendar() {
     <div>
       {/* Month nav */}
       <div className="flex items-center justify-between mb-6">
-        <button onClick={prevMonth} aria-label="Previous month" className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "var(--forest)" }}>‹</button>
-        <h3 className="text-2xl md:text-3xl font-bold" style={{ color: "var(--forest)" }}>{MONTHS[m]} {y}</h3>
-        <button onClick={nextMonth} aria-label="Next month" className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "var(--forest)" }}>›</button>
+        <button onClick={prevMonth} aria-label="Previous month" className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>‹</button>
+        <h3 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>{MONTHS[m]} {y}</h3>
+        <button onClick={nextMonth} aria-label="Next month" className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>›</button>
       </div>
 
       {/* Calendar grid */}
@@ -73,7 +73,7 @@ export default function EventsCalendar() {
                 className="min-h-[58px] md:min-h-[96px] rounded-xl p-1.5 md:p-2 flex flex-col gap-1"
                 style={{ backgroundColor: d ? "var(--sand)" : "transparent", outline: isToday(d) ? "2px solid var(--leaf)" : "none" }}
               >
-                {d && <span className="text-[11px] md:text-sm font-semibold" style={{ color: "var(--forest)" }}>{d}</span>}
+                {d && <span className="text-[11px] md:text-sm font-semibold" style={{ color: "#000000" }}>{d}</span>}
                 <div className="flex flex-col gap-1 overflow-hidden">
                   {dayEvents.map((e) => (
                     <button
@@ -95,7 +95,7 @@ export default function EventsCalendar() {
       </div>
 
       {/* This month's events list */}
-      <h3 className="text-xl font-bold mt-12 mb-5" style={{ color: "var(--forest)" }}>
+      <h3 className="text-xl font-bold mt-12 mb-5" style={{ color: "#000000" }}>
         {monthEvents.length > 0 ? `Events in ${MONTHS[m]}` : `No events listed in ${MONTHS[m]}`}
       </h3>
       <div className="flex flex-col gap-3">
@@ -115,10 +115,10 @@ export default function EventsCalendar() {
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
                 <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{e.category}</span>
               </div>
-              <p className="font-bold leading-snug truncate" style={{ color: "var(--forest)" }}>{e.title}</p>
-              <p className="text-sm truncate" style={{ color: "var(--ink)", opacity: 0.6 }}>{e.location}</p>
+              <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
+              <p className="text-sm truncate" style={{ color: "#000000", opacity: 0.6 }}>{e.location}</p>
             </div>
-            <span className="shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "var(--forest)" }}>→</span>
+            <span className="shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
           </Link>
         ))}
       </div>

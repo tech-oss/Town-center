@@ -63,27 +63,27 @@ export default function PressPage() {
 
           <div className="flex flex-col gap-6 mb-12">
             {introParagraphs.map((p, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
+              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>{p}</p>
             ))}
           </div>
 
           <div className="grid sm:grid-cols-2 gap-5 mb-14">
             {cards.map((c) => (
               <div key={c.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
-                <h3 className="font-bold text-lg mb-2" style={{ color: "var(--forest)" }}>{c.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--ink)", opacity: 0.78 }}>{c.body}</p>
+                <h3 className="font-bold text-lg mb-2" style={{ color: "#000000" }}>{c.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.78 }}>{c.body}</p>
               </div>
             ))}
           </div>
 
           {/* Grow your presence section */}
           <div className="mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
               For businesses to grow your presence and visibility
             </h2>
             <div className="flex flex-col gap-5">
               {visibilityParagraphs.map((p, i) => (
-                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>{p}</p>
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>{p}</p>
               ))}
             </div>
           </div>

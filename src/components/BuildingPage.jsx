@@ -96,11 +96,11 @@ export default function BuildingPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
               About the development
             </p>
-            <h2 className="text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "var(--forest)" }}>
+            <h2 className="text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>
               About {b.name}
             </h2>
             {(b.longDescription || [b.description]).map((para, i) => (
-              <p key={i} className="text-base md:text-lg leading-relaxed mb-5" style={{ color: "var(--ink)", opacity: 0.82 }}>
+              <p key={i} className="text-base md:text-lg leading-relaxed mb-5" style={{ color: "#000000", opacity: 0.82 }}>
                 {para}
               </p>
             ))}
@@ -141,7 +141,7 @@ export default function BuildingPage() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Specification
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "var(--forest)" }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>
             Features
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -155,7 +155,7 @@ export default function BuildingPage() {
                   style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
                 >
                   <span className="text-xl leading-none shrink-0 mt-0.5">{icon}</span>
-                  <span className="text-sm font-medium leading-snug" style={{ color: "var(--forest)" }}>{text}</span>
+                  <span className="text-sm font-medium leading-snug" style={{ color: "#000000" }}>{text}</span>
                 </div>
               );
             })}
@@ -170,7 +170,7 @@ export default function BuildingPage() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
               Connectivity
             </p>
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
               Getting around
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -182,7 +182,7 @@ export default function BuildingPage() {
                 >
                   <span className="text-2xl shrink-0 leading-none">{modeIcon(place.mode)}</span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>
+                    <p className="text-sm font-semibold leading-snug" style={{ color: "#000000" }}>
                       {place.name}
                     </p>
                     <p className="text-xs mt-0.5 font-semibold" style={{ color: "var(--leaf)" }}>
@@ -202,10 +202,10 @@ export default function BuildingPage() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Lifestyle
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "var(--forest)" }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>
             Your 15-minute town
           </h2>
-          <p className="text-base mb-8 max-w-2xl" style={{ color: "var(--ink)", opacity: 0.7 }}>
+          <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000", opacity: 0.7 }}>
             Everything you need is right on your doorstep in Maidenhead.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -217,7 +217,7 @@ export default function BuildingPage() {
                 style={{ backgroundColor: "#fff", boxShadow: "0 8px 30px -18px rgba(28,46,56,0.25)" }}
               >
                 <span className="text-2xl" aria-hidden="true">{c.icon}</span>
-                <span className="font-bold" style={{ color: "var(--forest)" }}>{c.label}</span>
+                <span className="font-bold" style={{ color: "#000000" }}>{c.label}</span>
                 <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
                   Explore <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </span>
@@ -233,10 +233,10 @@ export default function BuildingPage() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Developer
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "var(--forest)" }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>
             Contact {b.developer}
           </h2>
-          <p className="text-base mb-8 max-w-2xl" style={{ color: "var(--ink)", opacity: 0.7 }}>
+          <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000", opacity: 0.7 }}>
             For pricing, availability and upcoming releases, contact the {b.developer} team directly.
           </p>
           <div className="grid sm:grid-cols-3 gap-4">
@@ -251,7 +251,7 @@ export default function BuildingPage() {
                 <span className="text-3xl shrink-0">🌐</span>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Website</p>
-                  <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "var(--forest)" }}>Visit developer site ↗</p>
+                  <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "#000000" }}>Visit developer site ↗</p>
                 </div>
               </a>
             )}
@@ -264,7 +264,7 @@ export default function BuildingPage() {
                 <span className="text-3xl shrink-0">✉️</span>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Email</p>
-                  <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "var(--forest)" }}>{b.email}</p>
+                  <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "#000000" }}>{b.email}</p>
                 </div>
               </a>
             )}
@@ -277,7 +277,7 @@ export default function BuildingPage() {
                 <span className="text-3xl shrink-0">📞</span>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Telephone</p>
-                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "var(--forest)" }}>{b.phone}</p>
+                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "#000000" }}>{b.phone}</p>
                 </div>
               </a>
             )}
@@ -302,7 +302,7 @@ export default function BuildingPage() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Explore more
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
             More developments in Maidenhead
           </h2>
           <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">

@@ -12,7 +12,7 @@ export default function FeatureBlocks() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
             In Focus
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
+          <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
             Featured Stories
           </h2>
         </div>
@@ -39,10 +39,10 @@ export default function FeatureBlocks() {
                 <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "var(--leaf)" }}>
                   {f.eyebrow}
                 </p>
-                <h3 className="text-3xl md:text-5xl font-bold leading-tight mb-5" style={{ color: "var(--forest)" }}>
+                <h3 className="text-3xl md:text-5xl font-bold leading-tight mb-5" style={{ color: "#000000" }}>
                   {f.cardHeading}
                 </h3>
-                <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: "var(--ink)", opacity: 0.75 }}>
+                <p className="text-base md:text-lg leading-relaxed mb-8" style={{ color: "#000000", opacity: 0.75 }}>
                   {f.cardBody}
                 </p>
                 <Link

@@ -67,7 +67,7 @@ export default function WeatherWidget() {
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
             <circle cx="12" cy="10" r="3" />
           </svg>
-          <p className="text-sm font-bold" style={{ color: "var(--forest)" }}>
+          <p className="text-sm font-bold" style={{ color: "#000000" }}>
             {weather.label} · 7-day forecast
           </p>
         </div>
@@ -77,7 +77,7 @@ export default function WeatherWidget() {
       </div>
 
       {error ? (
-        <p className="text-sm text-center py-6" style={{ color: "var(--forest)", opacity: 0.6 }}>
+        <p className="text-sm text-center py-6" style={{ color: "#000000", opacity: 0.6 }}>
           Weather is unavailable right now — please check back soon.
         </p>
       ) : (

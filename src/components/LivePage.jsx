@@ -24,7 +24,7 @@ export default function LivePage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{live.hero.title}</h1>
           <p className="text-lg text-white/85 mt-4 max-w-2xl leading-relaxed">{live.hero.intro}</p>
           <div className="flex flex-wrap gap-3 mt-7">
-            <Link to="/live/for-sale" className="px-6 py-3 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>Properties For Sale</Link>
+            <Link to="/live/for-sale" className="px-6 py-3 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>Properties For Sale</Link>
             <Link to="/live/for-rent" className="px-6 py-3 rounded-full font-semibold text-white transition-colors" style={{ border: "1.5px solid rgba(255,255,255,0.6)" }}>Properties For Rent</Link>
           </div>
         </div>
@@ -35,7 +35,7 @@ export default function LivePage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Lifestyle</p>
-            <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "var(--forest)" }}>Life in Maidenhead</h2>
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>Life in Maidenhead</h2>
           </div>
           <LifestyleBento />
         </div>
@@ -50,8 +50,8 @@ export default function LivePage() {
       {/* Our Buildings */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "var(--forest)" }}>Developments</h2>
-          <p className="text-base mb-10 max-w-2xl" style={{ color: "var(--ink)", opacity: 0.7 }}>Explore Maidenhead's leading residential developments.</p>
+          <h2 className="text-3xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "#000000" }}>Developments</h2>
+          <p className="text-base mb-10 max-w-2xl" style={{ color: "#000000", opacity: 0.7 }}>Explore Maidenhead's leading residential developments.</p>
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {(buildings ?? []).map((b) => (
               <Link key={b.slug} to={`/live/building/${b.slug}`} className="group relative rounded-3xl overflow-hidden block aspect-[3/4]"

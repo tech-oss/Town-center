@@ -13,7 +13,7 @@ function Row({ icon, children }) {
   return (
     <div className="flex items-start gap-3">
       <span className="shrink-0 mt-0.5">{icons[icon]}</span>
-      <span className="text-sm" style={{ color: "rgba(26,26,26,0.75)" }}>{children}</span>
+      <span className="text-sm" style={{ color: "rgba(0,0,0,0.75)" }}>{children}</span>
     </div>
   );
 }
@@ -51,7 +51,7 @@ export default function PlaceDetailScreen() {
           </div>
 
           <MobileCard className="p-4 flex flex-col gap-3">
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(26,26,26,0.7)" }}>{place.blurb}</p>
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.7)" }}>{place.blurb}</p>
             <div className="h-px" style={{ background: "rgba(0,0,0,0.07)" }} />
             <Row icon="pin">{place.address}</Row>
             <Row icon="clock">{place.hours}</Row>
@@ -59,7 +59,7 @@ export default function PlaceDetailScreen() {
           </MobileCard>
 
           <div className="grid grid-cols-2 gap-3">
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}>
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>
               Directions
             </a>
             <Link to="/mobile/map" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#fff" }}>

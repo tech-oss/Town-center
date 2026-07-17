@@ -88,11 +88,11 @@ function CompactCard({ post }) {
       {/* Body */}
       <div className="flex flex-col flex-1 p-4 gap-2">
         <span className="sm:hidden"><Badge label={post.category} /></span>
-        <p className="text-[10px] font-medium" style={{ color: "var(--ink)", opacity: 0.5 }}>{post.date}</p>
-        <h3 className="text-base leading-snug" style={{ color: "var(--forest)", fontFamily: "var(--font-heading)", fontWeight: 700 }}>
+        <p className="text-[10px] font-medium" style={{ color: "#000000", opacity: 0.5 }}>{post.date}</p>
+        <h3 className="text-base leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)", fontWeight: 700 }}>
           {post.title}
         </h3>
-        <p className="text-xs leading-relaxed line-clamp-2 hidden sm:block" style={{ color: "var(--ink)", opacity: 0.7 }}>
+        <p className="text-xs leading-relaxed line-clamp-2 hidden sm:block" style={{ color: "#000000", opacity: 0.7 }}>
           {post.excerpt}
         </p>
         <span className="inline-flex items-center gap-1 text-xs font-semibold mt-auto" style={{ color: "var(--leaf)" }}>
@@ -120,7 +120,7 @@ export default function BlogCards() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
               {blogCards.eyebrow}
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "var(--forest)" }}>
+            <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
               {blogCards.heading}
             </h2>
           </div>
@@ -128,7 +128,7 @@ export default function BlogCards() {
           <CardLink
             href={blogCards.cta.href}
             className={btn.text.className}
-            style={{ color: "var(--forest)" }}
+            style={{ color: "#000000" }}
           >
             {blogCards.cta.label}
             <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>

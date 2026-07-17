@@ -63,27 +63,27 @@ export default function PropertyPage() {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_400px] gap-10 lg:gap-14">
           {/* Main */}
           <div>
-            <p className="text-3xl md:text-4xl font-bold" style={{ color: "var(--forest)" }}>{fmtPrice(p.price, p.status)}</p>
+            <p className="text-3xl md:text-4xl font-bold" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>
             <h1 className="text-xl md:text-2xl font-semibold mt-1 mb-1" style={{ color: "var(--leaf)" }}>{p.bedLabel} property · {p.building}</h1>
-            <p className="text-sm mb-6" style={{ color: "var(--ink)", opacity: 0.6 }}>{p.location}</p>
+            <p className="text-sm mb-6" style={{ color: "#000000", opacity: 0.6 }}>{p.location}</p>
 
             {/* Key facts */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
               {[["Bedrooms", p.beds === 0 ? "Studio" : p.beds === 99 ? "Penthouse" : p.beds], ["Bathrooms", p.baths], ["Size", `${p.sqft} sq ft`], ["Floor", p.floor]].map(([k, v]) => (
                 <div key={k} className="rounded-2xl p-4 text-center" style={{ backgroundColor: "#fff", boxShadow: "0 4px 16px -10px rgba(28,46,56,0.25)" }}>
                   <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{k}</p>
-                  <p className="text-lg font-bold mt-1" style={{ color: "var(--forest)" }}>{v}</p>
+                  <p className="text-lg font-bold mt-1" style={{ color: "#000000" }}>{v}</p>
                 </div>
               ))}
             </div>
 
-            <h2 className="text-xl font-bold mb-3" style={{ color: "var(--forest)" }}>About this home</h2>
-            <p className="text-base leading-relaxed mb-8" style={{ color: "var(--ink)", opacity: 0.82 }}>{p.description}</p>
+            <h2 className="text-xl font-bold mb-3" style={{ color: "#000000" }}>About this home</h2>
+            <p className="text-base leading-relaxed mb-8" style={{ color: "#000000", opacity: 0.82 }}>{p.description}</p>
 
-            <h2 className="text-xl font-bold mb-3" style={{ color: "var(--forest)" }}>Features</h2>
+            <h2 className="text-xl font-bold mb-3" style={{ color: "#000000" }}>Features</h2>
             <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5 mb-8">
               {p.features.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "var(--ink)", opacity: 0.82 }}>
+                <li key={f} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000", opacity: 0.82 }}>
                   <span style={{ color: "var(--sage)" }}>✓</span> {f}
                 </li>
               ))}
@@ -95,7 +95,7 @@ export default function PropertyPage() {
                 More about {b.name}
                 <span>→</span>
               </Link>
-              <Link to="/live/enquire" className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full" style={{ border: "1.5px solid var(--forest)", color: "var(--forest)" }}>
+              <Link to="/live/enquire" className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full" style={{ border: "1.5px solid var(--forest)", color: "#000000" }}>
                 ⤓ Download Brochure
               </Link>
             </div>
@@ -119,7 +119,7 @@ export default function PropertyPage() {
       {similar.length > 0 && (
         <section className="pb-20 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>Similar homes</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>Similar homes</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {similar.map((x) => <PropertyCard key={x.slug} p={x} />)}
             </div>

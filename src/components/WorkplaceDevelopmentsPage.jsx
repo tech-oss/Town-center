@@ -65,9 +65,9 @@ function DevelopmentCard({ b }) {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>About the development</p>
-            <h3 className="text-2xl md:text-3xl font-bold mb-5 leading-tight" style={{ color: "var(--forest)" }}>About {b.name}</h3>
+            <h3 className="text-2xl md:text-3xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>About {b.name}</h3>
             {(b.longDescription || [b.description]).map((para, i) => (
-              <p key={i} className="text-base leading-relaxed mb-4" style={{ color: "var(--ink)", opacity: 0.82 }}>{para}</p>
+              <p key={i} className="text-base leading-relaxed mb-4" style={{ color: "#000000", opacity: 0.82 }}>{para}</p>
             ))}
             {b.website && (
               <a href={b.website} target="_blank" rel="noopener noreferrer"
@@ -93,7 +93,7 @@ function DevelopmentCard({ b }) {
       <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>Specification</p>
-          <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "var(--forest)" }}>Features</h3>
+          <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Features</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {b.amenities.map((a) => {
               const icon = typeof a === "object" ? a.icon : "✓";
@@ -101,7 +101,7 @@ function DevelopmentCard({ b }) {
               return (
                 <div key={text} className="flex items-start gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--sand)" }}>
                   <span className="text-xl shrink-0 mt-0.5">{icon}</span>
-                  <span className="text-sm font-medium leading-snug" style={{ color: "var(--forest)" }}>{text}</span>
+                  <span className="text-sm font-medium leading-snug" style={{ color: "#000000" }}>{text}</span>
                 </div>
               );
             })}
@@ -114,13 +114,13 @@ function DevelopmentCard({ b }) {
         <section className="py-12 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>Connectivity</p>
-            <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "var(--forest)" }}>Getting around</h3>
+            <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Getting around</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {b.nearbyPlaces.map((place) => (
                 <div key={place.name} className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: "#fff" }}>
                   <span className="text-2xl shrink-0">{modeIcon(place.mode)}</span>
                   <div>
-                    <p className="text-sm font-semibold" style={{ color: "var(--forest)" }}>{place.name}</p>
+                    <p className="text-sm font-semibold" style={{ color: "#000000" }}>{place.name}</p>
                     <p className="text-xs mt-0.5 font-semibold" style={{ color: "var(--leaf)" }}>{place.distance}</p>
                   </div>
                 </div>
@@ -134,8 +134,8 @@ function DevelopmentCard({ b }) {
       <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
           <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>Contact</p>
-          <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "var(--forest)" }}>Get in touch</h3>
-          <p className="text-base mb-7 max-w-xl" style={{ color: "var(--ink)", opacity: 0.7 }}>
+          <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Get in touch</h3>
+          <p className="text-base mb-7 max-w-xl" style={{ color: "#000000", opacity: 0.7 }}>
             For availability, pricing and viewings contact the {b.developer} team directly.
           </p>
           <div className="flex flex-wrap gap-4">
@@ -146,7 +146,7 @@ function DevelopmentCard({ b }) {
                 <span className="text-3xl">🌐</span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Website</p>
-                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "var(--forest)" }}>Visit developer site ↗</p>
+                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "#000000" }}>Visit developer site ↗</p>
                 </div>
               </a>
             )}
@@ -157,7 +157,7 @@ function DevelopmentCard({ b }) {
                 <span className="text-3xl">✉️</span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Email</p>
-                  <p className="text-sm font-semibold group-hover:underline truncate" style={{ color: "var(--forest)" }}>{b.email}</p>
+                  <p className="text-sm font-semibold group-hover:underline truncate" style={{ color: "#000000" }}>{b.email}</p>
                 </div>
               </a>
             )}
@@ -168,7 +168,7 @@ function DevelopmentCard({ b }) {
                 <span className="text-3xl">📞</span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Telephone</p>
-                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "var(--forest)" }}>{b.phone}</p>
+                  <p className="text-sm font-semibold group-hover:underline" style={{ color: "#000000" }}>{b.phone}</p>
                 </div>
               </a>
             )}
@@ -208,7 +208,7 @@ export default function WorkplaceDevelopmentsPage() {
         <section className="pb-20 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>Explore more</p>
-            <h3 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "var(--forest)" }}>Other workplace developments</h3>
+            <h3 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>Other workplace developments</h3>
             <div className="grid sm:grid-cols-2 gap-5">
               {others.map((x) => (
                 <Link key={x.slug} to={`/work/developments/${x.slug}`}

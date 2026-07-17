@@ -185,7 +185,7 @@ export default function GettingHerePage() {
               href={q.href}
               onClick={(e) => scrollTo(e, q.href)}
               className="shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-colors"
-              style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+              style={{ backgroundColor: "var(--mint)", color: "#000000" }}
               onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
             >
@@ -282,7 +282,7 @@ export default function GettingHerePage() {
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold mb-2" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                    <p className="text-xs font-semibold mb-2" style={{ color: "#000000", opacity: 0.6 }}>
                       Navigate to the following car parks from your location:
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -298,7 +298,7 @@ export default function GettingHerePage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-colors"
-                          style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+                          style={{ backgroundColor: "var(--mint)", color: "#000000" }}
                           onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
                         >
@@ -343,18 +343,18 @@ export default function GettingHerePage() {
                   own section; desktop keeps the alternating left/right layout. */}
               <div className="order-first md:order-none">
                 <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
-                <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>{sec.heading}</h2>
-                <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "var(--ink)", opacity: 0.82 }}>{sec.intro}</p>
+                <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
+                <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000", opacity: 0.82 }}>{sec.intro}</p>
                 <div className="flex flex-col divide-y" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
                   {sec.blocks.map((b) => (
                     <div key={b.title} className="py-3.5">
-                      <h3 className="font-bold text-base mb-1" style={{ color: "var(--forest)" }}>{b.title}</h3>
-                      <p className="text-sm leading-relaxed" style={{ color: "var(--ink)", opacity: 0.72 }}>{b.body}</p>
+                      <h3 className="font-bold text-base mb-1" style={{ color: "#000000" }}>{b.title}</h3>
+                      <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.72 }}>{b.body}</p>
                     </div>
                   ))}
                 </div>
                 {sec.note && (
-                  <p className="text-sm leading-relaxed mt-4 italic" style={{ color: "var(--forest)" }}>{sec.note}</p>
+                  <p className="text-sm leading-relaxed mt-4 italic" style={{ color: "#000000" }}>{sec.note}</p>
                 )}
               </div>
             </div>
@@ -367,16 +367,16 @@ export default function GettingHerePage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>Before You Visit</h2>
-            <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--ink)", opacity: 0.82 }}>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
+            <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000", opacity: 0.82 }}>
               A few practical things worth knowing before you head into the town centre.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {goodToKnow.map((g) => (
               <div key={g.id} id={g.id} className="scroll-mt-24 bg-white rounded-3xl p-7" style={{ boxShadow: "0 10px 40px -20px rgba(28,46,56,0.3)" }}>
-                <h3 className="font-bold text-lg mb-3" style={{ color: "var(--forest)" }}>{g.title}</h3>
-                <p className="text-sm md:text-base leading-relaxed" style={{ color: "var(--ink)", opacity: 0.78 }}>{g.body}</p>
+                <h3 className="font-bold text-lg mb-3" style={{ color: "#000000" }}>{g.title}</h3>
+                <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000", opacity: 0.78 }}>{g.body}</p>
               </div>
             ))}
           </div>

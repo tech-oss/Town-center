@@ -26,10 +26,10 @@ export default function PlanScreen() {
                 <PlanIcon name={item.icon} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold" style={{ color: "var(--forest)" }}>{item.title}</p>
-                <p className="text-xs mt-0.5" style={{ color: "rgba(26,26,26,0.6)" }}>{item.blurb}</p>
+                <p className="text-sm font-bold" style={{ color: "#000000" }}>{item.title}</p>
+                <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.6)" }}>{item.blurb}</p>
               </div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(26,26,26,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
             </MobileCard>
           </Link>
         ))}

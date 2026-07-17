@@ -23,14 +23,14 @@ function Calendar({ year, month, onMonth, selected, onSelect, eventDates }) {
         <button onClick={() => onMonth(-1)} className="w-8 h-8 flex items-center justify-center rounded-full active:bg-black/5" aria-label="Previous month">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
         </button>
-        <p className="text-sm font-bold" style={{ color: "var(--forest)" }}>{MONTHS[month]} {year}</p>
+        <p className="text-sm font-bold" style={{ color: "#000000" }}>{MONTHS[month]} {year}</p>
         <button onClick={() => onMonth(1)} className="w-8 h-8 flex items-center justify-center rounded-full active:bg-black/5" aria-label="Next month">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
         </button>
       </div>
       <div className="grid grid-cols-7 gap-y-1 mb-1">
         {DOW.map((d, i) => (
-          <span key={i} className="text-[10px] font-bold text-center" style={{ color: "rgba(26,26,26,0.4)" }}>{d}</span>
+          <span key={i} className="text-[10px] font-bold text-center" style={{ color: "rgba(0,0,0,0.4)" }}>{d}</span>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-y-1">
@@ -104,7 +104,7 @@ export default function WhatsOnScreen() {
               onClick={() => setFilter(f)}
               className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={filter === f
-                ? { backgroundColor: "var(--sage)", color: "var(--forest)" }
+                ? { backgroundColor: "var(--sage)", color: "#000000" }
                 : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)" }}
             >
               {f}
@@ -130,12 +130,12 @@ export default function WhatsOnScreen() {
               <MobileCard key={e.id} className="flex items-center gap-3 p-3 active:opacity-90">
                 <div className="shrink-0 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: "rgba(82,199,182,0.12)", width: 52, height: 52 }}>
                   <span className="text-[10px] font-bold uppercase" style={{ color: "var(--leaf)" }}>{e.month}</span>
-                  <span className="text-lg font-bold leading-none" style={{ color: "var(--forest)" }}>{e.day}</span>
+                  <span className="text-lg font-bold leading-none" style={{ color: "#000000" }}>{e.day}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate" style={{ color: "var(--forest)" }}>{e.title}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(26,26,26,0.6)" }}>{e.time}</p>
-                  <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(26,26,26,0.45)" }}>{e.location}</p>
+                  <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{e.title}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.6)" }}>{e.time}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.45)" }}>{e.location}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-1 rounded-full shrink-0" style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "var(--leaf)" }}>{e.category}</span>
               </MobileCard>

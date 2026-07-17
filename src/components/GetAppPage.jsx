@@ -77,14 +77,14 @@ export default function GetAppPage() {
       {/* Feature highlights */}
       <section className="px-6 md:px-12 py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-4xl font-bold mb-10 leading-tight" style={{ color: "var(--forest)" }}>
+          <h2 className="text-2xl md:text-4xl font-bold mb-10 leading-tight" style={{ color: "#000000" }}>
             Everything Maidenhead, in your pocket
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((f) => (
               <div key={f.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
-                <h3 className="font-bold text-lg mb-2" style={{ color: "var(--forest)" }}>{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "var(--ink)", opacity: 0.75 }}>{f.text}</p>
+                <h3 className="font-bold text-lg mb-2" style={{ color: "#000000" }}>{f.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>{f.text}</p>
               </div>
             ))}
           </div>

@@ -192,7 +192,7 @@ const Header = forwardRef(function Header(_, ref) {
                         to={l.to}
                         onClick={() => setOpenDropdown(null)}
                         className="text-sm transition-colors duration-150"
-                        style={{ color: "var(--forest)" }}
+                        style={{ color: "#000000" }}
                         onMouseEnter={(e) => (e.currentTarget.style.color = "var(--leaf)")}
                         onMouseLeave={(e) => (e.currentTarget.style.color = "var(--forest)")}
                       >

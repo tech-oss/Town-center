@@ -57,10 +57,10 @@ export default function PlanVisit() {
           <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
             {planVisit.eyebrow}
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "var(--forest)" }}>
+          <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
             {planVisit.heading}
           </h2>
-          <p className="text-base leading-relaxed" style={{ color: "var(--ink)", opacity: 0.75 }}>
+          <p className="text-base leading-relaxed" style={{ color: "#000000", opacity: 0.75 }}>
             {planVisit.intro}
           </p>
         </div>
@@ -84,21 +84,21 @@ export default function PlanVisit() {
               >
                 <span
                   className="shrink-0 transition-transform duration-200 group-hover:scale-110"
-                  style={{ color: "var(--forest)" }}
+                  style={{ color: "#000000" }}
                 >
                   <OptionIcon id={opt.id} />
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block font-bold text-lg leading-snug" style={{ color: "var(--forest)" }}>
+                  <span className="block font-bold text-lg leading-snug" style={{ color: "#000000" }}>
                     {opt.title}
                   </span>
-                  <span className="block text-sm mt-0.5" style={{ color: "var(--ink)", opacity: 0.6 }}>
+                  <span className="block text-sm mt-0.5" style={{ color: "#000000", opacity: 0.6 }}>
                     {opt.subtitle}
                   </span>
                 </span>
                 <span
                   className="shrink-0 text-xl transition-transform duration-200 group-hover:translate-x-1"
-                  style={{ color: "var(--forest)" }}
+                  style={{ color: "#000000" }}
                   aria-hidden="true"
                 >
                   →

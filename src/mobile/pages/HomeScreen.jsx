@@ -39,7 +39,7 @@ export default function HomeScreen() {
             <img src={featuredSpot.image} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{featuredSpot.eyebrow}</p>
-              <p className="text-sm font-bold leading-snug" style={{ color: "var(--forest)" }}>{featuredSpot.title}</p>
+              <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{featuredSpot.title}</p>
               <span className="text-xs font-semibold inline-flex items-center gap-1 mt-0.5" style={{ color: "var(--leaf)" }}>
                 Find Out More <span>→</span>
               </span>
@@ -71,7 +71,7 @@ export default function HomeScreen() {
         <Link
           to="/mobile/whats-on"
           className="w-full text-center py-3.5 rounded-2xl text-sm font-bold active:opacity-80"
-          style={{ backgroundColor: "var(--sage)", color: "var(--forest)" }}
+          style={{ backgroundColor: "var(--sage)", color: "#000000" }}
         >
           Explore What's On
         </Link>
