@@ -20,28 +20,9 @@ export const header = {
   ],
 };
 
-// ─── Hero Slider ─────────────────────────────────────────────────────────────
+// ─── Hero (static) ──────────────────────────────────────────────────────────
 export const hero = {
-  autoplayInterval: 3800, // ms between slides
   slides: [
-    {
-      // Maidenhead Bridge over the Thames — © Wikimedia Commons (CC BY-SA)
-      imageSrc: "/images/slide-bridge.jpg",
-      imagePosition: "center 62%",
-      imageAlt: "Maidenhead Bridge spanning the River Thames",
-      eyebrow: "Welcome to",
-      headline: "Maidenhead",
-      subheadline:
-        "A fast-growing riverside town set on the banks of the Thames, with excellent Elizabeth Line links into central London.",
-      primaryCta: { label: "Live", href: "/live" },
-      secondaryCta: { label: "Plan Your Visit", href: "/getting-here" },
-      featureCard: {
-        image: "/images/card-lock.jpg",
-        label: "On the River",
-        title: "Boulter's Lock & Ray Mill Island",
-        cta: { label: "Find Out More", to: "/attraction/boulters-lock" },
-      },
-    },
     {
       // Maidenhead regeneration — El Cerdo / Chapel Arches waterfront development
       imageSrc: "/images/slide-river.jpg",
@@ -58,24 +39,6 @@ export const hero = {
         label: "Eat & Drink",
         title: "Waterfront Dining & Bars",
         cta: { label: "See All Restaurants", to: "/attraction/waterfront-dining" },
-      },
-    },
-    {
-      // H&W Taplow — riverside restaurant & terrace on the Thames near Maidenhead
-      imageSrc: "/images/slide-cafe.jpg",
-      imagePosition: "center 50%",
-      imageAlt: "H&W Taplow riverside restaurant terrace on the Thames",
-      eyebrow: "Eat · Drink · Relax",
-      headline: "Waterfront Dining",
-      subheadline:
-        "From riverside terraces to independent restaurants — soak up the Thames views with great food and drink to match.",
-      primaryCta: { label: "Eat & Drink", href: "/eat-drink" },
-      secondaryCta: { label: "Plan Your Visit", href: "/getting-here" },
-      featureCard: {
-        image: "/images/card-taplow.jpg",
-        label: "Featured Venue",
-        title: "H&W Taplow — Thames Terrace",
-        cta: { label: "Discover More", to: "/attraction/hw-taplow" },
       },
     },
   ],
