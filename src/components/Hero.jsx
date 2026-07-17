@@ -34,7 +34,7 @@ export default function Hero() {
               {s.eyebrow}
             </p>
             <h1
-              className="text-5xl lg:text-7xl font-bold text-white mb-5 leading-tight"
+              className="hero-title text-5xl lg:text-7xl text-white mb-5"
               style={{ textShadow: "0 2px 24px rgba(0,0,0,0.35)" }}
             >
               {s.headline}
@@ -139,8 +139,8 @@ export default function Hero() {
             {s.eyebrow}
           </p>
           <h1
-            className="text-4xl font-bold mb-4 leading-tight"
-            style={{ fontFamily: "var(--font-heading)", color: "var(--forest)" }}
+            className="hero-title text-4xl mb-4"
+            style={{ color: "var(--forest)" }}
           >
             {s.headline}
           </h1>

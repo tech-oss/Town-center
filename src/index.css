@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
 /* ─── Maidenhead Brand Palette ──────────────────────────────────────────────── */
@@ -19,10 +18,42 @@ html {
   font-family: var(--font-body);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
 }
 
+/* ─── Typography hierarchy (Instrument Sans headings / Inter Tight body) ────
+   Weights use !important: Tailwind utility classes like font-bold/font-semibold
+   are applied inline throughout ~20+ components, and would otherwise win the
+   cascade. This is the single source of truth for the weight scale so it is
+   guaranteed to apply everywhere without hand-editing every component. */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
+  font-weight: 500 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+h5, h6 {
+  font-weight: 600 !important;
+}
+
+/* Homepage hero title — light editorial weight, tighter tracking/leading */
+.hero-title {
+  font-weight: 300 !important;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+/* Inter Tight for all remaining UI text — nav, buttons, links, labels, forms */
+button, input, select, textarea, a, label,
+p, span, li {
+  font-family: var(--font-body);
+}
+
+nav a, header nav, button, .btn, a[class*="rounded-full"] {
+  font-weight: 500 !important;
 }
 
 /* ─── Hero slider animations ─────────────────────────────────────────────── */
