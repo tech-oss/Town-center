@@ -149,7 +149,7 @@ export default function Hero() {
                   <SmartLink
                     to={s.primaryCta.href}
                     className="inline-block px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90"
-                    style={{ backgroundColor: "var(--sage)" }}
+                    style={{ backgroundColor: "var(--forest)" }}
                   >
                     {s.primaryCta.label}
                   </SmartLink>
@@ -251,7 +251,7 @@ export default function Hero() {
                 <SmartLink
                   to={s.primaryCta.href}
                   className="block w-full py-3.5 rounded-full text-sm font-semibold text-white text-center transition-opacity duration-150 hover:opacity-90"
-                  style={{ backgroundColor: "var(--sage)" }}
+                  style={{ backgroundColor: "var(--forest)" }}
                 >
                   {s.primaryCta.label}
                 </SmartLink>

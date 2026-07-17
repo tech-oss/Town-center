@@ -412,7 +412,7 @@ export default function TradersMap() {
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
           {brandGrid.ctas.map((cta) => (
-            <Link key={cta.href} to={cta.href} className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5" style={{ backgroundColor: "var(--sage)" }}>
+            <Link key={cta.href} to={cta.href} className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5" style={{ backgroundColor: "var(--forest)" }}>
               {cta.label} <span>→</span>
             </Link>
           ))}

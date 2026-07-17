@@ -48,7 +48,7 @@ export default function Newsletter() {
             <button
               type="submit"
               className="px-7 py-3.5 rounded-full text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90 shrink-0"
-              style={{ backgroundColor: "var(--sage)" }}
+              style={{ backgroundColor: "var(--forest)" }}
             >
               {newsletter.buttonLabel}
             </button>

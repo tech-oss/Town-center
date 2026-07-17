@@ -48,7 +48,7 @@ export default function FeatureBlocks() {
                 <Link
                   to={`/story/${f.slug}`}
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
-                  style={{ backgroundColor: "var(--sage)" }}
+                  style={{ backgroundColor: "var(--forest)" }}
                 >
                   Read more
                   <span>→</span>
