@@ -40,8 +40,9 @@ function FeaturedCard({ post }) {
         <Badge label={post.category} />
       </span>
 
-      {/* Text pinned to bottom */}
-      <div className="relative z-10 mt-auto p-6 flex flex-col gap-2">
+      {/* Text pinned to bottom — mobile gets a solid backing so it stays
+          readable over busy photos; desktop is untouched (transparent). */}
+      <div className="relative z-10 mt-auto p-6 flex flex-col gap-2 bg-white/90 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none">
         <p className="text-[11px] font-medium" style={{ color: "rgba(0,0,0,0.6)" }}>{post.date}</p>
         <h3
           className="text-2xl leading-snug"
