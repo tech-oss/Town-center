@@ -9,6 +9,14 @@ export default function QuickLinks() {
     >
       <div className="max-w-7xl mx-auto">
 
+        {/* ── Intro copy (centered) ── */}
+        <p
+          className="max-w-3xl mx-auto text-center text-base md:text-lg leading-relaxed mb-10 md:mb-14"
+          style={{ color: "rgba(26,26,26,0.75)" }}
+        >
+          {quickLinks.intro}
+        </p>
+
         {/* ── Header (left-aligned) ── */}
         <div className="mb-8 md:mb-12">
           <p

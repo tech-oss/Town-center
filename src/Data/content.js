@@ -48,6 +48,8 @@ export const hero = {
 export const quickLinks = {
   eyebrow: "Find Your Way Around",
   heading: "Explore Maidenhead",
+  intro:
+    "A vibrant riverside destination where historic charm meets contemporary living. Stroll along the Thames, browse independent shops and boutiques, relax in welcoming cafés and artisan coffee shops, enjoy waterside dining, and unwind in stylish bars. Family-friendly attractions and beautiful green spaces to world-renowned Michelin-starred restaurants just minutes away, there's something for every visitor to enjoy.",
   items: [
     {
       label: "Eat & Drink",
