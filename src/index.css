@@ -182,15 +182,29 @@ button, .btn, a[class*="rounded-full"] { font-weight: 600 !important; }
 }
 
 /* ─── Fullscreen cinematic hero ─────────────────────────────────────────────
-   The hero fills the entire viewport on all screen sizes; the overlay header
-   floats on top of it (the homepage <main> has no top padding). 100dvh tracks
-   the dynamic viewport so mobile browser chrome hiding/showing never clips it,
-   with a 100vh fallback for older engines. */
+   Desktop/tablet: the hero fills the entire viewport; the overlay header floats
+   on top of it (the homepage <main> has no top padding). 100dvh tracks the
+   dynamic viewport so mobile browser chrome hiding/showing never clips it, with
+   a 100vh fallback for older engines. */
 .hero-section {
   height: 100vh;
   height: 100dvh;
   min-height: 560px;
   overflow: hidden;
+}
+
+/* Mobile (portrait): the hero video is landscape (4:3), so filling a tall
+   portrait screen with object-cover would crop it hard and look zoomed in.
+   A shorter hero brings the container closer to the video's own proportions,
+   so far more of the frame is visible (much less zoom) while the section stays
+   immersive and the caption stays comfortably centred. */
+@media (max-width: 767px) {
+  .hero-section {
+    height: 64svh;
+    height: 64dvh;
+    min-height: 440px;
+    max-height: 600px;
+  }
 }
 
 /* ─── Overlay header (Battersea-style) ──────────────────────────────────────
