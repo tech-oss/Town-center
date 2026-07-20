@@ -6,6 +6,7 @@ import { liveMenu } from "../Data/live";
 import { exploreMenu } from "../Data/explore";
 import { workMenu } from "../Data/work";
 import SmartLink from "./SmartLink";
+import useHeaderScroll from "../hooks/useHeaderScroll";
 
 const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
@@ -13,10 +14,17 @@ const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
   const [openDropdown, setOpenDropdown] = useState(null); // desktop hover
   const [mobileExpanded, setMobileExpanded] = useState(null); // mobile accordion
-  const [scrolled, setScrolled] = useState(false);
   const [search, setSearch] = useState("");
   const { pathname } = useLocation();
   const closeTimer = useRef(null);
+
+  // Premium overlay-header behaviour: transparent over the hero at the top,
+  // hides on scroll-down, reveals (solid brand blue) on scroll-up / hover.
+  const { hidden, solid } = useHeaderScroll(pathname === "/");
+  // The mobile drawer or an open desktop mega-menu always need the solid
+  // backing and a visible header, regardless of scroll position.
+  const forceSolid = solid || menuOpen || openDropdown !== null;
+  const isHidden = hidden && !menuOpen && openDropdown === null;
 
   // Open immediately on hover; close with a short grace delay so the cursor
   // can travel from the nav item down into the open panel without it shutting.
@@ -30,13 +38,7 @@ const Header = forwardRef(function Header(_, ref) {
   };
   const cancelClose = () => clearTimeout(closeTimer.current);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Keep --header-height CSS variable in sync (used by the desktop hero-section CSS rule)
+  // Keep --header-height CSS variable in sync (used by the hero-section CSS rule)
   useEffect(() => {
     const el = document.querySelector("header");
     if (!el) return;
@@ -57,8 +59,9 @@ const Header = forwardRef(function Header(_, ref) {
   return (
     <header
       ref={ref}
-      className={`fixed top-0 inset-x-0 z-50 transition-shadow duration-200 ${scrolled ? "shadow-lg" : ""}`}
-      style={{ backgroundColor: "var(--forest)" }}
+      className="site-header fixed top-0 inset-x-0 z-50"
+      data-solid={forceSolid}
+      data-hidden={isHidden}
     >
       {/* Utility bar — links on the left, search on the right */}
       <div

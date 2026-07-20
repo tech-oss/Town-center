@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { Routes, Route, Navigate, useParams } from 'react-router-dom'
+import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom'
 import MobileApp from './mobile/MobileApp'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
@@ -44,6 +44,12 @@ function SectionCategoryRedirect() {
 function PublicSite() {
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
+  const { pathname } = useLocation()
+  // The homepage hero is a fullscreen video that the transparent header floats
+  // over, so its <main> must start at y=0 (no header offset). Every other page
+  // keeps the measured header height as top padding so content clears the
+  // fixed header.
+  const isHome = pathname === '/'
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.
@@ -60,7 +66,7 @@ function PublicSite() {
     <>
       <ScrollToTop />
       <Header ref={headerRef} />
-      <main style={{ paddingTop: headerHeight || undefined }}>
+      <main style={{ paddingTop: isHome ? 0 : headerHeight || undefined }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           {/* Plan your visit / info pages */}
