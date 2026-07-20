@@ -58,130 +58,96 @@ export default function Hero() {
         tabIndex={-1}
       />
 
-      {/* ── Readability overlays (~25% flat tint + bottom gradient) ── */}
+      {/* ── Readability overlays (balanced for centred caption) ──
+          Flat tint for overall contrast + a soft radial vignette that darkens
+          the edges so the white caption reads crisply over any video frame. */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ backgroundColor: "rgba(12,20,24,0.25)" }}
+        style={{ backgroundColor: "rgba(12,20,24,0.34)" }}
       />
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "linear-gradient(to top, rgba(12,20,24,0.72) 0%, rgba(12,20,24,0.15) 42%, rgba(12,20,24,0) 68%)",
+            "radial-gradient(ellipse 92% 72% at 50% 46%, rgba(12,20,24,0) 34%, rgba(12,20,24,0.5) 100%)",
         }}
       />
 
-      {/* ── Content (overlaid, pinned to the bottom-left) ── */}
-      <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:px-14 flex flex-col justify-end pb-16 md:pb-24">
-        <div className="max-w-2xl">
-          {/* ── Hero text (eyebrow · headline · subheadline) — HIDDEN.
-               To restore, delete this opening comment marker and the matching
-               closing marker below; the copy renders exactly as before. ──
-          <p
-            className="text-xs font-semibold tracking-widest uppercase mb-4"
-            style={{ color: "var(--mint)" }}
+      {/* ── Caption (centred over the video) ── */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+        <h1
+          className="text-white uppercase"
+          style={{ fontFamily: "var(--font-heading)", textShadow: "0 2px 32px rgba(0,0,0,0.55)" }}
+        >
+          <span
+            className="block text-base sm:text-lg md:text-2xl font-medium mb-3 md:mb-5"
+            style={{ letterSpacing: "0.32em", paddingLeft: "0.32em", color: "rgba(255,255,255,0.92)" }}
           >
-            {s.eyebrow}
-          </p>
-          <h1
-            className="hero-title text-5xl md:text-7xl text-white mb-5"
-            style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}
-          >
-            {s.headline}
-          </h1>
-          <p
-            className="text-lg max-w-xl mb-8 leading-relaxed"
-            style={{ color: "rgba(255,255,255,0.9)", textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}
-          >
-            {s.subheadline}
-          </p>
-          ── end hero text ── */}
+            Welcome to
+          </span>
+          <span className="hero-title block text-6xl sm:text-7xl md:text-8xl leading-none">
+            Maidenhead
+          </span>
+        </h1>
 
-          {/* Mobile feature card — compact, above the CTAs (desktop uses the
-              absolute card bottom-right instead). */}
-          {s.featureCard && (
-            <CardLink
-              cta={s.featureCard.cta}
-              className="md:hidden mb-6 flex items-center gap-3 bg-white rounded-2xl shadow-xl p-3 group"
-            >
-              <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                <img
-                  src={s.featureCard.image}
-                  alt={s.featureCard.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold tracking-wide uppercase mb-0.5" style={{ color: "var(--sage)" }}>
-                  {s.featureCard.label}
-                </p>
-                <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>
-                  {s.featureCard.title}
-                </p>
-                <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>
-                  {s.featureCard.cta.label}
-                </p>
-              </div>
-              <span className="text-lg shrink-0" style={{ color: "var(--sage)" }}>→</span>
-            </CardLink>
-          )}
-
-          {/* ── Hero CTA buttons — HIDDEN.
-               To restore, delete this opening comment marker and the matching
-               closing marker below; the buttons render exactly as before. ──
-          <div className="flex flex-col sm:flex-row gap-3">
-            <SmartLink
-              to={s.primaryCta.href}
-              className="inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-opacity duration-150 hover:opacity-90"
-              style={{ backgroundColor: "var(--forest)" }}
-            >
-              {s.primaryCta.label}
-            </SmartLink>
-            <SmartLink
-              to={s.secondaryCta.href}
-              className="inline-block text-center px-8 py-3.5 rounded-full text-sm font-semibold border border-white/50 text-white transition-colors duration-150 hover:bg-white/10"
-            >
-              {s.secondaryCta.label}
-            </SmartLink>
-          </div>
-          ── end hero buttons ── */}
+        <div className="flex items-center gap-3 md:gap-4 mt-6 md:mt-8">
+          <span className="hidden sm:block" style={{ height: 1, width: 36, background: "rgba(255,255,255,0.55)" }} />
+          <p
+            className="text-[11px] sm:text-xs md:text-sm font-semibold uppercase"
+            style={{
+              letterSpacing: "0.22em",
+              paddingLeft: "0.22em",
+              color: "rgba(255,255,255,0.92)",
+              textShadow: "0 1px 12px rgba(0,0,0,0.5)",
+            }}
+          >
+            Riverside · Connected · Thriving
+          </p>
+          <span className="hidden sm:block" style={{ height: 1, width: 36, background: "rgba(255,255,255,0.55)" }} />
         </div>
       </div>
 
-      {/* ── Desktop feature card (absolute, bottom-right) ── */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          FEATURE CARD ("Waterfront Dining & Bars") — COMMENTED OUT per request.
+          To restore, delete the opening marker below and the closing marker at
+          the end of this block; both the mobile (inline) and desktop (absolute)
+          cards render exactly as before.
+      ─────────────────────────────────────────────────────────────────────────
+      {s.featureCard && (
+        <CardLink
+          cta={s.featureCard.cta}
+          className="md:hidden absolute left-4 right-4 bottom-8 flex items-center gap-3 bg-white rounded-2xl shadow-xl p-3 group z-10"
+        >
+          <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
+            <img src={s.featureCard.image} alt={s.featureCard.title} className="w-full h-full object-cover" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold tracking-wide uppercase mb-0.5" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
+            <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>{s.featureCard.title}</p>
+            <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>{s.featureCard.cta.label}</p>
+          </div>
+          <span className="text-lg shrink-0" style={{ color: "var(--sage)" }}>→</span>
+        </CardLink>
+      )}
       {s.featureCard && (
         <CardLink
           cta={s.featureCard.cta}
           className="hidden md:flex absolute bottom-10 right-12 w-72 rounded-2xl overflow-hidden shadow-2xl flex-col bg-white group z-10"
         >
           <div className="h-36 overflow-hidden">
-            <img
-              src={s.featureCard.image}
-              alt={s.featureCard.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
+            <img src={s.featureCard.image} alt={s.featureCard.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
           </div>
           <div className="p-4 flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold tracking-wide uppercase mb-1" style={{ color: "var(--sage)" }}>
-                {s.featureCard.label}
-              </p>
-              <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>
-                {s.featureCard.title}
-              </p>
-              <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>
-                {s.featureCard.cta.label}
-              </p>
+              <p className="text-xs font-semibold tracking-wide uppercase mb-1" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
+              <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>{s.featureCard.title}</p>
+              <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>{s.featureCard.cta.label}</p>
             </div>
-            <span
-              className="text-xl shrink-0 mt-1 transition-transform duration-150 group-hover:translate-x-1"
-              style={{ color: "var(--sage)" }}
-            >
-              →
-            </span>
+            <span className="text-xl shrink-0 mt-1 transition-transform duration-150 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
           </div>
         </CardLink>
       )}
+      ═══ end feature card ═══ */}
     </section>
   );
 }
