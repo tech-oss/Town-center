@@ -74,6 +74,9 @@ export default function Hero() {
       {/* ── Content (overlaid, pinned to the bottom-left) ── */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-6 md:px-14 flex flex-col justify-end pb-16 md:pb-24">
         <div className="max-w-2xl">
+          {/* ── Hero text (eyebrow · headline · subheadline) — HIDDEN.
+               To restore, delete this opening comment marker and the matching
+               closing marker below; the copy renders exactly as before. ──
           <p
             className="text-xs font-semibold tracking-widest uppercase mb-4"
             style={{ color: "var(--mint)" }}
@@ -92,6 +95,7 @@ export default function Hero() {
           >
             {s.subheadline}
           </p>
+          ── end hero text ── */}
 
           {/* Mobile feature card — compact, above the CTAs (desktop uses the
               absolute card bottom-right instead). */}
@@ -122,6 +126,9 @@ export default function Hero() {
             </CardLink>
           )}
 
+          {/* ── Hero CTA buttons — HIDDEN.
+               To restore, delete this opening comment marker and the matching
+               closing marker below; the buttons render exactly as before. ──
           <div className="flex flex-col sm:flex-row gap-3">
             <SmartLink
               to={s.primaryCta.href}
@@ -137,6 +144,7 @@ export default function Hero() {
               {s.secondaryCta.label}
             </SmartLink>
           </div>
+          ── end hero buttons ── */}
         </div>
       </div>
 
