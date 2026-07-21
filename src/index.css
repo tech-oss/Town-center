@@ -193,19 +193,9 @@ button, .btn, a[class*="rounded-full"] { font-weight: 600 !important; }
   overflow: hidden;
 }
 
-/* Mobile (portrait): the hero video is landscape (4:3), so filling a tall
-   portrait screen with object-cover would crop it hard and look zoomed in.
-   A shorter hero brings the container closer to the video's own proportions,
-   so far more of the frame is visible (much less zoom) while the section stays
-   immersive and the caption stays comfortably centred. */
-@media (max-width: 767px) {
-  .hero-section {
-    height: 64svh;
-    height: 64dvh;
-    min-height: 440px;
-    max-height: 600px;
-  }
-}
+/* Mobile keeps the same fullscreen height: the hero now serves a dedicated 9:16
+   (portrait) cut, so object-cover fills a phone screen with almost no crop —
+   no orientation mismatch, no zoom. */
 
 /* ─── Overlay header (Battersea-style) ──────────────────────────────────────
    Transparent over the hero at the top; slides out on scroll-down; reveals

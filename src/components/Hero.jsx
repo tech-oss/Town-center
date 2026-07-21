@@ -1,7 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { hero } from "../Data/content";
 import SmartLink from "./SmartLink";
+
+// Per-device hero media — a native 16:9 cut for landscape screens and a 9:16
+// cut for portrait phones, so object-cover fills each with almost no crop.
+const DESKTOP_MEDIA = { src: "/videos/hero.mp4", poster: "/images/hero-poster.jpg" };
+const MOBILE_MEDIA = { src: "/videos/hero-mobile.mp4", poster: "/images/hero-poster-mobile.jpg" };
+const DESKTOP_QUERY = "(min-width: 768px)";
 
 // Feature-card wrapper: SPA <Link> for internal routes (cta.to), <a> for hash anchors
 function CardLink({ cta, className, children }) {
@@ -21,6 +27,25 @@ const prefersReducedMotion =
 export default function Hero() {
   const videoRef = useRef(null);
 
+  // Pick the orientation-matched source. matchMedia keeps only ONE video in the
+  // DOM at a time, so the other device's file is never downloaded.
+  const [media, setMedia] = useState(() =>
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia(DESKTOP_QUERY).matches
+      ? DESKTOP_MEDIA
+      : MOBILE_MEDIA
+  );
+
+  useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mql = window.matchMedia(DESKTOP_QUERY);
+    const onChange = (e) => setMedia(e.matches ? DESKTOP_MEDIA : MOBILE_MEDIA);
+    onChange(mql);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
   // Robustness fallback: some engines (Safari, mobile power-saving) don't honour
   // the autoplay attribute alone even when muted. Nudge playback once the video
   // can play — unless the user prefers reduced motion, in which case the poster
@@ -36,7 +61,7 @@ export default function Hero() {
     tryPlay();
     v.addEventListener("canplay", tryPlay, { once: true });
     return () => v.removeEventListener("canplay", tryPlay);
-  }, []);
+  }, [media.src]);
 
   return (
     <section aria-label="Hero" className="hero-section relative w-full overflow-hidden">
@@ -45,10 +70,11 @@ export default function Hero() {
           mobile, no controls. The poster paints instantly and is the fallback
           when autoplay is suppressed (reduced-motion / power-saving). */}
       <video
+        key={media.src}
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
-        src="/videos/hero.mp4"
-        poster="/images/hero-poster.jpg"
+        src={media.src}
+        poster={media.poster}
         autoPlay={!prefersReducedMotion}
         loop
         muted
