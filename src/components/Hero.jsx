@@ -54,13 +54,27 @@ export default function Hero() {
     if (prefersReducedMotion) return;
     const v = videoRef.current;
     if (!v) return;
+    // iOS Safari only allows muted autoplay when the muted *property* is set on
+    // the element (React's `muted` attribute alone is frequently NOT reflected
+    // to the property — that's what makes Safari block autoplay and overlay a
+    // play button). Force it, along with inline playback, before play().
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    v.playsInline = true;
+    v.setAttribute("playsinline", "");
     const tryPlay = () => {
       const p = v.play();
       if (p && typeof p.catch === "function") p.catch(() => {});
     };
     tryPlay();
+    // Retry once the media is ready — covers power-saving / late-decode cases.
+    v.addEventListener("loadeddata", tryPlay, { once: true });
     v.addEventListener("canplay", tryPlay, { once: true });
-    return () => v.removeEventListener("canplay", tryPlay);
+    return () => {
+      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", tryPlay);
+    };
   }, [media.src]);
 
   return (
@@ -82,6 +96,18 @@ export default function Hero() {
         preload="metadata"
         aria-hidden="true"
         tabIndex={-1}
+        disablePictureInPicture
+        disableRemotePlayback
+        controls={false}
+        // Paint the poster (and a brand-dark fallback) as the element's own
+        // background so there is never a grey flash before the video decodes.
+        style={{
+          backgroundColor: "#1C2E38",
+          backgroundImage: `url(${media.poster})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
       />
 
       {/* ── Readability overlays (balanced for centred caption) ──
