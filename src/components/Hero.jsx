@@ -27,6 +27,18 @@ const prefersReducedMotion =
 export default function Hero() {
   const videoRef = useRef(null);
 
+  // Always-on tap fallback: if the video is paused (e.g. iOS Low Power Mode
+  // blocked autoplay), a tap anywhere in the hero starts it. Taps bubble up to
+  // the section, so this catches the native play-button tap too.
+  const handleHeroTap = () => {
+    const v = videoRef.current;
+    if (!v || !v.paused) return;
+    v.muted = true;
+    v.playsInline = true;
+    const p = v.play();
+    if (p && typeof p.catch === "function") p.catch(() => {});
+  };
+
   // Pick the orientation-matched source. matchMedia keeps only ONE video in the
   // DOM at a time, so the other device's file is never downloaded.
   const [media, setMedia] = useState(() =>
@@ -71,14 +83,36 @@ export default function Hero() {
     // Retry once the media is ready — covers power-saving / late-decode cases.
     v.addEventListener("loadeddata", tryPlay, { once: true });
     v.addEventListener("canplay", tryPlay, { once: true });
+
+    // ── iOS Low Power Mode ──
+    // Safari blocks ALL autoplay in Low Power Mode (unavoidable) and shows a
+    // native play button. Tapping it did nothing because the caption/overlay
+    // layer sits above the video and swallows the gesture. So we listen for the
+    // first user interaction anywhere — in the CAPTURE phase, so no overlay can
+    // stop it — and start playback then (a tap is a valid user activation that
+    // Low Power Mode allows for muted inline video). Retries on every gesture
+    // until playback actually begins, then detaches.
+    const gestureOpts = { capture: true, passive: true };
+    const onGesture = () => tryPlay();
+    document.addEventListener("pointerdown", onGesture, gestureOpts);
+    document.addEventListener("touchstart", onGesture, gestureOpts);
+    const onPlaying = () => {
+      document.removeEventListener("pointerdown", onGesture, gestureOpts);
+      document.removeEventListener("touchstart", onGesture, gestureOpts);
+    };
+    v.addEventListener("playing", onPlaying, { once: true });
+
     return () => {
       v.removeEventListener("loadeddata", tryPlay);
       v.removeEventListener("canplay", tryPlay);
+      v.removeEventListener("playing", onPlaying);
+      document.removeEventListener("pointerdown", onGesture, gestureOpts);
+      document.removeEventListener("touchstart", onGesture, gestureOpts);
     };
   }, [media.src]);
 
   return (
-    <section aria-label="Hero" className="hero-section relative w-full overflow-hidden">
+    <section aria-label="Hero" className="hero-section relative w-full overflow-hidden" onClick={handleHeroTap}>
       {/* ── Fullscreen background video ──
           Covers the whole viewport, autoplays muted + looping, plays inline on
           mobile, no controls. The poster paints instantly and is the fallback
