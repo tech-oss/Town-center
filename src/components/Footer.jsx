@@ -44,7 +44,7 @@ function AccordionSection({ heading, links }) {
     <div className="border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between py-4 text-sm font-semibold uppercase tracking-widest text-white"
+        className="w-full flex items-center justify-between py-4 text-sm font-semibold uppercase tracking-[0.02em] text-white"
       >
         {heading}
         <svg
@@ -94,11 +94,11 @@ export default function Footer() {
             <a href="/" aria-label={header.logoAlt} className="inline-flex flex-col items-start leading-none">
               <span className="flex flex-col items-center">
                 <img src={header.markSrc} alt="" aria-hidden="true" className="h-12 w-auto shrink-0 -mb-1" />
-                <span className="text-base font-semibold tracking-[0.26em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
+                <span className="text-base font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                   {header.logo}
                 </span>
               </span>
-              <span className="mt-2 text-[9px] font-semibold uppercase tracking-[0.12em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
+              <span className="mt-2 text-[9px] font-semibold uppercase tracking-[0.02em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
                 {header.tagline}
               </span>
             </a>
@@ -117,7 +117,7 @@ export default function Footer() {
           {/* Link columns */}
           {footer.columns.map((col) => (
             <div key={col.heading} className="flex flex-col gap-4">
-              <p className="text-xs font-semibold tracking-widest uppercase text-white">{col.heading}</p>
+              <p className="text-xs font-semibold tracking-[0.02em] uppercase text-white">{col.heading}</p>
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}><NavLink href={l.href}>{l.label}</NavLink></li>
@@ -137,11 +137,11 @@ export default function Footer() {
             <a href="/" aria-label={header.logoAlt} className="inline-flex flex-col items-start leading-none">
               <span className="flex flex-col items-center">
                 <img src={header.markSrc} alt="" aria-hidden="true" className="h-10 w-auto shrink-0 -mb-1" />
-                <span className="text-sm font-semibold tracking-[0.26em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
+                <span className="text-sm font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                   {header.logo}
                 </span>
               </span>
-              <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.12em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
+              <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.02em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
                 {header.tagline}
               </span>
             </a>

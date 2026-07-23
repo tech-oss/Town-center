@@ -31,7 +31,7 @@ export default function ArticlePage() {
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumb */}
-          <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
@@ -41,7 +41,7 @@ export default function ArticlePage() {
 
           {/* Meta */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
+            <span className="text-[11px] font-bold uppercase tracking-[0.02em] px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
               {article.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
@@ -77,7 +77,7 @@ export default function ArticlePage() {
             <div className="flex items-center gap-4 min-w-0">
               <img src={biz.image} alt="" className="w-16 h-16 rounded-2xl object-cover shrink-0" />
               <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
                 <p className="font-bold text-lg leading-tight" style={{ color: "#000000" }}>{biz.name}</p>
                 <p className="text-sm truncate" style={{ color: "#000000" }}>{biz.address}</p>
               </div>
@@ -110,7 +110,7 @@ export default function ArticlePage() {
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img src={a.image} alt={a.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}>
+                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}>
                       {a.category}
                     </span>
                   </div>

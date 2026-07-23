@@ -73,7 +73,7 @@ export default function FeatureArticlePage() {
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumb */}
-          <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <Link to="/news" className="hover:opacity-70 transition-opacity">Journal</Link>
@@ -83,7 +83,7 @@ export default function FeatureArticlePage() {
 
           {/* Meta */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-wide px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
+            <span className="text-[11px] font-bold uppercase tracking-[0.02em] px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
               {story.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
@@ -135,7 +135,7 @@ export default function FeatureArticlePage() {
           {/* CTA */}
           <div className="mt-16 rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
             <div className="flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--sage)" }}>{story.eyebrow}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--sage)" }}>{story.eyebrow}</p>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>{story.location}</p>
             </div>
             <a
@@ -168,7 +168,7 @@ export default function FeatureArticlePage() {
                 >
                   <div className="relative aspect-[16/9] overflow-hidden">
                     <img src={f.cardImage} alt={f.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}>
+                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}>
                       {f.eyebrow}
                     </span>
                   </div>

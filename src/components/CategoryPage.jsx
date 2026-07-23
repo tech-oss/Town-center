@@ -96,7 +96,7 @@ export default function CategoryPage() {
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           {/* Breadcrumb */}
-          <nav className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
+          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <span className="mx-2 opacity-50">/</span>
             <Link to={sec.path} className="hover:text-white transition-colors">{sec.label}</Link>

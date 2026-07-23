@@ -53,7 +53,7 @@ export default function AttractionPage() {
           {/* Main */}
           <div>
             {/* Breadcrumb */}
-            <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+            <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
               <Link to="/" className="hover:opacity-70">Home</Link>
               <span className="mx-2 opacity-40">/</span>
               <Link to="/see-do" className="hover:opacity-70">See &amp; Do</Link>
@@ -61,7 +61,7 @@ export default function AttractionPage() {
               <span style={{ color: "#000000" }}>Boulter's Lock</span>
             </nav>
 
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{a.eyebrow}</span>
+            <span className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{a.eyebrow}</span>
             <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-5 leading-tight" style={{ color: "#000000" }}>{a.title}</h1>
             {a.subtitle && (
               <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "#000000" }}>{a.subtitle}</p>
@@ -96,7 +96,7 @@ export default function AttractionPage() {
           <aside className="lg:sticky lg:top-28 self-start flex flex-col gap-6">
             {a.highlights?.length > 0 && (
               <div className="rounded-3xl p-7" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
-                <h3 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--leaf)" }}>Highlights</h3>
+                <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>Highlights</h3>
                 <ul className="flex flex-col gap-2.5">
                   {a.highlights.map((h) => (
                     <li key={h} className="flex items-start gap-2.5 text-sm" style={{ color: "#000000" }}>
@@ -107,7 +107,7 @@ export default function AttractionPage() {
               </div>
             )}
             <div className="rounded-3xl p-7" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
-              <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find It</h3>
+              <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find It</h3>
               <p className="text-sm leading-relaxed mb-4" style={{ color: "#000000" }}>{a.address}</p>
               <a href={directionsUrl} target="_blank" rel="noopener noreferrer"
                 className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
@@ -142,7 +142,7 @@ export default function AttractionPage() {
                     <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <div className="flex flex-col gap-2 p-6">
-                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{it.tag}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{it.tag}</span>
                     <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{it.name}</h3>
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-1" style={{ color: "#000000" }}>
                       Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>

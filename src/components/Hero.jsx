@@ -167,7 +167,7 @@ export default function Hero() {
         >
           <span
             className="block text-base sm:text-lg md:text-2xl font-medium mb-3 md:mb-5"
-            style={{ letterSpacing: "0.32em", paddingLeft: "0.32em", color: "rgba(255,255,255,0.92)" }}
+            style={{ letterSpacing: "-0.01em", color: "rgba(255,255,255,0.92)" }}
           >
             Welcome to
           </span>
@@ -181,8 +181,7 @@ export default function Hero() {
           <p
             className="text-[11px] sm:text-xs md:text-sm font-semibold uppercase"
             style={{
-              letterSpacing: "0.22em",
-              paddingLeft: "0.22em",
+              letterSpacing: "0.02em",
               color: "rgba(255,255,255,0.92)",
               textShadow: "0 1px 12px rgba(0,0,0,0.5)",
             }}
@@ -208,7 +207,7 @@ export default function Hero() {
             <img src={s.featureCard.image} alt={s.featureCard.title} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold tracking-wide uppercase mb-0.5" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-0.5" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
             <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>{s.featureCard.title}</p>
             <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>{s.featureCard.cta.label}</p>
           </div>
@@ -225,7 +224,7 @@ export default function Hero() {
           </div>
           <div className="p-4 flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold tracking-wide uppercase mb-1" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
+              <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-1" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
               <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>{s.featureCard.title}</p>
               <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>{s.featureCard.cta.label}</p>
             </div>

@@ -39,7 +39,7 @@ function Badge({ href, icon, top, bottom, sm }) {
     >
       <span className="shrink-0">{icon}</span>
       <span className="flex flex-col leading-none text-left">
-        <span className={`tracking-wide ${sm ? "text-[8px]" : "text-[10px]"}`} style={{ opacity: 0.85 }}>{top}</span>
+        <span className={`tracking-[0.02em] ${sm ? "text-[8px]" : "text-[10px]"}`}>{top}</span>
         <span className={`font-semibold tracking-tight ${sm ? "text-sm" : "text-base"}`}>{bottom}</span>
       </span>
     </a>

@@ -158,12 +158,12 @@ export default function GettingHerePage() {
           className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end"
           style={{ minHeight: "62vh", paddingTop: "6rem", paddingBottom: "3rem" }}
         >
-          <nav className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--sage)" }}>
+          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
             <Link to="/" className="hover:text-white">Home</Link>
             <span className="mx-2 opacity-50">/</span>
             <span className="text-white">Getting Here</span>
           </nav>
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--sage)" }}>
             Plan Your Visit
           </p>
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">
@@ -342,7 +342,7 @@ export default function GettingHerePage() {
               {/* On mobile the heading/intro comes first so each map sits with its
                   own section; desktop keeps the alternating left/right layout. */}
               <div className="order-first md:order-none">
-                <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
+                <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
                 <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000" }}>{sec.intro}</p>
                 <div className="flex flex-col divide-y" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
@@ -366,7 +366,7 @@ export default function GettingHerePage() {
       <section id="good-to-know" className="scroll-mt-24 px-6 md:px-12 pt-20 pb-24 mt-20" style={{ backgroundColor: "var(--mint)" }}>
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
               A few practical things worth knowing before you head into the town centre.

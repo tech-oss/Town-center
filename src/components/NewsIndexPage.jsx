@@ -27,7 +27,7 @@ export default function NewsIndexPage() {
               "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--sage)" }}>
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>
           From the Journal
         </span>
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
@@ -43,7 +43,7 @@ export default function NewsIndexPage() {
       <section className="py-16 md:py-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb */}
-          <nav className="mb-10 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-10 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <span>Journal</span>
@@ -60,7 +60,7 @@ export default function NewsIndexPage() {
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={story.image} alt={story.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   <span
-                    className="absolute top-3 left-3 text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
+                    className="absolute top-3 left-3 text-[11px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
                     style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#000000" }}
                   >
                     {story.category}

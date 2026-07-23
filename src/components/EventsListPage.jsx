@@ -28,7 +28,7 @@ export default function EventsListPage() {
       {/* Hero band */}
       <section className="relative flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)" }} />
-        <span className="relative text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--sage)" }}>What's On</span>
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>What's On</span>
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-4 text-white">All Events</h1>
         <p className="relative text-base md:text-lg max-w-xl leading-relaxed" style={{ color: "var(--mint)" }}>
           Every event happening across Maidenhead — markets, music, festivals and family days out.
@@ -41,7 +41,7 @@ export default function EventsListPage() {
       {/* List */}
       <section className="py-16 md:py-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <nav className="mb-10 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-10 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <span>All Events</span>

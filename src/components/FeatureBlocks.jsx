@@ -9,7 +9,7 @@ export default function FeatureBlocks() {
       <div className="max-w-6xl mx-auto">
         {/* Section header */}
         <div className="max-w-2xl mb-14">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
             In Focus
           </p>
           <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
@@ -36,7 +36,7 @@ export default function FeatureBlocks() {
 
               {/* Copy */}
               <div>
-                <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "var(--leaf)" }}>
+                <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-4" style={{ color: "var(--leaf)" }}>
                   {f.eyebrow}
                 </p>
                 <h3 className="text-3xl md:text-5xl font-bold leading-tight mb-5" style={{ color: "#000000" }}>

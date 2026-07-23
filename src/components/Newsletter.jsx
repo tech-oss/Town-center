@@ -17,7 +17,7 @@ export default function Newsletter() {
       style={{ backgroundColor: "#ffffff" }}
     >
       <div className="max-w-2xl mx-auto text-center">
-        <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
+        <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
           {newsletter.eyebrow}
         </p>
         <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>

@@ -42,7 +42,7 @@ export default function WorkPage() {
         <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(20,33,42,0.95) 0%, rgba(20,33,42,0.78) 45%, rgba(20,33,42,0.55) 100%)" }} />
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-10 md:pb-14">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "var(--sage)" }}>{work.hero.eyebrow}</p>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-4" style={{ color: "var(--sage)" }}>{work.hero.eyebrow}</p>
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">{work.hero.title}</h1>
           <p className="text-base md:text-lg text-white/80 mt-5 max-w-xl leading-relaxed">{work.hero.intro}</p>
 
@@ -103,7 +103,7 @@ export default function WorkPage() {
               return (
                 <Link key={i} to={f.to} className="group bg-white rounded-2xl p-5 flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)", border: "1px solid rgba(28,46,56,0.06)" }}>
-                  <span className="self-start text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>
+                  <span className="self-start text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>
                     {f.tag}
                   </span>
                   <h3 className="font-bold text-lg leading-snug mb-3" style={{ color: "#000000" }}>{f.title}</h3>

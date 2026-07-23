@@ -44,7 +44,7 @@ export default function PressPage() {
               "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--sage)" }}>
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>
           Get Involved
         </span>
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">Work With Us &amp; Enquiries</h1>
@@ -55,7 +55,7 @@ export default function PressPage() {
 
       <section className="py-16 md:py-20 px-6 md:px-12">
         <div className="max-w-3xl mx-auto">
-          <nav className="mb-10 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-10 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <span>Work With Us &amp; Enquiries</span>

@@ -13,7 +13,7 @@ export default function EnquirePage() {
         <img src={live.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.4) 0%, rgba(28,46,56,0.82) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-10">
-          <nav className="mb-3 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
+          <nav className="mb-3 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white">Home</Link>
             <span className="mx-2 opacity-50">/</span>
             <Link to="/live" className="hover:text-white">Live</Link>
@@ -37,7 +37,7 @@ export default function EnquirePage() {
                 <div key={k} className="flex items-center gap-4">
                   <span className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: "var(--mint)" }}>{icon}</span>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{k}</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{k}</p>
                     <p className="text-sm font-semibold" style={{ color: "#000000" }}>{v}</p>
                   </div>
                 </div>

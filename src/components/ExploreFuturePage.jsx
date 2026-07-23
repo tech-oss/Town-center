@@ -20,12 +20,12 @@ export default function ExploreFuturePage() {
         <img src={explore.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end" style={{ minHeight: "70vh", paddingTop: "6rem", paddingBottom: "3.5rem" }}>
-          <nav className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--sage)" }}>
+          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
             <Link to="/" className="hover:text-white">Home</Link>
             <span className="mx-2 opacity-50">/</span>
             <span className="text-white">Explore</span>
           </nav>
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>{explore.hero.eyebrow}</p>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--sage)" }}>{explore.hero.eyebrow}</p>
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">{explore.hero.title}</h1>
           <p className="text-xl md:text-2xl text-white/90 mt-4 max-w-2xl" style={{ fontFamily: "var(--font-heading)" }}>{explore.hero.subtitle}</p>
           <p className="text-base md:text-lg text-white/75 mt-4 max-w-2xl leading-relaxed">{explore.hero.lead}</p>
@@ -35,7 +35,7 @@ export default function ExploreFuturePage() {
       {/* ── Vision ── */}
       <section id="nicholson" className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>The Vision</p>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>The Vision</p>
           <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>A bold vision for the heart of town</h2>
           <div className="flex flex-col gap-5">
             {explore.vision.map((p, i) => (
@@ -68,7 +68,7 @@ export default function ExploreFuturePage() {
                 <img src={f.image} alt={f.heading} loading="lazy" className="w-full h-full object-cover" />
               </div>
               <div>
-                <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{f.eyebrow}</p>
+                <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{f.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{f.heading}</h2>
                 <div className="flex flex-col gap-4">
                   {f.body.map((p, bi) => (
@@ -85,7 +85,7 @@ export default function ExploreFuturePage() {
       <section id="masterplan" className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-8">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.masterplan.eyebrow}</p>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.masterplan.eyebrow}</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.masterplan.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.masterplan.body}</p>
           </div>
@@ -99,7 +99,7 @@ export default function ExploreFuturePage() {
       <section id="developments" className="pb-20 px-6 md:px-12" style={{ backgroundColor: "var(--mint)" }}>
         <div className="max-w-6xl mx-auto pt-16 md:pt-20">
           <div className="max-w-2xl mb-8">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.developments.eyebrow}</p>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.developments.eyebrow}</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.developments.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.developments.intro}</p>
           </div>
@@ -111,7 +111,7 @@ export default function ExploreFuturePage() {
               const c = devTagColors[d.tag] ?? { bg: "#E5E7EB", text: "#374151" };
               return (
                 <div key={d.title} className="bg-white rounded-2xl p-5 flex flex-col" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
-                  <span className="self-start text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>{d.tag}</span>
+                  <span className="self-start text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>{d.tag}</span>
                   <h3 className="font-bold text-base leading-snug mb-2" style={{ color: "#000000" }}>{d.title}</h3>
                   <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{d.desc}</p>
                 </div>
@@ -124,7 +124,7 @@ export default function ExploreFuturePage() {
       {/* ── Community ── */}
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Your Town, Your Future</p>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Your Town, Your Future</p>
           <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>{explore.community.heading}</h2>
           <p className="text-lg md:text-xl leading-relaxed" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>{explore.community.body}</p>
         </div>

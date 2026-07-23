@@ -61,7 +61,7 @@ export default function EventsCalendar() {
       <div className="bg-white rounded-3xl p-3 md:p-5" style={{ boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
         <div className="grid grid-cols-7 gap-1 md:gap-2 mb-1">
           {WEEKDAYS.map((w) => (
-            <div key={w} className="text-center text-[10px] md:text-xs font-bold uppercase tracking-wide py-2" style={{ color: "var(--leaf)" }}>{w}</div>
+            <div key={w} className="text-center text-[10px] md:text-xs font-bold uppercase tracking-[0.02em] py-2" style={{ color: "var(--leaf)" }}>{w}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1 md:gap-2">
@@ -113,7 +113,7 @@ export default function EventsCalendar() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
-                <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{e.category}</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{e.category}</span>
               </div>
               <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
               <p className="text-sm truncate" style={{ color: "#000000" }}>{e.location}</p>

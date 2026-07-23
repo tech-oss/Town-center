@@ -124,7 +124,7 @@ export default function DetailPage() {
       <section className="py-12 md:py-16 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb */}
-          <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
@@ -135,7 +135,7 @@ export default function DetailPage() {
           <div className="grid lg:grid-cols-[1fr_360px] gap-10 lg:gap-14">
             {/* Main column */}
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>
+              <span className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>
                 {item.tag}
               </span>
               <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "#000000" }}>
@@ -183,7 +183,7 @@ export default function DetailPage() {
               <div className="bg-white rounded-3xl p-7 flex flex-col gap-6" style={{ boxShadow: "0 10px 40px -20px rgba(28,46,56,0.3)" }}>
                 {/* Opening hours */}
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
                   <ul className="flex flex-col gap-1.5">
                     {item.hours.map((h) => (
                       <li key={h.day} className="flex justify-between text-sm">
@@ -198,7 +198,7 @@ export default function DetailPage() {
 
                 {/* Location & contact */}
                 <div>
-                  <h3 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
+                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
                   <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{item.address}</p>
                   {item.phone && item.phone !== "—" && (
                     <p className="text-sm" style={{ color: "#000000" }}>
@@ -397,7 +397,7 @@ export default function DetailPage() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2 p-6">
-                    <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{it.tag}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{it.tag}</span>
                     <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{it.name}</h3>
                   </div>
                 </Link>

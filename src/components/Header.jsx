@@ -108,10 +108,10 @@ const Header = forwardRef(function Header(_, ref) {
         {/* Logo lockup */}
         <Link to="/" onClick={closeAll} className="shrink-0 flex flex-col items-center leading-none" aria-label={header.logoAlt}>
           <img src={header.markSrc} alt="" aria-hidden="true" className="h-14 md:h-16 w-auto" />
-          <span className="mt-2.5 text-base md:text-xl font-semibold tracking-[0.32em] pl-[0.32em] text-white" style={{ fontFamily: "var(--font-body)" }}>
+          <span className="mt-2.5 text-base md:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
             {header.logo}
           </span>
-          <span className="mt-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.18em] pl-[0.18em]" style={{ color: "var(--sage)" }}>
+          <span className="mt-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: "var(--sage)" }}>
             {header.tagline}
           </span>
         </Link>
@@ -127,7 +127,7 @@ const Header = forwardRef(function Header(_, ref) {
                   <Link
                     to={menu.path}
                     onClick={() => setOpenDropdown(null)}
-                    className="flex items-center gap-1 text-sm font-medium tracking-wide transition-colors duration-150 py-1"
+                    className="flex items-center gap-1 text-sm font-medium tracking-[0.02em] transition-colors duration-150 py-1"
                     style={{ color: isOpen ? "var(--sage)" : "rgba(255,255,255,0.85)" }}
                   >
                     {nav.label}
@@ -144,7 +144,7 @@ const Header = forwardRef(function Header(_, ref) {
                 <Link
                   key={nav.label}
                   to={nav.href}
-                  className="text-sm font-medium tracking-wide transition-colors duration-150"
+                  className="text-sm font-medium tracking-[0.02em] transition-colors duration-150"
                   style={{ color: active ? "var(--sage)" : "rgba(255,255,255,0.85)" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
                   onMouseLeave={(e) => (e.currentTarget.style.color = active ? "var(--sage)" : "rgba(255,255,255,0.85)")}
@@ -157,7 +157,7 @@ const Header = forwardRef(function Header(_, ref) {
               <a
                 key={nav.label}
                 href={nav.href}
-                className="text-sm font-medium tracking-wide transition-colors duration-150"
+                className="text-sm font-medium tracking-[0.02em] transition-colors duration-150"
                 style={{ color: "rgba(255,255,255,0.85)" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
@@ -187,7 +187,7 @@ const Header = forwardRef(function Header(_, ref) {
           <div className="max-w-6xl mx-auto px-8 py-8 grid grid-cols-3 gap-10">
             {menusByLabel[openDropdown].columns.map((col) => (
               <div key={col.heading}>
-                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
+                <p className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
                 <ul className="flex flex-col gap-2.5">
                   {col.links.map((l) => (
                     <li key={l.to}>
@@ -253,7 +253,7 @@ const Header = forwardRef(function Header(_, ref) {
                     <div className="pb-3 flex flex-col gap-4">
                       {menu.columns.map((col) => (
                         <div key={col.heading}>
-                          <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--sage)" }}>{col.heading}</p>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--sage)" }}>{col.heading}</p>
                           <ul className="flex flex-col gap-1.5 pl-1">
                             {col.links.map((l) => (
                               <li key={l.to}>

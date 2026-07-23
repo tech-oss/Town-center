@@ -62,7 +62,7 @@ export function PropertyCard({ p }) {
     >
       <div className="relative aspect-[4/3] overflow-hidden">
         <img src={p.image} alt={`${p.bedLabel} at ${p.building}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
+        <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
           {p.status === "rent" ? "To Rent" : "For Sale"}
         </span>
       </div>
@@ -88,7 +88,7 @@ const selStyle = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.1
 function Sel({ label, value, onChange, children }) {
   return (
     <div className="flex flex-col gap-1">
-      {label && <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--leaf)" }}>{label}</span>}
+      {label && <span className="text-[10px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{label}</span>}
       <div className="relative">
         <select className={selCls} style={selStyle} value={value} onChange={(e) => onChange(e.target.value)}>
           {children}
@@ -160,7 +160,7 @@ export default function PropertySearch({ mode }) {
         <img src={buildings[0].hero} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.4) 0%, rgba(28,46,56,0.82) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-10">
-          <nav className="mb-3 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
+          <nav className="mb-3 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white">Home</Link>
             <span className="mx-2 opacity-50">/</span>
             <Link to="/live" className="hover:text-white">Live</Link>
@@ -212,7 +212,7 @@ export default function PropertySearch({ mode }) {
 
           {/* Row 2: Price range */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--leaf)" }}>
               Price range ({isRent ? "£ pcm" : "£"})
             </p>
             <div className="flex items-center gap-2">
@@ -240,7 +240,7 @@ export default function PropertySearch({ mode }) {
 
           {/* Row 3: Bedrooms */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--leaf)" }}>
               No. of bedrooms
             </p>
             <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export function FeaturedProperties() {
   const [hero, ...rest] = featured;
 
   const statusBadge = (p) => (
-    <span className="absolute top-4 left-4 z-10 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
+    <span className="absolute top-4 left-4 z-10 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
       {p.status === "rent" ? "To Rent" : "For Sale"}
     </span>
   );
@@ -312,7 +312,7 @@ export function FeaturedProperties() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>Featured Homes</p>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--mint)" }}>Featured Homes</p>
             <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
           </div>
           <Link to="/live/overview" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
@@ -357,7 +357,7 @@ export function FeaturedProperties() {
                   <img src={p.image} alt={`${p.bedLabel} at ${p.building}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" />
                 </div>
                 <div className="flex flex-col flex-1 p-4 gap-1 justify-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wide w-fit px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "rent" ? "rgba(30,95,95,0.12)" : "rgba(47,140,140,0.13)", color: "var(--teal-deep, #1e5f5f)" }}>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.02em] w-fit px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "rent" ? "rgba(30,95,95,0.12)" : "rgba(47,140,140,0.13)", color: "var(--teal-deep, #1e5f5f)" }}>
                     {p.status === "rent" ? "To Rent" : "For Sale"}
                   </span>
                   <p className="text-lg font-bold mt-0.5" style={{ color: "#000000" }}>{fmtPrice(p.price, p.status)}</p>

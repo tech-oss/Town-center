@@ -21,12 +21,12 @@ export default function GetAppPage() {
         <div className="relative max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           {/* Copy */}
           <div>
-            <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--sage)" }}>
+            <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
               <span className="mx-2 opacity-50">/</span>
               <span className="text-white">Get the App</span>
             </nav>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-4" style={{ color: "var(--sage)" }}>The Maidenhead App</p>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-4" style={{ color: "var(--sage)" }}>The Maidenhead App</p>
             <h1 className="text-4xl md:text-6xl font-bold leading-[1.05] text-white mb-6">
               Get the Maidenhead App
             </h1>
@@ -54,8 +54,8 @@ export default function GetAppPage() {
               <div className="w-full h-full rounded-[2rem] overflow-hidden flex flex-col" style={{ backgroundColor: "var(--sand)" }}>
                 <div className="px-5 pt-10 pb-6 flex flex-col items-center text-center" style={{ background: "linear-gradient(160deg, var(--forest), var(--teal-deep))" }}>
                   <img src={header.markSrc} alt="" className="h-10 w-auto mb-1" />
-                  <span className="text-white text-sm font-semibold tracking-[0.26em]">{header.logo}</span>
-                  <span className="text-[8px] font-semibold uppercase tracking-[0.12em] mt-1" style={{ color: "var(--sage)" }}>{header.tagline}</span>
+                  <span className="text-white text-sm font-semibold tracking-[0.02em]">{header.logo}</span>
+                  <span className="text-[8px] font-semibold uppercase tracking-[0.02em] mt-1" style={{ color: "var(--sage)" }}>{header.tagline}</span>
                 </div>
                 <div className="flex-1 p-4 flex flex-col gap-3">
                   {["Today's offers", "What's on near you", "New this week", "Explore the town"].map((t, i) => (

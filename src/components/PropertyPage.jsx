@@ -33,7 +33,7 @@ export default function PropertyPage() {
       {/* Gallery hero */}
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-6xl mx-auto">
-          <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <Link to="/live" className="hover:opacity-70">Live</Link>
@@ -42,7 +42,7 @@ export default function PropertyPage() {
           </nav>
           <div className="relative rounded-3xl overflow-hidden aspect-[16/9] bg-black shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
             <img src={p.gallery[active]} alt={`${p.bedLabel} at ${p.building}`} className="w-full h-full object-cover" />
-            <span className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-wide px-3 py-1.5 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
+            <span className="absolute top-4 left-4 text-[11px] font-bold uppercase tracking-[0.02em] px-3 py-1.5 rounded-full" style={{ backgroundColor: p.status === "rent" ? "var(--teal-deep)" : "var(--forest)", color: "#fff" }}>
               {p.status === "rent" ? "To Rent" : "For Sale"}
             </span>
           </div>
@@ -71,7 +71,7 @@ export default function PropertyPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
               {[["Bedrooms", p.beds === 0 ? "Studio" : p.beds === 99 ? "Penthouse" : p.beds], ["Bathrooms", p.baths], ["Size", `${p.sqft} sq ft`], ["Floor", p.floor]].map(([k, v]) => (
                 <div key={k} className="rounded-2xl p-4 text-center" style={{ backgroundColor: "#fff", boxShadow: "0 4px 16px -10px rgba(28,46,56,0.25)" }}>
-                  <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{k}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{k}</p>
                   <p className="text-lg font-bold mt-1" style={{ color: "#000000" }}>{v}</p>
                 </div>
               ))}

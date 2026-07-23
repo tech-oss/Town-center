@@ -9,15 +9,15 @@ export default function QuickLinks() {
     >
       <div className="max-w-7xl mx-auto">
 
-        {/* ── Intro copy (editorial serif, right-aligned) ── */}
+        {/* ── Intro copy (editorial, right-aligned) ── */}
         <p
           className="text-right mb-12 md:mb-16 text-xl md:text-[2.25rem]"
           style={{
             color: "#000000",
-            fontFamily: '"Playfair Display", Georgia, serif',
-            fontWeight: 400,
+            fontFamily: "var(--font-heading)",
+            fontWeight: 300,
             lineHeight: 1.3,
-            letterSpacing: "-0.01em",
+            letterSpacing: "-0.02em",
           }}
         >
           {quickLinks.intro}

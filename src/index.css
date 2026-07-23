@@ -2,16 +2,14 @@
 
 /* ═══════════════════════════════════════════════════════════════════════════
    FLUID TYPE SCALE — centralized design tokens
-   These override Tailwind's default text-* utilities, so every existing
-   `text-sm … text-7xl` usage across the site (≈700 of them) inherits the new
-   premium, fluid sizing + reading-optimised line-height WITHOUT touching a
-   single component. The hierarchy (relative order of sizes) is preserved
-   exactly; only absolute sizes, fluidity, and line-heights change.
-
-   Desktop maxima map to the editorial scale:
-     text-7xl → 88px (Hero)   text-4xl → 52px (H2)   text-xl → 24px (Lead)
-     text-6xl → 76px          text-3xl → 40px (H3)   text-base → 19px (Body)
-     text-5xl → 64px (H1)     text-2xl → 30px (H4)   text-sm → 16px (Small)
+   Modelled on the april-taylor.com system: a single restrained grotesque
+   family (Switzer) spanning a wide scale from small, tightly-set body copy up
+   to an oversized light-weight display tier, with consistently tight/negative
+   tracking at every size rather than only on large headings. These override
+   Tailwind's default text-* utilities, so every existing `text-sm … text-8xl`
+   usage across the site inherits the new sizing, line-height and tracking
+   WITHOUT touching a single component. The relative hierarchy (order of
+   sizes) is preserved; only absolute sizes, fluidity, and rhythm change.
    Each clamp() interpolates smoothly from ~360px to ~1280px viewports.
    ═══════════════════════════════════════════════════════════════════════════ */
 @theme {
@@ -54,12 +52,13 @@
   --sand:      #F0FAFA;   /* pale teal-white — alternate section backgrounds   */
   --ink:       #1A1A1A;   /* body text                                          */
 
-  --font-heading: "Instrument Sans", Futura, "Century Gothic", sans-serif;
-  --font-body:    "Inter Tight", Futura, "Century Gothic", sans-serif;
+  /* — Single restrained family for headings AND body, per the reference
+       system: one grotesque sans carries the whole hierarchy through weight
+       and scale contrast alone, rather than mixing typefaces. — */
+  --font-heading: "Switzer", -apple-system, "Segoe UI", sans-serif;
+  --font-body:    "Switzer", -apple-system, "Segoe UI", sans-serif;
 
-  /* — Body weight: 450 sits between Regular and Medium for a fuller,
-       more confident read (served by the variable Inter Tight axis). — */
-  --fw-body: 450;
+  --fw-body: 400;
 
   /* — Consistent vertical-rhythm spacing scale (8·16·24·32·48·64·96·128).
        Available as reusable tokens for section spacing and reading rhythm. — */
@@ -78,52 +77,76 @@
 
 html {
   font-family: var(--font-body);
-  color: var(--ink);
+  color: #000000;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-weight: var(--fw-body);
   line-height: 1.7;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
-/* ─── Typography hierarchy (Instrument Sans headings / Inter Tight body) ────
-   Weights use !important: Tailwind utility classes like font-bold/font-semibold
-   are applied inline throughout ~20+ components, and would otherwise win the
-   cascade. This is the single source of truth for the weight scale so it is
-   guaranteed to apply everywhere without hand-editing every component. */
+/* ─── Typography hierarchy (single family: Switzer) ──────────────────────────
+   Modelled on the reference system: one grotesque sans, a restrained weight
+   range (300 light display → 500 medium emphasis, no bold anywhere), and
+   tracking that tightens progressively as size increases — from -2% at body
+   sizes to -3% at the largest display sizes. Weights use !important: Tailwind
+   utility classes like font-bold/font-semibold are applied inline throughout
+   ~20+ components, and would otherwise win the cascade. This is the single
+   source of truth for the weight scale so it is guaranteed to apply
+   everywhere without hand-editing every component. */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   letter-spacing: -0.02em;
   line-height: 1.12;
   text-wrap: balance;   /* avoid orphan words on multi-line headings */
 }
 
-h5, h6 {
-  font-weight: 600 !important;
+/* Large headings step down to the light display weight; small headings step
+   up to medium — the restrained 300–500 range the whole hierarchy lives in. */
+.text-3xl, .text-4xl, .text-5xl, .text-6xl, .text-7xl, .text-8xl {
+  font-weight: 300 !important;
+}
+h5, h6, .text-sm, .text-xs {
+  font-weight: 500 !important;
 }
 
-/* Display / hero-scale headings get slightly tighter tracking for a
-   crisper, more editorial masthead feel. */
+/* Display / hero-scale headings tighten further for a crisper masthead feel. */
 .text-5xl, .text-6xl, .text-7xl, .text-8xl { letter-spacing: -0.03em; }
 
-/* Homepage hero title — light editorial weight, tighter tracking/leading */
+/* Homepage hero title — light editorial weight, tightest tracking/leading */
 .hero-title {
   font-weight: 300 !important;
   letter-spacing: -0.04em;
   line-height: 0.95;
 }
 
-/* Inter Tight for all remaining UI text — nav, buttons, links, labels, forms */
+/* Switzer for all remaining UI text — nav, buttons, links, labels, forms */
 button, input, select, textarea, a, label,
 p, span, li {
   font-family: var(--font-body);
+  letter-spacing: -0.02em;
 }
 
-/* Navigation stays medium; buttons / pill CTAs step up to semibold for a
-   more premium, deliberate feel. */
+/* Navigation and buttons stay in the same restrained medium weight as small
+   headings — nothing on the site goes bolder than 500. */
 nav a, header nav { font-weight: 500 !important; }
-button, .btn, a[class*="rounded-full"] { font-weight: 600 !important; }
+button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
+
+/* ─── Jet-black text enforcement ─────────────────────────────────────────────
+   Every heading and paragraph renders in true #000000 by default (a deliberate
+   deviation from the reference, which uses dark gray). This must live in
+   Tailwind's `base` layer: Tailwind's cascade layers (theme, base, components,
+   utilities) give `utilities` — where `.text-white` and every other Tailwind
+   color class live — priority over `base` for equal-specificity NORMAL
+   declarations regardless of selector specificity. An unlayered rule here
+   would instead win over ALL utility classes (Tailwind's layers always lose
+   to unlayered author CSS), which is what broke the white hero title. */
+@layer base {
+  h1, h2, h3, h4, h5, h6, p, li, dt, dd, blockquote {
+    color: #000000;
+  }
+}
 
 /* ─── Reusable reading utilities (opt-in — do not alter existing layouts) ────
    Apply to long-form prose blocks that want the full editorial rhythm:

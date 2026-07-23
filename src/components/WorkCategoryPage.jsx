@@ -16,7 +16,7 @@ export default function WorkCategoryPage() {
         <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(20,33,42,0.95), rgba(20,33,42,0.7))" }} />
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
-          <nav className="mb-4 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--sage)" }}>
+          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
             <Link to="/work" className="hover:text-white">Work</Link>
             <span className="mx-2 opacity-50">/</span>
             <span className="text-white">{cat.title}</span>

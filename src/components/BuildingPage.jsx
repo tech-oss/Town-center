@@ -43,7 +43,7 @@ export default function BuildingPage() {
           style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.15) 0%, rgba(28,46,56,0.88) 100%)" }}
         />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-14">
-          <nav className="mb-5 text-xs font-semibold tracking-widest uppercase" style={{ color: "var(--mint)" }}>
+          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <span className="mx-2 opacity-50">/</span>
             <Link to="/live" className="hover:text-white transition-colors">Live</Link>
@@ -51,7 +51,7 @@ export default function BuildingPage() {
             <span className="text-white">{b.name}</span>
           </nav>
           <span
-            className="self-start inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
+            className="self-start inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.02em]"
             style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
           >
             {b.developer}
@@ -81,7 +81,7 @@ export default function BuildingPage() {
             <div key={s.label} className="flex items-center gap-3 px-4 first:pl-0">
               <span className="text-2xl leading-none shrink-0">{s.icon}</span>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-white/50 leading-none mb-0.5">{s.label}</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.02em] text-white/50 leading-none mb-0.5">{s.label}</p>
                 <p className="text-sm font-bold text-white leading-snug">{s.value}</p>
               </div>
             </div>
@@ -93,7 +93,7 @@ export default function BuildingPage() {
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
               About the development
             </p>
             <h2 className="text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>
@@ -138,7 +138,7 @@ export default function BuildingPage() {
       {/* ── 4. FEATURES GRID ────────────────────────────────────────────────── */}
       <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Specification
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>
@@ -167,7 +167,7 @@ export default function BuildingPage() {
       {b.nearbyPlaces && b.nearbyPlaces.length > 0 && (
         <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
               Connectivity
             </p>
             <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
@@ -199,7 +199,7 @@ export default function BuildingPage() {
       {/* ── 6. YOUR 15-MINUTE TOWN ──────────────────────────────────────────── */}
       <section className="py-14 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Lifestyle
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>
@@ -230,7 +230,7 @@ export default function BuildingPage() {
       {/* ── 7. DEVELOPER CONTACT ────────────────────────────────────────────── */}
       <section className="py-16 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Developer
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>
@@ -250,7 +250,7 @@ export default function BuildingPage() {
               >
                 <span className="text-3xl shrink-0">🌐</span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Website</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>Website</p>
                   <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "#000000" }}>Visit developer site ↗</p>
                 </div>
               </a>
@@ -263,7 +263,7 @@ export default function BuildingPage() {
               >
                 <span className="text-3xl shrink-0">✉️</span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Email</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>Email</p>
                   <p className="text-sm font-semibold truncate group-hover:underline" style={{ color: "#000000" }}>{b.email}</p>
                 </div>
               </a>
@@ -276,7 +276,7 @@ export default function BuildingPage() {
               >
                 <span className="text-3xl shrink-0">📞</span>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest mb-0.5" style={{ color: "var(--leaf)" }}>Telephone</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>Telephone</p>
                   <p className="text-sm font-semibold group-hover:underline" style={{ color: "#000000" }}>{b.phone}</p>
                 </div>
               </a>
@@ -299,7 +299,7 @@ export default function BuildingPage() {
       {/* ── 9. OTHER DEVELOPMENTS ───────────────────────────────────────────── */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
             Explore more
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
@@ -325,7 +325,7 @@ export default function BuildingPage() {
                 />
                 {x.status && (
                   <span
-                    className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest"
+                    className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.02em]"
                     style={{
                       backgroundColor: x.status === "Coming Soon" ? "rgba(245,200,66,0.9)" : "rgba(47,140,140,0.85)",
                       color: x.status === "Coming Soon" ? "#1a3a42" : "#fff",
@@ -335,7 +335,7 @@ export default function BuildingPage() {
                   </span>
                 )}
                 <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <p className="text-[10px] font-semibold uppercase tracking-widest mb-0.5" style={{ color: "var(--sage)" }}>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--sage)" }}>
                     {x.developer}
                   </p>
                   <h3 className="text-lg font-bold text-white leading-snug">{x.name}</h3>

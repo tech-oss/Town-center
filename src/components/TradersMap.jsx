@@ -307,7 +307,7 @@ export default function TradersMap() {
     <section className="py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>{brandGrid.eyebrow}</p>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{brandGrid.eyebrow}</p>
           <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{brandGrid.heading}</h2>
           <p className="text-base max-w-xl mx-auto leading-relaxed" style={{ color: "#000000" }}>{brandGrid.subheading}</p>
         </div>
@@ -392,7 +392,7 @@ export default function TradersMap() {
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-sm leading-snug truncate" style={{ color: isActive ? "#2f8c8c" : "var(--forest)" }}>
                             {b.name}
-                            {isActive && <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wide" style={{ color: "#2f8c8c" }}>● Selected</span>}
+                            {isActive && <span className="ml-1.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ color: "#2f8c8c" }}>● Selected</span>}
                           </p>
                           <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{b.category}</p>
                         </div>
