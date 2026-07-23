@@ -1,0 +1,90 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   BrandMark — the animated "M" mark used in the header & footer lockups.
+   Carries the layers the 6-phase reveal (hooks/useLogoReveal) drives:
+   a colour mark, a luminous ghost, a travelling edge glow, and a light sweep.
+
+   Sizing: the colour <img> is in normal flow and defines the box; the ghost,
+   glow and sweep are absolutely positioned over it. Height comes from the
+   caller's utility classes (h-14, h-12 …) so the site layout is unchanged.
+
+   Default --reveal:1 means the diagonal reveal mask is fully OPEN — so when
+   the animation is skipped (already played this session, or reduced-motion)
+   the mark simply shows, statically and correctly. The hook sets --reveal:0
+   at the start of the timeline and tweens it back to 1 for the stroke draw.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.wrap {
+  --reveal: 1;
+  position: relative;
+  display: inline-block;
+  line-height: 0; /* no descender gap under the img */
+  -webkit-mask-image: linear-gradient(
+    115deg,
+    #000 calc(var(--reveal) * 130% - 18%),
+    transparent calc(var(--reveal) * 130% + 2%)
+  );
+  mask-image: linear-gradient(
+    115deg,
+    #000 calc(var(--reveal) * 130% - 18%),
+    transparent calc(var(--reveal) * 130% + 2%)
+  );
+}
+
+.color {
+  display: block; /* defines the box + kills inline descender space */
+}
+
+.ghost {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0; /* decorative layers hidden unless the timeline drives them */
+  pointer-events: none;
+  /* Luminous "drawn by light" version of the exact same asset. */
+  filter: grayscale(1) brightness(2.4) contrast(0.85)
+    drop-shadow(0 0 6px rgba(82, 199, 182, 0.85))
+    drop-shadow(0 0 16px rgba(82, 199, 182, 0.35));
+}
+
+.glow {
+  position: absolute;
+  inset: -22%;
+  background: radial-gradient(
+    ellipse 30% 78% at 50% 50%,
+    rgba(150, 215, 211, 0.55) 0%,
+    rgba(82, 199, 182, 0.22) 45%,
+    rgba(82, 199, 182, 0) 72%
+  );
+  transform: rotate(25deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Light sweep, clipped to the mark's own pixels via the logo as a mask. */
+.sweepMask {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: url("/logo-mark.svg");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: url("/logo-mark.svg");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+}
+.sweep {
+  position: absolute;
+  inset: -30%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(244, 255, 253, 0.85) 49%,
+    rgba(203, 244, 238, 0.55) 52%,
+    rgba(255, 255, 255, 0) 63%
+  );
+  opacity: 0;
+}

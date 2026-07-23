@@ -2,21 +2,32 @@ import { useLayoutEffect } from "react";
 import { gsap } from "gsap";
 
 /**
- * Compact brand-lockup reveal for the site chrome (header / footer logos) —
- * the ~1s "light settle" edition of the full cinematic intro in
- * components/LogoAnimation: the mark condenses out of teal light, then the
- * wordmark blurs up and the tagline follows.
+ * The 6-phase cinematic brand reveal for the site chrome (header / footer
+ * logos) — the compact edition of the fullscreen intro in
+ * components/LogoAnimation, matching the reference storyboard:
  *
- * Professional restraint rules:
+ *   1. Fade in        — the mark begins hidden behind a closed reveal mask.
+ *   2. Stroke draw     — a diagonal light mask uncovers the luminous ghost of
+ *                        the mark while a soft teal glow rides the draw edge.
+ *   3. Form complete   — the true-colour mark crossfades in and settles
+ *                        (0.96 → 1.01 → 1).
+ *   4. Text reveal     — the wordmark fades + slides up (blur → sharp).
+ *   5. Tagline appear  — the tagline fades in just after.
+ *   6. Light sweep     — one glass sweep crosses the mark, then everything is
+ *      & settle          perfectly still (subtle glow only, no looping).
+ *
+ * Total ≈ 2.2s (within the 2–3s spec). Professional restraint:
  *  · Plays ONCE per browser session (sessionStorage) — SPA navigation and
  *    reloads within the session never replay it.
- *  · The footer variant waits until the lockup first scrolls into view.
- *  · prefers-reduced-motion skips the animation entirely (logo just shows).
- *  · Only transforms / opacity / filters are animated; layout never moves.
+ *  · The footer variant waits until its lockup first scrolls into view.
+ *  · prefers-reduced-motion skips everything — the finished logo just shows.
+ *  · Only transforms / opacity / filters / the mask var are animated; layout
+ *    never moves. will-change is applied only for the timeline's duration.
  *
- * Expected DOM inside rootRef: elements tagged with data-logo-mark,
- * data-logo-word, data-logo-tag (multiple lockups per root are fine — the
- * footer has desktop + mobile variants).
+ * Expected DOM inside rootRef (from BrandMark + the lockup markup); multiple
+ * lockups per root are fine (the footer has desktop + mobile variants):
+ *   [data-logo-markwrap] [data-logo-mark] [data-logo-ghost]
+ *   [data-logo-glow] [data-logo-sweep] [data-logo-word] [data-logo-tag]
  */
 const SESSION_PREFIX = "mh-logo-reveal:";
 
@@ -41,67 +52,82 @@ export default function useLogoReveal(rootRef, { id, whenVisible = false } = {})
     const root = rootRef.current;
     if (!root) return;
 
-    const marks = root.querySelectorAll("[data-logo-mark]");
-    if (!marks.length) return;
+    const wrap = root.querySelectorAll("[data-logo-markwrap]");
+    if (!wrap.length) return;
+    const color = root.querySelectorAll("[data-logo-mark]");
+    const ghost = root.querySelectorAll("[data-logo-ghost]");
+    const glow = root.querySelectorAll("[data-logo-glow]");
+    const sweep = root.querySelectorAll("[data-logo-sweep]");
     const words = root.querySelectorAll("[data-logo-word]");
     const tags = root.querySelectorAll("[data-logo-tag]");
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || hasPlayed(id)) return; // logo simply renders, fully static
+    if (reduced || hasPlayed(id)) return; // static logo (CSS defaults), no work
 
     let io;
     const ctx = gsap.context(() => {
+      // Hide everything the timeline will bring in, synchronously and before
+      // paint (useLayoutEffect), so there is never a flash of the finished
+      // logo. --reveal:0 closes the diagonal mask; the ghost shows THROUGH it
+      // as it opens, so the ghost stays autoAlpha:1.
+      gsap.set(wrap, { "--reveal": 0 });
+      gsap.set(ghost, { autoAlpha: 1 });
+      gsap.set(color, { autoAlpha: 0 });
+      gsap.set([...glow, ...sweep], { autoAlpha: 0 });
+      gsap.set(words, { autoAlpha: 0, y: 10, filter: "blur(6px)", willChange: "transform, filter" });
+      gsap.set(tags, { autoAlpha: 0, y: 8 });
+
       const tl = gsap.timeline({
         paused: true,
-        onComplete: () => markPlayed(id),
+        defaults: { ease: "power2.out" },
+        onComplete: () => {
+          gsap.set(words, { clearProps: "willChange" });
+          markPlayed(id);
+        },
       });
 
-      // Mark condenses out of teal light: bright, desaturated and haloed,
-      // settling into its true colours. clearProps drops the filter (and its
-      // compositing cost) the moment each tween finishes.
-      tl.fromTo(
-        marks,
-        {
-          autoAlpha: 0,
-          scale: 0.92,
-          filter:
-            "brightness(2.3) saturate(0.35) drop-shadow(0 0 14px rgba(82,199,182,0.85))",
-        },
-        {
-          autoAlpha: 1,
-          scale: 1,
-          filter:
-            "brightness(1) saturate(1) drop-shadow(0 0 0px rgba(82,199,182,0))",
-          duration: 0.75,
-          ease: "power2.out",
-          clearProps: "filter",
-        },
-        0
-      )
+      // ── Phase 2 · Stroke draw (0 → 0.75s) ──
+      tl.to(wrap, { "--reveal": 1, duration: 0.75, ease: "none" }, 0)
         .fromTo(
-          words,
-          { autoAlpha: 0, y: 10, filter: "blur(6px)" },
-          {
-            autoAlpha: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.5,
-            ease: "power2.out",
-            clearProps: "filter",
-          },
-          0.28
+          glow,
+          { xPercent: -70, autoAlpha: 0 },
+          { xPercent: 70, autoAlpha: 0.9, duration: 0.75, ease: "none" },
+          0
         )
+        .to(glow, { autoAlpha: 0, duration: 0.3, ease: "sine.out" }, 0.6);
+
+      // ── Phase 3 · Form complete — colour crossfade + settle (0.6 → 1.0s) ──
+      tl.to(color, { autoAlpha: 1, duration: 0.4, ease: "sine.inOut" }, 0.6)
+        .to(ghost, { autoAlpha: 0, duration: 0.4, ease: "sine.inOut" }, 0.6)
         .fromTo(
-          tags,
-          { autoAlpha: 0, y: 8 },
-          { autoAlpha: 1, y: 0, duration: 0.4, ease: "sine.out" },
-          0.5
-        );
+          wrap,
+          { scale: 0.96 },
+          { scale: 1.01, duration: 0.28, ease: "power1.inOut" },
+          0.6
+        )
+        .to(wrap, { scale: 1, duration: 0.22, ease: "power1.out" }, 0.88);
+
+      // ── Phase 4 · Text reveal (0.95 → 1.4s) ──
+      tl.to(words, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.45 }, 0.95);
+
+      // ── Phase 5 · Tagline appear (1.35 → 1.7s) ──
+      tl.to(tags, { autoAlpha: 1, y: 0, duration: 0.4, ease: "sine.out" }, 1.35);
+
+      // ── Phase 6 · Light sweep & settle (1.6 → 2.2s) ──
+      tl.fromTo(
+        sweep,
+        { xPercent: -160, autoAlpha: 0 },
+        { xPercent: 160, autoAlpha: 0.5, duration: 0.6, ease: "sine.inOut" },
+        1.6
+      ).to(sweep, { autoAlpha: 0, duration: 0.18, ease: "sine.out" }, 2.05);
+
+      // Dev-only: expose the timeline so it can be scrubbed from the console
+      // / automated checks (backgrounded tabs suspend requestAnimationFrame).
+      if (import.meta.env.DEV) {
+        window.__logoReveal = { ...(window.__logoReveal || {}), [id]: tl };
+      }
 
       if (whenVisible) {
-        // Hide immediately (a paused fromTo hasn't applied its start state
-        // yet) so there's no flash before the observer fires.
-        gsap.set([...marks, ...words, ...tags], { autoAlpha: 0 });
         io = new IntersectionObserver(
           (entries) => {
             if (entries.some((e) => e.isIntersecting)) {
@@ -111,7 +137,7 @@ export default function useLogoReveal(rootRef, { id, whenVisible = false } = {})
           },
           { threshold: 0.5 }
         );
-        marks.forEach((m) => io.observe(m));
+        wrap.forEach((m) => io.observe(m));
       } else {
         tl.play();
       }

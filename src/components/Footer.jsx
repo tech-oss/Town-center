@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { footer, header } from "../Data/content";
 import AppBadges from "./AppBadges";
+import BrandMark from "./BrandMark/BrandMark";
 import useLogoReveal from "../hooks/useLogoReveal";
 
 // ── Social icons ──────────────────────────────────────────────────────────────
@@ -99,7 +100,7 @@ export default function Footer() {
           <div className="flex flex-col gap-5">
             <a href="/" aria-label={header.logoAlt} className="brand-lockup inline-flex flex-col items-start leading-none">
               <span className="flex flex-col items-center">
-                <img data-logo-mark src={header.markSrc} alt="" aria-hidden="true" className="h-12 w-auto shrink-0 -mb-1" />
+                <BrandMark imgClassName="h-12 w-auto shrink-0 -mb-1" />
                 <span data-logo-word className="text-base font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                   {header.logo}
                 </span>
@@ -142,7 +143,7 @@ export default function Footer() {
           <div className="flex items-center justify-between mb-6">
             <a href="/" aria-label={header.logoAlt} className="brand-lockup inline-flex flex-col items-start leading-none">
               <span className="flex flex-col items-center">
-                <img data-logo-mark src={header.markSrc} alt="" aria-hidden="true" className="h-10 w-auto shrink-0 -mb-1" />
+                <BrandMark imgClassName="h-10 w-auto shrink-0 -mb-1" />
                 <span data-logo-word className="text-sm font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                   {header.logo}
                 </span>
