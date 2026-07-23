@@ -215,15 +215,20 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
    into a frame), matching the reference recording. Reduced-motion disables it. */
 .spotlight-photo {
   transform-origin: center;
-  transition: transform 600ms cubic-bezier(0.33, 1, 0.68, 1);
+  transition:
+    transform 600ms cubic-bezier(0.33, 1, 0.68, 1),
+    box-shadow 600ms cubic-bezier(0.33, 1, 0.68, 1);
   will-change: transform;
 }
 .spotlight-card:hover .spotlight-photo {
-  transform: scale(0.92);
+  /* Recede further into the mat so the background frames the photo on every
+     edge (like the reference), with a soft shadow for framed-print depth. */
+  transform: scale(0.84);
+  box-shadow: 0 22px 55px -18px rgba(0, 0, 0, 0.38);
 }
 @media (prefers-reduced-motion: reduce) {
   .spotlight-photo { transition: none; }
-  .spotlight-card:hover .spotlight-photo { transform: none; }
+  .spotlight-card:hover .spotlight-photo { transform: none; box-shadow: none; }
 }
 
 /* ─── Hero slider animations ─────────────────────────────────────────────── */
