@@ -62,8 +62,7 @@ export default function OurStoryPage() {
                   key={i}
                   className={`text-base md:text-lg leading-relaxed ${isDisclaimer ? "italic" : ""}`}
                   style={{
-                    color: isDisclaimer ? "var(--forest)" : "var(--ink)",
-                    opacity: isDisclaimer ? 1 : 0.82,
+                    color: isDisclaimer ? "var(--forest)" : "#000000",
                     fontWeight: isDisclaimer ? 500 : undefined,
                   }}
                 >

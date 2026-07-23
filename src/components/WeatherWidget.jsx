@@ -99,7 +99,7 @@ export default function WeatherWidget() {
                   <span className="text-2xl leading-none" aria-hidden="true">{d.icon}</span>
                   <span
                     className="text-[10px] font-medium"
-                    style={{ color: i === 0 ? "rgba(255,255,255,0.7)" : "var(--ink)", opacity: i === 0 ? 1 : 0.6 }}
+                    style={{ color: i === 0 ? "rgba(255,255,255,0.7)" : "#000000" }}
                   >
                     {d.label}
                   </span>
@@ -107,7 +107,7 @@ export default function WeatherWidget() {
                     <span className="text-base font-bold" style={{ color: i === 0 ? "#fff" : "var(--forest)" }}>
                       {d.max}°
                     </span>
-                    <span className="text-xs" style={{ color: i === 0 ? "rgba(255,255,255,0.6)" : "var(--ink)", opacity: i === 0 ? 1 : 0.5 }}>
+                    <span className="text-xs" style={{ color: i === 0 ? "rgba(255,255,255,0.6)" : "#000000" }}>
                       {d.min}°
                     </span>
                   </span>

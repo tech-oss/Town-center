@@ -9,14 +9,15 @@ export default function QuickLinks() {
     >
       <div className="max-w-7xl mx-auto">
 
-        {/* ── Intro copy (editorial, right-aligned) ── */}
+        {/* ── Intro copy (serif editorial statement, right-aligned) — the site's
+            equivalent of the reference's oversized serif statement paragraph ── */}
         <p
           className="text-right mb-12 md:mb-16 text-xl md:text-[2.25rem]"
           style={{
             color: "#000000",
-            fontFamily: "var(--font-heading)",
+            fontFamily: "var(--font-serif)",
             fontWeight: 300,
-            lineHeight: 1.3,
+            lineHeight: 1.25,
             letterSpacing: "-0.02em",
           }}
         >

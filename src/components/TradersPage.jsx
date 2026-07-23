@@ -60,8 +60,7 @@ export default function TradersPage() {
                   key={i}
                   className={`text-base md:text-lg leading-relaxed ${isDirectory ? "italic" : ""}`}
                   style={{
-                    color: isDirectory ? "var(--forest)" : "var(--ink)",
-                    opacity: isDirectory ? 1 : 0.82,
+                    color: isDirectory ? "var(--forest)" : "#000000",
                     fontWeight: isDirectory ? 500 : undefined,
                   }}
                 >

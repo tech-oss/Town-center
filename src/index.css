@@ -52,9 +52,12 @@
   --sand:      #F0FAFA;   /* pale teal-white — alternate section backgrounds   */
   --ink:       #1A1A1A;   /* body text                                          */
 
-  /* — Single restrained family for headings AND body, per the reference
-       system: one grotesque sans carries the whole hierarchy through weight
-       and scale contrast alone, rather than mixing typefaces. — */
+  /* — Editorial pairing, per the reference system: a high-contrast display
+       serif (Fraunces ≈ Reckless Neue) reserved for hero titles and major
+       editorial headings, against a quiet grotesque sans (Switzer ≈ Suisse
+       Int'l) for body, nav, cards and all UI. The contrast BETWEEN the two
+       families is the design language — neither ever does the other's job. — */
+  --font-serif:   "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-heading: "Switzer", -apple-system, "Segoe UI", sans-serif;
   --font-body:    "Switzer", -apple-system, "Segoe UI", sans-serif;
 
@@ -85,21 +88,32 @@ html {
   letter-spacing: -0.02em;
 }
 
-/* ─── Typography hierarchy (single family: Switzer) ──────────────────────────
-   Modelled on the reference system: one grotesque sans, a restrained weight
-   range (300 light display → 500 medium emphasis, no bold anywhere), and
-   tracking that tightens progressively as size increases — from -2% at body
-   sizes to -3% at the largest display sizes. Weights use !important: Tailwind
-   utility classes like font-bold/font-semibold are applied inline throughout
-   ~20+ components, and would otherwise win the cascade. This is the single
-   source of truth for the weight scale so it is guaranteed to apply
-   everywhere without hand-editing every component. */
+/* ─── Typography hierarchy (Fraunces serif display / Switzer sans UI) ────────
+   Modelled on the reference system: dramatic editorial moments — hero titles,
+   major page headings, featured section titles — set in a light high-contrast
+   serif with tight tracking and compact leading; everything else (mid/small
+   headings, cards, nav, body, buttons) in the quiet grotesque sans at
+   restrained weights (300–500, no bold anywhere). Weights use !important:
+   Tailwind utility classes like font-bold/font-semibold are applied inline
+   throughout ~20+ components, and would otherwise win the cascade. This is
+   the single source of truth so the system applies everywhere without
+   hand-editing every component. */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: 400 !important;
   letter-spacing: -0.02em;
   line-height: 1.12;
   text-wrap: balance;   /* avoid orphan words on multi-line headings */
+}
+
+/* Major editorial headings go serif: page titles (h1) and section titles (h2)
+   are the "visual impact" tier; h3–h6 stay sans so cards and UI read cleanly.
+   Serif display sits at light weight with snug leading, like the reference's
+   oversized light serif titles. */
+h1, h2, .font-serif-display {
+  font-family: var(--font-serif);
+  font-weight: 400 !important;   /* .text-3xl+ rule below lightens display sizes to 300 */
+  line-height: 1.06;
 }
 
 /* Large headings step down to the light display weight; small headings step
@@ -114,11 +128,15 @@ h5, h6, .text-sm, .text-xs {
 /* Display / hero-scale headings tighten further for a crisper masthead feel. */
 .text-5xl, .text-6xl, .text-7xl, .text-8xl { letter-spacing: -0.03em; }
 
-/* Homepage hero title — light editorial weight, tightest tracking/leading */
+/* Homepage hero title — light serif display, tightest tracking/leading.
+   Must set the family explicitly: the span/UI rule below would otherwise put
+   this <span> back in the sans. The sans "Welcome to" kicker above it keeps
+   the deliberate sans-kicker/serif-display contrast from the reference. */
 .hero-title {
+  font-family: var(--font-serif);
   font-weight: 300 !important;
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  letter-spacing: -0.03em;
+  line-height: 1;
 }
 
 /* Switzer for all remaining UI text — nav, buttons, links, labels, forms */

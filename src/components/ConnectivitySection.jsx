@@ -125,8 +125,7 @@ export default function ConnectivitySection() {
                       style={{
                         fontSize: current ? "12px" : "11px",
                         fontWeight: current ? 700 : 500,
-                        color: current ? "var(--forest)" : "var(--ink)",
-                        opacity: current ? 1 : 0.72,
+                        color: current ? "var(--forest)" : "#000000",
                       }}
                     >
                       {name}
