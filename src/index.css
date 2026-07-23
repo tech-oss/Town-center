@@ -114,6 +114,10 @@ h1, h2, .font-serif-display {
   font-family: var(--font-serif);
   font-weight: 400 !important;   /* .text-3xl+ rule below lightens display sizes to 300 */
   line-height: 1.06;
+  /* Force Fraunces' largest optical size: maximum thick/thin stroke contrast,
+     the defining trait of the reference's display serif at every size. */
+  font-variation-settings: "opsz" 144;
+  letter-spacing: -0.03em;
 }
 
 /* Large headings step down to the light display weight; small headings step
