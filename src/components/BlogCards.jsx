@@ -26,15 +26,21 @@ function PortfolioCard({ post, layout }) {
   return (
     <CardLink
       href={post.href}
-      className={`group block ${layout.col} ${layout.offset}`}
+      className={`spotlight-card group block ${layout.col} ${layout.offset}`}
     >
-      {/* Image — the varied aspect ratios give the reference's size contrast */}
-      <div className={`relative w-full overflow-hidden aspect-[4/3] ${layout.ratio}`}>
+      {/* Image — varied aspect ratios give the reference's size contrast.
+          Hover: the photo eases inward to ~0.92, revealing a soft mat border
+          around it (a "framed photograph" recede), matching the reference. The
+          wrapper's mat colour shows through only while the image is inset. */}
+      <div
+        className={`relative w-full overflow-hidden aspect-[4/3] ${layout.ratio}`}
+        style={{ backgroundColor: "#efece6" }}
+      >
         <img
           src={post.imageSrc}
           alt={post.imageAlt}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          className="spotlight-photo w-full h-full object-cover"
         />
       </div>
 
