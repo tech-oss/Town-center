@@ -7,6 +7,7 @@ import { exploreMenu } from "../Data/explore";
 import { workMenu } from "../Data/work";
 import SmartLink from "./SmartLink";
 import useHeaderScroll from "../hooks/useHeaderScroll";
+import useLogoReveal from "../hooks/useLogoReveal";
 
 const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
@@ -17,6 +18,10 @@ const Header = forwardRef(function Header(_, ref) {
   const [search, setSearch] = useState("");
   const { pathname } = useLocation();
   const closeTimer = useRef(null);
+
+  // Cinematic brand entrance (once per session) — see hooks/useLogoReveal.
+  const logoRef = useRef(null);
+  useLogoReveal(logoRef, { id: "header" });
 
   // Premium overlay-header behaviour: transparent over the hero at the top,
   // hides on scroll-down, reveals (solid brand blue) on scroll-up / hover.
@@ -106,12 +111,12 @@ const Header = forwardRef(function Header(_, ref) {
       {/* Main nav bar */}
       <div className="flex items-center justify-between px-6 md:px-8 py-2">
         {/* Logo lockup */}
-        <Link to="/" onClick={closeAll} className="shrink-0 flex flex-col items-center leading-none" aria-label={header.logoAlt}>
-          <img src={header.markSrc} alt="" aria-hidden="true" className="h-14 md:h-16 w-auto" />
-          <span className="mt-2.5 text-base md:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
+        <Link ref={logoRef} to="/" onClick={closeAll} className="brand-lockup shrink-0 flex flex-col items-center leading-none" aria-label={header.logoAlt}>
+          <img data-logo-mark src={header.markSrc} alt="" aria-hidden="true" className="h-14 md:h-16 w-auto" />
+          <span data-logo-word className="mt-2.5 text-base md:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
             {header.logo}
           </span>
-          <span className="mt-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: "var(--sage)" }}>
+          <span data-logo-tag className="mt-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: "var(--sage)" }}>
             {header.tagline}
           </span>
         </Link>

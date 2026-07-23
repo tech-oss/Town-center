@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { footer, header } from "../Data/content";
 import AppBadges from "./AppBadges";
+import useLogoReveal from "../hooks/useLogoReveal";
 
 // ── Social icons ──────────────────────────────────────────────────────────────
 function SocialIcon({ icon }) {
@@ -82,8 +83,13 @@ function AppCard() {
 
 // ── Footer ────────────────────────────────────────────────────────────────────
 export default function Footer() {
+  // Brand entrance when the footer lockup first scrolls into view
+  // (once per session) — see hooks/useLogoReveal.
+  const footerRef = useRef(null);
+  useLogoReveal(footerRef, { id: "footer", whenVisible: true });
+
   return (
-    <footer className="px-6 md:px-12 pt-12 pb-6" style={{ backgroundColor: "var(--ink)", color: "white" }}>
+    <footer ref={footerRef} className="px-6 md:px-12 pt-12 pb-6" style={{ backgroundColor: "var(--ink)", color: "white" }}>
       <div className="max-w-6xl mx-auto">
 
         {/* ── Desktop layout ── */}
@@ -91,14 +97,14 @@ export default function Footer() {
 
           {/* Brand column */}
           <div className="flex flex-col gap-5">
-            <a href="/" aria-label={header.logoAlt} className="inline-flex flex-col items-start leading-none">
+            <a href="/" aria-label={header.logoAlt} className="brand-lockup inline-flex flex-col items-start leading-none">
               <span className="flex flex-col items-center">
-                <img src={header.markSrc} alt="" aria-hidden="true" className="h-12 w-auto shrink-0 -mb-1" />
-                <span className="text-base font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
+                <img data-logo-mark src={header.markSrc} alt="" aria-hidden="true" className="h-12 w-auto shrink-0 -mb-1" />
+                <span data-logo-word className="text-base font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                   {header.logo}
                 </span>
               </span>
-              <span className="mt-2 text-[9px] font-semibold uppercase tracking-[0.02em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
+              <span data-logo-tag className="mt-2 text-[9px] font-semibold uppercase tracking-[0.02em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
                 {header.tagline}
               </span>
             </a>
@@ -134,14 +140,14 @@ export default function Footer() {
         <div className="md:hidden mb-8">
           {/* Logo + social */}
           <div className="flex items-center justify-between mb-6">
-            <a href="/" aria-label={header.logoAlt} className="inline-flex flex-col items-start leading-none">
+            <a href="/" aria-label={header.logoAlt} className="brand-lockup inline-flex flex-col items-start leading-none">
               <span className="flex flex-col items-center">
-                <img src={header.markSrc} alt="" aria-hidden="true" className="h-10 w-auto shrink-0 -mb-1" />
-                <span className="text-sm font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
+                <img data-logo-mark src={header.markSrc} alt="" aria-hidden="true" className="h-10 w-auto shrink-0 -mb-1" />
+                <span data-logo-word className="text-sm font-semibold tracking-[0.02em] text-white whitespace-nowrap" style={{ fontFamily: "var(--font-body)" }}>
                   {header.logo}
                 </span>
               </span>
-              <span className="mt-1 text-[8px] font-semibold uppercase tracking-[0.02em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
+              <span data-logo-tag className="mt-1 text-[8px] font-semibold uppercase tracking-[0.02em] whitespace-nowrap" style={{ color: "var(--sage)" }}>
                 {header.tagline}
               </span>
             </a>
