@@ -3,8 +3,8 @@ import { gsap } from "gsap";
 
 /**
  * The 6-phase cinematic brand reveal for the site chrome (header / footer
- * logos) — the compact edition of the fullscreen intro in
- * components/LogoAnimation, matching the reference storyboard:
+ * logos), played on a continuous gentle LOOP (à la bullring.co.uk): the mark
+ * draws in, the lockup settles and holds, then the whole sequence redraws.
  *
  *   1. Fade in        — the mark begins hidden behind a closed reveal mask.
  *   2. Stroke draw     — a diagonal light mask uncovers the luminous ghost of
@@ -13,41 +13,25 @@ import { gsap } from "gsap";
  *                        (0.96 → 1.01 → 1).
  *   4. Text reveal     — the wordmark fades + slides up (blur → sharp).
  *   5. Tagline appear  — the tagline fades in just after.
- *   6. Light sweep     — one glass sweep crosses the mark, then everything is
- *      & settle          perfectly still (subtle glow only, no looping).
+ *   6. Light sweep     — one glass sweep crosses the mark; the lockup then
+ *      & settle          holds fully settled for a beat before the loop repeats.
  *
- * Total ≈ 2.2s (within the 2–3s spec). Professional restraint:
- *  · Plays ONCE per browser session (sessionStorage) — SPA navigation and
- *    reloads within the session never replay it.
- *  · The footer variant waits until its lockup first scrolls into view.
- *  · prefers-reduced-motion skips everything — the finished logo just shows.
+ * One draw ≈ 2.2s + a ~2.8s settled hold ≈ a ~5s cycle.
+ *
+ * Professional guarantees:
+ *  · prefers-reduced-motion skips all motion — the finished logo just shows.
+ *  · The loop only runs while the lockup is on screen (IntersectionObserver
+ *    play/pause), so an off-screen header/footer costs nothing.
+ *  · Every phase uses fromTo, so each repeat resets cleanly with no drift.
  *  · Only transforms / opacity / filters / the mask var are animated; layout
- *    never moves. will-change is applied only for the timeline's duration.
+ *    never moves. gsap.context reverts all inline styles on unmount.
  *
  * Expected DOM inside rootRef (from BrandMark + the lockup markup); multiple
  * lockups per root are fine (the footer has desktop + mobile variants):
  *   [data-logo-markwrap] [data-logo-mark] [data-logo-ghost]
  *   [data-logo-glow] [data-logo-sweep] [data-logo-word] [data-logo-tag]
  */
-const SESSION_PREFIX = "mh-logo-reveal:";
-
-function hasPlayed(id) {
-  try {
-    return sessionStorage.getItem(SESSION_PREFIX + id) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markPlayed(id) {
-  try {
-    sessionStorage.setItem(SESSION_PREFIX + id, "1");
-  } catch {
-    /* private mode — replaying next load is acceptable */
-  }
-}
-
-export default function useLogoReveal(rootRef, { id, whenVisible = false } = {}) {
+export default function useLogoReveal(rootRef, { id } = {}) {
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -62,32 +46,34 @@ export default function useLogoReveal(rootRef, { id, whenVisible = false } = {})
     const tags = root.querySelectorAll("[data-logo-tag]");
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced || hasPlayed(id)) return; // static logo (CSS defaults), no work
+    if (reduced) return; // static logo (CSS defaults), no work
 
     let io;
     const ctx = gsap.context(() => {
-      // Hide everything the timeline will bring in, synchronously and before
-      // paint (useLayoutEffect), so there is never a flash of the finished
-      // logo. --reveal:0 closes the diagonal mask; the ghost shows THROUGH it
-      // as it opens, so the ghost stays autoAlpha:1.
-      gsap.set(wrap, { "--reveal": 0 });
-      gsap.set(ghost, { autoAlpha: 1 });
-      gsap.set(color, { autoAlpha: 0 });
-      gsap.set([...glow, ...sweep], { autoAlpha: 0 });
-      gsap.set(words, { autoAlpha: 0, y: 10, filter: "blur(6px)", willChange: "transform, filter" });
-      gsap.set(tags, { autoAlpha: 0, y: 8 });
+      // will-change stays on for the whole loop — these layers are always
+      // animating — and is reverted with every other inline style on unmount.
+      gsap.set([...wrap, ...words], { willChange: "transform, filter" });
 
       const tl = gsap.timeline({
         paused: true,
+        repeat: -1,
+        repeatDelay: 2.8, // settled hold between draws
         defaults: { ease: "power2.out" },
-        onComplete: () => {
-          gsap.set(words, { clearProps: "willChange" });
-          markPlayed(id);
-        },
       });
 
       // ── Phase 2 · Stroke draw (0 → 0.75s) ──
-      tl.to(wrap, { "--reveal": 1, duration: 0.75, ease: "none" }, 0)
+      tl.fromTo(
+        wrap,
+        { "--reveal": 0 },
+        { "--reveal": 1, duration: 0.75, ease: "none" },
+        0
+      )
+        .fromTo(
+          ghost,
+          { autoAlpha: 1 },
+          { autoAlpha: 1, duration: 0.75, ease: "none" },
+          0
+        )
         .fromTo(
           glow,
           { xPercent: -70, autoAlpha: 0 },
@@ -97,7 +83,7 @@ export default function useLogoReveal(rootRef, { id, whenVisible = false } = {})
         .to(glow, { autoAlpha: 0, duration: 0.3, ease: "sine.out" }, 0.6);
 
       // ── Phase 3 · Form complete — colour crossfade + settle (0.6 → 1.0s) ──
-      tl.to(color, { autoAlpha: 1, duration: 0.4, ease: "sine.inOut" }, 0.6)
+      tl.fromTo(color, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "sine.inOut" }, 0.6)
         .to(ghost, { autoAlpha: 0, duration: 0.4, ease: "sine.inOut" }, 0.6)
         .fromTo(
           wrap,
@@ -108,10 +94,20 @@ export default function useLogoReveal(rootRef, { id, whenVisible = false } = {})
         .to(wrap, { scale: 1, duration: 0.22, ease: "power1.out" }, 0.88);
 
       // ── Phase 4 · Text reveal (0.95 → 1.4s) ──
-      tl.to(words, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.45 }, 0.95);
+      tl.fromTo(
+        words,
+        { autoAlpha: 0, y: 10, filter: "blur(6px)" },
+        { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.45 },
+        0.95
+      );
 
       // ── Phase 5 · Tagline appear (1.35 → 1.7s) ──
-      tl.to(tags, { autoAlpha: 1, y: 0, duration: 0.4, ease: "sine.out" }, 1.35);
+      tl.fromTo(
+        tags,
+        { autoAlpha: 0, y: 8 },
+        { autoAlpha: 1, y: 0, duration: 0.4, ease: "sine.out" },
+        1.35
+      );
 
       // ── Phase 6 · Light sweep & settle (1.6 → 2.2s) ──
       tl.fromTo(
@@ -121,31 +117,26 @@ export default function useLogoReveal(rootRef, { id, whenVisible = false } = {})
         1.6
       ).to(sweep, { autoAlpha: 0, duration: 0.18, ease: "sine.out" }, 2.05);
 
-      // Dev-only: expose the timeline so it can be scrubbed from the console
-      // / automated checks (backgrounded tabs suspend requestAnimationFrame).
+      // Dev-only: expose the timeline for console scrubbing / automated checks.
       if (import.meta.env.DEV) {
         window.__logoReveal = { ...(window.__logoReveal || {}), [id]: tl };
       }
 
-      if (whenVisible) {
-        io = new IntersectionObserver(
-          (entries) => {
-            if (entries.some((e) => e.isIntersecting)) {
-              tl.play();
-              io.disconnect();
-            }
-          },
-          { threshold: 0.5 }
-        );
-        wrap.forEach((m) => io.observe(m));
-      } else {
-        tl.play();
-      }
+      // Run the loop only while on screen — pause when scrolled away.
+      io = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.some((e) => e.isIntersecting);
+          if (visible) tl.play();
+          else tl.pause();
+        },
+        { threshold: 0.4 }
+      );
+      wrap.forEach((m) => io.observe(m));
     }, root);
 
     return () => {
       io?.disconnect();
       ctx.revert();
     };
-  }, [rootRef, id, whenVisible]);
+  }, [rootRef, id]);
 }
