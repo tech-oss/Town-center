@@ -29,18 +29,27 @@ function PortfolioCard({ post, layout }) {
       className={`spotlight-card group block ${layout.col} ${layout.offset}`}
     >
       {/* Image — varied aspect ratios give the reference's size contrast.
-          Hover: the photo eases inward to ~0.92, revealing a soft mat border
-          around it (a "framed photograph" recede), matching the reference. The
-          wrapper's mat colour shows through only while the image is inset. */}
+          Hover: the sharp photo eases inward, revealing a blurred, dimmed copy
+          of the same image around its edges (a soft framed vignette, not blank
+          space), matching the reference. */}
       <div
         className={`relative w-full overflow-hidden aspect-[4/3] ${layout.ratio}`}
-        style={{ backgroundColor: "#efece6" }}
+        style={{ backgroundColor: "#1a1a1a" }}
       >
+        {/* Blurred, dimmed copy of the photo — the frame revealed on hover */}
+        <img
+          src={post.imageSrc}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Sharp foreground — insets on hover to reveal the blurred frame */}
         <img
           src={post.imageSrc}
           alt={post.imageAlt}
           loading="lazy"
-          className="spotlight-photo w-full h-full object-cover"
+          className="spotlight-photo absolute inset-0 w-full h-full object-cover"
         />
       </div>
 

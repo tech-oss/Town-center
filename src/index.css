@@ -213,7 +213,17 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
    Each spotlight image sits full-bleed at rest; on hover it eases inward to
    ~0.92, revealing the wrapper's soft mat border around it (the photo recedes
    into a frame), matching the reference recording. Reduced-motion disables it. */
+/* Blurred, dimmed copy of the photo sitting behind the sharp one. Scaled up so
+   its blurred edges are pushed past the container (no transparent bleed). Fully
+   hidden at rest — the sharp foreground covers it — and revealed as a soft
+   vignette frame around the edges once the foreground insets on hover. */
+.spotlight-photo-bg {
+  z-index: 0;
+  transform: scale(1.25);
+  filter: blur(20px) brightness(0.55) saturate(1.05);
+}
 .spotlight-photo {
+  z-index: 1;
   transform-origin: center;
   transition:
     transform 600ms cubic-bezier(0.33, 1, 0.68, 1),
@@ -221,10 +231,10 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
   will-change: transform;
 }
 .spotlight-card:hover .spotlight-photo {
-  /* Recede further into the mat so the background frames the photo on every
-     edge (like the reference), with a soft shadow for framed-print depth. */
+  /* Recede into the blurred frame on every edge (like the reference), with a
+     soft shadow for framed-print depth. */
   transform: scale(0.84);
-  box-shadow: 0 22px 55px -18px rgba(0, 0, 0, 0.38);
+  box-shadow: 0 22px 55px -18px rgba(0, 0, 0, 0.5);
 }
 @media (prefers-reduced-motion: reduce) {
   .spotlight-photo { transition: none; }
