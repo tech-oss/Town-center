@@ -114,7 +114,7 @@ const Header = forwardRef(function Header(_, ref) {
         {/* Logo lockup */}
         <Link ref={logoRef} to="/" onClick={closeAll} className="brand-lockup shrink-0 flex flex-col items-center leading-none" aria-label={header.logoAlt}>
           <BrandMark imgClassName="h-14 md:h-16 w-auto" />
-          <span data-logo-word className="mt-2.5 text-base md:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
+          <span data-logo-word className="-mt-1.5 text-base md:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
             {header.logo}
           </span>
           <span data-logo-tag className="mt-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: "var(--sage)" }}>

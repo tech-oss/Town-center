@@ -2,29 +2,25 @@ import { useLayoutEffect } from "react";
 import { gsap } from "gsap";
 
 /**
- * The 6-phase cinematic brand reveal for the site chrome (header / footer
- * logos), played on a continuous gentle LOOP (à la bullring.co.uk): the mark
- * draws in, the lockup settles and holds, then the whole sequence redraws.
+ * The cinematic brand reveal for the site chrome (header / footer logos).
  *
- *   1. Fade in        — the mark begins hidden behind a closed reveal mask.
- *   2. Stroke draw     — a diagonal light mask uncovers the luminous ghost of
- *                        the mark while a soft teal glow rides the draw edge.
- *   3. Form complete   — the true-colour mark crossfades in and settles
- *                        (0.96 → 1.01 → 1).
- *   4. Text reveal     — the wordmark fades + slides up (blur → sharp).
- *   5. Tagline appear  — the tagline fades in just after.
- *   6. Light sweep     — one glass sweep crosses the mark; the lockup then
- *      & settle          holds fully settled for a beat before the loop repeats.
+ * First load plays the full 6-phase sequence — the mark draws in, the wordmark
+ * reveals, the tagline follows, and a light sweep passes. From then on ONLY the
+ * "M" mark keeps looping (draw → settle → sweep, on a gentle repeat); the
+ * wordmark and tagline stay put in their final positions. This keeps the rich
+ * first impression while making the ongoing loop subtle and non-distracting.
  *
- * One draw ≈ 2.2s + a ~2.8s settled hold ≈ a ~5s cycle.
+ * Implemented as two timelines so the text animates exactly once:
+ *   · markTl  — mark draw / colour settle / light sweep, repeat: -1 (every loop)
+ *   · textTl  — wordmark + tagline reveal, played once (first load only)
+ * Both start together, so the first-load timing is identical to before.
  *
- * Professional guarantees:
+ * Guarantees:
  *  · prefers-reduced-motion skips all motion — the finished logo just shows.
- *  · The loop only runs while the lockup is on screen (IntersectionObserver
- *    play/pause), so an off-screen header/footer costs nothing.
- *  · Every phase uses fromTo, so each repeat resets cleanly with no drift.
- *  · Only transforms / opacity / filters / the mask var are animated; layout
- *    never moves. gsap.context reverts all inline styles on unmount.
+ *  · Both timelines only run while the lockup is on screen (IntersectionObserver
+ *    play/pause); a completed textTl never replays on scroll-back.
+ *  · Every phase uses fromTo, so each mark repeat resets cleanly with no drift.
+ *  · Only transforms / opacity / filters / the mask var are animated.
  *
  * Expected DOM inside rootRef (from BrandMark + the lockup markup); multiple
  * lockups per root are fine (the footer has desktop + mobile variants):
@@ -50,84 +46,71 @@ export default function useLogoReveal(rootRef, { id } = {}) {
 
     let io;
     const ctx = gsap.context(() => {
-      // will-change stays on for the whole loop — these layers are always
-      // animating — and is reverted with every other inline style on unmount.
-      gsap.set([...wrap, ...words], { willChange: "transform, filter" });
+      // Hide what the timelines bring in, synchronously and before paint, so
+      // there's never a flash of the finished logo. --reveal:0 closes the mask;
+      // the ghost shows THROUGH it as it opens, so ghost stays autoAlpha:1.
+      gsap.set(wrap, { "--reveal": 0, willChange: "transform" });
+      gsap.set(ghost, { autoAlpha: 1 });
+      gsap.set(color, { autoAlpha: 0 });
+      gsap.set([...glow, ...sweep], { autoAlpha: 0 });
+      gsap.set(words, { autoAlpha: 0, y: 10, filter: "blur(6px)", willChange: "transform, filter" });
+      gsap.set(tags, { autoAlpha: 0, y: 8 });
 
-      const tl = gsap.timeline({
+      // ── Mark loop — draws, settles and sweeps on every repeat ──────────────
+      const markTl = gsap.timeline({
         paused: true,
         repeat: -1,
         repeatDelay: 2.8, // settled hold between draws
         defaults: { ease: "power2.out" },
       });
 
-      // ── Phase 2 · Stroke draw (0 → 0.75s) ──
-      tl.fromTo(
-        wrap,
-        { "--reveal": 0 },
-        { "--reveal": 1, duration: 0.75, ease: "none" },
-        0
-      )
-        .fromTo(
-          ghost,
-          { autoAlpha: 1 },
-          { autoAlpha: 1, duration: 0.75, ease: "none" },
-          0
-        )
-        .fromTo(
-          glow,
-          { xPercent: -70, autoAlpha: 0 },
-          { xPercent: 70, autoAlpha: 0.9, duration: 0.75, ease: "none" },
-          0
-        )
-        .to(glow, { autoAlpha: 0, duration: 0.3, ease: "sine.out" }, 0.6);
-
-      // ── Phase 3 · Form complete — colour crossfade + settle (0.6 → 1.0s) ──
-      tl.fromTo(color, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "sine.inOut" }, 0.6)
+      // Stroke draw (0 → 0.75s)
+      markTl
+        .fromTo(wrap, { "--reveal": 0 }, { "--reveal": 1, duration: 0.75, ease: "none" }, 0)
+        .fromTo(ghost, { autoAlpha: 1 }, { autoAlpha: 1, duration: 0.75, ease: "none" }, 0)
+        .fromTo(glow, { xPercent: -70, autoAlpha: 0 }, { xPercent: 70, autoAlpha: 0.9, duration: 0.75, ease: "none" }, 0)
+        .to(glow, { autoAlpha: 0, duration: 0.3, ease: "sine.out" }, 0.6)
+        // Form complete — colour crossfade + settle (0.6 → 1.0s)
+        .fromTo(color, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, ease: "sine.inOut" }, 0.6)
         .to(ghost, { autoAlpha: 0, duration: 0.4, ease: "sine.inOut" }, 0.6)
-        .fromTo(
-          wrap,
-          { scale: 0.96 },
-          { scale: 1.01, duration: 0.28, ease: "power1.inOut" },
-          0.6
-        )
-        .to(wrap, { scale: 1, duration: 0.22, ease: "power1.out" }, 0.88);
+        .fromTo(wrap, { scale: 0.96 }, { scale: 1.01, duration: 0.28, ease: "power1.inOut" }, 0.6)
+        .to(wrap, { scale: 1, duration: 0.22, ease: "power1.out" }, 0.88)
+        // Light sweep (1.6 → 2.2s)
+        .fromTo(sweep, { xPercent: -160, autoAlpha: 0 }, { xPercent: 160, autoAlpha: 0.5, duration: 0.6, ease: "sine.inOut" }, 1.6)
+        .to(sweep, { autoAlpha: 0, duration: 0.18, ease: "sine.out" }, 2.05);
 
-      // ── Phase 4 · Text reveal (0.95 → 1.4s) ──
-      tl.fromTo(
-        words,
-        { autoAlpha: 0, y: 10, filter: "blur(6px)" },
-        { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.45 },
-        0.95
-      );
+      // ── Text reveal — plays ONCE on first load, then stays put ─────────────
+      let textDone = false;
+      const textTl = gsap.timeline({
+        paused: true,
+        defaults: { ease: "power2.out" },
+        onComplete: () => {
+          textDone = true;
+          gsap.set(words, { clearProps: "willChange" });
+        },
+      });
+      textTl
+        .fromTo(words, { autoAlpha: 0, y: 10, filter: "blur(6px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.45 }, 0.95)
+        .fromTo(tags, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.4, ease: "sine.out" }, 1.35);
 
-      // ── Phase 5 · Tagline appear (1.35 → 1.7s) ──
-      tl.fromTo(
-        tags,
-        { autoAlpha: 0, y: 8 },
-        { autoAlpha: 1, y: 0, duration: 0.4, ease: "sine.out" },
-        1.35
-      );
-
-      // ── Phase 6 · Light sweep & settle (1.6 → 2.2s) ──
-      tl.fromTo(
-        sweep,
-        { xPercent: -160, autoAlpha: 0 },
-        { xPercent: 160, autoAlpha: 0.5, duration: 0.6, ease: "sine.inOut" },
-        1.6
-      ).to(sweep, { autoAlpha: 0, duration: 0.18, ease: "sine.out" }, 2.05);
-
-      // Dev-only: expose the timeline for console scrubbing / automated checks.
+      // Dev-only: expose timelines for console scrubbing / automated checks.
       if (import.meta.env.DEV) {
-        window.__logoReveal = { ...(window.__logoReveal || {}), [id]: tl };
+        window.__logoReveal = { ...(window.__logoReveal || {}), [id]: { markTl, textTl } };
       }
 
-      // Run the loop only while on screen — pause when scrolled away.
+      // Run only while on screen. The text plays once — never replayed on
+      // scroll-back (guarded by textDone; play() on a finished tl is a no-op
+      // anyway, this just makes the intent explicit).
       io = new IntersectionObserver(
         (entries) => {
           const visible = entries.some((e) => e.isIntersecting);
-          if (visible) tl.play();
-          else tl.pause();
+          if (visible) {
+            markTl.play();
+            if (!textDone) textTl.play();
+          } else {
+            markTl.pause();
+            textTl.pause();
+          }
         },
         { threshold: 0.4 }
       );
