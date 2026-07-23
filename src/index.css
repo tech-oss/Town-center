@@ -220,7 +220,7 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
 .spotlight-photo-bg {
   z-index: 0;
   transform: scale(1.25);
-  filter: blur(8px) brightness(0.9) saturate(1.05);
+  filter: blur(2px) brightness(0.9) saturate(1.05);
 }
 .spotlight-photo {
   z-index: 1;
