@@ -9,20 +9,15 @@ export default function QuickLinks() {
     >
       <div className="max-w-7xl mx-auto">
 
-        {/* ── Intro copy — oversized serif editorial statement matching the
-            reference's display scale, weight, tight leading, -3% tracking and
-            full optical contrast — kept right-aligned per our own layout ── */}
+        {/* ── Intro copy (editorial serif, right-aligned) ── */}
         <p
-          className="text-right mb-12 md:mb-16"
+          className="text-right mb-12 md:mb-16 text-xl md:text-[2.25rem]"
           style={{
             color: "#000000",
-            fontFamily: "var(--font-serif)",
+            fontFamily: '"Playfair Display", Georgia, serif',
             fontWeight: 400,
-            fontSize: "clamp(1.9rem, 4.6vw, 4.4rem)",
-            lineHeight: 1.04,
-            letterSpacing: "-0.03em",
-            fontVariationSettings: '"opsz" 144',
-            textWrap: "pretty",
+            lineHeight: 1.3,
+            letterSpacing: "-0.01em",
           }}
         >
           {quickLinks.intro}
