@@ -28,6 +28,7 @@ import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
 import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
+import LogoAnimation from './components/LogoAnimation/LogoAnimation'
 
 // See & Do place links now use the shared event layout at /event/:slug.
 function SeeDoPlaceRedirect() {
@@ -114,10 +115,20 @@ function PublicSite() {
   )
 }
 
+// Standalone fullscreen demo of the cinematic logo intro (no header/footer).
+function LogoAnimationDemo() {
+  return (
+    <div style={{ height: '100vh', backgroundColor: '#0c1418' }}>
+      <LogoAnimation />
+    </div>
+  )
+}
+
 function App() {
   return (
     <Routes>
       <Route path="/mobile/*" element={<MobileApp />} />
+      <Route path="/logo-animation" element={<LogoAnimationDemo />} />
       <Route path="*" element={<PublicSite />} />
     </Routes>
   )

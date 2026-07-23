@@ -1,0 +1,167 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   LogoAnimation — cinematic brand intro
+   All animated properties are transforms / opacity / masks (GPU-friendly).
+   Layout is static; GSAP only touches compositor-safe values.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.75rem;
+  min-height: 100%;
+  padding: 4rem 2rem;
+  background-color: #0c1418;
+  opacity: 0; /* GSAP fades the whole stage in (autoAlpha) */
+  overflow: hidden;
+}
+
+/* ── Phase 1 · ambient glow behind the mark ────────────────────────────── */
+.ambient {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40rem;
+  height: 40rem;
+  transform: translate(-50%, -58%);
+  background: radial-gradient(
+    circle,
+    rgba(82, 199, 182, 0.14) 0%,
+    rgba(82, 199, 182, 0.05) 38%,
+    rgba(12, 20, 24, 0) 68%
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Logo group (hover target once settled) ────────────────────────────── */
+.logoGroup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  transition:
+    transform 280ms cubic-bezier(0.33, 1, 0.68, 1),
+    filter 280ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+.root[data-settled="true"] .logoGroup:hover {
+  transform: scale(1.015);
+  filter: brightness(1.05) saturate(1.06);
+}
+
+/* ── The mark ──────────────────────────────────────────────────────────────
+   --reveal (0 → 1) drives a diagonal gradient mask across the whole wrap:
+   the soft band between the two stops is the "light pen" edge. */
+.markWrap {
+  --reveal: 0;
+  position: relative;
+  width: clamp(7.5rem, 18vw, 11rem);
+  aspect-ratio: 1;
+  -webkit-mask-image: linear-gradient(
+    115deg,
+    #000 calc(var(--reveal) * 130% - 18%),
+    transparent calc(var(--reveal) * 130% + 2%)
+  );
+  mask-image: linear-gradient(
+    115deg,
+    #000 calc(var(--reveal) * 130% - 18%),
+    transparent calc(var(--reveal) * 130% + 2%)
+  );
+}
+
+.markGhost,
+.markColor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+}
+
+/* Luminous "blueprint" ghost of the exact same asset: brightened towards
+   white with a soft teal halo, so the reveal reads as drawn by light. */
+.markGhost {
+  filter: grayscale(1) brightness(2.4) contrast(0.85)
+    drop-shadow(0 0 10px rgba(82, 199, 182, 0.85))
+    drop-shadow(0 0 26px rgba(82, 199, 182, 0.35));
+}
+
+/* Travelling glow that rides the reveal edge during construction. */
+.glowEdge {
+  position: absolute;
+  inset: -18%;
+  background: radial-gradient(
+    ellipse 32% 78% at 50% 50%,
+    rgba(150, 215, 211, 0.55) 0%,
+    rgba(82, 199, 182, 0.22) 45%,
+    rgba(82, 199, 182, 0) 72%
+  );
+  transform: rotate(25deg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Phase 6 · light sweep, clipped to the logo mark's own pixels ──────── */
+.sweepMask {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-image: url("/logo-mark.svg");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: url("/logo-mark.svg");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  pointer-events: none;
+  overflow: hidden;
+}
+.sweep {
+  position: absolute;
+  inset: -30%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(244, 255, 253, 0.85) 49%,
+    rgba(203, 244, 238, 0.55) 52%,
+    rgba(255, 255, 255, 0) 64%
+  );
+  opacity: 0;
+}
+
+/* ── Wordmark + tagline (matches the site header lockup) ───────────────── */
+.name {
+  display: flex;
+  margin: 0;
+  color: #ffffff;
+  font-family: var(--font-body, "Switzer", sans-serif);
+  font-weight: 600;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+/* will-change is applied by GSAP only for the intro's duration and cleared
+   once settled, so no compositor layers persist on a static logo. */
+.letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(18px);
+  filter: blur(8px);
+}
+
+.tagline {
+  margin: 0;
+  color: var(--sage, #52c7b6);
+  font-family: var(--font-body, "Switzer", sans-serif);
+  font-weight: 500;
+  font-size: clamp(0.65rem, 1.4vw, 0.8rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(10px);
+}
