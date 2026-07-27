@@ -1,8 +1,6 @@
 import { Link } from "react-router-dom";
-import { categoryColors } from "../Data/events";
 import { getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
-import { card, pill } from "../utils/design";
 
 // Returns the next occurrence of a given weekday (0=Sun … 6=Sat) on or after today.
 function nextWeekday(weekday) {
@@ -53,24 +51,60 @@ function upcomingFrom(events) {
     .sort((a, b) => sortDate(a) - sortDate(b));
 }
 
-function CalendarIcon() {
+// ── One event card — image + caption (title left / excerpt right), matching
+// the "Featured Stories" / "In the Spotlight" 4:3 portfolio treatment: sharp
+// foreground photo that insets on hover to reveal a blurred, dimmed frame.
+function EventCard({ event }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-      <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
-    </svg>
-  );
-}
-function PinIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
-    </svg>
+    <Link to={`/event/${event.slug}`} className="spotlight-card group block md:col-span-4">
+      <div
+        className="relative w-full overflow-hidden aspect-[4/3]"
+        style={{ backgroundColor: "#1a1a1a" }}
+      >
+        <img
+          src={event.image}
+          alt=""
+          aria-hidden="true"
+          loading="lazy"
+          className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
+        />
+        <img
+          src={event.image}
+          alt={event.title}
+          loading="lazy"
+          className="spotlight-photo absolute inset-0 w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
+        <div className="sm:max-w-[52%]">
+          <p
+            className="text-[11px] font-medium uppercase tracking-[0.02em] mb-1"
+            style={{ color: "var(--leaf)" }}
+          >
+            {event.category}
+          </p>
+          <h3
+            className="text-base md:text-lg leading-snug"
+            style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "#000000" }}
+          >
+            {event.title}
+          </h3>
+        </div>
+        <p
+          className="text-xs leading-relaxed sm:max-w-[44%] sm:text-right"
+          style={{ color: "#000000" }}
+        >
+          {event.excerpt}
+        </p>
+      </div>
+    </Link>
   );
 }
 
 export default function EventsGrid() {
   const { data: events } = useFetch(getEvents, []);
-  const upcomingEvents = upcomingFrom(events ?? []);
+  const upcomingEvents = upcomingFrom(events ?? []).slice(0, 3);
   return (
     <section id="events" className="py-20 md:py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">
@@ -93,42 +127,13 @@ export default function EventsGrid() {
             <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
           </Link>
         </div>
+        <div className="mb-10 -mt-4 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
 
-        {/* Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Cards — same side-by-side portfolio treatment as Featured Stories,
+            three per row */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-12">
           {upcomingEvents.map((e) => (
-            <Link
-              key={e.slug}
-              to={`/event/${e.slug}`}
-              className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
-              style={{ borderRadius: card.radius, boxShadow: card.shadow }}
-            >
-              <div className="relative aspect-[16/10] overflow-hidden" style={{ borderRadius: `${card.radius} ${card.radius} 0 0` }}>
-                <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                <span
-                  className={pill.className + " absolute top-3 left-3"}
-                  style={{ backgroundColor: "rgba(255,255,255,0.95)", color: categoryColors[e.category] || "var(--forest)" }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
-                  {e.category}
-                </span>
-              </div>
-              <div className="flex flex-col gap-2 p-5">
-                <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>{e.title}</h3>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
-                  <CalendarIcon />{e.date}
-                </div>
-                <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
-                  <PinIcon />{e.location}
-                </div>
-                <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000" }}>
-                  {e.excerpt}
-                </p>
-                <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-2" style={{ color: "#000000" }}>
-                  Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                </span>
-              </div>
-            </Link>
+            <EventCard key={e.slug} event={e} />
           ))}
         </div>
 
