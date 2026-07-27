@@ -2,53 +2,52 @@ import { Link } from "react-router-dom";
 import { getStories } from "../api";
 import useFetch from "../hooks/useFetch";
 
-// ── One featured story card — image + caption (title left / excerpt right),
-// matching the "In the Spotlight" portfolio treatment: sharp foreground
-// photo that insets on hover to reveal a blurred, dimmed copy as a frame.
+// ── One featured story card — a 60vw image with its caption set beside it in
+// the remaining white space (opposite the image on alternating rows), rather
+// than stacked underneath. The image keeps the "In the Spotlight" hover: a
+// sharp foreground photo that insets to reveal a blurred, dimmed frame.
 function FeatureCard({ story, align }) {
+  const reversed = align === "right";
   return (
     <Link
       to={`/story/${story.slug}`}
-      className={`spotlight-card group block w-full md:w-[60vw] ${align === "right" ? "md:ml-auto" : "md:mr-auto"}`}
+      className={`group flex flex-col ${reversed ? "md:flex-row-reverse" : "md:flex-row"} md:items-center gap-6 md:gap-12 w-full`}
     >
-      <div
-        className="relative w-full overflow-hidden aspect-[6/4]"
-        style={{ backgroundColor: "#1a1a1a" }}
-      >
-        <img
-          src={story.cardImage}
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
-        />
-        <img
-          src={story.cardImage}
-          alt={story.cardHeading}
-          loading="lazy"
-          className="spotlight-photo absolute inset-0 w-full h-full object-cover"
-        />
+      <div className="spotlight-card shrink-0 w-full md:w-[60vw]">
+        <div
+          className="relative w-full overflow-hidden aspect-[6/4]"
+          style={{ backgroundColor: "#1a1a1a" }}
+        >
+          <img
+            src={story.cardImage}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
+          />
+          <img
+            src={story.cardImage}
+            alt={story.cardHeading}
+            loading="lazy"
+            className="spotlight-photo absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
-        <div className="sm:max-w-[52%]">
-          <p
-            className="text-[11px] font-medium uppercase tracking-[0.02em] mb-1"
-            style={{ color: "var(--leaf)" }}
-          >
-            {story.eyebrow}
-          </p>
-          <h3
-            className="text-base md:text-lg leading-snug"
-            style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "#000000" }}
-          >
-            {story.cardHeading}
-          </h3>
-        </div>
+      <div className={`flex-1 min-w-0 px-6 md:px-0 ${reversed ? "md:text-right" : ""}`}>
         <p
-          className="text-xs leading-relaxed sm:max-w-[44%] sm:text-right"
-          style={{ color: "#000000" }}
+          className="text-[11px] font-medium uppercase tracking-[0.02em] mb-3"
+          style={{ color: "var(--leaf)" }}
         >
+          {story.eyebrow}
+        </p>
+        <h3
+          className="text-2xl md:text-3xl leading-snug mb-4"
+          style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "#000000" }}
+        >
+          {story.cardHeading}
+        </h3>
+        <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000" }}>
           {story.cardBody}
         </p>
       </div>
