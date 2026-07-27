@@ -3,13 +3,16 @@ import { getStories } from "../api";
 import useFetch from "../hooks/useFetch";
 
 // ── One featured story card — image + caption (title left / excerpt right),
-// matching the "In the Spotlight" 4:3 portfolio treatment: sharp foreground
+// matching the "In the Spotlight" portfolio treatment: sharp foreground
 // photo that insets on hover to reveal a blurred, dimmed copy as a frame.
-function FeatureCard({ story }) {
+function FeatureCard({ story, align }) {
   return (
-    <Link to={`/story/${story.slug}`} className="spotlight-card group block md:col-span-6">
+    <Link
+      to={`/story/${story.slug}`}
+      className={`spotlight-card group block w-full md:w-1/2 ${align === "right" ? "md:ml-auto" : "md:mr-auto"}`}
+    >
       <div
-        className="relative w-full overflow-hidden aspect-[4/3]"
+        className="relative w-full overflow-hidden aspect-[6/4]"
         style={{ backgroundColor: "#1a1a1a" }}
       >
         <img
@@ -69,9 +72,9 @@ export default function FeatureBlocks() {
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-12">
-          {(features ?? []).map((story) => (
-            <FeatureCard key={story.slug} story={story} />
+        <div className="flex flex-col gap-y-12">
+          {(features ?? []).map((story, i) => (
+            <FeatureCard key={story.slug} story={story} align={i % 2 === 1 ? "right" : "left"} />
           ))}
         </div>
       </div>
