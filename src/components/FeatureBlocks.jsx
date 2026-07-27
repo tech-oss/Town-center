@@ -50,6 +50,13 @@ function FeatureCard({ story, align }) {
         <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000" }}>
           {story.cardBody}
         </p>
+        <span
+          className={`inline-flex items-center gap-1.5 text-sm font-semibold mt-5 ${reversed ? "md:flex-row-reverse" : ""}`}
+          style={{ color: "#000000" }}
+        >
+          Read more
+          <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+        </span>
       </div>
     </Link>
   );
