@@ -167,28 +167,6 @@ export const blogCards = {
       href: "/news/cocoba-hot-chocolate-bombes",
       date: "All year round",
     },
-    {
-      id: 4,
-      category: "The Fat Duck · Feature",
-      title: "The Fat Duck, Bray: Where Fine Dining Becomes Fiction",
-      excerpt:
-        "A few miles from Maidenhead sits Heston Blumenthal's three-Michelin-star theatre of taste, memory and illusion.",
-      imageSrc: "/images/fatduck/food-1.jpg",
-      imageAlt: "The Fat Duck, Bray",
-      href: "/story/the-fat-duck",
-      date: "Bray · Three Michelin Stars",
-    },
-    {
-      id: 5,
-      category: "Coppa Club · What's On",
-      title: "Shake, Stir & Sip: Cocktail Masterclass",
-      excerpt:
-        "A hands-on cocktail masterclass led by Coppa Club's in-house bartenders — shake, stir and sip through their signature serves.",
-      imageSrc: "/images/coppa/cocktail.jpg",
-      imageAlt: "Cocktail masterclass at Coppa Club",
-      href: "/news/coppa-cocktail-masterclass",
-      date: "Monthly · 7pm",
-    },
   ],
 };
 

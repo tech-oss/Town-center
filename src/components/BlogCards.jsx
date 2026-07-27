@@ -14,11 +14,9 @@ function CardLink({ href, className, style, children }) {
 //   row 1 → big left  + small right     row 2 → medium centre
 //   row 3 → small left + big right
 const LAYOUT = [
-  { col: "md:col-start-1 md:col-end-8",  ratio: "md:aspect-[4/3]",   offset: "" },
-  { col: "md:col-start-9 md:col-end-13", ratio: "md:aspect-[4/3]",   offset: "md:mt-20" },
-  { col: "md:col-start-4 md:col-end-11", ratio: "md:aspect-[16/10]", offset: "md:mt-10" },
-  { col: "md:col-start-1 md:col-end-5",  ratio: "md:aspect-[5/4]",   offset: "md:mt-16" },
-  { col: "md:col-start-6 md:col-end-13", ratio: "md:aspect-[16/11]", offset: "" },
+  { col: "md:col-start-1 md:col-end-7",  ratio: "md:aspect-[4/3]", offset: "" },
+  { col: "md:col-start-7 md:col-end-13", ratio: "md:aspect-[4/3]", offset: "" },
+  { col: "md:col-start-1 md:col-end-7",  ratio: "md:aspect-[4/3]", offset: "md:mt-6" },
 ];
 
 // ── One scatter item: image + caption (title left / promo text right) ────────
@@ -82,7 +80,7 @@ function PortfolioCard({ post, layout }) {
 
 // ── Section ────────────────────────────────────────────────────────────────
 export default function BlogCards() {
-  const posts = blogCards.posts.slice(0, 5);
+  const posts = blogCards.posts.slice(0, 3);
 
   return (
     <section
