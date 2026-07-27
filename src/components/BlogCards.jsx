@@ -34,7 +34,7 @@ function PortfolioCard({ post, layout }) {
         className={`spotlight-card group block ${revealed ? "is-revealed" : ""}`}
       >
         <div
-          className="relative w-full overflow-hidden aspect-[3/2]"
+          className="relative w-[400px] h-[500px] max-w-full overflow-hidden"
           style={{ backgroundColor: "#1a1a1a" }}
         >
           {/* Blurred, dimmed copy of the photo — the frame revealed on hover/tap */}
