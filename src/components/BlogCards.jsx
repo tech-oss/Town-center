@@ -31,10 +31,10 @@ function PortfolioCard({ post, layout }) {
       <CardLink
         href={post.href}
         onClick={onImageClick}
-        className={`spotlight-card group block ${revealed ? "is-revealed" : ""}`}
+        className={`spotlight-card group block w-[450px] max-w-full ${revealed ? "is-revealed" : ""}`}
       >
         <div
-          className="relative w-[420px] h-[450px] max-w-full overflow-hidden"
+          className="relative w-full h-[460px] overflow-hidden"
           style={{ backgroundColor: "#1a1a1a" }}
         >
           {/* Blurred, dimmed copy of the photo — the frame revealed on hover/tap */}
@@ -55,8 +55,8 @@ function PortfolioCard({ post, layout }) {
         </div>
       </CardLink>
 
-      {/* Caption — title on the left, promotional text on the right (small) */}
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
+      {/* Caption — width-matched to the image above it so both edges align */}
+      <div className="mt-4 w-[450px] max-w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
         <div className="sm:max-w-[52%]">
           <p
             className="text-[11px] font-medium uppercase tracking-[0.02em] mb-1"
@@ -83,7 +83,7 @@ function PortfolioCard({ post, layout }) {
           where the image itself no longer navigates */}
       <CardLink
         href={post.href}
-        className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-3"
+        className="group/more flex items-center gap-1.5 text-sm font-semibold mt-3 w-[450px] max-w-full"
         style={{ color: "#000000" }}
       >
         Read more
