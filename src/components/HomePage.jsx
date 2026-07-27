@@ -13,12 +13,12 @@ export default function HomePage() {
     <>
       <Hero />
       <QuickLinks />
+      <FeatureBlocks />
       <BlogCards />
       <TradersMap />
-      <AppCta />
-      <FeatureBlocks />
       <EventsGrid />
       <PlanVisit />
+      <AppCta />
       <Newsletter />
     </>
   );
