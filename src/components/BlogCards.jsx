@@ -14,9 +14,9 @@ function CardLink({ href, className, style, children }) {
 //   row 1 → big left  + small right     row 2 → medium centre
 //   row 3 → small left + big right
 const LAYOUT = [
-  { col: "md:col-start-1 md:col-end-7",  ratio: "md:aspect-[4/3]", offset: "" },
-  { col: "md:col-start-7 md:col-end-13", ratio: "md:aspect-[4/3]", offset: "" },
-  { col: "md:col-start-4 md:col-end-10", ratio: "md:aspect-[4/3]", offset: "md:mt-6" },
+  { col: "md:col-start-1 md:col-end-7",  ratio: "md:aspect-[2/3]", offset: "" },
+  { col: "md:col-start-7 md:col-end-13", ratio: "md:aspect-[2/3]", offset: "" },
+  { col: "md:col-start-4 md:col-end-10", ratio: "md:aspect-[2/3]", offset: "md:mt-6" },
 ];
 
 // ── One scatter item: image + caption (title left / promo text right) ────────
