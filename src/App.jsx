@@ -28,6 +28,7 @@ import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
 import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
+import ChatWidget from './components/ChatWidget'
 import LogoAnimation from './components/LogoAnimation/LogoAnimation'
 
 // See & Do place links now use the shared event layout at /event/:slug.
@@ -67,6 +68,11 @@ function PublicSite() {
     <>
       <ScrollToTop />
       <Header ref={headerRef} />
+      {/* Rendered near the top of the DOM (rather than after the footer) so
+          the widget's own IntersectionObserver-based lazy load fires on the
+          very first paint, regardless of scroll position — it renders as a
+          fixed corner bubble either way. */}
+      <ChatWidget />
       <main style={{ paddingTop: isHome ? 0 : headerHeight || undefined }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
