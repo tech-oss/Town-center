@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 
 // Returns the next occurrence of a given weekday (0=Sun … 6=Sat) on or after today.
 function nextWeekday(weekday) {
@@ -53,28 +54,38 @@ function upcomingFrom(events) {
 
 // ── One event card — image + caption (title left / excerpt right), matching
 // the "Featured Stories" / "In the Spotlight" 4:3 portfolio treatment: sharp
-// foreground photo that insets on hover to reveal a blurred, dimmed frame.
+// foreground photo that insets on hover to reveal a blurred, dimmed frame. On
+// touch devices the image itself doesn't navigate — a tap only toggles that
+// reveal; "Read more" is the actual link on mobile.
 function EventCard({ event }) {
+  const { revealed, onImageClick } = useTapReveal();
+  const to = `/event/${event.slug}`;
   return (
-    <Link to={`/event/${event.slug}`} className="spotlight-card group block md:col-span-4">
-      <div
-        className="relative w-full overflow-hidden aspect-[4/3]"
-        style={{ backgroundColor: "#1a1a1a" }}
+    <div className="md:col-span-4">
+      <Link
+        to={to}
+        onClick={onImageClick}
+        className={`spotlight-card group block ${revealed ? "is-revealed" : ""}`}
       >
-        <img
-          src={event.image}
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
-        />
-        <img
-          src={event.image}
-          alt={event.title}
-          loading="lazy"
-          className="spotlight-photo absolute inset-0 w-full h-full object-cover"
-        />
-      </div>
+        <div
+          className="relative w-full overflow-hidden aspect-[4/3]"
+          style={{ backgroundColor: "#1a1a1a" }}
+        >
+          <img
+            src={event.image}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
+          />
+          <img
+            src={event.image}
+            alt={event.title}
+            loading="lazy"
+            className="spotlight-photo absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
+      </Link>
 
       <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
         <div className="sm:max-w-[52%]">
@@ -98,7 +109,18 @@ function EventCard({ event }) {
           {event.excerpt}
         </p>
       </div>
-    </Link>
+
+      {/* Read more — the reliable link on every device, including mobile
+          where the image itself no longer navigates */}
+      <Link
+        to={to}
+        className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-3"
+        style={{ color: "#000000" }}
+      >
+        Read more
+        <span className="transition-transform duration-200 group-hover/more:translate-x-1">→</span>
+      </Link>
+    </div>
   );
 }
 
