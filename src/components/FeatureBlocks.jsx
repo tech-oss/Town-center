@@ -9,7 +9,7 @@ function FeatureCard({ story, align }) {
   return (
     <Link
       to={`/story/${story.slug}`}
-      className={`spotlight-card group block w-full md:w-1/2 ${align === "right" ? "md:ml-auto" : "md:mr-auto"}`}
+      className={`spotlight-card group block w-full md:w-[60vw] ${align === "right" ? "md:ml-auto" : "md:mr-auto"}`}
     >
       <div
         className="relative w-full overflow-hidden aspect-[6/4]"
@@ -71,12 +71,14 @@ export default function FeatureBlocks() {
           </h2>
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
         </div>
+      </div>
 
-        <div className="flex flex-col gap-y-12">
-          {(features ?? []).map((story, i) => (
-            <FeatureCard key={story.slug} story={story} align={i % 2 === 1 ? "right" : "left"} />
-          ))}
-        </div>
+      {/* Cards break out of the max-w-6xl container so each can size itself
+          relative to the full viewport width, not just the text column. */}
+      <div className="flex flex-col gap-y-12">
+        {(features ?? []).map((story, i) => (
+          <FeatureCard key={story.slug} story={story} align={i % 2 === 1 ? "right" : "left"} />
+        ))}
       </div>
     </section>
   );
