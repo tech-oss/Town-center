@@ -1,55 +1,59 @@
 import { Link } from "react-router-dom";
 import { blogCards } from "../Data/content";
 import { btn } from "../utils/design";
+import useTapReveal from "../hooks/useTapReveal";
 
-function CardLink({ href, className, style, children }) {
-  if (href?.startsWith("/")) return <Link to={href} className={className} style={style}>{children}</Link>;
-  return <a href={href} className={className} style={style}>{children}</a>;
+function CardLink({ href, className, style, onClick, children }) {
+  if (href?.startsWith("/")) return <Link to={href} className={className} style={style} onClick={onClick}>{children}</Link>;
+  return <a href={href} className={className} style={style} onClick={onClick}>{children}</a>;
 }
 
 // ── Per-item placement on the desktop 12-column scatter ──────────────────────
-// Each entry positions one card: its column span, image aspect ratio (which
-// sets its relative size), and a vertical offset for the staggered, editorial
-// rhythm of the reference. Items that fit a row sit side-by-side via auto-flow:
-//   row 1 → big left  + small right     row 2 → medium centre
-//   row 3 → small left + big right
+// Each entry positions one card: its column span and a vertical offset for
+// the staggered, editorial rhythm of the reference. All three share the same
+// 3:4 image ratio.
 const LAYOUT = [
-  { col: "md:col-start-1 md:col-end-7",  ratio: "md:aspect-[4/5]", offset: "" },
-  { col: "md:col-start-7 md:col-end-13", ratio: "md:aspect-[4/5]", offset: "" },
-  { col: "md:col-start-4 md:col-end-10", ratio: "md:aspect-[4/5]", offset: "md:mt-6" },
+  { col: "md:col-start-1 md:col-end-7",  offset: "" },
+  { col: "md:col-start-7 md:col-end-13", offset: "" },
+  { col: "md:col-start-4 md:col-end-10", offset: "md:mt-6" },
 ];
 
 // ── One scatter item: image + caption (title left / promo text right) ────────
 function PortfolioCard({ post, layout }) {
+  const { revealed, onImageClick } = useTapReveal();
   return (
-    <CardLink
-      href={post.href}
-      className={`spotlight-card group block ${layout.col} ${layout.offset}`}
-    >
-      {/* Image — varied aspect ratios give the reference's size contrast.
-          Hover: the sharp photo eases inward, revealing a blurred, dimmed copy
-          of the same image around its edges (a soft framed vignette, not blank
-          space), matching the reference. */}
-      <div
-        className={`relative w-full overflow-hidden aspect-[4/3] ${layout.ratio}`}
-        style={{ backgroundColor: "#1a1a1a" }}
+    <div className={`${layout.col} ${layout.offset}`}>
+      {/* Image — hover (desktop) or tap (touch) eases the sharp photo inward,
+          revealing a blurred, dimmed copy of the same image around its edges
+          (a soft framed vignette, not blank space), matching the reference.
+          On touch devices the tap only toggles this effect; it doesn't
+          navigate — "Read more" below is the actual link on mobile. */}
+      <CardLink
+        href={post.href}
+        onClick={onImageClick}
+        className={`spotlight-card group block ${revealed ? "is-revealed" : ""}`}
       >
-        {/* Blurred, dimmed copy of the photo — the frame revealed on hover */}
-        <img
-          src={post.imageSrc}
-          alt=""
-          aria-hidden="true"
-          loading="lazy"
-          className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
-        />
-        {/* Sharp foreground — insets on hover to reveal the blurred frame */}
-        <img
-          src={post.imageSrc}
-          alt={post.imageAlt}
-          loading="lazy"
-          className="spotlight-photo absolute inset-0 w-full h-full object-cover"
-        />
-      </div>
+        <div
+          className="relative w-full overflow-hidden aspect-[3/4]"
+          style={{ backgroundColor: "#1a1a1a" }}
+        >
+          {/* Blurred, dimmed copy of the photo — the frame revealed on hover/tap */}
+          <img
+            src={post.imageSrc}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover"
+          />
+          {/* Sharp foreground — insets on hover/tap to reveal the blurred frame */}
+          <img
+            src={post.imageSrc}
+            alt={post.imageAlt}
+            loading="lazy"
+            className="spotlight-photo absolute inset-0 w-full h-full object-cover"
+          />
+        </div>
+      </CardLink>
 
       {/* Caption — title on the left, promotional text on the right (small) */}
       <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
@@ -74,7 +78,18 @@ function PortfolioCard({ post, layout }) {
           {post.excerpt}
         </p>
       </div>
-    </CardLink>
+
+      {/* Read more — the reliable link on every device, including mobile
+          where the image itself no longer navigates */}
+      <CardLink
+        href={post.href}
+        className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-3"
+        style={{ color: "#000000" }}
+      >
+        Read more
+        <span className="transition-transform duration-200 group-hover/more:translate-x-1">→</span>
+      </CardLink>
+    </div>
   );
 }
 

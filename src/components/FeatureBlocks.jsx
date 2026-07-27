@@ -1,19 +1,25 @@
 import { Link } from "react-router-dom";
 import { getStories } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 
 // ── One featured story card — a 60vw image with its caption set beside it in
 // the remaining white space (opposite the image on alternating rows), rather
 // than stacked underneath. The image keeps the "In the Spotlight" hover: a
-// sharp foreground photo that insets to reveal a blurred, dimmed frame.
+// sharp foreground photo that insets to reveal a blurred, dimmed frame. On
+// touch devices the image itself doesn't navigate — a tap only toggles that
+// reveal; "Read more" is the actual link on mobile.
 function FeatureCard({ story, align }) {
   const reversed = align === "right";
+  const { revealed, onImageClick } = useTapReveal();
+  const to = `/story/${story.slug}`;
   return (
-    <Link
-      to={`/story/${story.slug}`}
-      className={`group flex flex-col ${reversed ? "md:flex-row-reverse" : "md:flex-row"} md:items-center gap-6 md:gap-12 w-full`}
-    >
-      <div className="spotlight-card shrink-0 w-full md:w-[60vw]">
+    <div className={`flex flex-col ${reversed ? "md:flex-row-reverse" : "md:flex-row"} md:items-center gap-6 md:gap-12 w-full`}>
+      <Link
+        to={to}
+        onClick={onImageClick}
+        className={`spotlight-card group/img shrink-0 block w-full md:w-[60vw] ${revealed ? "is-revealed" : ""}`}
+      >
         <div
           className="relative w-full overflow-hidden aspect-[6/4]"
           style={{ backgroundColor: "#1a1a1a" }}
@@ -32,7 +38,7 @@ function FeatureCard({ story, align }) {
             className="spotlight-photo absolute inset-0 w-full h-full object-cover"
           />
         </div>
-      </div>
+      </Link>
 
       <div className={`flex-1 min-w-0 px-6 md:px-0 ${reversed ? "md:text-right" : ""}`}>
         <p
@@ -50,15 +56,16 @@ function FeatureCard({ story, align }) {
         <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000" }}>
           {story.cardBody}
         </p>
-        <span
-          className={`inline-flex items-center gap-1.5 text-sm font-semibold mt-5 ${reversed ? "md:flex-row-reverse" : ""}`}
+        <Link
+          to={to}
+          className={`group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-5 ${reversed ? "md:flex-row-reverse" : ""}`}
           style={{ color: "#000000" }}
         >
           Read more
-          <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-        </span>
+          <span className="transition-transform duration-200 group-hover/more:translate-x-1">→</span>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
 
