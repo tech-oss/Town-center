@@ -87,25 +87,52 @@ function EventCard({ event }) {
         </div>
       </Link>
 
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
-        <div className="sm:max-w-[52%]">
-          <p
-            className="text-[11px] font-medium uppercase tracking-[0.02em] mb-1"
-            style={{ color: "var(--leaf)" }}
-          >
-            {event.category}
-          </p>
-          <h3
-            className="text-base md:text-lg leading-snug"
-            style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "#000000" }}
-          >
-            {event.title}
-          </h3>
-        </div>
+      <div className="mt-4">
         <p
-          className="text-xs leading-relaxed sm:max-w-[44%] sm:text-right"
-          style={{ color: "#000000" }}
+          className="text-[11px] font-medium uppercase tracking-[0.02em] mb-1"
+          style={{ color: "var(--leaf)" }}
         >
+          {event.category}
+        </p>
+        <h3
+          className="text-base md:text-lg leading-snug mb-2.5"
+          style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "#000000" }}
+        >
+          {event.title}
+        </h3>
+
+        {/* Date / time / location — matching the reference's detail rows */}
+        <div className="flex flex-col gap-1.5 mb-2.5">
+          {event.date && (
+            <div className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0">
+                <rect x="3" y="5" width="18" height="16" rx="2" />
+                <path d="M3 10h18M8 3v4M16 3v4" />
+              </svg>
+              <span>{event.date}</span>
+            </div>
+          )}
+          {event.time && (
+            <div className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3.5 2" />
+              </svg>
+              <span>{event.time}</span>
+            </div>
+          )}
+          {event.location && (
+            <div className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="shrink-0">
+                <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" />
+                <circle cx="12" cy="9.5" r="2.3" />
+              </svg>
+              <span>{event.location}</span>
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs leading-relaxed" style={{ color: "#000000" }}>
           {event.excerpt}
         </p>
       </div>
