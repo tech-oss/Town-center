@@ -167,7 +167,7 @@ export default function Hero() {
         >
           <span
             className="block text-base sm:text-lg md:text-2xl font-medium mb-3 md:mb-5"
-            style={{ letterSpacing: "-0.01em", color: "rgba(255,255,255,0.92)" }}
+            style={{ letterSpacing: "-0.01em", color: "#ffffff" }}
           >
             Welcome to
           </span>
@@ -182,7 +182,7 @@ export default function Hero() {
             className="text-base sm:text-lg md:text-2xl font-medium uppercase"
             style={{
               letterSpacing: "-0.01em",
-              color: "rgba(255,255,255,0.92)",
+              color: "#ffffff",
               textShadow: "0 1px 12px rgba(0,0,0,0.5)",
             }}
           >

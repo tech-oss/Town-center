@@ -80,9 +80,9 @@ const Header = forwardRef(function Header(_, ref) {
               key={link.label}
               to={link.href}
               className="transition-colors duration-150"
-              style={{ color: "var(--mint)" }}
+              style={{ color: "#ffffff" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--mint)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#ffffff")}
             >
               {link.label}
             </SmartLink>
@@ -246,7 +246,7 @@ const Header = forwardRef(function Header(_, ref) {
                 <div key={nav.label} style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
                   <button
                     className="w-full flex items-center justify-between py-3 text-sm font-medium"
-                    style={{ color: "rgba(255,255,255,0.9)" }}
+                    style={{ color: "#ffffff" }}
                     aria-expanded={expanded}
                     onClick={() => setMobileExpanded(expanded ? null : menu.label)}
                   >
@@ -263,7 +263,7 @@ const Header = forwardRef(function Header(_, ref) {
                           <ul className="flex flex-col gap-1.5 pl-1">
                             {col.links.map((l) => (
                               <li key={l.to}>
-                                <Link to={l.to} onClick={closeAll} className="block py-1 text-sm" style={{ color: "rgba(255,255,255,0.7)" }}>
+                                <Link to={l.to} onClick={closeAll} className="block py-1 text-sm" style={{ color: "#ffffff" }}>
                                   {l.label}
                                 </Link>
                               </li>
@@ -282,7 +282,7 @@ const Header = forwardRef(function Header(_, ref) {
                   key={nav.label}
                   to={nav.href}
                   className="py-3 text-sm font-medium"
-                  style={{ color: "rgba(255,255,255,0.85)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+                  style={{ color: "#ffffff", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
                   onClick={closeAll}
                 >
                   {nav.label}
@@ -294,7 +294,7 @@ const Header = forwardRef(function Header(_, ref) {
                 key={nav.label}
                 href={nav.href}
                 className="py-3 text-sm font-medium"
-                style={{ color: "rgba(255,255,255,0.85)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+                style={{ color: "#ffffff", borderBottom: "1px solid rgba(255,255,255,0.07)" }}
                 onClick={closeAll}
               >
                 {nav.label}
