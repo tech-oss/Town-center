@@ -171,7 +171,7 @@ export default function Hero() {
           >
             Welcome to
           </span>
-          <span className="hero-title block text-6xl sm:text-7xl md:text-8xl leading-none">
+          <span className="hero-title block text-5xl sm:text-7xl md:text-9xl leading-none">
             Maidenhead
           </span>
         </h1>
@@ -179,9 +179,9 @@ export default function Hero() {
         <div className="flex items-center gap-3 md:gap-4 mt-6 md:mt-8">
           <span className="hidden sm:block" style={{ height: 1, width: 36, background: "rgba(255,255,255,0.55)" }} />
           <p
-            className="text-[11px] sm:text-xs md:text-sm font-semibold uppercase"
+            className="text-base sm:text-lg md:text-2xl font-medium uppercase"
             style={{
-              letterSpacing: "0.02em",
+              letterSpacing: "-0.01em",
               color: "rgba(255,255,255,0.92)",
               textShadow: "0 1px 12px rgba(0,0,0,0.5)",
             }}

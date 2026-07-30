@@ -132,14 +132,13 @@ h5, h6, .text-sm, .text-xs {
 /* Display / hero-scale headings tighten further for a crisper masthead feel. */
 .text-5xl, .text-6xl, .text-7xl, .text-8xl { letter-spacing: -0.03em; }
 
-/* Homepage hero title — light serif display, tightest tracking/leading.
-   Must set the family explicitly: the span/UI rule below would otherwise put
-   this <span> back in the sans. The sans "Welcome to" kicker above it keeps
-   the deliberate sans-kicker/serif-display contrast from the reference. */
+/* Homepage hero title — thin sans display with wide tracking, matching the
+   Battersea Power Station reference typography (light grotesque, generous
+   letter-spacing, not a serif). */
 .hero-title {
-  font-family: var(--font-serif);
+  font-family: var(--font-heading);
   font-weight: 300 !important;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.06em;
   line-height: 1;
 }
 
