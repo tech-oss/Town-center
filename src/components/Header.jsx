@@ -133,8 +133,8 @@ const Header = forwardRef(function Header(_, ref) {
                   <Link
                     to={menu.path}
                     onClick={() => setOpenDropdown(null)}
-                    className="flex items-center gap-1 text-sm font-medium tracking-[0.02em] transition-colors duration-150 py-1"
-                    style={{ color: isOpen ? "var(--sage)" : "rgba(255,255,255,0.85)" }}
+                    className="flex items-center gap-1 text-[16px] font-medium tracking-[0.02em] transition-colors duration-150 py-1"
+                    style={{ color: isOpen ? "var(--sage)" : "#ffffff" }}
                   >
                     {nav.label}
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
@@ -150,10 +150,10 @@ const Header = forwardRef(function Header(_, ref) {
                 <Link
                   key={nav.label}
                   to={nav.href}
-                  className="text-sm font-medium tracking-[0.02em] transition-colors duration-150"
-                  style={{ color: active ? "var(--sage)" : "rgba(255,255,255,0.85)" }}
+                  className="text-[16px] font-medium tracking-[0.02em] transition-colors duration-150"
+                  style={{ color: active ? "var(--sage)" : "#ffffff" }}
                   onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = active ? "var(--sage)" : "rgba(255,255,255,0.85)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = active ? "var(--sage)" : "#ffffff")}
                 >
                   {nav.label}
                 </Link>
@@ -163,10 +163,10 @@ const Header = forwardRef(function Header(_, ref) {
               <a
                 key={nav.label}
                 href={nav.href}
-                className="text-sm font-medium tracking-[0.02em] transition-colors duration-150"
-                style={{ color: "rgba(255,255,255,0.85)" }}
+                className="text-[16px] font-medium tracking-[0.02em] transition-colors duration-150"
+                style={{ color: "#ffffff" }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--sage)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#ffffff")}
               >
                 {nav.label}
               </a>
