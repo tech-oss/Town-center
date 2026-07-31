@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -6,7 +6,7 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { brandGrid } from "../Data/content";
-import { card } from "../utils/design";
+import { itemBySlug } from "../Data/pages";
 
 const CENTRE = { lat: 51.5235, lng: -0.7125 };
 const EIGHT_MILES_M = 12875;
@@ -22,6 +22,13 @@ function haversineM(a, b) {
       Math.cos((b.lat * Math.PI) / 180) *
       Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+}
+
+// Metres → short imperial label, matching the reference ("0.1 mi").
+function milesLabel(metres) {
+  const mi = metres / 1609.344;
+  if (mi < 0.1) return "< 0.1 mi";
+  return `${mi.toFixed(1)} mi`;
 }
 
 function makePin(active = false) {
@@ -76,8 +83,6 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
   const popupRef = useRef(null);
 
   // Latest callbacks via refs so marker handlers never go stale (no rebuilds).
-  // Assigned in an effect (after commit) rather than during render; marker click
-  // handlers read `.current` at event time, so behaviour is identical.
   const selectRef = useRef(onSelectBrand);
   const readRef = useRef(onReadMore);
   const navRef = useRef(onNavigate);
@@ -127,20 +132,13 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
   useEffect(() => {
     apiRef.current = {
       focus(b) {
-        // 1. Clear any previous popup + highlight (kills stale cards).
-        //    Null the ref BEFORE closing so the popupclose handler doesn't
-        //    mistake this programmatic close for a user dismissal (which would
-        //    deselect and cancel the new selection).
         const prevPopup = popupRef.current;
         popupRef.current = null;
         if (prevPopup) map.closePopup(prevPopup);
         if (highlightRef.current) { map.removeLayer(highlightRef.current); highlightRef.current = null; }
 
-        // 2. Recentre on the business (instant = reliable + predictable)
         map.setView([b.lat, b.lng], DETAIL_ZOOM, { animate: false });
 
-        // 3. Drop a dedicated highlight pin ABOVE everything (visible even if
-        //    the underlying clustered marker is collapsed into a number badge)
         highlightRef.current = L.marker([b.lat, b.lng], {
           icon: makePin(true),
           zIndexOffset: 1000,
@@ -148,9 +146,6 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
         }).addTo(map);
         highlightRef.current.on("click", () => selectRef.current(b));
 
-        // 4. Open a standalone popup at the exact coordinates. Because it is
-        //    bound to a latlng (not a marker), it ALWAYS shows the right card
-        //    in the right place, regardless of clustering.
         const popup = L.popup({
           offset: [0, -46],
           closeButton: true,
@@ -163,7 +158,6 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
         map.openPopup(popup);
         popupRef.current = popup;
 
-        // 5. Wire the popup's buttons once its DOM exists
         const el = popup.getElement();
         if (el) {
           const readBtn = el.querySelector(`[data-read-id="${b.id}"]`);
@@ -211,13 +205,410 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
   return null;
 }
 
+// ── Tabs mirror the site header: All / Eat & Drink / Shop & Services / See & Do.
+// `sections` lists which trader data-sections roll up into each tab.
 const FILTERS = [
-  { key: "all", label: "All" },
-  { key: "food-drink", label: "Food & Drink" },
-  { key: "shopping", label: "Shopping" },
-  { key: "services", label: "Services" },
-  { key: "health-beauty", label: "Health & Beauty" },
+  { key: "all",           label: "All",              sections: null },
+  { key: "eat-drink",     label: "Eat & Drink",      sections: ["food-drink"] },
+  { key: "shop-services", label: "Shop & Services",  sections: ["shopping", "services", "health-beauty"] },
+  { key: "see-do",        label: "See & Do",         sections: ["see-do"] },
 ];
+
+const PinIcon = (props) => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" />
+    <circle cx="12" cy="9.5" r="2.3" />
+  </svg>
+);
+
+// ── One directory row — thumbnail, name, category · distance, address ─────────
+function TraderRow({ b, isActive, distance, onSelect, onDirections }) {
+  const thumb = b.image ?? b.logo;
+  return (
+    <li>
+      <div
+        onClick={() => onSelect(b)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onSelect(b); } }}
+        className="group flex items-center gap-3.5 px-4 sm:px-5 py-3.5 cursor-pointer transition-colors duration-150 hover:bg-[rgba(47,164,164,0.06)] focus:outline-none focus-visible:bg-[rgba(47,164,164,0.09)]"
+        style={{
+          borderBottom: "1px solid rgba(0,0,0,0.055)",
+          backgroundColor: isActive ? "rgba(47,140,140,0.09)" : undefined,
+        }}
+      >
+        {/* Thumbnail — a real photo where we have one, otherwise the logo on a
+            soft tint so every row keeps the same visual weight */}
+        <div
+          className="shrink-0 w-14 h-14 rounded-xl overflow-hidden flex items-center justify-center"
+          style={{
+            background: b.image ? "#e9f4f4" : "#f4fafa",
+            border: isActive ? "2px solid #2f8c8c" : "1px solid rgba(0,0,0,0.07)",
+            boxShadow: isActive ? "0 0 0 3px rgba(47,140,140,0.15)" : undefined,
+          }}
+        >
+          <img
+            src={thumb}
+            alt=""
+            loading="lazy"
+            className={b.image ? "w-full h-full object-cover" : "w-9 h-9 object-contain"}
+          />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p
+            className="font-semibold text-sm leading-snug truncate"
+            style={{ color: isActive ? "#2f8c8c" : "var(--forest)" }}
+          >
+            {b.name}
+          </p>
+          <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.62)" }}>
+            {b.category}
+            <span className="mx-1.5" style={{ color: "rgba(0,0,0,0.28)" }}>•</span>
+            <span style={{ color: "var(--leaf)", fontWeight: 600 }}>{distance}</span>
+          </p>
+          {(b.address || b.tagline) && (
+            <p className="text-[11px] mt-1 flex items-center gap-1 truncate" style={{ color: "rgba(0,0,0,0.5)" }}>
+              <PinIcon className="shrink-0" style={{ color: "rgba(0,0,0,0.35)" }} />
+              <span className="truncate">{b.address ?? b.tagline}</span>
+            </p>
+          )}
+        </div>
+
+        {/* Directions — the one action on the row (no bookmark, per the brief) */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onDirections(b); }}
+          aria-label={`Directions to ${b.name}`}
+          title="Get directions"
+          className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150 hover:scale-105"
+          style={{ background: "rgba(28,46,56,0.06)", color: "var(--forest)" }}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 11l19-9-9 19-2-8-8-2z" />
+          </svg>
+        </button>
+      </div>
+    </li>
+  );
+}
+
+// ── Resolving richer detail for a selected trader ────────────────────────────
+// Traders that own a detail page (/section/place/:slug) can borrow its real
+// content — description, gallery, hours, phone. The bulk of the directory has
+// no such page, so every field below is optional and the card simply drops the
+// rows it has no data for.
+//
+// The seeded detail pages ship deliberate placeholders for contact fields;
+// these sentinels are filtered out rather than shown, so nobody rings a dead
+// number or follows a dead link. Replace them with real values in
+// src/Data/pages.js and they'll appear automatically.
+const PLACEHOLDER_VALUES = new Set([
+  "01628 000 000",
+  "www.maidenhead.example",
+  "The Colonnade, High Street, Maidenhead SL6 1QJ",
+]);
+
+const real = (v) => (v && !PLACEHOLDER_VALUES.has(v) ? v : null);
+
+function placeFor(brand) {
+  const slug = brand?.to?.includes("/place/") ? brand.to.split("/place/")[1].split(/[?#]/)[0] : null;
+  return slug ? itemBySlug[slug] ?? null : null;
+}
+
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+// Returns the hours entry covering today, purely by reading the published
+// schedule — no "open right now" inference, which we have no live data for.
+function todaysHours(hours) {
+  if (!hours?.length) return null;
+  const today = new Date().getDay();
+  for (const h of hours) {
+    const [from, to] = h.day.split(/[–—-]/).map((s) => s.trim());
+    const a = DAYS.indexOf(from);
+    if (a === -1) continue;
+    const b = to ? DAYS.indexOf(to) : a;
+    if (b === -1) continue;
+    const inRange = a <= b ? today >= a && today <= b : today >= a || today <= b;
+    if (inRange) return h;
+  }
+  return null;
+}
+
+const SAVED_KEY = "mh:saved-traders";
+
+function useSavedTraders() {
+  const [saved, setSaved] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(SAVED_KEY) ?? "[]"));
+    } catch {
+      return new Set();
+    }
+  });
+  const toggle = useCallback((id) => {
+    setSaved((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try { localStorage.setItem(SAVED_KEY, JSON.stringify([...next])); } catch { /* storage unavailable */ }
+      return next;
+    });
+  }, []);
+  return { saved, toggle };
+}
+
+// ── Small building blocks for the detail card ────────────────────────────────
+function ActionButton({ icon, label, onClick, href, active }) {
+  const cls = "flex flex-col items-center gap-1.5 flex-1 min-w-0 py-1 transition-opacity duration-150 hover:opacity-60";
+  const style = { color: active ? "var(--leaf)" : "var(--forest)" };
+  const inner = (
+    <>
+      {icon}
+      <span className="text-[11px] font-medium leading-none truncate w-full text-center">{label}</span>
+    </>
+  );
+  if (href) {
+    return (
+      <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className={cls} style={style}>
+        {inner}
+      </a>
+    );
+  }
+  return <button onClick={onClick} className={cls} style={style}>{inner}</button>;
+}
+
+function DetailRow({ icon, children }) {
+  return (
+    <div className="flex items-start gap-2.5 py-3 px-4 min-w-0">
+      <span className="shrink-0 mt-0.5" style={{ color: "var(--leaf)" }}>{icon}</span>
+      <div className="min-w-0 text-xs leading-relaxed" style={{ color: "var(--forest)" }}>{children}</div>
+    </div>
+  );
+}
+
+const IconClock = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3.5 2" strokeLinecap="round" /></svg>;
+const IconPhone = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+const IconGlobe = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>;
+const IconMapPin = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" strokeLinejoin="round" /><circle cx="12" cy="9.5" r="2.3" /></svg>;
+
+// ── Selected-trader card — replaces the list while a business is active ──────
+function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext, onDirections, isSaved, onToggleSave }) {
+  const [hoursOpen, setHoursOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const hero = place?.image ?? b.image ?? b.logo;
+  const description = place?.description ?? b.tagline ?? null;
+  const address = real(place?.address) ?? b.address ?? null;
+  const phone = real(place?.phone);
+  const website = real(place?.website);
+  const hours = place?.hours ?? null;
+  const today = todaysHours(hours);
+  const gallery = (place?.gallery ?? []).filter((g) => g !== hero);
+  const detailHref = b.to?.includes("/place/") ? b.to : null;
+
+  const share = useCallback(async () => {
+    const url = detailHref ? `${window.location.origin}${detailHref}` : window.location.href;
+    const data = { title: b.name, text: `${b.name} — ${b.category}, Maidenhead`, url };
+    try {
+      if (navigator.share) { await navigator.share(data); return; }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch { /* dismissed or unavailable */ }
+  }, [b, detailHref]);
+
+  const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
+
+  return (
+    <>
+      {/* Header — back + position within the current list */}
+      <div className="flex items-center justify-between gap-3 px-3 sm:px-4 py-3 shrink-0" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <button
+          onClick={onBack}
+          className="group inline-flex items-center gap-2 text-sm font-semibold transition-opacity hover:opacity-65"
+          style={{ color: "var(--forest)" }}
+        >
+          <span className="transition-transform duration-200 group-hover:-translate-x-0.5">←</span>
+          Back to results
+        </button>
+        {index > 0 && (
+          <div className="flex items-center gap-1 shrink-0">
+            <span className="text-[11px] mr-1 tabular-nums" style={{ color: "rgba(0,0,0,0.5)" }}>{index} of {total}</span>
+            <button onClick={onPrev} aria-label="Previous business" className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-[rgba(28,46,56,0.08)]" style={{ color: "var(--forest)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
+            <button onClick={onNext} aria-label="Next business" className="w-7 h-7 rounded-full flex items-center justify-center transition-colors hover:bg-[rgba(28,46,56,0.08)]" style={{ color: "var(--forest)" }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="overflow-y-auto flex-1 overscroll-contain">
+        {/* Hero */}
+        <div className="relative w-full aspect-[16/9] overflow-hidden" style={{ background: "#e9f4f4" }}>
+          <img src={hero} alt={b.name} className={b.image || place?.image ? "w-full h-full object-cover" : "w-full h-full object-contain p-8"} />
+        </div>
+
+        {/* Identity — logo tucked over the hero, as in the reference */}
+        <div className="px-4 sm:px-5">
+          <div className="flex items-start gap-3.5 -mt-7 relative">
+            <div
+              className="shrink-0 w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden"
+              style={{ border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 6px 18px -6px rgba(13,42,51,0.35)" }}
+            >
+              <img src={b.logo} alt="" className="w-10 h-10 object-contain" />
+            </div>
+            <div className="flex-1 min-w-0 pt-8">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h3 className="text-xl leading-tight truncate" style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--forest)" }}>
+                    {b.name}
+                  </h3>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.6)" }}>{b.category}</p>
+                </div>
+                <button
+                  onClick={() => onToggleSave(b.id)}
+                  aria-label={isSaved ? `Remove ${b.name} from saved` : `Save ${b.name}`}
+                  aria-pressed={isSaved}
+                  className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-[rgba(28,46,56,0.07)]"
+                  style={{ color: isSaved ? "var(--leaf)" : "var(--forest)" }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round">
+                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                  </svg>
+                </button>
+              </div>
+              {(address || distance) && (
+                <p className="text-[11px] mt-1.5 flex items-center gap-1.5 min-w-0" style={{ color: "rgba(0,0,0,0.55)" }}>
+                  <PinIcon className="shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />
+                  <span className="truncate">{address}</span>
+                  {address && <span style={{ color: "rgba(0,0,0,0.28)" }}>•</span>}
+                  <span className="shrink-0" style={{ color: "var(--leaf)", fontWeight: 600 }}>{distance}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          {description && (
+            <p className="text-xs leading-relaxed mt-4" style={{ color: "rgba(0,0,0,0.72)" }}>{description}</p>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-stretch gap-1 px-3 sm:px-4 mt-4 py-3 mx-1" style={{ borderTop: "1px solid rgba(0,0,0,0.07)", borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
+          {websiteHref && <ActionButton icon={IconGlobe} label="Website" href={websiteHref} />}
+          <ActionButton
+            icon={<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z" /></svg>}
+            label="Directions"
+            onClick={() => onDirections(b)}
+          />
+          {phone && <ActionButton icon={IconPhone} label="Call" href={`tel:${phone.replace(/\s+/g, "")}`} />}
+          <ActionButton
+            icon={<svg width="15" height="15" viewBox="0 0 24 24" fill={isSaved ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.9" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>}
+            label={isSaved ? "Saved" : "Save"}
+            active={isSaved}
+            onClick={() => onToggleSave(b.id)}
+          />
+          <ActionButton
+            icon={<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v14" /></svg>}
+            label={copied ? "Copied" : "Share"}
+            active={copied}
+            onClick={share}
+          />
+        </div>
+
+        {/* Facts — two columns, mirroring the reference */}
+        {(today || hours || phone || address || websiteHref) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 px-1 py-1">
+            {(today || hours) && (
+              <DetailRow icon={IconClock}>
+                {today ? (
+                  <>
+                    <button
+                      onClick={() => setHoursOpen((o) => !o)}
+                      aria-expanded={hoursOpen}
+                      className="flex items-center gap-1.5 font-semibold transition-opacity hover:opacity-70"
+                      style={{ color: "var(--leaf)" }}
+                    >
+                      Open today
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`transition-transform duration-200 ${hoursOpen ? "rotate-180" : ""}`}><path d="M6 9l6 6 6-6" /></svg>
+                    </button>
+                    <div style={{ color: "rgba(0,0,0,0.7)" }}>{today.time}</div>
+                    {hoursOpen && (
+                      <ul className="mt-2 flex flex-col gap-1">
+                        {hours.map((h) => (
+                          <li key={h.day} className="flex justify-between gap-3" style={{ color: h === today ? "var(--forest)" : "rgba(0,0,0,0.55)", fontWeight: h === today ? 600 : 400 }}>
+                            <span>{h.day}</span><span>{h.time}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                ) : (
+                  <span style={{ color: "rgba(0,0,0,0.6)" }}>Opening hours vary</span>
+                )}
+              </DetailRow>
+            )}
+            {phone && (
+              <DetailRow icon={IconPhone}>
+                <a href={`tel:${phone.replace(/\s+/g, "")}`} className="transition-opacity hover:opacity-70">{phone}</a>
+              </DetailRow>
+            )}
+            {address && <DetailRow icon={IconMapPin}>{address}</DetailRow>}
+            {websiteHref && (
+              <DetailRow icon={IconGlobe}>
+                <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="truncate block transition-opacity hover:opacity-70">
+                  {website.replace(/^https?:\/\//, "")}
+                </a>
+              </DetailRow>
+            )}
+          </div>
+        )}
+
+        {/* Gallery */}
+        {gallery.length > 0 && (
+          <div className="px-4 sm:px-5 pt-2 pb-5">
+            <div className="grid grid-cols-4 gap-2">
+              {gallery.slice(0, 3).map((src) => (
+                <div key={src} className="aspect-square rounded-lg overflow-hidden" style={{ background: "#e9f4f4" }}>
+                  <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+                </div>
+              ))}
+              {gallery.length > 3 &&
+                (detailHref ? (
+                  <Link to={detailHref} className="relative aspect-square rounded-lg overflow-hidden block group/g">
+                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white transition-opacity group-hover/g:opacity-90" style={{ background: "rgba(13,42,51,0.68)" }}>
+                      +{gallery.length - 3}
+                    </span>
+                  </Link>
+                ) : (
+                  <div className="relative aspect-square rounded-lg overflow-hidden">
+                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white" style={{ background: "rgba(13,42,51,0.68)" }}>
+                      +{gallery.length - 3}
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Footer — through to the full profile where one exists */}
+      {detailHref && (
+        <Link
+          to={detailHref}
+          className="group flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold shrink-0 transition-colors duration-150 hover:bg-[rgba(47,164,164,0.07)]"
+          style={{ borderTop: "1px solid rgba(0,0,0,0.06)", color: "var(--forest)" }}
+        >
+          View full profile
+          <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+        </Link>
+      )}
+    </>
+  );
+}
 
 export default function TradersMap() {
   const navigate = useNavigate();
@@ -239,45 +630,47 @@ export default function TradersMap() {
     );
   }, []);
 
-  const filtered = filter === "all"
-    ? brandGrid.brands
-    : brandGrid.brands.filter((b) => b.section === filter);
+  // Distances are measured from the visitor when we know where they are,
+  // otherwise from the town centre.
+  const origin = userPos || CENTRE;
 
-  // Search across ALL brands regardless of category chip
+  const activeFilter = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
+
+  const filtered = useMemo(
+    () =>
+      activeFilter.sections === null
+        ? brandGrid.brands
+        : brandGrid.brands.filter((b) => activeFilter.sections.includes(b.section)),
+    [activeFilter]
+  );
+
+  // Free-text search runs within the selected tab.
   const q = searchQuery.trim().toLowerCase();
   const searchActive = q.length > 0;
-  const searchResults = searchActive
-    ? brandGrid.brands
-        .filter(
-          (b) =>
-            b.name.toLowerCase().includes(q) ||
-            b.category.toLowerCase().includes(q)
-        )
-        .sort((a, b) => {
-          const an = a.name.toLowerCase();
-          const bn = b.name.toLowerCase();
-          // Exact name match first
-          if (an === q && bn !== q) return -1;
-          if (bn === q && an !== q) return 1;
-          // Name starts with query next
-          const aStarts = an.startsWith(q);
-          const bStarts = bn.startsWith(q);
-          if (aStarts && !bStarts) return -1;
-          if (bStarts && !aStarts) return 1;
-          // Then alphabetical
-          return an.localeCompare(bn);
-        })
-    : null;
+  const results = useMemo(() => {
+    if (!searchActive) return filtered;
+    return filtered
+      .filter((b) => b.name.toLowerCase().includes(q) || b.category.toLowerCase().includes(q))
+      .sort((a, b) => {
+        const an = a.name.toLowerCase();
+        const bn = b.name.toLowerCase();
+        if (an === q && bn !== q) return -1;
+        if (bn === q && an !== q) return 1;
+        const aStarts = an.startsWith(q);
+        const bStarts = bn.startsWith(q);
+        if (aStarts && !bStarts) return -1;
+        if (bStarts && !aStarts) return 1;
+        return an.localeCompare(bn);
+      });
+  }, [filtered, q, searchActive]);
 
   const handleNavigate = useCallback((b) => {
-    const origin = userPos ? `&origin=${userPos.lat},${userPos.lng}` : "";
-    window.open(`https://www.google.com/maps/dir/?api=1${origin}&destination=${b.lat},${b.lng}&travelmode=walking`, "_blank");
+    const from = userPos ? `&origin=${userPos.lat},${userPos.lng}` : "";
+    window.open(`https://www.google.com/maps/dir/?api=1${from}&destination=${b.lat},${b.lng}&travelmode=walking`, "_blank");
   }, [userPos]);
 
-  const handleReadMore = useCallback((b) => { navigate(b.to); }, [navigate]);
+  const handleReadMore = useCallback((b) => { if (b.to) navigate(b.to); }, [navigate]);
 
-  // Select: update state. MapLayer's effect re-focuses the map. If the same
-  // brand is tapped again, re-focus directly (effect won't re-run for same id).
   const handleSelect = useCallback((b) => {
     setActiveBrand((prev) => {
       if (prev?.id === b.id) { apiRef.current?.focus(b); return prev; }
@@ -287,136 +680,251 @@ export default function TradersMap() {
 
   const handleDeselect = useCallback(() => setActiveBrand(null), []);
 
-  const sortedFiltered = activeBrand
-    ? [activeBrand, ...filtered.filter((b) => b.id !== activeBrand.id)]
-    : filtered;
+  const { saved, toggle: toggleSave } = useSavedTraders();
 
-  // The list shown in the directory panel
-  const directoryList = searchActive ? searchResults : sortedFiltered;
+  // Position of the selection within the list the visitor is currently browsing,
+  // powering the "n of N" counter and the prev/next arrows.
+  const activeIndex = activeBrand ? results.findIndex((x) => x.id === activeBrand.id) : -1;
+  const step = useCallback(
+    (dir) => {
+      if (activeIndex < 0 || results.length === 0) return;
+      handleSelect(results[(activeIndex + dir + results.length) % results.length]);
+    },
+    [activeIndex, results, handleSelect]
+  );
+
+  // Keep the selected trader pinned to the top of the list.
+  const directoryList = activeBrand && !searchActive
+    ? [activeBrand, ...results.filter((b) => b.id !== activeBrand.id)]
+    : results;
 
   const handleSearchKeyDown = useCallback((e) => {
-    if (e.key === "Enter" && searchResults && searchResults.length > 0) {
-      const top = searchResults[0];
+    if (e.key === "Enter" && results.length > 0) {
       setSearchQuery("");
-      handleSelect(top);
+      handleSelect(results[0]);
     }
     if (e.key === "Escape") setSearchQuery("");
-  }, [searchResults, handleSelect]);
+  }, [results, handleSelect]);
 
   return (
-    <section className="py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{brandGrid.eyebrow}</p>
-          <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{brandGrid.heading}</h2>
-          <p className="text-base max-w-xl mx-auto leading-relaxed" style={{ color: "#000000" }}>{brandGrid.subheading}</p>
-        </div>
+    <section
+      className="py-20 md:py-24 overflow-hidden"
+      style={{ background: "linear-gradient(180deg, #ffffff 0%, var(--sand) 42%, var(--sand) 100%)" }}
+    >
+      {/* ── Heading ── */}
+      <div className="max-w-6xl mx-auto px-6 md:px-12 text-center mb-8">
+        <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+          {brandGrid.eyebrow}
+        </p>
+        <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
+          {brandGrid.heading}
+        </h2>
+        <p className="text-base max-w-xl mx-auto leading-relaxed" style={{ color: "#000000" }}>
+          {brandGrid.subheading}
+        </p>
+      </div>
 
-        <div className="overflow-hidden" style={{ borderRadius: card.radius, boxShadow: card.shadow, background: "#fff" }}>
-          {/* Filter chips */}
-          <div className="flex gap-2 overflow-x-auto px-5 py-4 scrollbar-none" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)" }}>
-            {FILTERS.map((f) => (
+      {/* ── Tabs — mirroring the header nav ── */}
+      <div className="max-w-6xl mx-auto px-6 md:px-12 mb-8">
+        <div
+          className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none sm:justify-center -mx-1 px-1 py-1"
+          role="tablist"
+          aria-label="Filter traders by category"
+        >
+          {FILTERS.map((f) => {
+            const on = filter === f.key;
+            return (
               <button
                 key={f.key}
-                onClick={() => { setFilter(f.key); handleDeselect(); }}
-                className="shrink-0 px-4 py-1.5 rounded-full text-[12px] font-semibold transition-all duration-200 whitespace-nowrap"
-                style={filter === f.key ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(0,0,0,0.05)", color: "#000000" }}
+                role="tab"
+                aria-selected={on}
+                onClick={() => { setFilter(f.key); handleDeselect(); setSearchQuery(""); }}
+                className="shrink-0 px-4 sm:px-5 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 whitespace-nowrap"
+                style={
+                  on
+                    ? { backgroundColor: "var(--forest)", color: "#fff", boxShadow: "0 6px 16px -6px rgba(28,46,56,0.5)" }
+                    : { backgroundColor: "rgba(255,255,255,0.85)", color: "var(--forest)", border: "1px solid rgba(28,46,56,0.12)" }
+                }
               >
                 {f.label}
               </button>
-            ))}
-          </div>
+            );
+          })}
+        </div>
+      </div>
 
-          {/* Map + Directory */}
-          <div className="flex flex-col md:flex-row" style={{ minHeight: "460px" }}>
-            <div className="relative flex-1 min-h-[320px] md:min-h-0" style={{ zIndex: 0, isolation: "isolate" }}>
-              <MapContainer center={[CENTRE.lat, CENTRE.lng]} zoom={14} scrollWheelZoom={false} attributionControl={false} style={{ width: "100%", height: "100%", minHeight: "320px" }}>
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" maxZoom={20} />
-                <MapLayer
-                  brands={filtered}
-                  activeBrand={activeBrand}
-                  onSelectBrand={handleSelect}
-                  onReadMore={handleReadMore}
-                  onNavigate={handleNavigate}
-                  onDeselect={handleDeselect}
-                  userPos={userPos}
-                  apiRef={apiRef}
+      {/* ── Full-bleed map with the directory panel floating over it ──
+           The map runs the full width of the viewport and sits directly on the
+           page background (no card chrome), so it reads as part of the page
+           rather than a widget dropped onto it. */}
+      <div className="relative w-full">
+        <div
+          className="relative h-[380px] sm:h-[460px] lg:h-[660px] w-full"
+          style={{ zIndex: 0, isolation: "isolate" }}
+        >
+          <MapContainer
+            center={[CENTRE.lat, CENTRE.lng]}
+            zoom={14}
+            scrollWheelZoom={false}
+            attributionControl={false}
+            style={{ width: "100%", height: "100%", background: "var(--sand)" }}
+          >
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" maxZoom={20} />
+            <MapLayer
+              brands={filtered}
+              activeBrand={activeBrand}
+              onSelectBrand={handleSelect}
+              onReadMore={handleReadMore}
+              onNavigate={handleNavigate}
+              onDeselect={handleDeselect}
+              userPos={userPos}
+              apiRef={apiRef}
+            />
+          </MapContainer>
+
+          {/* Soft edge fade so the map melts into the page background rather
+              than ending on a hard rectangle */}
+          <div
+            className="pointer-events-none absolute inset-x-0 top-0 h-16"
+            style={{ background: "linear-gradient(180deg, var(--sand) 0%, rgba(240,250,250,0) 100%)", zIndex: 400 }}
+          />
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+            style={{ background: "linear-gradient(0deg, var(--sand) 0%, rgba(240,250,250,0) 100%)", zIndex: 400 }}
+          />
+        </div>
+
+        {/* Panel — floats over the map from lg up, stacks beneath it on mobile */}
+        <div className="relative lg:absolute lg:inset-y-0 lg:right-0 lg:flex lg:items-center lg:pr-8 xl:pr-12 lg:pointer-events-none" style={{ zIndex: 500 }}>
+          <div
+            className="mx-auto lg:mx-0 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-2xl lg:w-[430px] xl:w-[460px] lg:max-w-none -mt-10 lg:mt-0 lg:pointer-events-auto flex flex-col overflow-hidden"
+            style={{
+              maxHeight: "min(600px, calc(100vh - 8rem))",
+              background: "rgba(255,255,255,0.92)",
+              backdropFilter: "blur(14px)",
+              WebkitBackdropFilter: "blur(14px)",
+              borderRadius: "18px",
+              border: "1px solid rgba(255,255,255,0.7)",
+              boxShadow: "0 24px 60px -20px rgba(13,42,51,0.35), 0 4px 14px rgba(13,42,51,0.08)",
+            }}
+          >
+            {activeBrand ? (
+              <TraderDetail
+                b={activeBrand}
+                place={placeFor(activeBrand)}
+                distance={milesLabel(haversineM(origin, activeBrand))}
+                index={activeIndex + 1}
+                total={results.length}
+                onBack={handleDeselect}
+                onPrev={() => step(-1)}
+                onNext={() => step(1)}
+                onDirections={handleNavigate}
+                isSaved={saved.has(activeBrand.id)}
+                onToggleSave={toggleSave}
+              />
+            ) : (
+            <>
+            {/* Search — sits above the Featured Businesses heading */}
+            <div className="px-4 sm:px-5 pt-4 pb-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+              <div
+                className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-shadow duration-150"
+                style={{ background: "rgba(28,46,56,0.055)", border: "1px solid rgba(28,46,56,0.08)" }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--forest)", flexShrink: 0, opacity: 0.55 }}>
+                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search businesses…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearchKeyDown}
+                  aria-label="Search businesses"
+                  className="flex-1 bg-transparent text-sm outline-none placeholder:opacity-50"
+                  style={{ color: "var(--forest)", minWidth: 0 }}
                 />
-              </MapContainer>
-            </div>
-
-            {/* Directory */}
-            <div className="w-full md:w-72 lg:w-80 flex-shrink-0 flex flex-col" style={{ borderLeft: "1px solid rgba(0,0,0,0.07)", maxHeight: "460px" }}>
-              {/* Search bar */}
-              <div className="px-3 py-2.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.07)", flexShrink: 0 }}>
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: "rgba(0,0,0,0.05)" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ color: "#000000", flexShrink: 0 }}>
-                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-                  </svg>
-                  <input
-                    type="text"
-                    placeholder="Search businesses…"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleSearchKeyDown}
-                    className="flex-1 bg-transparent text-sm outline-none"
-                    style={{ color: "#000000", minWidth: 0 }}
-                  />
-                  {searchActive && (
-                    <button onClick={() => setSearchQuery("")} style={{ color: "#000000", flexShrink: 0, lineHeight: 1, fontSize: 16 }}>✕</button>
-                  )}
-                </div>
                 {searchActive && (
-                  <p className="text-[11px] mt-1.5 px-1" style={{ color: "#000000" }}>
-                    {searchResults.length === 0 ? "No results" : `${searchResults.length} result${searchResults.length !== 1 ? "s" : ""} — press Enter to select top match`}
-                  </p>
-                )}
-              </div>
-
-              <div className="overflow-y-auto flex-1">
-                {directoryList.length === 0 ? (
-                  <p className="text-sm text-center py-10" style={{ color: "#000000" }}>{searchActive ? "No businesses match your search." : "No traders in this category yet."}</p>
-                ) : (
-                  directoryList.map((b) => {
-                    const isActive = activeBrand?.id === b.id;
-                    return (
-                      <div
-                        key={b.id}
-                        onClick={() => handleSelect(b)}
-                        className="flex items-center gap-3 px-4 py-3.5 cursor-pointer transition-colors duration-150 hover:bg-[rgba(0,0,0,0.03)]"
-                        style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", backgroundColor: isActive ? "rgba(47,140,140,0.08)" : undefined }}
-                      >
-                        <div className="shrink-0 w-11 h-11 rounded-lg bg-white flex items-center justify-center overflow-hidden" style={{ border: isActive ? "2px solid #2f8c8c" : "1px solid rgba(0,0,0,0.08)", boxShadow: isActive ? "0 0 0 3px rgba(47,140,140,0.15)" : undefined }}>
-                          <img src={b.logo} alt={b.name} className="w-9 h-9 object-contain" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm leading-snug truncate" style={{ color: isActive ? "#2f8c8c" : "var(--forest)" }}>
-                            {b.name}
-                            {isActive && <span className="ml-1.5 text-[10px] font-bold uppercase tracking-[0.02em]" style={{ color: "#2f8c8c" }}>● Selected</span>}
-                          </p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{b.category}</p>
-                        </div>
-                        {isActive ? (
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0" style={{ color: "#2f8c8c" }}><path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        ) : (
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 opacity-30"><path d="M9 18l6-6-6-6"/></svg>
-                        )}
-                      </div>
-                    );
-                  })
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear search"
+                    className="shrink-0 leading-none transition-opacity hover:opacity-60"
+                    style={{ color: "var(--forest)", fontSize: 15 }}
+                  >
+                    ✕
+                  </button>
                 )}
               </div>
             </div>
+
+            {/* Heading row */}
+            <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+              <h3
+                className="text-lg sm:text-xl leading-none"
+                style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--forest)" }}
+              >
+                {searchActive ? "Search results" : "Featured Businesses"}
+              </h3>
+              <Link
+                to="/traders"
+                className="group inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap shrink-0 transition-opacity hover:opacity-70"
+                style={{ color: "var(--leaf)" }}
+              >
+                View all
+                <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+              </Link>
+            </div>
+
+            {/* Results */}
+            <div className="overflow-y-auto flex-1 overscroll-contain">
+              {directoryList.length === 0 ? (
+                <p className="text-sm text-center py-12 px-6" style={{ color: "rgba(0,0,0,0.55)" }}>
+                  {searchActive
+                    ? `No businesses match “${searchQuery.trim()}”.`
+                    : "No traders in this category yet."}
+                </p>
+              ) : (
+                <ul>
+                  {directoryList.map((b) => (
+                    <TraderRow
+                      key={b.id}
+                      b={b}
+                      isActive={activeBrand?.id === b.id}
+                      distance={milesLabel(haversineM(origin, b))}
+                      onSelect={handleSelect}
+                      onDirections={handleNavigate}
+                    />
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Footer link */}
+            <Link
+              to="/traders"
+              className="group flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors duration-150 hover:bg-[rgba(47,164,164,0.07)]"
+              style={{ borderTop: "1px solid rgba(0,0,0,0.06)", color: "var(--forest)" }}
+            >
+              View all businesses
+              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+            </Link>
+            </>
+            )}
           </div>
         </div>
+      </div>
 
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-          {brandGrid.ctas.map((cta) => (
-            <Link key={cta.href} to={cta.href} className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5" style={{ backgroundColor: "var(--forest)" }}>
-              {cta.label} <span>→</span>
-            </Link>
-          ))}
-        </div>
+      {/* ── Section CTAs ── */}
+      <div className="max-w-6xl mx-auto px-6 md:px-12 mt-12 lg:mt-14 flex flex-col sm:flex-row gap-3 justify-center">
+        {brandGrid.ctas.map((cta) => (
+          <Link
+            key={cta.href}
+            to={cta.href}
+            className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:-translate-y-0.5"
+            style={{ backgroundColor: "var(--forest)" }}
+          >
+            {cta.label} <span>→</span>
+          </Link>
+        ))}
       </div>
     </section>
   );

@@ -382,7 +382,7 @@ const seeItems = [
 export const sections = {
   shop: {
     key: "shop",
-    label: "Shop",
+    label: "Shop & Services",
     path: "/shop",
     landing: {
       title: "Shopping at Maidenhead",
