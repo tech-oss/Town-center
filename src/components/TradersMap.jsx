@@ -443,7 +443,7 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
         )}
       </div>
 
-      <div className="overflow-y-auto flex-1 overscroll-contain">
+      <div className="flex-1 min-h-0 overflow-visible lg:overflow-y-auto lg:overscroll-contain">
         {/* Hero */}
         <div className="relative w-full aspect-[16/9] overflow-hidden" style={{ background: "#e9f4f4" }}>
           <img src={hero} alt={b.name} className={b.image || place?.image ? "w-full h-full object-cover" : "w-full h-full object-contain p-8"} />
@@ -759,6 +759,7 @@ export default function TradersMap() {
            rather than a widget dropped onto it. */}
       <div className="relative w-full">
         <div
+          data-immersive
           className="relative h-[380px] sm:h-[460px] lg:h-[660px] w-full"
           style={{ zIndex: 0, isolation: "isolate" }}
         >
@@ -796,10 +797,17 @@ export default function TradersMap() {
 
         {/* Panel — floats over the map from lg up, stacks beneath it on mobile */}
         <div className="relative lg:absolute lg:inset-y-0 lg:right-0 lg:flex lg:items-center lg:pr-8 xl:pr-12 lg:pointer-events-none" style={{ zIndex: 500 }}>
+          {/* Height and scrolling differ by breakpoint on purpose. On desktop the
+              panel is a fixed-height floating card that scrolls internally. On
+              touch, nesting a scroller inside the page scroller traps the
+              gesture — so an open detail card grows to its natural height and
+              lets the page do all the scrolling, while the (necessarily bounded)
+              list chains its overscroll to the page instead of dead-ending. */}
           <div
-            className="mx-auto lg:mx-0 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-2xl lg:w-[430px] xl:w-[460px] lg:max-w-none -mt-10 lg:mt-0 lg:pointer-events-auto flex flex-col overflow-hidden"
+            className={`mx-auto lg:mx-0 w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-2xl lg:w-[430px] xl:w-[460px] lg:max-w-none -mt-10 lg:mt-0 lg:pointer-events-auto flex flex-col overflow-hidden ${
+              activeBrand ? "max-h-none" : "max-h-[70vh]"
+            } lg:max-h-[min(600px,calc(100vh-8rem))]`}
             style={{
-              maxHeight: "min(600px, calc(100vh - 8rem))",
               background: "rgba(255,255,255,0.92)",
               backdropFilter: "blur(14px)",
               WebkitBackdropFilter: "blur(14px)",
@@ -875,7 +883,7 @@ export default function TradersMap() {
             </div>
 
             {/* Results */}
-            <div className="overflow-y-auto flex-1 overscroll-contain">
+            <div className="overflow-y-auto flex-1 min-h-0 overscroll-auto lg:overscroll-contain">
               {directoryList.length === 0 ? (
                 <p className="text-sm text-center py-12 px-6" style={{ color: "rgba(0,0,0,0.55)" }}>
                   {searchActive

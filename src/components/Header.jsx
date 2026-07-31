@@ -9,6 +9,7 @@ import SmartLink from "./SmartLink";
 import BrandMark from "./BrandMark/BrandMark";
 import useHeaderScroll from "../hooks/useHeaderScroll";
 import useLogoReveal from "../hooks/useLogoReveal";
+import useOverImmersive from "../hooks/useOverImmersive";
 
 const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
@@ -29,8 +30,12 @@ const Header = forwardRef(function Header(_, ref) {
   const { hidden, solid } = useHeaderScroll(pathname === "/");
   // The mobile drawer or an open desktop mega-menu always need the solid
   // backing and a visible header, regardless of scroll position.
+  // Full-bleed interactive regions (the traders map) push the header out of the
+  // way while they're under it, so pointer events reach the map rather than the
+  // nav floating over it.
+  const overImmersive = useOverImmersive();
   const forceSolid = solid || menuOpen || openDropdown !== null;
-  const isHidden = hidden && !menuOpen && openDropdown === null;
+  const isHidden = (hidden || overImmersive) && !menuOpen && openDropdown === null;
 
   // Open immediately on hover; close with a short grace delay so the cursor
   // can travel from the nav item down into the open panel without it shutting.
