@@ -709,7 +709,7 @@ export default function TradersMap() {
   return (
     <section
       className="py-20 md:py-24 overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #ffffff 0%, var(--sand) 42%, var(--sand) 100%)" }}
+      style={{ background: "#ffffff" }}
     >
       {/* ── Heading ── */}
       <div className="max-w-6xl mx-auto px-6 md:px-12 text-center mb-8">
