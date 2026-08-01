@@ -95,7 +95,7 @@ function PortfolioCard({ post, layout }) {
 
 // ── Section ────────────────────────────────────────────────────────────────
 export default function BlogCards() {
-  const posts = blogCards.posts.slice(0, 3);
+  const posts = blogCards.posts.filter((p) => p.homepage).slice(0, 3);
 
   return (
     <section

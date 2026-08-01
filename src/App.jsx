@@ -20,6 +20,7 @@ import ExploreFuturePage from './components/ExploreFuturePage'
 import OurStoryPage from './components/OurStoryPage'
 import GettingHerePage from './components/GettingHerePage'
 import NewsIndexPage from './components/NewsIndexPage'
+import OffersPage from './components/OffersPage'
 import PressPage from './components/PressPage'
 import TradersPage from './components/TradersPage'
 import FeatureArticlePage from './components/FeatureArticlePage'
@@ -85,6 +86,7 @@ function PublicSite() {
           <Route path="/press" element={<PressPage />} />
           {/* Journal */}
           <Route path="/news" element={<NewsIndexPage />} />
+          <Route path="/offers" element={<OffersPage />} />
           <Route path="/news/:articleSlug" element={<ArticlePage />} />
           {/* Featured stories */}
           <Route path="/story/:slug" element={<FeatureArticlePage />} />

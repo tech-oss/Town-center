@@ -208,10 +208,11 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
 // ── Tabs mirror the site header: All / Eat & Drink / Shop & Services / See & Do.
 // `sections` lists which trader data-sections roll up into each tab.
 const FILTERS = [
-  { key: "all",           label: "All",              sections: null },
-  { key: "eat-drink",     label: "Eat & Drink",      sections: ["food-drink"] },
-  { key: "shop-services", label: "Shop & Services",  sections: ["shopping", "services", "health-beauty"] },
-  { key: "see-do",        label: "See & Do",         sections: ["see-do"] },
+  { key: "all",       label: "All",         sections: null },
+  { key: "eat-drink", label: "Eat & Drink", sections: ["food-drink"] },
+  { key: "shop",      label: "Shop",        sections: ["shopping"] },
+  { key: "services",  label: "Services",    sections: ["services", "health-beauty"] },
+  { key: "see-do",    label: "See & Do",    sections: ["see-do"] },
 ];
 
 const PinIcon = (props) => (

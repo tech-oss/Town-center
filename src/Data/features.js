@@ -7,6 +7,7 @@
 export const features = [
   {
     slug: "jetts-maidenhead",
+    homepage: true,
     eyebrow: "Fitness & Wellbeing",
     category: "Fitness & Wellbeing",
     date: "Now open · One Maidenhead",
@@ -81,6 +82,7 @@ export const features = [
   },
   {
     slug: "the-fat-duck",
+    homepage: true,
     eyebrow: "Eat & Drink",
     category: "Fine Dining",
     date: "Bray · Three Michelin Stars",
@@ -144,6 +146,92 @@ export const features = [
       "/images/fatduck/food-3.jpg",
       "/images/fatduck/madhatter.jpg",
       "/images/fatduck/icecream.jpg",
+    ],
+  },
+  {
+    slug: "esquires-coffee-maidenhead",
+    homepage: false,
+    eyebrow: "Eat & Drink",
+    category: "Coffee & Culture",
+    date: "Open Daily · High Street",
+    cardHeading: "Esquires Coffee: Maidenhead's Independent Living Room",
+    cardBody:
+      "A relaxed, plant-filled café on the High Street built for lingering — good coffee, honest food and a table for as long as you need it.",
+    cardImage: "/images/esquires/hero-1.png",
+    title: "Esquires Coffee: Maidenhead's Independent Living Room",
+    heroImage: "/images/esquires/hero-1.png",
+    standfirst:
+      "Tucked into the High Street, Esquires Coffee has become the kind of place regulars call their second office: a relaxed, independently-run café built for lingering over a proper coffee rather than rushing one down.",
+    location: "High Street, Maidenhead SL6 1JN",
+    website: "esquirescoffee.co.uk/maidenhead",
+    body: [
+      {
+        heading: "Coffee Taken Seriously, Atmosphere Kept Easy",
+        paras: [
+          "Esquires has built its name on ethically-sourced, carefully roasted beans, and Maidenhead's branch doesn't cut corners — every cup is pulled with the same attention whether it's a quiet Tuesday morning or the Saturday rush.",
+          "But the coffee is only half the appeal. The room itself, all warm wood and greenery, is set up for people who want to stay: laptops open, meetings running long, friends catching up over a second flat white.",
+        ],
+      },
+      {
+        heading: "A Menu Built for the Whole Day",
+        paras: [
+          "Alongside the coffee menu, Esquires serves breakfasts, brunch plates, toasties and cakes made to be eaten slowly, not grabbed on the way past — the kind of food that matches the pace of the room.",
+        ],
+      },
+      {
+        heading: "Part of the High Street's Daily Rhythm",
+        paras: [
+          "For a lot of Maidenhead regulars, Esquires is simply where the day starts or where an afternoon gets reclaimed — a dependable, unpretentious spot in the middle of town that's become part of the daily routine for locals and commuters alike.",
+        ],
+      },
+    ],
+    gallery: [
+      "/images/esquires/cafe-1.jpg",
+      "/images/esquires/cafe-2.jpg",
+      "/images/esquires/cafe-3.jpg",
+    ],
+  },
+  {
+    slug: "cocoba-chocolate-cafe-story",
+    homepage: false,
+    eyebrow: "Eat & Drink",
+    category: "Chocolate Café",
+    date: "Open Daily · High Street",
+    cardHeading: "COCOBA: The Chocolate Café That Became a High Street Fixture",
+    cardBody:
+      "Since opening in 2024, COCOBA has turned a simple idea — real chocolate, properly made — into one of the High Street's most-loved cafés.",
+    cardImage: "/images/cocoba/storefront.jpg",
+    title: "COCOBA: The Chocolate Café That Became a High Street Fixture",
+    heroImage: "/images/cocoba/storefront.jpg",
+    standfirst:
+      "Since opening in October 2024, COCOBA Maidenhead has become a much-loved spot for coffee and chocolate lovers alike — a warm, welcoming café built around one straightforward idea: real chocolate, properly made.",
+    location: "High Street, Maidenhead SL6 1JN",
+    website: "cocobachocolate.com",
+    body: [
+      {
+        heading: "Chocolate as the Main Event",
+        paras: [
+          "Owners Viv and Shashank set out to make COCOBA a chocolate café in the fullest sense — not a coffee shop that happens to sell chocolate, but a space where the chocolate itself, crafted at COCOBA's own Kent factory, is the reason people come back.",
+          "That shows up everywhere on the menu: luxurious real-chocolate hot drinks, the café's now-famous hot chocolate bombes, and a rotating case of handmade truffles and bars.",
+        ],
+      },
+      {
+        heading: "A Café for the Whole Day",
+        paras: [
+          "Alongside the chocolate, there's expertly pulled barista coffee, freshly made cakes, waffles and desserts, plus light lunches and brunch favourites — enough to make COCOBA a genuine all-day stop, not just a treat on the way past.",
+        ],
+      },
+      {
+        heading: "A Fixture in Under a Year",
+        paras: [
+          "In a short space of time, COCOBA has settled into the rhythm of the High Street — a spot for meeting friends, working over a coffee, spending time with family, or simply treating yourself on an ordinary afternoon.",
+        ],
+      },
+    ],
+    gallery: [
+      "/images/cocoba/interior.jpg",
+      "/images/cocoba/dessert.jpg",
+      "/images/cocoba/truffles.jpg",
     ],
   },
 ];

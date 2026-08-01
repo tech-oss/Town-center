@@ -8,7 +8,9 @@ export const header = {
   navItems: [
     { label: "See & Do", href: "#see-do" },
     { label: "Eat & Drink", href: "#eat-drink" },
-    { label: "Shop & Services", href: "#shop" },
+    { label: "Shop", href: "#shop" },
+    { label: "Services", href: "#services" },
+    { label: "Offers", href: "/offers" },
     { label: "Live", href: "#live" },
     { label: "Work", href: "/work" },
     { label: "Explore", href: "#explore" },
@@ -136,6 +138,7 @@ export const blogCards = {
   posts: [
     {
       id: 1,
+      homepage: true,
       category: "COCOBA · Offer",
       title: "End of Season Sale — While Stocks Last",
       excerpt:
@@ -147,6 +150,7 @@ export const blogCards = {
     },
     {
       id: 2,
+      homepage: true,
       category: "Coppa Club · Offer",
       title: "Champagne & Sparkling Tasting Evening",
       excerpt:
@@ -158,6 +162,7 @@ export const blogCards = {
     },
     {
       id: 3,
+      homepage: true,
       category: "COCOBA · Featured",
       title: "Meet the Hot Chocolate Bombes",
       excerpt:

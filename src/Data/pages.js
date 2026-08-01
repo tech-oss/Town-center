@@ -212,6 +212,24 @@ const shopItems = [
   item("thames-travel", "Thames Travel", "shop", "travel-agents", "Travel Agents"),
 ];
 
+// ─── SERVICES ────────────────────────────────────────────────────────────────
+const servicesItems = [
+  // Tradesperson
+  item("thames-valley-builders", "Thames Valley Builders", "services", "builders", "Builders"),
+  item("brightspark-electrical", "BrightSpark Electrical", "services", "electricians", "Electricians"),
+  item("riverside-plumbing-heating", "Riverside Plumbing & Heating", "services", "plumbers", "Plumbers & Heating"),
+  item("maidenhead-decorators", "Maidenhead Decorators", "services", "decorators-painters", "Decorators & Painters"),
+  item("towncentre-locksmiths", "Town Centre Locksmiths", "services", "locksmiths", "Locksmiths"),
+  item("sparkle-clean-co", "Sparkle Clean Co.", "services", "cleaners", "Cleaners"),
+  // Professionals
+  item("thames-accountancy", "Thames Accountancy", "services", "accountants", "Accountants"),
+  item("maidenhead-legal-partners", "Maidenhead Legal Partners", "services", "solicitors", "Solicitors"),
+  item("bridgeview-financial", "Bridgeview Financial", "services", "financial-advisers", "Financial Advisers"),
+  item("riverside-estates", "Riverside Estates", "services", "estate-agents", "Estate Agents"),
+  item("towncentre-recruitment", "Town Centre Recruitment", "services", "recruitment", "Recruitment"),
+  item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance Brokers"),
+];
+
 // ─── EAT & DRINK ─────────────────────────────────────────────────────────────
 const eatItems = [
   {
@@ -382,7 +400,7 @@ const seeItems = [
 export const sections = {
   shop: {
     key: "shop",
-    label: "Shop & Services",
+    label: "Shop",
     path: "/shop",
     landing: {
       title: "Shopping at Maidenhead",
@@ -406,7 +424,7 @@ export const sections = {
         ],
       },
       {
-        heading: "Services",
+        heading: "Local Services",
         links: [
           { label: "Banks & Foreign Exchange", to: "/shop?category=banks" },
           { label: "Childcare", to: "/shop?category=childcare" },
@@ -431,6 +449,45 @@ export const sections = {
       },
     ],
     items: shopItems,
+  },
+
+  services: {
+    key: "services",
+    label: "Services",
+    path: "/services",
+    landing: {
+      title: "Services in Maidenhead",
+      intro:
+        "Trusted local tradespeople and professionals — from builders and electricians to accountants and solicitors — all on hand in and around the town centre.",
+      hero: "/images/ql-transport.jpg",
+    },
+    columns: [
+      {
+        heading: "Tradesperson",
+        links: [
+          { label: "See All Tradespeople", to: "/services" },
+          { label: "Builders", to: "/services?category=builders" },
+          { label: "Electricians", to: "/services?category=electricians" },
+          { label: "Plumbers & Heating", to: "/services?category=plumbers" },
+          { label: "Decorators & Painters", to: "/services?category=decorators-painters" },
+          { label: "Locksmiths", to: "/services?category=locksmiths" },
+          { label: "Cleaners", to: "/services?category=cleaners" },
+        ],
+      },
+      {
+        heading: "Professionals",
+        links: [
+          { label: "See All Professionals", to: "/services" },
+          { label: "Accountants", to: "/services?category=accountants" },
+          { label: "Solicitors", to: "/services?category=solicitors" },
+          { label: "Financial Advisers", to: "/services?category=financial-advisers" },
+          { label: "Estate Agents", to: "/services?category=estate-agents" },
+          { label: "Recruitment", to: "/services?category=recruitment" },
+          { label: "Insurance Brokers", to: "/services?category=insurance-brokers" },
+        ],
+      },
+    ],
+    items: servicesItems,
   },
 
   "eat-drink": {
@@ -535,6 +592,20 @@ export const categoryTitles = {
   opticians: "Opticians & Pharmacies",
   spa: "Spa",
   "travel-agents": "Travel Agents",
+  // services — tradesperson
+  builders: "Builders",
+  electricians: "Electricians",
+  plumbers: "Plumbers & Heating",
+  "decorators-painters": "Decorators & Painters",
+  locksmiths: "Locksmiths",
+  cleaners: "Cleaners",
+  // services — professionals
+  accountants: "Accountants",
+  solicitors: "Solicitors",
+  "financial-advisers": "Financial Advisers",
+  "estate-agents": "Estate Agents",
+  recruitment: "Recruitment",
+  "insurance-brokers": "Insurance Brokers",
   // eat & drink
   bars: "Bars",
   restaurants: "Restaurants",
@@ -573,4 +644,4 @@ export const allArticles = allItems.flatMap((biz) =>
 export const articleBySlug = Object.fromEntries(allArticles.map((a) => [a.slug, a]));
 
 // The three dropdown menus, in nav order
-export const menus = [sections["see-do"], sections["eat-drink"], sections.shop];
+export const menus = [sections["see-do"], sections["eat-drink"], sections.shop, sections.services];

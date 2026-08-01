@@ -70,7 +70,8 @@ function FeatureCard({ story, align }) {
 }
 
 export default function FeatureBlocks() {
-  const { data: features } = useFetch(getStories, []);
+  const { data: allFeatures } = useFetch(getStories, []);
+  const features = (allFeatures ?? []).filter((f) => f.homepage);
 
   return (
     <section className="py-24 px-6 md:px-12 bg-white">
