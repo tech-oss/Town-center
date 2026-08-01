@@ -754,14 +754,22 @@ export default function TradersMap() {
       </div>
 
       {/* ── Full-bleed map with the directory panel floating over it ──
-           The map runs the full width of the viewport, framed with a solid
-           border so it reads as a distinct feature rather than blending into
-           the page background. */}
+           The map runs the full width of the viewport. It's framed the same
+           way as the panel and the site's cards — a hairline in the brand
+           navy plus a soft, colour-matched shadow — rather than a flat black
+           rule, so it reads as a premium feature of the page instead of a
+           box dropped on top of it. */}
       <div className="relative w-full">
         <div
           data-immersive
           className="relative h-[380px] sm:h-[460px] lg:h-[660px] w-full"
-          style={{ zIndex: 0, isolation: "isolate", border: "2px solid #000000", boxSizing: "border-box" }}
+          style={{
+            zIndex: 0,
+            isolation: "isolate",
+            boxSizing: "border-box",
+            border: "1px solid rgba(28,46,56,0.16)",
+            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.5), 0 20px 48px -18px rgba(13,42,51,0.32)",
+          }}
         >
           <MapContainer
             center={[CENTRE.lat, CENTRE.lng]}
