@@ -636,13 +636,13 @@ export default function TradersMap() {
 
   const activeFilter = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
 
-  const filtered = useMemo(
-    () =>
+  const filtered = useMemo(() => {
+    const list =
       activeFilter.sections === null
         ? brandGrid.brands
-        : brandGrid.brands.filter((b) => activeFilter.sections.includes(b.section)),
-    [activeFilter]
-  );
+        : brandGrid.brands.filter((b) => activeFilter.sections.includes(b.section));
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
+  }, [activeFilter]);
 
   // Free-text search runs within the selected tab.
   const q = searchQuery.trim().toLowerCase();
@@ -693,10 +693,10 @@ export default function TradersMap() {
     [activeIndex, results, handleSelect]
   );
 
-  // Keep the selected trader pinned to the top of the list.
-  const directoryList = activeBrand && !searchActive
-    ? [activeBrand, ...results.filter((b) => b.id !== activeBrand.id)]
-    : results;
+  // The list only renders while nothing is selected (a selection shows the
+  // detail card instead), so it simply mirrors the current results —
+  // alphabetical within the active tab, or search matches.
+  const directoryList = results;
 
   const handleSearchKeyDown = useCallback((e) => {
     if (e.key === "Enter" && results.length > 0) {
@@ -754,14 +754,14 @@ export default function TradersMap() {
       </div>
 
       {/* ── Full-bleed map with the directory panel floating over it ──
-           The map runs the full width of the viewport and sits directly on the
-           page background (no card chrome), so it reads as part of the page
-           rather than a widget dropped onto it. */}
+           The map runs the full width of the viewport, framed with a solid
+           border so it reads as a distinct feature rather than blending into
+           the page background. */}
       <div className="relative w-full">
         <div
           data-immersive
           className="relative h-[380px] sm:h-[460px] lg:h-[660px] w-full"
-          style={{ zIndex: 0, isolation: "isolate" }}
+          style={{ zIndex: 0, isolation: "isolate", border: "2px solid #000000", boxSizing: "border-box" }}
         >
           <MapContainer
             center={[CENTRE.lat, CENTRE.lng]}
@@ -782,17 +782,6 @@ export default function TradersMap() {
               apiRef={apiRef}
             />
           </MapContainer>
-
-          {/* Soft edge fade so the map melts into the page background rather
-              than ending on a hard rectangle */}
-          <div
-            className="pointer-events-none absolute inset-x-0 top-0 h-16"
-            style={{ background: "linear-gradient(180deg, var(--sand) 0%, rgba(240,250,250,0) 100%)", zIndex: 400 }}
-          />
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
-            style={{ background: "linear-gradient(0deg, var(--sand) 0%, rgba(240,250,250,0) 100%)", zIndex: 400 }}
-          />
         </div>
 
         {/* Panel — floats over the map from lg up, stacks beneath it on mobile */}
@@ -832,7 +821,7 @@ export default function TradersMap() {
               />
             ) : (
             <>
-            {/* Search — sits above the Featured Businesses heading */}
+            {/* Search */}
             <div className="px-4 sm:px-5 pt-4 pb-3" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
               <div
                 className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-shadow duration-150"
@@ -843,11 +832,11 @@ export default function TradersMap() {
                 </svg>
                 <input
                   type="text"
-                  placeholder="Search businesses…"
+                  placeholder="Search for a business"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleSearchKeyDown}
-                  aria-label="Search businesses"
+                  aria-label="Search for a business"
                   className="flex-1 bg-transparent text-sm outline-none placeholder:opacity-50"
                   style={{ color: "var(--forest)", minWidth: 0 }}
                 />
@@ -862,24 +851,6 @@ export default function TradersMap() {
                   </button>
                 )}
               </div>
-            </div>
-
-            {/* Heading row */}
-            <div className="flex items-center justify-between gap-3 px-4 sm:px-5 py-3.5" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-              <h3
-                className="text-lg sm:text-xl leading-none"
-                style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--forest)" }}
-              >
-                {searchActive ? "Search results" : "Featured Businesses"}
-              </h3>
-              <Link
-                to="/traders"
-                className="group inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap shrink-0 transition-opacity hover:opacity-70"
-                style={{ color: "var(--leaf)" }}
-              >
-                View all
-                <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
-              </Link>
             </div>
 
             {/* Results */}
@@ -905,16 +876,6 @@ export default function TradersMap() {
                 </ul>
               )}
             </div>
-
-            {/* Footer link */}
-            <Link
-              to="/traders"
-              className="group flex items-center justify-center gap-1.5 py-3.5 text-sm font-semibold transition-colors duration-150 hover:bg-[rgba(47,164,164,0.07)]"
-              style={{ borderTop: "1px solid rgba(0,0,0,0.06)", color: "var(--forest)" }}
-            >
-              View all businesses
-              <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-            </Link>
             </>
             )}
           </div>
