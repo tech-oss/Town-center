@@ -228,6 +228,15 @@ const servicesItems = [
   item("riverside-estates", "Riverside Estates", "services", "estate-agents", "Estate Agents"),
   item("towncentre-recruitment", "Town Centre Recruitment", "services", "recruitment", "Recruitment"),
   item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance Brokers"),
+  // Freelancers
+  item("riverside-graphic-design", "Riverside Graphic Design", "services", "graphic-designers", "Graphic Designers"),
+  item("thames-web-studio", "Thames Web Studio", "services", "web-developers", "Web Developers"),
+  item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photographers", "Photographers"),
+  item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "copywriters", "Copywriters & Content Writers"),
+  item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-consultants", "Marketing Consultants"),
+  item("towncentre-pt", "Town Centre PT", "services", "personal-trainers", "Personal Trainers"),
+  item("riverside-tutoring", "Riverside Tutoring", "services", "tutors", "Tutors"),
+  item("maidenhead-va-services", "Maidenhead VA Services", "services", "virtual-assistants", "Virtual Assistants"),
 ];
 
 // ─── EAT & DRINK ─────────────────────────────────────────────────────────────
@@ -486,6 +495,20 @@ export const sections = {
           { label: "Insurance Brokers", to: "/services?category=insurance-brokers" },
         ],
       },
+      {
+        heading: "Freelancers",
+        links: [
+          { label: "See All Freelancers", to: "/services" },
+          { label: "Graphic Designers", to: "/services?category=graphic-designers" },
+          { label: "Web Developers", to: "/services?category=web-developers" },
+          { label: "Photographers", to: "/services?category=photographers" },
+          { label: "Copywriters & Content Writers", to: "/services?category=copywriters" },
+          { label: "Marketing Consultants", to: "/services?category=marketing-consultants" },
+          { label: "Personal Trainers", to: "/services?category=personal-trainers" },
+          { label: "Tutors", to: "/services?category=tutors" },
+          { label: "Virtual Assistants", to: "/services?category=virtual-assistants" },
+        ],
+      },
     ],
     items: servicesItems,
   },
@@ -606,6 +629,15 @@ export const categoryTitles = {
   "estate-agents": "Estate Agents",
   recruitment: "Recruitment",
   "insurance-brokers": "Insurance Brokers",
+  // services — freelancers
+  "graphic-designers": "Graphic Designers",
+  "web-developers": "Web Developers",
+  photographers: "Photographers",
+  copywriters: "Copywriters & Content Writers",
+  "marketing-consultants": "Marketing Consultants",
+  "personal-trainers": "Personal Trainers",
+  tutors: "Tutors",
+  "virtual-assistants": "Virtual Assistants",
   // eat & drink
   bars: "Bars",
   restaurants: "Restaurants",
