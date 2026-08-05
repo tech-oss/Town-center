@@ -46,7 +46,7 @@ export default function BuildingPage() {
           <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white transition-colors">Home</Link>
             <span className="mx-2 opacity-50">/</span>
-            <Link to="/live" className="hover:text-white transition-colors">Live</Link>
+            <Link to="/live" className="hover:text-white transition-colors">Live & Stay</Link>
             <span className="mx-2 opacity-50">/</span>
             <span className="text-white">{b.name}</span>
           </nav>

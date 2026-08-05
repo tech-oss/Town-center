@@ -8,4 +8,5 @@ export * from "./articles";
 export * from "./attractions";
 export * from "./developments";
 export * from "./stories";
+export * from "./stay";
 export { request } from "./client";

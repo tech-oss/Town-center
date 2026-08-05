@@ -36,7 +36,7 @@ export default function PropertyPage() {
           <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70">Home</Link>
             <span className="mx-2 opacity-40">/</span>
-            <Link to="/live" className="hover:opacity-70">Live</Link>
+            <Link to="/live" className="hover:opacity-70">Live & Stay</Link>
             <span className="mx-2 opacity-40">/</span>
             <Link to={p.status === "rent" ? "/live/for-rent" : "/live/for-sale"} className="hover:opacity-70">{p.status === "rent" ? "For Rent" : "For Sale"}</Link>
           </nav>

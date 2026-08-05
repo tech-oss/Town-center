@@ -11,7 +11,7 @@ export const header = {
     { label: "Shop", href: "#shop" },
     { label: "Services", href: "#services" },
     { label: "Offers", href: "/offers" },
-    { label: "Live", href: "#live" },
+    { label: "Live & Stay", href: "#live" },
     { label: "Work", href: "/work" },
     { label: "Explore", href: "#explore" },
   ],

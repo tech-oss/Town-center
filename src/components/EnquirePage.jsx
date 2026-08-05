@@ -16,7 +16,7 @@ export default function EnquirePage() {
           <nav className="mb-3 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
             <Link to="/" className="hover:text-white">Home</Link>
             <span className="mx-2 opacity-50">/</span>
-            <Link to="/live" className="hover:text-white">Live</Link>
+            <Link to="/live" className="hover:text-white">Live & Stay</Link>
             <span className="mx-2 opacity-50">/</span>
             <span className="text-white">Enquire</span>
           </nav>

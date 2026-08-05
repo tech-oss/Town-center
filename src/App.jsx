@@ -9,6 +9,8 @@ import DetailPage from './components/DetailPage'
 import ArticlePage from './components/ArticlePage'
 import LivePage from './components/LivePage'
 import PropertySearch from './components/PropertySearch'
+import StayListingPage from './components/StayListingPage'
+import StayDetailPage from './components/StayDetailPage'
 import PropertyPage from './components/PropertyPage'
 import BuildingPage from './components/BuildingPage'
 import EnquirePage from './components/EnquirePage'
@@ -106,6 +108,10 @@ function PublicSite() {
           <Route path="/about" element={<OurStoryPage />} />
           {/* Live (residential) section */}
           <Route path="/live" element={<LivePage />} />
+          <Route path="/live/stay/hotels" element={<StayListingPage kind="hotels" />} />
+          <Route path="/live/stay/hotels/:slug" element={<StayDetailPage kind="hotels" />} />
+          <Route path="/live/stay/accommodation" element={<StayListingPage kind="accommodation" />} />
+          <Route path="/live/stay/accommodation/:slug" element={<StayDetailPage kind="accommodation" />} />
           <Route path="/live/overview" element={<PropertySearch mode="overview" />} />
           <Route path="/live/for-sale" element={<PropertySearch mode="sale" />} />
           <Route path="/live/for-rent" element={<PropertySearch mode="rent" />} />

@@ -562,16 +562,9 @@ export const live = {
 // ─── Live dropdown menu ───────────────────────────────────────────────────────
 export const liveMenu = {
   key: "live",
-  label: "Live",
+  label: "Live & Stay",
   path: "/live",
   columns: [
-    {
-      heading: "For Sale & Rent",
-      links: [
-        { label: "Properties For Sale", to: "/live/for-sale" },
-        { label: "Properties For Rent", to: "/live/for-rent" },
-      ],
-    },
     {
       heading: "Living in Maidenhead",
       links: [
@@ -580,8 +573,22 @@ export const liveMenu = {
       ],
     },
     {
+      heading: "Stay",
+      links: [
+        { label: "Hotels", to: "/live/stay/hotels" },
+        { label: "Accommodation", to: "/live/stay/accommodation" },
+      ],
+    },
+    {
       heading: "Developments",
       links: buildings.map((b) => ({ label: b.name, to: `/live/building/${b.slug}` })),
+    },
+    {
+      heading: "For Sale & Rent",
+      links: [
+        { label: "Properties For Sale", to: "/live/for-sale" },
+        { label: "Properties For Rent", to: "/live/for-rent" },
+      ],
     },
   ],
 };

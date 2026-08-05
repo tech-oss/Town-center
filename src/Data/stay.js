@@ -1,0 +1,179 @@
+// ════════════════════════════════════════════════════════════════════════════
+//  "Stay" — visitor accommodation in and around Maidenhead.
+//  Routes:
+//   /live/stay/hotels                    → Hotels listing
+//   /live/stay/hotels/:slug              → Hotel detail
+//   /live/stay/accommodation             → Privately-owned accommodation listing
+//   /live/stay/accommodation/:slug       → Accommodation detail
+//
+//  HOTELS — real, publicly-listed Maidenhead hotels (name/address verified via
+//  web search, Aug 2026). No live pricing/availability feed is wired up, so
+//  `priceFrom` is a rounded "from" indicator only, and every card links out to
+//  the hotel's own site/OTA listing for booking — this site does not take
+//  reservations.
+//
+//  ACCOMMODATION — there is no public API for Airbnb/private-host listings,
+//  and scraping or fabricating real hosts' homes and addresses would publish
+//  private individuals' property details without consent. These entries are
+//  clearly-labelled examples in the same spirit as the site's other seeded
+//  demo listings (e.g. shop/services placeholders) — replace with a real
+//  channel-manager or Airbnb partner feed before launch.
+// ════════════════════════════════════════════════════════════════════════════
+
+const img = (seed, w = 1200, h = 800) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
+
+export const hotels = [
+  {
+    slug: "fredricks-hotel-restaurant-spa",
+    name: "Fredrick's Hotel, Restaurant & Spa",
+    stars: 4,
+    tagline: "A 4-star Edwardian townhouse hotel with private gardens and a spa",
+    description:
+      "Built in the 1920s, Fredrick's is a long-standing 4-star hotel in the heart of Maidenhead, set in its own private gardens with a swimming pool, spa and an on-site restaurant.",
+    address: "Shoppenhangers Road, Maidenhead SL6 2PZ",
+    mapQuery: "Fredrick's Hotel, Shoppenhangers Road, Maidenhead SL6 2PZ",
+    website: "https://www.fredricks-hotel.co.uk/",
+    priceFrom: null,
+    image: img("fredricks-hotel", 1200, 800),
+    gallery: [img("fredricks-hotel", 1200, 800), img("fredricks-hotel-2", 900, 600), img("fredricks-hotel-3", 900, 600)],
+    amenities: ["Spa & swimming pool", "On-site restaurant", "Private gardens", "Free Wi-Fi", "On-site parking"],
+  },
+  {
+    slug: "premier-inn-maidenhead-town-centre",
+    name: "Premier Inn Maidenhead Town Centre",
+    stars: 3,
+    tagline: "Budget-friendly chain hotel a short walk from the River Thames",
+    description:
+      "A centrally-located Premier Inn within walking distance of the River Thames and Maidenhead's shops, restaurants and station.",
+    address: "Kidwells Park Drive, Maidenhead SL6 8AQ",
+    mapQuery: "Premier Inn Maidenhead Town Centre, Kidwells Park Drive, Maidenhead SL6 8AQ",
+    website: "https://www.premierinn.com/gb/en/hotels/england/berkshire/maidenhead/maidenhead-town-centre.html",
+    priceFrom: null,
+    image: img("premier-inn-mh", 1200, 800),
+    gallery: [img("premier-inn-mh", 1200, 800), img("premier-inn-mh-2", 900, 600), img("premier-inn-mh-3", 900, 600)],
+    amenities: ["Free Wi-Fi", "On-site restaurant/bar", "Family rooms", "Good night guarantee"],
+  },
+  {
+    slug: "thames-riviera-hotel",
+    name: "Thames Riviera Hotel",
+    stars: 3,
+    tagline: "Riverside hotel by Maidenhead Bridge, part of the Sure Hotel Collection by Best Western",
+    description:
+      "Set right on the riverside by Maidenhead Bridge, the Thames Riviera Hotel is a short walk from Skindles restaurant across the bridge and from the town centre.",
+    address: "Bridge Road, Maidenhead SL6 8DW",
+    mapQuery: "Thames Riviera Hotel, Bridge Road, Maidenhead SL6 8DW",
+    website: null,
+    priceFrom: null,
+    image: img("thames-riviera", 1200, 800),
+    gallery: [img("thames-riviera", 1200, 800), img("thames-riviera-2", 900, 600), img("thames-riviera-3", 900, 600)],
+    amenities: ["Riverside setting", "On-site restaurant", "Free Wi-Fi", "On-site parking"],
+  },
+  {
+    slug: "travelodge-maidenhead-central",
+    name: "Travelodge Maidenhead Central",
+    stars: 2,
+    tagline: "Simple, budget accommodation on King Street in the town centre",
+    description:
+      "A no-frills Travelodge on King Street, right in the town centre and close to Maidenhead's shops, restaurants and station.",
+    address: "99 King Street, Maidenhead SL6 1DP",
+    mapQuery: "Travelodge Maidenhead Central, 99 King Street, Maidenhead SL6 1DP",
+    website: "https://www.travelodge.co.uk/",
+    priceFrom: null,
+    image: img("travelodge-mh", 1200, 800),
+    gallery: [img("travelodge-mh", 1200, 800), img("travelodge-mh-2", 900, 600), img("travelodge-mh-3", 900, 600)],
+    amenities: ["Free Wi-Fi", "Town centre location", "Family rooms"],
+  },
+  {
+    slug: "holiday-inn-maidenhead-windsor",
+    name: "Holiday Inn Maidenhead / Windsor, an IHG Hotel",
+    stars: 4,
+    tagline: "Larger IHG hotel near the M4, geared towards business and event stays",
+    description:
+      "A short drive from the town centre near the M4, this Holiday Inn offers conference facilities alongside its guest rooms — a popular choice for business travellers visiting Maidenhead and Windsor.",
+    address: "Manor Lane, Maidenhead SL6 2RA",
+    mapQuery: "Holiday Inn Maidenhead Windsor, Manor Lane, Maidenhead SL6 2RA",
+    website: "https://www.ihg.com/holidayinn/",
+    priceFrom: null,
+    image: img("holiday-inn-mh", 1200, 800),
+    gallery: [img("holiday-inn-mh", 1200, 800), img("holiday-inn-mh-2", 900, 600), img("holiday-inn-mh-3", 900, 600)],
+    amenities: ["Conference facilities", "On-site restaurant/bar", "Free parking", "Free Wi-Fi"],
+  },
+];
+
+export const hotelBySlug = Object.fromEntries(hotels.map((h) => [h.slug, h]));
+
+// ─── Accommodation ───────────────────────────────────────────────────────────
+// EXAMPLE listings only — see file header. Not sourced from Airbnb or any
+// other platform; every host name and property is fictional.
+export const accommodations = [
+  {
+    slug: "riverside-loft-apartment",
+    name: "Riverside Loft Apartment",
+    type: "Entire apartment",
+    tagline: "Bright, modern loft overlooking the Waterside Quarter",
+    description:
+      "A one-bedroom loft-style apartment in Maidenhead's regenerated Waterside Quarter, a few minutes' walk from the station and the town centre's restaurants and bars.",
+    area: "Waterside Quarter, Maidenhead town centre",
+    mapQuery: "Waterside Quarter, Maidenhead SL6",
+    guests: 2,
+    bedrooms: 1,
+    priceFrom: null,
+    host: "Hosted by Emma",
+    image: img("riverside-loft", 1200, 800),
+    gallery: [img("riverside-loft", 1200, 800), img("riverside-loft-2", 900, 600), img("riverside-loft-3", 900, 600)],
+    amenities: ["Free Wi-Fi", "Fully equipped kitchen", "Washer/dryer", "Riverside views", "5 min walk to station"],
+  },
+  {
+    slug: "the-old-bakery-cottage",
+    name: "The Old Bakery Cottage",
+    type: "Entire cottage",
+    tagline: "Two-bedroom cottage near the High Street, once a working bakery",
+    description:
+      "A converted cottage with two bedrooms, a private courtyard garden and period character, a short walk from Maidenhead's High Street.",
+    area: "Near High Street, Maidenhead town centre",
+    mapQuery: "High Street, Maidenhead SL6",
+    guests: 4,
+    bedrooms: 2,
+    priceFrom: null,
+    host: "Hosted by James & Priya",
+    image: img("old-bakery-cottage", 1200, 800),
+    gallery: [img("old-bakery-cottage", 1200, 800), img("old-bakery-cottage-2", 900, 600), img("old-bakery-cottage-3", 900, 600)],
+    amenities: ["Private courtyard garden", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Pet friendly"],
+  },
+  {
+    slug: "bridge-street-studio",
+    name: "Bridge Street Studio",
+    type: "Private room in a home",
+    tagline: "Compact studio-style room, walking distance to the river",
+    description:
+      "A private, self-contained studio room with its own entrance, a short walk from Maidenhead Bridge and the riverside.",
+    area: "Near Bridge Street, Maidenhead",
+    mapQuery: "Bridge Street, Maidenhead SL6",
+    guests: 2,
+    bedrooms: 1,
+    priceFrom: null,
+    host: "Hosted by Alex",
+    image: img("bridge-street-studio", 1200, 800),
+    gallery: [img("bridge-street-studio", 1200, 800), img("bridge-street-studio-2", 900, 600), img("bridge-street-studio-3", 900, 600)],
+    amenities: ["Private entrance", "Free Wi-Fi", "Kettle & microwave", "Walk to the river"],
+  },
+  {
+    slug: "thameside-boathouse-retreat",
+    name: "Thameside Boathouse Retreat",
+    type: "Entire home",
+    tagline: "Three-bedroom riverside home with a private garden onto the Thames",
+    description:
+      "A spacious riverside home with a private garden running down to the Thames, a short drive from the town centre — well suited to families or small groups.",
+    area: "Riverside, near Boulter's Lock, Maidenhead",
+    mapQuery: "Boulter's Lock, Maidenhead SL6",
+    guests: 6,
+    bedrooms: 3,
+    priceFrom: null,
+    host: "Hosted by Sarah",
+    image: img("thameside-boathouse", 1200, 800),
+    gallery: [img("thameside-boathouse", 1200, 800), img("thameside-boathouse-2", 900, 600), img("thameside-boathouse-3", 900, 600)],
+    amenities: ["Private garden onto the Thames", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Garden furniture & BBQ"],
+  },
+];
+
+export const accommodationBySlug = Object.fromEntries(accommodations.map((a) => [a.slug, a]));
