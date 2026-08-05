@@ -195,7 +195,10 @@ const Header = forwardRef(function Header(_, ref) {
       {/* Desktop mega-menu dropdown */}
       {openDropdown && menusByLabel[openDropdown] && (
         <div className="hidden md:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-          <div className="max-w-6xl mx-auto px-8 py-8 grid grid-cols-3 gap-10">
+          <div
+            className="max-w-6xl mx-auto px-8 py-8 grid gap-10"
+            style={{ gridTemplateColumns: `repeat(${menusByLabel[openDropdown].columns.length}, minmax(0, 1fr))` }}
+          >
             {menusByLabel[openDropdown].columns.map((col) => (
               <div key={col.heading}>
                 <p className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
