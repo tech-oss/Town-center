@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { blogCards } from "../Data/content";
-import { btn } from "../utils/design";
 import useTapReveal from "../hooks/useTapReveal";
 
 function CardLink({ href, className, style, onClick, children }) {
@@ -100,24 +99,12 @@ export default function BlogCards() {
       <div className="relative max-w-6xl mx-auto">
         {/* Header — heading + rule, matching the reference's editorial masthead */}
         <div className="mb-14 md:mb-16">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
-                {blogCards.eyebrow}
-              </p>
-              <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
-                {blogCards.heading}
-              </h2>
-            </div>
-            <CardLink
-              href={blogCards.cta.href}
-              className={btn.text.className}
-              style={{ color: "#000000" }}
-            >
-              {blogCards.cta.label}
-              <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
-            </CardLink>
-          </div>
+          <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+            {blogCards.eyebrow}
+          </p>
+          <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
+            {blogCards.heading}
+          </h2>
           <p
             className="mt-4 text-sm md:text-base text-right sm:text-left sm:max-w-xs sm:ml-auto"
             style={{ color: "#000000", fontFamily: '"Playfair Display", Georgia, serif' }}
@@ -134,6 +121,18 @@ export default function BlogCards() {
           {posts.map((post, i) => (
             <PortfolioCard key={post.id} post={post} offset={OFFSETS[i]} />
           ))}
+        </div>
+
+        {/* See All Stories — after the last card, right-aligned */}
+        <div className="mt-8 flex justify-end">
+          <CardLink
+            href={blogCards.cta.href}
+            className="inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity duration-150 hover:opacity-70"
+            style={{ color: "#000000" }}
+          >
+            {blogCards.cta.label}
+            <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
+          </CardLink>
         </div>
       </div>
     </section>
