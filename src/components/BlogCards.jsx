@@ -118,6 +118,12 @@ export default function BlogCards() {
               <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
             </CardLink>
           </div>
+          <p
+            className="mt-4 text-sm md:text-base text-left sm:max-w-xs sm:ml-auto"
+            style={{ color: "#000000", fontFamily: '"Playfair Display", Georgia, serif' }}
+          >
+            Exclusive offers, special events and more
+          </p>
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
         </div>
 
