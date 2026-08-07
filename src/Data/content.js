@@ -172,6 +172,18 @@ export const blogCards = {
       href: "/news/cocoba-hot-chocolate-bombes",
       date: "All year round",
     },
+    {
+      id: 4,
+      homepage: true,
+      category: "Coppa Club · What's On",
+      title: "Shake, Stir & Sip: Cocktail Masterclass",
+      excerpt:
+        "A hands-on cocktail masterclass led by Coppa Club's in-house bartenders — learn to shake, stir and sip your way through their signature serves.",
+      imageSrc: "/images/coppa/cocktail.jpg",
+      imageAlt: "Cocktail masterclass at Coppa Club",
+      href: "/news/coppa-cocktail-masterclass",
+      date: "Monthly · 7pm",
+    },
   ],
 };
 

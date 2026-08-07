@@ -10,12 +10,14 @@ function CardLink({ href, className, style, onClick, children }) {
 
 // ── Per-item placement on the desktop 12-column scatter ──────────────────────
 // Each entry positions one card: its column span and a vertical offset for
-// the staggered, editorial rhythm of the reference. All three share the same
-// 3:4 image ratio.
+// the staggered, editorial rhythm of the reference. Four cards sit as a 2×2,
+// with the lower pair nudged down to keep the staggered feel. All share the
+// same image size.
 const LAYOUT = [
   { col: "md:col-start-1 md:col-end-7",  offset: "" },
   { col: "md:col-start-7 md:col-end-13", offset: "" },
-  { col: "md:col-start-4 md:col-end-10", offset: "md:mt-6" },
+  { col: "md:col-start-1 md:col-end-7",  offset: "md:mt-6" },
+  { col: "md:col-start-7 md:col-end-13", offset: "md:mt-6" },
 ];
 
 // ── One scatter item: image + caption (title left / promo text right) ────────
@@ -95,7 +97,7 @@ function PortfolioCard({ post, layout }) {
 
 // ── Section ────────────────────────────────────────────────────────────────
 export default function BlogCards() {
-  const posts = blogCards.posts.filter((p) => p.homepage).slice(0, 3);
+  const posts = blogCards.posts.filter((p) => p.homepage).slice(0, 4);
 
   return (
     <section
