@@ -109,7 +109,7 @@ export default function BlogCards() {
         <div className="mb-14 md:mb-16">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+              <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
                 {blogCards.eyebrow}
               </p>
               <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>

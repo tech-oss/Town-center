@@ -1,56 +1,6 @@
 import { Link } from "react-router-dom";
-import { getEvents } from "../api";
-import useFetch from "../hooks/useFetch";
+import { featuredEvents } from "../Data/events";
 import useTapReveal from "../hooks/useTapReveal";
-
-// Returns the next occurrence of a given weekday (0=Sun … 6=Sat) on or after today.
-function nextWeekday(weekday) {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  const diff = (weekday - d.getDay() + 7) % 7;
-  d.setDate(d.getDate() + diff);
-  return d;
-}
-
-// Returns the Nth (1-based) occurrence of `weekday` in the given month/year.
-function nthWeekdayOfMonth(n, weekday, year, month) {
-  const d = new Date(year, month, 1);
-  const firstOccurrence = (weekday - d.getDay() + 7) % 7;
-  d.setDate(1 + firstOccurrence + (n - 1) * 7);
-  return d;
-}
-
-// Compute the sort-date for an event:
-// - one-off events: their iso date
-// - recurring (recurringWeekday): next occurrence, respecting nthWeekday if set
-function sortDate(e) {
-  if (e.iso) return new Date(e.iso);
-  if (e.recurringWeekday !== undefined) {
-    if (e.nthWeekday) {
-      // e.g. { recurringWeekday: 0, nthWeekday: 2 } = 2nd Sunday each month
-      const now = new Date();
-      const candidate = nthWeekdayOfMonth(e.nthWeekday, e.recurringWeekday, now.getFullYear(), now.getMonth());
-      const today = new Date(); today.setHours(0,0,0,0);
-      if (candidate >= today) return candidate;
-      // next month
-      const nm = now.getMonth() === 11 ? 0 : now.getMonth() + 1;
-      const ny = now.getMonth() === 11 ? now.getFullYear() + 1 : now.getFullYear();
-      return nthWeekdayOfMonth(e.nthWeekday, e.recurringWeekday, ny, nm);
-    }
-    return nextWeekday(e.recurringWeekday);
-  }
-  return new Date(8640000000000000); // no date → sort last
-}
-
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-// Only show upcoming events: future one-offs + all recurring events.
-function upcomingFrom(events) {
-  return events
-    .filter(e => e.recurringWeekday !== undefined || !e.iso || new Date(e.iso) >= today)
-    .sort((a, b) => sortDate(a) - sortDate(b));
-}
 
 // ── One event card — image + caption (title left / excerpt right), matching
 // the "Featured Stories" / "In the Spotlight" 4:3 portfolio treatment: sharp
@@ -152,19 +102,18 @@ function EventCard({ event }) {
 }
 
 export default function EventsGrid() {
-  const { data: events } = useFetch(getEvents, []);
-  const upcomingEvents = upcomingFrom(events ?? []).slice(0, 3);
+  const upcomingEvents = featuredEvents;
   return (
     <section id="events" className="py-20 md:py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-end justify-between gap-4 mb-10">
           <div>
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
               Upcoming Events
             </p>
             <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
-              What's On
+              WHAT'S ON
             </h2>
           </div>
           <Link

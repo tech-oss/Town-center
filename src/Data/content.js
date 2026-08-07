@@ -49,7 +49,7 @@ export const hero = {
 // ─── QuickLinks ───────────────────────────────────────────────────────────────
 export const quickLinks = {
   eyebrow: "Find Your Way Around",
-  heading: "Explore Maidenhead",
+  heading: "EXPLORE",
   intro:
     "A vibrant riverside destination where historic charm meets contemporary living. Stroll along the Thames, browse independent shops and boutiques, relax in welcoming cafés and artisan coffee shops, enjoy waterside dining, and unwind in stylish bars. Family-friendly attractions and beautiful green spaces to world-renowned Michelin-starred restaurants just minutes away, there's something for every visitor to enjoy.",
   items: [
@@ -95,7 +95,7 @@ export const quickLinks = {
 // ─── PlanVisit (Getting Here — bottom practical-info section) ──────────────────
 export const planVisit = {
   eyebrow: "Plan Your Visit",
-  heading: "Getting Here & Good to Know",
+  heading: "GETTING HERE & GOOD TO KNOW",
   intro:
     "By rail, road, bus or bicycle, getting to and around Maidenhead is easy.",
   // Live 7-day forecast for Maidenhead (lat/lon used by the weather widget)
@@ -133,7 +133,7 @@ export const planVisit = {
 // ─── BlogCards ────────────────────────────────────────────────────────────────
 export const blogCards = {
   eyebrow: "From the Journal",
-  heading: "In the Spotlight",
+  heading: "IN THE SPOTLIGHT",
   cta: { label: "See All Stories", href: "/news" },
   posts: [
     {
@@ -314,7 +314,7 @@ const extraBrands = extraTraders.map(([name, category, section, lat, lng], i) =>
 // ─── BrandGrid ────────────────────────────────────────────────────────────────
 export const brandGrid = {
   eyebrow: "Curated for Work and Wellbeing",
-  heading: "Our Traders",
+  heading: "OUR TRADERS",
   subheading:
     "A vibrant collection of shops, restaurants, and services — all surrounded by green spaces and riverside tranquility.",
   ctas: [

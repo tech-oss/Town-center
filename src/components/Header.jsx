@@ -196,7 +196,7 @@ const Header = forwardRef(function Header(_, ref) {
       {openDropdown && menusByLabel[openDropdown] && (
         <div className="hidden md:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
           <div
-            className="max-w-6xl mx-auto px-8 py-8 grid gap-10"
+            className={`py-8 grid gap-10 ${openDropdown === "Explore" ? "ml-auto px-8 w-max" : "max-w-6xl mx-auto px-8"}`}
             style={{ gridTemplateColumns: `repeat(${menusByLabel[openDropdown].columns.length}, minmax(0, 1fr))` }}
           >
             {menusByLabel[openDropdown].columns.map((col) => (

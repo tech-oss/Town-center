@@ -77,11 +77,11 @@ export default function FeatureBlocks() {
     <section className="py-24 px-6 md:px-12 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="mb-14 md:mb-16">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+          <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
             In Focus
           </p>
           <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
-            Featured Stories
+            FEATURED STORIES
           </h2>
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
         </div>

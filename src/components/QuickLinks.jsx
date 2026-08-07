@@ -11,7 +11,7 @@ export default function QuickLinks() {
 
         {/* ── Intro copy (editorial serif, right-aligned) ── */}
         <p
-          className="text-right mb-12 md:mb-16 text-xl md:text-[2.25rem]"
+          className="text-right mb-12 md:mb-16 text-2xl md:text-[2.5rem]"
           style={{
             color: "#000000",
             fontFamily: '"Playfair Display", Georgia, serif',
@@ -26,7 +26,7 @@ export default function QuickLinks() {
         {/* ── Header (left-aligned) ── */}
         <div className="mb-8 md:mb-12">
           <p
-            className="text-xs font-semibold tracking-[0.2em] uppercase mb-3"
+            className="text-sm font-semibold tracking-[0.2em] uppercase mb-3"
             style={{ color: "var(--leaf)" }}
           >
             {quickLinks.eyebrow}

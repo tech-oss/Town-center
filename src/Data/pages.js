@@ -15,6 +15,8 @@
 //   /:section/place/:slug         → item detail page
 // ════════════════════════════════════════════════════════════════════════════
 
+import { featuredEvents } from "./events";
+
 // Stable dummy image per slug (replace with real assets later)
 const img = (seed) => `https://picsum.photos/seed/${seed}/900/650`;
 
@@ -446,7 +448,7 @@ export const sections = {
         ],
       },
       {
-        heading: "Popular",
+        heading: "Featured",
         links: [
           { label: "Zara", to: "/shop/place/zara" },
           { label: "M&S", to: "/shop/place/m-s" },
@@ -549,7 +551,7 @@ export const sections = {
         ],
       },
       {
-        heading: "New To Maidenhead",
+        heading: "Featured",
         links: [
           { label: "Coppa Club", to: "/eat-drink/place/coppa-club" },
           { label: "Bakedd", to: "/eat-drink/place/bakedd" },
@@ -590,6 +592,12 @@ export const sections = {
           { label: "Learning", to: "/see-do?category=learning" },
           { label: "Sport & Wellness", to: "/see-do?category=sport-wellness" },
         ],
+      },
+      {
+        heading: "Featured",
+        // The same events currently shown on the homepage's What's On grid —
+        // sourced from the one shared list so the two never drift apart.
+        links: featuredEvents.map((e) => ({ label: e.title, to: `/event/${e.slug}` })),
       },
     ],
     items: seeItems,
