@@ -77,12 +77,22 @@ export default function FeatureBlocks() {
     <section className="py-24 px-6 md:px-12 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="mb-14 md:mb-16">
-          <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
-            In Focus
-          </p>
-          <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
-            FEATURED STORIES
-          </h2>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+                In Focus
+              </p>
+              <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
+                FEATURED STORIES
+              </h2>
+            </div>
+            <p
+              className="text-sm md:text-base text-left md:max-w-xs"
+              style={{ color: "#000000", fontFamily: '"Playfair Display", Georgia, serif' }}
+            >
+              Meet the people, discover the places, share the moments.
+            </p>
+          </div>
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
         </div>
       </div>
