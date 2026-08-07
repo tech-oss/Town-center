@@ -2,7 +2,7 @@ import AppBadges from "./AppBadges";
 
 export default function AppCta() {
   return (
-    <section className="px-6 md:px-12 py-16 md:py-20" style={{ backgroundColor: "#ffffff" }}>
+    <section className="px-6 md:px-12 py-20 md:py-24" style={{ backgroundColor: "#ffffff" }}>
       <div
         className="max-w-6xl mx-auto rounded-3xl overflow-hidden relative px-8 md:px-14 py-12 md:py-16"
         style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}

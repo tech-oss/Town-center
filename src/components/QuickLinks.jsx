@@ -7,7 +7,7 @@ export default function QuickLinks() {
       className="py-16 md:py-24 px-6 md:px-12"
       style={{ backgroundColor: "#ffffff" }}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-6xl mx-auto">
 
         {/* ── Intro copy (editorial serif, right-aligned) ── */}
         <p

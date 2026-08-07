@@ -8,23 +8,16 @@ function CardLink({ href, className, style, onClick, children }) {
   return <a href={href} className={className} style={style} onClick={onClick}>{children}</a>;
 }
 
-// ── Per-item placement on the desktop 12-column scatter ──────────────────────
-// Each entry positions one card: its column span and a vertical offset for
-// the staggered, editorial rhythm of the reference. Four cards sit as a 2×2,
-// with the lower pair nudged down to keep the staggered feel. All share the
-// same image size.
-const LAYOUT = [
-  { col: "md:col-start-1 md:col-end-7",  offset: "" },
-  { col: "md:col-start-7 md:col-end-13", offset: "" },
-  { col: "md:col-start-1 md:col-end-7",  offset: "md:mt-6" },
-  { col: "md:col-start-7 md:col-end-13", offset: "md:mt-6" },
-];
+// ── Per-item vertical offset ─────────────────────────────────────────────────
+// The four cards flow into a 2×2; the lower pair is nudged down to keep the
+// staggered, editorial rhythm of the reference. All share the same image size.
+const OFFSETS = ["", "", "md:mt-6", "md:mt-6"];
 
 // ── One scatter item: image + caption (title left / promo text right) ────────
-function PortfolioCard({ post, layout }) {
+function PortfolioCard({ post, offset }) {
   const { revealed, onImageClick } = useTapReveal();
   return (
-    <div className={`${layout.col} ${layout.offset}`}>
+    <div className={offset}>
       {/* Image — hover (desktop) or tap (touch) eases the sharp photo inward,
           revealing a blurred, dimmed copy of the same image around its edges
           (a soft framed vignette, not blank space), matching the reference.
@@ -33,7 +26,7 @@ function PortfolioCard({ post, layout }) {
       <CardLink
         href={post.href}
         onClick={onImageClick}
-        className={`spotlight-card group block w-[450px] max-w-full ${revealed ? "is-revealed" : ""}`}
+        className={`spotlight-card group block w-full ${revealed ? "is-revealed" : ""}`}
       >
         <div
           className="relative w-full h-[345px] md:h-[391px] overflow-hidden"
@@ -58,7 +51,7 @@ function PortfolioCard({ post, layout }) {
       </CardLink>
 
       {/* Caption — width-matched to the image above it so both edges align */}
-      <div className="mt-4 w-[450px] max-w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
+      <div className="mt-4 w-full flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5 sm:gap-6">
         <div className="sm:max-w-[52%]">
           <p
             className="text-[11px] font-medium uppercase tracking-[0.02em] mb-1"
@@ -85,7 +78,7 @@ function PortfolioCard({ post, layout }) {
           where the image itself no longer navigates */}
       <CardLink
         href={post.href}
-        className="group/more flex items-center gap-1.5 text-sm font-semibold mt-3 w-[450px] max-w-full"
+        className="group/more flex items-center gap-1.5 text-sm font-semibold mt-3 w-full"
         style={{ color: "#000000" }}
       >
         Read more
@@ -128,10 +121,12 @@ export default function BlogCards() {
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
         </div>
 
-        {/* Staggered editorial scatter — single column on mobile */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-12 md:gap-y-6 items-start">
+        {/* Staggered editorial scatter — single column on mobile. On desktop the
+            grid is sized to exactly two 450px cards plus the gap and centred, so
+            the block sits with equal space either side rather than stretching. */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-12 md:gap-y-6 items-start md:max-w-[924px] md:mx-auto">
           {posts.map((post, i) => (
-            <PortfolioCard key={post.id} post={post} layout={LAYOUT[i]} />
+            <PortfolioCard key={post.id} post={post} offset={OFFSETS[i]} />
           ))}
         </div>
       </div>
