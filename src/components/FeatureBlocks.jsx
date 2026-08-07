@@ -80,7 +80,7 @@ export default function FeatureBlocks() {
           <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
             In Focus
           </p>
-          <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
+          <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
             FEATURED STORIES
           </h2>
           <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />

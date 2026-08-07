@@ -112,7 +112,7 @@ export default function EventsGrid() {
             <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
               Upcoming Events
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight" style={{ color: "#000000" }}>
+            <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
               WHAT'S ON
             </h2>
           </div>

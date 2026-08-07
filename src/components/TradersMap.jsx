@@ -663,7 +663,7 @@ export default function TradersMap() {
         <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
           {brandGrid.eyebrow}
         </p>
-        <h2 className="text-3xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>
+        <h2 className="home-section-title text-3xl md:text-5xl mb-4 leading-tight" style={{ color: "#000000" }}>
           {brandGrid.heading}
         </h2>
         <p className="text-base max-w-xl mx-auto leading-relaxed" style={{ color: "#000000" }}>

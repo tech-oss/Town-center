@@ -132,9 +132,10 @@ h5, h6, .text-sm, .text-xs {
 /* Display / hero-scale headings tighten further for a crisper masthead feel. */
 .text-5xl, .text-6xl, .text-7xl, .text-8xl { letter-spacing: -0.03em; }
 
-/* "EXPLORE" (QuickLinks section title) — deliberately bolder than the
-   300-weight default the rest of the h2s use. */
-.explore-heading {
+/* Homepage section titles (EXPLORE, FEATURED STORIES, IN THE SPOTLIGHT, OUR
+   TRADERS, WHAT'S ON) — deliberately bolder than the 300-weight default the
+   rest of the h2s use. */
+.home-section-title {
   font-weight: 600 !important;
 }
 

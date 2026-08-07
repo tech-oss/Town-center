@@ -32,7 +32,7 @@ export default function QuickLinks() {
             {quickLinks.eyebrow}
           </p>
           <h2
-            className="explore-heading text-4xl md:text-5xl"
+            className="home-section-title text-4xl md:text-5xl"
             style={{ color: "#000000" }}
           >
             {quickLinks.heading}
