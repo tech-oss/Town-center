@@ -87,7 +87,7 @@ export default function FeatureBlocks() {
               </h2>
             </div>
             <p
-              className="text-sm md:text-base text-left md:max-w-xs md:mt-28"
+              className="text-sm md:text-base text-right md:text-left md:max-w-xs md:mt-28"
               style={{ color: "#000000", fontFamily: '"Playfair Display", Georgia, serif' }}
             >
               Meet the people, discover the places, share the moments.

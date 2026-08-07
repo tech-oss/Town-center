@@ -119,7 +119,7 @@ export default function BlogCards() {
             </CardLink>
           </div>
           <p
-            className="mt-4 text-sm md:text-base text-left sm:max-w-xs sm:ml-auto"
+            className="mt-4 text-sm md:text-base text-right sm:text-left sm:max-w-xs sm:ml-auto"
             style={{ color: "#000000", fontFamily: '"Playfair Display", Georgia, serif' }}
           >
             Exclusive offers, special events and more
