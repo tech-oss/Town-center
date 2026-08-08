@@ -70,7 +70,7 @@ const Header = forwardRef(function Header(_, ref) {
   return (
     <header
       ref={ref}
-      className="site-header fixed top-0 inset-x-0 z-50"
+      className="site-header fixed top-0 inset-x-0 z-[600]"
       data-solid={forceSolid}
       data-hidden={isHidden}
     >
