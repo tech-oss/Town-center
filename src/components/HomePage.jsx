@@ -7,6 +7,7 @@ import EventsGrid from "./EventsGrid";
 import PlanVisit from "./PlanVisit";
 import AppCta from "./AppCta";
 import Newsletter from "./Newsletter";
+import InstagramFeed from "./InstagramFeed";
 
 export default function HomePage() {
   return (
@@ -20,6 +21,7 @@ export default function HomePage() {
       <PlanVisit />
       <AppCta />
       <Newsletter />
+      <InstagramFeed />
     </>
   );
 }
