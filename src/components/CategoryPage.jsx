@@ -4,7 +4,6 @@ import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
-import EventsCalendar from "./EventsCalendar";
 
 // The real What's On events surfaced as See & Do cards that link to the shared
 // /event/:slug detail page — keeps one source of truth.
@@ -133,14 +132,6 @@ export default function CategoryPage() {
             <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000" }}>
               {intro}
             </p>
-          )}
-
-          {/* See & Do landing: interactive events calendar */}
-          {section === "see-do" && !isCategory && (
-            <div className="mb-14">
-              <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: "#000000" }}>Events Calendar</h2>
-              <EventsCalendar />
-            </div>
           )}
 
           {/* Category filter chips */}
