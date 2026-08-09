@@ -573,7 +573,7 @@ export const sections = {
       title: "See & Do at Maidenhead",
       intro:
         "With a vibrant mix of leisure, entertainment, shopping, dining and wellbeing experiences, alongside a year-round calendar of events, there's always something new to discover in Maidenhead. Explore everything the town has to offer and start planning your visit today.",
-      hero: "/images/ql-see.jpg",
+      hero: "/images/see-do-hero.png",
     },
     categoryHeroes: {
       film: { src: "/images/cinema.png", fit: "contain", bg: "#0a0a0f" },

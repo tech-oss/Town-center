@@ -129,7 +129,7 @@ export default function CategoryPage() {
               </>
             )}
           </nav>
-          <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+          <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
             {title}
           </h1>
         </div>
