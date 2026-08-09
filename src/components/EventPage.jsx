@@ -1,10 +1,25 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { categoryColors } from "../Data/events";
+import { categoryTitles } from "../Data/pages";
 import { getEventBySlug, getEvents, getBusinessBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
+
+// What's On events carry their own category system (Music, Family, Market,
+// Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
+// category so the breadcrumb links to a real, filterable category, matching
+// the mapping used to tag these events on the See & Do listing page.
+const EVENT_CATEGORY_MAP = {
+  Music: "art-culture",
+  Theatre: "art-culture",
+  Family: "family",
+  Market: "community",
+  Festive: "community",
+  Community: "community",
+  Sport: "sport-wellness",
+};
 
 // Map a What's On event, or a See & Do business (from the businesses resource),
 // onto the shared event shape so every See & Do detail page uses the same layout.
@@ -82,18 +97,25 @@ export default function EventPage() {
 
   const gallery = event.gallery?.length ? event.gallery : [event.image];
   const dot = categoryColors[event.category] || "var(--leaf)";
+
+  // Real See & Do category for the breadcrumb: businesses already carry their
+  // own category slug; What's On events map through EVENT_CATEGORY_MAP.
+  const categorySlug = business?.category ?? EVENT_CATEGORY_MAP[rawEvent?.category] ?? "community";
+  const categoryLabel = categoryTitles[categorySlug] ?? event.category;
   const next = () => setActive((a) => (a + 1) % gallery.length);
   const prev = () => setActive((a) => (a - 1 + gallery.length) % gallery.length);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumb */}
           <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
-            <Link to="/see-do?category=events" className="hover:opacity-70 transition-opacity">What's On</Link>
+            <Link to="/see-do" className="hover:opacity-70 transition-opacity">See & Do</Link>
+            <span className="mx-2 opacity-40">/</span>
+            <Link to={`/see-do?category=${categorySlug}`} className="hover:opacity-70 transition-opacity">{categoryLabel}</Link>
           </nav>
 
           {/* Carousel */}
@@ -229,14 +251,14 @@ export default function EventPage() {
       {/* More events */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>More What's On</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>More See & Do</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {allEvents.filter((e) => e.slug !== event.slug).slice(0, 3).map((e) => (
               <Link
                 key={e.slug}
                 to={`/event/${e.slug}`}
-                className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-                style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
+                className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                style={{ borderRadius: "0px", boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <img src={e.image} alt={e.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />

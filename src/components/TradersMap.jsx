@@ -213,7 +213,7 @@ const FILTERS = [
   { key: "shop",      label: "Shop",             sections: ["shopping"] },
   { key: "services",  label: "Services",         sections: ["services", "health-beauty"] },
   { key: "see-do",    label: "See & Do",         sections: ["see-do"] },
-  { key: "stay",      label: "Stay on the map",  sections: ["stay"] },
+  { key: "stay",      label: "Stay",             sections: ["stay"] },
 ];
 
 const PinIcon = (props) => (
