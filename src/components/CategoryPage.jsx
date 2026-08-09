@@ -123,18 +123,6 @@ export default function CategoryPage() {
         <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
-          {/* Breadcrumb */}
-          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <Link to={sec.path} className="hover:text-white transition-colors">{sec.label}</Link>
-            {isCategory && (
-              <>
-                <span className="mx-2 opacity-50">/</span>
-                <span className="text-white">{title}</span>
-              </>
-            )}
-          </nav>
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
             {title}
           </h1>
@@ -144,6 +132,18 @@ export default function CategoryPage() {
       {/* ── Intro + content ── */}
       <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
+          {/* Breadcrumb */}
+          <nav className="mb-6 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+            <Link to="/" className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>Home</Link>
+            <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+            <Link to={sec.path} className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>{sec.label}</Link>
+            {isCategory && (
+              <>
+                <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+                <span style={{ color: "#000000" }}>{title}</span>
+              </>
+            )}
+          </nav>
           {section === "see-do" && !isCategory ? (
             <p
               className="text-right mb-12 md:mb-16 text-2xl md:text-[2.5rem] max-w-3xl ml-auto"

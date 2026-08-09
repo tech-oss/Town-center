@@ -570,7 +570,7 @@ export const sections = {
     label: "See & Do",
     path: "/see-do",
     landing: {
-      title: "See & Do at Maidenhead",
+      title: "See & Do",
       intro:
         "With a vibrant mix of leisure, entertainment, shopping, dining and wellbeing experiences, alongside a year-round calendar of events, there's always something new to discover in Maidenhead. Explore everything the town has to offer and start planning your visit today.",
       hero: "/images/see-do-hero.png",
