@@ -113,11 +113,11 @@ export default function CategoryPage() {
   return (
     <div>
       {/* ── Hero banner ──
-          See & Do's header floats transparent over this hero (like the
-          homepage), so it needs to be tall enough to sit fully behind the
-          header instead of leaving a gap of page background above it. */}
+          The header floats transparent over this hero (like the homepage),
+          so it needs to be tall enough to sit fully behind the header
+          instead of leaving a gap of page background above it. */}
       <section
-        className={`relative w-full overflow-hidden ${section === "see-do" ? "h-[70vh] min-h-[520px]" : "h-[42vh] min-h-[300px]"}`}
+        className="relative w-full overflow-hidden h-[70vh] min-h-[520px]"
         style={heroBg ? { backgroundColor: heroBg } : undefined}
       >
         <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />

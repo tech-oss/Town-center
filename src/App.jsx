@@ -51,10 +51,11 @@ function PublicSite() {
   const [headerHeight, setHeaderHeight] = useState(0)
   const { pathname } = useLocation()
   // The homepage hero is a fullscreen video that the transparent header floats
-  // over, so its <main> must start at y=0 (no header offset). See & Do has the
-  // same transparent-over-hero header treatment. Every other page keeps the
-  // measured header height as top padding so content clears the fixed header.
-  const isHome = pathname === '/' || pathname === '/see-do'
+  // over, so its <main> must start at y=0 (no header offset). Shop, Eat &
+  // Drink, Services and See & Do share the same transparent-over-hero header
+  // treatment. Every other page keeps the measured header height as top
+  // padding so content clears the fixed header.
+  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services'].includes(pathname)
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.
