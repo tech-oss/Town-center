@@ -113,7 +113,7 @@ export default function CategoryPage() {
       </section>
 
       {/* ── Intro + content ── */}
-      <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+      <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
           {section === "see-do" && !isCategory ? (
             <p
