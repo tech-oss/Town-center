@@ -1,4 +1,3 @@
-import { useRef, useLayoutEffect } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
@@ -59,26 +58,6 @@ export default function CategoryPage() {
   // items come from the businesses resource, events from the events resource.
   const { data: sectionItems } = useFetch(() => getBusinesses({ section }), [section]);
   const { data: whatsOnEvents } = useFetch(getEvents, []);
-
-  // When the user switches filter, scroll the chip row to a consistent spot
-  // just under the header. Because the page height differs between views (the
-  // events calendar only shows on the "All" landing), preserving the raw scroll
-  // offset would land you in a different place each time — so we re-anchor.
-  // Skips the first render so navigating *into* the page still lands at the top
-  // (handled by <ScrollToTop>).
-  const chipsRef = useRef(null);
-  const firstRun = useRef(true);
-  useLayoutEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false;
-      return;
-    }
-    const el = chipsRef.current;
-    if (!el) return;
-    const headerH = document.querySelector("header")?.offsetHeight ?? 0;
-    const y = el.getBoundingClientRect().top + window.scrollY - headerH - 16;
-    window.scrollTo(0, Math.max(0, y));
-  }, [category]);
 
   if (!sec) return <Navigate to="/" replace />;
 
@@ -167,10 +146,8 @@ export default function CategoryPage() {
               category is visible without a horizontal scroll; desktop keeps the
               original single-row scrolling strip. */}
           <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 mb-10">
-            <div
-              ref={chipsRef}
-              className="flex flex-wrap md:flex-nowrap gap-2 md:gap-2.5 md:flex-1 md:min-w-0 md:overflow-x-auto md:pb-3 md:-mx-1 md:px-1 md:scrollbar-none"
-            >
+            <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-2.5 md:flex-1 md:min-w-0 md:overflow-x-auto md:pb-3 md:-mx-1 md:px-1 md:scrollbar-none">
+
               <FilterChip to={sec.path} active={!isCategory} label="All" />
               {(() => {
                 const seen = new Set();
