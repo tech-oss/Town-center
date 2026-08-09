@@ -112,9 +112,15 @@ export default function CategoryPage() {
 
   return (
     <div>
-      {/* ── Hero banner ── */}
-      <section className="relative h-[42vh] min-h-[300px] w-full overflow-hidden" style={heroBg ? { backgroundColor: heroBg } : undefined}>
-        <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit }} />
+      {/* ── Hero banner ──
+          See & Do's header floats transparent over this hero (like the
+          homepage), so it needs to be tall enough to sit fully behind the
+          header instead of leaving a gap of page background above it. */}
+      <section
+        className={`relative w-full overflow-hidden ${section === "see-do" ? "h-[70vh] min-h-[520px]" : "h-[42vh] min-h-[300px]"}`}
+        style={heroBg ? { backgroundColor: heroBg } : undefined}
+      >
+        <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           {/* Breadcrumb */}
