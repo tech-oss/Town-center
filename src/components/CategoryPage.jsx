@@ -8,7 +8,6 @@ import useFetch from "../hooks/useFetch";
 // Colour key for the See & Do category dots — one fixed colour per category,
 // reused everywhere a category is shown so it reads as a consistent legend.
 const CATEGORY_COLORS = {
-  events: "#4c9a2a",
   "art-culture": "#8b5cf6",
   community: "#f59e0b",
   family: "#ec4899",
@@ -19,20 +18,36 @@ const CATEGORY_COLORS = {
   "sport-wellness": "#22c55e",
 };
 
+// What's On events carry their own category system (Music, Family, Market,
+// Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
+// category so every card, event or otherwise, uses the same consistent set.
+const EVENT_CATEGORY_MAP = {
+  Music: "art-culture",
+  Theatre: "art-culture",
+  Family: "family",
+  Market: "community",
+  Festive: "community",
+  Community: "community",
+  Sport: "sport-wellness",
+};
+
 // The real What's On events surfaced as See & Do cards that link to the shared
 // /event/:slug detail page — keeps one source of truth.
-const toEventCard = (e) => ({
-  slug: e.slug,
-  name: e.title,
-  tag: "What's On",
-  section: "see-do",
-  category: "events",
-  image: e.image,
-  date: e.date,
-  address: e.location,
-  description: e.excerpt,
-  to: `/event/${e.slug}`,
-});
+const toEventCard = (e) => {
+  const category = EVENT_CATEGORY_MAP[e.category] ?? "community";
+  return {
+    slug: e.slug,
+    name: e.title,
+    tag: categoryTitles[category],
+    section: "see-do",
+    category,
+    image: e.image,
+    date: e.date,
+    address: e.location,
+    description: e.excerpt,
+    to: `/event/${e.slug}`,
+  };
+};
 
 export default function CategoryPage() {
   const { section } = useParams();
@@ -75,20 +90,14 @@ export default function CategoryPage() {
     ? baseItems.filter((i) => i.category === category || i.categories?.includes(category))
     : baseItems;
 
-  // See & Do: real What's On events for the "events" category; on the landing
-  // show events first, then activities. All See & Do cards link to the shared
-  // /event/:slug detail page so every listing uses the same layout.
+  // See & Do: real What's On events are folded in alongside activities, each
+  // tagged with its mapped category so every listing — event or otherwise —
+  // filters consistently. All See & Do cards link to the shared /event/:slug
+  // detail page so every listing uses the same layout.
   if (section === "see-do") {
-    if (category === "events") {
-      items = eventCards;
-    } else if (!category) {
-      const activities = baseItems
-        .filter((i) => i.category !== "events")
-        .map((i) => ({ ...i, to: `/event/${i.slug}` }));
-      items = [...eventCards, ...activities];
-    } else {
-      items = items.map((i) => ({ ...i, to: `/event/${i.slug}` }));
-    }
+    const activities = baseItems.map((i) => ({ ...i, to: `/event/${i.slug}` }));
+    const allSeeDo = [...eventCards, ...activities];
+    items = category ? allSeeDo.filter((i) => i.category === category) : allSeeDo;
   }
   const isCategory = Boolean(category);
   const title = isCategory ? categoryTitles[category] ?? sec.label : sec.landing.title;
@@ -165,7 +174,7 @@ export default function CategoryPage() {
             </div>
             {section === "see-do" && (
               <Link
-                to="/see-do?category=events"
+                to="/whats-on"
                 className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap transition-opacity duration-150 hover:opacity-70"
                 style={{ color: "#000000" }}
               >
@@ -178,16 +187,18 @@ export default function CategoryPage() {
           {/* Card grid */}
           {items.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {items.map((it) => (
+              {items.map((it) => {
+                const radius = section === "see-do" ? "0px" : card.radius;
+                return (
                 <Link
                   key={it.slug}
                   to={it.to ?? `/${it.section}/place/${it.slug}`}
                   className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
-                  style={{ borderRadius: card.radius, boxShadow: card.shadow }}
+                  style={{ borderRadius: radius, boxShadow: card.shadow }}
                 >
                   <div
                     className="relative aspect-[4/3] overflow-hidden"
-                    style={{ borderRadius: `${card.radius} ${card.radius} 0 0`, backgroundColor: it.logo ? "var(--mint)" : undefined }}
+                    style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: it.logo ? "var(--mint)" : undefined }}
                   >
                     {it.logo ? (
                       <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-10 transition-transform duration-500 group-hover:scale-105" />
@@ -238,7 +249,8 @@ export default function CategoryPage() {
                     </span>
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>

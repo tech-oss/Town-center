@@ -369,8 +369,8 @@ const eatItems = [
 
 // ─── SEE & DO ────────────────────────────────────────────────────────────────
 const seeItems = [
-  item("winter-makers-market", "Winter Makers Market", "see-do", "events", "What's On"),
-  item("riverside-jazz-festival", "Riverside Jazz Festival", "see-do", "events", "What's On"),
+  item("winter-makers-market", "Winter Makers Market", "see-do", "community", "Community"),
+  item("riverside-jazz-festival", "Riverside Jazz Festival", "see-do", "art-culture", "Art & Culture"),
   item("maidenhead-heritage-walk", "Maidenhead Heritage Walk", "see-do", "art-culture", "Art & Culture"),
   item("community-garden-day", "Community Garden Day", "see-do", "community", "Community"),
   item("kids-craft-club", "Kids' Craft Club", "see-do", "family", "Family"),
@@ -661,7 +661,6 @@ export const categoryTitles = {
   japanese: "Japanese",
   bakery: "Bakery",
   // see & do
-  events: "What's On",
   "art-culture": "Art & Culture",
   community: "Community",
   family: "Family",
