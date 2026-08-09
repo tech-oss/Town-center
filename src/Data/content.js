@@ -1,3 +1,5 @@
+import { hotels, accommodations } from "./stay";
+
 // ─── Header ──────────────────────────────────────────────────────────────────
 export const header = {
   logo: "MAIDENHEAD",                  // wordmark text
@@ -311,6 +313,36 @@ const extraBrands = extraTraders.map(([name, category, section, lat, lng], i) =>
   lng,
 }));
 
+// "Stay on the map" tab — hotels & accommodation, reusing the /live/stay data.
+const stayBrands = [
+  ...hotels.map((h, i) => ({
+    id: 500 + i,
+    name: h.name,
+    category: "Hotel",
+    section: "stay",
+    logo: h.image,
+    image: h.image,
+    to: `/live/stay/hotels/${h.slug}`,
+    address: h.address,
+    tagline: h.tagline,
+    lat: h.lat,
+    lng: h.lng,
+  })),
+  ...accommodations.map((a, i) => ({
+    id: 520 + i,
+    name: a.name,
+    category: a.type,
+    section: "stay",
+    logo: a.image,
+    image: a.image,
+    to: `/live/stay/accommodation/${a.slug}`,
+    address: a.area,
+    tagline: a.tagline,
+    lat: a.lat,
+    lng: a.lng,
+  })),
+];
+
 // ─── BrandGrid ────────────────────────────────────────────────────────────────
 export const brandGrid = {
   eyebrow: "Curated for Work and Wellbeing",
@@ -332,6 +364,7 @@ export const brandGrid = {
     { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", address: "Unit D, 7 Garden Boulevard, Maidenhead SL6 1QQ", tagline: "Coffee, sandwiches & salads", lat: 51.520813, lng: -0.721299 },
     { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", address: "Mill Lane, Taplow, Maidenhead SL6 0AA", tagline: "Pub classics by the water", lat: 51.526859, lng: -0.700343 },
     ...extraBrands,
+    ...stayBrands,
   ],
 };
 
@@ -390,29 +423,18 @@ export const footer = {
   blurb: "Maidenhead is a vibrant riverside town, where history, community and opportunity come together.",
   columns: [
     {
-      heading: "Visit",
-      links: [
-        { label: "Getting Here",   href: "/getting-here" },
-        { label: "Parking",        href: "/getting-here#parking" },
-        { label: "Accessibility",  href: "/getting-here#accessibility" },
-        { label: "Opening Hours",  href: "/getting-here#opening-hours" },
-      ],
-    },
-    {
-      heading: "Discover",
-      links: [
-        { label: "Eat & Drink", href: "/eat-drink" },
-        { label: "Shop",        href: "/shop" },
-        { label: "See & Do",    href: "/see-do" },
-        { label: "Events",      href: "/see-do?category=events" },
-      ],
-    },
-    {
       heading: "About",
       links: [
         { label: "Our Story",    href: "/about" },
         { label: "Traders",      href: "/traders" },
         { label: "Work With Us", href: "/work-with-us" },
+      ],
+    },
+    {
+      heading: "Legal",
+      links: [
+        { label: "Privacy Policy",       href: "/privacy" },
+        { label: "Terms & Conditions",   href: "/terms" },
       ],
     },
   ],

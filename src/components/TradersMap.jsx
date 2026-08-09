@@ -208,11 +208,12 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
 // ── Tabs mirror the site header: All / Eat & Drink / Shop & Services / See & Do.
 // `sections` lists which trader data-sections roll up into each tab.
 const FILTERS = [
-  { key: "all",       label: "All",         sections: null },
-  { key: "eat-drink", label: "Eat & Drink", sections: ["food-drink"] },
-  { key: "shop",      label: "Shop",        sections: ["shopping"] },
-  { key: "services",  label: "Services",    sections: ["services", "health-beauty"] },
-  { key: "see-do",    label: "See & Do",    sections: ["see-do"] },
+  { key: "all",       label: "All",              sections: null },
+  { key: "eat-drink", label: "Eat & Drink",      sections: ["food-drink"] },
+  { key: "shop",      label: "Shop",             sections: ["shopping"] },
+  { key: "services",  label: "Services",         sections: ["services", "health-beauty"] },
+  { key: "see-do",    label: "See & Do",         sections: ["see-do"] },
+  { key: "stay",      label: "Stay on the map",  sections: ["stay"] },
 ];
 
 const PinIcon = (props) => (
@@ -381,7 +382,7 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
   const hours = place?.hours ?? null;
   const today = todaysHours(hours);
   const gallery = (place?.gallery ?? []).filter((g) => g !== hero);
-  const detailHref = b.to?.includes("/place/") ? b.to : null;
+  const detailHref = b.to?.includes("/place/") || b.to?.includes("/live/stay/") ? b.to : null;
 
   const share = useCallback(async () => {
     const url = detailHref ? `${window.location.origin}${detailHref}` : window.location.href;

@@ -33,10 +33,10 @@ function SocialIcon({ icon }) {
 // ── Nav link (internal or external) ──────────────────────────────────────────
 function NavLink({ href, children }) {
   const isInternal = href?.startsWith("/");
-  const cls = "text-sm transition-opacity duration-150 hover:opacity-70" ;
+  const cls = "text-sm text-white transition-opacity duration-150 hover:opacity-70" ;
   return isInternal
-    ? <Link to={href} className={cls} style={{ color: "rgba(255,255,255,0.75)" }}>{children}</Link>
-    : <a href={href} className={cls} style={{ color: "rgba(255,255,255,0.75)" }}>{children}</a>;
+    ? <Link to={href} className={cls}>{children}</Link>
+    : <a href={href} className={cls}>{children}</a>;
 }
 
 // ── Mobile accordion section ──────────────────────────────────────────────────
@@ -75,7 +75,7 @@ function AppCard() {
     <div className="rounded-2xl p-6 flex flex-col gap-4" style={{ backgroundColor: "rgba(255,255,255,0.07)" }}>
       <div>
         <p className="font-bold text-white text-base mb-1">{footer.app.heading}</p>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>{footer.app.body}</p>
+        <p className="text-sm text-white">{footer.app.body}</p>
       </div>
       <AppBadges className="flex-col" size="sm" />
     </div>
@@ -94,7 +94,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto">
 
         {/* ── Desktop layout ── */}
-        <div className="hidden md:grid gap-10 mb-12" style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr 1.5fr" }}>
+        <div className="hidden md:grid gap-10 mb-12" style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1.5fr" }}>
 
           {/* Brand column */}
           <div className="flex flex-col gap-5">
@@ -109,12 +109,12 @@ export default function Footer() {
                 {header.tagline}
               </span>
             </a>
-            <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+            <p className="text-sm leading-relaxed text-white">
               {footer.blurb}
             </p>
             <div className="flex items-center gap-4">
               {footer.social.map((s) => (
-                <a key={s.label} href={s.href} aria-label={s.label} className="transition-opacity hover:opacity-70" style={{ color: "rgba(255,255,255,0.8)" }}>
+                <a key={s.label} href={s.href} aria-label={s.label} className="text-white transition-opacity hover:opacity-70">
                   <SocialIcon icon={s.icon} />
                 </a>
               ))}
@@ -154,7 +154,7 @@ export default function Footer() {
             </a>
             <div className="flex items-center gap-4">
               {footer.social.map((s) => (
-                <a key={s.label} href={s.href} aria-label={s.label} className="transition-opacity hover:opacity-70" style={{ color: "rgba(255,255,255,0.8)" }}>
+                <a key={s.label} href={s.href} aria-label={s.label} className="text-white transition-opacity hover:opacity-70">
                   <SocialIcon icon={s.icon} />
                 </a>
               ))}
@@ -172,13 +172,8 @@ export default function Footer() {
         </div>
 
         {/* ── Bottom bar ── */}
-        <div className="border-t pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-          <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>{footer.legal}</p>
-          <div className="flex items-center gap-4">
-            <a href="/privacy" className="text-xs transition-opacity hover:opacity-70" style={{ color: "rgba(255,255,255,0.45)" }}>Privacy Policy</a>
-            <span style={{ color: "rgba(255,255,255,0.2)" }}>|</span>
-            <a href="/terms" className="text-xs transition-opacity hover:opacity-70" style={{ color: "rgba(255,255,255,0.45)" }}>Terms &amp; Conditions</a>
-          </div>
+        <div className="border-t pt-6" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+          <p className="text-xs text-white">{footer.legal}</p>
         </div>
       </div>
     </footer>

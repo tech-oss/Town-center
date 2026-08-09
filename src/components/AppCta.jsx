@@ -21,8 +21,9 @@ export default function AppCta() {
               Take the whole town with you
             </h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--mint)" }}>
-              Discover what's on, find offers, navigate the town centre and keep your favourite places close
-              — download the Maidenhead app and never miss a thing.
+              Discover what's on, find exclusive offers, get updates straight to your phone, explore the town
+              and keep your favourite places close — all in one app. Download the Maidenhead app and never
+              miss a thing.
             </p>
           </div>
           <div className="shrink-0 w-full md:w-auto">
