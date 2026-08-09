@@ -163,9 +163,14 @@ export default function CategoryPage() {
             </p>
           )}
 
-          {/* Category filter chips */}
-          <div className="flex items-center gap-4 mb-10">
-            <div ref={chipsRef} className="flex flex-1 min-w-0 gap-2.5 overflow-x-auto pb-3 -mx-1 px-1 scrollbar-none">
+          {/* Category filter chips — wrap onto multiple lines on mobile so every
+              category is visible without a horizontal scroll; desktop keeps the
+              original single-row scrolling strip. */}
+          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 mb-10">
+            <div
+              ref={chipsRef}
+              className="flex flex-wrap md:flex-nowrap gap-2 md:gap-2.5 md:flex-1 md:min-w-0 md:overflow-x-auto md:pb-3 md:-mx-1 md:px-1 md:scrollbar-none"
+            >
               <FilterChip to={sec.path} active={!isCategory} label="All" />
               {(() => {
                 const seen = new Set();
@@ -181,7 +186,7 @@ export default function CategoryPage() {
             {section === "see-do" && (
               <Link
                 to="/whats-on"
-                className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap transition-opacity duration-150 hover:opacity-70"
+                className="self-end md:self-auto shrink-0 inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold whitespace-nowrap transition-opacity duration-150 hover:opacity-70"
                 style={{ color: "#000000" }}
               >
                 View full calendar
