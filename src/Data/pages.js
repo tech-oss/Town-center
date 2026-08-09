@@ -572,7 +572,7 @@ export const sections = {
     landing: {
       title: "See & Do at Maidenhead",
       intro:
-        "Whatever you're into, there's always something happening in Maidenhead — events, culture, family days out, sport and more, right on the river.",
+        "With a vibrant mix of leisure, entertainment, shopping, dining and wellbeing experiences, alongside a year-round calendar of events, there's always something new to discover in Maidenhead. Explore everything the town has to offer and start planning your visit today.",
       hero: "/images/ql-see.jpg",
     },
     categoryHeroes: {

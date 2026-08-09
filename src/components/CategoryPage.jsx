@@ -116,9 +116,24 @@ export default function CategoryPage() {
       {/* ── Intro + content ── */}
       <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000" }}>
-            {intro}
-          </p>
+          {section === "see-do" && !isCategory ? (
+            <p
+              className="text-right mb-12 md:mb-16 text-2xl md:text-[2.5rem] max-w-3xl ml-auto"
+              style={{
+                color: "#000000",
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontWeight: 400,
+                lineHeight: 1.3,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              {intro}
+            </p>
+          ) : (
+            <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000" }}>
+              {intro}
+            </p>
+          )}
 
           {/* See & Do landing: interactive events calendar */}
           {section === "see-do" && !isCategory && (
