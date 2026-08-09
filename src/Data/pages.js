@@ -414,7 +414,7 @@ export const sections = {
     label: "Shop",
     path: "/shop",
     landing: {
-      title: "Shopping at Maidenhead",
+      title: "Shop",
       intro:
         "From independent boutiques to high-street favourites — spanning beauty, fashion, homeware and more, you'll find everything you need across Maidenhead town centre.",
       hero: "/images/ql-shop.jpg",
@@ -520,9 +520,9 @@ export const sections = {
     label: "Eat & Drink",
     path: "/eat-drink",
     landing: {
-      title: "Eat, Drink & Explore at Maidenhead",
+      title: "Eat & Drink",
       intro:
-        "Experience Maidenhead differently — from riverside terraces and independent restaurants to cosy cafés and lively bars, there's a table for every occasion.",
+        "Experience Maidenhead in a whole new way from scenic riverside terraces and independent restaurants to cosy cafés and vibrant bars, there's a perfect spot for every occasion.",
       hero: "/images/card-cafe.jpg",
     },
     columns: [

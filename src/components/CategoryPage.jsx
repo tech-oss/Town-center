@@ -123,7 +123,7 @@ export default function CategoryPage() {
               </>
             )}
           </nav>
-          {section === "see-do" && !isCategory ? (
+          {(section === "see-do" || section === "eat-drink" || section === "shop") && !isCategory ? (
             <p
               className="text-right mb-12 md:mb-16 text-2xl md:text-[2.5rem] max-w-3xl ml-auto"
               style={{
