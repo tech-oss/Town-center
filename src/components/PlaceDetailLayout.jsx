@@ -89,13 +89,9 @@ export default function PlaceDetailLayout({
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      {/* ── 1. Single main hero image ── */}
-      <section className="px-6 md:px-12 pt-6 md:pt-10">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden aspect-[16/9] bg-black shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
-            <img src={heroImage} alt={title} className="w-full h-full object-cover" />
-          </div>
-        </div>
+      {/* ── 1. Single main hero image — full-bleed, square corners ── */}
+      <section className="relative w-full overflow-hidden h-[60vh] md:h-[75vh] min-h-[420px] bg-black">
+        <img src={heroImage} alt={title} className="w-full h-full object-cover" />
       </section>
 
       {/* ── 2. Category · title · description ── */}
@@ -267,13 +263,14 @@ export default function PlaceDetailLayout({
         </div>
       </section>
 
-      {/* ── 4. Additional photos — up to 6, two per row ── */}
+      {/* ── 4. Additional photos — up to 6, two per row. 80% page width, 20%
+          taller than square, square corners. ── */}
       {extraImages.length > 0 && (
         <section className="py-12 md:py-16 px-6 md:px-12">
-          <div className="max-w-4xl mx-auto">
+          <div className="w-[80%] mx-auto">
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               {extraImages.slice(0, 6).map((src, i) => (
-                <div key={i} className="aspect-square rounded-2xl overflow-hidden">
+                <div key={i} className="aspect-[5/6] overflow-hidden">
                   <img src={src} alt={`${title} ${i + 2}`} loading="lazy" className="w-full h-full object-cover" />
                 </div>
               ))}
