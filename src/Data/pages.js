@@ -194,6 +194,11 @@ function item(slug, name, section, category, tag, blurb) {
     address: "The Colonnade, High Street, Maidenhead SL6 1QJ",
     phone: "01628 000 000",
     website: "www.maidenhead.example",
+    social: {
+      facebook: `https://www.facebook.com/${slug}`,
+      instagram: `https://www.instagram.com/${slug}`,
+      x: `https://x.com/${slug}`,
+    },
     news: newsFor(slug, name),
   };
 }
