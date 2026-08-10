@@ -3,6 +3,7 @@ import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
+import CategoryFilterBar from "./CategoryFilterBar";
 
 // Colour key for the See & Do category dots — one fixed colour per category,
 // reused everywhere a category is shown so it reads as a consistent legend.
@@ -142,35 +143,29 @@ export default function CategoryPage() {
             </p>
           )}
 
-          {/* Category filter chips — wrap onto multiple lines on mobile so every
-              category is visible without a horizontal scroll; desktop keeps the
-              original single-row scrolling strip. */}
-          <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 mb-10">
-            <div className="flex flex-wrap md:flex-nowrap gap-2 md:gap-2.5 md:flex-1 md:min-w-0 md:overflow-x-auto md:pb-3 md:-mx-1 md:px-1 md:scrollbar-none">
-
-              <FilterChip to={sec.path} active={!isCategory} label="All" />
-              {(() => {
-                const seen = new Set();
-                return sec.columns
-                  .flatMap((c) => c.links)
-                  .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
-                  .map((l) => {
-                    const cat = l.to.split("?category=")[1];
-                    return <FilterChip key={l.to} to={l.to} active={category === cat} label={l.label} />;
-                  });
-              })()}
-            </div>
-            {section === "see-do" && (
+          {/* Category filter — icon row + "More" dropdown on desktop, a
+              "Browse Categories" bottom sheet on mobile. */}
+          <CategoryFilterBar
+            basePath={sec.path}
+            activeCategory={category}
+            categories={(() => {
+              const seen = new Set();
+              return sec.columns
+                .flatMap((c) => c.links)
+                .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
+                .map((l) => ({ value: l.to.split("?category=")[1], label: l.label }));
+            })()}
+            extra={section === "see-do" && (
               <Link
                 to="/whats-on"
-                className="self-end md:self-auto shrink-0 inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold whitespace-nowrap transition-opacity duration-150 hover:opacity-70"
+                className="shrink-0 inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold whitespace-nowrap transition-opacity duration-150 hover:opacity-70"
                 style={{ color: "#000000" }}
               >
                 View full calendar
                 <span>→</span>
               </Link>
             )}
-          </div>
+          />
 
           {/* Card grid */}
           {items.length > 0 ? (
@@ -248,20 +243,5 @@ export default function CategoryPage() {
         </div>
       </section>
     </div>
-  );
-}
-
-function FilterChip({ to, active, label }) {
-  return (
-    <Link
-      to={to}
-      replace
-      className="shrink-0 px-4 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-[0.07em] transition-all duration-200 whitespace-nowrap"
-      style={active
-        ? { backgroundColor: "var(--forest)", color: "#fff", boxShadow: "0 2px 8px rgba(13,42,51,0.18)" }
-        : { backgroundColor: "#fff", color: "#000000", boxShadow: "0 1px 4px rgba(13,42,51,0.07)" }}
-    >
-      {label}
-    </Link>
   );
 }
