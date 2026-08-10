@@ -176,7 +176,7 @@ export default function CategoryPage() {
           {items.length > 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((it) => {
-                const radius = section === "see-do" ? "0px" : card.radius;
+                const radius = ["see-do", "eat-drink", "shop"].includes(section) ? "0px" : card.radius;
                 return (
                 <Link
                   key={it.slug}
