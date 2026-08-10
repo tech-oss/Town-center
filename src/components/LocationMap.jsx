@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
@@ -29,9 +29,10 @@ async function geocode(query) {
   return result;
 }
 
-export default function LocationMap({ query, lat, lng, heading = "Location", note, rounded = true }) {
+export default function LocationMap({ query, lat, lng, heading = "Location", note, rounded = true, width = "100%" }) {
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);
   const [error, setError] = useState(false);
+  const markerRef = useRef(null);
 
   // When the target changes, reset state during render (no extra paint). Hardcoded
   // coords resolve immediately; otherwise the effect below geocodes the query.
@@ -64,7 +65,7 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
       )}
       <div
         className={`relative overflow-hidden aspect-[16/9] md:aspect-[21/9] ${rounded ? "rounded-3xl" : ""}`}
-        style={{ boxShadow: "0 14px 50px -26px rgba(28,46,56,0.4)", isolation: "isolate", zIndex: 0 }}
+        style={{ width, marginLeft: "auto", marginRight: "auto", boxShadow: "0 14px 50px -26px rgba(28,46,56,0.4)", isolation: "isolate", zIndex: 0 }}
       >
         {pos ? (
           <MapContainer
@@ -75,8 +76,19 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
             style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
           >
             <TileLayer url={CARTO_VOYAGER} maxZoom={20} />
-            <Marker position={[pos.lat, pos.lng]} icon={PIN_ICON}>
-              {note && <Popup>{note}</Popup>}
+            <Marker
+              position={[pos.lat, pos.lng]}
+              icon={PIN_ICON}
+              ref={markerRef}
+              eventHandlers={{
+                add: (e) => e.target.openPopup(),
+              }}
+            >
+              {note && (
+                <Popup closeButton={false} autoClose={false} closeOnClick={false} className="location-tile-popup">
+                  {note}
+                </Popup>
+              )}
             </Marker>
           </MapContainer>
         ) : error ? (

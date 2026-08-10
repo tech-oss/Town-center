@@ -404,3 +404,21 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
 .mobile-stagger > *:nth-child(5) { animation-delay: 0.2s; }
 .mobile-stagger > *:nth-child(6) { animation-delay: 0.25s; }
 .mobile-stagger > *:nth-child(7) { animation-delay: 0.3s; }
+
+/* Always-open "location tile" popup on detail-page maps — a plain label
+   pinned above the marker rather than a dismissible Leaflet popup. */
+.location-tile-popup .leaflet-popup-content-wrapper {
+  border-radius: 0;
+  box-shadow: 0 8px 24px -10px rgba(28, 46, 56, 0.4);
+  padding: 0;
+}
+.location-tile-popup .leaflet-popup-content {
+  margin: 10px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+}
+.location-tile-popup .leaflet-popup-tip {
+  box-shadow: 0 4px 10px -6px rgba(28, 46, 56, 0.4);
+}

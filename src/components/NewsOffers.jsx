@@ -36,7 +36,7 @@ export default function NewsOffers({ item }) {
               <Link
                 key={post.id}
                 to={`/news/${post.slug}`}
-                className="group relative flex flex-row md:flex-col rounded-2xl overflow-hidden p-3 gap-3 md:gap-0
+                className="group relative flex flex-row md:flex-col overflow-hidden p-3 gap-3 md:gap-0
                            transition-all duration-300 ease-out hover:-translate-y-1"
                 style={{
                   backgroundColor: "rgba(240,250,250,0.62)",
@@ -49,7 +49,7 @@ export default function NewsOffers({ item }) {
                 }}
               >
                 {/* Image */}
-                <div className="relative shrink-0 w-28 sm:w-32 md:w-full self-stretch md:self-auto overflow-hidden rounded-xl">
+                <div className="relative shrink-0 w-28 sm:w-32 md:w-full self-stretch md:self-auto overflow-hidden">
                   <img
                     src={post.image}
                     alt={post.title}

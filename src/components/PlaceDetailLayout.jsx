@@ -281,14 +281,11 @@ export default function PlaceDetailLayout({
         </section>
       )}
 
-      {/* ── 5. Location map — full width ── */}
+      {/* ── 5. Location map — 80% page width, address shown as an always-open
+          tile above the pin rather than a separate text block ── */}
       {directionsQuery && (
         <section className="pb-16">
-          <div className="px-6 md:px-12 max-w-4xl mx-auto mb-4">
-            <h2 className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>Location</h2>
-            {address && <p className="text-sm mt-1" style={{ color: "#000000" }}>{address}</p>}
-          </div>
-          <LocationMap query={directionsQuery} heading={null} rounded={false} />
+          <LocationMap query={directionsQuery} heading={null} note={address} rounded={false} width="80%" />
         </section>
       )}
 
@@ -304,7 +301,7 @@ export default function PlaceDetailLayout({
                 <Link
                   key={it.slug}
                   to={it.to}
-                  className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden" style={it.logo ? { backgroundColor: "var(--mint)" } : undefined}>
