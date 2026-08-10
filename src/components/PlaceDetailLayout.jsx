@@ -89,9 +89,11 @@ export default function PlaceDetailLayout({
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      {/* ── 1. Single main hero image — full-bleed, square corners ── */}
-      <section className="relative w-full overflow-hidden h-[60vh] md:h-[75vh] min-h-[420px] bg-black">
-        <img src={heroImage} alt={title} className="w-full h-full object-cover" />
+      {/* ── 1. Single main hero image — 80% page width, square corners ── */}
+      <section className="pt-6 md:pt-10">
+        <div className="relative w-[80%] mx-auto overflow-hidden h-[60vh] md:h-[75vh] min-h-[420px] bg-black">
+          <img src={heroImage} alt={title} className="w-full h-full object-cover" />
+        </div>
       </section>
 
       {/* ── 2. Category · title · description ── */}
@@ -279,12 +281,14 @@ export default function PlaceDetailLayout({
         </section>
       )}
 
-      {/* ── 5. Location map ── */}
+      {/* ── 5. Location map — full width ── */}
       {directionsQuery && (
-        <section className="pb-16 px-6 md:px-12">
-          <div className="max-w-4xl mx-auto">
-            <LocationMap heading="Location" note={address} query={directionsQuery} />
+        <section className="pb-16">
+          <div className="px-6 md:px-12 max-w-4xl mx-auto mb-4">
+            <h2 className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>Location</h2>
+            {address && <p className="text-sm mt-1" style={{ color: "#000000" }}>{address}</p>}
           </div>
+          <LocationMap query={directionsQuery} heading={null} rounded={false} />
         </section>
       )}
 
