@@ -21,7 +21,7 @@ export default function NewsOffers({ item }) {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>
               {item.name}
             </p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">News &amp; Offers</h2>
+            <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">News &amp; Offers</h2>
           </div>
           <span className="text-sm font-semibold self-start sm:self-auto text-white/70">
             {posts.length} update{posts.length === 1 ? "" : "s"}
