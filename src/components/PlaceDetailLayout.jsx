@@ -114,7 +114,7 @@ export default function PlaceDetailLayout({
       {/* ── 2. Single main hero image — full width on mobile, 60% on
           desktop, square corners ── */}
       <section className="pt-8 md:pt-10">
-        <div className="relative w-full sm:w-[60%] mx-auto overflow-hidden aspect-[4/3] sm:aspect-[16/10] bg-black">
+        <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[4/3] sm:aspect-[16/10] bg-black">
           <img src={heroImage} alt={title} className="w-full h-full object-cover" />
         </div>
       </section>
