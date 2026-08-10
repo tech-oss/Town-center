@@ -87,17 +87,39 @@ export default function PlaceDetailLayout({
   const waShare = `https://wa.me/?text=${t}%20${u}`;
   const websiteHref = normalizeUrl(website);
 
+  // Tagline shown under the title above the hero: the first description
+  // paragraph, so nothing needs to be authored twice. The remaining
+  // paragraphs (if any) still render in their usual place below the hero.
+  const firstParagraphText = Array.isArray(description)
+    ? (typeof description[0] === "string" ? description[0] : description[0]?.text)
+    : description;
+  const remainingDescription = Array.isArray(description) ? description.slice(1) : null;
+
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      {/* ── 1. Single main hero image — 80% page width, square corners.
-          Shorter on mobile (~20% less tall than desktop's mobile height). ── */}
-      <section className="pt-6 md:pt-10">
-        <div className="relative w-[80%] mx-auto overflow-hidden h-[48vh] md:h-[75vh] min-h-[336px] md:min-h-[420px] bg-black">
+      {/* ── 1. Title & tagline, centered above the hero ── */}
+      <section className="pt-10 md:pt-16 px-6 text-center">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-3xl md:text-6xl font-bold leading-tight tracking-tight mb-4" style={{ color: "#000000" }}>
+            {title}
+          </h1>
+          {firstParagraphText && (
+            <p className="text-sm md:text-base uppercase tracking-[0.08em] leading-relaxed" style={{ color: "#000000" }}>
+              {firstParagraphText}
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* ── 2. Single main hero image — full width on mobile, 60% on
+          desktop, square corners ── */}
+      <section className="pt-8 md:pt-10">
+        <div className="relative w-full sm:w-[60%] mx-auto overflow-hidden aspect-[4/3] sm:aspect-[16/10] bg-black">
           <img src={heroImage} alt={title} className="w-full h-full object-cover" />
         </div>
       </section>
 
-      {/* ── 2. Category · title · description ── */}
+      {/* ── 3. Breadcrumb · category · description ── */}
       <section className="pt-10 md:pt-14 px-6 md:px-12">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumb */}
@@ -124,10 +146,6 @@ export default function PlaceDetailLayout({
             </span>
           )}
 
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-6" style={{ color: "#000000" }}>
-            {title}
-          </h1>
-
           {metaRows.length > 0 && (
             <div className="flex flex-col gap-3 mb-6">
               {metaRows.map((row, i) => (
@@ -139,15 +157,13 @@ export default function PlaceDetailLayout({
             </div>
           )}
 
-          {description && (
+          {remainingDescription?.length > 0 && (
             <div className="flex flex-col gap-5 mb-2">
-              {Array.isArray(description)
-                ? description.map((p, i) => (
-                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
-                      {typeof p === "string" ? p : (<>{p.lead && <strong>{p.lead} </strong>}{p.text}</>)}
-                    </p>
-                  ))
-                : <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{description}</p>}
+              {remainingDescription.map((p, i) => (
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
+                  {typeof p === "string" ? p : (<>{p.lead && <strong>{p.lead} </strong>}{p.text}</>)}
+                </p>
+              ))}
             </div>
           )}
 
@@ -275,7 +291,7 @@ export default function PlaceDetailLayout({
           <div className="w-[90%] sm:w-[80%] mx-auto">
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               {extraImages.slice(0, 6).map((src, i) => (
-                <div key={i} className="aspect-[5/6] overflow-hidden">
+                <div key={i} className="aspect-[25/24] overflow-hidden">
                   <img src={src} alt={`${title} ${i + 2}`} loading="lazy" className="w-full h-full object-cover" />
                 </div>
               ))}
