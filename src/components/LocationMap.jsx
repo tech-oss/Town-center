@@ -29,7 +29,7 @@ async function geocode(query) {
   return result;
 }
 
-export default function LocationMap({ query, lat, lng, heading = "Location", note, rounded = true, width = "100%" }) {
+export default function LocationMap({ query, lat, lng, heading = "Location", note, rounded = true, width = "100%", widthClassName, aspectClassName = "aspect-[16/9] md:aspect-[21/9]" }) {
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);
   const [error, setError] = useState(false);
   const markerRef = useRef(null);
@@ -64,8 +64,8 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
         <p className="text-base mb-6" style={{ color: "#000000" }}>{note}</p>
       )}
       <div
-        className={`relative overflow-hidden aspect-[16/9] md:aspect-[21/9] ${rounded ? "rounded-3xl" : ""}`}
-        style={{ width, marginLeft: "auto", marginRight: "auto", boxShadow: "0 14px 50px -26px rgba(28,46,56,0.4)", isolation: "isolate", zIndex: 0 }}
+        className={`relative overflow-hidden ${aspectClassName} ${rounded ? "rounded-3xl" : ""} ${widthClassName || ""}`}
+        style={{ width: widthClassName ? undefined : width, marginLeft: "auto", marginRight: "auto", boxShadow: "0 14px 50px -26px rgba(28,46,56,0.4)", isolation: "isolate", zIndex: 0 }}
       >
         {pos ? (
           <MapContainer

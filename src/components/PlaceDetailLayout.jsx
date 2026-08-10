@@ -89,9 +89,10 @@ export default function PlaceDetailLayout({
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      {/* ── 1. Single main hero image — 80% page width, square corners ── */}
+      {/* ── 1. Single main hero image — 80% page width, square corners.
+          Shorter on mobile (~20% less tall than desktop's mobile height). ── */}
       <section className="pt-6 md:pt-10">
-        <div className="relative w-[80%] mx-auto overflow-hidden h-[60vh] md:h-[75vh] min-h-[420px] bg-black">
+        <div className="relative w-[80%] mx-auto overflow-hidden h-[48vh] md:h-[75vh] min-h-[336px] md:min-h-[420px] bg-black">
           <img src={heroImage} alt={title} className="w-full h-full object-cover" />
         </div>
       </section>
@@ -202,13 +203,13 @@ export default function PlaceDetailLayout({
                 </div>
               )}
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {websiteHref && (
                   <a
                     href={websiteHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full sm:w-auto"
                     style={{ backgroundColor: "var(--forest)" }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
@@ -221,7 +222,7 @@ export default function PlaceDetailLayout({
                     href={extraButtonHref || websiteHref || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full sm:w-auto"
                     style={{ backgroundColor: "var(--sage)" }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
@@ -234,7 +235,7 @@ export default function PlaceDetailLayout({
                     href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors w-full sm:w-auto"
                     style={{ border: "2px solid var(--forest)", color: "#000000" }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#000000"; }}
@@ -242,24 +243,26 @@ export default function PlaceDetailLayout({
                     <PinIcon /> Get Directions
                   </a>
                 )}
-                <Link
-                  to="/get-the-app"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors"
-                  style={{ border: "2px solid var(--forest)", color: "#000000" }}
-                >
-                  Get the App
-                </Link>
-                <button
-                  onClick={() => setShareOpen(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors border"
-                  style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                  </svg>
-                  Share
-                </button>
+                <div className="flex gap-3 w-full sm:w-auto sm:contents">
+                  <Link
+                    to="/get-the-app"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors flex-1 sm:flex-none sm:w-auto"
+                    style={{ border: "2px solid var(--forest)", color: "#000000" }}
+                  >
+                    Get the App
+                  </Link>
+                  <button
+                    onClick={() => setShareOpen(true)}
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors border flex-1 sm:flex-none sm:w-auto"
+                    style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                    </svg>
+                    Share
+                  </button>
+                </div>
               </div>
             </div>
         </div>
@@ -269,7 +272,7 @@ export default function PlaceDetailLayout({
           taller than square, square corners. ── */}
       {extraImages.length > 0 && (
         <section className="py-12 md:py-16 px-6 md:px-12">
-          <div className="w-[80%] mx-auto">
+          <div className="w-[90%] sm:w-[80%] mx-auto">
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               {extraImages.slice(0, 6).map((src, i) => (
                 <div key={i} className="aspect-[5/6] overflow-hidden">
@@ -281,11 +284,19 @@ export default function PlaceDetailLayout({
         </section>
       )}
 
-      {/* ── 5. Location map — 80% page width, address shown as an always-open
-          tile above the pin rather than a separate text block ── */}
+      {/* ── 5. Location map — 90% width and taller on mobile, 80% width on
+          desktop; address shown as an always-open tile above the pin rather
+          than a separate text block ── */}
       {directionsQuery && (
         <section className="pb-16">
-          <LocationMap query={directionsQuery} heading={null} note={address} rounded={false} width="80%" />
+          <LocationMap
+            query={directionsQuery}
+            heading={null}
+            note={address}
+            rounded={false}
+            widthClassName="w-[90%] sm:w-[80%]"
+            aspectClassName="aspect-[8/5] sm:aspect-[16/9] md:aspect-[21/9]"
+          />
         </section>
       )}
 
@@ -296,31 +307,31 @@ export default function PlaceDetailLayout({
         <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>{relatedHeading}</h2>
-            <div className="flex overflow-x-auto snap-x snap-mandatory -mx-6 px-6 gap-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:gap-6 lg:grid-cols-3 md:gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:gap-8">
               {related.map((it) => (
                 <Link
                   key={it.slug}
                   to={it.to}
-                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5 shrink-0 w-[80%] snap-start sm:w-auto sm:shrink"
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden" style={it.logo ? { backgroundColor: "var(--mint)" } : undefined}>
                     {it.logo ? (
-                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-10 transition-transform duration-500 group-hover:scale-105" />
+                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-3 sm:p-10 transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                       <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     )}
                     {it.tag && (
-                      <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}>
-                        {it.tagDotColor && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: it.tagDotColor }} />}
+                      <span className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}>
+                        {it.tagDotColor && <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: it.tagDotColor }} />}
                         {it.tag}
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-col gap-2 p-6">
-                    {!it.tag && it.category && <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{it.category}</span>}
-                    <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{it.name}</h3>
-                    {it.date && <p className="text-xs" style={{ color: "#000000" }}>{it.date}</p>}
+                  <div className="flex flex-col gap-0.5 sm:gap-2 p-2 sm:p-6">
+                    {!it.tag && it.category && <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{it.category}</span>}
+                    <h3 className="font-bold text-xs sm:text-xl leading-snug line-clamp-2" style={{ color: "#000000" }}>{it.name}</h3>
+                    {it.date && <p className="text-[9px] sm:text-xs line-clamp-1" style={{ color: "#000000" }}>{it.date}</p>}
                   </div>
                 </Link>
               ))}
