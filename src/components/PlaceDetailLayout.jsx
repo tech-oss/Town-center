@@ -100,7 +100,7 @@ export default function PlaceDetailLayout({
       {/* ── 1. Title & tagline, centered above the hero ── */}
       <section className="pt-10 md:pt-16 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl md:text-6xl font-bold leading-tight tracking-tight mb-4" style={{ color: "#000000" }}>
+          <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
             {title}
           </h1>
           {firstParagraphText && (
