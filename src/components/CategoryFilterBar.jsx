@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 // ── Shared icon set for category filters ──
@@ -86,84 +86,185 @@ const CATEGORY_ICON = {
   learning: "book", "sport-wellness": "dumbbell",
 };
 
-// How many categories show inline before collapsing the rest into "More".
-const VISIBLE_COUNT = 7;
+// Width set aside for the "More" control when the categories don't all fit.
+const MORE_WIDTH = 110;
+// The bar's own horizontal padding (pl-1.5 + pr-2), excluded from the space
+// the category strip can use.
+const BAR_PADDING = 14;
 
 export default function CategoryFilterBar({ basePath, categories, activeCategory, extra }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
 
-  const visible = categories.slice(0, VISIBLE_COUNT);
-  const overflow = categories.slice(VISIBLE_COUNT);
+  // How many categories fit on one line is measured rather than hard-coded:
+  // label lengths differ a lot per section (Eat & Drink's "Bars" vs Services'
+  // "Copywriters & Content Writers"), so a fixed count would either clip or
+  // leave the bar looking sparse.
+  //
+  // Both inputs are deliberately independent of how many items are currently
+  // shown, so a measurement can never feed back into itself: widths come from
+  // a hidden row that always renders the FULL set, and the space to fill is
+  // derived from the bar's own width (fixed by the page container) minus the
+  // two fixed-width controls that flank the strip.
+  const gaugeRef = useRef(null);
+  const barRef = useRef(null);
+  const chipRef = useRef(null);
+  const [fitCount, setFitCount] = useState(categories.length);
+
+  const measure = () => {
+    const gauge = gaugeRef.current;
+    const bar = barRef.current;
+    const chip = chipRef.current;
+    if (!gauge || !bar || !chip) return;
+
+    const barWidth = bar.clientWidth;
+    if (!barWidth) return;
+
+    const widths = [...gauge.children].map((el) => el.getBoundingClientRect().width);
+    const total = widths.reduce((a, b) => a + b, 0);
+    const room = barWidth - chip.getBoundingClientRect().width - BAR_PADDING;
+
+    // Everything fits — no "More" control, so none of its width to set aside.
+    const next = total <= room
+      ? widths.length
+      : (() => {
+          let used = 0;
+          let n = 0;
+          for (const w of widths) {
+            if (used + w > room - MORE_WIDTH) break;
+            used += w;
+            n += 1;
+          }
+          return Math.max(1, n);
+        })();
+
+    setFitCount((prev) => (prev === next ? prev : next));
+  };
+
+  // Re-measure after every render (cheap, and settles in one extra pass since
+  // the inputs don't depend on the result), on viewport resize, and whenever
+  // the bar itself changes width. Observing the bar is safe — unlike the
+  // strip, its width is fixed by the page container rather than by how many
+  // items are showing, so this can't loop.
+  useLayoutEffect(measure);
+
+  useLayoutEffect(() => {
+    const bar = barRef.current;
+    window.addEventListener("resize", measure);
+    const ro = bar ? new ResizeObserver(measure) : null;
+    if (ro && bar) ro.observe(bar);
+    return () => {
+      window.removeEventListener("resize", measure);
+      ro?.disconnect();
+    };
+  }, []);
+
+  const visible = categories.slice(0, fitCount);
+  const overflow = categories.slice(fitCount);
   const activeItem = categories.find((c) => c.value === activeCategory);
 
   return (
     <div className="mb-10">
-      {/* ── Desktop: inline icon row + "More" dropdown ── */}
-      <div className="hidden sm:flex items-center gap-x-7 lg:gap-x-9 gap-y-3 flex-wrap pb-5 border-b" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
-        <Link
-          to={basePath}
-          replace
-          className="inline-flex items-center gap-2 pl-3.5 pr-4 py-2 rounded-full text-sm font-semibold transition-colors shrink-0"
-          style={!activeCategory
-            ? { backgroundColor: "var(--forest)", color: "#fff" }
-            : { backgroundColor: "transparent", color: "#000000" }}
+      {/* ── Desktop: one white pill-shaped bar — "All Categories" chip, then
+          divider-separated category links, then "More". Strictly single-line:
+          the category strip is the only flexible part, so "More" can never
+          wrap onto a second row. ── */}
+      <div className="hidden sm:flex items-center gap-4">
+        <div
+          ref={barRef}
+          className="flex-1 min-w-0 flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
+          style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
         >
-          <Icon name="grid" /> All Categories
-        </Link>
-
-        {visible.map((c) => (
           <Link
-            key={c.value}
-            to={`${basePath}?category=${c.value}`}
+            ref={chipRef}
+            to={basePath}
             replace
-            className="inline-flex items-center gap-2 text-sm font-medium transition-opacity hover:opacity-70 shrink-0"
-            style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}
+            className="inline-flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full text-sm font-semibold transition-colors shrink-0"
+            style={!activeCategory
+              ? { backgroundColor: "var(--forest)", color: "#fff" }
+              : { backgroundColor: "transparent", color: "#000000" }}
           >
-            <Icon name={CATEGORY_ICON[c.value]} color="var(--leaf)" />
-            <span style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}>{c.label}</span>
+            <Icon name="grid" /> All Categories
           </Link>
-        ))}
 
-        {overflow.length > 0 && (
-          <div className="relative ml-auto shrink-0">
-            <button
-              onClick={() => setDesktopMoreOpen((v) => !v)}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-70"
-              style={{ color: "#000000" }}
-            >
-              More
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: desktopMoreOpen ? "rotate(180deg)" : "none", transition: "transform 150ms" }}>
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </button>
-            {desktopMoreOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setDesktopMoreOpen(false)} />
-                <div
-                  className="absolute right-0 top-full mt-3 z-20 w-64 bg-white rounded-2xl overflow-hidden py-2"
-                  style={{ boxShadow: "0 20px 48px -16px rgba(28,46,56,0.35)" }}
+          {/* Category strip — the single flexible element, so the bar always
+              stays one line no matter how long the labels are. */}
+          <div className="relative flex-1 min-w-0 flex items-center flex-nowrap overflow-hidden">
+            {visible.map((c) => (
+              <div key={c.value} className="flex items-center shrink-0">
+                <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
+                <Link
+                  to={`${basePath}?category=${c.value}`}
+                  replace
+                  className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 text-sm font-medium whitespace-nowrap transition-opacity hover:opacity-70"
+                  style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}
                 >
-                  {overflow.map((c) => (
-                    <Link
-                      key={c.value}
-                      to={`${basePath}?category=${c.value}`}
-                      replace
-                      onClick={() => setDesktopMoreOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:opacity-70"
-                      style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}
-                    >
-                      <Icon name={CATEGORY_ICON[c.value]} color="var(--leaf)" />
-                      {c.label}
-                    </Link>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+                  <Icon name={CATEGORY_ICON[c.value]} color="var(--leaf)" />
+                  {c.label}
+                </Link>
+              </div>
+            ))}
 
-        {extra}
+            {/* Hidden gauge: always the full set, used only to measure natural
+                item widths. Never visible and never hit-testable. */}
+            <div
+              ref={gaugeRef}
+              aria-hidden="true"
+              className="absolute left-0 top-0 flex items-center flex-nowrap invisible pointer-events-none"
+            >
+              {categories.map((c) => (
+                <div key={c.value} className="flex items-center shrink-0">
+                  <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" />
+                  <span className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 text-sm font-medium whitespace-nowrap">
+                    <Icon name={CATEGORY_ICON[c.value]} />
+                    {c.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {overflow.length > 0 && (
+            <div className="relative shrink-0 flex items-center">
+              <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
+              <button
+                onClick={() => setDesktopMoreOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 px-3 lg:px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-opacity hover:opacity-70"
+                style={{ color: "#000000" }}
+              >
+                More
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: desktopMoreOpen ? "rotate(180deg)" : "none", transition: "transform 150ms" }}>
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              {desktopMoreOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setDesktopMoreOpen(false)} />
+                  <div
+                    className="absolute right-0 top-full mt-3 z-20 w-64 bg-white rounded-2xl overflow-hidden py-2"
+                    style={{ boxShadow: "0 20px 48px -16px rgba(28,46,56,0.35)" }}
+                  >
+                    {overflow.map((c) => (
+                      <Link
+                        key={c.value}
+                        to={`${basePath}?category=${c.value}`}
+                        replace
+                        onClick={() => setDesktopMoreOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:opacity-70"
+                        style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}
+                      >
+                        <Icon name={CATEGORY_ICON[c.value]} color="var(--leaf)" />
+                        {c.label}
+                      </Link>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        {extra && <div className="shrink-0">{extra}</div>}
       </div>
 
       {/* ── Mobile: "Browse Categories" button opening a bottom sheet ── */}
