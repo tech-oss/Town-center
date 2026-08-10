@@ -296,12 +296,12 @@ export default function PlaceDetailLayout({
         <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>{relatedHeading}</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+            <div className="flex overflow-x-auto snap-x snap-mandatory -mx-6 px-6 gap-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:gap-6 lg:grid-cols-3 md:gap-8">
               {related.map((it) => (
                 <Link
                   key={it.slug}
                   to={it.to}
-                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5 shrink-0 w-[80%] snap-start sm:w-auto sm:shrink"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden" style={it.logo ? { backgroundColor: "var(--mint)" } : undefined}>
