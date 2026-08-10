@@ -169,69 +169,78 @@ export default function PlaceDetailLayout({
 
           {/* ── 3. Opening hours / contact / social, then the action buttons —
               always rendered so Get the App / Share stay consistent even when
-              an item has no hours/contact/website/directions data. ── */}
-          <div className="mt-8 p-6 md:p-7 rounded-3xl flex flex-col gap-6" style={{ backgroundColor: "var(--sand)" }}>
-              {hours?.length > 0 && (
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
-                  <ul className="flex flex-col gap-1.5 max-w-sm">
-                    {hours.map((h) => (
-                      <li key={h.day} className="flex justify-between text-sm">
-                        <span style={{ color: "#000000" }}>{h.day}</span>
-                        <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
-                      </li>
+              an item has no hours/contact/website/directions data.
+              Desktop (sm+): a two-column layout — info on the left, actions
+              stacked as a vertical button rail on the right, filling the
+              space that otherwise sat empty. Mobile stays a single stacked
+              column, unchanged. ── */}
+          <div
+            className="mt-8 p-6 sm:p-8 md:p-10 rounded-3xl flex flex-col gap-6 sm:grid sm:grid-cols-[1.3fr_1fr] sm:gap-x-12 sm:items-center"
+            style={{ backgroundColor: "var(--sand)" }}
+          >
+              <div className="flex flex-col gap-6">
+                {hours?.length > 0 && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
+                    <ul className="flex flex-col gap-1.5 max-w-sm">
+                      {hours.map((h) => (
+                        <li key={h.day} className="flex justify-between text-sm">
+                          <span style={{ color: "#000000" }}>{h.day}</span>
+                          <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {(address || (phone && phone !== "—") || email) && (
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
+                    {address && <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{address}</p>}
+                    {phone && phone !== "—" && (
+                      <p className="text-sm" style={{ color: "#000000" }}>
+                        <span className="font-semibold">Tel:</span>{" "}
+                        <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline">{phone}</a>
+                      </p>
+                    )}
+                    {email && (
+                      <p className="text-sm" style={{ color: "#000000" }}>
+                        <span className="font-semibold">Email:</span>{" "}
+                        <a href={`mailto:${email}`} className="hover:underline">{email}</a>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {social?.length > 0 && (
+                  <div className="flex items-center gap-2.5">
+                    {social.map((sl) => (
+                      <a
+                        key={sl.icon}
+                        href={sl.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={sl.label}
+                        title={sl.label}
+                        className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
+                        style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
+                      >
+                        <ShareIcon name={sl.icon} />
+                      </a>
                     ))}
-                  </ul>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
 
-              {(address || (phone && phone !== "—") || email) && (
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
-                  {address && <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{address}</p>}
-                  {phone && phone !== "—" && (
-                    <p className="text-sm" style={{ color: "#000000" }}>
-                      <span className="font-semibold">Tel:</span>{" "}
-                      <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline">{phone}</a>
-                    </p>
-                  )}
-                  {email && (
-                    <p className="text-sm" style={{ color: "#000000" }}>
-                      <span className="font-semibold">Email:</span>{" "}
-                      <a href={`mailto:${email}`} className="hover:underline">{email}</a>
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {social?.length > 0 && (
-                <div className="flex items-center gap-2.5">
-                  {social.map((sl) => (
-                    <a
-                      key={sl.icon}
-                      href={sl.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={sl.label}
-                      title={sl.label}
-                      className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                      style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
-                    >
-                      <ShareIcon name={sl.icon} />
-                    </a>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <div className="flex flex-col gap-3 sm:border-l sm:pl-10" style={{ borderColor: "rgba(28,46,56,0.12)" }}>
                 {websiteHref && (
                   <a
                     href={websiteHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full sm:w-auto"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full"
                     style={{ backgroundColor: "var(--forest)" }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
@@ -244,7 +253,7 @@ export default function PlaceDetailLayout({
                     href={extraButtonHref || websiteHref || "#"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full sm:w-auto"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full"
                     style={{ backgroundColor: "var(--sage)" }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
@@ -257,7 +266,7 @@ export default function PlaceDetailLayout({
                     href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors w-full sm:w-auto"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors w-full"
                     style={{ border: "2px solid var(--forest)", color: "#000000" }}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#000000"; }}
@@ -265,17 +274,17 @@ export default function PlaceDetailLayout({
                     <PinIcon /> Get Directions
                   </a>
                 )}
-                <div className="flex gap-3 w-full sm:w-auto sm:contents">
+                <div className="flex gap-3 w-full">
                   <Link
                     to="/get-the-app"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors flex-1 sm:flex-none sm:w-auto"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors flex-1"
                     style={{ border: "2px solid var(--forest)", color: "#000000" }}
                   >
                     Get the App
                   </Link>
                   <button
                     onClick={() => setShareOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors border flex-1 sm:flex-none sm:w-auto"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors border flex-1"
                     style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
