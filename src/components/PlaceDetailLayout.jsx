@@ -190,10 +190,16 @@ export default function PlaceDetailLayout({
                   <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
                   {address && <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{address}</p>}
                   {phone && phone !== "—" && (
-                    <p className="text-sm" style={{ color: "#000000" }}><span className="font-semibold">Tel:</span> {phone}</p>
+                    <p className="text-sm" style={{ color: "#000000" }}>
+                      <span className="font-semibold">Tel:</span>{" "}
+                      <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline">{phone}</a>
+                    </p>
                   )}
                   {email && (
-                    <p className="text-sm" style={{ color: "#000000" }}><span className="font-semibold">Email:</span> {email}</p>
+                    <p className="text-sm" style={{ color: "#000000" }}>
+                      <span className="font-semibold">Email:</span>{" "}
+                      <a href={`mailto:${email}`} className="hover:underline">{email}</a>
+                    </p>
                   )}
                 </div>
               )}
