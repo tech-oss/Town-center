@@ -318,7 +318,7 @@ const eatItems = [
       { day: "Sunday", time: "9am – 5pm" },
     ],
     address: "2B High Street, Maidenhead SL6 1QJ",
-    mapQuery: "COCOBA Chocolate Cafe, High Street, Maidenhead SL6 1QJ",
+    mapQuery: "2B High Street, Maidenhead SL6 1QJ",
     phone: "—",
     email: "maidenhead@cocobachocolate.com",
     social: {
@@ -344,7 +344,7 @@ const eatItems = [
       { day: "Sunday", time: "9am – 4pm" },
     ],
     address: "70 High St, Maidenhead SL6, 1PY",
-    mapQuery: "Esquires Coffee, 70 High Street, Maidenhead SL6 1PY",
+    mapQuery: "70 High Street, Maidenhead SL6 1PY",
     phone: "01628 000 000",
     website: "www.esquirescoffee.co.uk",
   },
