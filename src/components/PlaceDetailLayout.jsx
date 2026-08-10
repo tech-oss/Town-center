@@ -296,7 +296,7 @@ export default function PlaceDetailLayout({
       {extraImages.length > 0 && (
         <section className="py-12 md:py-16 px-6 md:px-12">
           <div className="w-[90%] sm:w-full sm:max-w-[44.8rem] mx-auto">
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
               {extraImages.slice(0, 6).map((src, i) => (
                 <div key={i} className="aspect-[25/24] overflow-hidden">
                   <img src={src} alt={`${title} ${i + 2}`} loading="lazy" className="w-full h-full object-cover" />
