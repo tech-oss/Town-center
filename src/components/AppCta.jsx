@@ -17,10 +17,10 @@ export default function AppCta() {
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>
               Maidenhead in your pocket
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight mb-4">
+            <h2 className="hero-title uppercase text-3xl md:text-4xl text-white mb-4">
               Take the whole town with you
             </h2>
-            <p className="text-base md:text-lg leading-relaxed" style={{ color: "var(--mint)" }}>
+            <p className="text-base md:text-lg leading-relaxed" style={{ color: "#ffffff" }}>
               Discover what's on, find exclusive offers, get updates straight to your phone, explore the town
               and keep your favourite places close — all in one app. Download the Maidenhead app and never
               miss a thing.
