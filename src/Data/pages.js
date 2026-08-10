@@ -20,6 +20,16 @@ import { featuredEvents } from "./events";
 // Stable dummy image per slug (replace with real assets later)
 const img = (seed) => `https://picsum.photos/seed/${seed}/900/650`;
 
+// Pads a gallery out to 7 images (1 hero + 6 extra, filling the detail page's
+// photo grid) with placeholder shots when a real gallery is shorter.
+const padGallery = (slug, images) => {
+  const padded = [...images];
+  for (let n = images.length + 1; padded.length < 7; n++) {
+    padded.push(img(`${slug}-${n}`));
+  }
+  return padded;
+};
+
 // Shared dummy detail content so every sub-page is fully populated
 const HOURS = [
   { day: "Monday – Friday", time: "9am – 8pm" },
@@ -176,7 +186,7 @@ function item(slug, name, section, category, tag, blurb) {
     category,
     tag,
     image: img(slug),
-    gallery: [img(slug), img(slug + "-2"), img(slug + "-3")],
+    gallery: [1, 2, 3, 4, 5, 6, 7].map((n) => img(n === 1 ? slug : `${slug}-${n}`)),
     description:
       blurb ||
       `${name} is one of the many places that make Maidenhead town centre special. Drop in to discover what's on offer, from everyday essentials to something a little different — all just a short walk from the station and the riverside.`,
@@ -247,13 +257,13 @@ const eatItems = [
     // ── Real content: Coppa Club, Maidenhead ──
     ...item("coppa-club", "Coppa Club", "eat-drink", "restaurants", "Restaurants"),
     image: "/images/coppa/hero.jpg",
-    gallery: [
+    gallery: padGallery("coppa", [
       "/images/coppa/hero.jpg",
       "/images/coppa/terrace.jpg",
       "/images/coppa/garden.jpg",
       "/images/coppa/bar.jpg",
       "/images/coppa/dining.jpg",
-    ],
+    ]),
     description:
       "Located in the centre of Maidenhead overlooking the waterway, Coppa Club provides a welcoming space to relax and dine. Whether you're enjoying the garden room or meeting friends for drinks at the bar, you're welcome any time.",
     hours: [
@@ -282,14 +292,14 @@ const eatItems = [
     // ── Real content: COCOBA Chocolate Café, Maidenhead ──
     ...item("cocoba", "COCOBA Chocolate Café", "eat-drink", "cafes", "Cafés"),
     image: "/images/cocoba/storefront.jpg",
-    gallery: [
+    gallery: padGallery("cocoba", [
       "/images/cocoba/storefront.jpg",
       "/images/cocoba/dessert.jpg",
       "/images/cocoba/interior.jpg",
       "/images/cocoba/cocoba4.png",
       "/images/cocoba/cocoba5.png",
       "/images/cocoba/cocoba6.png",
-    ],
+    ]),
     paragraphs: [
       "Nestled in the heart of Maidenhead, COCOBA Chocolate Café is more than just a coffee shop—it's a destination for chocolate lovers, coffee enthusiasts, and anyone looking to relax and indulge.",
       "Opened in October 2024, COCOBA Maidenhead combines the warmth of a welcoming neighbourhood café with the craftsmanship of an artisan chocolate maker. Every hot chocolate, dessert, and chocolate treat is created using premium chocolate crafted at COCOBA's dedicated Kent chocolate factory, delivering a truly authentic chocolate experience.",
@@ -379,11 +389,11 @@ const seeItems = [
   {
     ...item("odeon-luxe-maidenhead", "ODEON Luxe Maidenhead", "see-do", "film", "Film"),
     image: "/images/cinema.png",
-    gallery: [
+    gallery: padGallery("odeon", [
       "/images/cinema.png",
       "/images/cinema.png",
       "/images/cinema.png",
-    ],
+    ]),
     paragraphs: [
       "Located in the heart of Maidenhead town centre, ODEON Luxe Maidenhead is a popular entertainment venue that serves both the local community and visitors to the area. Offering the latest blockbuster films, family favourites, live screenings, and special cinematic events, it provides a modern and welcoming destination for people of all ages.",
       "Following a major refurbishment, the cinema now features luxury reclining seats, state-of-the-art screens, and immersive sound technology, ensuring a comfortable and enjoyable viewing experience. Its central location on King Street makes it a convenient stop for visitors exploring the town's shops, restaurants, and attractions, while also serving as a valued social and leisure hub for local residents.",

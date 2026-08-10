@@ -113,12 +113,14 @@ export default function EventPage() {
       metaRows={metaRows}
       description={description}
       hours={event.hours}
-      address={event.isBusiness ? event.location : null}
+      address={event.location}
       phone={event.phone}
       email={event.email}
       website={event.website}
       social={buildSocial(event.social)}
       directionsQuery={event.location}
+      extraButtonLabel="Buy Tickets"
+      extraButtonHref={event.website}
       shareTitle={`${event.title} — Maidenhead`}
       relatedHeading="More See & Do"
       related={allEvents

@@ -72,6 +72,8 @@ export default function DetailPage() {
       website={!item.hideWeb ? item.website : null}
       social={!item.freePlan ? buildSocial(item) : null}
       directionsQuery={!item.freePlan ? mapQuery : null}
+      extraButtonLabel={item.section === "eat-drink" ? "Booking" : undefined}
+      extraButtonHref={item.website}
       shareTitle={`${item.name} — Maidenhead`}
       relatedHeading="You might also like"
       related={related.map((it) => ({

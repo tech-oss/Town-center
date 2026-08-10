@@ -26,6 +26,16 @@ export const categoryColors = Object.fromEntries(
   Object.entries(categories).map(([k, v]) => [k, v.color])
 );
 
+// Pads a gallery out to 7 images (1 hero + 6 extra, filling the detail page's
+// photo grid) with placeholder shots when a real gallery is shorter.
+const padGallery = (slug, images) => {
+  const padded = [...images];
+  for (let n = images.length + 1; padded.length < 7; n++) {
+    padded.push(`https://picsum.photos/seed/${slug}-${n}/900/650`);
+  }
+  return padded;
+};
+
 export const events = [
   {
     slug: "duck-derby-fun-day",
@@ -44,7 +54,7 @@ export const events = [
       { lead: "A day out for all the family", text: "The much-loved Duck Derby returns to Ray Mill Island with a packed programme of family activities, stalls and games throughout the afternoon." },
       { text: "Cheer on your duck as it races along the river, then enjoy the relaxed riverside atmosphere with food, refreshments and plenty to keep all ages entertained." },
     ],
-    gallery: ["/images/events/duck-derby.jpg", "/images/events/market.jpg", "/images/events/popup.jpg"],
+    gallery: padGallery("duck-derby", ["/images/events/duck-derby.jpg", "/images/events/market.jpg", "/images/events/popup.jpg"]),
   },
   {
     slug: "maidenhead-farmers-market",
@@ -66,12 +76,12 @@ export const events = [
       { text: "Located in Grove Road Car Park (between Broadway and York Road), free on-site parking is available from York Road, making it easy to stock up on the best of the season." },
       { text: "It's the perfect Sunday morning outing — support local producers, discover seasonal ingredients and pick up something special for the week ahead." },
     ],
-    gallery: [
+    gallery: padGallery("farmers-market", [
       "/images/events/farmers-market-3.jpg",
       "/images/events/farmers-market-2.jpg",
       "/images/events/farmers-market-1.jpg",
       "/images/events/farmers-market-4.jpg",
-    ],
+    ]),
   },
   {
     slug: "battle-of-the-choirs",
@@ -92,7 +102,7 @@ export const events = [
       { text: "With an electric atmosphere and a friendly competitive spirit, it's a wonderful showcase of the singing talent that thrives across Maidenhead and the surrounding area." },
       { text: "Part of Maidenhead Festival — organised for the community, by the community." },
     ],
-    gallery: ["/images/events/choirs-1.jpg", "/images/events/choirs-2.jpg"],
+    gallery: padGallery("choirs", ["/images/events/choirs-1.jpg", "/images/events/choirs-2.jpg"]),
   },
   {
     slug: "live-and-local-summer-sounds",
@@ -112,7 +122,7 @@ export const events = [
       { lead: "Live & Local", text: "Summer Sounds brings local acoustic artists to the town centre for a casual, free-to-attend afternoon of music." },
       { text: "Grab a refreshment, find a spot in the sun and enjoy the relaxed atmosphere as performers fill the streets with the sounds of summer." },
     ],
-    gallery: ["/images/events/summer-1.jpg", "/images/events/summer-2.jpg", "/images/events/summer-3.jpg", "/images/events/summer-4.jpg"],
+    gallery: padGallery("summer", ["/images/events/summer-1.jpg", "/images/events/summer-2.jpg", "/images/events/summer-3.jpg", "/images/events/summer-4.jpg"]),
   },
   {
     slug: "battle-of-the-bands",
@@ -132,7 +142,7 @@ export const events = [
       { lead: "The crowd picks the champion", text: "Battle of the Bands showcases some of the area's most exciting emerging artists across a range of genres, all competing for your vote." },
       { text: "Expect a high-energy evening of live music, standout performances and a real sense of community spirit as the town centre comes alive after dark." },
     ],
-    gallery: ["/images/events/bands-1.jpg", "/images/events/bands-hero.jpg", "/images/events/bands-2.jpg", "/images/events/bands-3.jpg"],
+    gallery: padGallery("bands", ["/images/events/bands-1.jpg", "/images/events/bands-hero.jpg", "/images/events/bands-2.jpg", "/images/events/bands-3.jpg"]),
   },
   {
     slug: "christmas-lights-switch-on",
@@ -151,7 +161,7 @@ export const events = [
       { lead: "A festive stage takeover", text: "Acoustic artists, choirs, bands, dance groups and performing arts schools take over multiple stages throughout the day during the Christmas Market." },
       { text: "Join the crowds for a magical evening of performances, festive food and seasonal cheer as Maidenhead officially switches on its Christmas lights." },
     ],
-    gallery: ["/images/events/festive.jpg", "/images/events/shopping.jpg", "/images/events/music.jpg"],
+    gallery: padGallery("festive", ["/images/events/festive.jpg", "/images/events/shopping.jpg", "/images/events/music.jpg"]),
   },
 ];
 

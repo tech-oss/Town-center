@@ -75,6 +75,8 @@ export default function PlaceDetailLayout({
   relatedHeading,
   related = [],
   afterMap,
+  extraButtonLabel,
+  extraButtonHref,
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -84,7 +86,6 @@ export default function PlaceDetailLayout({
   const t = encodeURIComponent(shareTitle || title);
   const waShare = `https://wa.me/?text=${t}%20${u}`;
   const websiteHref = normalizeUrl(website);
-  const hasContactBlock = Boolean(hours?.length || address || (phone && phone !== "—") || email || social?.length);
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
@@ -151,9 +152,10 @@ export default function PlaceDetailLayout({
             </div>
           )}
 
-          {/* ── 3. Opening hours / contact / social, then the action buttons ── */}
-          {(hasContactBlock || websiteHref || directionsQuery) && (
-            <div className="mt-8 p-6 md:p-7 rounded-3xl flex flex-col gap-6" style={{ backgroundColor: "var(--sand)" }}>
+          {/* ── 3. Opening hours / contact / social, then the action buttons —
+              always rendered so Get the App / Share stay consistent even when
+              an item has no hours/contact/website/directions data. ── */}
+          <div className="mt-8 p-6 md:p-7 rounded-3xl flex flex-col gap-6" style={{ backgroundColor: "var(--sand)" }}>
               {hours?.length > 0 && (
                 <div>
                   <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
@@ -216,6 +218,19 @@ export default function PlaceDetailLayout({
                     <GlobeIcon /> Visit Website
                   </a>
                 )}
+                {extraButtonLabel && (
+                  <a
+                    href={extraButtonHref || websiteHref || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors"
+                    style={{ backgroundColor: "var(--sage)" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
+                  >
+                    <TicketIcon /> {extraButtonLabel}
+                  </a>
+                )}
                 {directionsQuery && (
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`}
@@ -249,7 +264,6 @@ export default function PlaceDetailLayout({
                 </button>
               </div>
             </div>
-          )}
         </div>
       </section>
 
