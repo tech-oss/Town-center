@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 // ── Shared icon set for category filters ──
@@ -95,6 +95,17 @@ const BAR_PADDING = 14;
 export default function CategoryFilterBar({ basePath, categories, activeCategory, extra }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
+
+  // Lock background scroll while the mobile sheet is open — without this,
+  // a scroll gesture that reaches the top/bottom of the sheet's own list
+  // chains into the page behind it, so the sheet appears to "flicker" and
+  // the listing cards show through underneath it.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [mobileOpen]);
 
   // How many categories fit on one line is measured rather than hard-coded:
   // label lengths differ a lot per section (Eat & Drink's "Bars" vs Services'
@@ -290,7 +301,7 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
           onClick={() => setMobileOpen(false)}
         >
           <div
-            className="w-full bg-white rounded-t-3xl pt-5 pb-6 max-h-[80vh] overflow-y-auto"
+            className="w-full bg-white rounded-t-3xl pt-5 pb-6 max-h-[80vh] overflow-y-auto overscroll-contain"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 mb-4">
