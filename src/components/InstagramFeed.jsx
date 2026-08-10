@@ -155,7 +155,7 @@ export default function InstagramFeed() {
           <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
             Follow Along
           </p>
-          <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
+          <h2 className="hero-title uppercase text-3xl md:text-5xl" style={{ color: "#000000" }}>
             On Instagram
           </h2>
         </div>
