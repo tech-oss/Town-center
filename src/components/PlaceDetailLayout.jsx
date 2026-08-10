@@ -290,11 +290,12 @@ export default function PlaceDetailLayout({
         </div>
       </section>
 
-      {/* ── 4. Additional photos — up to 6, two per row. 80% page width, 20%
-          taller than square, square corners. ── */}
+      {/* ── 4. Additional photos — up to 6, two per row. 90% width on
+          mobile; on desktop matched to the content column above (max-w-4xl)
+          then reduced 20% further, square corners. ── */}
       {extraImages.length > 0 && (
         <section className="py-12 md:py-16 px-6 md:px-12">
-          <div className="w-[90%] sm:w-[80%] mx-auto">
+          <div className="w-[90%] sm:w-full sm:max-w-[44.8rem] mx-auto">
             <div className="grid grid-cols-2 gap-3 md:gap-4">
               {extraImages.slice(0, 6).map((src, i) => (
                 <div key={i} className="aspect-[25/24] overflow-hidden">
