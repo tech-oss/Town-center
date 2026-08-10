@@ -55,6 +55,11 @@ export const events = [
       { text: "Cheer on your duck as it races along the river, then enjoy the relaxed riverside atmosphere with food, refreshments and plenty to keep all ages entertained." },
     ],
     gallery: padGallery("duck-derby", ["/images/events/duck-derby.jpg", "/images/events/market.jpg", "/images/events/popup.jpg"]),
+    social: {
+      facebook: "https://www.facebook.com/duck-derby-fun-day",
+      instagram: "https://www.instagram.com/duck-derby-fun-day",
+      x: "https://x.com/duck-derby-fun-day",
+    },
   },
   {
     slug: "maidenhead-farmers-market",
@@ -82,6 +87,11 @@ export const events = [
       "/images/events/farmers-market-1.jpg",
       "/images/events/farmers-market-4.jpg",
     ]),
+    social: {
+      facebook: "https://www.facebook.com/maidenhead-farmers-market",
+      instagram: "https://www.instagram.com/maidenhead-farmers-market",
+      x: "https://x.com/maidenhead-farmers-market",
+    },
   },
   {
     slug: "battle-of-the-choirs",
@@ -103,6 +113,11 @@ export const events = [
       { text: "Part of Maidenhead Festival — organised for the community, by the community." },
     ],
     gallery: padGallery("choirs", ["/images/events/choirs-1.jpg", "/images/events/choirs-2.jpg"]),
+    social: {
+      facebook: "https://www.facebook.com/battle-of-the-choirs",
+      instagram: "https://www.instagram.com/battle-of-the-choirs",
+      x: "https://x.com/battle-of-the-choirs",
+    },
   },
   {
     slug: "live-and-local-summer-sounds",
@@ -123,6 +138,11 @@ export const events = [
       { text: "Grab a refreshment, find a spot in the sun and enjoy the relaxed atmosphere as performers fill the streets with the sounds of summer." },
     ],
     gallery: padGallery("summer", ["/images/events/summer-1.jpg", "/images/events/summer-2.jpg", "/images/events/summer-3.jpg", "/images/events/summer-4.jpg"]),
+    social: {
+      facebook: "https://www.facebook.com/live-and-local-summer-sounds",
+      instagram: "https://www.instagram.com/live-and-local-summer-sounds",
+      x: "https://x.com/live-and-local-summer-sounds",
+    },
   },
   {
     slug: "battle-of-the-bands",
@@ -143,6 +163,11 @@ export const events = [
       { text: "Expect a high-energy evening of live music, standout performances and a real sense of community spirit as the town centre comes alive after dark." },
     ],
     gallery: padGallery("bands", ["/images/events/bands-1.jpg", "/images/events/bands-hero.jpg", "/images/events/bands-2.jpg", "/images/events/bands-3.jpg"]),
+    social: {
+      facebook: "https://www.facebook.com/battle-of-the-bands",
+      instagram: "https://www.instagram.com/battle-of-the-bands",
+      x: "https://x.com/battle-of-the-bands",
+    },
   },
   {
     slug: "christmas-lights-switch-on",
@@ -162,6 +187,11 @@ export const events = [
       { text: "Join the crowds for a magical evening of performances, festive food and seasonal cheer as Maidenhead officially switches on its Christmas lights." },
     ],
     gallery: padGallery("festive", ["/images/events/festive.jpg", "/images/events/shopping.jpg", "/images/events/music.jpg"]),
+    social: {
+      facebook: "https://www.facebook.com/christmas-lights-switch-on",
+      instagram: "https://www.instagram.com/christmas-lights-switch-on",
+      x: "https://x.com/christmas-lights-switch-on",
+    },
   },
 ];
 
