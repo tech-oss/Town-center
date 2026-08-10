@@ -158,7 +158,7 @@ export default function PlaceDetailLayout({
           )}
 
           {remainingDescription?.length > 0 && (
-            <div className="flex flex-col gap-5 mb-2">
+            <div className="flex flex-col gap-5 mb-2 text-center max-w-3xl mx-auto">
               {remainingDescription.map((p, i) => (
                 <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
                   {typeof p === "string" ? p : (<>{p.lead && <strong>{p.lead} </strong>}{p.text}</>)}
