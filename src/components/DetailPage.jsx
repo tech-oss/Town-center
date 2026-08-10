@@ -1,24 +1,28 @@
-import { useParams, Link, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, Navigate } from "react-router-dom";
+import { useEffect } from "react";
 import { sections } from "../Data/pages";
 import { getBusinessBySlug, getBusinesses } from "../api";
 import useFetch from "../hooks/useFetch";
 import NewsOffers from "./NewsOffers";
-import LocationMap from "./LocationMap";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
+import PlaceDetailLayout from "./PlaceDetailLayout";
+
+// Business social profiles → the shared layout's { icon, href, label } shape.
+function buildSocial(item) {
+  const s = item.social;
+  if (!s) return null;
+  return [
+    s.instagram && { icon: "instagram", href: s.instagram, label: "Instagram" },
+    s.facebook && { icon: "facebook", href: s.facebook, label: "Facebook" },
+    s.x && { icon: "x", href: s.x, label: "X" },
+  ].filter(Boolean);
+}
 
 export default function DetailPage() {
   const { slug } = useParams();
   const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
   const { data: allBusinesses, loading: loadingList } = useFetch(getBusinesses, []);
-  const [active, setActive] = useState(0);
-  const [shareOpen, setShareOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-  // Reset the gallery to the first image when navigating to a different item
-  // (adjusting state during render — no extra paint).
-  const [seenSlug, setSeenSlug] = useState(slug);
-  if (slug !== seenSlug) { setSeenSlug(slug); setActive(0); }
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -40,372 +44,45 @@ export default function DetailPage() {
   // Map / directions target — prefer an explicit query, else the business name + town
   const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
 
-  // ── Social links ──
-  // If the business has its own social profiles (item.social), link to those;
-  // otherwise fall back to "share this page" links. Email/WhatsApp included.
-  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
-  const u = encodeURIComponent(shareUrl);
-  const t = encodeURIComponent(`${item.name} — Maidenhead`);
-  const waShare = `https://wa.me/?text=${t}%20${u}`;
-  const s = item.social;
-  const socialItems = s
-    ? [
-        s.instagram && { icon: "instagram", href: s.instagram, label: "Instagram" },
-        s.facebook && { icon: "facebook", href: s.facebook, label: "Facebook" },
-        s.x && { icon: "x", href: s.x, label: "X" },
-        item.email && { icon: "email", href: `mailto:${item.email}`, label: "Email" },
-      ].filter(Boolean)
-    : [
-        { icon: "facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, label: "Share on Facebook" },
-        { icon: "x", href: `https://twitter.com/intent/tweet?url=${u}&text=${t}`, label: "Share on X" },
-        { icon: "whatsapp", href: waShare, label: "Share on WhatsApp" },
-        { icon: "email", href: `mailto:?subject=${t}&body=${u}`, label: "Share by email" },
-      ];
-  const ShareIcon = ({ name }) => {
-    const p = { width: 16, height: 16, viewBox: "0 0 24 24" };
-    if (name === "instagram") return (<svg {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none" /></svg>);
-    if (name === "facebook") return (<svg {...p} fill="currentColor"><path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H9v3h2v7h3v-7h2.5l.5-3H14V9.5c0-.3.2-.5.5-.5z" /></svg>);
-    if (name === "x") return (<svg {...p} fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-6l-4.3-5.6L6.3 21H3.3l7-8L2.6 3h6.1l3.9 5.1L17.5 3zm-2.1 16h1.6L8.7 4.7H7L15.4 19z" /></svg>);
-    if (name === "whatsapp") return (<svg {...p} fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.5A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.9.9-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-5.5c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.5.1-.6.8-.8 1-.3.2-.5.1a6.5 6.5 0 0 1-1.9-1.2 7.2 7.2 0 0 1-1.3-1.7c-.1-.2 0-.4.1-.5l.4-.4.2-.4v-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3A2.8 2.8 0 0 0 6.5 10a4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c.6.3 1.1.4 1.5.5a3.6 3.6 0 0 0 1.6.1c.5-.1 1.4-.6 1.6-1.1s.2-1 .1-1.1-.3-.2-.5-.3z" /></svg>);
-    return (<svg {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>);
-  };
+  const heroImage = item.logoHeader ? item.logo : item.gallery[0];
+  const extraImages = item.logoHeader ? [] : item.gallery.slice(1);
+
+  const description = item.hideDescription
+    ? null
+    : item.paragraphs
+    ? item.paragraphs
+    : [item.description, item.description2].filter(Boolean);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* ── Free-plan header: logo only, no photography ── */}
-      {item.logoHeader ? (
-        <section className="px-6 md:px-12 pt-6 md:pt-10">
-          <div className="max-w-6xl mx-auto">
-            <div
-              className="relative rounded-3xl overflow-hidden aspect-[16/9] sm:aspect-[21/9] flex items-center justify-center"
-              style={{ backgroundColor: "var(--mint)" }}
-            >
-              <img
-                src={item.logo}
-                alt={item.name}
-                className="max-h-[55%] max-w-[70%] w-auto object-contain"
-              />
-            </div>
-          </div>
-        </section>
-      ) : (
-      /* ── Gallery hero ── */
-      /* Contained 16:9 frame matching the photos' native ratio, so cover photos
-          display in full with no corner/edge cropping on web or mobile. */
-      <section className="px-6 md:px-12 pt-6 md:pt-10">
-        <div className="max-w-6xl mx-auto">
-          <div
-            className="relative rounded-3xl overflow-hidden aspect-[16/9] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]"
-            style={{ backgroundColor: item.containHero ? "var(--mint)" : "#000" }}
-          >
-            <img src={item.gallery[active]} alt={item.name} className={`w-full h-full ${item.containHero ? "object-contain" : "object-cover"}`} />
-          </div>
-          {/* Thumbnails */}
-          {item.gallery.length > 1 && (
-            <div className="flex gap-3 mt-3 pb-1 overflow-x-auto scrollbar-none">
-              {item.gallery.map((g, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  aria-label={`View image ${i + 1}`}
-                  className="shrink-0 w-24 h-16 md:w-28 md:h-20 rounded-xl overflow-hidden border-2 transition-all"
-                  style={{ borderColor: i === active ? "var(--sage)" : "transparent", opacity: i === active ? 1 : 0.7 }}
-                >
-                  <img src={g} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-      )}
-
-      {/* ── Body ── */}
-      <section className="py-12 md:py-16 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
-            <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <Link to={`/${item.section}?category=${item.category}`} className="hover:opacity-70 transition-opacity">{item.tag}</Link>
-          </nav>
-
-          <div className="grid lg:grid-cols-[1fr_360px] gap-10 lg:gap-14">
-            {/* Main column */}
-            <div>
-              <span className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>
-                {item.tag}
-              </span>
-              <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-6 leading-tight" style={{ color: "#000000" }}>
-                {item.name}
-              </h1>
-              {item.hideDescription ? null : item.paragraphs ? (
-                <div className="flex flex-col gap-5">
-                  {item.paragraphs.map((p, i) => (
-                    <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
-                  ))}
-                </div>
-              ) : (
-                <>
-                  <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
-                    {item.description}
-                  </p>
-                  {item.description2 && (
-                    <p className="text-base leading-relaxed mt-5" style={{ color: "#000000" }}>
-                      {item.description2}
-                    </p>
-                  )}
-                </>
-              )}
-
-              {/* Website CTA — shown in main column so it's visible on all screen sizes */}
-              {item.website && !item.hideWeb && (
-                <div className="mt-8">
-                  <a
-                    href={`https://${item.website.replace(/^https?:\/\//, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-semibold text-white transition-colors"
-                    style={{ backgroundColor: "var(--forest)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
-                  >
-                    Visit Website ↗
-                  </a>
-                </div>
-              )}
-            </div>
-
-            {/* Info sidebar */}
-            <aside className="lg:sticky lg:top-28 self-start">
-              <div className="bg-white rounded-3xl p-7 flex flex-col gap-6" style={{ boxShadow: "0 10px 40px -20px rgba(28,46,56,0.3)" }}>
-                {/* Opening hours */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
-                  <ul className="flex flex-col gap-1.5">
-                    {item.hours.map((h) => (
-                      <li key={h.day} className="flex justify-between text-sm">
-                        <span style={{ color: "#000000" }}>{h.day}</span>
-                        <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="h-px" style={{ backgroundColor: "rgba(28,46,56,0.1)" }} />
-
-                {/* Location & contact */}
-                <div>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
-                  <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{item.address}</p>
-                  {item.phone && item.phone !== "—" && (
-                    <p className="text-sm" style={{ color: "#000000" }}>
-                      <span className="font-semibold" style={{ color: "#000000" }}>Tel:</span> {item.phone}
-                    </p>
-                  )}
-                  {item.email && !item.freePlan && (
-                    <p className="text-sm" style={{ color: "#000000" }}>
-                      <span className="font-semibold" style={{ color: "#000000" }}>Email:</span> {item.email}
-                    </p>
-                  )}
-                  {item.website && !item.hideWeb && (
-                    <p className="text-sm" style={{ color: "#000000" }}>
-                      <span className="font-semibold" style={{ color: "#000000" }}>Web:</span>{" "}
-                      <a
-                        href={`https://${item.website.replace(/^https?:\/\//, "")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:opacity-70 transition-opacity"
-                        style={{ color: "var(--leaf)" }}
-                      >
-                        {item.website}
-                      </a>
-                    </p>
-                  )}
-                </div>
-
-                {/* Social icons — above the actions */}
-                {!item.freePlan && (
-                <div className="flex items-center gap-2.5">
-                  {socialItems.map((sl) => (
-                    <a
-                      key={sl.icon}
-                      href={sl.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={sl.label}
-                      title={sl.label}
-                      className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                      style={{ backgroundColor: "var(--mint)", color: "#000000" }}
-                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
-                    >
-                      <ShareIcon name={sl.icon} />
-                    </a>
-                  ))}
-                </div>
-                )}
-
-                {/* Actions */}
-                {item.website && !item.hideWeb && (
-                <a
-                  href={`https://${item.website.replace(/^https?:\/\//, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-center py-3 rounded-full font-semibold text-white transition-colors"
-                  style={{ backgroundColor: "var(--forest)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
-                >
-                  Visit Website ↗
-                </a>
-                )}
-
-                {!item.freePlan && (
-                <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-center py-3 rounded-full font-semibold transition-colors"
-                  style={{ border: "1.5px solid var(--forest)", color: "#000000" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--forest)"; }}
-                >
-                  Get Directions
-                </a>
-                )}
-
-                <Link to="/get-the-app" className="block text-center py-3 rounded-full font-semibold transition-colors" style={{ border: "1.5px solid var(--forest)", color: "#000000" }}>
-                  Get the App
-                </Link>
-
-                {/* Share button */}
-                {!item.freePlan && (
-                <button
-                  onClick={() => setShareOpen(true)}
-                  className="flex items-center justify-center gap-2 w-full py-3 rounded-full font-semibold transition-colors border"
-                  style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                  </svg>
-                  Share
-                </button>
-                )}
-              </div>
-            </aside>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ── Location map ── */}
-      {!item.freePlan && (
-        <section className="pb-16 px-6 md:px-12">
-          <div className="max-w-6xl mx-auto">
-            <LocationMap heading="Location" note={item.address} query={mapQuery} lat={item.lat} lng={item.lng} />
-          </div>
-        </section>
-      )}
-
-      {/* ── Per-business News & Offers (unique to this place) ── */}
-      {/* Free-plan listings don't include news & offers */}
-      {!item.freePlan && <NewsOffers item={item} />}
-
-      {/* ── Share modal ── */}
-      {shareOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
-          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
-          onClick={() => setShareOpen(false)}
-        >
-          <div
-            className="w-full sm:max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 pb-10 sm:pb-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xl font-bold" style={{ color: "#000000" }}>Share</h3>
-              <button
-                onClick={() => setShareOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm font-bold"
-                style={{ backgroundColor: "var(--forest)" }}
-              >✕</button>
-            </div>
-
-            {/* Copy link */}
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                });
-              }}
-              className="w-full py-3.5 rounded-xl border text-sm font-medium mb-3 transition-colors"
-              style={{ borderColor: "rgba(28,46,56,0.15)", color: copied ? "var(--leaf)" : "var(--forest)" }}
-            >
-              {copied ? "Copied!" : "Copy link"}
-            </button>
-
-            {/* Share options */}
-            {[
-              { label: "Email", icon: "email", href: `mailto:?subject=${t}&body=${u}` },
-              { label: "WhatsApp", icon: "whatsapp", href: waShare },
-              { label: "Facebook", icon: "facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
-              { label: "X", icon: "x", href: `https://twitter.com/intent/tweet?url=${u}&text=${t}` },
-              { label: "Instagram", icon: "instagram", href: "https://www.instagram.com/" },
-            ].map((opt) => (
-              <a
-                key={opt.label}
-                href={opt.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 w-full py-3.5 px-1 border-t text-sm font-medium"
-                style={{ borderColor: "rgba(28,46,56,0.1)", color: "#000000" }}
-                onClick={() => setShareOpen(false)}
-              >
-                <span className="w-6 flex justify-center" style={{ color: "var(--leaf)" }}>
-                  <ShareIcon name={opt.icon} />
-                </span>
-                {opt.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Related ── */}
-      {related.length > 0 && (
-        <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>You might also like</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {related.map((it) => (
-                <Link
-                  key={it.slug}
-                  to={`/${it.section}/place/${it.slug}`}
-                  className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-                  style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden" style={it.logo ? { backgroundColor: "var(--mint)" } : undefined}>
-                    {it.logo ? (
-                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-10 transition-transform duration-500 group-hover:scale-105" />
-                    ) : (
-                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-2 p-6">
-                    <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{it.tag}</span>
-                    <h3 className="font-bold text-xl leading-snug" style={{ color: "#000000" }}>{it.name}</h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-    </div>
+    <PlaceDetailLayout
+      breadcrumbs={[
+        { label: "Home", to: "/" },
+        { label: sec.label, to: sec.path },
+        { label: item.tag, to: `/${item.section}?category=${item.category}` },
+      ]}
+      categoryLabel={item.tag}
+      title={item.name}
+      heroImage={heroImage}
+      extraImages={extraImages}
+      description={description}
+      hours={item.hours}
+      address={item.address}
+      phone={item.phone}
+      email={!item.freePlan ? item.email : null}
+      website={!item.hideWeb ? item.website : null}
+      social={!item.freePlan ? buildSocial(item) : null}
+      directionsQuery={!item.freePlan ? mapQuery : null}
+      shareTitle={`${item.name} — Maidenhead`}
+      relatedHeading="You might also like"
+      related={related.map((it) => ({
+        slug: it.slug,
+        to: `/${it.section}/place/${it.slug}`,
+        image: it.image,
+        logo: it.logo,
+        category: it.tag,
+        name: it.name,
+      }))}
+      afterMap={!item.freePlan && <NewsOffers item={item} />}
+    />
   );
 }
