@@ -201,20 +201,25 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
           {/* Category strip — the single flexible element, so the bar always
               stays one line no matter how long the labels are. */}
           <div className="relative flex-1 min-w-0 flex items-center flex-nowrap overflow-hidden">
-            {visible.map((c) => (
-              <div key={c.value} className="flex items-center shrink-0">
-                <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
-                <Link
-                  to={`${basePath}?category=${c.value}`}
-                  replace
-                  className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 text-sm font-medium whitespace-nowrap transition-opacity hover:opacity-70"
-                  style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}
-                >
-                  <Icon name={CATEGORY_ICON[c.value]} color="var(--leaf)" />
-                  {c.label}
-                </Link>
-              </div>
-            ))}
+            {visible.map((c) => {
+              const active = activeCategory === c.value;
+              return (
+                <div key={c.value} className="flex items-center shrink-0">
+                  <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
+                  <Link
+                    to={`${basePath}?category=${c.value}`}
+                    replace
+                    className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors hover:opacity-70"
+                    style={active
+                      ? { backgroundColor: "var(--forest)", color: "#fff" }
+                      : { backgroundColor: "transparent", color: "#000000" }}
+                  >
+                    <Icon name={CATEGORY_ICON[c.value]} color={active ? "#fff" : "var(--leaf)"} />
+                    {c.label}
+                  </Link>
+                </div>
+              );
+            })}
 
             {/* Hidden gauge: always the full set, used only to measure natural
                 item widths. Never visible and never hit-testable. */}
@@ -255,19 +260,24 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
                     className="absolute right-0 top-full mt-3 z-20 w-64 bg-white rounded-2xl overflow-hidden py-2"
                     style={{ boxShadow: "0 20px 48px -16px rgba(28,46,56,0.35)" }}
                   >
-                    {overflow.map((c) => (
-                      <Link
-                        key={c.value}
-                        to={`${basePath}?category=${c.value}`}
-                        replace
-                        onClick={() => setDesktopMoreOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:opacity-70"
-                        style={{ color: activeCategory === c.value ? "var(--leaf)" : "#000000" }}
-                      >
-                        <Icon name={CATEGORY_ICON[c.value]} color="var(--leaf)" />
-                        {c.label}
-                      </Link>
-                    ))}
+                    {overflow.map((c) => {
+                      const active = activeCategory === c.value;
+                      return (
+                        <Link
+                          key={c.value}
+                          to={`${basePath}?category=${c.value}`}
+                          replace
+                          onClick={() => setDesktopMoreOpen(false)}
+                          className="flex items-center gap-3 mx-2 my-0.5 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors hover:opacity-70"
+                          style={active
+                            ? { backgroundColor: "var(--forest)", color: "#fff" }
+                            : { backgroundColor: "transparent", color: "#000000" }}
+                        >
+                          <Icon name={CATEGORY_ICON[c.value]} color={active ? "#fff" : "var(--leaf)"} />
+                          {c.label}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </>
               )}
