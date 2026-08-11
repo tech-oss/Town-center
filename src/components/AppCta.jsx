@@ -27,7 +27,7 @@ export default function AppCta() {
             </p>
           </div>
           <div className="shrink-0 w-full md:w-auto">
-            <AppBadges className="flex-col sm:flex-row w-full md:w-auto" />
+            <AppBadges className="flex-col w-full md:w-auto" />
           </div>
         </div>
       </div>
