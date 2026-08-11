@@ -422,3 +422,10 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
 .location-tile-popup .leaflet-popup-tip {
   box-shadow: 0 4px 10px -6px rgba(28, 46, 56, 0.4);
 }
+
+/* Homepage app-CTA title — stays on one line from tablet width up. */
+@media (min-width: 768px) {
+  .app-cta-title {
+    white-space: nowrap;
+  }
+}

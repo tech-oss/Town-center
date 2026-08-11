@@ -13,11 +13,11 @@ export default function AppCta() {
           style={{ background: "radial-gradient(ellipse 60% 80% at 90% 20%, rgba(82,199,182,0.28) 0%, transparent 70%)" }}
         />
         <div className="relative flex flex-col md:flex-row md:items-center gap-8 md:justify-between">
-          <div className="max-w-xl">
+          <div className="max-w-xl md:max-w-none md:flex-1">
             <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>
               Maidenhead in your pocket
             </p>
-            <h2 className="hero-title uppercase text-3xl md:text-4xl text-white mb-4">
+            <h2 className="hero-title app-cta-title uppercase text-3xl md:text-4xl lg:text-5xl text-white mb-4">
               The Maidenhead App
             </h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#ffffff" }}>
