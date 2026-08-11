@@ -18,11 +18,11 @@ export default function AppCta() {
               Maidenhead in your pocket
             </p>
             <h2 className="hero-title uppercase text-3xl md:text-4xl text-white mb-4">
-              Take the whole town with you
+              The Maidenhead App
             </h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#ffffff" }}>
               Discover what's on, find exclusive offers, get updates straight to your phone, explore the town
-              and keep your favourite places close — all in one app. Download the Maidenhead app and never
+              and keep your favourite places close — all in one app. Download "The Maidenhead App" and never
               miss a thing.
             </p>
           </div>
