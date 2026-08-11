@@ -180,7 +180,7 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
           divider-separated category links, then "More". Strictly single-line:
           the category strip is the only flexible part, so "More" can never
           wrap onto a second row. ── */}
-      <div className="hidden sm:flex items-center gap-4">
+      <div className="hidden sm:flex sm:flex-col gap-4">
         <div
           ref={barRef}
           className="flex-1 min-w-0 flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
@@ -285,7 +285,7 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
           )}
         </div>
 
-        {extra && <div className="shrink-0">{extra}</div>}
+        {extra && <div className="shrink-0 self-end">{extra}</div>}
       </div>
 
       {/* ── Mobile: "Browse Categories" button opening a bottom sheet ── */}
