@@ -6,7 +6,7 @@ import { getEventBySlug, getEvents, getBusinessBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
-import PlaceDetailLayout, { CalendarIcon, PinIcon, TicketIcon } from "./PlaceDetailLayout";
+import PlaceDetailLayout, { CalendarIcon, TicketIcon } from "./PlaceDetailLayout";
 
 // What's On events carry their own category system (Music, Family, Market,
 // Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
@@ -88,9 +88,11 @@ export default function EventPage() {
   const categorySlug = business?.category ?? EVENT_CATEGORY_MAP[rawEvent?.category] ?? "community";
   const categoryLabel = categoryTitles[categorySlug] ?? event.category;
 
+  // Location isn't included here — it already renders in the info card's
+  // Find Us column via the `address` prop below, so repeating it as a Pin
+  // row here would just duplicate it.
   const metaRows = [
     event.date && { icon: <CalendarIcon />, text: event.date + (event.time ? ` · ${event.time}` : "") },
-    !event.isBusiness && event.location && { icon: <PinIcon />, text: event.location },
     event.tickets && { icon: <TicketIcon />, text: event.tickets },
   ].filter(Boolean);
 

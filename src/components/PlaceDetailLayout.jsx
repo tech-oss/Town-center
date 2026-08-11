@@ -191,17 +191,6 @@ export default function PlaceDetailLayout({
             </span>
           )}
 
-          {metaRows.length > 0 && (
-            <div className="flex flex-col gap-3 mb-6">
-              {metaRows.map((row, i) => (
-                <div key={i} className="flex items-center gap-3 text-base" style={{ color: "#000000" }}>
-                  <span style={{ color: "#000000" }}>{row.icon}</span>
-                  <span>{row.text}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
           {remainingDescription?.length > 0 && (
             <div className="flex flex-col gap-5 mb-2 text-center max-w-3xl mx-auto">
               {remainingDescription.map((p, i) => (
@@ -219,7 +208,7 @@ export default function PlaceDetailLayout({
             className="mt-8 rounded-3xl overflow-hidden flex flex-col lg:flex-row lg:items-stretch"
             style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
           >
-              {hours?.length > 0 && (
+              {hours?.length > 0 ? (
                 <div
                   className="px-6 py-7 md:px-8 lg:w-[30%] shrink-0 border-b lg:border-b-0 lg:border-r"
                   style={{ borderColor: "rgba(28,46,56,0.1)" }}
@@ -238,7 +227,25 @@ export default function PlaceDetailLayout({
                     ))}
                   </ul>
                 </div>
-              )}
+              ) : metaRows.length > 0 ? (
+                // Events have no opening hours — date/time, location and
+                // ticket type take this column instead, so every detail page
+                // reads as the same card layout.
+                <div
+                  className="px-6 py-7 md:px-8 lg:w-[30%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  style={{ borderColor: "rgba(28,46,56,0.1)" }}
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>Event Details</h3>
+                  <div className="flex flex-col gap-3">
+                    {metaRows.map((row, i) => (
+                      <div key={i} className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                        <span className="mt-0.5" style={{ color: "var(--leaf)" }}>{row.icon}</span>
+                        <span className="leading-relaxed">{row.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               {(address || (phone && phone !== "—") || email || social?.length > 0) && (
                 <div
@@ -291,11 +298,15 @@ export default function PlaceDetailLayout({
                 </div>
               )}
 
-              {/* Action rail — circular icon buttons with the label beneath,
-                  divider-separated on desktop. */}
+              {/* Action rail — circular icon buttons with the label beneath.
+                  Wraps onto as many rows as needed rather than forcing a
+                  single row, since a fixed-width column plus up to 5 actions
+                  (Website/Booking/Directions/App/Share) won't always fit on
+                  one line — forcing it previously made items spill out of
+                  this column into the one beside it. */}
               <div className="flex-1 min-w-0 px-6 py-7 md:px-8 flex items-center">
-                <div className="w-full grid grid-cols-3 gap-y-6 sm:grid-cols-5 lg:flex lg:items-start lg:justify-center">
-                  {actions.map((a, i) => {
+                <div className="w-full grid grid-cols-3 gap-y-6 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-start lg:content-start lg:gap-x-6 lg:gap-y-6">
+                  {actions.map((a) => {
                     const inner = (
                       <>
                         <span
@@ -307,21 +318,10 @@ export default function PlaceDetailLayout({
                         <span className="text-sm text-center leading-snug" style={{ color: "#000000" }}>{a.label}</span>
                       </>
                     );
-                    const cls = "group flex flex-col items-center gap-2.5 px-2 lg:px-5 transition-opacity hover:opacity-70";
-                    return (
-                      <div key={a.label} className="flex items-start justify-center lg:justify-start">
-                        {i > 0 && (
-                          <span className="hidden lg:block w-px self-stretch min-h-[76px]" style={{ backgroundColor: "rgba(28,46,56,0.1)" }} />
-                        )}
-                        {a.to ? (
-                          <Link to={a.to} className={cls}>{inner}</Link>
-                        ) : a.onClick ? (
-                          <button type="button" onClick={a.onClick} className={cls}>{inner}</button>
-                        ) : (
-                          <a href={a.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
-                        )}
-                      </div>
-                    );
+                    const cls = "group flex flex-col items-center gap-2.5 transition-opacity hover:opacity-70";
+                    if (a.to) return <Link key={a.label} to={a.to} className={cls}>{inner}</Link>;
+                    if (a.onClick) return <button key={a.label} type="button" onClick={a.onClick} className={cls}>{inner}</button>;
+                    return <a key={a.label} href={a.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>;
                   })}
                 </div>
               </div>
