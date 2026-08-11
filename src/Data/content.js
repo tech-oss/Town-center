@@ -20,7 +20,7 @@ export const header = {
   utilityLinks: [
     { label: "Our Story", href: "/about" },
     { label: "Work with Us", href: "/work-with-us" },
-    { label: "Get the App", href: "/get-the-app" },
+    { label: "Get The Maidenhead App", href: "/get-the-app" },
   ],
 };
 
