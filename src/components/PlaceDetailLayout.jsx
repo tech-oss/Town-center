@@ -10,24 +10,46 @@ export function CalendarIcon() {
     </svg>
   );
 }
-export function PinIcon() {
+export function PinIcon({ size = 18 }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
-export function TicketIcon() {
+export function TicketIcon({ size = 18 }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
       <path d="M3 9a2 2 0 002-2V5h14v2a2 2 0 000 4v2a2 2 0 000 4v2H5v-2a2 2 0 00-2-2V9z" /><path d="M9 5v14" strokeDasharray="2 2" />
     </svg>
   );
 }
-export function GlobeIcon() {
+export function GlobeIcon({ size = 18 }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
       <circle cx="12" cy="12" r="10" /><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+    </svg>
+  );
+}
+export function PhoneIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014.1 2h3a2 2 0 012 1.7c.1 1 .4 1.9.7 2.8a2 2 0 01-.5 2.1L8.1 9.9a16 16 0 006 6l1.3-1.3a2 2 0 012.1-.4c.9.3 1.8.6 2.8.7a2 2 0 011.7 2z" />
+    </svg>
+  );
+}
+function MailIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" />
+    </svg>
+  );
+}
+function ShareNodesIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
     </svg>
   );
 }
@@ -86,6 +108,29 @@ export default function PlaceDetailLayout({
   const t = encodeURIComponent(shareTitle || title);
   const waShare = `https://wa.me/?text=${t}%20${u}`;
   const websiteHref = normalizeUrl(website);
+
+  // The info card's action rail. Built as data so the rail can render each
+  // entry identically (circular icon + label) and place dividers between
+  // them, whichever subset of actions this listing actually has.
+  const actions = [
+    websiteHref && {
+      label: "Visit Website",
+      href: websiteHref,
+      icon: <GlobeIcon size={22} />,
+    },
+    extraButtonLabel && {
+      label: extraButtonLabel,
+      href: extraButtonHref || websiteHref || "#",
+      icon: <TicketIcon size={22} />,
+    },
+    directionsQuery && {
+      label: "Get Directions",
+      href: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`,
+      icon: <PinIcon size={22} />,
+    },
+    { label: "Get the App", to: "/get-the-app", icon: <PhoneIcon size={22} /> },
+    { label: "Share", onClick: () => setShareOpen(true), icon: <ShareNodesIcon size={22} /> },
+  ].filter(Boolean);
 
   // Tagline shown under the title above the hero: the first description
   // paragraph, so nothing needs to be authored twice. The remaining
@@ -167,132 +212,117 @@ export default function PlaceDetailLayout({
             </div>
           )}
 
-          {/* ── 3. Opening hours / contact / social, then the action buttons —
-              always rendered so Get the App / Share stay consistent even when
-              an item has no hours/contact/website/directions data.
-              Desktop (sm+): a two-column layout — info on the left, actions
-              stacked as a vertical button rail on the right, filling the
-              space that otherwise sat empty. Mobile stays a single stacked
-              column, unchanged. ── */}
+          {/* ── 3. Info card — opening hours, contact/social and the action
+              rail, as three divider-separated columns on a white card. Stacks
+              vertically on mobile; the action rail wraps to a grid there. ── */}
           <div
-            className="mt-8 p-6 sm:p-8 md:p-10 rounded-3xl flex flex-col gap-6 sm:grid sm:grid-cols-[1.3fr_1fr] sm:gap-x-12 sm:items-center"
-            style={{ backgroundColor: "var(--sand)" }}
+            className="mt-8 rounded-3xl overflow-hidden flex flex-col lg:flex-row lg:items-stretch"
+            style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
           >
-              <div className="flex flex-col gap-6">
-                {hours?.length > 0 && (
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
-                    <ul className="flex flex-col gap-1.5 max-w-sm">
-                      {hours.map((h) => (
-                        <li key={h.day} className="flex justify-between text-sm">
-                          <span style={{ color: "#000000" }}>{h.day}</span>
-                          <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              {hours?.length > 0 && (
+                <div
+                  className="px-6 py-7 md:px-8 lg:w-[30%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  style={{ borderColor: "rgba(28,46,56,0.1)" }}
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
+                  <ul className="flex flex-col">
+                    {hours.map((h, i) => (
+                      <li
+                        key={h.day}
+                        className="flex justify-between gap-4 text-sm py-2.5"
+                        style={i < hours.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.08)" } : undefined}
+                      >
+                        <span style={{ color: "#000000" }}>{h.day}</span>
+                        <span className="font-semibold whitespace-nowrap" style={{ color: "#000000" }}>{h.time}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-                {(address || (phone && phone !== "—") || email) && (
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Find Us</h3>
-                    {address && <p className="text-sm leading-relaxed mb-2" style={{ color: "#000000" }}>{address}</p>}
+              {(address || (phone && phone !== "—") || email || social?.length > 0) && (
+                <div
+                  className="px-6 py-7 md:px-8 lg:w-[32%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  style={{ borderColor: "rgba(28,46,56,0.1)" }}
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>Find Us</h3>
+
+                  <div className="flex flex-col gap-3">
+                    {address && (
+                      <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                        <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PinIcon /></span>
+                        <span className="leading-relaxed">{address}</span>
+                      </div>
+                    )}
                     {phone && phone !== "—" && (
-                      <p className="text-sm" style={{ color: "#000000" }}>
-                        <span className="font-semibold">Tel:</span>{" "}
-                        <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline">{phone}</a>
-                      </p>
+                      <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                        <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PhoneIcon /></span>
+                        <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline break-all">{phone}</a>
+                      </div>
                     )}
                     {email && (
-                      <p className="text-sm" style={{ color: "#000000" }}>
-                        <span className="font-semibold">Email:</span>{" "}
-                        <a href={`mailto:${email}`} className="hover:underline">{email}</a>
-                      </p>
+                      <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                        <span className="mt-0.5" style={{ color: "var(--leaf)" }}><MailIcon /></span>
+                        <a href={`mailto:${email}`} className="hover:underline break-all">{email}</a>
+                      </div>
                     )}
                   </div>
-                )}
 
-                {social?.length > 0 && (
-                  <div className="flex items-center gap-2.5">
-                    {social.map((sl) => (
-                      <a
-                        key={sl.icon}
-                        href={sl.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={sl.label}
-                        title={sl.label}
-                        className="w-9 h-9 rounded-full flex items-center justify-center transition-colors"
-                        style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--leaf)"; e.currentTarget.style.color = "#fff"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--mint)"; e.currentTarget.style.color = "var(--forest)"; }}
-                      >
-                        <ShareIcon name={sl.icon} />
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
+                  {social?.length > 0 && (
+                    <div className="flex items-center gap-3 mt-5">
+                      {social.map((sl) => (
+                        <a
+                          key={sl.icon}
+                          href={sl.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={sl.label}
+                          title={sl.label}
+                          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                          style={{ border: "1.5px solid var(--mint)", color: "var(--leaf)" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--sage)"; e.currentTarget.style.borderColor = "var(--sage)"; e.currentTarget.style.color = "#fff"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.borderColor = "var(--mint)"; e.currentTarget.style.color = "var(--leaf)"; }}
+                        >
+                          <ShareIcon name={sl.icon} />
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
-              <div className="flex flex-col gap-3 sm:border-l sm:pl-10" style={{ borderColor: "rgba(28,46,56,0.12)" }}>
-                {websiteHref && (
-                  <a
-                    href={websiteHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full"
-                    style={{ backgroundColor: "var(--forest)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--forest)")}
-                  >
-                    <GlobeIcon /> Visit Website
-                  </a>
-                )}
-                {extraButtonLabel && (
-                  <a
-                    href={extraButtonHref || websiteHref || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-white transition-colors w-full"
-                    style={{ backgroundColor: "var(--sage)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
-                  >
-                    <TicketIcon /> {extraButtonLabel}
-                  </a>
-                )}
-                {directionsQuery && (
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors w-full"
-                    style={{ border: "2px solid var(--forest)", color: "#000000" }}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--forest)"; e.currentTarget.style.color = "#fff"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "#000000"; }}
-                  >
-                    <PinIcon /> Get Directions
-                  </a>
-                )}
-                <div className="flex gap-3 w-full">
-                  <Link
-                    to="/get-the-app"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors flex-1"
-                    style={{ border: "2px solid var(--forest)", color: "#000000" }}
-                  >
-                    Get the App
-                  </Link>
-                  <button
-                    onClick={() => setShareOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold transition-colors border flex-1"
-                    style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-                      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                    </svg>
-                    Share
-                  </button>
+              {/* Action rail — circular icon buttons with the label beneath,
+                  divider-separated on desktop. */}
+              <div className="flex-1 min-w-0 px-6 py-7 md:px-8 flex items-center">
+                <div className="w-full grid grid-cols-3 gap-y-6 sm:grid-cols-5 lg:flex lg:items-start lg:justify-center">
+                  {actions.map((a, i) => {
+                    const inner = (
+                      <>
+                        <span
+                          className="w-14 h-14 rounded-full flex items-center justify-center transition-colors"
+                          style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
+                        >
+                          {a.icon}
+                        </span>
+                        <span className="text-sm text-center leading-snug" style={{ color: "#000000" }}>{a.label}</span>
+                      </>
+                    );
+                    const cls = "group flex flex-col items-center gap-2.5 px-2 lg:px-5 transition-opacity hover:opacity-70";
+                    return (
+                      <div key={a.label} className="flex items-start justify-center lg:justify-start">
+                        {i > 0 && (
+                          <span className="hidden lg:block w-px self-stretch min-h-[76px]" style={{ backgroundColor: "rgba(28,46,56,0.1)" }} />
+                        )}
+                        {a.to ? (
+                          <Link to={a.to} className={cls}>{inner}</Link>
+                        ) : a.onClick ? (
+                          <button type="button" onClick={a.onClick} className={cls}>{inner}</button>
+                        ) : (
+                          <a href={a.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
