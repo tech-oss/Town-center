@@ -74,7 +74,7 @@ export default function FeatureBlocks() {
   const features = (allFeatures ?? []).filter((f) => f.homepage);
 
   return (
-    <section className="py-24 px-6 md:px-12 bg-white">
+    <section className="py-14 md:py-16 px-6 md:px-12 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="mb-14 md:mb-16">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">

@@ -93,7 +93,7 @@ export default function BlogCards() {
 
   return (
     <section
-      className="relative py-24 px-6 md:px-12"
+      className="relative py-14 md:py-16 px-6 md:px-12"
       style={{ backgroundColor: "#ffffff" }}
     >
       <div className="relative max-w-6xl mx-auto">

@@ -656,7 +656,7 @@ export default function TradersMap() {
 
   return (
     <section
-      className="py-20 md:py-24 overflow-hidden"
+      className="py-14 md:py-16 overflow-hidden"
       style={{ background: "#ffffff" }}
     >
       {/* ── Heading ── */}

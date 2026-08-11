@@ -13,7 +13,7 @@ export default function Newsletter() {
   return (
     <section
       id="newsletter"
-      className="py-24 px-6 md:px-12"
+      className="py-14 md:py-16 px-6 md:px-12"
       style={{ backgroundColor: "#ffffff" }}
     >
       <div className="max-w-2xl mx-auto text-center">

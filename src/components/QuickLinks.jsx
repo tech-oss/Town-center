@@ -4,7 +4,7 @@ import SmartLink from "./SmartLink";
 export default function QuickLinks() {
   return (
     <section
-      className="py-16 md:py-24 px-6 md:px-12"
+      className="py-14 md:py-16 px-6 md:px-12"
       style={{ backgroundColor: "#ffffff" }}
     >
       <div className="max-w-6xl mx-auto">

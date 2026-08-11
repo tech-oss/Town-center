@@ -149,7 +149,7 @@ export default function InstagramFeed() {
   const [openIndex, setOpenIndex] = useState(null);
 
   return (
-    <section className="py-20 md:py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
+    <section className="py-14 md:py-16 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 md:mb-14">
           <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
