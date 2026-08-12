@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
@@ -54,6 +55,10 @@ export default function CategoryPage() {
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || undefined;
   const sec = sections[section];
+  const [search, setSearch] = useState("");
+  // Clear a typed search when the user switches to a different listing
+  // section, so it doesn't silently keep filtering the new page's items.
+  useEffect(() => setSearch(""), [section]);
 
   // `sections` provides the page config (hero, columns, chips); the listed
   // items come from the businesses resource, events from the events resource.
@@ -79,6 +84,13 @@ export default function CategoryPage() {
     const allSeeDo = [...eventCards, ...activities];
     items = category ? allSeeDo.filter((i) => i.category === category) : allSeeDo;
   }
+
+  // Search-by-name, applied on top of whichever category is active.
+  const trimmedSearch = search.trim().toLowerCase();
+  if (trimmedSearch) {
+    items = items.filter((i) => i.name.toLowerCase().includes(trimmedSearch));
+  }
+
   const isCategory = Boolean(category);
   const title = isCategory ? categoryTitles[category] ?? sec.label : sec.landing.title;
   // The intro line stays the section's landing copy regardless of which
@@ -159,6 +171,8 @@ export default function CategoryPage() {
             basePath={sec.path}
             activeCategory={category}
             categories={categories}
+            search={search}
+            onSearchChange={setSearch}
             extra={section === "see-do" && (
               <Link
                 to="/whats-on"
@@ -243,7 +257,9 @@ export default function CategoryPage() {
             </div>
           ) : (
             <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>
-              Nothing listed here just yet — check back soon.
+              {trimmedSearch
+                ? `No results for "${search.trim()}" — try a different name.`
+                : "Nothing listed here just yet — check back soon."}
             </p>
           )}
         </div>

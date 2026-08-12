@@ -92,7 +92,7 @@ const MORE_WIDTH = 110;
 // the category strip can use.
 const BAR_PADDING = 14;
 
-export default function CategoryFilterBar({ basePath, categories, activeCategory, extra }) {
+export default function CategoryFilterBar({ basePath, categories, activeCategory, extra, search = "", onSearchChange }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopMoreOpen, setDesktopMoreOpen] = useState(false);
 
@@ -178,10 +178,13 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
   return (
     <div className="mb-10">
       {/* ── Desktop: one white pill-shaped bar — "All Categories" chip, then
-          divider-separated category links, then "More". Strictly single-line:
-          the category strip is the only flexible part, so "More" can never
-          wrap onto a second row. ── */}
+          divider-separated category links, then "More" — with a search-by-
+          name field alongside it, on the same row so it reads as part of
+          the same filter control rather than a separate, disconnected
+          element. Strictly single-line: the category strip is the only
+          flexible part, so "More" can never wrap onto a second row. ── */}
       <div className="hidden sm:flex sm:flex-col gap-4">
+        <div className="flex items-center gap-3 lg:gap-4">
         <div
           ref={barRef}
           className="flex-1 min-w-0 flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
@@ -289,6 +292,9 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
           )}
         </div>
 
+        <SearchInput value={search} onChange={onSearchChange} className="w-56 lg:w-64 shrink-0" />
+        </div>
+
         {extra && <div className="shrink-0 self-end">{extra}</div>}
       </div>
 
@@ -305,8 +311,9 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
             <line x1="4" y1="17" x2="20" y2="17" /><circle cx="9" cy="17" r="2" fill="#fff" stroke="none" />
           </svg>
         </button>
-        {extra}
+        <SearchInput value={search} onChange={onSearchChange} className="flex-1 min-w-0" />
       </div>
+      {extra && <div className="flex sm:hidden justify-end mt-3">{extra}</div>}
 
       {mobileOpen && (
         <div
@@ -358,6 +365,40 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
             ))}
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+// Search-by-name field — a pill matching the category bar's own visual
+// weight (white, rounded-full, same soft shadow) so it reads as part of
+// the same filter control rather than a bolted-on extra. Shared between
+// the mobile and desktop layouts.
+function SearchInput({ value, onChange, className = "" }) {
+  return (
+    <div className={`relative ${className}`}>
+      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "rgba(28,46,56,0.4)" }}>
+        <Icon name="search" />
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search by name"
+        aria-label="Search by name"
+        className="w-full pl-11 pr-9 py-2.5 sm:py-3 rounded-full text-sm bg-white focus:outline-none"
+        style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)", color: "#000000" }}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          aria-label="Clear search"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+          style={{ backgroundColor: "rgba(28,46,56,0.08)", color: "#000000" }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
       )}
     </div>
   );
