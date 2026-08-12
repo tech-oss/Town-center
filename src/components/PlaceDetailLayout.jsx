@@ -205,7 +205,7 @@ export default function PlaceDetailLayout({
               rail, as three divider-separated columns on a white card. Stacks
               vertically on mobile; the action rail wraps to a grid there. ── */}
           <div
-            className="mt-8 rounded-3xl overflow-hidden flex flex-col lg:flex-row lg:items-stretch"
+            className="mt-8 rounded-3xl overflow-hidden flex flex-col lg:flex-row lg:items-stretch transition-transform duration-300 ease-out hover:scale-[1.015]"
             style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
           >
               {hours?.length > 0 ? (
@@ -336,7 +336,12 @@ export default function PlaceDetailLayout({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
               {extraImages.slice(0, 6).map((src, i) => (
                 <div key={i} className="aspect-[25/24] overflow-hidden">
-                  <img src={src} alt={`${title} ${i + 2}`} loading="lazy" className="w-full h-full object-cover" />
+                  <img
+                    src={src}
+                    alt={`${title} ${i + 2}`}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110"
+                  />
                 </div>
               ))}
             </div>
