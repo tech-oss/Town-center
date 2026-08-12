@@ -218,11 +218,11 @@ export default function PlaceDetailLayout({
                     {hours.map((h, i) => (
                       <li
                         key={h.day}
-                        className="flex justify-between gap-4 text-sm py-2.5"
+                        className="text-sm py-2.5"
                         style={i < hours.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.08)" } : undefined}
                       >
-                        <span style={{ color: "#000000" }}>{h.day}</span>
-                        <span className="font-semibold whitespace-nowrap" style={{ color: "#000000" }}>{h.time}</span>
+                        <div style={{ color: "#000000" }}>{h.day}</div>
+                        <div className="font-semibold mt-0.5" style={{ color: "#000000" }}>{h.time}</div>
                       </li>
                     ))}
                   </ul>
