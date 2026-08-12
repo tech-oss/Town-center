@@ -1,6 +1,79 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LocationMap from "./LocationMap";
+
+// ── Gallery lightbox — full-screen image with prev/next arrows, a counter,
+// and keyboard/backdrop-click dismissal. Shared by every detail page's
+// photo grid. ──
+function GalleryLightbox({ images, index, onClose, onStep }) {
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") onStep(-1);
+      if (e.key === "ArrowRight") onStep(1);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose, onStep]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center p-4 md:p-8"
+      style={{ backgroundColor: "rgba(0,0,0,0.9)" }}
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute top-4 right-4 md:top-6 md:right-6 text-white hover:opacity-70 transition-opacity z-10 cursor-pointer"
+        style={{ fontSize: 26, lineHeight: 1 }}
+      >
+        ✕
+      </button>
+
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={(e) => { e.stopPropagation(); onStep(-1); }}
+            aria-label="Previous photo"
+            className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full items-center justify-center text-white transition-colors hover:bg-white/10 cursor-pointer"
+            style={{ fontSize: 22 }}
+          >
+            ‹
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); onStep(1); }}
+            aria-label="Next photo"
+            className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full items-center justify-center text-white transition-colors hover:bg-white/10 cursor-pointer"
+            style={{ fontSize: 22 }}
+          >
+            ›
+          </button>
+        </>
+      )}
+
+      <img
+        src={images[index]}
+        alt=""
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-full max-h-full object-contain"
+      />
+
+      {images.length > 1 && (
+        <div
+          className="absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 text-white text-sm"
+          style={{ textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}
+        >
+          {index + 1} / {images.length}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ── Shared icon set — used across the meta rows, contact block and share UI ──
 export function CalendarIcon() {
@@ -102,6 +175,8 @@ export default function PlaceDetailLayout({
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(null);
+  const galleryImages = extraImages.slice(0, 6);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const u = encodeURIComponent(shareUrl);
@@ -316,7 +391,7 @@ export default function PlaceDetailLayout({
                         <span className="text-sm lg:text-xs text-center leading-snug" style={{ color: "#000000" }}>{a.label}</span>
                       </>
                     );
-                    const cls = "group flex flex-col items-center gap-2.5 lg:gap-2 transition-opacity hover:opacity-70";
+                    const cls = "group flex flex-col items-center gap-2.5 lg:gap-2 transition-opacity hover:opacity-70 cursor-pointer";
                     if (a.to) return <Link key={a.label} to={a.to} className={cls}>{inner}</Link>;
                     if (a.onClick) return <button key={a.label} type="button" onClick={a.onClick} className={cls}>{inner}</button>;
                     return <a key={a.label} href={a.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>;
@@ -334,15 +409,21 @@ export default function PlaceDetailLayout({
         <section className="py-12 md:py-16 px-6 md:px-12">
           <div className="w-[90%] sm:w-full sm:max-w-4xl mx-auto">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
-              {extraImages.slice(0, 6).map((src, i) => (
-                <div key={i} className="aspect-[25/24] overflow-hidden">
+              {galleryImages.map((src, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setGalleryIndex(i)}
+                  aria-label={`Enlarge photo ${i + 2}`}
+                  className="aspect-[25/24] overflow-hidden cursor-pointer"
+                >
                   <img
                     src={src}
                     alt={`${title} ${i + 2}`}
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110"
                   />
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -459,6 +540,15 @@ export default function PlaceDetailLayout({
             ))}
           </div>
         </div>
+      )}
+
+      {galleryIndex !== null && (
+        <GalleryLightbox
+          images={galleryImages}
+          index={galleryIndex}
+          onClose={() => setGalleryIndex(null)}
+          onStep={(delta) => setGalleryIndex((i) => (i + delta + galleryImages.length) % galleryImages.length)}
+        />
       )}
     </div>
   );
