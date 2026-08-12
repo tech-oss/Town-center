@@ -88,6 +88,18 @@ html {
   letter-spacing: -0.02em;
 }
 
+/* iOS Safari treats the whole document as horizontally rubber-band-scrollable
+   the moment any descendant, anywhere on the page, is even a fraction of a
+   pixel wider than the viewport — arbitrary-width utilities (w-[90%] etc.),
+   negative margins and absolutely-positioned elements make that easy to hit
+   by accident. Pin both axes here as a hard guard so a single stray element
+   can never drag the whole page sideways; content itself still lays out
+   normally since nothing inside relies on the body actually scrolling. */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* ─── Typography hierarchy (Fraunces serif display / Switzer sans UI) ────────
    Modelled on the reference system: dramatic editorial moments — hero titles,
    major page headings, featured section titles — set in a light high-contrast
