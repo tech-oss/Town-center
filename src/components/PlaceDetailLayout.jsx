@@ -392,7 +392,7 @@ export default function PlaceDetailLayout({
                           className="w-14 h-14 lg:w-11 lg:h-11 rounded-full flex items-center justify-center transition-colors"
                           style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
                         >
-                          {a.icon}
+                          <span className="flex items-center justify-center lg:scale-125">{a.icon}</span>
                         </span>
                         <span className="text-sm lg:text-xs text-center leading-snug" style={{ color: "#000000" }}>{a.label}</span>
                       </>
