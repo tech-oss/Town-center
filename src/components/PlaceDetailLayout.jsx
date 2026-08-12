@@ -205,7 +205,7 @@ export default function PlaceDetailLayout({
               rail, as three divider-separated columns on a white card. Stacks
               vertically on mobile; the action rail wraps to a grid there. ── */}
           <div
-            className="mt-8 rounded-3xl overflow-hidden flex flex-col lg:flex-row lg:items-stretch transition-transform duration-300 ease-out hover:scale-[1.015]"
+            className="mt-8 overflow-hidden flex flex-col lg:flex-row lg:items-stretch transition-transform duration-300 ease-out hover:scale-[1.015]"
             style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
           >
               {hours?.length > 0 ? (
