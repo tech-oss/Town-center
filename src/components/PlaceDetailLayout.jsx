@@ -210,7 +210,7 @@ export default function PlaceDetailLayout({
           >
               {hours?.length > 0 ? (
                 <div
-                  className="px-6 py-7 md:px-8 lg:w-[30%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  className="px-6 py-7 md:px-8 lg:w-[26%] shrink-0 border-b lg:border-b-0 lg:border-r"
                   style={{ borderColor: "rgba(28,46,56,0.1)" }}
                 >
                   <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
@@ -232,7 +232,7 @@ export default function PlaceDetailLayout({
                 // ticket type take this column instead, so every detail page
                 // reads as the same card layout.
                 <div
-                  className="px-6 py-7 md:px-8 lg:w-[30%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  className="px-6 py-7 md:px-8 lg:w-[26%] shrink-0 border-b lg:border-b-0 lg:border-r"
                   style={{ borderColor: "rgba(28,46,56,0.1)" }}
                 >
                   <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>Event Details</h3>
@@ -249,7 +249,7 @@ export default function PlaceDetailLayout({
 
               {(address || (phone && phone !== "—") || email || social?.length > 0) && (
                 <div
-                  className="px-6 py-7 md:px-8 lg:w-[32%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  className="px-6 py-7 md:px-8 lg:w-[28%] shrink-0 border-b lg:border-b-0 lg:border-r"
                   style={{ borderColor: "rgba(28,46,56,0.1)" }}
                 >
                   <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>Find Us</h3>
@@ -299,26 +299,24 @@ export default function PlaceDetailLayout({
               )}
 
               {/* Action rail — circular icon buttons with the label beneath.
-                  Wraps onto as many rows as needed rather than forcing a
-                  single row, since a fixed-width column plus up to 5 actions
-                  (Website/Booking/Directions/App/Share) won't always fit on
-                  one line — forcing it previously made items spill out of
-                  this column into the one beside it. */}
+                  On desktop the column is wide enough (post +8% from the
+                  other two columns) for all 3-5 actions to sit smaller and
+                  in a single row; mobile keeps its own grid untouched. */}
               <div className="flex-1 min-w-0 px-6 py-7 md:px-8 flex items-center">
-                <div className="w-full grid grid-cols-3 gap-y-6 sm:grid-cols-5 lg:flex lg:flex-wrap lg:items-start lg:content-start lg:gap-x-6 lg:gap-y-6">
+                <div className="w-full grid grid-cols-3 gap-y-6 sm:grid-cols-5 lg:flex lg:flex-nowrap lg:items-start lg:justify-between lg:gap-x-3">
                   {actions.map((a) => {
                     const inner = (
                       <>
                         <span
-                          className="w-14 h-14 rounded-full flex items-center justify-center transition-colors"
+                          className="w-14 h-14 lg:w-11 lg:h-11 rounded-full flex items-center justify-center transition-colors"
                           style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
                         >
                           {a.icon}
                         </span>
-                        <span className="text-sm text-center leading-snug" style={{ color: "#000000" }}>{a.label}</span>
+                        <span className="text-sm lg:text-xs text-center leading-snug" style={{ color: "#000000" }}>{a.label}</span>
                       </>
                     );
-                    const cls = "group flex flex-col items-center gap-2.5 transition-opacity hover:opacity-70";
+                    const cls = "group flex flex-col items-center gap-2.5 lg:gap-2 transition-opacity hover:opacity-70";
                     if (a.to) return <Link key={a.label} to={a.to} className={cls}>{inner}</Link>;
                     if (a.onClick) return <button key={a.label} type="button" onClick={a.onClick} className={cls}>{inner}</button>;
                     return <a key={a.label} href={a.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>;
