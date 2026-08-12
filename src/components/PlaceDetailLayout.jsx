@@ -203,8 +203,6 @@ export default function PlaceDetailLayout({
       href: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`,
       icon: <PinIcon size={22} />,
     },
-    { label: "Get the App", to: "/get-the-app", icon: <PhoneIcon size={22} /> },
-    { label: "Share", onClick: () => setShareOpen(true), icon: <ShareNodesIcon size={22} /> },
   ].filter(Boolean);
 
   // Tagline shown under the title above the hero: the first description
@@ -350,35 +348,43 @@ export default function PlaceDetailLayout({
                     )}
                   </div>
 
-                  {social?.length > 0 && (
-                    <div className="flex items-center gap-3 mt-5">
-                      {social.map((sl) => (
-                        <a
-                          key={sl.icon}
-                          href={sl.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={sl.label}
-                          title={sl.label}
-                          className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                          style={{ border: "1.5px solid var(--mint)", color: "var(--leaf)" }}
-                          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--sage)"; e.currentTarget.style.borderColor = "var(--sage)"; e.currentTarget.style.color = "#fff"; }}
-                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.borderColor = "var(--mint)"; e.currentTarget.style.color = "var(--leaf)"; }}
-                        >
-                          <ShareIcon name={sl.icon} />
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3 mt-5">
+                    {social?.map((sl) => (
+                      <a
+                        key={sl.icon}
+                        href={sl.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={sl.label}
+                        title={sl.label}
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+                        style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
+                      >
+                        <ShareIcon name={sl.icon} />
+                      </a>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setShareOpen(true)}
+                      aria-label="Share"
+                      title="Share"
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 cursor-pointer"
+                      style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
+                    >
+                      <ShareNodesIcon size={16} />
+                    </button>
+                  </div>
                 </div>
               )}
 
-              {/* Action rail — circular icon buttons with the label beneath.
-                  On desktop the column is wide enough (post +8% from the
-                  other two columns) for all 3-5 actions to sit smaller and
-                  in a single row; mobile keeps its own grid untouched. */}
+              {/* Action rail — circular icon buttons with the label beneath,
+                  for the listing's own actions (Website/Tickets/Directions).
+                  Share moved into the Find Us column next to the social
+                  icons, and Get the App is its own full-width bar below the
+                  card — neither belongs here anymore since they aren't
+                  actions specific to this listing. */}
               <div className="flex-1 min-w-0 px-6 py-7 md:px-8 flex items-center">
-                <div className="w-full grid grid-cols-3 gap-y-6 sm:grid-cols-5 lg:flex lg:flex-nowrap lg:items-start lg:justify-between lg:gap-x-3">
+                <div className="w-full grid grid-cols-3 gap-y-6 lg:flex lg:flex-nowrap lg:items-start lg:justify-start lg:gap-x-6">
                   {actions.map((a) => {
                     const inner = (
                       <>
@@ -400,6 +406,21 @@ export default function PlaceDetailLayout({
               </div>
             </div>
         </div>
+
+        {/* ── Get the App — its own full-width bar rather than a small icon
+            in the action rail, since downloading the app is a site-wide
+            promo rather than an action specific to this listing. Centered
+            content reads clearly as a distinct call to action. ── */}
+        <Link
+          to="/get-the-app"
+          className="mt-4 flex items-center justify-center gap-3 py-4 px-6 rounded-2xl transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "var(--forest)", color: "#fff" }}
+        >
+          <PhoneIcon size={18} />
+          <span className="text-sm font-semibold uppercase tracking-[0.06em]">
+            The Maidenhead App
+          </span>
+        </Link>
       </section>
 
       {/* ── 4. Additional photos — up to 6, two per row. 90% width on
