@@ -384,7 +384,7 @@ export default function PlaceDetailLayout({
                   card — neither belongs here anymore since they aren't
                   actions specific to this listing. */}
               <div className="flex-1 min-w-0 px-6 py-7 md:px-8 flex items-center">
-                <div className="w-full grid grid-cols-3 gap-y-6 lg:flex lg:flex-nowrap lg:items-start lg:justify-start lg:gap-x-6">
+                <div className="w-full grid grid-cols-3 gap-y-6 lg:flex lg:flex-nowrap lg:items-start lg:justify-center lg:gap-x-6">
                   {actions.map((a) => {
                     const inner = (
                       <>
