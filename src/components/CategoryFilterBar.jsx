@@ -121,6 +121,12 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
   const barRef = useRef(null);
   const chipRef = useRef(null);
   const [fitCount, setFitCount] = useState(categories.length);
+  // Widest natural item width (icon + label + the item's own padding),
+  // applied to every visible item so each occupies an equal-width slot —
+  // otherwise a short label like "Bars" sits in a much narrower box than
+  // "Private Dining", making the divider spacing between items look uneven
+  // even though the padding itself is identical.
+  const [itemWidth, setItemWidth] = useState(0);
 
   const measure = () => {
     const gauge = gaugeRef.current;
@@ -134,22 +140,17 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
     const widths = [...gauge.children].map((el) => el.getBoundingClientRect().width);
     const total = widths.reduce((a, b) => a + b, 0);
     const room = barWidth - chip.getBoundingClientRect().width - BAR_PADDING;
+    const maxWidth = widths.length ? Math.max(...widths) : 0;
 
     // Everything fits — no "More" control, so none of its width to set aside.
-    const next = total <= room
+    // Fit is computed against each item's equal (widest) width rather than
+    // its own natural width, since that's what will actually be rendered.
+    const next = maxWidth * widths.length <= room
       ? widths.length
-      : (() => {
-          let used = 0;
-          let n = 0;
-          for (const w of widths) {
-            if (used + w > room - MORE_WIDTH) break;
-            used += w;
-            n += 1;
-          }
-          return Math.max(1, n);
-        })();
+      : Math.max(1, Math.floor((room - MORE_WIDTH) / maxWidth));
 
     setFitCount((prev) => (prev === next ? prev : next));
+    setItemWidth((prev) => (prev === maxWidth ? prev : maxWidth));
   };
 
   // Re-measure after every render (cheap, and settles in one extra pass since
@@ -209,10 +210,13 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
                   <Link
                     to={`${basePath}?category=${c.value}`}
                     replace
-                    className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors hover:opacity-70"
-                    style={active
-                      ? { backgroundColor: "var(--forest)", color: "#fff" }
-                      : { backgroundColor: "transparent", color: "#000000" }}
+                    className="inline-flex items-center justify-center gap-2 px-2.5 lg:px-3.5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors hover:opacity-70"
+                    style={{
+                      ...(active
+                        ? { backgroundColor: "var(--forest)", color: "#fff" }
+                        : { backgroundColor: "transparent", color: "#000000" }),
+                      ...(itemWidth ? { width: itemWidth } : null),
+                    }}
                   >
                     <Icon name={CATEGORY_ICON[c.value]} color={active ? "#fff" : "var(--leaf)"} />
                     {c.label}
