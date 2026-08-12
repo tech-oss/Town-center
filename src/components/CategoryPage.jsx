@@ -184,7 +184,7 @@ export default function CategoryPage() {
                   style={{ borderRadius: radius, boxShadow: card.shadow }}
                 >
                   <div
-                    className="relative aspect-[4/3] overflow-hidden"
+                    className="relative aspect-[4/3] sm:aspect-[6/5] overflow-hidden"
                     style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: it.logo ? "var(--mint)" : undefined }}
                   >
                     {it.logo ? (
@@ -226,7 +226,7 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {!it.hideDescription && (it.paragraphs?.[0] || it.description) && (
-                      <p className="hidden sm:block text-xs leading-relaxed line-clamp-2" style={{ color: "#000000" }}>
+                      <p className="hidden sm:block text-xs leading-relaxed line-clamp-1" style={{ color: "#000000" }}>
                         {it.paragraphs?.[0] || it.description}
                       </p>
                     )}
