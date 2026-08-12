@@ -405,22 +405,24 @@ export default function PlaceDetailLayout({
                 </div>
               </div>
             </div>
-        </div>
 
-        {/* ── Get the App — its own full-width bar rather than a small icon
-            in the action rail, since downloading the app is a site-wide
-            promo rather than an action specific to this listing. Centered
-            content reads clearly as a distinct call to action. ── */}
+        {/* ── Get the App — its own bar rather than a small icon in the
+            action rail, since downloading the app is a site-wide promo
+            rather than an action specific to this listing. Matches the
+            card's own width (full-bleed only on mobile, where the card
+            itself is full-bleed). Centered content reads clearly as a
+            distinct call to action. ── */}
         <Link
           to="/get-the-app"
           className="mt-4 flex items-center justify-center gap-3 py-4 px-6 rounded-2xl transition-opacity hover:opacity-90"
           style={{ backgroundColor: "var(--forest)", color: "#fff" }}
         >
-          <PhoneIcon size={18} />
+          <img src="/logo-mark.svg" alt="" aria-hidden="true" className="h-[18px] w-auto shrink-0" />
           <span className="text-sm font-semibold uppercase tracking-[0.06em]">
             The Maidenhead App
           </span>
         </Link>
+        </div>
       </section>
 
       {/* ── 4. Additional photos — up to 6, two per row. 90% width on
