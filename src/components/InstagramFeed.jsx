@@ -167,7 +167,7 @@ export default function InstagramFeed() {
               key={post.url}
               onClick={() => setOpenIndex(i)}
               aria-label="Play Instagram post"
-              className="group relative aspect-square overflow-hidden bg-black"
+              className="group relative aspect-square overflow-hidden bg-black cursor-pointer"
             >
               <img
                 src={post.thumb}
