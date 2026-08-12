@@ -139,6 +139,13 @@ h5, h6, .text-sm, .text-xs {
   font-weight: 600 !important;
 }
 
+/* See & Do / Eat & Drink / Shop / Services listing cards — the h3 name
+   deliberately steps up from the default light heading weight so it reads
+   as the clear focal point of the card. */
+.listing-card-title {
+  font-weight: 600 !important;
+}
+
 /* Homepage hero title — thin sans display with wide tracking, matching the
    Battersea Power Station reference typography (light grotesque, generous
    letter-spacing, not a serif). */

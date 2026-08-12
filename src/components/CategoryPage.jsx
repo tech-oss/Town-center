@@ -202,7 +202,7 @@ export default function CategoryPage() {
                         {it.tag}
                       </span>
                     )}
-                    <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
+                    <h3 className="listing-card-title text-lg leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
                       {it.name}
                     </h3>
                     {it.date && (
