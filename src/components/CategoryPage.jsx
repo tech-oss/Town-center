@@ -173,7 +173,7 @@ export default function CategoryPage() {
 
           {/* Card grid */}
           {items.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
               {items.map((it) => {
                 const radius = ["see-do", "eat-drink", "shop"].includes(section) ? "0px" : card.radius;
                 return (
@@ -188,15 +188,15 @@ export default function CategoryPage() {
                     style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: it.logo ? "var(--mint)" : undefined }}
                   >
                     {it.logo ? (
-                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-10 transition-transform duration-500 group-hover:scale-105" />
+                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-5 sm:p-10 transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                       <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     )}
                   </div>
-                  <div className="flex flex-col gap-1.5 p-3.5 sm:p-4">
+                  <div className="flex flex-col gap-1 sm:gap-1.5 p-2 sm:p-4">
                     {it.tag && (
                       <span
-                        className={pill.className}
+                        className={`${pill.className} !text-[8px] sm:!text-[10px] !px-1.5 sm:!px-2.5 !py-0.5 sm:!py-1`}
                         style={{ color: "#000000", backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(13,42,51,0.12)", alignSelf: "flex-start" }}
                       >
                         <span
@@ -206,11 +206,11 @@ export default function CategoryPage() {
                         {it.tag}
                       </span>
                     )}
-                    <h3 className="listing-card-title text-sm sm:text-base leading-snug" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
+                    <h3 className="listing-card-title text-xs sm:text-base leading-snug line-clamp-2" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
                       {it.name}
                     </h3>
                     {it.date && (
-                      <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: "#000000" }}>
+                      <span className="hidden sm:inline-flex items-center gap-1.5 text-xs" style={{ color: "#000000" }}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
                         </svg>
@@ -218,7 +218,7 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {it.address && (
-                      <span className="inline-flex items-center gap-1.5 text-xs" style={{ color: "#000000" }}>
+                      <span className="hidden sm:inline-flex items-center gap-1.5 text-xs" style={{ color: "#000000" }}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
                           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
                         </svg>
@@ -226,11 +226,11 @@ export default function CategoryPage() {
                       </span>
                     )}
                     {!it.hideDescription && (it.paragraphs?.[0] || it.description) && (
-                      <p className="text-xs leading-relaxed line-clamp-2" style={{ color: "#000000" }}>
+                      <p className="hidden sm:block text-xs leading-relaxed line-clamp-2" style={{ color: "#000000" }}>
                         {it.paragraphs?.[0] || it.description}
                       </p>
                     )}
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold mt-1" style={{ color: "#000000" }}>
+                    <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold mt-1" style={{ color: "#000000" }}>
                       Read more
                       <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                     </span>
