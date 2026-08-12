@@ -85,6 +85,23 @@ export default function CategoryPage() {
     ? `Browse ${categoryTitles[category]?.toLowerCase() ?? "places"} across Maidenhead town centre.`
     : sec.landing.intro;
 
+  const categories = (() => {
+    const seen = new Set();
+    return sec.columns
+      .flatMap((c) => c.links)
+      .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
+      .map((l) => ({ value: l.to.split("?category=")[1], label: l.label }));
+  })();
+
+  // Longest possible category-intro sentence for this section — used only
+  // to reserve vertical space (see below) so the intro block never grows
+  // taller when a user switches between categories with different-length
+  // names and shifts the category bar underneath it.
+  const longestCategoryIntro = categories.reduce((longest, c) => {
+    const text = `Browse ${c.label.toLowerCase()} across Maidenhead town centre.`;
+    return text.length > longest.length ? text : longest;
+  }, intro);
+
   const catHero = category && sec.categoryHeroes?.[category];
   const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero;
   const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
@@ -124,37 +141,66 @@ export default function CategoryPage() {
               </>
             )}
           </nav>
-          {(section === "see-do" || section === "eat-drink" || section === "shop") && !isCategory ? (
-            <p
-              className="text-right mb-12 md:mb-16 text-2xl md:text-[2.5rem] max-w-3xl ml-auto"
-              style={{
-                color: "#000000",
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontWeight: 400,
-                lineHeight: 1.3,
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {intro}
+          {/* Reserves a consistent footprint for the intro line so the
+              category bar below never shifts position when switching
+              between "All Categories" and a category, or between two
+              categories with differently-sized names/labels. Every possible
+              variant of the intro text (landing copy, and the longest
+              category-intro sentence this section can produce) is stacked
+              invisibly in the same CSS grid cell — the grid auto-sizes the
+              row to whichever variant is tallest — with the real, visible
+              text layered on top, bottom-aligned within that space. */}
+          <div className="mb-10 md:mb-16 grid">
+            {["see-do", "eat-drink", "shop"].includes(section) && (
+              <p
+                aria-hidden="true"
+                className="invisible text-right text-2xl md:text-[2.5rem] max-w-3xl ml-auto"
+                style={{ gridArea: "1 / 1", fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 400, lineHeight: 1.3, letterSpacing: "-0.01em" }}
+              >
+                {sec.landing.intro}
+              </p>
+            )}
+            <p aria-hidden="true" className="invisible text-base md:text-lg leading-relaxed max-w-3xl" style={{ gridArea: "1 / 1" }}>
+              {longestCategoryIntro}
             </p>
-          ) : (
-            <p className="text-base md:text-lg leading-relaxed max-w-3xl mb-10" style={{ color: "#000000" }}>
-              {intro}
-            </p>
-          )}
+            {/* Sections without the big pull-quote (Services) render their
+                landing copy in this same plain style, so it needs its own
+                reservation too — otherwise a landing intro longer than
+                every category sentence would still shrink the block when a
+                category is picked. */}
+            {!["see-do", "eat-drink", "shop"].includes(section) && (
+              <p aria-hidden="true" className="invisible text-base md:text-lg leading-relaxed max-w-3xl" style={{ gridArea: "1 / 1" }}>
+                {sec.landing.intro}
+              </p>
+            )}
+            <div className="flex flex-col justify-end" style={{ gridArea: "1 / 1" }}>
+              {["see-do", "eat-drink", "shop"].includes(section) && !isCategory ? (
+                <p
+                  className="text-right text-2xl md:text-[2.5rem] max-w-3xl ml-auto"
+                  style={{
+                    color: "#000000",
+                    fontFamily: '"Playfair Display", Georgia, serif',
+                    fontWeight: 400,
+                    lineHeight: 1.3,
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {intro}
+                </p>
+              ) : (
+                <p className="text-base md:text-lg leading-relaxed max-w-3xl" style={{ color: "#000000" }}>
+                  {intro}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Category filter — icon row + "More" dropdown on desktop, a
               "Browse Categories" bottom sheet on mobile. */}
           <CategoryFilterBar
             basePath={sec.path}
             activeCategory={category}
-            categories={(() => {
-              const seen = new Set();
-              return sec.columns
-                .flatMap((c) => c.links)
-                .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
-                .map((l) => ({ value: l.to.split("?category=")[1], label: l.label }));
-            })()}
+            categories={categories}
             extra={section === "see-do" && (
               <Link
                 to="/whats-on"
