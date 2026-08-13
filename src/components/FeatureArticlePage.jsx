@@ -50,6 +50,14 @@ export default function FeatureArticlePage() {
   const more = stories.filter((f) => f.slug !== story.slug);
   const websiteUrl = `https://${story.website.replace(/^https?:\/\//, "")}`;
 
+  // Story titles are authored as "Business Name: subtitle" — the business
+  // name is the actual hero title (matching See & Do's short place names),
+  // with the rest rendered as the uppercase tagline underneath it, exactly
+  // like PlaceDetailLayout's title + tagline treatment.
+  const titleSplit = story.title.split(/:\s+/);
+  const heroTitle = titleSplit[0];
+  const heroSubtitle = titleSplit.length > 1 ? titleSplit.slice(1).join(": ") : null;
+
   // Weave gallery images through the body: pair each image with a substantial
   // section (skip the short intro block), alternating image left/right.
   const imageForBlock = {};
@@ -94,8 +102,13 @@ export default function FeatureArticlePage() {
           </div>
 
           <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
-            {story.title}
+            {heroTitle}
           </h1>
+          {heroSubtitle && (
+            <p className="text-sm md:text-base uppercase tracking-[0.08em] leading-relaxed mb-6" style={{ color: "#000000" }}>
+              {heroSubtitle}
+            </p>
+          )}
 
           {/* Cover image */}
           <div className="relative overflow-hidden aspect-[16/9] bg-black">
