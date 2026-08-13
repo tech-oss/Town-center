@@ -69,7 +69,7 @@ export default function OffersPage() {
         <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>
           Offers &amp; Stories
         </span>
-        <h1 className="hero-title relative text-4xl md:text-6xl leading-tight mb-6 text-white">
+        <h1 className="hero-title relative uppercase text-4xl md:text-6xl leading-tight mb-6 text-white">
           Every Story, In One Place
         </h1>
         <p
