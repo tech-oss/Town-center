@@ -432,7 +432,7 @@ export const sections = {
       title: "Shop",
       intro:
         "From independent boutiques to high-street favourites — spanning beauty, fashion, homeware and more, you'll find everything you need across Maidenhead.",
-      hero: "/images/ql-shop.jpg",
+      hero: "/images/shop-hero.png",
     },
     columns: [
       {
