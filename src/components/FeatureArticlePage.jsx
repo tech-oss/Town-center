@@ -101,14 +101,16 @@ export default function FeatureArticlePage() {
             <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
           </div>
 
-          <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
-            {heroTitle}
-          </h1>
-          {heroSubtitle && (
-            <p className="text-sm md:text-base uppercase tracking-[0.08em] leading-relaxed mb-6" style={{ color: "#000000" }}>
-              {heroSubtitle}
-            </p>
-          )}
+          <div className="text-center">
+            <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
+              {heroTitle}
+            </h1>
+            {heroSubtitle && (
+              <p className="text-sm md:text-base uppercase tracking-[0.08em] leading-relaxed mb-6" style={{ color: "#000000" }}>
+                {heroSubtitle}
+              </p>
+            )}
+          </div>
 
           {/* Cover image */}
           <div className="relative overflow-hidden aspect-[16/9] bg-black">
