@@ -56,8 +56,8 @@ export default function OffersPage() {
     <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
       {/* Hero band */}
       <section
-        className="relative flex flex-col items-center justify-center text-center px-6 overflow-hidden"
-        style={{ backgroundColor: "var(--forest)", height: "1000px" }}
+        className="relative flex flex-col items-center justify-center text-center px-6 py-6 md:py-8 overflow-hidden"
+        style={{ backgroundColor: "var(--forest)" }}
       >
         <div
           className="absolute inset-0 pointer-events-none"
