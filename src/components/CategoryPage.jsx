@@ -111,6 +111,9 @@ export default function CategoryPage() {
   const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero;
   const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
   const heroBg  = typeof catHero === "object" ? catHero.bg  : undefined;
+  // A separate desktop hero image, only set up for the Shop landing page so
+  // far — falls back to the single `heroSrc` everywhere else.
+  const heroDesktopSrc = !isCategory && sec.landing.heroDesktop;
 
   return (
     <div>
@@ -122,7 +125,14 @@ export default function CategoryPage() {
         className="relative w-full overflow-hidden h-[70vh] min-h-[520px]"
         style={heroBg ? { backgroundColor: heroBg } : undefined}
       >
-        <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
+        {heroDesktopSrc ? (
+          <>
+            <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full md:hidden" style={{ objectFit: heroFit, objectPosition: "center" }} />
+            <img src={heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full hidden md:block" style={{ objectFit: heroFit, objectPosition: "center" }} />
+          </>
+        ) : (
+          <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
+        )}
         {/* Eat & Drink and Shop show the hero photo with no darkening
             overlay, at the user's request — every other section keeps the
             gradient so the white title stays readable over it. */}
