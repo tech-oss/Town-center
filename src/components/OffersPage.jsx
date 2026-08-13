@@ -53,7 +53,7 @@ function SearchInput({ value, onChange, className = "" }) {
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search by name, business or category"
+        placeholder="Search by name or business"
         aria-label="Search offers and stories"
         className="w-full pl-11 pr-9 py-2.5 sm:py-3 rounded-full text-sm bg-white focus:outline-none"
         style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)", color: "#000000" }}
