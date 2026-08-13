@@ -539,7 +539,8 @@ export const sections = {
       title: "Eat & Drink",
       intro:
         "Experience Maidenhead in a whole new way from scenic riverside terraces and independent restaurants to cosy cafés and vibrant bars, there's a perfect spot for every occasion.",
-      hero: "/images/card-cafe.jpg",
+      hero: "/images/eat-drink-hero.png",
+      heroDesktop: "/images/eat-drink-hero-desktop.png",
     },
     columns: [
       {
