@@ -123,7 +123,12 @@ export default function CategoryPage() {
         style={heroBg ? { backgroundColor: heroBg } : undefined}
       >
         <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
+        {/* Eat & Drink and Shop show the hero photo with no darkening
+            overlay, at the user's request — every other section keeps the
+            gradient so the white title stays readable over it. */}
+        {!["eat-drink", "shop"].includes(section) && (
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
+        )}
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
             {title}
