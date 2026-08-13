@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { getStories, getArticles } from "../api";
 import { blogCards } from "../Data/content";
 import useFetch from "../hooks/useFetch";
+import AppBadges from "./AppBadges";
 
 // Slugs currently live on the homepage's "In the Spotlight" cards, so the
 // same "On Homepage" badge used for Featured Stories can be applied here too.
@@ -68,13 +69,20 @@ export default function OffersPage() {
         <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>
           Offers &amp; Stories
         </span>
-        <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
+        <h1 className="hero-title relative text-4xl md:text-6xl leading-tight mb-6 text-white">
           Every Story, In One Place
         </h1>
-        <p className="relative text-base md:text-lg max-w-xl leading-relaxed" style={{ color: "var(--mint)" }}>
-          The complete collection of Featured Stories and In the Spotlight articles from Maidenhead's
-          independent businesses — including the ones you won't find on the homepage.
+        <p
+          className="relative text-base md:text-lg max-w-xl leading-relaxed font-medium mb-8"
+          style={{ color: "#ffffff", letterSpacing: "-0.01em" }}
+        >
+          Discover the complete collection of Featured Stories and Spotlight Articles. Find and search for
+          offers and the latest news from businesses around Maidenhead. Download The Maidenhead App to get
+          all the offers direct to you anytime you need.
         </p>
+        <div className="relative">
+          <AppBadges />
+        </div>
       </section>
 
       {/* Body */}
