@@ -166,7 +166,7 @@ export default function ServicesDetailLayout({
           {/* CTA rail */}
           <div className="flex flex-col gap-3">
             {phone && (
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--teal-deep)", color: "#ffffff" }}>
+              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
                 <PhoneIcon size={16} /> Call Now {phone}
               </a>
             )}
