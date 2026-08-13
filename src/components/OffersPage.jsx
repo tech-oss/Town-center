@@ -54,9 +54,12 @@ export default function OffersPage() {
 
   return (
     <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
-      {/* Hero band */}
+      {/* Hero band — same height as the Shop/Eat & Drink/Services/See & Do
+          hero (70vh, 520px floor) so the transparent header always sits
+          fully behind it; content is bottom-anchored, matching those pages,
+          so the title never crowds the header nav. */}
       <section
-        className="relative flex flex-col items-center justify-center text-center px-6 py-6 md:py-8 overflow-hidden"
+        className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
         style={{ backgroundColor: "var(--forest)" }}
       >
         <div
@@ -66,14 +69,14 @@ export default function OffersPage() {
               "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--sage)" }}>
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>
           Offers &amp; Stories
         </span>
-        <h1 className="hero-title relative uppercase text-2xl md:text-4xl leading-tight mb-3 text-white">
+        <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
           Every Story, In One Place
         </h1>
         <p
-          className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium mb-4"
+          className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium mb-5"
           style={{ color: "#ffffff", letterSpacing: "-0.01em" }}
         >
           Discover the complete collection of Featured Stories and Spotlight Articles. Find and search for
