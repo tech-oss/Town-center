@@ -93,7 +93,7 @@ export default function FeatureArticlePage() {
             <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
           </div>
 
-          <h1 className="hero-title uppercase text-3xl md:text-5xl leading-tight mb-4" style={{ color: "#000000" }}>
+          <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
             {story.title}
           </h1>
 
