@@ -111,9 +111,15 @@ export default function CategoryPage() {
   const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero;
   const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
   const heroBg  = typeof catHero === "object" ? catHero.bg  : undefined;
-  // A separate desktop hero image, only set up for the Shop landing page so
-  // far — falls back to the single `heroSrc` everywhere else.
+  // A separate desktop hero image, only set up for the Shop/Eat & Drink/
+  // Services landing pages so far — falls back to the single `heroSrc`
+  // everywhere else.
   const heroDesktopSrc = !isCategory && sec.landing.heroDesktop;
+  // Services' desktop photo has its subject (a tradesperson up a ladder)
+  // near the top of the frame — cover-cropping from dead center at wide
+  // viewports (container aspect ~2:1 vs. the photo's own ~1.8:1) sliced
+  // straight through it, so bias the crop toward the top instead.
+  const heroDesktopPosition = section === "services" ? "center 20%" : "center";
 
   return (
     <div>
@@ -128,15 +134,15 @@ export default function CategoryPage() {
         {heroDesktopSrc ? (
           <>
             <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full md:hidden" style={{ objectFit: heroFit, objectPosition: "center" }} />
-            <img src={heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full hidden md:block" style={{ objectFit: heroFit, objectPosition: "center" }} />
+            <img src={heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full hidden md:block" style={{ objectFit: heroFit, objectPosition: heroDesktopPosition }} />
           </>
         ) : (
           <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
         )}
-        {/* Eat & Drink and Shop show the hero photo with no darkening
-            overlay, at the user's request — every other section keeps the
+        {/* Eat & Drink, Shop and Services show the hero photo with no
+            darkening overlay, at the user's request — See & Do keeps the
             gradient so the white title stays readable over it. */}
-        {!["eat-drink", "shop"].includes(section) && (
+        {!["eat-drink", "shop", "services"].includes(section) && (
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
         )}
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
