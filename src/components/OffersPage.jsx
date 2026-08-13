@@ -73,34 +73,41 @@ function SearchInput({ value, onChange, className = "" }) {
   );
 }
 
-// Type filter — a single-row pill bar (All + one chip per tag) matching the
-// category bar's visual weight from CategoryFilterBar, but state-driven
-// rather than route-driven since this listing spans multiple article types
-// instead of one section's categories.
+// Type filter — one continuous white pill-shaped bar with divider-separated
+// chips (All, then one per tag), matching CategoryFilterBar's desktop bar
+// exactly (same bg/shadow/radius/divider treatment used on See & Do, Eat &
+// Drink, Shop and Services) — state-driven rather than route-driven since
+// this listing spans multiple article types instead of one section's
+// categories.
 function TypeFilterBar({ types, active, onChange }) {
   return (
-    <div className="flex items-center flex-wrap gap-2">
+    <div
+      className="inline-flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
+      style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
+    >
       <button
         type="button"
         onClick={() => onChange(null)}
-        className="inline-flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
-        style={!active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "#fff", color: "#000000", boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
+        className="inline-flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors shrink-0"
+        style={!active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "transparent", color: "#000000" }}
       >
         All
       </button>
       {types.map((t) => {
         const isActive = active === t;
         return (
-          <button
-            key={t}
-            type="button"
-            onClick={() => onChange(t)}
-            className="inline-flex items-center gap-2 pl-3.5 pr-4.5 py-2.5 rounded-full text-sm font-medium transition-colors"
-            style={isActive ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "#fff", color: "#000000", boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : (TYPE_COLORS[t] ?? "var(--leaf)") }} />
-            {t}
-          </button>
+          <div key={t} className="flex items-center shrink-0">
+            <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
+            <button
+              type="button"
+              onClick={() => onChange(t)}
+              className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors hover:opacity-70"
+              style={isActive ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "transparent", color: "#000000" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : (TYPE_COLORS[t] ?? "var(--leaf)") }} />
+              {t}
+            </button>
+          </div>
         );
       })}
     </div>
