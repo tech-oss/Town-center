@@ -1,0 +1,584 @@
+import { Link } from "react-router-dom";
+import { useState } from "react";
+import LocationMap from "./LocationMap";
+import {
+  PinIcon,
+  PhoneIcon,
+  GlobeIcon,
+  MailIcon,
+  ShareNodesIcon,
+  ShareIcon,
+  GalleryLightbox,
+} from "./PlaceDetailLayout";
+
+function StarIcon({ filled = true, size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5" className="shrink-0">
+      <path d="M12 2.5l2.9 6.4 6.9.7-5.2 4.7 1.5 6.8L12 17.6l-6.1 3.5 1.5-6.8-5.2-4.7 6.9-.7L12 2.5z" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function CheckIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+function BadgeIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <circle cx="12" cy="8" r="6" /><path d="M9 13.5 7 22l5-3 5 3-2-8.5" />
+    </svg>
+  );
+}
+function CardIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <rect x="2" y="5" width="20" height="14" rx="2" /><path d="M2 10h20" />
+    </svg>
+  );
+}
+function LeafIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <path d="M5 21c8 0 14-6 14-16C10 5 4 11 4 19a2 2 0 001 2z" /><path d="M5 21c4-6 8-10 14-14" />
+    </svg>
+  );
+}
+
+function StarRow({ value, size = 14 }) {
+  return (
+    <span className="inline-flex items-center gap-0.5" style={{ color: "#F5A623" }}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <StarIcon key={n} size={size} filled={n <= Math.round(value)} />
+      ))}
+    </span>
+  );
+}
+
+const TABS = ["Overview", "Services", "Reviews", "Photos", "Areas Covered", "FAQ"];
+
+// ── The Services business-profile page — a distinct, richer layout used
+// only for /services/place/:slug, modeled on a classic local-directory
+// profile (hero header, tabbed body, sticky contact sidebar). Does not
+// affect See & Do / Eat & Drink / Shop, which keep PlaceDetailLayout. ──
+export default function ServicesDetailLayout({
+  breadcrumbs,
+  categoryLabel,
+  title,
+  heroImage,
+  extraImages = [],
+  description,
+  hours,
+  address,
+  phone,
+  email,
+  website,
+  social,
+  directionsQuery,
+  rating,
+  reviewCount,
+  badges = [],
+  aboutHeading,
+  aboutText,
+  stats = [],
+  servicesOffered = [],
+  whyChooseUs = [],
+  areasCovered = [],
+  reviewsBreakdown = [],
+  reviewsList = [],
+  businessInfo,
+  accreditations = [],
+  faq = [],
+  relatedHeading,
+  related = [],
+}) {
+  const [tab, setTab] = useState("Overview");
+  const [galleryIndex, setGalleryIndex] = useState(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const galleryImages = [heroImage, ...extraImages].filter(Boolean);
+  const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
+  const shareUrl = typeof window !== "undefined" ? window.location.href : "";
+  const u = encodeURIComponent(shareUrl);
+  const t = encodeURIComponent(title);
+  const waShare = `https://wa.me/?text=${t}%20${u}`;
+
+  const totalReviews = reviewsBreakdown.reduce((s, r) => s + r.count, 0) || reviewCount || 0;
+
+  const Section = ({ heading, children, className = "" }) => (
+    <div className={`bg-white p-6 md:p-7 ${className}`} style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+      {heading && <h3 className="text-lg font-bold mb-4" style={{ color: "#000000" }}>{heading}</h3>}
+      {children}
+    </div>
+  );
+
+  return (
+    <div style={{ backgroundColor: "var(--sand)" }}>
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6">
+        {/* Breadcrumb */}
+        <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+          {breadcrumbs.map((b, i) => (
+            <span key={i}>
+              {i > 0 && <span className="mx-2 opacity-40">/</span>}
+              {b.to ? <Link to={b.to} className="hover:opacity-70 transition-opacity">{b.label}</Link> : <span>{b.label}</span>}
+            </span>
+          ))}
+        </nav>
+
+        {/* ── Header: logo + identity (left) / CTA rail (right) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mb-6">
+          <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+            <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
+              <img src={heroImage} alt={title} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>{title}</h1>
+                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
+                  <BadgeIcon size={12} /> Verified Business
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
+                <StarRow value={rating} />
+                <span className="font-semibold">{rating?.toFixed(1)}</span>
+                <span className="opacity-70">({totalReviews} reviews)</span>
+                <span className="opacity-40">·</span>
+                <span>{categoryLabel}</span>
+              </div>
+              {badges.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {badges.map((b) => (
+                    <span key={b} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
+                      {b}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {description && (
+                <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{description}</p>
+              )}
+            </div>
+          </div>
+
+          {/* CTA rail */}
+          <div className="flex flex-col gap-3">
+            {phone && (
+              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "#F5A623", color: "#1A1200" }}>
+                <PhoneIcon size={16} /> Call Now {phone}
+              </a>
+            )}
+            {email && (
+              <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                <MailIcon size={16} /> Request a Quote
+              </a>
+            )}
+            {websiteHref && (
+              <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                <GlobeIcon size={16} /> Visit Website
+              </a>
+            )}
+            <div className="grid grid-cols-3 gap-3">
+              {directionsQuery && (
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <PinIcon size={16} /> Directions
+                </a>
+              )}
+              <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                <ShareNodesIcon size={16} /> Share
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Photo strip ── */}
+        {galleryImages.length > 0 && (
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
+            <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-3 sm:col-span-2 row-span-2 aspect-[4/3] sm:aspect-auto overflow-hidden cursor-pointer">
+              <img src={galleryImages[0]} alt={title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+            </button>
+            {galleryImages.slice(1, 5).map((src, i) => (
+              <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="relative aspect-square overflow-hidden cursor-pointer">
+                <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                {i === 3 && galleryImages.length > 5 && (
+                  <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold" style={{ backgroundColor: "rgba(28,46,56,0.55)" }}>
+                    View all {galleryImages.length} photos
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* ── Body: tabs + content (left) / sidebar (right) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 pb-16">
+          <div>
+            <div className="flex items-center gap-5 md:gap-7 mb-6 overflow-x-auto border-b" style={{ borderColor: "rgba(28,46,56,0.12)" }}>
+              {TABS.map((tb) => (
+                <button
+                  key={tb}
+                  type="button"
+                  onClick={() => setTab(tb)}
+                  className="pb-3 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer"
+                  style={{
+                    color: tab === tb ? "var(--leaf)" : "rgba(0,0,0,0.55)",
+                    borderBottom: tab === tb ? "2px solid var(--leaf)" : "2px solid transparent",
+                  }}
+                >
+                  {tb}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-6">
+              {tab === "Overview" && (
+                <>
+                  <Section heading={aboutHeading}>
+                    <p className="text-sm leading-relaxed mb-5" style={{ color: "#000000" }}>{aboutText}</p>
+                    {stats.length > 0 && (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-5 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
+                        {stats.map((s) => (
+                          <div key={s.label} className="text-center">
+                            <div className="text-lg font-bold" style={{ color: "var(--leaf)" }}>{s.value}</div>
+                            <div className="text-xs" style={{ color: "#000000" }}>{s.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </Section>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <Section heading="Services We Offer">
+                      <ul className="flex flex-col gap-2.5">
+                        {servicesOffered.slice(0, 8).map((s) => (
+                          <li key={s} className="flex items-center gap-2.5 text-sm" style={{ color: "#000000" }}>
+                            <span style={{ color: "var(--leaf)" }}><CheckIcon /></span>{s}
+                          </li>
+                        ))}
+                      </ul>
+                      {servicesOffered.length > 0 && (
+                        <button type="button" onClick={() => setTab("Services")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all services →</button>
+                      )}
+                    </Section>
+                    <Section heading="Why Choose Us?">
+                      <ul className="flex flex-col gap-2.5">
+                        {whyChooseUs.map((w) => (
+                          <li key={w} className="flex items-center gap-2.5 text-sm" style={{ color: "#000000" }}>
+                            <span style={{ color: "var(--leaf)" }}><BadgeIcon /></span>{w}
+                          </li>
+                        ))}
+                      </ul>
+                    </Section>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <Section heading="Areas We Cover">
+                      <p className="text-sm mb-4" style={{ color: "#000000" }}>{title} provides service across the following areas.</p>
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {areasCovered.slice(0, 6).map((a) => (
+                          <span key={a} className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>{a}</span>
+                        ))}
+                      </div>
+                      <button type="button" onClick={() => setTab("Areas Covered")} className="text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all areas →</button>
+                    </Section>
+                    {hours?.length > 0 && (
+                      <Section heading="Opening Hours">
+                        <ul className="flex flex-col">
+                          {hours.map((h, i) => (
+                            <li key={h.day} className="flex items-center justify-between text-sm py-2" style={i < hours.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.08)" } : undefined}>
+                              <span style={{ color: "#000000" }}>{h.day}</span>
+                              <span className="font-semibold" style={{ color: h.time === "Closed" ? "#C0392B" : "#000000" }}>{h.time}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </Section>
+                    )}
+                  </div>
+
+                  <Section heading="Customer Reviews">
+                    <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
+                    {reviewsList[0] && <ReviewCard {...reviewsList[0]} />}
+                    <button type="button" onClick={() => setTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
+                  </Section>
+                </>
+              )}
+
+              {tab === "Services" && (
+                <Section heading="Services We Offer">
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {servicesOffered.map((s) => (
+                      <li key={s} className="flex items-center gap-2.5 text-sm" style={{ color: "#000000" }}>
+                        <span style={{ color: "var(--leaf)" }}><CheckIcon /></span>{s}
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              )}
+
+              {tab === "Reviews" && (
+                <Section heading="Customer Reviews">
+                  <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
+                  <div className="flex flex-col gap-4 mt-2">
+                    {reviewsList.map((r, i) => <ReviewCard key={i} {...r} />)}
+                  </div>
+                </Section>
+              )}
+
+              {tab === "Photos" && (
+                <Section heading="Photos">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {galleryImages.map((src, i) => (
+                      <button key={i} type="button" onClick={() => setGalleryIndex(i)} className="aspect-square overflow-hidden cursor-pointer">
+                        <img src={src} alt={`${title} ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                      </button>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {tab === "Areas Covered" && (
+                <Section heading="Areas We Cover">
+                  <p className="text-sm mb-5" style={{ color: "#000000" }}>{title} provides service across the following areas.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {areasCovered.map((a) => (
+                      <span key={a} className="inline-flex items-center gap-1.5 text-sm font-semibold px-3.5 py-2 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
+                        <PinIcon size={14} />{a}
+                      </span>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {tab === "FAQ" && (
+                <Section heading="Frequently Asked Questions">
+                  <div className="flex flex-col gap-5">
+                    {faq.map((f, i) => (
+                      <div key={i} className={i < faq.length - 1 ? "pb-5 border-b" : ""} style={i < faq.length - 1 ? { borderColor: "rgba(28,46,56,0.1)" } : undefined}>
+                        <div className="font-semibold text-sm mb-1.5" style={{ color: "#000000" }}>{f.q}</div>
+                        <div className="text-sm leading-relaxed" style={{ color: "#000000" }}>{f.a}</div>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+              )}
+            </div>
+          </div>
+
+          {/* ── Sidebar ── */}
+          <div className="flex flex-col gap-6 lg:sticky lg:top-6 self-start">
+            {(address || phone || email) && (
+              <Section heading="Contact Details">
+                <div className="flex flex-col gap-3">
+                  {phone && (
+                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PhoneIcon /></span>
+                      <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline break-all">{phone}</a>
+                    </div>
+                  )}
+                  {email && (
+                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><MailIcon /></span>
+                      <a href={`mailto:${email}`} className="hover:underline break-all">{email}</a>
+                    </div>
+                  )}
+                  {websiteHref && (
+                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><GlobeIcon /></span>
+                      <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="hover:underline break-all">{website}</a>
+                    </div>
+                  )}
+                  {address && (
+                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PinIcon /></span>
+                      <span className="leading-relaxed">{address}</span>
+                    </div>
+                  )}
+                </div>
+                {social?.length > 0 && (
+                  <div className="flex items-center gap-3 mt-5">
+                    {social.map((sl) => (
+                      <a key={sl.icon} href={sl.href} target="_blank" rel="noopener noreferrer" aria-label={sl.label} title={sl.label} className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
+                        <ShareIcon name={sl.icon} />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </Section>
+            )}
+
+            {directionsQuery && (
+              <Section heading={null} className="p-0! overflow-hidden">
+                <LocationMap query={directionsQuery} heading={null} note={null} rounded={false} widthClassName="w-full" aspectClassName="aspect-[4/3]" />
+                <div className="p-4">
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                    Get Directions
+                  </a>
+                </div>
+              </Section>
+            )}
+
+            {businessInfo && (
+              <Section heading="Business Information">
+                <div className="flex flex-col gap-3 text-sm">
+                  {[
+                    ["Business Type", businessInfo.type],
+                    ["VAT Registered", businessInfo.vatRegistered],
+                    ["Insurance", businessInfo.insurance],
+                    ["Payment Methods", businessInfo.paymentMethods?.join(", ")],
+                    ["Languages Spoken", businessInfo.languages],
+                  ].filter(([, v]) => v).map(([label, value]) => (
+                    <div key={label} className="flex items-start justify-between gap-3">
+                      <span className="opacity-60" style={{ color: "#000000" }}>{label}</span>
+                      <span className="font-semibold text-right" style={{ color: "#000000" }}>{value}</span>
+                    </div>
+                  ))}
+                  {businessInfo.memberships?.length > 0 && (
+                    <div className="pt-3 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
+                      <span className="opacity-60 text-sm block mb-2" style={{ color: "#000000" }}>Memberships</span>
+                      <div className="flex flex-wrap gap-2">
+                        {businessInfo.memberships.map((m) => (
+                          <span key={m} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>{m}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-start gap-2.5 mt-5 p-3.5 rounded-xl text-xs leading-relaxed" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
+                  <LeafIcon size={16} /> <span>We care about the environment — recycling waste and using energy-efficient solutions wherever possible.</span>
+                </div>
+              </Section>
+            )}
+
+            {accreditations.length > 0 && (
+              <Section heading="Accreditations & Certifications">
+                <div className="flex flex-wrap gap-2">
+                  {accreditations.map((a) => (
+                    <span key={a} className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
+                      <CardIcon size={13} />{a}
+                    </span>
+                  ))}
+                </div>
+              </Section>
+            )}
+          </div>
+        </div>
+
+        {/* ── Similar businesses ── */}
+        {related.length > 0 && (
+          <section className="pb-16">
+            <h2 className="text-xl font-bold mb-5" style={{ color: "#000000" }}>{relatedHeading}</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {related.map((it) => (
+                <Link key={it.slug} to={it.to} className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}>
+                  <div className="relative aspect-square overflow-hidden">
+                    <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </div>
+                  <div className="flex flex-col gap-1 p-3">
+                    {it.rating && (
+                      <div className="flex items-center gap-1 text-xs" style={{ color: "#000000" }}>
+                        <StarRow value={it.rating} size={11} /> <span className="opacity-70">({it.reviewCount})</span>
+                      </div>
+                    )}
+                    <h3 className="font-bold text-sm leading-snug line-clamp-1" style={{ color: "#000000" }}>{it.name}</h3>
+                    {it.category && <p className="text-xs opacity-70" style={{ color: "#000000" }}>{it.category}</p>}
+                    <span className="text-xs font-semibold mt-1" style={{ color: "var(--leaf)" }}>View Profile</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {shareOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} onClick={() => setShareOpen(false)}>
+          <div className="w-full sm:max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 pb-10 sm:pb-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-xl font-bold" style={{ color: "#000000" }}>Share</h3>
+              <button onClick={() => setShareOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm font-bold" style={{ backgroundColor: "var(--forest)" }}>✕</button>
+            </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                });
+              }}
+              className="w-full py-3.5 rounded-xl border text-sm font-medium mb-3 transition-colors"
+              style={{ borderColor: "rgba(28,46,56,0.15)", color: copied ? "var(--leaf)" : "var(--forest)" }}
+            >
+              {copied ? "Copied!" : "Copy link"}
+            </button>
+            {[
+              { label: "Email", icon: "email", href: `mailto:?subject=${t}&body=${u}` },
+              { label: "WhatsApp", icon: "whatsapp", href: waShare },
+              { label: "Facebook", icon: "facebook", href: `https://www.facebook.com/sharer/sharer.php?u=${u}` },
+              { label: "X", icon: "x", href: `https://twitter.com/intent/tweet?url=${u}&text=${t}` },
+            ].map((opt) => (
+              <a key={opt.label} href={opt.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 w-full py-3.5 px-1 border-t text-sm font-medium" style={{ borderColor: "rgba(28,46,56,0.1)", color: "#000000" }} onClick={() => setShareOpen(false)}>
+                <span className="w-6 flex justify-center" style={{ color: "var(--leaf)" }}><ShareIcon name={opt.icon} /></span>
+                {opt.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {galleryIndex !== null && (
+        <GalleryLightbox
+          images={galleryImages}
+          index={galleryIndex}
+          onClose={() => setGalleryIndex(null)}
+          onStep={(delta) => setGalleryIndex((i) => (i + delta + galleryImages.length) % galleryImages.length)}
+        />
+      )}
+    </div>
+  );
+}
+
+function ReviewsSummary({ rating, totalReviews, breakdown }) {
+  const max = Math.max(...breakdown.map((b) => b.count), 1);
+  return (
+    <div className="flex flex-col sm:flex-row gap-6 mb-5 pb-5 border-b" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
+      <div className="text-center sm:w-28 shrink-0">
+        <div className="text-4xl font-bold" style={{ color: "#000000" }}>{rating?.toFixed(1)}</div>
+        <StarRow value={rating} size={16} />
+        <div className="text-xs opacity-60 mt-1" style={{ color: "#000000" }}>Based on {totalReviews} reviews</div>
+      </div>
+      <div className="flex-1 flex flex-col gap-1.5 justify-center">
+        {breakdown.map((b) => (
+          <div key={b.stars} className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
+            <span className="w-3">{b.stars}</span>
+            <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(28,46,56,0.08)" }}>
+              <div className="h-full rounded-full" style={{ width: `${(b.count / max) * 100}%`, backgroundColor: "#F5A623" }} />
+            </div>
+            <span className="w-6 text-right opacity-60">{b.count}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReviewCard({ name, area, stars, timeAgo, text }) {
+  return (
+    <div className="flex gap-3 py-4 border-b last:border-b-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
+        {name?.[0]}
+      </div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-semibold text-sm" style={{ color: "#000000" }}>{name}</span>
+          <span className="text-xs opacity-50" style={{ color: "#000000" }}>{area}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-0.5 mb-1.5">
+          <StarRow value={stars} size={12} />
+          <span className="text-xs opacity-50" style={{ color: "#000000" }}>{timeAgo}</span>
+        </div>
+        <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{text}</p>
+      </div>
+    </div>
+  );
+}

@@ -6,6 +6,7 @@ import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
 import CategoryPage from './components/CategoryPage'
 import DetailPage from './components/DetailPage'
+import ServicesDetailPage from './components/ServicesDetailPage'
 import ArticlePage from './components/ArticlePage'
 import LivePage from './components/LivePage'
 import PropertySearch from './components/PropertySearch'
@@ -120,6 +121,7 @@ function PublicSite() {
           <Route path="/live/building/:slug" element={<BuildingPage />} />
           <Route path="/live/property/:slug" element={<PropertyPage />} />
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
+          <Route path="/services/place/:slug" element={<ServicesDetailPage />} />
           <Route path="/:section" element={<CategoryPage />} />
           <Route path="/:section/category/:category" element={<SectionCategoryRedirect />} />
           <Route path="/:section/place/:slug" element={<DetailPage />} />
