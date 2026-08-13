@@ -78,29 +78,8 @@ export default function FeatureArticlePage() {
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Cover ── */}
-      <section className="px-6 md:px-12 pt-6 md:pt-10">
+      <section className="px-6 md:px-12 pt-10 md:pt-16">
         <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
-            <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <Link to="/offers" className="hover:opacity-70 transition-opacity">Offers</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <span>{story.eyebrow}</span>
-          </nav>
-
-          {/* Meta */}
-          <div className="flex items-center gap-3 mb-4">
-            <span
-              className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
-              style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
-            >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--forest)" }} />
-              {story.category}
-            </span>
-            <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
-          </div>
-
           <div className="text-center">
             <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
               {heroTitle}
@@ -113,7 +92,7 @@ export default function FeatureArticlePage() {
           </div>
 
           {/* Cover image */}
-          <div className="relative overflow-hidden aspect-[16/9] bg-black">
+          <div className="relative overflow-hidden aspect-[16/9] bg-black mt-4">
             <img src={story.heroImage} alt={story.title} className="w-full h-full object-cover" />
           </div>
         </div>
@@ -122,6 +101,30 @@ export default function FeatureArticlePage() {
       {/* ── Body ── */}
       <section className="py-12 md:py-16 px-6 md:px-12">
         <div className="max-w-5xl mx-auto">
+          {/* Breadcrumb + meta — below the hero, matching See & Do's
+              PlaceDetailLayout order (breadcrumb/category sit under the
+              hero image there too, not above it). */}
+          <div className="max-w-4xl mx-auto">
+            <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+              <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
+              <span className="mx-2 opacity-40">/</span>
+              <Link to="/offers" className="hover:opacity-70 transition-opacity">Offers</Link>
+              <span className="mx-2 opacity-40">/</span>
+              <span>{story.eyebrow}</span>
+            </nav>
+
+            <div className="flex items-center gap-3 mb-10">
+              <span
+                className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
+                style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
+              >
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--forest)" }} />
+                {story.category}
+              </span>
+              <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
+            </div>
+          </div>
+
           {/* Standfirst */}
           <p className="max-w-3xl mx-auto text-lg md:text-2xl leading-relaxed mb-14 font-medium text-center" style={{ color: "#000000" }}>
             {story.standfirst}

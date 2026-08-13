@@ -28,33 +28,12 @@ export default function ArticlePage() {
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Cover ── */}
-      <section className="px-6 md:px-12 pt-6 md:pt-10">
-        <div className="max-w-4xl mx-auto">
-          {/* Breadcrumb */}
-          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
-            <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
-            <span className="mx-2 opacity-40">/</span>
-            <Link to={bizPath} className="hover:opacity-70 transition-opacity">{biz.name}</Link>
-          </nav>
-
-          {/* Meta */}
-          <div className="flex items-center gap-3 mb-4">
-            <span
-              className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
-              style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
-            >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
-              {article.category}
-            </span>
-            <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
-          </div>
-
+      <section className="px-6 md:px-12 pt-10 md:pt-16">
+        <div className="max-w-4xl mx-auto text-center">
           <h1 className="hero-title uppercase text-3xl md:text-5xl leading-tight mb-2" style={{ color: "#000000" }}>
             {article.title}
           </h1>
-          <p className="text-sm mb-7" style={{ color: "#000000" }}>
+          <p className="text-sm mb-6" style={{ color: "#000000" }}>
             At <Link to={bizPath} className="font-semibold underline-offset-2 hover:underline" style={{ color: "var(--leaf)" }}>{biz.name}</Link> · {biz.tag}
           </p>
 
@@ -68,6 +47,28 @@ export default function ArticlePage() {
       {/* ── Body ── */}
       <section className="py-12 md:py-16 px-6 md:px-12">
         <div className="max-w-4xl mx-auto">
+          {/* Breadcrumb + meta — below the hero, matching See & Do's
+              PlaceDetailLayout order (breadcrumb/category sit under the
+              hero image there too, not above it). */}
+          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+            <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
+            <span className="mx-2 opacity-40">/</span>
+            <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
+            <span className="mx-2 opacity-40">/</span>
+            <Link to={bizPath} className="hover:opacity-70 transition-opacity">{biz.name}</Link>
+          </nav>
+
+          <div className="flex items-center gap-3 mb-10">
+            <span
+              className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
+              style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
+              {article.category}
+            </span>
+            <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
+          </div>
+
           <article className="flex flex-col gap-5">
             {article.body.map((para, i) => (
               <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
