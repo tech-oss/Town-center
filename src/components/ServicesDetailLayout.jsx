@@ -116,7 +116,7 @@ export default function ServicesDetailLayout({
   );
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6">
         {/* Breadcrumb */}
         <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
@@ -166,7 +166,7 @@ export default function ServicesDetailLayout({
           {/* CTA rail */}
           <div className="flex flex-col gap-3">
             {phone && (
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "#F5A623", color: "#1A1200" }}>
+              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--teal-deep)", color: "#ffffff" }}>
                 <PhoneIcon size={16} /> Call Now {phone}
               </a>
             )}
