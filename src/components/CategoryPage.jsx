@@ -161,7 +161,7 @@ export default function CategoryPage() {
               </>
             )}
           </nav>
-          {["see-do", "eat-drink", "shop"].includes(section) ? (
+          {["see-do", "eat-drink", "shop", "services"].includes(section) ? (
             <p
               className="text-right mb-10 md:mb-16 text-2xl md:text-[2.5rem] max-w-3xl ml-auto"
               style={{
@@ -204,7 +204,7 @@ export default function CategoryPage() {
           {items.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
               {items.map((it) => {
-                const radius = ["see-do", "eat-drink", "shop"].includes(section) ? "0px" : card.radius;
+                const radius = ["see-do", "eat-drink", "shop", "services"].includes(section) ? "0px" : card.radius;
                 return (
                 <Link
                   key={it.slug}
