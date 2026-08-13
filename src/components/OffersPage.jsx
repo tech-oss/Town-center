@@ -56,7 +56,7 @@ export default function OffersPage() {
     <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
       {/* Hero band */}
       <section
-        className="relative flex flex-col items-center justify-center text-center px-6 py-24 md:py-32 overflow-hidden"
+        className="relative flex flex-col items-center justify-center text-center px-6 py-6 md:py-8 overflow-hidden"
         style={{ backgroundColor: "var(--forest)" }}
       >
         <div
@@ -66,14 +66,14 @@ export default function OffersPage() {
               "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--sage)" }}>
           Offers &amp; Stories
         </span>
-        <h1 className="hero-title relative uppercase text-4xl md:text-6xl leading-tight mb-6 text-white">
+        <h1 className="hero-title relative uppercase text-2xl md:text-4xl leading-tight mb-3 text-white">
           Every Story, In One Place
         </h1>
         <p
-          className="relative text-base md:text-lg max-w-xl leading-relaxed font-medium mb-8"
+          className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium mb-4"
           style={{ color: "#ffffff", letterSpacing: "-0.01em" }}
         >
           Discover the complete collection of Featured Stories and Spotlight Articles. Find and search for
@@ -81,7 +81,7 @@ export default function OffersPage() {
           all the offers direct to you anytime you need.
         </p>
         <div className="relative">
-          <AppBadges />
+          <AppBadges size="sm" />
         </div>
       </section>
 
