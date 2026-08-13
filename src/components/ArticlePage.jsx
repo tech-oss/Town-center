@@ -26,7 +26,7 @@ export default function ArticlePage() {
   const more = (biz.news ?? []).filter((a) => a.slug !== article.slug).slice(0, 3);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Cover ── */}
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-4xl mx-auto">
@@ -41,13 +41,17 @@ export default function ArticlePage() {
 
           {/* Meta */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-[0.02em] px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
+            <span
+              className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
+              style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
               {article.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-2" style={{ color: "#000000" }}>
+          <h1 className="hero-title uppercase text-3xl md:text-5xl leading-tight mb-2" style={{ color: "#000000" }}>
             {article.title}
           </h1>
           <p className="text-sm mb-7" style={{ color: "#000000" }}>
@@ -55,7 +59,7 @@ export default function ArticlePage() {
           </p>
 
           {/* Cover image */}
-          <div className="relative rounded-3xl overflow-hidden aspect-[16/9] bg-black shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+          <div className="relative overflow-hidden aspect-[16/9] bg-black">
             <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
           </div>
         </div>
@@ -73,12 +77,15 @@ export default function ArticlePage() {
           </article>
 
           {/* Back-to-business CTA */}
-          <div className="mt-10 rounded-3xl p-7 flex flex-col sm:flex-row sm:items-center gap-5 sm:justify-between" style={{ backgroundColor: "#fff", boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
+          <div
+            className="mt-10 overflow-hidden p-7 flex flex-col sm:flex-row sm:items-center gap-5 sm:justify-between"
+            style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
+          >
             <div className="flex items-center gap-4 min-w-0">
-              <img src={biz.image} alt="" className="w-16 h-16 rounded-2xl object-cover shrink-0" />
+              <img src={biz.image} alt="" className="w-16 h-16 object-cover shrink-0" />
               <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
-                <p className="font-bold text-lg leading-tight" style={{ color: "#000000" }}>{biz.name}</p>
+                <p className="text-lg leading-tight" style={{ color: "#000000" }}>{biz.name}</p>
                 <p className="text-sm truncate" style={{ color: "#000000" }}>{biz.address}</p>
               </div>
             </div>
@@ -97,20 +104,24 @@ export default function ArticlePage() {
 
       {/* ── More from this business ── */}
       {more.length > 0 && (
-        <section className="pb-20 px-6 md:px-12">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>More from {biz.name}</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <section className="pb-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+          <div className="max-w-4xl mx-auto pt-16 md:pt-20">
+            <h2 className="hero-title uppercase text-2xl md:text-3xl mb-8" style={{ color: "#000000" }}>More from {biz.name}</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {more.map((a) => (
                 <Link
                   key={a.slug}
                   to={`/news/${a.slug}`}
-                  className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img src={a.image} alt={a.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}>
+                    <span
+                      className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
                       {a.category}
                     </span>
                   </div>

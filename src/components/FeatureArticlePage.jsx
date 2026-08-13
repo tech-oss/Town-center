@@ -68,7 +68,7 @@ export default function FeatureArticlePage() {
   }
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Cover ── */}
       <section className="px-6 md:px-12 pt-6 md:pt-10">
         <div className="max-w-4xl mx-auto">
@@ -76,25 +76,29 @@ export default function FeatureArticlePage() {
           <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
-            <Link to="/news" className="hover:opacity-70 transition-opacity">Journal</Link>
+            <Link to="/offers" className="hover:opacity-70 transition-opacity">Offers</Link>
             <span className="mx-2 opacity-40">/</span>
             <span>{story.eyebrow}</span>
           </nav>
 
           {/* Meta */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-[11px] font-bold uppercase tracking-[0.02em] px-3 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
+            <span
+              className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
+              style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--forest)" }} />
               {story.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight mb-4" style={{ color: "#000000" }}>
+          <h1 className="hero-title uppercase text-3xl md:text-5xl leading-tight mb-4" style={{ color: "#000000" }}>
             {story.title}
           </h1>
 
           {/* Cover image */}
-          <div className="relative rounded-3xl overflow-hidden aspect-[16/9] bg-black shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+          <div className="relative overflow-hidden aspect-[16/9] bg-black">
             <img src={story.heroImage} alt={story.title} className="w-full h-full object-cover" />
           </div>
         </div>
@@ -116,7 +120,7 @@ export default function FeatureArticlePage() {
                 return (
                   <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div className={imageRight ? "md:order-2" : ""}>
-                      <div className="rounded-3xl overflow-hidden bg-black h-72 md:h-full md:min-h-[24rem] shadow-[0_24px_60px_-30px_rgba(28,46,56,0.55)]">
+                      <div className="overflow-hidden bg-black h-72 md:h-full md:min-h-[24rem]">
                         <img src={img.src} alt={block.heading || story.title} loading="lazy" className="w-full h-full object-cover" />
                       </div>
                     </div>
@@ -133,7 +137,7 @@ export default function FeatureArticlePage() {
           </article>
 
           {/* CTA */}
-          <div className="mt-16 rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
+          <div className="mt-16 overflow-hidden p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
             <div className="flex-1">
               <p className="text-[11px] font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--sage)" }}>{story.eyebrow}</p>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>{story.location}</p>
@@ -155,20 +159,24 @@ export default function FeatureArticlePage() {
 
       {/* ── More stories ── */}
       {more.length > 0 && (
-        <section className="pb-20 px-6 md:px-12">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>More stories</h2>
-            <div className="grid sm:grid-cols-2 gap-6">
+        <section className="pb-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+          <div className="max-w-4xl mx-auto pt-16 md:pt-20">
+            <h2 className="hero-title uppercase text-2xl md:text-3xl mb-8" style={{ color: "#000000" }}>More Stories</h2>
+            <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
               {more.map((f) => (
                 <Link
                   key={f.slug}
                   to={`/story/${f.slug}`}
-                  className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[16/9] overflow-hidden">
                     <img src={f.cardImage} alt={f.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}>
+                    <span
+                      className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
+                      style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--forest)" }} />
                       {f.eyebrow}
                     </span>
                   </div>

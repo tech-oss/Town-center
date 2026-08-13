@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getStories, getArticles } from "../api";
 import { blogCards } from "../Data/content";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
+import { card, pill } from "../utils/design";
 
 // Slugs currently live on the homepage's "In the Spotlight" cards, so the
 // same "On Homepage" badge used for Featured Stories can be applied here too.
@@ -11,10 +12,20 @@ const homepageSpotlightSlugs = new Set(
   blogCards.posts.filter((p) => p.homepage).map((p) => p.href.split("/").pop())
 );
 
+// One colour per tag, echoing the dot-colour treatment CategoryPage uses for
+// its own category pills, so this listing reads as the same design system.
+const TYPE_COLORS = {
+  Featured: "var(--forest)",
+  Offer: "#F5A623",
+  News: "var(--leaf)",
+  "What's On": "var(--teal-deep)",
+};
+const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
+
 function HomepageBadge() {
   return (
     <span
-      className="absolute top-3 right-3 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
+      className="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-[0.02em] px-2 py-0.5 rounded-full"
       style={{ backgroundColor: "var(--forest)", color: "#fff" }}
     >
       On Homepage
@@ -22,19 +33,76 @@ function HomepageBadge() {
   );
 }
 
-function SectionHeading({ eyebrow, title, intro }) {
+function SearchIcon() {
   return (
-    <div className="mb-10 md:mb-12">
-      <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
-        {eyebrow}
-      </p>
-      <h2 className="text-3xl md:text-4xl font-bold leading-tight mb-3" style={{ color: "#000000" }}>
-        {title}
-      </h2>
-      <p className="text-base max-w-2xl leading-relaxed" style={{ color: "#000000" }}>
-        {intro}
-      </p>
-      <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <circle cx="10" cy="10" r="7" /><path d="M21 21l-5.5-5.5" />
+    </svg>
+  );
+}
+
+// Search-by-name field, matching CategoryFilterBar's own SearchInput pill
+// (same shadow/radius/padding) so the two listing experiences feel identical.
+function SearchInput({ value, onChange, className = "" }) {
+  return (
+    <div className={`relative ${className}`}>
+      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2" style={{ color: "rgba(28,46,56,0.4)" }}>
+        <SearchIcon />
+      </span>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Search by name, business or category"
+        aria-label="Search offers and stories"
+        className="w-full pl-11 pr-9 py-2.5 sm:py-3 rounded-full text-sm bg-white focus:outline-none"
+        style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)", color: "#000000" }}
+      />
+      {value && (
+        <button
+          type="button"
+          onClick={() => onChange("")}
+          aria-label="Clear search"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full transition-opacity hover:opacity-70"
+          style={{ backgroundColor: "rgba(28,46,56,0.08)", color: "#000000" }}
+        >
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+      )}
+    </div>
+  );
+}
+
+// Type filter — a single-row pill bar (All + one chip per tag) matching the
+// category bar's visual weight from CategoryFilterBar, but state-driven
+// rather than route-driven since this listing spans multiple article types
+// instead of one section's categories.
+function TypeFilterBar({ types, active, onChange }) {
+  return (
+    <div className="flex items-center flex-wrap gap-2">
+      <button
+        type="button"
+        onClick={() => onChange(null)}
+        className="inline-flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full text-sm font-semibold transition-colors"
+        style={!active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "#fff", color: "#000000", boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
+      >
+        All
+      </button>
+      {types.map((t) => {
+        const isActive = active === t;
+        return (
+          <button
+            key={t}
+            type="button"
+            onClick={() => onChange(t)}
+            className="inline-flex items-center gap-2 pl-3.5 pr-4.5 py-2.5 rounded-full text-sm font-medium transition-colors"
+            style={isActive ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "#fff", color: "#000000", boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : (TYPE_COLORS[t] ?? "var(--leaf)") }} />
+            {t}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -42,6 +110,8 @@ function SectionHeading({ eyebrow, title, intro }) {
 export default function OffersPage() {
   const { data: allFeatures } = useFetch(getStories, []);
   const { data: allArticles } = useFetch(getArticles, []);
+  const [search, setSearch] = useState("");
+  const [activeType, setActiveType] = useState(null);
 
   // Same real-vs-auto-generated split NewsIndexPage uses, so this page and
   // /news always agree on what counts as a genuine spotlight story.
@@ -52,8 +122,52 @@ export default function OffersPage() {
     window.scrollTo(0, 0);
   }, []);
 
+  // One unified list — Featured Stories and In the Spotlight articles
+  // normalised to the same shape, so they can share a single search+filter
+  // and one directory-style card grid instead of two separate sections.
+  const items = useMemo(() => [
+    ...featuredStories.map((s) => ({
+      slug: s.slug,
+      to: `/story/${s.slug}`,
+      image: s.cardImage,
+      title: s.cardHeading,
+      excerpt: s.cardBody,
+      date: s.date,
+      type: "Featured",
+      businessName: null,
+      homepage: !!s.homepage,
+    })),
+    ...spotlightStories.map((s) => ({
+      slug: s.slug,
+      to: `/news/${s.slug}`,
+      image: s.image,
+      title: s.title,
+      excerpt: s.excerpt,
+      date: s.date,
+      type: s.category,
+      businessName: s.business?.name ?? null,
+      homepage: homepageSpotlightSlugs.has(s.slug),
+    })),
+  ], [featuredStories, spotlightStories]);
+
+  const types = useMemo(
+    () => TYPE_ORDER.filter((t) => items.some((it) => it.type === t)),
+    [items]
+  );
+
+  const trimmedSearch = search.trim().toLowerCase();
+  const filtered = items.filter((it) => {
+    if (activeType && it.type !== activeType) return false;
+    if (!trimmedSearch) return true;
+    return (
+      it.title?.toLowerCase().includes(trimmedSearch) ||
+      it.businessName?.toLowerCase().includes(trimmedSearch) ||
+      it.type?.toLowerCase().includes(trimmedSearch)
+    );
+  });
+
   return (
-    <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
       {/* Hero band — same height as the Shop/Eat & Drink/Services/See & Do
           hero (70vh, 520px floor) so the transparent header always sits
           fully behind it; content is bottom-anchored, matching those pages,
@@ -89,88 +203,75 @@ export default function OffersPage() {
       </section>
 
       {/* Body */}
-      <section className="py-16 md:py-20 px-6 md:px-12">
+      <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
           {/* Breadcrumb */}
-          <nav className="mb-10 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+          <nav className="mb-6 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
             <span>Offers</span>
           </nav>
 
-          {/* ── Featured Stories ── */}
-          <SectionHeading
-            eyebrow="In Focus"
-            title="Featured Stories"
-            intro="Long-form editorial pieces on the places shaping Maidenhead — a mix of stories currently on the homepage and others you'll only find here."
-          />
-          {featuredStories.length === 0 ? (
-            <p className="text-sm mb-16" style={{ color: "rgba(0,0,0,0.55)" }}>No featured stories yet.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16 md:mb-20">
-              {featuredStories.map((story) => (
-                <Link
-                  key={story.slug}
-                  to={`/story/${story.slug}`}
-                  className="group relative bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-                  style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <img src={story.cardImage} alt={story.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span
-                      className="absolute top-3 left-3 text-[11px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#000000" }}
-                    >
-                      {story.category}
-                    </span>
-                    {story.homepage && <HomepageBadge />}
-                  </div>
-                  <div className="flex flex-col gap-2 p-6 flex-1">
-                    <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{story.date}</p>
-                    <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000" }}>{story.cardHeading}</h3>
-                    <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{story.cardBody}</p>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
-                      Read more
-                      <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          {/* ── Search + filter ── */}
+          <div className="mb-10 flex flex-col sm:flex-row sm:items-center gap-3">
+            <TypeFilterBar types={types} active={activeType} onChange={setActiveType} />
+            <SearchInput value={search} onChange={setSearch} className="sm:ml-auto w-full sm:w-72" />
+          </div>
 
-          {/* ── In the Spotlight ── */}
-          <SectionHeading
-            eyebrow="From the Journal"
-            title="In the Spotlight"
-            intro="News, offers and events from Maidenhead's independent businesses — the full archive, not just what's currently live on the homepage."
-          />
-          {spotlightStories.length === 0 ? (
-            <p className="text-sm" style={{ color: "rgba(0,0,0,0.55)" }}>No spotlight articles yet.</p>
+          {/* ── Card grid — same layout/typography as the See & Do / Eat &
+              Drink / Shop / Services listing pages ── */}
+          {filtered.length === 0 ? (
+            <p className="text-sm py-16 text-center" style={{ color: "rgba(0,0,0,0.55)" }}>
+              {trimmedSearch
+                ? `No results for "${search.trim()}" — try a different name.`
+                : "Nothing listed here just yet — check back soon."}
+            </p>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {spotlightStories.map((story) => (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+              {filtered.map((it) => (
                 <Link
-                  key={story.slug}
-                  to={`/news/${story.slug}`}
-                  className="group relative bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-                  style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
+                  key={it.slug}
+                  to={it.to}
+                  className="group relative bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
+                  style={{ boxShadow: card.shadow }}
                 >
-                  <div className="relative aspect-[16/10] overflow-hidden">
-                    <img src={story.image} alt={story.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <span
-                      className="absolute top-3 left-3 text-[11px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
-                      style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#000000" }}
-                    >
-                      {story.category}
-                    </span>
-                    {homepageSpotlightSlugs.has(story.slug) && <HomepageBadge />}
+                  <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
+                    <img src={it.image} alt={it.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    {it.homepage && <HomepageBadge />}
                   </div>
-                  <div className="flex flex-col gap-2 p-6 flex-1">
-                    <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{story.date}</p>
-                    <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000" }}>{story.title}</h3>
-                    <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{story.excerpt}</p>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
+                  <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
+                    {it.type && (
+                      <span
+                        className={`${pill.className} !text-[9px] sm:!text-[9px] !px-2 sm:!px-2 !py-0.5 sm:!py-0.5`}
+                        style={{ color: "#000000", backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(13,42,51,0.12)", alignSelf: "flex-start" }}
+                      >
+                        <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: TYPE_COLORS[it.type] ?? "var(--leaf)" }} />
+                        {it.type}
+                      </span>
+                    )}
+                    <h3 className="listing-card-title text-xs sm:text-sm leading-snug sm:leading-tight line-clamp-2 sm:line-clamp-1" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
+                      {it.title}
+                    </h3>
+                    {it.date && (
+                      <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px]" style={{ color: "#000000" }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                          <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
+                        </svg>
+                        <span className="line-clamp-1">{it.date}</span>
+                      </span>
+                    )}
+                    {it.businessName && (
+                      <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px]" style={{ color: "#000000" }}>
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span className="line-clamp-1">{it.businessName}</span>
+                      </span>
+                    )}
+                    <div className="hidden sm:block">
+                      <p className="text-[11px] leading-snug line-clamp-1" style={{ color: "#000000" }}>{it.excerpt}</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold mt-0.5" style={{ color: "#000000" }}>
                       Read more
                       <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                     </span>
