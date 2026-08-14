@@ -14,7 +14,7 @@ export default function ExploreFuturePage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Hero — same height/layout/typography treatment as the Offers
           page hero (bottom-anchored, centered, hero-title typeface), just
           keeping this page's own background image and copy. ── */}
