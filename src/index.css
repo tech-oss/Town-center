@@ -91,13 +91,20 @@ html {
 /* iOS Safari treats the whole document as horizontally rubber-band-scrollable
    the moment any descendant, anywhere on the page, is even a fraction of a
    pixel wider than the viewport — arbitrary-width utilities (w-[90%] etc.),
-   negative margins and absolutely-positioned elements make that easy to hit
-   by accident. Pin both axes here as a hard guard so a single stray element
-   can never drag the whole page sideways; content itself still lays out
-   normally since nothing inside relies on the body actually scrolling. */
-html, body {
+   negative margins and absolutely-positioned elements (e.g. CategoryFilterBar's
+   hidden measurement gauge) make that easy to hit by accident, and new pages
+   keep reintroducing it. overflow-x: hidden on html/body alone isn't always
+   enough on iOS Safari — it still rubber-bands past the edge if ANY ancestor
+   in the chain up to the root can be measured as wider than the viewport, so
+   the guard is repeated on #root, and overscroll-behavior-x kills the
+   left/right bounce gesture itself as a hard backstop regardless of cause. */
+html, body, #root {
   max-width: 100%;
+  width: 100%;
   overflow-x: hidden;
+}
+html, body {
+  overscroll-behavior-x: none;
 }
 
 /* ─── Typography hierarchy (Switzer sans, everywhere) ────────────────────────
