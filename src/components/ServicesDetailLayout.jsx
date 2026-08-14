@@ -46,13 +46,6 @@ function LeafIcon({ size = 18 }) {
     </svg>
   );
 }
-function HeartIcon({ size = 16, filled = false }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-      <path d="M12 20s-7-4.4-9.5-9A5 5 0 0112 6a5 5 0 019.5 5c-2.5 4.6-9.5 9-9.5 9z" />
-    </svg>
-  );
-}
 
 function StarRow({ value, size = 14 }) {
   return (
@@ -107,7 +100,6 @@ export default function ServicesDetailLayout({
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   const galleryImages = [heroImage, ...extraImages].filter(Boolean);
   const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
@@ -376,15 +368,12 @@ export default function ServicesDetailLayout({
                 <GlobeIcon size={16} /> Visit Website
               </a>
             )}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {directionsQuery && (
                 <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
                   <PinIcon size={16} /> Directions
                 </a>
               )}
-              <button type="button" onClick={() => setSaved((v) => !v)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: saved ? "#C0392B" : "var(--forest)" }}>
-                <HeartIcon size={16} filled={saved} /> {saved ? "Saved" : "Save"}
-              </button>
               <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
                 <ShareNodesIcon size={16} /> Share
               </button>
