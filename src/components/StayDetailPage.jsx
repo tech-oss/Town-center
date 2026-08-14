@@ -109,6 +109,8 @@ export default function StayDetailPage({ kind }) {
       email={item.email}
       social={buildSocial(item)}
       website={item.website}
+      extraButtonLabel={isHotels && item.website ? "Booking" : undefined}
+      extraButtonHref={item.website}
       directionsQuery={item.mapQuery}
       relatedHeading={isHotels ? "More Hotels in Maidenhead" : "More Accommodation in Maidenhead"}
       related={related}
