@@ -46,7 +46,7 @@ export default function ExploreFuturePage() {
       <section id="nicholson" className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>The Vision</p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>A bold vision for the heart of town</h2>
+          <h2 className="hero-title uppercase text-3xl md:text-6xl mb-6" style={{ color: "#000000" }}>A bold vision for the heart of town</h2>
           <div className="flex flex-col gap-5">
             {explore.vision.map((p, i) => (
               <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
