@@ -487,7 +487,7 @@ export default function ServicesDetailLayout({
       {related.length > 0 && (
         <div className="max-w-[1200px] mx-auto px-4 md:px-8 pb-16">
           <section className="pt-16">
-            <h2 className="text-xl font-bold mb-5" style={{ color: "#000000" }}>{relatedHeading}</h2>
+            <h2 className="hero-title uppercase text-2xl md:text-3xl mb-5" style={{ color: "#000000" }}>{relatedHeading}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {related.map((it) => (
                 <Link key={it.slug} to={it.to} className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}>
