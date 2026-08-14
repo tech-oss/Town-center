@@ -69,7 +69,7 @@ export default function ArticlePage() {
             <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
           </div>
 
-          <article className="flex flex-col gap-5">
+          <article className="flex flex-col gap-5 text-center max-w-3xl mx-auto">
             {article.body.map((para, i) => (
               <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
                 {para}
