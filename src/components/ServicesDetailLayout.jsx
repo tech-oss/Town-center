@@ -46,6 +46,13 @@ function LeafIcon({ size = 18 }) {
     </svg>
   );
 }
+function HeartIcon({ size = 16, filled = false }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+      <path d="M12 20s-7-4.4-9.5-9A5 5 0 0112 6a5 5 0 019.5 5c-2.5 4.6-9.5 9-9.5 9z" />
+    </svg>
+  );
+}
 
 function StarRow({ value, size = 14 }) {
   return (
@@ -61,8 +68,10 @@ const TABS = ["Overview", "Services", "Reviews", "Photos", "Areas Covered", "FAQ
 
 // ── The Services business-profile page — a distinct, richer layout used
 // only for /services/place/:slug, modeled on a classic local-directory
-// profile (hero header, tabbed body, sticky contact sidebar). Does not
-// affect See & Do / Eat & Drink / Shop, which keep PlaceDetailLayout. ──
+// profile: one continuous two-column grid (≈68% main / 32% sidebar) so the
+// sidebar sits alongside the header, gallery, tabs and overview content
+// from the very top of the page, not just below them. Does not affect
+// See & Do / Eat & Drink / Shop, which keep PlaceDetailLayout. ──
 export default function ServicesDetailLayout({
   breadcrumbs,
   categoryLabel,
@@ -98,6 +107,7 @@ export default function ServicesDetailLayout({
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const galleryImages = [heroImage, ...extraImages].filter(Boolean);
   const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
@@ -117,8 +127,8 @@ export default function ServicesDetailLayout({
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6">
-        {/* Breadcrumb */}
+      <div className="max-w-[1200px] mx-auto px-4 md:px-8 pt-6 pb-16">
+        {/* ── 1. Breadcrumb ── */}
         <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
           {breadcrumbs.map((b, i) => (
             <span key={i}>
@@ -128,93 +138,69 @@ export default function ServicesDetailLayout({
           ))}
         </nav>
 
-        {/* ── Header: logo + identity (left) / CTA rail (right) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mb-6">
-          <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-            <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-              <img src={heroImage} alt={title} className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>{title}</h1>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
-                  <BadgeIcon size={12} /> Verified Business
-                </span>
+        {/* ── One continuous 2-column grid: ~68% main / 32% sidebar. The
+            sidebar starts here (top of the header) and runs the full
+            height of the profile, alongside the gallery/tabs/overview
+            content below — not just next to the header. ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
+          {/* ══ Main column (~68%) ══ */}
+          <div className="min-w-0">
+            {/* ── 2. Business header ── */}
+            <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5 mb-6" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+              <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
+                <img src={heroImage} alt={title} className="w-full h-full object-cover" />
               </div>
-              <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
-                <StarRow value={rating} />
-                <span className="font-semibold">{rating?.toFixed(1)}</span>
-                <span className="opacity-70">({totalReviews} reviews)</span>
-                <span className="opacity-40">·</span>
-                <span>{categoryLabel}</span>
-              </div>
-              {badges.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {badges.map((b) => (
-                    <span key={b} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
-                      {b}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {description && (
-                <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{description}</p>
-              )}
-            </div>
-          </div>
-
-          {/* CTA rail */}
-          <div className="flex flex-col gap-3">
-            {phone && (
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
-                <PhoneIcon size={16} /> Call Now {phone}
-              </a>
-            )}
-            {email && (
-              <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <MailIcon size={16} /> Request a Quote
-              </a>
-            )}
-            {websiteHref && (
-              <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <GlobeIcon size={16} /> Visit Website
-              </a>
-            )}
-            <div className="grid grid-cols-3 gap-3">
-              {directionsQuery && (
-                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <PinIcon size={16} /> Directions
-                </a>
-              )}
-              <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <ShareNodesIcon size={16} /> Share
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Photo strip ── */}
-        {galleryImages.length > 0 && (
-          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
-            <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-3 sm:col-span-2 row-span-2 aspect-[4/3] sm:aspect-auto overflow-hidden cursor-pointer">
-              <img src={galleryImages[0]} alt={title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-            </button>
-            {galleryImages.slice(1, 5).map((src, i) => (
-              <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="relative aspect-square overflow-hidden cursor-pointer">
-                <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                {i === 3 && galleryImages.length > 5 && (
-                  <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold" style={{ backgroundColor: "rgba(28,46,56,0.55)" }}>
-                    View all {galleryImages.length} photos
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                  <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>{title}</h1>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
+                    <BadgeIcon size={12} /> Verified Business
                   </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
+                  <StarRow value={rating} />
+                  <span className="font-semibold">{rating?.toFixed(1)}</span>
+                  <span className="opacity-70">({totalReviews} reviews)</span>
+                  <span className="opacity-40">·</span>
+                  <span>{categoryLabel}</span>
+                </div>
+                {badges.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {badges.map((b) => (
+                      <span key={b} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
+                        {b}
+                      </span>
+                    ))}
+                  </div>
                 )}
-              </button>
-            ))}
-          </div>
-        )}
+                {description && (
+                  <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{description}</p>
+                )}
+              </div>
+            </div>
 
-        {/* ── Body: tabs + content (left) / sidebar (right) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 pb-16">
-          <div>
+            {/* ── 3. Photo gallery — large primary image (~2/3 width) with
+                four smaller tiles beside it, last one carrying the "view
+                all" overlay. ── */}
+            {galleryImages.length > 0 && (
+              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
+                <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-3 sm:col-span-2 row-span-2 aspect-[4/3] sm:aspect-auto overflow-hidden cursor-pointer">
+                  <img src={galleryImages[0]} alt={title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                </button>
+                {galleryImages.slice(1, 5).map((src, i) => (
+                  <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="relative aspect-square overflow-hidden cursor-pointer">
+                    <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                    {i === 3 && galleryImages.length > 5 && (
+                      <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold" style={{ backgroundColor: "rgba(28,46,56,0.55)" }}>
+                        View all {galleryImages.length} photos
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* ── 4. Profile tabs — full width of the main column ── */}
             <div className="flex items-center gap-5 md:gap-7 mb-6 overflow-x-auto border-b" style={{ borderColor: "rgba(28,46,56,0.12)" }}>
               {TABS.map((tb) => (
                 <button
@@ -235,6 +221,7 @@ export default function ServicesDetailLayout({
             <div className="flex flex-col gap-6">
               {tab === "Overview" && (
                 <>
+                  {/* ── 5. About — full main-column width, stats row underneath ── */}
                   <Section heading={aboutHeading}>
                     <p className="text-sm leading-relaxed mb-5" style={{ color: "#000000" }}>{aboutText}</p>
                     {stats.length > 0 && (
@@ -249,6 +236,7 @@ export default function ServicesDetailLayout({
                     )}
                   </Section>
 
+                  {/* ── 6. Services + Why Choose Us — two equal-width cards ── */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <Section heading="Services We Offer">
                       <ul className="flex flex-col gap-2.5">
@@ -273,6 +261,7 @@ export default function ServicesDetailLayout({
                     </Section>
                   </div>
 
+                  {/* ── 7. Areas We Cover + Opening Hours — two equal-width cards ── */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <Section heading="Areas We Cover">
                       <p className="text-sm mb-4" style={{ color: "#000000" }}>{title} provides service across the following areas.</p>
@@ -297,6 +286,7 @@ export default function ServicesDetailLayout({
                     )}
                   </div>
 
+                  {/* ── 8. Customer Reviews — full main-column width ── */}
                   <Section heading="Customer Reviews">
                     <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
                     {reviewsList[0] && <ReviewCard {...reviewsList[0]} />}
@@ -366,8 +356,40 @@ export default function ServicesDetailLayout({
             </div>
           </div>
 
-          {/* ── Sidebar ── */}
-          <div className="flex flex-col gap-6 lg:sticky lg:top-6 self-start">
+          {/* ══ Sidebar (~32%) — starts at the very top, alongside the
+              header, and runs down next to the gallery/tabs/overview
+              content the whole way. ══ */}
+          <div className="flex flex-col gap-4 lg:sticky lg:top-6 self-start">
+            {/* CTA rail */}
+            {phone && (
+              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
+                <PhoneIcon size={16} /> Call Now {phone}
+              </a>
+            )}
+            {email && (
+              <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                <MailIcon size={16} /> Request a Quote
+              </a>
+            )}
+            {websiteHref && (
+              <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                <GlobeIcon size={16} /> Visit Website
+              </a>
+            )}
+            <div className="grid grid-cols-3 gap-3">
+              {directionsQuery && (
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <PinIcon size={16} /> Directions
+                </a>
+              )}
+              <button type="button" onClick={() => setSaved((v) => !v)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: saved ? "#C0392B" : "var(--forest)" }}>
+                <HeartIcon size={16} filled={saved} /> {saved ? "Saved" : "Save"}
+              </button>
+              <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                <ShareNodesIcon size={16} /> Share
+              </button>
+            </div>
+
             {(address || phone || email) && (
               <Section heading="Contact Details">
                 <div className="flex flex-col gap-3">
@@ -465,9 +487,9 @@ export default function ServicesDetailLayout({
           </div>
         </div>
 
-        {/* ── Similar businesses ── */}
+        {/* ── 9. Similar businesses — full-width 4-card grid below both columns ── */}
         {related.length > 0 && (
-          <section className="pb-16">
+          <section className="pt-16">
             <h2 className="text-xl font-bold mb-5" style={{ color: "#000000" }}>{relatedHeading}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {related.map((it) => (
