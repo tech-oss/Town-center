@@ -172,6 +172,10 @@ export default function PlaceDetailLayout({
   afterMap,
   extraButtonLabel,
   extraButtonHref,
+  // Optional extra pills rendered alongside the category pill — same
+  // styling, just additional badges (e.g. a star rating) for listing types
+  // that need one more piece of at-a-glance info than the base layout.
+  extraBadges,
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -254,14 +258,19 @@ export default function PlaceDetailLayout({
             ))}
           </nav>
 
-          {categoryLabel && (
-            <span
-              className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full mb-5"
-              style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
-            >
-              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: categoryColor }} />
-              {categoryLabel}
-            </span>
+          {(categoryLabel || extraBadges) && (
+            <div className="flex flex-wrap items-center gap-3 mb-5">
+              {categoryLabel && (
+                <span
+                  className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full"
+                  style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
+                >
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: categoryColor }} />
+                  {categoryLabel}
+                </span>
+              )}
+              {extraBadges}
+            </div>
           )}
 
           {remainingDescription?.length > 0 && (
