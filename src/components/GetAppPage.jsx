@@ -86,8 +86,8 @@ export default function GetAppPage() {
           {/* CTA */}
           <div className="mt-14 rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Download today</h2>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>Free to download on iOS and Android.</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ color: "#ffffff" }}>Download today</h2>
+              <p className="text-sm leading-relaxed" style={{ color: "#ffffff" }}>Free to download on iOS and Android.</p>
             </div>
             <AppBadges className="flex-col sm:flex-row" />
           </div>
