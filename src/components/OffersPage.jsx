@@ -73,17 +73,41 @@ function SearchInput({ value, onChange, className = "" }) {
   );
 }
 
-// Type filter — one continuous white pill-shaped bar with divider-separated
-// chips (All, then one per tag), matching CategoryFilterBar's desktop bar
-// exactly (same bg/shadow/radius/divider treatment used on See & Do, Eat &
-// Drink, Shop and Services) — state-driven rather than route-driven since
-// this listing spans multiple article types instead of one section's
-// categories.
-function TypeFilterBar({ types, active, onChange }) {
+function RadioDot({ active }) {
   return (
-    <div className="max-w-full overflow-x-auto no-scrollbar sm:overflow-visible">
+    <span
+      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+      style={{ border: `2px solid ${active ? "var(--leaf)" : "rgba(28,46,56,0.25)"}` }}
+    >
+      {active && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />}
+    </span>
+  );
+}
+
+// Type filter — desktop: one continuous white pill-shaped bar with
+// divider-separated chips (All, then one per tag), matching
+// CategoryFilterBar's desktop bar exactly (same bg/shadow/radius/divider
+// treatment used on See & Do, Eat & Drink, Shop and Services). Mobile: a
+// "Browse Types" button that opens the same bottom-sheet pattern
+// CategoryFilterBar uses, rather than a horizontally scrolling bar — state-
+// driven instead of route-driven since this listing spans multiple article
+// types instead of one section's categories.
+function TypeFilterBar({ types, active, onChange }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const activeLabel = active ?? "Browse Types";
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [mobileOpen]);
+
+  return (
+    <>
+      {/* ── Desktop ── */}
       <div
-        className="inline-flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
+        className="hidden sm:inline-flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
         style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
       >
         <button
@@ -112,7 +136,72 @@ function TypeFilterBar({ types, active, onChange }) {
           );
         })}
       </div>
-    </div>
+
+      {/* ── Mobile: button opening a bottom sheet, same pattern as
+          CategoryFilterBar's "Browse Categories" ── */}
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        className="sm:hidden inline-flex items-center gap-2.5 pl-5 pr-4 py-3 rounded-full text-sm font-semibold transition-opacity shrink-0"
+        style={{ backgroundColor: "var(--forest)", color: "#fff" }}
+      >
+        {activeLabel}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="7" x2="20" y2="7" /><circle cx="15" cy="7" r="2" fill="#fff" stroke="none" />
+          <line x1="4" y1="17" x2="20" y2="17" /><circle cx="9" cy="17" r="2" fill="#fff" stroke="none" />
+        </svg>
+      </button>
+
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:hidden"
+          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+          onClick={() => setMobileOpen(false)}
+        >
+          <div
+            className="w-full bg-white rounded-t-3xl pt-5 pb-6 max-h-[80vh] overflow-y-auto overscroll-contain"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 mb-4">
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em]" style={{ color: "#000000" }}>Types</h3>
+              <button
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close"
+                className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm font-bold"
+                style={{ backgroundColor: "var(--forest)" }}
+              >✕</button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => { onChange(null); setMobileOpen(false); }}
+              className="flex items-center justify-between gap-3 w-full px-6 py-3.5 border-t"
+              style={{ borderColor: "rgba(28,46,56,0.08)" }}
+            >
+              <span className="flex items-center gap-3 text-[15px]" style={{ color: "#000000" }}>
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "var(--forest)" }} /> All
+              </span>
+              <RadioDot active={!active} />
+            </button>
+
+            {types.map((t) => (
+              <button
+                type="button"
+                key={t}
+                onClick={() => { onChange(t); setMobileOpen(false); }}
+                className="flex items-center justify-between gap-3 w-full px-6 py-3.5 border-t"
+                style={{ borderColor: "rgba(28,46,56,0.08)" }}
+              >
+                <span className="flex items-center gap-3 text-[15px]" style={{ color: "#000000" }}>
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: TYPE_COLORS[t] ?? "var(--leaf)" }} /> {t}
+                </span>
+                <RadioDot active={active === t} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -222,9 +311,9 @@ export default function OffersPage() {
           </nav>
 
           {/* ── Search + filter ── */}
-          <div className="mb-10 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="mb-10 flex items-center gap-3">
             <TypeFilterBar types={types} active={activeType} onChange={setActiveType} />
-            <SearchInput value={search} onChange={setSearch} className="sm:ml-auto w-full sm:w-72" />
+            <SearchInput value={search} onChange={setSearch} className="sm:ml-auto flex-1 min-w-0 sm:flex-none sm:w-72" />
           </div>
 
           {/* ── Card grid — same layout/typography as the See & Do / Eat &
