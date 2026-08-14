@@ -74,8 +74,23 @@ export const explore = {
   masterplan: {
     eyebrow: "The Masterplan",
     heading: "Explore the Nicholson Quarter",
-    body: "A network of yards and squares — from Nicholson Yard and White Hart Yard to Brewery Yard and Sir Nicholas Winton Square — knitting new streets, homes, workspace, a cinema and health club into the heart of the town.",
-    image: "/images/explore/masterplan.jpg",
+    body: "A network of yards and squares — from Nicholson Yard and White Hart Yard to Brewery Yard and Sir Nicholas Winton Square — knitting new streets, homes, workspace, a cinema and health club into the heart of the town. Use the map below to explore each part of the new quarter.",
+    image: "/images/explore/nicholson-map.png",
+    // Numbered key to the masterplan image, one entry per location it marks.
+    locations: [
+      { number: 1, title: "High Street", body: "The backbone of the town centre, reimagined with improved shops, cafés, restaurants and public spaces — a lively destination to shop, relax and spend time together." },
+      { number: 2, title: "Brewery Yard", tagline: "Celebrate the independent", body: "A home for independent businesses, creative talent and local makers — flexible, characterful spaces that champion originality over uniformity." },
+      { number: 3, title: "Brock Lane", tagline: "A key connection to the rest of the town", body: "A welcoming new gateway into the town centre, linking Queen Street retail and the cultural quarter with a vibrant, pedestrian-friendly street in its own right." },
+      { number: 4, title: "Car Park", body: "A new, upgraded town-centre car park with cycle parking and electric vehicle charging points to encourage more sustainable travel." },
+      { number: 5, title: "The Yards", body: "A series of attractive pedestrian routes connecting the High Street with Nicholson Quarter, with flexible retail units, seating, planting and space for markets and food stalls." },
+      { number: 6, title: "White Hart Yard", tagline: "Made for wandering", body: "A destination for discovery — independent boutiques, artisan makers and emerging brands, with seasonal markets and pop-ups that reward exploration." },
+      { number: 7, title: "Nicholson Yard", tagline: "Fresh flavours, always on the menu", body: "A curated dining destination blending acclaimed local operators with exciting new arrivals — from artisan coffee to destination restaurants and street food." },
+      { number: 8, title: "Sir Nicholas Winton Square", tagline: "Maidenhead's New Town Square", body: "A vibrant new civic heart for everyday life, celebrations and events, with café terraces, green landscaping and a flexible design for festivals and markets." },
+      { number: 9, title: "Moffatt Square", tagline: "The place to relax, indulge and unwind", body: "A beautifully landscaped public square where dining, nature and social life come together — from morning coffee to relaxed evening gatherings." },
+      { number: 10, title: "Moffatt Street", tagline: "Savour life's simple pleasures", body: "A contemporary market hall of specialist food merchants, independent producers and artisan makers, celebrating the best in seasonal, locally sourced produce." },
+      { number: 11, title: "Desborough Way", tagline: "Indulge in the unusual", body: "Independent boutiques, emerging designers and specialist makers offering a more thoughtful, considered way to shop." },
+      { number: 12, title: "King Street", body: "Set to benefit from improvements creating a more attractive, vibrant and welcoming environment, strengthening connections across the town centre." },
+    ],
   },
 
   developments: {

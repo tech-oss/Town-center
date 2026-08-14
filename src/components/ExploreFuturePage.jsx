@@ -91,8 +91,29 @@ export default function ExploreFuturePage() {
             <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.masterplan.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.masterplan.body}</p>
           </div>
-          <div className="overflow-hidden bg-white p-2 md:p-3 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
+          <div className="overflow-hidden bg-white p-2 md:p-3 mb-10 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
             <img src={explore.masterplan.image} alt="Nicholson Quarter masterplan" loading="lazy" className="w-full h-auto" />
+          </div>
+
+          {/* Numbered key to the masterplan — one card per marked location. */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {explore.masterplan.locations.map((loc) => (
+              <div key={loc.number} className="bg-white rounded-2xl p-5 flex flex-col" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span
+                    className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                    style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}
+                  >
+                    {loc.number}
+                  </span>
+                  <h3 className="font-bold text-base leading-snug" style={{ color: "#000000" }}>{loc.title}</h3>
+                </div>
+                {loc.tagline && (
+                  <p className="text-xs font-semibold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--leaf)" }}>{loc.tagline}</p>
+                )}
+                <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{loc.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
