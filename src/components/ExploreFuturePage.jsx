@@ -2,14 +2,6 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { explore } from "../Data/explore";
 
-const devTagColors = {
-  "Town Centre Regeneration": { bg: "#FDE2E1", text: "#B3261E" },
-  "Riverside & Station Edge": { bg: "#D6ECFB", text: "#1F6FA8" },
-  "South-West Growth": { bg: "#DCF4E3", text: "#1E7A45" },
-  "Employment & Industrial": { bg: "#E7E1F7", text: "#5B3FA0" },
-  "Office & Business": { bg: "#FFF0D6", text: "#9A6B12" },
-};
-
 export default function ExploreFuturePage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -101,32 +93,6 @@ export default function ExploreFuturePage() {
           </div>
           <div className="overflow-hidden bg-white p-2 md:p-3 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
             <img src={explore.masterplan.image} alt="Nicholson Quarter masterplan" loading="lazy" className="w-full h-auto" />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Major developments map + grid ── */}
-      <section id="developments" className="pb-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
-        <div className="max-w-6xl mx-auto pt-16 md:pt-20">
-          <div className="max-w-2xl mb-8">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.developments.eyebrow}</p>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.developments.heading}</h2>
-            <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.developments.intro}</p>
-          </div>
-          <div className="overflow-hidden bg-white p-2 md:p-3 mb-10 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
-            <img src={explore.developments.image} alt="Map of major current and planned developments in Maidenhead" loading="lazy" className="w-full h-auto" />
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {explore.developments.items.map((d) => {
-              const c = devTagColors[d.tag] ?? { bg: "#E5E7EB", text: "#374151" };
-              return (
-                <div key={d.title} className="bg-white rounded-2xl p-5 flex flex-col" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
-                  <span className="self-start text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>{d.tag}</span>
-                  <h3 className="font-bold text-base leading-snug mb-2" style={{ color: "#000000" }}>{d.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{d.desc}</p>
-                </div>
-              );
-            })}
           </div>
         </div>
       </section>
