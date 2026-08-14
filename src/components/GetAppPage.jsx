@@ -18,8 +18,11 @@ export default function GetAppPage() {
       <section className="relative overflow-hidden px-6 md:px-12 py-16 md:py-24" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 80% at 85% 15%, rgba(82,199,182,0.3) 0%, transparent 70%)" }} />
         <div className="relative max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          {/* Copy */}
-          <div>
+          {/* Copy — App Store/Play badges are their own grid item below (not
+              nested here) so mobile can stack image above them while desktop
+              keeps this whole block, image and badges in their usual spots
+              via explicit column/row placement. */}
+          <div className="md:col-start-1 md:row-start-1">
             <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
               <Link to="/" className="hover:text-white transition-colors">Home</Link>
               <span className="mx-2 opacity-50">/</span>
@@ -29,7 +32,7 @@ export default function GetAppPage() {
             <h1 className="hero-title uppercase text-3xl md:text-5xl lg:text-6xl leading-tight text-white mb-6" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
               Get the Maidenhead App
             </h1>
-            <div className="flex flex-col gap-4 mb-8">
+            <div className="flex flex-col gap-4">
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>
                 Make the most of everything the town has to offer, all from one convenient place.
               </p>
@@ -41,13 +44,14 @@ export default function GetAppPage() {
                 Maidenhead every day.
               </p>
             </div>
-            <AppBadges className="flex-col sm:flex-row" />
           </div>
 
           {/* App-in-use photo — soft-masked so its edges dissolve into the
               hero's own dark gradient rather than sitting as a hard-edged
-              rectangle photo. */}
-          <div className="flex justify-center md:justify-end">
+              rectangle photo. Mobile order: copy text, then photo, then
+              badges (per request); desktop keeps it beside the copy,
+              spanning both rows. */}
+          <div className="flex justify-center md:justify-end md:col-start-2 md:row-start-1 md:row-span-2">
             <div className="relative w-full max-w-[560px] h-[380px] md:h-[520px]">
               <img
                 src="/images/get-app/app-hero.jpg"
@@ -62,6 +66,10 @@ export default function GetAppPage() {
                 }}
               />
             </div>
+          </div>
+
+          <div className="mt-8 md:mt-0 md:col-start-1 md:row-start-2">
+            <AppBadges className="flex-col sm:flex-row" />
           </div>
         </div>
       </section>
