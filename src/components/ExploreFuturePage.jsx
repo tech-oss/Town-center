@@ -74,7 +74,7 @@ export default function ExploreFuturePage() {
         <div className="max-w-6xl mx-auto flex flex-col gap-16 md:gap-24">
           {explore.features.map((f, i) => (
             <div key={f.id} id={f.id} className={`grid md:grid-cols-2 gap-8 md:gap-14 items-center ${i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}>
-              <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
+              <div className="overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                 <img src={f.image} alt={f.heading} loading="lazy" className="w-full h-full object-cover" />
               </div>
               <div>
@@ -99,8 +99,8 @@ export default function ExploreFuturePage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.masterplan.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.masterplan.body}</p>
           </div>
-          <div className="rounded-3xl overflow-hidden bg-white p-2 md:p-3 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
-            <img src={explore.masterplan.image} alt="Nicholson Quarter masterplan" loading="lazy" className="w-full h-auto rounded-2xl" />
+          <div className="overflow-hidden bg-white p-2 md:p-3 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
+            <img src={explore.masterplan.image} alt="Nicholson Quarter masterplan" loading="lazy" className="w-full h-auto" />
           </div>
         </div>
       </section>
@@ -113,8 +113,8 @@ export default function ExploreFuturePage() {
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.developments.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.developments.intro}</p>
           </div>
-          <div className="rounded-3xl overflow-hidden bg-white p-2 md:p-3 mb-10 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
-            <img src={explore.developments.image} alt="Map of major current and planned developments in Maidenhead" loading="lazy" className="w-full h-auto rounded-2xl" />
+          <div className="overflow-hidden bg-white p-2 md:p-3 mb-10 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
+            <img src={explore.developments.image} alt="Map of major current and planned developments in Maidenhead" loading="lazy" className="w-full h-auto" />
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {explore.developments.items.map((d) => {
@@ -142,7 +142,7 @@ export default function ExploreFuturePage() {
 
       {/* ── Closing ── */}
       <section className="px-6 md:px-12 pb-24">
-        <div className="max-w-6xl mx-auto rounded-3xl overflow-hidden relative">
+        <div className="max-w-6xl mx-auto overflow-hidden relative">
           <img src="/images/explore/evening.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.92), rgba(31,155,181,0.82))" }} />
           <div className="relative z-10 px-8 md:px-14 py-14 md:py-20 max-w-3xl">
