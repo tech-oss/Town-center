@@ -168,6 +168,14 @@ h5, h6, .text-sm, .text-xs {
   line-height: 1;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Switzer for all remaining UI text — nav, buttons, links, labels, forms */
 button, input, select, textarea, a, label,
 p, span, li {

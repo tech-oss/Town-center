@@ -81,35 +81,37 @@ function SearchInput({ value, onChange, className = "" }) {
 // categories.
 function TypeFilterBar({ types, active, onChange }) {
   return (
-    <div
-      className="inline-flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
-      style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
-    >
-      <button
-        type="button"
-        onClick={() => onChange(null)}
-        className="inline-flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors shrink-0"
-        style={!active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "transparent", color: "#000000" }}
+    <div className="max-w-full overflow-x-auto no-scrollbar sm:overflow-visible">
+      <div
+        className="inline-flex items-center flex-nowrap bg-white rounded-full pl-1.5 pr-2 py-1.5"
+        style={{ boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }}
       >
-        All
-      </button>
-      {types.map((t) => {
-        const isActive = active === t;
-        return (
-          <div key={t} className="flex items-center shrink-0">
-            <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
-            <button
-              type="button"
-              onClick={() => onChange(t)}
-              className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors hover:opacity-70"
-              style={isActive ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "transparent", color: "#000000" }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : (TYPE_COLORS[t] ?? "var(--leaf)") }} />
-              {t}
-            </button>
-          </div>
-        );
-      })}
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          className="inline-flex items-center gap-2 pl-4 pr-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors shrink-0"
+          style={!active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "transparent", color: "#000000" }}
+        >
+          All
+        </button>
+        {types.map((t) => {
+          const isActive = active === t;
+          return (
+            <div key={t} className="flex items-center shrink-0">
+              <span className="w-px h-6 mx-0.5 lg:mx-1.5 shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.12)" }} />
+              <button
+                type="button"
+                onClick={() => onChange(t)}
+                className="inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors hover:opacity-70 shrink-0"
+                style={isActive ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "transparent", color: "#000000" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: isActive ? "#fff" : (TYPE_COLORS[t] ?? "var(--leaf)") }} />
+                {t}
+              </button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
