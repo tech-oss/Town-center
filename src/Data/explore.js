@@ -22,9 +22,9 @@ export const explore = {
 
   stats: [
     { value: "55+", label: "New shops, bars & restaurants" },
-    { value: "450+", label: "New homes & senior living" },
-    { value: "1000s", label: "Residents consulted" },
-    { value: "1", label: "Once-in-a-generation transformation" },
+    { value: "800+", label: "New homes & senior living" },
+    { value: "450+", label: "Car parking spaces" },
+    { value: "1000+", label: "New jobs" },
   ],
 
   // Alternating image + text feature blocks
