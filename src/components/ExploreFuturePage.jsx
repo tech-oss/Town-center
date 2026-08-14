@@ -30,7 +30,7 @@ export default function ExploreFuturePage() {
         <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium mb-2 text-white" style={{ letterSpacing: "-0.01em" }}>
           {explore.hero.subtitle}
         </p>
-        <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium" style={{ color: "rgba(255,255,255,0.75)", letterSpacing: "-0.01em" }}>
+        <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium text-white" style={{ letterSpacing: "-0.01em" }}>
           {explore.hero.lead}
         </p>
       </section>
