@@ -57,13 +57,7 @@ export default function GetAppPage() {
                 src="/images/get-app/app-hero.jpg"
                 alt="Using the Maidenhead app on a phone"
                 className="w-full h-full"
-                style={{
-                  objectFit: "cover",
-                  objectPosition: "62% 42%",
-                  maskImage: "radial-gradient(ellipse 78% 78% at 50% 48%, black 55%, transparent 100%)",
-                  WebkitMaskImage: "radial-gradient(ellipse 78% 78% at 50% 48%, black 55%, transparent 100%)",
-                  filter: "drop-shadow(0 30px 70px rgba(0,0,0,0.5))",
-                }}
+                style={{ objectFit: "cover", objectPosition: "62% 42%" }}
               />
             </div>
           </div>
