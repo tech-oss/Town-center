@@ -53,7 +53,11 @@
   --ink:       #1A1A1A;   /* body text                                          */
 
   /* — One grotesque sans (Switzer ≈ Suisse Int'l) for everything: hero
-       titles, page headings, body, nav, cards and all UI. — */
+       titles, page headings, body, nav, cards and all UI. The one exception
+       is the homepage's own section titles (EXPLORE, FEATURED STORIES, IN
+       THE SPOTLIGHT, OUR TRADERS, WHAT'S ON), which keep the display serif
+       — see .home-section-title below. — */
+  --font-serif:   "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-heading: "Switzer", -apple-system, "Segoe UI", sans-serif;
   --font-body:    "Switzer", -apple-system, "Segoe UI", sans-serif;
 
@@ -124,10 +128,14 @@ h5, h6, .text-sm, .text-xs {
 .text-5xl, .text-6xl, .text-7xl, .text-8xl { letter-spacing: -0.03em; }
 
 /* Homepage section titles (EXPLORE, FEATURED STORIES, IN THE SPOTLIGHT, OUR
-   TRADERS, WHAT'S ON) — deliberately bolder than the 300-weight default the
-   rest of the h2s use. */
+   TRADERS, WHAT'S ON) — the one place the display serif survives, at a
+   bolder weight than the rest of the (now-sans) h2s use. */
 .home-section-title {
+  font-family: var(--font-serif);
   font-weight: 600 !important;
+  line-height: 1.06;
+  font-variation-settings: "opsz" 144;
+  letter-spacing: -0.03em;
 }
 
 /* See & Do / Eat & Drink / Shop / Services listing cards — the h3 name
