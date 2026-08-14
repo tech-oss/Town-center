@@ -175,12 +175,14 @@ export default function FeatureArticlePage() {
         </div>
       </section>
 
-      {/* ── More stories ── */}
+      {/* ── More stories — same card grid (size, spacing, typography) as
+          PlaceDetailLayout's "related" section on See & Do, for mobile and
+          desktop alike. ── */}
       {more.length > 0 && (
-        <section className="pb-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
-          <div className="max-w-4xl mx-auto pt-16 md:pt-20">
+        <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+          <div className="max-w-6xl mx-auto">
             <h2 className="hero-title uppercase text-2xl md:text-3xl mb-8" style={{ color: "#000000" }}>More Stories</h2>
-            <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:gap-8">
               {more.map((f) => (
                 <Link
                   key={f.slug}
@@ -188,18 +190,18 @@ export default function FeatureArticlePage() {
                   className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
-                  <div className="relative aspect-[16/9] overflow-hidden">
+                  <div className="relative aspect-[4/3] overflow-hidden">
                     <img src={f.cardImage} alt={f.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <span
-                      className="absolute top-3 left-3 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
+                      className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
                       style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--forest)" }} />
+                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: "var(--forest)" }} />
                       {f.eyebrow}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-1.5 p-5">
-                    <h3 className="font-bold text-base leading-snug" style={{ color: "#000000" }}>{f.cardHeading}</h3>
+                  <div className="flex flex-col gap-0.5 sm:gap-2 p-2 sm:p-6">
+                    <h3 className="font-bold text-xs sm:text-xl leading-snug line-clamp-2" style={{ color: "#000000" }}>{f.cardHeading}</h3>
                   </div>
                 </Link>
               ))}
