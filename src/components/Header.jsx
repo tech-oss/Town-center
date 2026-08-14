@@ -79,7 +79,7 @@ const Header = forwardRef(function Header(_, ref) {
     >
       {/* Utility bar — links on the left, search on the right */}
       <div
-        className="hidden md:flex justify-between items-center gap-5 px-8 py-1.5 text-xs font-medium"
+        className="hidden lg:flex justify-between items-center gap-5 px-8 py-1.5 text-xs font-medium"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
       >
         <div className="flex items-center gap-5">
@@ -118,20 +118,20 @@ const Header = forwardRef(function Header(_, ref) {
       </div>
 
       {/* Main nav bar */}
-      <div className="flex items-center justify-between px-6 md:px-8 py-2">
+      <div className="flex items-center justify-between px-6 lg:px-8 py-2">
         {/* Logo lockup */}
         <Link ref={logoRef} to="/" onClick={closeAll} className="brand-lockup shrink-0 flex flex-col items-center leading-none" aria-label={header.logoAlt}>
-          <BrandMark imgClassName="h-14 md:h-16 w-auto" />
-          <span data-logo-word className="-mt-1.5 text-base md:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
+          <BrandMark imgClassName="h-14 lg:h-16 w-auto" />
+          <span data-logo-word className="-mt-1.5 text-base lg:text-xl font-semibold tracking-[0.02em] text-white" style={{ fontFamily: "var(--font-body)" }}>
             {header.logo}
           </span>
-          <span data-logo-tag className="mt-1 text-[9px] md:text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: "var(--sage)" }}>
+          <span data-logo-tag className="mt-1 text-[9px] lg:text-[10px] font-semibold uppercase tracking-[0.02em]" style={{ color: "var(--sage)" }}>
             {header.tagline}
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-7" aria-label="Primary">
+        <nav className="hidden lg:flex items-center gap-7" aria-label="Primary">
           {header.navItems.map((nav) => {
             const menu = menusByLabel[nav.label];
             if (menu) {
@@ -184,7 +184,7 @@ const Header = forwardRef(function Header(_, ref) {
 
         {/* Hamburger */}
         <button
-          className="md:hidden flex flex-col gap-1.5 p-1"
+          className="lg:hidden flex flex-col gap-1.5 p-1"
           aria-label={menuOpen ? "Close menu" : "Open menu"}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((o) => !o)}
@@ -197,7 +197,7 @@ const Header = forwardRef(function Header(_, ref) {
 
       {/* Desktop mega-menu dropdown */}
       {openDropdown && menusByLabel[openDropdown] && (
-        <div className="hidden md:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
+        <div className="hidden lg:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
           <div
             className={`py-8 grid gap-10 ${openDropdown === "Explore" ? "ml-auto px-8 w-max" : "max-w-6xl mx-auto px-8"}`}
             style={{ gridTemplateColumns: `repeat(${menusByLabel[openDropdown].columns.length}, minmax(0, 1fr))` }}
@@ -229,7 +229,7 @@ const Header = forwardRef(function Header(_, ref) {
 
       {/* Mobile drawer */}
       {menuOpen && (
-        <nav className="md:hidden px-6 pb-5 flex flex-col gap-1 max-h-[75vh] overflow-y-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }} aria-label="Mobile primary">
+        <nav className="lg:hidden px-6 pb-5 flex flex-col gap-1 max-h-[75vh] overflow-y-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }} aria-label="Mobile primary">
           {/* Search */}
           <form
             onSubmit={(e) => e.preventDefault()}

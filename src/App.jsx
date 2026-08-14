@@ -34,6 +34,7 @@ import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
 import ChatWidget from './components/ChatWidget'
 import LogoAnimation from './components/LogoAnimation/LogoAnimation'
+import useOrientationRepaint from './hooks/useOrientationRepaint'
 
 // See & Do place links now use the shared event layout at /event/:slug.
 function SeeDoPlaceRedirect() {
@@ -48,6 +49,7 @@ function SectionCategoryRedirect() {
 }
 
 function PublicSite() {
+  useOrientationRepaint()
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
   const { pathname } = useLocation()

@@ -171,7 +171,7 @@ export default function Hero() {
           >
             Welcome to
           </span>
-          <span className="hero-title block text-5xl sm:text-7xl md:text-9xl leading-none">
+          <span className="hero-title block text-5xl sm:text-7xl md:text-8xl lg:text-9xl leading-none">
             Maidenhead
           </span>
         </h1>
