@@ -96,7 +96,7 @@ export default function ExploreFuturePage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-8">
             <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.masterplan.eyebrow}</p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.masterplan.heading}</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.masterplan.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.masterplan.body}</p>
           </div>
           <div className="overflow-hidden bg-white p-2 md:p-3 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
@@ -110,7 +110,7 @@ export default function ExploreFuturePage() {
         <div className="max-w-6xl mx-auto pt-16 md:pt-20">
           <div className="max-w-2xl mb-8">
             <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.developments.eyebrow}</p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.developments.heading}</h2>
+            <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{explore.developments.heading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{explore.developments.intro}</p>
           </div>
           <div className="overflow-hidden bg-white p-2 md:p-3 mb-10 shadow-[0_24px_60px_-28px_rgba(28,46,56,0.45)]">
@@ -135,7 +135,7 @@ export default function ExploreFuturePage() {
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Your Town, Your Future</p>
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>{explore.community.heading}</h2>
+          <h2 className="text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>{explore.community.heading}</h2>
           <p className="text-lg md:text-xl leading-relaxed" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>{explore.community.body}</p>
         </div>
       </section>
@@ -146,7 +146,7 @@ export default function ExploreFuturePage() {
           <img src="/images/explore/evening.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.92), rgba(31,155,181,0.82))" }} />
           <div className="relative z-10 px-8 md:px-14 py-14 md:py-20 max-w-3xl">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-5 leading-tight">{explore.closing.heading}</h2>
+            <h2 className="text-2xl md:text-4xl font-bold text-white mb-5 leading-tight">{explore.closing.heading}</h2>
             <div className="flex flex-col gap-4">
               {explore.closing.body.map((p, i) => (
                 <p key={i} className="text-base md:text-lg leading-relaxed text-white/85">{p}</p>
