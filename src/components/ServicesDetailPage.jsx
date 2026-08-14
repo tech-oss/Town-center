@@ -6,6 +6,7 @@ import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import ServicesDetailLayout from "./ServicesDetailLayout";
+import NewsOffers from "./NewsOffers";
 
 function buildSocial(item) {
   const s = item.social;
@@ -75,6 +76,7 @@ export default function ServicesDetailPage() {
       businessInfo={item.businessInfo}
       accreditations={item.accreditations}
       faq={item.faq}
+      afterGrid={!item.freePlan && <NewsOffers item={item} />}
       relatedHeading="Similar Businesses"
       related={related.map((it) => ({
         slug: it.slug,

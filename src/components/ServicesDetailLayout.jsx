@@ -93,6 +93,7 @@ export default function ServicesDetailLayout({
   businessInfo,
   accreditations = [],
   faq = [],
+  afterGrid,
   relatedHeading,
   related = [],
 }) {
@@ -119,7 +120,7 @@ export default function ServicesDetailLayout({
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      <div className="max-w-[1200px] mx-auto px-4 md:px-8 pt-6 pb-16">
+      <div className="max-w-[1200px] mx-auto px-4 md:px-8 pt-6">
         {/* ── 1. Breadcrumb ── */}
         <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
           {breadcrumbs.map((b, i) => (
@@ -475,9 +476,16 @@ export default function ServicesDetailLayout({
             )}
           </div>
         </div>
+      </div>
 
-        {/* ── 9. Similar businesses — full-width 4-card grid below both columns ── */}
-        {related.length > 0 && (
+      {/* ── News & Offers — same full-width glassmorphic section as Eat &
+          Drink / See & Do / Shop detail pages, sitting between the profile
+          grid and Similar Businesses. ── */}
+      {afterGrid}
+
+      {/* ── 9. Similar businesses — full-width 4-card grid below both columns ── */}
+      {related.length > 0 && (
+        <div className="max-w-[1200px] mx-auto px-4 md:px-8 pb-16">
           <section className="pt-16">
             <h2 className="text-xl font-bold mb-5" style={{ color: "#000000" }}>{relatedHeading}</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -500,8 +508,8 @@ export default function ServicesDetailLayout({
               ))}
             </div>
           </section>
-        )}
-      </div>
+        </div>
+      )}
 
       {shareOpen && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} onClick={() => setShareOpen(false)}>
