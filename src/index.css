@@ -52,12 +52,8 @@
   --sand:      #F0FAFA;   /* pale teal-white — alternate section backgrounds   */
   --ink:       #1A1A1A;   /* body text                                          */
 
-  /* — Editorial pairing, per the reference system: a high-contrast display
-       serif (Fraunces ≈ Reckless Neue) reserved for hero titles and major
-       editorial headings, against a quiet grotesque sans (Switzer ≈ Suisse
-       Int'l) for body, nav, cards and all UI. The contrast BETWEEN the two
-       families is the design language — neither ever does the other's job. — */
-  --font-serif:   "Fraunces", "Iowan Old Style", Georgia, serif;
+  /* — One grotesque sans (Switzer ≈ Suisse Int'l) for everything: hero
+       titles, page headings, body, nav, cards and all UI. — */
   --font-heading: "Switzer", -apple-system, "Segoe UI", sans-serif;
   --font-body:    "Switzer", -apple-system, "Segoe UI", sans-serif;
 
@@ -100,36 +96,19 @@ html, body {
   overflow-x: hidden;
 }
 
-/* ─── Typography hierarchy (Fraunces serif display / Switzer sans UI) ────────
-   Modelled on the reference system: dramatic editorial moments — hero titles,
-   major page headings, featured section titles — set in a light high-contrast
-   serif with tight tracking and compact leading; everything else (mid/small
-   headings, cards, nav, body, buttons) in the quiet grotesque sans at
-   restrained weights (300–500, no bold anywhere). Weights use !important:
-   Tailwind utility classes like font-bold/font-semibold are applied inline
-   throughout ~20+ components, and would otherwise win the cascade. This is
-   the single source of truth so the system applies everywhere without
-   hand-editing every component. */
-h1, h2, h3, h4, h5, h6 {
+/* ─── Typography hierarchy (Switzer sans, everywhere) ────────────────────────
+   One grotesque sans family for every heading tier and all UI, at restrained
+   weights (300–500, no bold anywhere). Weights use !important: Tailwind
+   utility classes like font-bold/font-semibold are applied inline throughout
+   ~20+ components, and would otherwise win the cascade. This is the single
+   source of truth so the system applies everywhere without hand-editing
+   every component. */
+h1, h2, h3, h4, h5, h6, .font-serif-display {
   font-family: var(--font-heading);
   font-weight: 400 !important;
   letter-spacing: -0.02em;
   line-height: 1.12;
   text-wrap: balance;   /* avoid orphan words on multi-line headings */
-}
-
-/* Major editorial headings go serif: page titles (h1) and section titles (h2)
-   are the "visual impact" tier; h3–h6 stay sans so cards and UI read cleanly.
-   Serif display sits at light weight with snug leading, like the reference's
-   oversized light serif titles. */
-h1, h2, .font-serif-display {
-  font-family: var(--font-serif);
-  font-weight: 400 !important;   /* .text-3xl+ rule below lightens display sizes to 300 */
-  line-height: 1.06;
-  /* Force Fraunces' largest optical size: maximum thick/thin stroke contrast,
-     the defining trait of the reference's display serif at every size. */
-  font-variation-settings: "opsz" 144;
-  letter-spacing: -0.03em;
 }
 
 /* Large headings step down to the light display weight; small headings step

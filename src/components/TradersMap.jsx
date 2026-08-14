@@ -437,7 +437,7 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
             </div>
             <div className="flex-1 min-w-0 pt-8">
               <div className="min-w-0">
-                <h3 className="text-xl leading-tight truncate" style={{ fontFamily: "var(--font-serif)", fontWeight: 400, color: "var(--forest)" }}>
+                <h3 className="text-xl leading-tight truncate" style={{ fontFamily: "var(--font-heading)", fontWeight: 400, color: "var(--forest)" }}>
                   {b.name}
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.6)" }}>{b.category}</p>

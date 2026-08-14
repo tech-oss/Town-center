@@ -145,7 +145,7 @@ export default function ServicesDetailLayout({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <h1 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>{title}</h1>
+                  <h1 className="text-2xl md:text-3xl" style={{ color: "#000000" }}>{title}</h1>
                   <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
                     <BadgeIcon size={12} /> Verified Business
                   </span>
