@@ -23,11 +23,6 @@ export default function ExploreFuturePage() {
       >
         <img src={explore.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
-        <nav className="relative mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
-          <Link to="/" className="hover:text-white transition-colors">Home</Link>
-          <span className="mx-2 opacity-50">/</span>
-          <span className="text-white">Explore</span>
-        </nav>
         <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>{explore.hero.eyebrow}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
           {explore.hero.title}
@@ -39,6 +34,13 @@ export default function ExploreFuturePage() {
           {explore.hero.lead}
         </p>
       </section>
+
+      {/* ── Breadcrumb — below the hero image, matching the Offers page. ── */}
+      <nav className="max-w-3xl mx-auto px-6 md:px-12 pt-8 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+        <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
+        <span className="mx-2 opacity-40">/</span>
+        <span>Explore</span>
+      </nav>
 
       {/* ── Vision ── */}
       <section id="nicholson" className="py-16 md:py-24 px-6 md:px-12">
