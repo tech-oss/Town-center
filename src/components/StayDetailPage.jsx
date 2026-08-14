@@ -24,6 +24,16 @@ function StarBadge({ stars }) {
 // rendered via PlaceDetailLayout's afterMap slot so it sits in the shared
 // layout's rhythm (between the map and the related grid) with matching
 // heading typography to the "Related" section beneath it.
+function buildSocial(item) {
+  const s = item.social;
+  if (!s) return null;
+  return [
+    s.instagram && { icon: "instagram", href: s.instagram, label: "Instagram" },
+    s.facebook && { icon: "facebook", href: s.facebook, label: "Facebook" },
+    s.x && { icon: "x", href: s.x, label: "X" },
+  ].filter(Boolean);
+}
+
 function AmenitiesSection({ amenities, heading }) {
   if (!amenities?.length) return null;
   return (
@@ -95,6 +105,9 @@ export default function StayDetailPage({ kind }) {
       extraImages={gallery.slice(1)}
       description={description}
       address={address}
+      phone={item.phone}
+      email={item.email}
+      social={buildSocial(item)}
       website={item.website}
       directionsQuery={item.mapQuery}
       relatedHeading={isHotels ? "More Hotels in Maidenhead" : "More Accommodation in Maidenhead"}
