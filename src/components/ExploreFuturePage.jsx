@@ -36,14 +36,14 @@ export default function ExploreFuturePage() {
       </section>
 
       {/* ── Breadcrumb — below the hero image, matching the Offers page. ── */}
-      <nav className="max-w-3xl mx-auto px-6 md:px-12 pt-8 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+      <nav className="max-w-3xl mx-auto px-6 md:px-12 pt-6 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
         <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
         <span className="mx-2 opacity-40">/</span>
         <span>Explore</span>
       </nav>
 
       {/* ── Vision ── */}
-      <section id="nicholson" className="py-16 md:py-24 px-6 md:px-12">
+      <section id="nicholson" className="pt-8 md:pt-10 pb-16 md:pb-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>The Vision</p>
           <h2 className="hero-title uppercase text-3xl md:text-6xl mb-6" style={{ color: "#000000" }}>A bold vision for the heart of town</h2>
