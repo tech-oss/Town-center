@@ -106,7 +106,7 @@ export default function ExploreFuturePage() {
       </section>
 
       {/* ── Major developments map + grid ── */}
-      <section id="developments" className="pb-20 px-6 md:px-12" style={{ backgroundColor: "var(--mint)" }}>
+      <section id="developments" className="pb-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto pt-16 md:pt-20">
           <div className="max-w-2xl mb-8">
             <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{explore.developments.eyebrow}</p>
