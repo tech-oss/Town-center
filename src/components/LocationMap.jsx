@@ -19,12 +19,25 @@ const PIN_ICON = L.divIcon({
 // In-memory cache so repeated renders don't re-geocode and avoid Nominatim rate limits
 const geocodeCache = new Map();
 
-async function geocode(query) {
-  if (geocodeCache.has(query)) return geocodeCache.get(query);
+async function geocodeOnce(query) {
   const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
   const res = await fetch(url, { headers: { "Accept-Language": "en" } });
   const data = await res.json();
-  const result = data.length > 0 ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
+  return data.length > 0 ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
+}
+
+// Some real addresses (farms, private lanes, building names) aren't indexed
+// as a full string in Nominatim and return zero results even though the
+// street/postcode alone resolves fine. Rather than showing "Map unavailable"
+// for those, progressively drop the leading comma-separated segment (the
+// most specific part, e.g. a farm/building name) and retry.
+async function geocode(query) {
+  if (geocodeCache.has(query)) return geocodeCache.get(query);
+  const segments = query.split(",").map((s) => s.trim());
+  let result = null;
+  for (let i = 0; i < segments.length && !result; i++) {
+    result = await geocodeOnce(segments.slice(i).join(", "));
+  }
   geocodeCache.set(query, result);
   return result;
 }
