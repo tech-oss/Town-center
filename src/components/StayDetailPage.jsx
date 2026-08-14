@@ -87,7 +87,7 @@ function amenityMeta(label) {
 function AmenitiesSection({ amenities, heading }) {
   if (!amenities?.length) return null;
   return (
-    <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+    <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-5xl mx-auto">
         <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Lifestyle</p>
         <h2 className="hero-title uppercase text-3xl md:text-5xl mb-4" style={{ color: "#000000" }}>{heading}</h2>
@@ -189,6 +189,7 @@ export default function StayDetailPage({ kind }) {
       extraButtonHref={item.website}
       directionsQuery={item.mapQuery}
       relatedHeading={isHotels ? "More Hotels in Maidenhead" : "More Accommodation in Maidenhead"}
+      relatedBackground="#ffffff"
       related={related}
       afterGallery={
         <AmenitiesSection
