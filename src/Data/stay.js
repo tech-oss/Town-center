@@ -22,6 +22,17 @@
 
 const img = (seed, w = 1200, h = 800) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
 
+// Pads a gallery out to 7 images (1 hero + 6 extra), matching the Eat &
+// Drink/See & Do/Shop detail pages' photo grid, with additional placeholder
+// shots when a listing's real gallery is shorter.
+const padGallery = (slug, images) => {
+  const padded = [...images];
+  for (let n = images.length + 1; padded.length < 7; n++) {
+    padded.push(img(`${slug}-${n}`, 900, 600));
+  }
+  return padded;
+};
+
 export const hotels = [
   {
     slug: "fredricks-hotel-restaurant-spa",
@@ -39,7 +50,7 @@ export const hotels = [
     social: { facebook: "https://www.facebook.com/FredricksHotelRestaurantSpa/" },
     priceFrom: null,
     image: img("fredricks-hotel", 1200, 800),
-    gallery: [img("fredricks-hotel", 1200, 800), img("fredricks-hotel-2", 900, 600), img("fredricks-hotel-3", 900, 600)],
+    gallery: padGallery("fredricks-hotel", [img("fredricks-hotel", 1200, 800), img("fredricks-hotel-2", 900, 600), img("fredricks-hotel-3", 900, 600)]),
     amenities: ["Spa & swimming pool", "On-site restaurant", "Private gardens", "Free Wi-Fi", "On-site parking"],
   },
   {
@@ -58,7 +69,7 @@ export const hotels = [
     social: { facebook: "https://www.facebook.com/PremierInnMaidenheadTownCentre/" },
     priceFrom: null,
     image: img("premier-inn-mh", 1200, 800),
-    gallery: [img("premier-inn-mh", 1200, 800), img("premier-inn-mh-2", 900, 600), img("premier-inn-mh-3", 900, 600)],
+    gallery: padGallery("premier-inn-mh", [img("premier-inn-mh", 1200, 800), img("premier-inn-mh-2", 900, 600), img("premier-inn-mh-3", 900, 600)]),
     amenities: ["Free Wi-Fi", "On-site restaurant/bar", "Family rooms", "Good night guarantee"],
   },
   {
@@ -78,7 +89,7 @@ export const hotels = [
     social: { facebook: "https://www.facebook.com/thamesrivierahotel/" },
     priceFrom: null,
     image: img("thames-riviera", 1200, 800),
-    gallery: [img("thames-riviera", 1200, 800), img("thames-riviera-2", 900, 600), img("thames-riviera-3", 900, 600)],
+    gallery: padGallery("thames-riviera", [img("thames-riviera", 1200, 800), img("thames-riviera-2", 900, 600), img("thames-riviera-3", 900, 600)]),
     amenities: ["Riverside setting", "On-site restaurant", "Free Wi-Fi", "On-site parking"],
   },
   {
@@ -97,7 +108,7 @@ export const hotels = [
     social: { facebook: "https://www.facebook.com/TLHotelMaidenheadCentral/" },
     priceFrom: null,
     image: img("travelodge-mh", 1200, 800),
-    gallery: [img("travelodge-mh", 1200, 800), img("travelodge-mh-2", 900, 600), img("travelodge-mh-3", 900, 600)],
+    gallery: padGallery("travelodge-mh", [img("travelodge-mh", 1200, 800), img("travelodge-mh-2", 900, 600), img("travelodge-mh-3", 900, 600)]),
     amenities: ["Free Wi-Fi", "Town centre location", "Family rooms"],
   },
   {
@@ -116,7 +127,7 @@ export const hotels = [
     social: { facebook: "https://www.facebook.com/HolidayInnMaidenheadWindsor" },
     priceFrom: null,
     image: img("holiday-inn-mh", 1200, 800),
-    gallery: [img("holiday-inn-mh", 1200, 800), img("holiday-inn-mh-2", 900, 600), img("holiday-inn-mh-3", 900, 600)],
+    gallery: padGallery("holiday-inn-mh", [img("holiday-inn-mh", 1200, 800), img("holiday-inn-mh-2", 900, 600), img("holiday-inn-mh-3", 900, 600)]),
     amenities: ["Conference facilities", "On-site restaurant/bar", "Free parking", "Free Wi-Fi"],
   },
 ];
@@ -143,7 +154,7 @@ export const accommodations = [
     priceFrom: null,
     host: "Hosted by Emma",
     image: img("riverside-loft", 1200, 800),
-    gallery: [img("riverside-loft", 1200, 800), img("riverside-loft-2", 900, 600), img("riverside-loft-3", 900, 600)],
+    gallery: padGallery("riverside-loft", [img("riverside-loft", 1200, 800), img("riverside-loft-2", 900, 600), img("riverside-loft-3", 900, 600)]),
     amenities: ["Free Wi-Fi", "Fully equipped kitchen", "Washer/dryer", "Riverside views", "5 min walk to station"],
   },
   {
@@ -162,7 +173,7 @@ export const accommodations = [
     priceFrom: null,
     host: "Hosted by James & Priya",
     image: img("old-bakery-cottage", 1200, 800),
-    gallery: [img("old-bakery-cottage", 1200, 800), img("old-bakery-cottage-2", 900, 600), img("old-bakery-cottage-3", 900, 600)],
+    gallery: padGallery("old-bakery-cottage", [img("old-bakery-cottage", 1200, 800), img("old-bakery-cottage-2", 900, 600), img("old-bakery-cottage-3", 900, 600)]),
     amenities: ["Private courtyard garden", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Pet friendly"],
   },
   {
@@ -181,7 +192,7 @@ export const accommodations = [
     priceFrom: null,
     host: "Hosted by Alex",
     image: img("bridge-street-studio", 1200, 800),
-    gallery: [img("bridge-street-studio", 1200, 800), img("bridge-street-studio-2", 900, 600), img("bridge-street-studio-3", 900, 600)],
+    gallery: padGallery("bridge-street-studio", [img("bridge-street-studio", 1200, 800), img("bridge-street-studio-2", 900, 600), img("bridge-street-studio-3", 900, 600)]),
     amenities: ["Private entrance", "Free Wi-Fi", "Kettle & microwave", "Walk to the river"],
   },
   {
@@ -200,7 +211,7 @@ export const accommodations = [
     priceFrom: null,
     host: "Hosted by Sarah",
     image: img("thameside-boathouse", 1200, 800),
-    gallery: [img("thameside-boathouse", 1200, 800), img("thameside-boathouse-2", 900, 600), img("thameside-boathouse-3", 900, 600)],
+    gallery: padGallery("thameside-boathouse", [img("thameside-boathouse", 1200, 800), img("thameside-boathouse-2", 900, 600), img("thameside-boathouse-3", 900, 600)]),
     amenities: ["Private garden onto the Thames", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Garden furniture & BBQ"],
   },
 ];

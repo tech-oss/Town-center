@@ -169,6 +169,7 @@ export default function PlaceDetailLayout({
   shareTitle,
   relatedHeading,
   related = [],
+  afterGallery,
   afterMap,
   extraButtonLabel,
   extraButtonHref,
@@ -461,6 +462,8 @@ export default function PlaceDetailLayout({
           </div>
         </section>
       )}
+
+      {afterGallery}
 
       {/* ── 5. Location map — 90% width and taller on mobile, 80% width on
           desktop; address shown as an always-open tile above the pin rather
