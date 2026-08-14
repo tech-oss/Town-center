@@ -56,7 +56,7 @@ function PublicSite() {
   // Drink, Services and See & Do share the same transparent-over-hero header
   // treatment. Every other page keeps the measured header height as top
   // padding so content clears the fixed header.
-  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers'].includes(pathname)
+  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future'].includes(pathname)
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.

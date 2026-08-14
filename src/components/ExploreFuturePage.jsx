@@ -15,21 +15,29 @@ export default function ExploreFuturePage() {
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* ── Hero ── */}
-      <section className="relative w-full overflow-hidden" style={{ minHeight: "70vh" }}>
+      {/* ── Hero — same height/layout/typography treatment as the Offers
+          page hero (bottom-anchored, centered, hero-title typeface), just
+          keeping this page's own background image and copy. ── */}
+      <section
+        className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
+      >
         <img src={explore.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end" style={{ minHeight: "70vh", paddingTop: "6rem", paddingBottom: "3.5rem" }}>
-          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
-            <Link to="/" className="hover:text-white">Home</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <span className="text-white">Explore</span>
-          </nav>
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--sage)" }}>{explore.hero.eyebrow}</p>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">{explore.hero.title}</h1>
-          <p className="text-xl md:text-2xl text-white/90 mt-4 max-w-2xl" style={{ fontFamily: "var(--font-heading)" }}>{explore.hero.subtitle}</p>
-          <p className="text-base md:text-lg text-white/75 mt-4 max-w-2xl leading-relaxed">{explore.hero.lead}</p>
-        </div>
+        <nav className="relative mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
+          <Link to="/" className="hover:text-white transition-colors">Home</Link>
+          <span className="mx-2 opacity-50">/</span>
+          <span className="text-white">Explore</span>
+        </nav>
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>{explore.hero.eyebrow}</span>
+        <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+          {explore.hero.title}
+        </h1>
+        <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium mb-2 text-white" style={{ letterSpacing: "-0.01em" }}>
+          {explore.hero.subtitle}
+        </p>
+        <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium" style={{ color: "rgba(255,255,255,0.75)", letterSpacing: "-0.01em" }}>
+          {explore.hero.lead}
+        </p>
       </section>
 
       {/* ── Vision ── */}
