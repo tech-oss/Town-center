@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { header } from "../Data/content";
 import AppBadges from "./AppBadges";
 
 const features = [
@@ -45,30 +44,21 @@ export default function GetAppPage() {
             <AppBadges className="flex-col sm:flex-row" />
           </div>
 
-          {/* Phone mockup */}
+          {/* App-in-use photo — soft-masked so its edges dissolve into the
+              hero's own dark gradient rather than sitting as a hard-edged
+              rectangle photo. */}
           <div className="flex justify-center md:justify-end">
-            <div className="relative w-[260px] h-[530px] rounded-[2.5rem] p-3 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)]" style={{ backgroundColor: "#0d1a20", border: "1px solid rgba(255,255,255,0.12)" }}>
-              {/* notch */}
-              <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-6 rounded-full" style={{ backgroundColor: "#0d1a20" }} />
-              {/* screen */}
-              <div className="w-full h-full rounded-[2rem] overflow-hidden flex flex-col" style={{ backgroundColor: "var(--sand)" }}>
-                <div className="px-5 pt-10 pb-6 flex flex-col items-center text-center" style={{ background: "linear-gradient(160deg, var(--forest), var(--teal-deep))" }}>
-                  <img src={header.markSrc} alt="" className="h-10 w-auto mb-1" />
-                  <span className="text-white text-sm font-semibold tracking-[0.02em]">{header.logo}</span>
-                  <span className="text-[8px] font-semibold uppercase tracking-[0.02em] mt-1" style={{ color: "var(--sage)" }}>{header.tagline}</span>
-                </div>
-                <div className="flex-1 p-4 flex flex-col gap-3">
-                  {["Today's offers", "What's on near you", "New this week", "Explore the town"].map((t, i) => (
-                    <div key={t} className="rounded-2xl p-3 bg-white flex items-center gap-3" style={{ boxShadow: "0 6px 20px -14px rgba(28,46,56,0.4)" }}>
-                      <div className="w-9 h-9 rounded-xl shrink-0" style={{ backgroundColor: i % 2 ? "var(--mint)" : "var(--leaf)" }} />
-                      <div className="flex-1">
-                        <div className="h-2.5 rounded-full mb-1.5" style={{ backgroundColor: "var(--forest)", opacity: 0.85, width: "70%" }} />
-                        <div className="h-2 rounded-full" style={{ backgroundColor: "var(--ink)", opacity: 0.18, width: "90%" }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div className="relative w-full max-w-[380px] md:max-w-[460px]">
+              <img
+                src="/images/get-app/app-hero.jpg"
+                alt="Using the Maidenhead app on a phone"
+                className="w-full h-auto"
+                style={{
+                  maskImage: "radial-gradient(ellipse 62% 62% at 50% 48%, black 30%, transparent 88%)",
+                  WebkitMaskImage: "radial-gradient(ellipse 62% 62% at 50% 48%, black 30%, transparent 88%)",
+                  filter: "drop-shadow(0 30px 70px rgba(0,0,0,0.5))",
+                }}
+              />
             </div>
           </div>
         </div>
