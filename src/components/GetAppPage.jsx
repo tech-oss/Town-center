@@ -48,14 +48,16 @@ export default function GetAppPage() {
               hero's own dark gradient rather than sitting as a hard-edged
               rectangle photo. */}
           <div className="flex justify-center md:justify-end">
-            <div className="relative w-full max-w-[380px] md:max-w-[460px]">
+            <div className="relative w-full max-w-[560px] h-[380px] md:h-[520px]">
               <img
                 src="/images/get-app/app-hero.jpg"
                 alt="Using the Maidenhead app on a phone"
-                className="w-full h-auto"
+                className="w-full h-full"
                 style={{
-                  maskImage: "radial-gradient(ellipse 62% 62% at 50% 48%, black 30%, transparent 88%)",
-                  WebkitMaskImage: "radial-gradient(ellipse 62% 62% at 50% 48%, black 30%, transparent 88%)",
+                  objectFit: "cover",
+                  objectPosition: "62% 42%",
+                  maskImage: "radial-gradient(ellipse 78% 78% at 50% 48%, black 55%, transparent 100%)",
+                  WebkitMaskImage: "radial-gradient(ellipse 78% 78% at 50% 48%, black 55%, transparent 100%)",
                   filter: "drop-shadow(0 30px 70px rgba(0,0,0,0.5))",
                 }}
               />
