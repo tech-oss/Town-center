@@ -2,13 +2,21 @@ import { Link, useParams, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { getGuideBySlug, guides } from "../Data/guides";
 import { card, pill } from "../utils/design";
+import useTapReveal from "../hooks/useTapReveal";
 
 function PlaceSection({ s, index }) {
   const reversed = index % 2 === 1;
+  const { revealed, onImageClick } = useTapReveal();
   return (
     <div id={s.id} className={`grid md:grid-cols-2 gap-8 md:gap-14 items-center ${reversed ? "md:[&>*:first-child]:order-2" : ""}`}>
-      <div className="overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
-        <img src={s.image} alt={s.title} loading="lazy" className="w-full h-full object-cover" />
+      <div
+        onClick={onImageClick}
+        className={`spotlight-card group/img block cursor-pointer shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)] ${revealed ? "is-revealed" : ""}`}
+      >
+        <div className="relative overflow-hidden aspect-[4/3]" style={{ backgroundColor: "#1a1a1a" }}>
+          <img src={s.image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+          <img src={s.image} alt={s.title} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+        </div>
       </div>
       <div>
         <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3 flex items-center gap-2" style={{ color: "var(--leaf)" }}>

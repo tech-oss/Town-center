@@ -1,6 +1,25 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { explore } from "../Data/explore";
+import useTapReveal from "../hooks/useTapReveal";
+
+// Feature image — keeps the "In the Spotlight" framed-photo hover: a sharp
+// foreground photo that insets on hover/tap to reveal a blurred, dimmed
+// frame around it, matching the homepage Featured Stories treatment.
+function FeatureImage({ image, alt }) {
+  const { revealed, onImageClick } = useTapReveal();
+  return (
+    <div
+      onClick={onImageClick}
+      className={`spotlight-card group/img block cursor-pointer shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)] ${revealed ? "is-revealed" : ""}`}
+    >
+      <div className="relative overflow-hidden aspect-[4/3]" style={{ backgroundColor: "#1a1a1a" }}>
+        <img src={image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+        <img src={image} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+      </div>
+    </div>
+  );
+}
 
 export default function ExploreFuturePage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -66,9 +85,7 @@ export default function ExploreFuturePage() {
         <div className="max-w-6xl mx-auto flex flex-col gap-16 md:gap-24">
           {explore.features.map((f, i) => (
             <div key={f.id} id={f.id} className={`grid md:grid-cols-2 gap-8 md:gap-14 items-center ${i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""}`}>
-              <div className="overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
-                <img src={f.image} alt={f.heading} loading="lazy" className="w-full h-full object-cover" />
-              </div>
+              <FeatureImage image={f.image} alt={f.heading} />
               <div>
                 <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{f.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{f.heading}</h2>

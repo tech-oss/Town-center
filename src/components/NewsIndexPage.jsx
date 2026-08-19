@@ -2,6 +2,43 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { getArticles } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
+
+// Story card — keeps the "In the Spotlight" framed-photo hover: a sharp
+// foreground photo that insets on hover/tap to reveal a blurred, dimmed
+// frame around it, matching the homepage Featured Stories treatment.
+function StoryCard({ story }) {
+  const { revealed, onImageClick } = useTapReveal();
+  return (
+    <div className="bg-white rounded-3xl overflow-hidden flex flex-col" style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}>
+      <Link
+        to={`/news/${story.slug}`}
+        onClick={onImageClick}
+        className={`spotlight-card group block ${revealed ? "is-revealed" : ""}`}
+      >
+        <div className="relative aspect-[16/10] overflow-hidden" style={{ backgroundColor: "#1a1a1a" }}>
+          <img src={story.image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+          <img src={story.image} alt={story.title} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+          <span
+            className="absolute top-3 left-3 z-10 text-[11px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
+            style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#000000" }}
+          >
+            {story.category}
+          </span>
+        </div>
+      </Link>
+      <div className="flex flex-col gap-2 p-6 flex-1">
+        <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{story.date}</p>
+        <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000" }}>{story.title}</h3>
+        <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{story.excerpt}</p>
+        <Link to={`/news/${story.slug}`} className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
+          Read more
+          <span className="transition-transform duration-200 group-hover/more:translate-x-1">→</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
 
 export default function NewsIndexPage() {
   const { data: articles } = useFetch(getArticles, []);
@@ -51,31 +88,7 @@ export default function NewsIndexPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {stories.map((story) => (
-              <Link
-                key={story.slug}
-                to={`/news/${story.slug}`}
-                className="group bg-white rounded-3xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-                style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
-              >
-                <div className="relative aspect-[16/10] overflow-hidden">
-                  <img src={story.image} alt={story.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <span
-                    className="absolute top-3 left-3 text-[11px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full"
-                    style={{ backgroundColor: "rgba(255,255,255,0.85)", color: "#000000" }}
-                  >
-                    {story.category}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-2 p-6 flex-1">
-                  <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{story.date}</p>
-                  <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000" }}>{story.title}</h3>
-                  <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{story.excerpt}</p>
-                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
-                    Read more
-                    <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                  </span>
-                </div>
-              </Link>
+              <StoryCard key={story.slug} story={story} />
             ))}
           </div>
         </div>
