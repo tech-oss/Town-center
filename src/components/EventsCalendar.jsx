@@ -1,18 +1,103 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { categoryColors } from "../Data/events";
+import { categories, categoryColors } from "../Data/events";
 import { getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const pad = (n) => String(n).padStart(2, "0");
+const toIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 
-function eventsForDay(events, y, m, day) {
+const QUICK_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "today", label: "Today" },
+  { key: "tomorrow", label: "Tomorrow" },
+  { key: "week", label: "This Week" },
+  { key: "upcoming", label: "Coming Up" },
+];
+
+// `dateRange`, when given, excludes the day entirely if it falls outside
+// the range — otherwise a recurring event would show on every matching
+// weekday of the month regardless of the selected range.
+function eventsForDay(events, y, m, day, dateRange) {
   const d = new Date(y, m, day);
+  if (dateRange) {
+    if (d < dateRange.start) return [];
+    if (dateRange.end && d > dateRange.end) return [];
+  }
   const iso = `${y}-${pad(m + 1)}-${pad(day)}`;
   return events.filter(
     (e) => e.iso === iso || (e.recurringWeekday != null && e.recurringWeekday === d.getDay())
+  );
+}
+
+// Resolves the active quick-filter / date-range selection into a concrete
+// [start, end] day span (end === null means "no upper bound").
+function resolveDateRange(quickFilter, rangeStart, rangeEnd) {
+  const today0 = startOfDay(new Date());
+  if (quickFilter === "today") return { start: today0, end: today0 };
+  if (quickFilter === "tomorrow") {
+    const t = new Date(today0);
+    t.setDate(t.getDate() + 1);
+    return { start: t, end: t };
+  }
+  if (quickFilter === "week") {
+    const dayIdx = (today0.getDay() + 6) % 7; // Monday = 0
+    const end = new Date(today0);
+    end.setDate(end.getDate() + (6 - dayIdx));
+    return { start: today0, end };
+  }
+  if (quickFilter === "upcoming") {
+    const dayIdx = (today0.getDay() + 6) % 7;
+    const start = new Date(today0);
+    start.setDate(start.getDate() + (7 - dayIdx)); // next Monday
+    return { start, end: null };
+  }
+  if (quickFilter === "range" && rangeStart) {
+    return {
+      start: new Date(`${rangeStart}T00:00:00`),
+      end: rangeEnd ? new Date(`${rangeEnd}T00:00:00`) : null,
+    };
+  }
+  return null; // "all" — no date restriction
+}
+
+function eventMatchesDateRange(e, range) {
+  if (!range) return true;
+  const { start, end } = range;
+  if (e.iso) {
+    const d = new Date(`${e.iso}T00:00:00`);
+    if (d < start) return false;
+    if (end && d > end) return false;
+    return true;
+  }
+  if (e.recurringWeekday != null) {
+    if (!end) return true; // unbounded upcoming — a recurring event will occur again
+    const spanDays = Math.round((end - start) / 86400000);
+    for (let i = 0; i <= spanDays; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      if (d.getDay() === e.recurringWeekday) return true;
+    }
+    return false;
+  }
+  return true;
+}
+
+function CalendarIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+function ChevronIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
   );
 }
 
@@ -50,9 +135,9 @@ function DayEventsModal({ day, monthLabel, year, events, onClose }) {
         </h3>
 
         <div className="flex flex-col gap-3">
-          {events.map((e) => (
+          {events.map((e, i) => (
             <Link
-              key={e.slug}
+              key={`${e.slug}-${i}`}
               to={`/event/${e.slug}`}
               onClick={onClose}
               className="flex items-center gap-3 rounded-2xl p-3.5"
@@ -82,7 +167,13 @@ export default function EventsCalendar() {
   const today = new Date();
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
   const [dayModal, setDayModal] = useState(null); // { day, events } | null
-  const [pickedDate, setPickedDate] = useState(""); // "YYYY-MM-DD" from the date picker
+
+  const [quickFilter, setQuickFilter] = useState("all"); // all | today | tomorrow | week | upcoming | range
+  const [rangeStart, setRangeStart] = useState("");
+  const [rangeEnd, setRangeEnd] = useState("");
+  const [rangeOpen, setRangeOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState(() => new Set()); // empty = all categories
+  const [typesOpen, setTypesOpen] = useState(false);
 
   const { y, m } = view;
   const daysInMonth = new Date(y, m + 1, 0).getDate();
@@ -96,69 +187,180 @@ export default function EventsCalendar() {
     return arr;
   }, [startWeekday, daysInMonth]);
 
+  const dateRange = useMemo(() => resolveDateRange(quickFilter, rangeStart, rangeEnd), [quickFilter, rangeStart, rangeEnd]);
+
+  // Category filter only — the date/range restriction is applied per-day
+  // below (via eventsForDay) rather than baked into this list, so a
+  // recurring event is only counted on the specific days its range covers.
+  const categoryFilteredEvents = useMemo(() => {
+    if (!events) return [];
+    return events.filter((e) => categoryFilter.size === 0 || categoryFilter.has(e.category));
+  }, [events, categoryFilter]);
+
+  // The flat chronological list (needed for quick/date-range filters, which
+  // span beyond the currently browsed month) only carries dated events —
+  // recurring-weekday events have no fixed date to sort by. When just a
+  // category is selected, stay on the per-month grouping instead, which
+  // already handles recurring events correctly via eventsForDay.
+  const useFlatList = quickFilter !== "all";
+
   const monthEvents = useMemo(() => {
     const list = [];
-    if (!events) return list;
     for (let d = 1; d <= daysInMonth; d++) {
-      eventsForDay(events, y, m, d).forEach((e) => list.push({ day: d, e }));
+      eventsForDay(categoryFilteredEvents, y, m, d, dateRange).forEach((e) => list.push({ day: d, e }));
     }
     return list;
-  }, [events, y, m, daysInMonth]);
+  }, [categoryFilteredEvents, y, m, daysInMonth, dateRange]);
 
-  // Dated events (recurring-weekday events have no fixed date to sort by),
-  // sorted chronologically, for the date-picker search below.
-  const searchResults = useMemo(() => {
-    if (!pickedDate || !events) return null;
-    const target = new Date(`${pickedDate}T00:00:00`);
-    return events
+  // Flat chronological list for the filtered view — only dated events have
+  // a fixed date to sort/display by (recurring-weekday events still show up
+  // on the calendar grid itself).
+  const filteredList = useMemo(() => {
+    return categoryFilteredEvents
       .filter((e) => e.iso)
+      .filter((e) => eventMatchesDateRange(e, dateRange))
       .map((e) => ({ e, date: new Date(`${e.iso}T00:00:00`) }))
-      .filter(({ date }) => date >= target)
       .sort((a, b) => a.date - b.date)
-      .slice(0, 25);
-  }, [pickedDate, events]);
+      .slice(0, 50);
+  }, [categoryFilteredEvents, dateRange]);
 
   const prevMonth = () => setView((v) => (v.m === 0 ? { y: v.y - 1, m: 11 } : { y: v.y, m: v.m - 1 }));
   const nextMonth = () => setView((v) => (v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 }));
   const isToday = (d) => d && today.getFullYear() === y && today.getMonth() === m && today.getDate() === d;
-  const isPicked = (d) => d && pickedDate === `${y}-${pad(m + 1)}-${pad(d)}`;
 
-  const onPickDate = (value) => {
-    setPickedDate(value);
-    if (value) {
-      const [py, pm] = value.split("-").map(Number);
-      setView({ y: py, m: pm - 1 });
+  const jumpTo = (date) => setView({ y: date.getFullYear(), m: date.getMonth() });
+
+  const onQuickFilter = (key) => {
+    setQuickFilter(key);
+    setRangeOpen(false);
+    if (key !== "range") {
+      setRangeStart("");
+      setRangeEnd("");
+    }
+    if (key === "today" || key === "tomorrow") {
+      const range = resolveDateRange(key, "", "");
+      jumpTo(range.start);
+    } else if (key === "week" || key === "upcoming") {
+      jumpTo(today);
     }
   };
 
-  const clearPickedDate = () => setPickedDate("");
+  const applyDateRange = () => {
+    if (!rangeStart) return;
+    setQuickFilter("range");
+    jumpTo(new Date(`${rangeStart}T00:00:00`));
+    setRangeOpen(false);
+  };
+
+  const clearDateRange = () => {
+    setRangeStart("");
+    setRangeEnd("");
+    if (quickFilter === "range") setQuickFilter("all");
+    setRangeOpen(false);
+  };
+
+  const toggleCategory = (key) => {
+    setCategoryFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const listHeading = () => {
+    if (!useFlatList) return monthEvents.length > 0 ? `Events in ${MONTHS[m]}` : `No events listed in ${MONTHS[m]}`;
+    const labels = { today: "Today", tomorrow: "Tomorrow", week: "This Week", upcoming: "Coming Up", range: "Selected Dates" };
+    const base = labels[quickFilter] || "Filtered Events";
+    return filteredList.length > 0 ? base : `No events found`;
+  };
 
   return (
     <div>
-      {/* Date search — jump straight to a date and see events from then on,
-          instead of paging through months one at a time. */}
-      <div className="flex flex-wrap items-center gap-3 mb-6 bg-white rounded-2xl p-3 px-4" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.28)" }}>
-        <label htmlFor="events-date-search" className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>
-          Search by date
-        </label>
-        <input
-          id="events-date-search"
-          type="date"
-          value={pickedDate}
-          onChange={(e) => onPickDate(e.target.value)}
-          className="text-sm rounded-lg px-3 py-2 outline-none border"
-          style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
-        />
-        {pickedDate && (
+      {/* Filter bar — quick date ranges, a custom date range, and event
+          type filtering. Drives both the calendar grid below and the list. */}
+      <div className="relative rounded-2xl p-3 md:p-4 mb-6 flex flex-wrap items-center gap-x-5 gap-y-3 md:gap-x-8" style={{ backgroundColor: "var(--sage)" }}>
+        {QUICK_FILTERS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => onQuickFilter(f.key)}
+            className="text-sm md:text-base font-bold text-white transition-opacity cursor-pointer"
+            style={{
+              opacity: quickFilter === f.key ? 1 : 0.8,
+              textDecoration: quickFilter === f.key ? "underline" : "none",
+              textUnderlineOffset: "6px",
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+
+        <div className="relative">
           <button
             type="button"
-            onClick={clearPickedDate}
-            className="text-xs font-semibold underline"
-            style={{ color: "#000000" }}
+            onClick={() => {
+              setRangeOpen((o) => !o);
+              setTypesOpen(false);
+            }}
+            className="flex items-center gap-2 text-sm font-bold text-white rounded-full px-4 py-2 border-2 cursor-pointer transition-colors hover:bg-white/10"
+            style={{ borderColor: "rgba(255,255,255,0.75)" }}
           >
-            Clear
+            Date range <CalendarIcon />
           </button>
-        )}
+          {rangeOpen && (
+            <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3 w-64" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+              <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
+                From
+                <input type="date" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
+              </label>
+              <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
+                To
+                <input type="date" value={rangeEnd} min={rangeStart || undefined} onChange={(e) => setRangeEnd(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
+              </label>
+              <div className="flex items-center gap-3 mt-1">
+                <button type="button" onClick={applyDateRange} disabled={!rangeStart} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--leaf)" }}>
+                  Apply
+                </button>
+                {(rangeStart || rangeEnd) && (
+                  <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="relative md:ml-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setTypesOpen((o) => !o);
+              setRangeOpen(false);
+            }}
+            className="flex items-center gap-2 text-sm font-bold text-white rounded-full pl-5 pr-4 py-2.5 cursor-pointer transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "var(--leaf)" }}
+          >
+            Event types{categoryFilter.size > 0 ? ` (${categoryFilter.size})` : ""} <ChevronIcon />
+          </button>
+          {typesOpen && (
+            <div className="absolute z-20 top-full mt-2 right-0 bg-white rounded-2xl p-2 shadow-xl w-60 flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+              {Object.entries(categories).map(([key, c]) => (
+                <label key={key} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                  <input type="checkbox" checked={categoryFilter.has(key)} onChange={() => toggleCategory(key)} className="accent-[var(--leaf)]" />
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                  {c.label}
+                </label>
+              ))}
+              {categoryFilter.size > 0 && (
+                <button type="button" onClick={() => setCategoryFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+                  Clear
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Month nav */}
@@ -177,14 +379,14 @@ export default function EventsCalendar() {
         </div>
         <div className="grid grid-cols-7 gap-1 md:gap-2">
           {cells.map((d, i) => {
-            const dayEvents = d ? eventsForDay(events ?? [], y, m, d) : [];
+            const dayEvents = d ? eventsForDay(categoryFilteredEvents, y, m, d, dateRange) : [];
             return (
               <div
                 key={i}
                 className="relative min-h-[58px] md:min-h-[96px] rounded-xl p-1.5 md:p-2 flex flex-col gap-1"
                 style={{
                   backgroundColor: d ? "var(--sand)" : "transparent",
-                  outline: isToday(d) ? "2px solid var(--leaf)" : isPicked(d) ? "2px solid var(--sage)" : "none",
+                  outline: isToday(d) ? "2px solid var(--leaf)" : "none",
                 }}
               >
                 {d && <span className="relative z-10 text-[11px] md:text-sm font-semibold" style={{ color: "#000000" }}>{d}</span>}
@@ -192,9 +394,9 @@ export default function EventsCalendar() {
                 {/* Desktop / larger screens — each event is its own button,
                     plenty of room for an accurate mouse click. */}
                 <div className="hidden md:flex md:flex-col gap-1 overflow-hidden relative z-10">
-                  {dayEvents.map((e) => (
+                  {dayEvents.map((e, i) => (
                     <button
-                      key={e.slug}
+                      key={`${e.slug}-${i}`}
                       onClick={() => navigate(`/event/${e.slug}`)}
                       title={e.title}
                       className="text-left rounded-md px-1.5 py-1 text-[11px] font-semibold leading-tight truncate transition-opacity hover:opacity-80"
@@ -240,69 +442,35 @@ export default function EventsCalendar() {
         </div>
       </div>
 
-      {/* Events list — either the picked date's chronological search
-          results, or the current month's events grouped as before. */}
-      {searchResults ? (
-        <>
-          <h3 className="text-xl font-bold mt-12 mb-5" style={{ color: "#000000" }}>
-            {searchResults.length > 0 ? `Events from ${pickedDate}` : `No upcoming events found from ${pickedDate}`}
-          </h3>
-          <div className="flex flex-col gap-3">
-            {searchResults.map(({ e, date }) => (
-              <Link
-                key={e.slug}
-                to={`/event/${e.slug}`}
-                className="group flex items-center gap-4 bg-white rounded-2xl p-3 pr-5 transition-transform hover:-translate-y-0.5"
-                style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.28)" }}
-              >
-                <div className="shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: "var(--forest)" }}>
-                  <span className="text-[9px] font-semibold uppercase" style={{ color: "var(--sage)" }}>{MONTHS[date.getMonth()].slice(0, 3)}</span>
-                  <span className="text-lg font-bold text-white leading-none">{date.getDate()}</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{e.category}</span>
-                  </div>
-                  <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
-                  <p className="text-sm truncate" style={{ color: "#000000" }}>{e.location}</p>
-                </div>
-                <span className="shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <h3 className="text-xl font-bold mt-12 mb-5" style={{ color: "#000000" }}>
-            {monthEvents.length > 0 ? `Events in ${MONTHS[m]}` : `No events listed in ${MONTHS[m]}`}
-          </h3>
-          <div className="flex flex-col gap-3">
-            {monthEvents.map(({ day, e }) => (
-              <Link
-                key={`${day}-${e.slug}`}
-                to={`/event/${e.slug}`}
-                className="group flex items-center gap-4 bg-white rounded-2xl p-3 pr-5 transition-transform hover:-translate-y-0.5"
-                style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.28)" }}
-              >
-                <div className="shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: "var(--forest)" }}>
-                  <span className="text-[9px] font-semibold uppercase" style={{ color: "var(--sage)" }}>{MONTHS[m].slice(0, 3)}</span>
-                  <span className="text-lg font-bold text-white leading-none">{day}</span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
-                    <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{e.category}</span>
-                  </div>
-                  <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
-                  <p className="text-sm truncate" style={{ color: "#000000" }}>{e.location}</p>
-                </div>
-                <span className="shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
-              </Link>
-            ))}
-          </div>
-        </>
-      )}
+      {/* Events list — the active filter's chronological results, or the
+          current month's events grouped as before when nothing is filtered. */}
+      <h3 className="text-xl font-bold mt-12 mb-5" style={{ color: "#000000" }}>
+        {listHeading()}
+      </h3>
+      <div className="flex flex-col gap-3">
+        {(useFlatList ? filteredList : monthEvents.map(({ day, e }) => ({ e, date: new Date(y, m, day) }))).map(({ e, date }) => (
+          <Link
+            key={`${e.slug}-${toIso(date)}`}
+            to={`/event/${e.slug}`}
+            className="group flex items-center gap-4 bg-white rounded-2xl p-3 pr-5 transition-transform hover:-translate-y-0.5"
+            style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.28)" }}
+          >
+            <div className="shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: "var(--forest)" }}>
+              <span className="text-[9px] font-semibold uppercase" style={{ color: "var(--sage)" }}>{MONTHS[date.getMonth()].slice(0, 3)}</span>
+              <span className="text-lg font-bold text-white leading-none">{date.getDate()}</span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
+                <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{e.category}</span>
+              </div>
+              <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
+              <p className="text-sm truncate" style={{ color: "#000000" }}>{e.location}</p>
+            </div>
+            <span className="shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
+          </Link>
+        ))}
+      </div>
 
       {dayModal && (
         <DayEventsModal
