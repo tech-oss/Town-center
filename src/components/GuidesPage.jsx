@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { guidesIndex, guides } from "../Data/guides";
+import { card, pill } from "../utils/design";
 
 export default function GuidesPage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -27,26 +28,36 @@ export default function GuidesPage() {
         <span>Neighbourhood Guides</span>
       </nav>
 
-      {/* Guides grid */}
+      {/* Guides grid — same card treatment as See & Do / Eat & Drink listings. */}
       <section className="px-6 md:px-12 pt-8 md:pt-10 pb-20 md:pb-28">
-        <div className="max-w-6xl mx-auto grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
           {guides.map((g) => (
             <Link
               key={g.slug}
               to={`/guides/${g.slug}`}
-              className="group flex flex-col overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1"
-              style={{ borderRadius: "0px", boxShadow: "0 10px 32px -18px rgba(28,46,56,0.35)" }}
+              className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
+              style={{ borderRadius: "0px", boxShadow: card.shadow }}
             >
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <img src={g.cardImage} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                <span className="absolute top-3 left-3 text-2xl">{g.icon}</span>
+              <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
+                <img src={g.cardImage} alt={g.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               </div>
-              <div className="p-5 flex flex-col flex-1">
-                <p className="text-xs font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--leaf)" }}>{g.category}</p>
-                <h3 className="listing-card-title text-lg leading-snug mb-2" style={{ color: "#000000" }}>{g.title}</h3>
-                <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{g.summary}</p>
-                <span className="mt-4 text-sm font-semibold inline-flex items-center gap-2 transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>
-                  Read the guide <span>→</span>
+              <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
+                <span
+                  className={`${pill.className} !text-[9px] sm:!text-[9px] !px-2 sm:!px-2 !py-0.5 sm:!py-0.5`}
+                  style={{ color: "#000000", backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(13,42,51,0.12)", alignSelf: "flex-start" }}
+                >
+                  <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />
+                  {g.category}
+                </span>
+                <h3 className="listing-card-title text-xs sm:text-sm leading-snug sm:leading-tight line-clamp-2 sm:line-clamp-1" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
+                  {g.title}
+                </h3>
+                <div className="hidden sm:block">
+                  <p className="text-[11px] leading-snug line-clamp-1" style={{ color: "#000000" }}>{g.summary}</p>
+                </div>
+                <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px] font-semibold mt-0.5 sm:mt-0.5" style={{ color: "#000000" }}>
+                  Read more
+                  <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                 </span>
               </div>
             </Link>

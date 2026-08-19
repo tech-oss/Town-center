@@ -1,6 +1,7 @@
 import { Link, useParams, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { getGuideBySlug, guides } from "../Data/guides";
+import { card, pill } from "../utils/design";
 
 function PlaceSection({ s, index }) {
   const reversed = index % 2 === 1;
@@ -176,15 +177,32 @@ export default function GuideDetailPage() {
           <div className="max-w-6xl mx-auto">
             <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>More Maidenhead Guides</p>
             <h2 className="text-2xl md:text-4xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>Keep exploring</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
               {related.map((g) => (
-                <Link key={g.slug} to={`/guides/${g.slug}`} className="group flex flex-col overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1" style={{ borderRadius: "0px", boxShadow: "0 10px 32px -18px rgba(28,46,56,0.35)" }}>
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={g.cardImage} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <Link
+                  key={g.slug}
+                  to={`/guides/${g.slug}`}
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
+                  style={{ borderRadius: "0px", boxShadow: card.shadow }}
+                >
+                  <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
+                    <img src={g.cardImage} alt={g.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
-                  <div className="p-5">
-                    <h3 className="listing-card-title text-lg leading-snug mb-2" style={{ color: "#000000" }}>{g.title}</h3>
-                    <span className="text-sm font-semibold inline-flex items-center gap-2" style={{ color: "#000000" }}>Read the guide <span>→</span></span>
+                  <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
+                    <span
+                      className={`${pill.className} !text-[9px] sm:!text-[9px] !px-2 sm:!px-2 !py-0.5 sm:!py-0.5`}
+                      style={{ color: "#000000", backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(13,42,51,0.12)", alignSelf: "flex-start" }}
+                    >
+                      <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />
+                      {g.category}
+                    </span>
+                    <h3 className="listing-card-title text-xs sm:text-sm leading-snug sm:leading-tight line-clamp-2 sm:line-clamp-1" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
+                      {g.title}
+                    </h3>
+                    <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px] font-semibold mt-0.5 sm:mt-0.5" style={{ color: "#000000" }}>
+                      Read more
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                    </span>
                   </div>
                 </Link>
               ))}
