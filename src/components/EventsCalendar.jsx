@@ -19,7 +19,6 @@ const QUICK_FILTERS = [
   { key: "today", label: "Today" },
   { key: "tomorrow", label: "Tomorrow" },
   { key: "week", label: "This Week" },
-  { key: "upcoming", label: "Coming Up" },
 ];
 
 // Whether `e` falls on `date` — for a recurring event with an `nthWeekday`
@@ -49,9 +48,9 @@ function eventsForDay(events, y, m, day, dateRange) {
 
 // Expands events (including recurring ones) into concrete dated occurrences
 // within the given range, for the flat chronological list — a bounded range
-// enumerates day-by-day; an unbounded "Coming Up" range is capped to a
-// six-month lookahead so recurring events still surface without scanning
-// forever.
+// enumerates day-by-day; an open-ended range (a date range with no "to"
+// date) is capped to a six-month lookahead so recurring events still
+// surface without scanning forever.
 function generateOccurrences(events, range) {
   const start = range?.start ?? startOfDay(new Date());
   const cappedEnd =
@@ -95,12 +94,6 @@ function resolveDateRange(quickFilter, rangeStart, rangeEnd) {
     const end = new Date(today0);
     end.setDate(end.getDate() + (6 - dayIdx));
     return { start: today0, end };
-  }
-  if (quickFilter === "upcoming") {
-    const dayIdx = (today0.getDay() + 6) % 7;
-    const start = new Date(today0);
-    start.setDate(start.getDate() + (7 - dayIdx)); // next Monday
-    return { start, end: null };
   }
   if (quickFilter === "range" && rangeStart) {
     return {
@@ -192,7 +185,7 @@ export default function EventsCalendar() {
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
   const [dayModal, setDayModal] = useState(null); // { day, events } | null
 
-  const [quickFilter, setQuickFilter] = useState("all"); // all | today | tomorrow | week | upcoming | range
+  const [quickFilter, setQuickFilter] = useState("all"); // all | today | tomorrow | week | range
   const [rangeStart, setRangeStart] = useState("");
   const [rangeEnd, setRangeEnd] = useState("");
   const [rangeOpen, setRangeOpen] = useState(false);
@@ -260,7 +253,7 @@ export default function EventsCalendar() {
     if (key === "today" || key === "tomorrow") {
       const range = resolveDateRange(key, "", "");
       jumpTo(range.start);
-    } else if (key === "week" || key === "upcoming") {
+    } else if (key === "week") {
       jumpTo(today);
     }
   };
@@ -297,7 +290,7 @@ export default function EventsCalendar() {
 
   const listHeading = () => {
     if (!useFlatList) return monthEvents.length > 0 ? `Events in ${MONTHS[m]}` : `No events listed in ${MONTHS[m]}`;
-    const labels = { today: "Today", tomorrow: "Tomorrow", week: "This Week", upcoming: "Coming Up", range: "Selected Dates" };
+    const labels = { today: "Today", tomorrow: "Tomorrow", week: "This Week", range: "Selected Dates" };
     const base = labels[quickFilter] || "Filtered Events";
     return filteredList.length > 0 ? base : `No events found`;
   };
@@ -305,89 +298,104 @@ export default function EventsCalendar() {
   return (
     <div>
       {/* Filter bar — quick date ranges, a custom date range, and event
-          type filtering. Drives both the calendar grid below and the list. */}
-      <div className="relative rounded-2xl p-3 md:p-4 mb-6 flex flex-wrap items-center gap-x-5 gap-y-3 md:gap-x-8" style={{ backgroundColor: "var(--sage)" }}>
-        {QUICK_FILTERS.map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => onQuickFilter(f.key)}
-            className="text-sm md:text-base font-bold text-white transition-opacity cursor-pointer"
-            style={{
-              opacity: quickFilter === f.key ? 1 : 0.8,
-              textDecoration: quickFilter === f.key ? "underline" : "none",
-              textUnderlineOffset: "6px",
-            }}
-          >
-            {f.label}
-          </button>
-        ))}
+          type filtering. Drives both the calendar grid below and the list.
+          Both dropdowns anchor to this outer bar (not their own trigger
+          button) so on narrow phones they always sit fully inside the
+          bar's width instead of spilling off the edge of the screen. */}
+      <div className="relative rounded-2xl p-3 md:p-4 mb-6 flex flex-col gap-2.5 md:flex-row md:flex-wrap md:items-center md:gap-x-8 md:gap-y-3" style={{ backgroundColor: "var(--sage)" }}>
+        {/* Quick filters — equal-width chips on mobile, inline text tabs
+            on desktop where there's room to breathe. */}
+        <div className="grid grid-cols-4 gap-1.5 md:flex md:items-center md:gap-x-5">
+          {QUICK_FILTERS.map((f) => {
+            const active = quickFilter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => onQuickFilter(f.key)}
+                className={[
+                  "px-2 py-2 rounded-full text-xs font-bold whitespace-nowrap text-center transition-colors cursor-pointer",
+                  active ? "bg-white text-[var(--forest)]" : "bg-white/[0.18] text-white",
+                  "md:bg-transparent md:px-0 md:py-0 md:rounded-none md:text-base md:text-left md:text-white",
+                ].join(" ")}
+              >
+                <span
+                  style={{ textDecoration: active ? "underline" : "none", textUnderlineOffset: "6px" }}
+                >
+                  {f.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-        <div className="relative">
+        {/* Date range + Event types — equal-width chips on mobile, own
+            sized buttons on desktop (Event types pinned to the far right). */}
+        <div className="grid grid-cols-2 gap-1.5 md:flex md:items-center md:gap-3 md:ml-auto">
           <button
             type="button"
             onClick={() => {
               setRangeOpen((o) => !o);
               setTypesOpen(false);
             }}
-            className="flex items-center gap-2 text-sm font-bold text-white rounded-full px-4 py-2 border-2 cursor-pointer transition-colors hover:bg-white/10"
+            className="flex items-center justify-center gap-1.5 text-xs md:text-sm font-bold text-white rounded-full px-3 py-2 md:px-4 border-2 cursor-pointer transition-colors hover:bg-white/10"
             style={{ borderColor: "rgba(255,255,255,0.75)" }}
           >
-            {rangeButtonLabel} <CalendarIcon />
+            <span className="truncate">{rangeButtonLabel}</span> <CalendarIcon />
           </button>
-          {rangeOpen && (
-            <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3 w-64" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
-              <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
-                From
-                <input type="date" lang="en-GB" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
-              </label>
-              <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
-                To
-                <input type="date" lang="en-GB" value={rangeEnd} min={rangeStart || undefined} onChange={(e) => setRangeEnd(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
-              </label>
-              <div className="flex items-center gap-3 mt-1">
-                <button type="button" onClick={applyDateRange} disabled={!rangeStart} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--leaf)" }}>
-                  Apply
-                </button>
-                {(rangeStart || rangeEnd) && (
-                  <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
-                    Clear
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
 
-        <div className="relative md:ml-auto">
           <button
             type="button"
             onClick={() => {
               setTypesOpen((o) => !o);
               setRangeOpen(false);
             }}
-            className="flex items-center gap-2 text-sm font-bold text-white rounded-full pl-5 pr-4 py-2.5 cursor-pointer transition-opacity hover:opacity-90"
+            className="flex items-center justify-center gap-1.5 text-xs md:text-sm font-bold text-white rounded-full pl-3 pr-2.5 md:pl-5 md:pr-4 py-2 md:py-2.5 cursor-pointer transition-opacity hover:opacity-90"
             style={{ backgroundColor: "var(--leaf)" }}
           >
-            Event types{categoryFilter.size > 0 ? ` (${categoryFilter.size})` : ""} <ChevronIcon />
+            <span className="truncate">Event types{categoryFilter.size > 0 ? ` (${categoryFilter.size})` : ""}</span> <ChevronIcon />
           </button>
-          {typesOpen && (
-            <div className="absolute z-20 top-full mt-2 right-0 bg-white rounded-2xl p-2 shadow-xl w-60 flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
-              {Object.entries(categories).map(([key, c]) => (
-                <label key={key} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
-                  <input type="checkbox" checked={categoryFilter.has(key)} onChange={() => toggleCategory(key)} className="accent-[var(--leaf)]" />
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
-                  {c.label}
-                </label>
-              ))}
-              {categoryFilter.size > 0 && (
-                <button type="button" onClick={() => setCategoryFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+        </div>
+
+        {rangeOpen && (
+          <div className="absolute z-20 top-full mt-2 left-3 right-3 md:left-0 md:right-auto md:w-64 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+            <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
+              From
+              <input type="date" lang="en-GB" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
+            </label>
+            <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
+              To
+              <input type="date" lang="en-GB" value={rangeEnd} min={rangeStart || undefined} onChange={(e) => setRangeEnd(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
+            </label>
+            <div className="flex items-center gap-3 mt-1">
+              <button type="button" onClick={applyDateRange} disabled={!rangeStart} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--leaf)" }}>
+                Apply
+              </button>
+              {(rangeStart || rangeEnd) && (
+                <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
                   Clear
                 </button>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {typesOpen && (
+          <div className="absolute z-20 top-full mt-2 left-3 right-3 md:left-auto md:right-0 md:w-60 bg-white rounded-2xl p-2 shadow-xl flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+            {Object.entries(categories).map(([key, c]) => (
+              <label key={key} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                <input type="checkbox" checked={categoryFilter.has(key)} onChange={() => toggleCategory(key)} className="accent-[var(--leaf)]" />
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                {c.label}
+              </label>
+            ))}
+            {categoryFilter.size > 0 && (
+              <button type="button" onClick={() => setCategoryFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+                Clear
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Calendar — kept compact and centered on desktop, where a
