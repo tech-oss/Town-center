@@ -9,10 +9,12 @@ import DetailPage from './components/DetailPage'
 import ServicesDetailPage from './components/ServicesDetailPage'
 import ArticlePage from './components/ArticlePage'
 import LivePage from './components/LivePage'
-import PropertySearch from './components/PropertySearch'
+// Property search platform (for sale / for rent) — paused for now, kept for
+// a future relaunch. See the commented-out routes below.
+// import PropertySearch from './components/PropertySearch'
+// import PropertyPage from './components/PropertyPage'
 import StayListingPage from './components/StayListingPage'
 import StayDetailPage from './components/StayDetailPage'
-import PropertyPage from './components/PropertyPage'
 import BuildingPage from './components/BuildingPage'
 import EnquirePage from './components/EnquirePage'
 import AttractionPage from './components/AttractionPage'
@@ -60,7 +62,7 @@ function PublicSite() {
   // Drink, Services and See & Do share the same transparent-over-hero header
   // treatment. Every other page keeps the measured header height as top
   // padding so content clears the fixed header.
-  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/live/stay/hotels', '/live/stay/accommodation'].includes(pathname)
+  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/live', '/live/stay/hotels', '/live/stay/accommodation'].includes(pathname)
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.
@@ -118,12 +120,14 @@ function PublicSite() {
           <Route path="/live/stay/hotels/:slug" element={<StayDetailPage kind="hotels" />} />
           <Route path="/live/stay/accommodation" element={<StayListingPage kind="accommodation" />} />
           <Route path="/live/stay/accommodation/:slug" element={<StayDetailPage kind="accommodation" />} />
-          <Route path="/live/overview" element={<PropertySearch mode="overview" />} />
-          <Route path="/live/for-sale" element={<PropertySearch mode="sale" />} />
-          <Route path="/live/for-rent" element={<PropertySearch mode="rent" />} />
+          {/* Property search platform (for sale / for rent) — paused for
+              now, kept for a future relaunch. */}
+          {/* <Route path="/live/overview" element={<PropertySearch mode="overview" />} /> */}
+          {/* <Route path="/live/for-sale" element={<PropertySearch mode="sale" />} /> */}
+          {/* <Route path="/live/for-rent" element={<PropertySearch mode="rent" />} /> */}
           <Route path="/live/enquire" element={<EnquirePage />} />
           <Route path="/live/building/:slug" element={<BuildingPage />} />
-          <Route path="/live/property/:slug" element={<PropertyPage />} />
+          {/* <Route path="/live/property/:slug" element={<PropertyPage />} /> */}
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
           <Route path="/services/place/:slug" element={<ServicesDetailPage />} />
           <Route path="/services/:group" element={<CategoryPage />} />

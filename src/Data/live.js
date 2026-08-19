@@ -583,13 +583,16 @@ export const liveMenu = {
       heading: "Developments",
       links: buildings.map((b) => ({ label: b.name, to: `/live/building/${b.slug}` })),
     },
-    {
-      heading: "For Sale & Rent",
-      links: [
-        { label: "Properties For Sale", to: "/live/for-sale" },
-        { label: "Properties For Rent", to: "/live/for-rent" },
-      ],
-    },
+    // For Sale & Rent — the property search platform is paused for now
+    // (see the commented-out routes in src/App.jsx). Re-add this column
+    // when it comes back.
+    // {
+    //   heading: "For Sale & Rent",
+    //   links: [
+    //     { label: "Properties For Sale", to: "/live/for-sale" },
+    //     { label: "Properties For Rent", to: "/live/for-rent" },
+    //   ],
+    // },
   ],
 };
 

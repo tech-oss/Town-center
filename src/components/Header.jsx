@@ -14,7 +14,7 @@ import useOverImmersive from "../hooks/useOverImmersive";
 const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
 // Routes whose hero banner the header floats transparently over.
-const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/live/stay/hotels", "/live/stay/accommodation"];
+const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/live", "/live/stay/hotels", "/live/stay/accommodation"];
 
 const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
