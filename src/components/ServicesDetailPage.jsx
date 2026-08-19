@@ -6,7 +6,23 @@ import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import ServicesDetailLayout from "./ServicesDetailLayout";
+import FreelancerDetailLayout from "./FreelancerDetailLayout";
 import NewsOffers from "./NewsOffers";
+
+// Categories under the Services "Freelancers" menu column — these get the
+// lighter, portfolio-first profile layout instead of the local-directory
+// business profile (opening hours, areas covered, business info) that
+// tradespeople and professionals use.
+const FREELANCER_CATEGORIES = new Set([
+  "graphic-designers",
+  "web-developers",
+  "photographers",
+  "copywriters",
+  "marketing-consultants",
+  "personal-trainers",
+  "tutors",
+  "virtual-assistants",
+]);
 
 function buildSocial(item) {
   const s = item.social;
@@ -34,7 +50,13 @@ export default function ServicesDetailPage() {
   if (!item) return <Navigate to="/" replace />;
   const sec = sections[item.section];
 
-  const sectionItems = allBusinesses.filter((i) => i.section === item.section);
+  const isFreelancer = FREELANCER_CATEGORIES.has(item.category);
+
+  // Freelancers only pair up with other freelancers — a graphic designer's
+  // "similar" list shouldn't surface builders or electricians.
+  const sectionItems = allBusinesses
+    .filter((i) => i.section === item.section)
+    .filter((i) => FREELANCER_CATEGORIES.has(i.category) === isFreelancer);
   const sameCat = sectionItems.filter((i) => i.category === item.category && i.slug !== item.slug);
   const others = sectionItems.filter((i) => i.category !== item.category && i.slug !== item.slug);
   const related = [...sameCat, ...others].slice(0, 4);
@@ -42,6 +64,51 @@ export default function ServicesDetailPage() {
   const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
   const heroImage = item.gallery[0];
   const extraImages = item.gallery.slice(1);
+
+  if (isFreelancer) {
+    return (
+      <FreelancerDetailLayout
+        breadcrumbs={[
+          { label: "Home", to: "/" },
+          { label: sec.label, to: sec.path },
+          { label: item.tag, to: `/${item.section}?category=${item.category}` },
+        ]}
+        categoryLabel={item.tag}
+        title={item.name}
+        heroImage={item.image}
+        description={item.description}
+        address={item.address}
+        phone={item.phone}
+        email={item.email}
+        website={item.website}
+        social={buildSocial(item)}
+        rating={item.rating}
+        reviewCount={item.reviewCount}
+        aboutHeading={item.aboutHeading}
+        aboutText={item.aboutText}
+        skills={item.servicesOffered}
+        portfolio={item.portfolio || item.gallery.map((src) => ({ image: src }))}
+        availability={item.availability || "Accepting new projects"}
+        workMode={item.workMode || "Remote & on-site"}
+        responseTime={item.responseTime || "Usually within 24 hours"}
+        experience={item.experience || item.stats?.[0]?.value}
+        reviewsBreakdown={item.reviewsBreakdown}
+        reviewsList={item.reviewsList}
+        faq={item.faq}
+        afterGrid={!item.freePlan && <NewsOffers item={item} />}
+        relatedHeading="Similar Freelancers"
+        related={related.map((it) => ({
+          slug: it.slug,
+          to: `/${it.section}/place/${it.slug}`,
+          image: it.image,
+          category: it.tag,
+          name: it.name,
+          rating: it.rating,
+          reviewCount: it.reviewCount,
+        }))}
+      />
+    );
+  }
 
   return (
     <ServicesDetailLayout
