@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { categoryColors } from "../Data/events";
+import { categories, categoryColors } from "../Data/events";
 import { getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 
@@ -12,6 +12,13 @@ const formatUkShort = (iso) => {
   const d = new Date(`${iso}T00:00:00`);
   return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`;
 };
+
+const QUICK_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "today", label: "Today" },
+  { key: "tomorrow", label: "Tomorrow" },
+  { key: "week", label: "This Week" },
+];
 
 // Whether `e` falls on `date` — for a recurring event with an `nthWeekday`
 // (e.g. { recurringWeekday: 0, nthWeekday: 2 } = 2nd Sunday of the month)
@@ -59,10 +66,42 @@ function generateOccurrences(events, range) {
   return results.sort((a, b) => a.date - b.date);
 }
 
-function CalendarIcon({ size = 16 }) {
+// Resolves the active quick-filter / date-range selection into a concrete
+// [start, end] day span (end === null means "no upper bound").
+function resolveDateRange(quickFilter, rangeStart, rangeEnd) {
+  const today0 = startOfDay(new Date());
+  if (quickFilter === "today") return { start: today0, end: today0 };
+  if (quickFilter === "tomorrow") {
+    const t = new Date(today0);
+    t.setDate(t.getDate() + 1);
+    return { start: t, end: t };
+  }
+  if (quickFilter === "week") {
+    const dayIdx = (today0.getDay() + 6) % 7; // Monday = 0
+    const end = new Date(today0);
+    end.setDate(end.getDate() + (6 - dayIdx));
+    return { start: today0, end };
+  }
+  if (quickFilter === "range" && rangeStart) {
+    return {
+      start: new Date(`${rangeStart}T00:00:00`),
+      end: rangeEnd ? new Date(`${rangeEnd}T00:00:00`) : null,
+    };
+  }
+  return null; // "all" — no date restriction
+}
+
+function CalendarIcon({ size = 15 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+function ChevronIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9l6 6 6-6" />
     </svg>
   );
 }
@@ -101,71 +140,135 @@ function EventCard({ e, date }) {
   );
 }
 
-// Chronological events list for What's On — a date range search over a flat
-// list of upcoming events (no month-grid calendar).
+// Filter bar (quick date ranges, a custom date range, and event type
+// filtering) driving a chronological events list for What's On.
 export default function EventsCalendar() {
   const { data: events } = useFetch(getEvents, []);
   const allEvents = events ?? [];
 
+  const [quickFilter, setQuickFilter] = useState("all"); // all | today | tomorrow | week | range
   const [rangeStart, setRangeStart] = useState("");
   const [rangeEnd, setRangeEnd] = useState("");
   const [rangeOpen, setRangeOpen] = useState(false);
-  const [appliedRange, setAppliedRange] = useState(null); // { start, end } | null
+  const [categoryFilter, setCategoryFilter] = useState(() => new Set()); // empty = all categories
+  const [typesOpen, setTypesOpen] = useState(false);
 
-  const eventsList = useMemo(() => generateOccurrences(allEvents, appliedRange).slice(0, 50), [allEvents, appliedRange]);
+  const dateRange = useMemo(() => resolveDateRange(quickFilter, rangeStart, rangeEnd), [quickFilter, rangeStart, rangeEnd]);
+
+  const categoryFilteredEvents = useMemo(
+    () => allEvents.filter((e) => categoryFilter.size === 0 || categoryFilter.has(e.category)),
+    [allEvents, categoryFilter]
+  );
+
+  const eventsList = useMemo(() => generateOccurrences(categoryFilteredEvents, dateRange).slice(0, 50), [categoryFilteredEvents, dateRange]);
+
+  const onQuickFilter = (key) => {
+    setQuickFilter(key);
+    setRangeOpen(false);
+    if (key !== "range") {
+      setRangeStart("");
+      setRangeEnd("");
+    }
+  };
 
   const applyDateRange = () => {
     if (!rangeStart) return;
-    setAppliedRange({ start: new Date(`${rangeStart}T00:00:00`), end: rangeEnd ? new Date(`${rangeEnd}T00:00:00`) : null });
+    setQuickFilter("range");
     setRangeOpen(false);
   };
 
   const clearDateRange = () => {
     setRangeStart("");
     setRangeEnd("");
-    setAppliedRange(null);
+    if (quickFilter === "range") setQuickFilter("all");
     setRangeOpen(false);
   };
 
-  const rangeButtonLabel = appliedRange
-    ? rangeEnd && rangeEnd !== rangeStart
-      ? `${formatUkShort(rangeStart)} – ${formatUkShort(rangeEnd)}`
-      : formatUkShort(rangeStart)
-    : "Select a date range";
+  const toggleCategory = (key) => {
+    setCategoryFilter((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
 
-  const listHeading = appliedRange
-    ? eventsList.length > 0
-      ? `Events from ${rangeButtonLabel}`
-      : `No events found from ${rangeButtonLabel}`
-    : "Upcoming Events";
+  const rangeButtonLabel =
+    quickFilter === "range" && rangeStart
+      ? rangeEnd && rangeEnd !== rangeStart
+        ? `${formatUkShort(rangeStart)} – ${formatUkShort(rangeEnd)}`
+        : formatUkShort(rangeStart)
+      : "Date range";
+
+  const listHeading = (() => {
+    const labels = { today: "Today", tomorrow: "Tomorrow", week: "This Week", range: "Selected Dates" };
+    if (quickFilter === "all") return "Upcoming Events";
+    const base = labels[quickFilter] || "Filtered Events";
+    return eventsList.length > 0 ? base : "No events found";
+  })();
 
   return (
     <div>
-      {/* Date range control — the only filter on this page. Plain (no
-          bar background), centered, with a short label above it. */}
-      <div className="relative flex flex-col items-center gap-2 mb-8">
-        <span className="text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--leaf)" }}>
-          Browse events by date
-        </span>
-        <div className="flex items-center gap-3">
+      {/* Filter bar — quick date ranges, a custom date range, and event
+          type filtering. Drives the events list below. Both dropdowns
+          anchor to this outer bar (not their own trigger button) so on
+          narrow phones they always sit fully inside the bar's width
+          instead of spilling off the edge of the screen. */}
+      <div className="relative rounded-2xl p-3 md:p-4 mb-8 flex flex-col gap-2.5 md:flex-row md:flex-wrap md:items-center md:gap-x-8 md:gap-y-3" style={{ backgroundColor: "var(--sage)" }}>
+        {/* Quick filters — equal-width chips on mobile, inline text tabs
+            on desktop where there's room to breathe. */}
+        <div className="grid grid-cols-4 gap-1.5 md:flex md:items-center md:gap-x-5">
+          {QUICK_FILTERS.map((f) => {
+            const active = quickFilter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => onQuickFilter(f.key)}
+                className={[
+                  "px-2 py-2 rounded-full text-xs font-bold whitespace-nowrap text-center transition-colors cursor-pointer",
+                  active ? "bg-white text-[var(--forest)]" : "bg-white/[0.18] text-white",
+                  "md:bg-transparent md:px-0 md:py-0 md:rounded-none md:text-base md:text-left md:text-white",
+                ].join(" ")}
+              >
+                <span style={{ textDecoration: active ? "underline" : "none", textUnderlineOffset: "6px" }}>
+                  {f.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Date range + Event types — equal-width chips on mobile, own
+            sized buttons on desktop (Event types pinned to the far right). */}
+        <div className="grid grid-cols-2 gap-1.5 md:flex md:items-center md:gap-3 md:ml-auto">
           <button
             type="button"
-            onClick={() => setRangeOpen((o) => !o)}
-            className="flex items-center justify-center gap-2 text-sm font-bold rounded-full px-5 py-2.5 border-2 cursor-pointer transition-colors hover:bg-black/[0.03]"
-            style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
+            onClick={() => {
+              setRangeOpen((o) => !o);
+              setTypesOpen(false);
+            }}
+            className="flex items-center justify-center gap-1.5 text-xs md:text-sm font-bold text-white rounded-full px-3 py-2 md:px-4 border-2 cursor-pointer transition-colors hover:bg-white/10"
+            style={{ borderColor: "rgba(255,255,255,0.75)" }}
           >
-            <CalendarIcon />
-            <span className="truncate">{rangeButtonLabel}</span>
+            <span className="truncate">{rangeButtonLabel}</span> <CalendarIcon />
           </button>
-          {appliedRange && (
-            <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline shrink-0" style={{ color: "#000000" }}>
-              Clear
-            </button>
-          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              setTypesOpen((o) => !o);
+              setRangeOpen(false);
+            }}
+            className="flex items-center justify-center gap-1.5 text-xs md:text-sm font-bold text-white rounded-full pl-3 pr-2.5 md:pl-5 md:pr-4 py-2 md:py-2.5 cursor-pointer transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "var(--leaf)" }}
+          >
+            <span className="truncate">Event types{categoryFilter.size > 0 ? ` (${categoryFilter.size})` : ""}</span> <ChevronIcon />
+          </button>
         </div>
 
         {rangeOpen && (
-          <div className="absolute z-20 top-full mt-2 left-1/2 -translate-x-1/2 w-72 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+          <div className="absolute z-20 top-full mt-2 left-3 right-3 md:left-0 md:right-auto md:w-64 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
             <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
               From
               <input type="date" lang="en-GB" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
@@ -186,10 +289,27 @@ export default function EventsCalendar() {
             </div>
           </div>
         )}
+
+        {typesOpen && (
+          <div className="absolute z-20 top-full mt-2 left-3 right-3 md:left-auto md:right-0 md:w-60 bg-white rounded-2xl p-2 shadow-xl flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+            {Object.entries(categories).map(([key, c]) => (
+              <label key={key} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                <input type="checkbox" checked={categoryFilter.has(key)} onChange={() => toggleCategory(key)} className="accent-[var(--leaf)]" />
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.color }} />
+                {c.label}
+              </label>
+            ))}
+            {categoryFilter.size > 0 && (
+              <button type="button" onClick={() => setCategoryFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+                Clear
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Events list — chronological upcoming events, or the applied date
-          range's results. Every card carries the event's own photo. */}
+      {/* Events list — chronological upcoming events, or the active
+          filter's results. Every card carries the event's own photo. */}
       <h3 className="text-xl font-bold mb-5" style={{ color: "#000000" }}>
         {listHeading}
       </h3>
