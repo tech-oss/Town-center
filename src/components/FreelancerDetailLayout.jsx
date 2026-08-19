@@ -111,6 +111,7 @@ export default function FreelancerDetailLayout({
   const waShare = `https://wa.me/?text=${t}%20${u}`;
 
   const totalReviews = reviewsBreakdown.reduce((s, r) => s + r.count, 0) || reviewCount || 0;
+  const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${title} reviews`)}`;
   const portfolioImages = portfolio.map((p) => p.image).filter(Boolean);
   // Maps each portfolio entry to its position within portfolioImages (for
   // the lightbox), or -1 for a link-only entry with no image.
@@ -189,7 +190,6 @@ export default function FreelancerDetailLayout({
                 <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
                   <StarRow value={rating} />
                   <span className="font-semibold">{rating?.toFixed(1)}</span>
-                  <span className="opacity-70">({totalReviews} reviews)</span>
                   <span className="opacity-40">·</span>
                   <span>{categoryLabel}</span>
                 </div>
@@ -265,7 +265,7 @@ export default function FreelancerDetailLayout({
 
                   <Section heading="Client Reviews">
                     <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
-                    {reviewsList[0] && <ReviewCard {...reviewsList[0]} />}
+                    {reviewsList[0] && <ReviewCard {...reviewsList[0]} sourceUrl={reviewsList[0].sourceUrl || defaultReviewSourceUrl} />}
                     {reviewsList.length > 0 && (
                       <button type="button" onClick={() => setTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
                     )}
@@ -291,7 +291,7 @@ export default function FreelancerDetailLayout({
                 <Section heading="Client Reviews">
                   <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
                   <div className="flex flex-col gap-4 mt-2">
-                    {reviewsList.map((r, i) => <ReviewCard key={i} {...r} />)}
+                    {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
                   </div>
                 </Section>
               )}
@@ -477,23 +477,26 @@ function ReviewsSummary({ rating, totalReviews, breakdown }) {
   );
 }
 
-function ReviewCard({ name, area, stars, timeAgo, text }) {
+function ReviewCard({ area, stars, timeAgo, text, sourceUrl }) {
   return (
-    <div className="flex gap-3 py-4 border-b last:border-b-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
-      <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
-        {name?.[0]}
+    <div className="py-4 border-b last:border-b-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+      <div className="flex items-center gap-2 flex-wrap mb-1.5">
+        <StarRow value={stars} size={12} />
+        <span className="text-xs opacity-50" style={{ color: "#000000" }}>{timeAgo}</span>
+        {area && <span className="text-xs opacity-50" style={{ color: "#000000" }}>· {area}</span>}
       </div>
-      <div className="min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-semibold text-sm" style={{ color: "#000000" }}>{name}</span>
-          <span className="text-xs opacity-50" style={{ color: "#000000" }}>{area}</span>
-        </div>
-        <div className="flex items-center gap-2 mt-0.5 mb-1.5">
-          <StarRow value={stars} size={12} />
-          <span className="text-xs opacity-50" style={{ color: "#000000" }}>{timeAgo}</span>
-        </div>
-        <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{text}</p>
-      </div>
+      <p className="text-sm leading-relaxed mb-2.5" style={{ color: "#000000" }}>{text}</p>
+      {sourceUrl && (
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors"
+          style={{ backgroundColor: "var(--sand)", color: "var(--forest)" }}
+        >
+          Read verified review <span>↗</span>
+        </a>
+      )}
     </div>
   );
 }
