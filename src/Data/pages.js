@@ -398,7 +398,18 @@ const servicesItems = [
   item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance Brokers"),
   // Freelancers
   item("riverside-graphic-design", "Riverside Graphic Design", "services", "graphic-designers", "Graphic Designers"),
-  item("thames-web-studio", "Thames Web Studio", "services", "web-developers", "Web Developers"),
+  {
+    // Portfolio mixes photos with links out to live project sites — a
+    // freelancer's work isn't always a picture (see FreelancerDetailLayout).
+    ...item("thames-web-studio", "Thames Web Studio", "services", "web-developers", "Web Developers"),
+    portfolio: [
+      { image: img("thames-web-studio-1") },
+      { link: "https://www.coppaclub.co.uk/maidenhead", title: "Coppa Club Maidenhead — restaurant website" },
+      { image: img("thames-web-studio-2") },
+      { link: "https://www.maidenheadfarmersmarket.org.uk/", title: "Maidenhead Farmers' Market — event site" },
+      { image: img("thames-web-studio-3") },
+    ],
+  },
   item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photographers", "Photographers"),
   item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "copywriters", "Copywriters & Content Writers"),
   item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-consultants", "Marketing Consultants"),

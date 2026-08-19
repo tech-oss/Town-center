@@ -112,6 +112,42 @@ export default function FreelancerDetailLayout({
 
   const totalReviews = reviewsBreakdown.reduce((s, r) => s + r.count, 0) || reviewCount || 0;
   const portfolioImages = portfolio.map((p) => p.image).filter(Boolean);
+  // Maps each portfolio entry to its position within portfolioImages (for
+  // the lightbox), or -1 for a link-only entry with no image.
+  let imgCounter = -1;
+  const portfolioImageIndex = portfolio.map((p) => (p.image ? ++imgCounter : -1));
+
+  // A portfolio entry isn't always a photo — a freelancer might instead
+  // want to point to a piece of work hosted elsewhere (a live site, a
+  // Behance/Dribbble case study, a YouTube reel, etc). Each tile renders as
+  // either a clickable image (opens the lightbox) or a link card (opens the
+  // external site, going through the sitewide "leaving our website"
+  // confirmation like every other outbound link).
+  const PortfolioTile = ({ p, index, big = false }) => {
+    const shapeClass = big ? "col-span-2 sm:row-span-2 aspect-[16/9] sm:aspect-auto" : "aspect-square";
+    if (p.image) {
+      return (
+        <button type="button" onClick={() => setGalleryIndex(portfolioImageIndex[index])} className={`${shapeClass} overflow-hidden cursor-pointer`}>
+          <img src={p.image} alt={p.title || `${title} portfolio ${index + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+        </button>
+      );
+    }
+    if (p.link) {
+      return (
+        <a
+          href={p.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${shapeClass} flex flex-col items-center justify-center gap-2 text-center p-3 transition-colors hover:opacity-80`}
+          style={{ backgroundColor: "var(--sand)" }}
+        >
+          <LinkIcon size={22} />
+          <span className="text-xs font-semibold leading-snug line-clamp-3" style={{ color: "var(--forest)" }}>{p.title || p.link}</span>
+        </a>
+      );
+    }
+    return null;
+  };
 
   const Section = ({ heading, children, className = "" }) => (
     <div className={`bg-white p-6 md:p-7 ${className}`} style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
@@ -145,7 +181,7 @@ export default function FreelancerDetailLayout({
           <div className="min-w-0">
             {/* ── Profile header — one profile picture, name, rating, skills ── */}
             <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5 mb-6" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-              <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden rounded-full sm:rounded-2xl mx-auto sm:mx-0" style={{ backgroundColor: "var(--forest)" }}>
+              <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
                 <img src={heroImage} alt={title} className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
@@ -172,18 +208,17 @@ export default function FreelancerDetailLayout({
               </div>
             </div>
 
-            {/* ── Portfolio preview — three examples, with a link into the
-                full Portfolio tab for the rest. ── */}
-            {portfolioImages.length > 0 && (
+            {/* ── Portfolio preview — same asymmetric big-image + two-tile
+                layout as the Services/Eat & Drink gallery preview, with a
+                link into the full Portfolio tab for the rest. ── */}
+            {portfolio.length > 0 && (
               <div className="mb-6">
-                <div className="grid grid-cols-3 gap-2">
-                  {portfolioImages.slice(0, 3).map((src, i) => (
-                    <button key={i} type="button" onClick={() => setGalleryIndex(i)} className="aspect-square overflow-hidden cursor-pointer">
-                      <img src={src} alt={`${title} portfolio ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                    </button>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {portfolio.slice(0, 3).map((p, i) => (
+                    <PortfolioTile key={i} p={p} index={i} big={i === 0} />
                   ))}
                 </div>
-                {portfolioImages.length > 3 && (
+                {portfolio.length > 3 && (
                   <button type="button" onClick={() => setTab("Portfolio")} className="mt-3 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>
                     See full portfolio →
                   </button>
@@ -240,25 +275,13 @@ export default function FreelancerDetailLayout({
 
               {tab === "Portfolio" && (
                 <Section heading="Portfolio">
-                  {portfolioImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-                      {portfolioImages.map((src, i) => (
-                        <button key={i} type="button" onClick={() => setGalleryIndex(i)} className="aspect-square overflow-hidden cursor-pointer">
-                          <img src={src} alt={`${title} portfolio ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                        </button>
+                  {portfolio.length > 0 ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {portfolio.map((p, i) => (
+                        <PortfolioTile key={i} p={p} index={i} />
                       ))}
                     </div>
-                  )}
-                  {portfolio.some((p) => p.link) && (
-                    <div className="flex flex-col gap-2.5">
-                      {portfolio.filter((p) => p.link).map((p) => (
-                        <a key={p.link} href={p.link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 text-sm font-semibold hover:underline" style={{ color: "var(--leaf)" }}>
-                          <LinkIcon /> {p.title || p.link}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                  {portfolioImages.length === 0 && !portfolio.some((p) => p.link) && (
+                  ) : (
                     <p className="text-sm" style={{ color: "#000000" }}>No portfolio examples added yet.</p>
                   )}
                 </Section>
@@ -292,14 +315,14 @@ export default function FreelancerDetailLayout({
           <div className="flex flex-col gap-4 lg:sticky lg:top-6 self-start">
             {/* CTA + remaining contact details — one continuous card */}
             <div className="bg-white p-5 flex flex-col gap-3" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-              {email && (
-                <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
-                  <MailIcon size={16} /> Get in Touch
+              {phone && (
+                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
+                  <PhoneIcon size={16} /> Call Now {phone}
                 </a>
               )}
-              {phone && (
-                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <PhoneIcon size={16} /> Call {phone}
+              {email && (
+                <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <MailIcon size={16} /> Get in Touch
                 </a>
               )}
               {websiteHref && (
@@ -307,9 +330,11 @@ export default function FreelancerDetailLayout({
                   <GlobeIcon size={16} /> Visit Website
                 </a>
               )}
-              <button type="button" onClick={() => setShareOpen(true)} className="flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <ShareNodesIcon size={16} /> Share Profile
-              </button>
+              <div className="grid grid-cols-1">
+                <button type="button" onClick={() => setShareOpen(true)} className="flex items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <ShareNodesIcon size={16} /> Share Profile
+                </button>
+              </div>
 
               {(address || social?.length > 0) && (
                 <div className="flex flex-col gap-3 pt-3 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
