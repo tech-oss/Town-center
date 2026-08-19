@@ -5,7 +5,6 @@ import { getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const pad = (n) => String(n).padStart(2, "0");
 const toIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -27,23 +26,11 @@ function eventOccursOnDate(e, date) {
   return false;
 }
 
-// `dateRange`, when given, excludes the day entirely if it falls outside
-// the range — otherwise a recurring event would show on every matching
-// weekday of the month regardless of the selected range.
-function eventsForDay(events, y, m, day, dateRange) {
-  const d = new Date(y, m, day);
-  if (dateRange) {
-    if (d < dateRange.start) return [];
-    if (dateRange.end && d > dateRange.end) return [];
-  }
-  return events.filter((e) => eventOccursOnDate(e, d));
-}
-
 // Expands events (including recurring ones) into concrete dated occurrences
-// within the given range, for the flat chronological list — a bounded range
-// enumerates day-by-day; an open-ended range (a date range with no "to"
-// date) is capped to a six-month lookahead so recurring events still
-// surface without scanning forever.
+// within the given range, sorted chronologically — a bounded range
+// enumerates day-by-day; an open-ended range (no range applied, or a "from"
+// date with no "to" date) is capped to a six-month lookahead so recurring
+// events still surface without scanning forever.
 function generateOccurrences(events, range) {
   const start = range?.start ?? startOfDay(new Date());
   const cappedEnd =
@@ -72,75 +59,11 @@ function generateOccurrences(events, range) {
   return results.sort((a, b) => a.date - b.date);
 }
 
-function CalendarIcon({ size = 15 }) {
+function CalendarIcon({ size = 16 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
     </svg>
-  );
-}
-
-// Day-detail card — a calendar cell is too small to give each event its
-// own accurately-clickable/tappable dot, on any device. Clicking or
-// tapping the whole cell opens this instead, listing that day's events.
-function DayEventsModal({ day, monthLabel, year, events, onClose }) {
-  return (
-    <div
-      className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-6"
-      style={{ backgroundColor: "rgba(15,28,35,0.55)" }}
-      onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        className="relative w-full sm:max-w-md max-h-[80vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6"
-        style={{ backgroundColor: "#ffffff" }}
-      >
-        <button
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/5"
-          style={{ color: "#000000" }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </button>
-
-        <h3 className="text-lg font-bold mb-4 pr-8" style={{ color: "#000000" }}>
-          {monthLabel} {day}, {year}
-        </h3>
-
-        <div className="flex flex-col gap-3">
-          {events.map((e, i) => (
-            <Link
-              key={`${e.slug}-${i}`}
-              to={`/event/${e.slug}`}
-              onClick={onClose}
-              className="flex items-center gap-3 overflow-hidden rounded-2xl"
-              style={{ backgroundColor: "var(--sand)" }}
-            >
-              {e.image && (
-                <div className="w-16 h-16 shrink-0 overflow-hidden">
-                  <img src={e.image} alt="" loading="lazy" className="w-full h-full object-cover" />
-                </div>
-              )}
-              <div className="min-w-0 flex-1 py-2.5 pr-2">
-                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
-                  {e.category}
-                </span>
-                <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
-                {e.location && <p className="text-xs truncate" style={{ color: "#000000" }}>{e.location}</p>}
-              </div>
-              <span className="shrink-0 text-lg pr-3" style={{ color: "#000000" }}>→</span>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -178,60 +101,22 @@ function EventCard({ e, date }) {
   );
 }
 
-// Reusable interactive month calendar (used on the See & Do hub and /whats-on).
+// Chronological events list for What's On — a date range search over a flat
+// list of upcoming events (no month-grid calendar).
 export default function EventsCalendar() {
   const { data: events } = useFetch(getEvents, []);
   const allEvents = events ?? [];
-  const today = new Date();
-  const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
-  const [dayModal, setDayModal] = useState(null); // { day, events } | null
 
   const [rangeStart, setRangeStart] = useState("");
   const [rangeEnd, setRangeEnd] = useState("");
   const [rangeOpen, setRangeOpen] = useState(false);
   const [appliedRange, setAppliedRange] = useState(null); // { start, end } | null
 
-  const { y, m } = view;
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const startWeekday = (new Date(y, m, 1).getDay() + 6) % 7; // Monday = 0
-
-  const cells = useMemo(() => {
-    const arr = [];
-    for (let i = 0; i < startWeekday; i++) arr.push(null);
-    for (let d = 1; d <= daysInMonth; d++) arr.push(d);
-    while (arr.length % 7 !== 0) arr.push(null);
-    return arr;
-  }, [startWeekday, daysInMonth]);
-
-  const useFlatList = Boolean(appliedRange);
-
-  const monthEvents = useMemo(() => {
-    const list = [];
-    for (let d = 1; d <= daysInMonth; d++) {
-      eventsForDay(allEvents, y, m, d, appliedRange).forEach((e) => list.push({ day: d, e }));
-    }
-    return list;
-  }, [allEvents, y, m, daysInMonth, appliedRange]);
-
-  // Flat chronological list for the date-range view — only dated events
-  // have a fixed date to sort/display by (recurring-weekday events still
-  // show up on the calendar grid itself).
-  const filteredList = useMemo(() => {
-    if (!useFlatList) return [];
-    return generateOccurrences(allEvents, appliedRange).slice(0, 50);
-  }, [allEvents, appliedRange, useFlatList]);
-
-  const prevMonth = () => setView((v) => (v.m === 0 ? { y: v.y - 1, m: 11 } : { y: v.y, m: v.m - 1 }));
-  const nextMonth = () => setView((v) => (v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 }));
-  const isToday = (d) => d && today.getFullYear() === y && today.getMonth() === m && today.getDate() === d;
-
-  const jumpTo = (date) => setView({ y: date.getFullYear(), m: date.getMonth() });
+  const eventsList = useMemo(() => generateOccurrences(allEvents, appliedRange).slice(0, 50), [allEvents, appliedRange]);
 
   const applyDateRange = () => {
     if (!rangeStart) return;
-    const range = { start: new Date(`${rangeStart}T00:00:00`), end: rangeEnd ? new Date(`${rangeEnd}T00:00:00`) : null };
-    setAppliedRange(range);
-    jumpTo(range.start);
+    setAppliedRange({ start: new Date(`${rangeStart}T00:00:00`), end: rangeEnd ? new Date(`${rangeEnd}T00:00:00`) : null });
     setRangeOpen(false);
   };
 
@@ -246,27 +131,27 @@ export default function EventsCalendar() {
     ? rangeEnd && rangeEnd !== rangeStart
       ? `${formatUkShort(rangeStart)} – ${formatUkShort(rangeEnd)}`
       : formatUkShort(rangeStart)
-    : "Date range";
+    : "Select a date range";
 
-  const listHeading = () => {
-    if (!useFlatList) return monthEvents.length > 0 ? `Events in ${MONTHS[m]}` : `No events listed in ${MONTHS[m]}`;
-    return filteredList.length > 0 ? `Events from ${rangeButtonLabel}` : `No events found from ${rangeButtonLabel}`;
-  };
+  const listHeading = appliedRange
+    ? eventsList.length > 0
+      ? `Events from ${rangeButtonLabel}`
+      : `No events found from ${rangeButtonLabel}`
+    : "Upcoming Events";
 
   return (
     <div>
-      {/* Date range bar — the only filter on this page. Browsing a
-          specific date (or range) narrows both the calendar grid above
-          and the results list below. */}
-      <div className="relative rounded-2xl p-3 md:p-4 mb-6 flex items-center gap-3" style={{ backgroundColor: "var(--sage)" }}>
-        <span className="hidden sm:inline text-sm font-bold text-white/90 mr-auto">Browse events by date</span>
+      {/* Date range bar — the only filter on this page, given generous
+          room since it's the sole control. */}
+      <div className="relative rounded-2xl p-3 md:p-4 mb-8 flex items-center gap-3" style={{ backgroundColor: "var(--sage)" }}>
         <button
           type="button"
           onClick={() => setRangeOpen((o) => !o)}
-          className="flex items-center justify-center gap-1.5 text-sm font-bold text-white rounded-full px-4 py-2.5 border-2 cursor-pointer transition-colors hover:bg-white/10 ml-auto sm:ml-0"
+          className="flex-1 flex items-center justify-center gap-2 text-sm md:text-base font-bold text-white rounded-full px-6 py-3.5 md:py-4 border-2 cursor-pointer transition-colors hover:bg-white/10"
           style={{ borderColor: "rgba(255,255,255,0.75)" }}
         >
-          <span className="truncate">{rangeButtonLabel}</span> <CalendarIcon />
+          <CalendarIcon />
+          <span className="truncate">{rangeButtonLabel}</span>
         </button>
         {appliedRange && (
           <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline text-white shrink-0">
@@ -275,7 +160,7 @@ export default function EventsCalendar() {
         )}
 
         {rangeOpen && (
-          <div className="absolute z-20 top-full mt-2 left-3 right-3 sm:left-auto sm:right-3 sm:w-64 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+          <div className="absolute z-20 top-full mt-2 left-3 right-3 sm:left-3 sm:right-3 md:w-80 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
             <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
               From
               <input type="date" lang="en-GB" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
@@ -298,98 +183,16 @@ export default function EventsCalendar() {
         )}
       </div>
 
-      {/* Calendar — kept compact and centered on desktop, where a
-          full-bleed grid otherwise reads as oversized; full-width on
-          mobile. Same day-selection experience at every size: a compact
-          dot/count indicator, tapping or clicking the cell opens the same
-          event-list card. */}
-      <div className="md:max-w-md md:mx-auto">
-        {/* Month nav */}
-        <div className="flex items-center justify-between mb-4 md:mb-5">
-          <button onClick={prevMonth} aria-label="Previous month" className="w-9 h-9 md:w-8 md:h-8 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>‹</button>
-          <h3 className="text-xl md:text-lg font-bold" style={{ color: "#000000" }}>{MONTHS[m]} {y}</h3>
-          <button onClick={nextMonth} aria-label="Next month" className="w-9 h-9 md:w-8 md:h-8 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>›</button>
-        </div>
-
-        {/* Calendar grid */}
-        <div className="bg-white rounded-3xl p-3 md:p-3" style={{ boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
-          <div className="grid grid-cols-7 gap-1 mb-1">
-            {WEEKDAYS.map((w) => (
-              <div key={w} className="text-center text-[10px] font-bold uppercase tracking-[0.02em] py-1.5" style={{ color: "var(--leaf)" }}>{w}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-1">
-            {cells.map((d, i) => {
-              const dayEvents = d ? eventsForDay(allEvents, y, m, d, appliedRange) : [];
-              return (
-                <div
-                  key={i}
-                  className="relative min-h-[52px] rounded-lg p-1 flex flex-col gap-0.5"
-                  style={{
-                    backgroundColor: d ? "var(--sand)" : "transparent",
-                    outline: isToday(d) ? "2px solid var(--leaf)" : "none",
-                  }}
-                >
-                  {d && <span className="relative z-10 text-[11px] font-semibold" style={{ color: "#000000" }}>{d}</span>}
-
-                  {/* A single compact indicator (dot, or a count badge when
-                      there's more than one event) rather than one dot per
-                      event, plus a full-cell tap target — so selecting a
-                      day doesn't require landing on the tiny indicator
-                      itself, on mouse or on touch. */}
-                  {d && dayEvents.length > 0 && (
-                    <>
-                      <div className="mt-auto relative z-10 pointer-events-none">
-                        {dayEvents.length === 1 ? (
-                          <span
-                            className="block w-2 h-2 rounded-full"
-                            style={{ backgroundColor: categoryColors[dayEvents[0].category] || "var(--forest)" }}
-                          />
-                        ) : (
-                          <span
-                            className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-white leading-none"
-                            style={{ backgroundColor: "var(--leaf)" }}
-                          >
-                            {dayEvents.length}
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setDayModal({ day: d, events: dayEvents })}
-                        className="absolute inset-0 rounded-lg cursor-pointer"
-                        aria-label={`View ${dayEvents.length} event${dayEvents.length > 1 ? "s" : ""} on ${MONTHS[m]} ${d}`}
-                      />
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Events list — the applied date range's chronological results, or
-          the current month's events grouped as before when no range is
-          set. Every card carries the event's own photo. */}
-      <h3 className="text-xl font-bold mt-12 mb-5" style={{ color: "#000000" }}>
-        {listHeading()}
+      {/* Events list — chronological upcoming events, or the applied date
+          range's results. Every card carries the event's own photo. */}
+      <h3 className="text-xl font-bold mb-5" style={{ color: "#000000" }}>
+        {listHeading}
       </h3>
       <div className="flex flex-col gap-3">
-        {(useFlatList ? filteredList : monthEvents.map(({ day, e }) => ({ e, date: new Date(y, m, day) }))).map(({ e, date }) => (
+        {eventsList.map(({ e, date }) => (
           <EventCard key={`${e.slug}-${toIso(date)}`} e={e} date={date} />
         ))}
       </div>
-
-      {dayModal && (
-        <DayEventsModal
-          day={dayModal.day}
-          monthLabel={MONTHS[m]}
-          year={y}
-          events={dayModal.events}
-          onClose={() => setDayModal(null)}
-        />
-      )}
     </div>
   );
 }
