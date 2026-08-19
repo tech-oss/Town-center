@@ -2,8 +2,27 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { getStoryBySlug, getStories } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
+
+// Feature photo — keeps the "In the Spotlight" framed-photo hover: a sharp
+// foreground photo that insets on hover/tap to reveal a blurred, dimmed
+// frame around it, matching the homepage Featured Stories treatment.
+function SpotlightImage({ src, alt, aspect = "aspect-[16/9]", className = "" }) {
+  const { revealed, onImageClick } = useTapReveal();
+  return (
+    <div
+      onClick={onImageClick}
+      className={`spotlight-card group/img block cursor-pointer ${revealed ? "is-revealed" : ""} ${className}`}
+    >
+      <div className={`relative overflow-hidden ${aspect}`} style={{ backgroundColor: "#1a1a1a" }}>
+        <img src={src} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+        <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+      </div>
+    </div>
+  );
+}
 
 // Renders a body block's text (heading + paragraphs + optional bullets).
 function BlockText({ block }) {
@@ -92,9 +111,7 @@ export default function FeatureArticlePage() {
           </div>
 
           {/* Cover image */}
-          <div className="relative overflow-hidden aspect-[16/9] bg-black mt-4">
-            <img src={story.heroImage} alt={story.title} className="w-full h-full object-cover" />
-          </div>
+          <SpotlightImage src={story.heroImage} alt={story.title} aspect="aspect-[16/9]" className="mt-4" />
         </div>
       </section>
 
@@ -138,9 +155,7 @@ export default function FeatureArticlePage() {
                 return (
                   <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div className={imageRight ? "md:order-2" : ""}>
-                      <div className="overflow-hidden bg-black h-72 md:h-full md:min-h-[24rem]">
-                        <img src={img.src} alt={block.heading || story.title} loading="lazy" className="w-full h-full object-cover" />
-                      </div>
+                      <SpotlightImage src={img.src} alt={block.heading || story.title} aspect="h-72 md:h-full md:min-h-[24rem]" />
                     </div>
                     <BlockText block={block} />
                   </div>
