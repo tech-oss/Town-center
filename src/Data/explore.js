@@ -132,7 +132,10 @@ export const exploreMenu = {
   columns: [
     {
       heading: "Explore",
-      links: [{ label: "The Future", to: "/explore/the-future" }],
+      links: [
+        { label: "The Future", to: "/explore/the-future" },
+        { label: "Neighbourhood Guides", to: "/guides" },
+      ],
     },
   ],
 };

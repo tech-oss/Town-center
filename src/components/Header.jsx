@@ -14,7 +14,8 @@ import useOverImmersive from "../hooks/useOverImmersive";
 const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
 
 // Routes whose hero banner the header floats transparently over.
-const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/live", "/live/stay/hotels", "/live/stay/accommodation"];
+const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/guides", "/live", "/live/stay/hotels", "/live/stay/accommodation"];
+const TRANSPARENT_HERO_PREFIXES = ["/guides/"];
 
 const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
@@ -30,7 +31,7 @@ const Header = forwardRef(function Header(_, ref) {
 
   // Premium overlay-header behaviour: transparent over the hero at the top,
   // hides on scroll-down, reveals (solid brand blue) on scroll-up / hover.
-  const { hidden, solid } = useHeaderScroll(TRANSPARENT_HERO_PATHS.includes(pathname));
+  const { hidden, solid } = useHeaderScroll(TRANSPARENT_HERO_PATHS.includes(pathname) || TRANSPARENT_HERO_PREFIXES.some((p) => pathname.startsWith(p)));
   // The mobile drawer or an open desktop mega-menu always need the solid
   // backing and a visible header, regardless of scroll position.
   // Full-bleed interactive regions (the traders map) push the header out of the

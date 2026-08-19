@@ -22,6 +22,8 @@ import WorkPage from './components/WorkPage'
 import WorkCategoryPage from './components/WorkCategoryPage'
 import WorkplaceDevelopmentsPage from './components/WorkplaceDevelopmentsPage'
 import ExploreFuturePage from './components/ExploreFuturePage'
+import GuidesPage from './components/GuidesPage'
+import GuideDetailPage from './components/GuideDetailPage'
 import OurStoryPage from './components/OurStoryPage'
 import GettingHerePage from './components/GettingHerePage'
 import NewsIndexPage from './components/NewsIndexPage'
@@ -62,7 +64,8 @@ function PublicSite() {
   // Drink, Services and See & Do share the same transparent-over-hero header
   // treatment. Every other page keeps the measured header height as top
   // padding so content clears the fixed header.
-  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/live', '/live/stay/hotels', '/live/stay/accommodation'].includes(pathname)
+  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/guides', '/live', '/live/stay/hotels', '/live/stay/accommodation'].includes(pathname)
+    || pathname.startsWith('/guides/')
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.
@@ -112,6 +115,8 @@ function PublicSite() {
           <Route path="/work/:category" element={<WorkCategoryPage />} />
           {/* Explore */}
           <Route path="/explore/the-future" element={<ExploreFuturePage />} />
+          <Route path="/guides" element={<GuidesPage />} />
+          <Route path="/guides/:slug" element={<GuideDetailPage />} />
           {/* About */}
           <Route path="/about" element={<OurStoryPage />} />
           {/* Live (residential) section */}
