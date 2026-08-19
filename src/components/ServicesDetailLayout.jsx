@@ -39,13 +39,6 @@ function CardIcon({ size = 15 }) {
     </svg>
   );
 }
-function LeafIcon({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-      <path d="M5 21c8 0 14-6 14-16C10 5 4 11 4 19a2 2 0 001 2z" /><path d="M5 21c4-6 8-10 14-14" />
-    </svg>
-  );
-}
 
 function StarRow({ value, size = 14 }) {
   return (
@@ -90,7 +83,6 @@ export default function ServicesDetailLayout({
   areasCovered = [],
   reviewsBreakdown = [],
   reviewsList = [],
-  businessInfo,
   accreditations = [],
   faq = [],
   afterGrid,
@@ -169,24 +161,26 @@ export default function ServicesDetailLayout({
               </div>
             </div>
 
-            {/* ── 3. Photo gallery — large primary image (~2/3 width) with
-                four smaller tiles beside it, last one carrying the "view
-                all" overlay. ── */}
+            {/* ── 3. Photo gallery — the business's profile picture is the
+                header image above; here just three supporting photos, with
+                a link into the full Photos tab for the rest. ── */}
             {galleryImages.length > 0 && (
-              <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-6">
-                <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-3 sm:col-span-2 row-span-2 aspect-[4/3] sm:aspect-auto overflow-hidden cursor-pointer">
-                  <img src={galleryImages[0]} alt={title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                </button>
-                {galleryImages.slice(1, 5).map((src, i) => (
-                  <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="relative aspect-square overflow-hidden cursor-pointer">
-                    <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-                    {i === 3 && galleryImages.length > 5 && (
-                      <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-semibold" style={{ backgroundColor: "rgba(28,46,56,0.55)" }}>
-                        View all {galleryImages.length} photos
-                      </span>
-                    )}
+              <div className="mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-2 sm:row-span-2 aspect-[16/9] sm:aspect-auto overflow-hidden cursor-pointer">
+                    <img src={galleryImages[0]} alt={title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
                   </button>
-                ))}
+                  {galleryImages.slice(1, 3).map((src, i) => (
+                    <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="aspect-square overflow-hidden cursor-pointer">
+                      <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                    </button>
+                  ))}
+                </div>
+                {galleryImages.length > 3 && (
+                  <button type="button" onClick={() => setTab("Photos")} className="mt-3 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>
+                    See all {galleryImages.length} photos →
+                  </button>
+                )}
               </div>
             )}
 
@@ -334,8 +328,8 @@ export default function ServicesDetailLayout({
               {tab === "FAQ" && (
                 <Section heading="Frequently Asked Questions">
                   <div className="flex flex-col gap-5">
-                    {faq.map((f, i) => (
-                      <div key={i} className={i < faq.length - 1 ? "pb-5 border-b" : ""} style={i < faq.length - 1 ? { borderColor: "rgba(28,46,56,0.1)" } : undefined}>
+                    {faq.slice(0, 8).map((f, i, arr) => (
+                      <div key={i} className={i < arr.length - 1 ? "pb-5 border-b" : ""} style={i < arr.length - 1 ? { borderColor: "rgba(28,46,56,0.1)" } : undefined}>
                         <div className="font-semibold text-sm mb-1.5" style={{ color: "#000000" }}>{f.q}</div>
                         <div className="text-sm leading-relaxed" style={{ color: "#000000" }}>{f.a}</div>
                       </div>
@@ -425,38 +419,6 @@ export default function ServicesDetailLayout({
                   <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
                     Get Directions
                   </a>
-                </div>
-              </Section>
-            )}
-
-            {businessInfo && (
-              <Section heading="Business Information">
-                <div className="flex flex-col gap-3 text-sm">
-                  {[
-                    ["Business Type", businessInfo.type],
-                    ["VAT Registered", businessInfo.vatRegistered],
-                    ["Insurance", businessInfo.insurance],
-                    ["Payment Methods", businessInfo.paymentMethods?.join(", ")],
-                    ["Languages Spoken", businessInfo.languages],
-                  ].filter(([, v]) => v).map(([label, value]) => (
-                    <div key={label} className="flex items-start justify-between gap-3">
-                      <span className="opacity-60" style={{ color: "#000000" }}>{label}</span>
-                      <span className="font-semibold text-right" style={{ color: "#000000" }}>{value}</span>
-                    </div>
-                  ))}
-                  {businessInfo.memberships?.length > 0 && (
-                    <div className="pt-3 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
-                      <span className="opacity-60 text-sm block mb-2" style={{ color: "#000000" }}>Memberships</span>
-                      <div className="flex flex-wrap gap-2">
-                        {businessInfo.memberships.map((m) => (
-                          <span key={m} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>{m}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-start gap-2.5 mt-5 p-3.5 rounded-xl text-xs leading-relaxed" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
-                  <LeafIcon size={16} /> <span>We care about the environment — recycling waste and using energy-efficient solutions wherever possible.</span>
                 </div>
               </Section>
             )}
