@@ -146,9 +146,6 @@ export default function ServicesDetailLayout({
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <h1 className="text-2xl md:text-3xl" style={{ color: "#000000" }}>{title}</h1>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}>
-                    <BadgeIcon size={12} /> Verified Business
-                  </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
                   <StarRow value={rating} />
@@ -353,52 +350,40 @@ export default function ServicesDetailLayout({
               header, and runs down next to the gallery/tabs/overview
               content the whole way. ══ */}
           <div className="flex flex-col gap-4 lg:sticky lg:top-6 self-start">
-            {/* CTA rail */}
-            {phone && (
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
-                <PhoneIcon size={16} /> Call Now {phone}
-              </a>
-            )}
-            {email && (
-              <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <MailIcon size={16} /> Request a Quote
-              </a>
-            )}
-            {websiteHref && (
-              <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <GlobeIcon size={16} /> Visit Website
-              </a>
-            )}
-            <div className="grid grid-cols-2 gap-3">
-              {directionsQuery && (
-                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <PinIcon size={16} /> Directions
+            {/* CTA rail + remaining contact details — one continuous card */}
+            <div className="bg-white p-5 flex flex-col gap-3" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+              {phone && (
+                <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-bold text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}>
+                  <PhoneIcon size={16} /> Call Now {phone}
                 </a>
               )}
-              <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                <ShareNodesIcon size={16} /> Share
-              </button>
-            </div>
+              {email && (
+                <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <MailIcon size={16} /> Request a Quote
+                </a>
+              )}
+              {websiteHref && (
+                <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <GlobeIcon size={16} /> Visit Website
+                </a>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                {directionsQuery && (
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                    <PinIcon size={16} /> Directions
+                  </a>
+                )}
+                <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
+                  <ShareNodesIcon size={16} /> Share
+                </button>
+              </div>
 
-            {(address || phone || email) && (
-              <Section heading="Contact Details">
-                <div className="flex flex-col gap-3">
-                  {phone && (
-                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
-                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PhoneIcon /></span>
-                      <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:underline break-all">{phone}</a>
-                    </div>
-                  )}
+              {(address || email) && (
+                <div className="flex flex-col gap-3 pt-3 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
                   {email && (
                     <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
                       <span className="mt-0.5" style={{ color: "var(--leaf)" }}><MailIcon /></span>
                       <a href={`mailto:${email}`} className="hover:underline break-all">{email}</a>
-                    </div>
-                  )}
-                  {websiteHref && (
-                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
-                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><GlobeIcon /></span>
-                      <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="hover:underline break-all">{website}</a>
                     </div>
                   )}
                   {address && (
@@ -408,15 +393,28 @@ export default function ServicesDetailLayout({
                     </div>
                   )}
                 </div>
-                {social?.length > 0 && (
-                  <div className="flex items-center gap-3 mt-5">
-                    {social.map((sl) => (
-                      <a key={sl.icon} href={sl.href} target="_blank" rel="noopener noreferrer" aria-label={sl.label} title={sl.label} className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
-                        <ShareIcon name={sl.icon} />
-                      </a>
-                    ))}
-                  </div>
-                )}
+              )}
+              {social?.length > 0 && (
+                <div className="flex items-center gap-3">
+                  {social.map((sl) => (
+                    <a key={sl.icon} href={sl.href} target="_blank" rel="noopener noreferrer" aria-label={sl.label} title={sl.label} className="w-9 h-9 rounded-full flex items-center justify-center transition-opacity hover:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
+                      <ShareIcon name={sl.icon} />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {hours?.length > 0 && (
+              <Section heading="Opening Hours">
+                <ul className="flex flex-col">
+                  {hours.map((h, i) => (
+                    <li key={h.day} className="flex items-center justify-between text-sm py-2" style={i < hours.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.08)" } : undefined}>
+                      <span style={{ color: "#000000" }}>{h.day}</span>
+                      <span className="font-semibold" style={{ color: h.time === "Closed" ? "#C0392B" : "#000000" }}>{h.time}</span>
+                    </li>
+                  ))}
+                </ul>
               </Section>
             )}
 

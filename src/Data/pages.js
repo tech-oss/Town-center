@@ -205,7 +205,7 @@ function item(slug, name, section, category, tag, blurb) {
     rating: 4.8,
     reviewCount: 46,
     verified: true,
-    badges: ["Accepting new customers"],
+    badges: ["24 hour booking"],
     aboutHeading: `About ${name}`,
     aboutText: `${name} is a friendly, reliable local business serving Maidenhead and the surrounding area. With years of experience, they take pride in quality work and looking after every customer, no job too big or too small.`,
     stats: [
@@ -301,7 +301,7 @@ const servicesItems = [
     rating: 5.0,
     reviewCount: 76,
     verified: true,
-    badges: ["Accepting new customers", "Family Run", "Gas Safe Registered"],
+    badges: ["24 hour booking", "Family Run", "Gas Safe Registered"],
     aboutHeading: "About Elgan Davies",
     aboutText:
       "Elgan Davies is a small, highly experienced and professional team of plumbing and heating engineers based in Fifield, Maidenhead. Established over 20 years ago, the family-run business has built an enviable reputation for the finest quality of technical work — treating every project, from a single tap to a full renovation, with uncompromising care.",
