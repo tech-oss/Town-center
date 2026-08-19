@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { categories, categoryColors } from "../Data/events";
 import { getEvents } from "../api";
@@ -9,6 +9,10 @@ const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const pad = (n) => String(n).padStart(2, "0");
 const toIso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const formatUkShort = (iso) => {
+  const d = new Date(`${iso}T00:00:00`);
+  return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0, 3)}`;
+};
 
 const QUICK_FILTERS = [
   { key: "all", label: "All" },
@@ -17,6 +21,19 @@ const QUICK_FILTERS = [
   { key: "week", label: "This Week" },
   { key: "upcoming", label: "Coming Up" },
 ];
+
+// Whether `e` falls on `date` — for a recurring event with an `nthWeekday`
+// (e.g. { recurringWeekday: 0, nthWeekday: 2 } = 2nd Sunday of the month)
+// only that specific week counts, not every matching weekday.
+function eventOccursOnDate(e, date) {
+  if (e.iso) return e.iso === toIso(date);
+  if (e.recurringWeekday != null) {
+    if (date.getDay() !== e.recurringWeekday) return false;
+    if (e.nthWeekday) return Math.floor((date.getDate() - 1) / 7) + 1 === e.nthWeekday;
+    return true;
+  }
+  return false;
+}
 
 // `dateRange`, when given, excludes the day entirely if it falls outside
 // the range — otherwise a recurring event would show on every matching
@@ -27,10 +44,40 @@ function eventsForDay(events, y, m, day, dateRange) {
     if (d < dateRange.start) return [];
     if (dateRange.end && d > dateRange.end) return [];
   }
-  const iso = `${y}-${pad(m + 1)}-${pad(day)}`;
-  return events.filter(
-    (e) => e.iso === iso || (e.recurringWeekday != null && e.recurringWeekday === d.getDay())
-  );
+  return events.filter((e) => eventOccursOnDate(e, d));
+}
+
+// Expands events (including recurring ones) into concrete dated occurrences
+// within the given range, for the flat chronological list — a bounded range
+// enumerates day-by-day; an unbounded "Coming Up" range is capped to a
+// six-month lookahead so recurring events still surface without scanning
+// forever.
+function generateOccurrences(events, range) {
+  const start = range?.start ?? startOfDay(new Date());
+  const cappedEnd =
+    range?.end ??
+    (() => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + 180);
+      return d;
+    })();
+  const spanDays = Math.round((cappedEnd - start) / 86400000);
+  const results = [];
+  for (const e of events) {
+    if (e.iso) {
+      const d = new Date(`${e.iso}T00:00:00`);
+      if (d >= start && d <= cappedEnd) results.push({ e, date: d });
+      continue;
+    }
+    if (e.recurringWeekday != null) {
+      for (let i = 0; i <= spanDays; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        if (eventOccursOnDate(e, d)) results.push({ e, date: new Date(d) });
+      }
+    }
+  }
+  return results.sort((a, b) => a.date - b.date);
 }
 
 // Resolves the active quick-filter / date-range selection into a concrete
@@ -64,28 +111,6 @@ function resolveDateRange(quickFilter, rangeStart, rangeEnd) {
   return null; // "all" — no date restriction
 }
 
-function eventMatchesDateRange(e, range) {
-  if (!range) return true;
-  const { start, end } = range;
-  if (e.iso) {
-    const d = new Date(`${e.iso}T00:00:00`);
-    if (d < start) return false;
-    if (end && d > end) return false;
-    return true;
-  }
-  if (e.recurringWeekday != null) {
-    if (!end) return true; // unbounded upcoming — a recurring event will occur again
-    const spanDays = Math.round((end - start) / 86400000);
-    for (let i = 0; i <= spanDays; i++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + i);
-      if (d.getDay() === e.recurringWeekday) return true;
-    }
-    return false;
-  }
-  return true;
-}
-
 function CalendarIcon({ size = 15 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -101,9 +126,9 @@ function ChevronIcon({ size = 15 }) {
   );
 }
 
-// Day-detail sheet — used on mobile where a calendar cell is too small to
-// give each event its own accurately-tappable dot. Tapping the whole cell
-// opens this instead, with full-width rows sized for a thumb.
+// Day-detail card — a calendar cell is too small to give each event its
+// own accurately-clickable/tappable dot, on any device. Clicking or
+// tapping the whole cell opens this instead, listing that day's events.
 function DayEventsModal({ day, monthLabel, year, events, onClose }) {
   return (
     <div
@@ -162,7 +187,6 @@ function DayEventsModal({ day, monthLabel, year, events, onClose }) {
 
 // Reusable interactive month calendar (used on the See & Do hub and /whats-on).
 export default function EventsCalendar() {
-  const navigate = useNavigate();
   const { data: events } = useFetch(getEvents, []);
   const today = new Date();
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
@@ -216,13 +240,9 @@ export default function EventsCalendar() {
   // a fixed date to sort/display by (recurring-weekday events still show up
   // on the calendar grid itself).
   const filteredList = useMemo(() => {
-    return categoryFilteredEvents
-      .filter((e) => e.iso)
-      .filter((e) => eventMatchesDateRange(e, dateRange))
-      .map((e) => ({ e, date: new Date(`${e.iso}T00:00:00`) }))
-      .sort((a, b) => a.date - b.date)
-      .slice(0, 50);
-  }, [categoryFilteredEvents, dateRange]);
+    if (!useFlatList) return [];
+    return generateOccurrences(categoryFilteredEvents, dateRange).slice(0, 50);
+  }, [categoryFilteredEvents, dateRange, useFlatList]);
 
   const prevMonth = () => setView((v) => (v.m === 0 ? { y: v.y - 1, m: 11 } : { y: v.y, m: v.m - 1 }));
   const nextMonth = () => setView((v) => (v.m === 11 ? { y: v.y + 1, m: 0 } : { y: v.y, m: v.m + 1 }));
@@ -268,6 +288,13 @@ export default function EventsCalendar() {
     });
   };
 
+  const rangeButtonLabel =
+    quickFilter === "range" && rangeStart
+      ? rangeEnd && rangeEnd !== rangeStart
+        ? `${formatUkShort(rangeStart)} – ${formatUkShort(rangeEnd)}`
+        : formatUkShort(rangeStart)
+      : "Date range";
+
   const listHeading = () => {
     if (!useFlatList) return monthEvents.length > 0 ? `Events in ${MONTHS[m]}` : `No events listed in ${MONTHS[m]}`;
     const labels = { today: "Today", tomorrow: "Tomorrow", week: "This Week", upcoming: "Coming Up", range: "Selected Dates" };
@@ -306,17 +333,17 @@ export default function EventsCalendar() {
             className="flex items-center gap-2 text-sm font-bold text-white rounded-full px-4 py-2 border-2 cursor-pointer transition-colors hover:bg-white/10"
             style={{ borderColor: "rgba(255,255,255,0.75)" }}
           >
-            Date range <CalendarIcon />
+            {rangeButtonLabel} <CalendarIcon />
           </button>
           {rangeOpen && (
             <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3 w-64" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
               <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
                 From
-                <input type="date" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
+                <input type="date" lang="en-GB" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
               </label>
               <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
                 To
-                <input type="date" value={rangeEnd} min={rangeStart || undefined} onChange={(e) => setRangeEnd(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
+                <input type="date" lang="en-GB" value={rangeEnd} min={rangeStart || undefined} onChange={(e) => setRangeEnd(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
               </label>
               <div className="flex items-center gap-3 mt-1">
                 <button type="button" onClick={applyDateRange} disabled={!rangeStart} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--leaf)" }}>
@@ -363,82 +390,74 @@ export default function EventsCalendar() {
         </div>
       </div>
 
-      {/* Month nav */}
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={prevMonth} aria-label="Previous month" className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>‹</button>
-        <h3 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>{MONTHS[m]} {y}</h3>
-        <button onClick={nextMonth} aria-label="Next month" className="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>›</button>
-      </div>
-
-      {/* Calendar grid */}
-      <div className="bg-white rounded-3xl p-3 md:p-5" style={{ boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
-        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-1">
-          {WEEKDAYS.map((w) => (
-            <div key={w} className="text-center text-[10px] md:text-xs font-bold uppercase tracking-[0.02em] py-2" style={{ color: "var(--leaf)" }}>{w}</div>
-          ))}
+      {/* Calendar — kept compact and centered on desktop, where a
+          full-bleed grid otherwise reads as oversized; full-width on
+          mobile. Same day-selection experience at every size: a compact
+          dot/count indicator, tapping or clicking the cell opens the same
+          event-list card. */}
+      <div className="md:max-w-md md:mx-auto">
+        {/* Month nav */}
+        <div className="flex items-center justify-between mb-4 md:mb-5">
+          <button onClick={prevMonth} aria-label="Previous month" className="w-9 h-9 md:w-8 md:h-8 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>‹</button>
+          <h3 className="text-xl md:text-lg font-bold" style={{ color: "#000000" }}>{MONTHS[m]} {y}</h3>
+          <button onClick={nextMonth} aria-label="Next month" className="w-9 h-9 md:w-8 md:h-8 rounded-full bg-white shadow flex items-center justify-center text-lg" style={{ color: "#000000" }}>›</button>
         </div>
-        <div className="grid grid-cols-7 gap-1 md:gap-2">
-          {cells.map((d, i) => {
-            const dayEvents = d ? eventsForDay(categoryFilteredEvents, y, m, d, dateRange) : [];
-            return (
-              <div
-                key={i}
-                className="relative min-h-[58px] md:min-h-[96px] rounded-xl p-1.5 md:p-2 flex flex-col gap-1"
-                style={{
-                  backgroundColor: d ? "var(--sand)" : "transparent",
-                  outline: isToday(d) ? "2px solid var(--leaf)" : "none",
-                }}
-              >
-                {d && <span className="relative z-10 text-[11px] md:text-sm font-semibold" style={{ color: "#000000" }}>{d}</span>}
 
-                {/* Desktop / larger screens — each event is its own button,
-                    plenty of room for an accurate mouse click. */}
-                <div className="hidden md:flex md:flex-col gap-1 overflow-hidden relative z-10">
-                  {dayEvents.map((e, i) => (
-                    <button
-                      key={`${e.slug}-${i}`}
-                      onClick={() => navigate(`/event/${e.slug}`)}
-                      title={e.title}
-                      className="text-left rounded-md px-1.5 py-1 text-[11px] font-semibold leading-tight truncate transition-opacity hover:opacity-80"
-                      style={{ backgroundColor: (categoryColors[e.category] || "#2F8C8C") + "22", color: categoryColors[e.category] || "var(--forest)" }}
-                    >
-                      {e.title}
-                    </button>
-                  ))}
+        {/* Calendar grid */}
+        <div className="bg-white rounded-3xl p-3 md:p-3" style={{ boxShadow: "0 10px 40px -22px rgba(28,46,56,0.3)" }}>
+          <div className="grid grid-cols-7 gap-1 mb-1">
+            {WEEKDAYS.map((w) => (
+              <div key={w} className="text-center text-[10px] font-bold uppercase tracking-[0.02em] py-1.5" style={{ color: "var(--leaf)" }}>{w}</div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map((d, i) => {
+              const dayEvents = d ? eventsForDay(categoryFilteredEvents, y, m, d, dateRange) : [];
+              return (
+                <div
+                  key={i}
+                  className="relative min-h-[52px] rounded-lg p-1 flex flex-col gap-0.5"
+                  style={{
+                    backgroundColor: d ? "var(--sand)" : "transparent",
+                    outline: isToday(d) ? "2px solid var(--leaf)" : "none",
+                  }}
+                >
+                  {d && <span className="relative z-10 text-[11px] font-semibold" style={{ color: "#000000" }}>{d}</span>}
+
+                  {/* A single compact indicator (dot, or a count badge when
+                      there's more than one event) rather than one dot per
+                      event, plus a full-cell tap target — so selecting a
+                      day doesn't require landing on the tiny indicator
+                      itself, on mouse or on touch. */}
+                  {d && dayEvents.length > 0 && (
+                    <>
+                      <div className="mt-auto relative z-10 pointer-events-none">
+                        {dayEvents.length === 1 ? (
+                          <span
+                            className="block w-2 h-2 rounded-full"
+                            style={{ backgroundColor: categoryColors[dayEvents[0].category] || "var(--forest)" }}
+                          />
+                        ) : (
+                          <span
+                            className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-white leading-none"
+                            style={{ backgroundColor: "var(--leaf)" }}
+                          >
+                            {dayEvents.length}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setDayModal({ day: d, events: dayEvents })}
+                        className="absolute inset-0 rounded-lg cursor-pointer"
+                        aria-label={`View ${dayEvents.length} event${dayEvents.length > 1 ? "s" : ""} on ${MONTHS[m]} ${d}`}
+                      />
+                    </>
+                  )}
                 </div>
-
-                {/* Mobile — a single compact indicator (dot, or a count
-                    badge when there's more than one event) rather than one
-                    dot per event, plus a full-cell tap target so a thumb
-                    doesn't need to land on the tiny indicator itself. */}
-                {d && dayEvents.length > 0 && (
-                  <>
-                    <div className="md:hidden mt-auto relative z-10 pointer-events-none">
-                      {dayEvents.length === 1 ? (
-                        <span
-                          className="block w-2 h-2 rounded-full"
-                          style={{ backgroundColor: categoryColors[dayEvents[0].category] || "var(--forest)" }}
-                        />
-                      ) : (
-                        <span
-                          className="inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold text-white leading-none"
-                          style={{ backgroundColor: "var(--leaf)" }}
-                        >
-                          {dayEvents.length}
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setDayModal({ day: d, events: dayEvents })}
-                      className="md:hidden absolute inset-0 rounded-xl"
-                      aria-label={`View ${dayEvents.length} event${dayEvents.length > 1 ? "s" : ""} on ${MONTHS[m]} ${d}`}
-                    />
-                  </>
-                )}
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       </div>
 
