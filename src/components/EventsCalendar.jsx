@@ -141,26 +141,31 @@ export default function EventsCalendar() {
 
   return (
     <div>
-      {/* Date range bar — the only filter on this page, given generous
-          room since it's the sole control. */}
-      <div className="relative rounded-2xl p-3 md:p-4 mb-8 flex items-center gap-3" style={{ backgroundColor: "var(--sage)" }}>
-        <button
-          type="button"
-          onClick={() => setRangeOpen((o) => !o)}
-          className="flex-1 flex items-center justify-center gap-2 text-sm md:text-base font-bold text-white rounded-full px-6 py-3.5 md:py-4 border-2 cursor-pointer transition-colors hover:bg-white/10"
-          style={{ borderColor: "rgba(255,255,255,0.75)" }}
-        >
-          <CalendarIcon />
-          <span className="truncate">{rangeButtonLabel}</span>
-        </button>
-        {appliedRange && (
-          <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline text-white shrink-0">
-            Clear
+      {/* Date range control — the only filter on this page. Plain (no
+          bar background), centered, with a short label above it. */}
+      <div className="relative flex flex-col items-center gap-2 mb-8">
+        <span className="text-xs font-semibold uppercase tracking-[0.08em]" style={{ color: "var(--leaf)" }}>
+          Browse events by date
+        </span>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setRangeOpen((o) => !o)}
+            className="flex items-center justify-center gap-2 text-sm font-bold rounded-full px-5 py-2.5 border-2 cursor-pointer transition-colors hover:bg-black/[0.03]"
+            style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
+          >
+            <CalendarIcon />
+            <span className="truncate">{rangeButtonLabel}</span>
           </button>
-        )}
+          {appliedRange && (
+            <button type="button" onClick={clearDateRange} className="text-xs font-semibold underline shrink-0" style={{ color: "#000000" }}>
+              Clear
+            </button>
+          )}
+        </div>
 
         {rangeOpen && (
-          <div className="absolute z-20 top-full mt-2 left-3 right-3 sm:left-3 sm:right-3 md:w-80 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+          <div className="absolute z-20 top-full mt-2 left-1/2 -translate-x-1/2 w-72 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
             <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
               From
               <input type="date" lang="en-GB" value={rangeStart} onChange={(e) => setRangeStart(e.target.value)} className="text-sm rounded-lg px-3 py-2 outline-none border" style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }} />
