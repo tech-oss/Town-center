@@ -126,6 +126,7 @@ function PublicSite() {
           <Route path="/live/property/:slug" element={<PropertyPage />} />
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
           <Route path="/services/place/:slug" element={<ServicesDetailPage />} />
+          <Route path="/services/:group" element={<CategoryPage />} />
           <Route path="/:section" element={<CategoryPage />} />
           <Route path="/:section/category/:category" element={<SectionCategoryRedirect />} />
           <Route path="/:section/place/:slug" element={<DetailPage />} />

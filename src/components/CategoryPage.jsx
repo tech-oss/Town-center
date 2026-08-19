@@ -51,14 +51,20 @@ const toEventCard = (e) => {
 };
 
 export default function CategoryPage() {
-  const { section } = useParams();
+  // Two routes render this component: the generic "/:section" listing, and
+  // "/services/:group" — a dedicated, category-scoped listing for one of
+  // Services' three columns (Tradespeople / Professionals / Freelancers),
+  // so "See All Tradespeople" etc. no longer land on the same combined list.
+  const { section: routeSection, group } = useParams();
+  const section = routeSection || (group ? "services" : undefined);
   const [searchParams] = useSearchParams();
   const category = searchParams.get("category") || undefined;
   const sec = sections[section];
+  const groupConfig = group ? sec?.groups?.find((g) => g.key === group) : null;
   const [search, setSearch] = useState("");
   // Clear a typed search when the user switches to a different listing
   // section, so it doesn't silently keep filtering the new page's items.
-  useEffect(() => setSearch(""), [section]);
+  useEffect(() => setSearch(""), [section, group]);
 
   // `sections` provides the page config (hero, columns, chips); the listed
   // items come from the businesses resource, events from the events resource.
@@ -66,8 +72,19 @@ export default function CategoryPage() {
   const { data: whatsOnEvents } = useFetch(getEvents, []);
 
   if (!sec) return <Navigate to="/" replace />;
+  if (group && !groupConfig) return <Navigate to={sec.path} replace />;
 
-  const baseItems = sectionItems ?? [];
+  // The column of the group's own filter chips (e.g. just Builders/
+  // Electricians/.../Cleaners for Tradespeople), used both to build the
+  // chip list below and to restrict the item pool to that group.
+  const groupColumn = groupConfig && sec.columns.find((c) => c.heading === groupConfig.heading);
+  const groupCategoryValues = groupColumn
+    ? new Set(groupColumn.links.filter((l) => l.to.includes("?category=")).map((l) => l.to.split("?category=")[1]))
+    : null;
+
+  const baseItems = groupCategoryValues
+    ? (sectionItems ?? []).filter((i) => groupCategoryValues.has(i.category))
+    : sectionItems ?? [];
   const eventCards = (whatsOnEvents ?? []).map(toEventCard);
 
   // An item appears under its primary `category` plus any extra `categories`.
@@ -92,20 +109,26 @@ export default function CategoryPage() {
   }
 
   const isCategory = Boolean(category);
-  const title = isCategory ? categoryTitles[category] ?? sec.label : sec.landing.title;
-  // The intro line stays the section's landing copy regardless of which
-  // category is selected, rather than swapping in a per-category sentence —
-  // that kept the text (and the category bar underneath it) shifting every
-  // time the user browsed between categories.
-  const intro = sec.landing.intro;
+  const title = isCategory ? categoryTitles[category] ?? sec.label : groupConfig?.label ?? sec.landing.title;
+  // The intro line stays constant regardless of which category is selected,
+  // rather than swapping in a per-category sentence — that kept the text
+  // (and the category bar underneath it) shifting every time the user
+  // browsed between categories.
+  const intro = groupConfig?.intro ?? sec.landing.intro;
 
+  // Grouped pages (e.g. /services/tradespeople) only offer that group's own
+  // chips — not every category across all of Services.
   const categories = (() => {
     const seen = new Set();
-    return sec.columns
-      .flatMap((c) => c.links)
+    const links = groupColumn ? groupColumn.links : sec.columns.flatMap((c) => c.links);
+    return links
       .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
       .map((l) => ({ value: l.to.split("?category=")[1], label: l.label }));
   })();
+
+  // Category chip links need to stay within the grouped URL (e.g.
+  // /services/tradespeople?category=builders), not the plain section path.
+  const basePath = groupConfig ? `/services/${group}` : sec.path;
 
   const catHero = category && sec.categoryHeroes?.[category];
   const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero;
@@ -160,6 +183,16 @@ export default function CategoryPage() {
             <Link to="/" className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>Home</Link>
             <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
             <Link to={sec.path} className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>{sec.label}</Link>
+            {groupConfig && (
+              <>
+                <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+                {isCategory ? (
+                  <Link to={basePath} className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>{groupConfig.label}</Link>
+                ) : (
+                  <span style={{ color: "#000000" }}>{groupConfig.label}</span>
+                )}
+              </>
+            )}
             {isCategory && (
               <>
                 <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
@@ -189,7 +222,7 @@ export default function CategoryPage() {
           {/* Category filter — icon row + "More" dropdown on desktop, a
               "Browse Categories" bottom sheet on mobile. */}
           <CategoryFilterBar
-            basePath={sec.path}
+            basePath={basePath}
             activeCategory={category}
             categories={categories}
             search={search}
