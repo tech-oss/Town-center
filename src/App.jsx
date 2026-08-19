@@ -34,7 +34,9 @@ import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
 import ChatWidget from './components/ChatWidget'
 import LogoAnimation from './components/LogoAnimation/LogoAnimation'
+import ExternalLinkModal from './components/ExternalLinkModal'
 import useOrientationRepaint from './hooks/useOrientationRepaint'
+import useExternalLinkGuard from './hooks/useExternalLinkGuard'
 
 // See & Do place links now use the shared event layout at /event/:slug.
 function SeeDoPlaceRedirect() {
@@ -144,12 +146,16 @@ function LogoAnimationDemo() {
 }
 
 function App() {
+  const { pendingHref, confirm, cancel } = useExternalLinkGuard()
   return (
-    <Routes>
-      <Route path="/mobile/*" element={<MobileApp />} />
-      <Route path="/logo-animation" element={<LogoAnimationDemo />} />
-      <Route path="*" element={<PublicSite />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/mobile/*" element={<MobileApp />} />
+        <Route path="/logo-animation" element={<LogoAnimationDemo />} />
+        <Route path="*" element={<PublicSite />} />
+      </Routes>
+      <ExternalLinkModal open={!!pendingHref} onConfirm={confirm} onCancel={cancel} />
+    </>
   )
 }
 
