@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { getHotels, getAccommodations } from "../api";
@@ -31,6 +31,45 @@ const TYPE_COLORS = {
 
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+// A small, local outward-code → centroid lookup for the Maidenhead area —
+// enough to power a real "search near a postcode" filter without a live
+// geocoding service. Falls back gracefully (no distance filtering) for any
+// postcode outside this list.
+const POSTCODE_COORDS = {
+  SL6: { lat: 51.522, lng: -0.72 }, // Maidenhead
+  SL4: { lat: 51.484, lng: -0.605 }, // Windsor
+  SL1: { lat: 51.511, lng: -0.595 }, // Slough
+  SL7: { lat: 51.571, lng: -0.782 }, // Marlow
+  SL8: { lat: 51.589, lng: -0.744 }, // Bourne End
+  RG9: { lat: 51.536, lng: -0.895 }, // Henley-on-Thames
+  RG10: { lat: 51.514, lng: -0.822 }, // Twyford
+};
+const RADIUS_OPTIONS = [1, 3, 5, 10];
+
+function milesBetween(lat1, lng1, lat2, lng2) {
+  const R = 3958.8; // Earth radius in miles
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function ChevronIcon({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+function PinIcon({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
 export default function StayListingPage({ kind }) {
   const isHotels = kind === "hotels";
   const basePath = isHotels ? "/live/stay/hotels" : "/live/stay/accommodation";
@@ -42,8 +81,27 @@ export default function StayListingPage({ kind }) {
   const activeCategory = searchParams.get("category") || undefined;
   const [search, setSearch] = useState("");
 
+  // Advanced search — postcode + radius, amenities, and (hotels only) star
+  // rating. These fields mirror what a business would configure in the
+  // admin backend (location, amenities, star rating); filtering here is
+  // done client-side against the same data already loaded for the grid.
+  const [postcode, setPostcode] = useState("");
+  const [radius, setRadius] = useState(RADIUS_OPTIONS[1]);
+  const [locationOpen, setLocationOpen] = useState(false);
+  const [appliedLocation, setAppliedLocation] = useState(null); // { lat, lng, radius } | null
+  const [amenitiesFilter, setAmenitiesFilter] = useState(() => new Set());
+  const [amenitiesOpen, setAmenitiesOpen] = useState(false);
+  const [starsFilter, setStarsFilter] = useState(() => new Set());
+  const [starsOpen, setStarsOpen] = useState(false);
+
   useEffect(() => { window.scrollTo(0, 0); }, []);
-  useEffect(() => setSearch(""), [kind]);
+  useEffect(() => {
+    setSearch("");
+    setPostcode("");
+    setAppliedLocation(null);
+    setAmenitiesFilter(new Set());
+    setStarsFilter(new Set());
+  }, [kind]);
 
   const landing = LANDING[kind];
 
@@ -60,6 +118,12 @@ export default function StayListingPage({ kind }) {
     return types.map((t) => ({ value: slugify(t), label: t }));
   })();
 
+  const allAmenities = useMemo(() => {
+    const set = new Set();
+    (allItems ?? []).forEach((i) => (i.amenities ?? []).forEach((a) => set.add(a)));
+    return [...set].sort();
+  }, [allItems]);
+
   let items = allItems ?? [];
   if (activeCategory) {
     items = isHotels
@@ -70,10 +134,48 @@ export default function StayListingPage({ kind }) {
   if (trimmedSearch) {
     items = items.filter((i) => i.name.toLowerCase().includes(trimmedSearch));
   }
+  if (isHotels && starsFilter.size > 0) {
+    items = items.filter((i) => starsFilter.has(i.stars));
+  }
+  if (amenitiesFilter.size > 0) {
+    items = items.filter((i) => [...amenitiesFilter].every((a) => i.amenities?.includes(a)));
+  }
+  if (appliedLocation) {
+    items = items.filter(
+      (i) => typeof i.lat === "number" && milesBetween(i.lat, i.lng, appliedLocation.lat, appliedLocation.lng) <= appliedLocation.radius
+    );
+  }
 
   const title = activeCategory
     ? categories.find((c) => c.value === activeCategory)?.label ?? landing.title
     : landing.title;
+
+  const outwardCode = postcode.trim().toUpperCase().split(/\s+/)[0];
+  const matchedCoords = POSTCODE_COORDS[outwardCode];
+
+  const applyLocation = () => {
+    if (!matchedCoords) return;
+    setAppliedLocation({ ...matchedCoords, radius });
+    setLocationOpen(false);
+  };
+  const clearLocation = () => {
+    setPostcode("");
+    setAppliedLocation(null);
+    setLocationOpen(false);
+  };
+
+  const toggleFromSet = (setter) => (value) => {
+    setter((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return next;
+    });
+  };
+  const toggleAmenity = toggleFromSet(setAmenitiesFilter);
+  const toggleStar = toggleFromSet(setStarsFilter);
+
+  const activeFilterCount = amenitiesFilter.size + starsFilter.size + (appliedLocation ? 1 : 0);
 
   return (
     <div>
@@ -119,9 +221,135 @@ export default function StayListingPage({ kind }) {
             {landing.intro}
           </p>
 
+          {/* Advanced search — location/postcode + radius, amenities, and
+              (hotels only) star rating. Sits above the name-search +
+              category chip bar shared with every other listing page. */}
+          <div className="relative flex flex-wrap items-center gap-2.5 mb-4">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setLocationOpen((o) => !o); setAmenitiesOpen(false); setStarsOpen(false); }}
+                className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
+                style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: appliedLocation ? "var(--sand)" : "#fff" }}
+              >
+                <PinIcon />
+                {appliedLocation ? `Within ${appliedLocation.radius} mi of ${outwardCode}` : "Near a postcode"}
+                <ChevronIcon />
+              </button>
+              {locationOpen && (
+                <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-4 shadow-xl flex flex-col gap-3 w-72" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+                  <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
+                    Postcode
+                    <input
+                      type="text"
+                      value={postcode}
+                      onChange={(e) => setPostcode(e.target.value)}
+                      placeholder="e.g. SL6 1QJ"
+                      className="text-sm rounded-lg px-3 py-2 outline-none border"
+                      style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
+                    />
+                  </label>
+                  <label className="text-xs font-semibold flex flex-col gap-1" style={{ color: "#000000" }}>
+                    Radius
+                    <select
+                      value={radius}
+                      onChange={(e) => setRadius(Number(e.target.value))}
+                      className="text-sm rounded-lg px-3 py-2 outline-none border bg-white"
+                      style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
+                    >
+                      {RADIUS_OPTIONS.map((r) => (
+                        <option key={r} value={r}>{r} mile{r > 1 ? "s" : ""}</option>
+                      ))}
+                    </select>
+                  </label>
+                  {postcode.trim() && !matchedCoords && (
+                    <p className="text-xs" style={{ color: "#C0392B" }}>Postcode area not recognised — try SL6, SL4, SL1, SL7, SL8 or RG9.</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-1">
+                    <button type="button" onClick={applyLocation} disabled={!matchedCoords} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--leaf)" }}>
+                      Apply
+                    </button>
+                    {appliedLocation && (
+                      <button type="button" onClick={clearLocation} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setAmenitiesOpen((o) => !o); setLocationOpen(false); setStarsOpen(false); }}
+                className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
+                style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: amenitiesFilter.size > 0 ? "var(--sand)" : "#fff" }}
+              >
+                Amenities{amenitiesFilter.size > 0 ? ` (${amenitiesFilter.size})` : ""}
+                <ChevronIcon />
+              </button>
+              {amenitiesOpen && (
+                <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-2 shadow-xl w-72 max-h-80 overflow-y-auto flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+                  {allAmenities.map((a) => (
+                    <label key={a} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                      <input type="checkbox" checked={amenitiesFilter.has(a)} onChange={() => toggleAmenity(a)} className="accent-[var(--leaf)]" />
+                      {a}
+                    </label>
+                  ))}
+                  {amenitiesFilter.size > 0 && (
+                    <button type="button" onClick={() => setAmenitiesFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+                      Clear
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {isHotels && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => { setStarsOpen((o) => !o); setLocationOpen(false); setAmenitiesOpen(false); }}
+                  className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
+                  style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: starsFilter.size > 0 ? "var(--sand)" : "#fff" }}
+                >
+                  Star rating{starsFilter.size > 0 ? ` (${starsFilter.size})` : ""}
+                  <ChevronIcon />
+                </button>
+                {starsOpen && (
+                  <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-2 shadow-xl w-48 flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+                    {[5, 4, 3, 2, 1].map((s) => (
+                      <label key={s} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                        <input type="checkbox" checked={starsFilter.has(s)} onChange={() => toggleStar(s)} className="accent-[var(--leaf)]" />
+                        <span style={{ color: "#c9962c" }}>{"★".repeat(s)}</span>
+                      </label>
+                    ))}
+                    {starsFilter.size > 0 && (
+                      <button type="button" onClick={() => setStarsFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeFilterCount > 0 && (
+              <button
+                type="button"
+                onClick={() => { clearLocation(); setAmenitiesFilter(new Set()); setStarsFilter(new Set()); }}
+                className="text-xs font-semibold underline"
+                style={{ color: "#000000" }}
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+
           {/* Category filter — same icon row + "More"/bottom-sheet component
-              as every other listing page, filtering by star rating (hotels)
-              or property type (accommodation). */}
+              as every other listing page: name search plus star rating
+              (hotels) or property type (accommodation). */}
           {categories.length > 1 && (
             <CategoryFilterBar
               basePath={basePath}
@@ -164,9 +392,7 @@ export default function StayListingPage({ kind }) {
                       </h3>
                       {address && (
                         <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px]" style={{ color: "#000000" }}>
-                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
-                          </svg>
+                          <PinIcon size={11} />
                           <span className="line-clamp-1">{address}</span>
                         </span>
                       )}
@@ -188,7 +414,7 @@ export default function StayListingPage({ kind }) {
             <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>
               {trimmedSearch
                 ? `No results for "${search.trim()}" — try a different name.`
-                : "Nothing listed here just yet — check back soon."}
+                : "No listings match these filters — try clearing one and searching again."}
             </p>
           )}
         </div>
