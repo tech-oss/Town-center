@@ -6,7 +6,7 @@ export default function EventsCalendarPage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
+    <div style={{ backgroundColor: "#ffffff", minHeight: "100vh" }}>
       {/* Hero band */}
       <section className="relative flex flex-col items-center justify-center text-center px-6 py-16 md:py-24 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)" }} />

@@ -116,14 +116,6 @@ export default function EventsGrid() {
               WHAT'S ON
             </h2>
           </div>
-          <Link
-            to="/whats-on"
-            className="group hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap shrink-0"
-            style={{ color: "#000000" }}
-          >
-            View full calendar
-            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-          </Link>
         </div>
         <div className="mb-10 -mt-4 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
 
