@@ -129,13 +129,13 @@ function DevelopmentCard({ b }) {
 
       {/* Getting around */}
       {b.nearbyPlaces?.length > 0 && (
-        <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+        <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
           <div className="max-w-6xl mx-auto">
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Connectivity</p>
             <h3 className="section-heading text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Getting around</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {b.nearbyPlaces.map((place) => (
-                <div key={place.name} className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: "#fff" }}>
+                <div key={place.name} className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: "var(--sand)" }}>
                   <span className="text-2xl shrink-0">{modeIcon(place.mode)}</span>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: "#000000" }}>{place.name}</p>
@@ -225,7 +225,7 @@ export default function WorkplaceDevelopmentsPage() {
           spacing, typography) as PlaceDetailLayout's "related" section on
           See & Do, for mobile and desktop alike. */}
       {others.length > 0 && (
-        <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+        <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
           <div className="max-w-6xl mx-auto">
             <h2 className="hero-title uppercase text-2xl md:text-3xl mb-8" style={{ color: "#000000" }}>More Developments In Maidenhead</h2>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:gap-8">
