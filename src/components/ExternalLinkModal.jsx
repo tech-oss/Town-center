@@ -81,8 +81,8 @@ export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
             ref={confirmRef}
             type="button"
             onClick={onConfirm}
-            className="flex-1 py-3 rounded-full text-sm font-semibold text-white transition-colors duration-150"
-            style={{ backgroundColor: "var(--leaf)" }}
+            className="flex-1 py-3 rounded-full text-sm font-semibold text-white transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={{ backgroundColor: "var(--leaf)", "--tw-ring-color": "var(--leaf)", "--tw-ring-offset-color": "var(--sand)" }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
           >
@@ -91,8 +91,8 @@ export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-3 rounded-full text-sm font-semibold transition-colors duration-150 border"
-            style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000" }}
+            className="flex-1 py-3 rounded-full text-sm font-semibold transition-colors duration-150 border outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={{ borderColor: "rgba(28,46,56,0.2)", color: "#000000", "--tw-ring-color": "var(--leaf)", "--tw-ring-offset-color": "var(--sand)" }}
           >
             Cancel
           </button>
