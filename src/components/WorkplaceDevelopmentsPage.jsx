@@ -35,13 +35,6 @@ function DevelopmentCard({ b }) {
         <img src={b.hero} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.12) 0%, rgba(28,46,56,0.88) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
-          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <Link to="/work" className="hover:text-white transition-colors">Work</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <span className="text-white">{b.name}</span>
-          </nav>
           <span
             className="self-start inline-flex items-center mb-3 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.02em]"
             style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
@@ -79,6 +72,18 @@ function DevelopmentCard({ b }) {
 
       {/* About + Gallery */}
       <section className="py-14 md:py-20 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto">
+          {/* Breadcrumb — below the hero image, matching every other
+              detail/landing page on the site (See & Do, Eat & Drink, etc.),
+              rather than overlaid on the photo. */}
+          <nav className="mb-8 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+            <Link to="/" className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>Home</Link>
+            <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+            <Link to="/work" className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>Work</Link>
+            <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+            <span style={{ color: "#000000" }}>{b.name}</span>
+          </nav>
+        </div>
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>About the development</p>
