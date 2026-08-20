@@ -599,3 +599,121 @@ export const liveMenu = {
 // Shared price formatting
 export const fmtPrice = (p, status) =>
   status === "rent" ? `£${p.toLocaleString()} pcm` : `£${p.toLocaleString()}`;
+
+// ════════════════════════════════════════════════════════════════════════════
+//  "Live in Maidenhead" — the editorial narrative for the /live landing page.
+//  Laid out as a hero, a centred lede, a run of alternating story sections
+//  (each with its own photograph), a flagship feature on Nicholson Quarter,
+//  a pull-quote band and a closing statement.
+// ════════════════════════════════════════════════════════════════════════════
+export const liveStory = {
+  hero: {
+    eyebrow: "Live & Stay",
+    title: "Live in Maidenhead",
+    subtitle:
+      "A town by the river. Surrounded by green space. Connected to London. And changing for the future.",
+    image: "/images/attractions/boulters-lock.jpg",
+  },
+
+  lede: [
+    "Maidenhead has always offered a rare combination: the energy and connectivity of a well-connected town, with the space, character and community of the Thames Valley.",
+    "Today, a new chapter is taking shape. New homes, new places to meet, new public spaces and investment across the town are creating opportunities for Maidenhead to grow — while the river, green spaces, heritage and communities that make it special remain at its heart.",
+  ],
+
+  // Alternating text + square photograph sections.
+  sections: [
+    {
+      id: "by-the-water",
+      eyebrow: "By the Water",
+      heading: "Space to breathe",
+      image: "/images/attractions/garden-path.jpg",
+      body: [
+        "The River Thames is part of what makes Maidenhead, Maidenhead.",
+        "From riverside walks and peaceful towpaths to Boulter's Lock, Ray Mill Island and the open landscape beyond, the river provides somewhere to slow down, explore and escape the pace of everyday life.",
+        "Alongside the Thames, parks, nature areas and open spaces give residents room to walk, run, cycle, play and spend time outdoors. It's a distinctive quality of life: close to London, but with space to breathe.",
+      ],
+    },
+    {
+      id: "green-maidenhead",
+      eyebrow: "Green Maidenhead",
+      heading: "More than a commuter town",
+      image: "/images/explore/green-streets.jpg",
+      body: [
+        "Maidenhead is surrounded by countryside and threaded with green spaces.",
+        "From a morning walk through the park to an afternoon beside the river, there are plenty of ways to enjoy the outdoors without leaving town. Places such as Kidwells Park, Ockwells Park, Braywick Nature Centre and the Riverside Gardens provide important spaces for recreation, nature and community life.",
+        "These aren't just green spaces on a map. They're places where everyday life happens — where people meet, exercise, bring their children, walk their dogs and enjoy the changing seasons.",
+      ],
+    },
+    {
+      id: "community",
+      eyebrow: "A Town With People In It",
+      heading: "Community, culture and things to do",
+      image: "/images/explore/market.jpg",
+      body: [
+        "A town isn't defined by its buildings. It's defined by the people who bring it to life.",
+        "Throughout the year, Maidenhead's parks, streets and venues host festivals, markets, performances, sporting activities, family events and community celebrations.",
+        "From local clubs and community groups to independent businesses and venues such as Norden Farm, there's an increasingly diverse range of things to see, do and get involved in.",
+        "As Maidenhead grows, so does the opportunity to create more places for people to meet, share experiences and build connections.",
+      ],
+    },
+    {
+      id: "connected",
+      eyebrow: "Connected",
+      heading: "London within reach. Home somewhere different.",
+      image: "/images/getting-here.jpg",
+      body: [
+        "Maidenhead's location has always been one of its greatest strengths.",
+        "The Elizabeth line puts central London within easy reach, while Great Western Railway connects the town with Reading and destinations further west. The M4 and A404 provide straightforward connections across the Thames Valley, to Heathrow and towards London.",
+        "So you don't have to choose between opportunity and quality of life.",
+        "Work in London. Explore the city. Come home to the river, the parks and a community of your own.",
+      ],
+    },
+    {
+      id: "next-chapter",
+      eyebrow: "The Next Chapter",
+      heading: "A town that's changing",
+      image: "/images/slide-river.jpg",
+      body: [
+        "Maidenhead is entering an exciting period of change.",
+        "New homes are creating opportunities for people at different stages of life to live in the town, while investment in the centre is bringing new spaces for living, working, shopping, eating and meeting.",
+        "The ambition isn't simply to build more.",
+        "It's to create a town that works better — with better connections, more places to spend time, improved public spaces and a stronger sense of what makes Maidenhead unique.",
+      ],
+    },
+  ],
+
+  // Flagship feature — the town-centre regeneration, given its own treatment.
+  nicholson: {
+    eyebrow: "Nicholson Quarter",
+    heading: "A new part of the town centre",
+    image: "/images/explore/street.jpg",
+    planImage: "/images/explore/masterplan.jpg",
+    intro: [
+      "One of the most significant changes is the transformation of the former Nicholsons Shopping Centre into Nicholson Quarter.",
+      "The development is creating a new mixed-use neighbourhood in the heart of Maidenhead, bringing together new homes, shops, restaurants, workspace, public spaces and landscaping.",
+    ],
+    outro: [
+      "New streets can reconnect parts of the town. New public spaces can become places to meet. New homes can bring new residents and new energy. And new businesses can give people more reasons to spend time in the centre.",
+      "Nicholson Quarter is part of a wider opportunity to create a more vibrant, connected and welcoming Maidenhead.",
+    ],
+  },
+
+  // Full-width pull-quote band.
+  pullQuote: {
+    lead: "But regeneration is about more than buildings.",
+    quote: "It's about what happens between them.",
+    image: "/images/explore/evening.jpg",
+  },
+
+  closing: {
+    heading: "A place to live. A place to grow.",
+    body: [
+      "Maidenhead's future isn't about becoming somewhere else.",
+      "It's about making more of what is already here — the river, the green spaces, the heritage, the community and an enviable connection to London and the wider Thames Valley.",
+      "New homes can bring new opportunities. Better public spaces can bring people together. A growing cultural and independent scene can give the town more life.",
+      "And through it all, the Thames and surrounding countryside remain a reminder of what makes Maidenhead different.",
+    ],
+    kicker: "Maidenhead is changing. The opportunity is to make that change count.",
+    cta: { label: "Come and explore the town", to: "/see-do" },
+  },
+};

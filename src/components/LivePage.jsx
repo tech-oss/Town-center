@@ -1,21 +1,72 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { live } from "../Data/live";
+import { liveStory } from "../Data/live";
 import { getBuildings } from "../api";
 import { getHotels, getAccommodations } from "../api/stay";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 import LocationMap from "./LocationMap";
-import LifestyleBento from "./LifestyleBento";
-import DesignedAroundYou from "./DesignedAroundYou";
 import ConnectivitySection from "./ConnectivitySection";
 // Property search platform (for sale / for rent) — paused for now, kept for
 // a future relaunch. See the commented-out routes in src/App.jsx.
 // import { FeaturedProperties } from "./PropertySearch";
 
-// ── Featured stays spotlight — replaces the old property "In the Spotlight"
-// section with a mix of hotels and accommodation, matching the same
-// asymmetric 1-large + 2-compact layout so the section keeps its visual
-// weight on the page. ──
+// ── Editorial photograph — carries the sitewide "framed photograph" hover
+// (a sharp foreground photo that insets on hover/tap to reveal a blurred,
+// dimmed frame), matching Featured Stories, Explore and the Guides pages. ──
+function StoryImage({ image, alt, aspect = "aspect-[4/3]" }) {
+  const { revealed, onImageClick } = useTapReveal();
+  return (
+    <div
+      onClick={onImageClick}
+      className={`spotlight-card group/img block cursor-pointer shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)] ${revealed ? "is-revealed" : ""}`}
+    >
+      <div className={`relative overflow-hidden ${aspect}`} style={{ backgroundColor: "#1a1a1a" }}>
+        <img src={image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+        <img src={image} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+      </div>
+    </div>
+  );
+}
+
+// ── One alternating story section — text column and photograph side by side
+// on desktop (text given the wider share, as on the reference layout), with
+// the sides swapping row to row. On mobile the photograph always leads, then
+// the copy beneath it. ──
+function StorySection({ section, index }) {
+  const reversed = index % 2 === 1;
+  return (
+    <div
+      id={section.id}
+      className={`grid md:grid-cols-12 gap-8 md:gap-14 lg:gap-20 items-center scroll-mt-28 ${
+        reversed ? "md:[&>*:first-child]:order-2" : ""
+      }`}
+    >
+      {/* Photograph — 5 of 12 columns on desktop, first on mobile. */}
+      <div className="md:col-span-5">
+        <StoryImage image={section.image} alt={section.heading} />
+      </div>
+
+      {/* Copy — 7 of 12 columns on desktop. */}
+      <div className="md:col-span-7">
+        <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+          {section.eyebrow}
+        </p>
+        <h2 className="text-2xl md:text-4xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>
+          {section.heading}
+        </h2>
+        <div className="flex flex-col gap-4">
+          {section.body.map((p, i) => (
+            <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
+              {p}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FeaturedStays() {
   const { data: hotels } = useFetch(getHotels, []);
   const { data: accommodations } = useFetch(getAccommodations, []);
@@ -98,51 +149,139 @@ export default function LivePage() {
   const { data: buildings } = useFetch(getBuildings, []);
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
+  const { hero, lede, sections, nicholson, pullQuote, closing } = liveStory;
+
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* Hero — same footprint as the See & Do / Eat & Drink / Shop /
-          Services landing pages (CategoryPage's hero), so it doesn't stand
-          out as a different size. */}
-      <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]">
-        <img src={live.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
-        <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>{live.hero.eyebrow}</p>
-          <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>{live.hero.title}</h1>
-          <p className="text-lg text-white/85 mt-4 max-w-2xl leading-relaxed">{live.hero.intro}</p>
-          {/* Properties For Sale / For Rent CTAs — paused along with the
-              property search platform (see src/App.jsx). */}
-          {/* <div className="flex flex-wrap gap-3 mt-7">
-            <Link to="/live/for-sale" className="px-6 py-3 rounded-full font-semibold transition-transform hover:scale-105" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>Properties For Sale</Link>
-            <Link to="/live/for-rent" className="px-6 py-3 rounded-full font-semibold text-white transition-colors" style={{ border: "1.5px solid rgba(255,255,255,0.6)" }}>Properties For Rent</Link>
-          </div> */}
+    <div style={{ backgroundColor: "#ffffff" }}>
+      {/* ── 1. Hero — same footprint and typography as the Explore / Guides
+          / Getting Here heroes, so every editorial landing page in the site
+          opens the same way. ── */}
+      <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
+        <img src={hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>
+          {hero.eyebrow}
+        </span>
+        <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+          {hero.title}
+        </h1>
+        <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium text-white" style={{ letterSpacing: "-0.01em" }}>
+          {hero.subtitle}
+        </p>
+      </section>
+
+      {/* ── 2. Breadcrumb — below the hero image, matching the other pages. ── */}
+      <nav className="max-w-6xl mx-auto px-6 md:px-12 pt-6 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+        <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
+        <span className="mx-2 opacity-40">/</span>
+        <span>Live in Maidenhead</span>
+      </nav>
+
+      {/* ── 3. Lede — the opening statement, centred and set larger than body
+          copy so it reads as an introduction rather than a first section. ── */}
+      <section className="pt-10 md:pt-14 pb-16 md:pb-24 px-6 md:px-12">
+        <div className="max-w-3xl mx-auto text-center flex flex-col gap-5">
+          {lede.map((p, i) => (
+            <p key={i} className="text-base md:text-xl leading-relaxed" style={{ color: "#000000" }}>
+              {p}
+            </p>
+          ))}
         </div>
       </section>
 
-      {/* Lifestyle bento (desktop) / auto-slider (mobile) */}
-      <section className="py-16 md:py-24 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="max-w-2xl mb-10">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Lifestyle</p>
-            <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>Life in Maidenhead</h2>
-          </div>
-          <LifestyleBento />
+      {/* ── 4. Story sections — alternating copy and photography, set on a
+          soft tinted band so the run reads as one continuous chapter. ── */}
+      <section className="px-6 md:px-12 py-16 md:py-24" style={{ backgroundColor: "var(--sand)" }}>
+        <div className="max-w-6xl mx-auto flex flex-col gap-20 md:gap-28">
+          {sections.map((s, i) => (
+            <StorySection key={s.id} section={s} index={i} />
+          ))}
         </div>
       </section>
 
-      {/* Designed Around You */}
-      <DesignedAroundYou />
-
-      {/* Connectivity — Elizabeth line + car/train times */}
+      {/* ── 5. Connectivity — the narrative "Connected" section above is
+          followed by the hard numbers (Elizabeth line, road and rail
+          times), so the story leads and the detail supports it. ── */}
       <ConnectivitySection />
 
-      {/* Developments — squared cards, same card typography as the See & Do
-          / Eat & Drink / Shop / Services listing grids (.listing-card-title,
-          var(--font-heading)). */}
-      <section className="pb-20 px-6 md:px-12">
+      {/* ── 6. Nicholson Quarter — the flagship change, given a darker
+          full-bleed treatment so it stands apart from the story run. ── */}
+      <section id="nicholson-quarter" className="relative overflow-hidden scroll-mt-28" style={{ backgroundColor: "var(--forest)" }}>
+        <div className="max-w-6xl mx-auto px-6 md:px-12 py-16 md:py-24">
+          <div className="grid md:grid-cols-12 gap-8 md:gap-14 lg:gap-20 items-center">
+            {/* Photograph first in the DOM so it leads on mobile — the same
+                image-then-copy rhythm the story sections above use. */}
+            <div className="md:col-span-5">
+              <div className="overflow-hidden aspect-[4/3] shadow-[0_24px_60px_-28px_rgba(0,0,0,0.7)]">
+                <img src={nicholson.image} alt={nicholson.heading} loading="lazy" className="w-full h-full object-cover" />
+              </div>
+            </div>
+            <div className="md:col-span-7">
+              <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--sage)" }}>
+                {nicholson.eyebrow}
+              </p>
+              <h2 className="text-2xl md:text-4xl font-bold mb-5 leading-tight text-white">
+                {nicholson.heading}
+              </h2>
+              <div className="flex flex-col gap-4">
+                {nicholson.intro.map((p, i) => (
+                  <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.82)" }}>
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* The masterplan, with the closing thoughts beside it. */}
+          <div className="grid md:grid-cols-12 gap-8 md:gap-14 lg:gap-20 items-center mt-14 md:mt-20">
+            <div className="md:col-span-7">
+              <div className="overflow-hidden bg-white p-2 md:p-3 shadow-[0_24px_60px_-28px_rgba(0,0,0,0.7)]">
+                <img src={nicholson.planImage} alt="Nicholson Quarter masterplan" loading="lazy" className="w-full h-auto" />
+              </div>
+            </div>
+            <div className="md:col-span-5 flex flex-col gap-4">
+              {nicholson.outro.map((p, i) => (
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.82)" }}>
+                  {p}
+                </p>
+              ))}
+              <Link
+                to="/explore/the-future"
+                className="inline-flex items-center gap-2 mt-3 px-7 py-3.5 rounded-full font-semibold transition-transform hover:scale-105 self-start"
+                style={{ backgroundColor: "var(--sage)", color: "#000000" }}
+              >
+                Explore the full vision <span>→</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. Pull-quote band — a full-width photograph carrying the single
+          line the regeneration story turns on. ── */}
+      <section className="relative overflow-hidden">
+        <img src={pullQuote.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.9), rgba(31,155,181,0.78))" }} />
+        <div className="relative z-10 max-w-4xl mx-auto px-6 md:px-12 py-20 md:py-32 text-center">
+          <p className="text-sm md:text-base mb-5" style={{ color: "rgba(255,255,255,0.8)" }}>
+            {pullQuote.lead}
+          </p>
+          <p className="hero-title uppercase text-2xl md:text-4xl lg:text-5xl leading-tight text-white" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.35)" }}>
+            {pullQuote.quote}
+          </p>
+        </div>
+      </section>
+
+      {/* ── 8. Developments — squared cards, same card typography as the
+          See & Do / Eat & Drink / Shop / Services listing grids. ── */}
+      <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "#000000" }}>Developments</h2>
-          <p className="text-base mb-10 max-w-2xl" style={{ color: "#000000" }}>Explore Maidenhead's leading residential developments.</p>
+          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>New Homes</p>
+          <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>Developments</h2>
+          <p className="text-base md:text-lg mb-10 max-w-2xl leading-relaxed" style={{ color: "#000000" }}>
+            Explore Maidenhead's leading residential developments.
+          </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             {(buildings ?? []).map((b) => (
               <Link
@@ -176,15 +315,41 @@ export default function LivePage() {
         </div>
       </section>
 
-      {/* Location map */}
-      <section className="pb-16 px-6 md:px-12">
+      {/* ── 9. Closing statement ── */}
+      <section className="px-6 md:px-12 pb-16 md:pb-24">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="hero-title uppercase text-3xl md:text-5xl mb-8 leading-tight" style={{ color: "#000000" }}>
+            {closing.heading}
+          </h2>
+          <div className="flex flex-col gap-5">
+            {closing.body.map((p, i) => (
+              <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
+                {p}
+              </p>
+            ))}
+          </div>
+          <p className="text-lg md:text-2xl leading-relaxed mt-10" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
+            {closing.kicker}
+          </p>
+          <Link
+            to={closing.cta.to}
+            className="inline-flex items-center gap-2 mt-9 px-7 py-3.5 rounded-full font-semibold transition-transform hover:scale-105"
+            style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}
+          >
+            {closing.cta.label} <span>→</span>
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 10. Location map ── */}
+      <section className="pb-16 md:pb-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <LocationMap heading="Where you'll live" note="Maidenhead, Berkshire — on the Elizabeth Line, 18 minutes from London Paddington." lat={51.5236} lng={-0.7197} query="Maidenhead, Berkshire" />
         </div>
       </section>
 
-      {/* Featured stays — In the Spotlight (hotels & accommodation, in
-          place of the paused property listings). */}
+      {/* ── 11. Featured stays — In the Spotlight (hotels & accommodation, in
+          place of the paused property listings). ── */}
       <FeaturedStays />
     </div>
   );
