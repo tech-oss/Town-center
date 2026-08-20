@@ -211,9 +211,12 @@ export default function OffersPage() {
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState(null);
 
-  // Same real-vs-auto-generated split NewsIndexPage uses, so this page and
-  // /news always agree on what counts as a genuine spotlight story.
-  const spotlightStories = (allArticles ?? []).filter((a) => !/-(offer|news|event)$/.test(a.slug));
+  // Unlike /news (which only shows the hand-written spotlight stories), this
+  // page is the home hub for every business's News & Offers — so it pulls
+  // every article from every section (Shop, Eat & Drink, See & Do and
+  // Services, including tradespeople, professionals and freelancers), not
+  // just the hand-picked ones.
+  const allNewsAndOffers = allArticles ?? [];
   const featuredStories = allFeatures ?? [];
 
   useEffect(() => {
@@ -235,7 +238,7 @@ export default function OffersPage() {
       businessName: null,
       homepage: !!s.homepage,
     })),
-    ...spotlightStories.map((s) => ({
+    ...allNewsAndOffers.map((s) => ({
       slug: s.slug,
       to: `/news/${s.slug}`,
       image: s.image,
@@ -246,7 +249,7 @@ export default function OffersPage() {
       businessName: s.business?.name ?? null,
       homepage: homepageSpotlightSlugs.has(s.slug),
     })),
-  ], [featuredStories, spotlightStories]);
+  ], [featuredStories, allNewsAndOffers]);
 
   const types = useMemo(
     () => TYPE_ORDER.filter((t) => items.some((it) => it.type === t)),
