@@ -111,7 +111,11 @@ export default function FreelancerDetailLayout({
   // jump down near the footer. Scroll the tab bar back into view instead.
   const goToTab = (tb) => {
     setTab(tb);
-    tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Instant, not smooth — an animated scroll here visibly travels down
+    // past the tab bar before correcting back up to it, which reads as a
+    // jarring double-motion. Snapping directly shows the new tab's content
+    // in full immediately.
+    tabsRef.current?.scrollIntoView({ block: "start" });
   };
 
   const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
