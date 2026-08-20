@@ -313,7 +313,7 @@ export function FeaturedProperties() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
             <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>Featured Homes</p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
+            <h2 className="section-heading text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
           </div>
           <Link to="/live/overview" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
             View all properties

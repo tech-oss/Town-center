@@ -22,7 +22,7 @@ export default function DesignedAroundYou() {
       <div className="max-w-6xl mx-auto">
         {/* Heading */}
         <div className="mb-7">
-          <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>Designed around you</h2>
+          <h2 className="section-heading text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>Designed around you</h2>
           <p className="text-base mt-2" style={{ color: "#000000" }}>From nature to nightlife, everything is within easy reach.</p>
         </div>
 

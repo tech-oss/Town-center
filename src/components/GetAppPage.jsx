@@ -71,7 +71,7 @@ export default function GetAppPage() {
       {/* Feature highlights */}
       <section className="px-6 md:px-12 py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl md:text-4xl font-bold mb-10 leading-tight" style={{ color: "#000000" }}>
+          <h2 className="section-heading text-2xl md:text-4xl font-bold mb-10 leading-tight" style={{ color: "#000000" }}>
             Everything Maidenhead, in your pocket
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">

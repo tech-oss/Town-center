@@ -67,7 +67,7 @@ function StorySection({ section, index }) {
         <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
           {section.eyebrow}
         </p>
-        <h2 className="text-2xl md:text-4xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>
+        <h2 className="section-heading text-2xl md:text-4xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>
           {section.heading}
         </h2>
         <div className="flex flex-col gap-4">
@@ -108,7 +108,7 @@ function FeaturedStays() {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
             <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>Where to Stay</p>
-            <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
+            <h2 className="section-heading text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
           </div>
           <Link to="/live/stay/hotels" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
             View all places to stay
@@ -244,7 +244,7 @@ export default function LivePage() {
               <p className="section-eyebrow mb-3" style={{ color: "var(--sage)" }}>
                 {nicholson.eyebrow}
               </p>
-              <h2 className="text-2xl md:text-4xl font-bold mb-5 leading-tight text-white">
+              <h2 className="section-heading text-2xl md:text-4xl font-bold mb-5 leading-tight text-white">
                 {nicholson.heading}
               </h2>
               <div className="flex flex-col gap-4">
@@ -300,7 +300,7 @@ export default function LivePage() {
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>New Homes</p>
-          <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>Developments</h2>
+          <h2 className="section-heading text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>Developments</h2>
           <p className="text-base md:text-lg mb-10 max-w-2xl leading-relaxed" style={{ color: "#000000" }}>
             Explore Maidenhead's leading residential developments.
           </p>

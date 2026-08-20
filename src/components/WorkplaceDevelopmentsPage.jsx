@@ -31,7 +31,7 @@ function DevelopmentCard({ b }) {
           >
             {b.developer}
           </span>
-          <h2 className="text-3xl md:text-5xl font-bold text-white leading-tight max-w-3xl">{b.name}</h2>
+          <h2 className="section-heading text-3xl md:text-5xl font-bold text-white leading-tight max-w-3xl">{b.name}</h2>
           <p className="text-lg text-white/80 mt-3 max-w-2xl leading-relaxed">{b.tagline}</p>
           {b.website && (
             <div className="mt-5">

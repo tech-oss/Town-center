@@ -77,7 +77,7 @@ export default function AttractionPage() {
             {/* Sections (heading + optional image + paras) */}
             {a.sections?.map((sec, si) => (
               <div key={si} className="mt-12">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
+                <h2 className="section-heading text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
                 {sec.image && (
                   <div className="rounded-3xl overflow-hidden aspect-[16/9] mb-6 shadow-[0_14px_50px_-26px_rgba(28,46,56,0.4)]">
                     <img src={sec.image} alt={sec.heading} loading="lazy" className="w-full h-full object-cover" />
@@ -132,7 +132,7 @@ export default function AttractionPage() {
       {related.length > 0 && (
         <section className="pb-20 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>You might like</h2>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>You might like</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {related.map((it) => (
                 <Link key={it.slug} to={`/${it.section}/place/${it.slug}`}

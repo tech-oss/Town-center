@@ -78,7 +78,7 @@ export default function PressPage() {
 
           {/* Grow your presence section */}
           <div className="mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
               For businesses to grow your presence and visibility
             </h2>
             <div className="flex flex-col gap-5">

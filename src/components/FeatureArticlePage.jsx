@@ -29,7 +29,7 @@ function BlockText({ block }) {
   return (
     <div className="flex flex-col gap-4">
       {block.heading && (
-        <h2 className="text-2xl md:text-3xl font-bold leading-tight" style={{ color: "#000000" }}>
+        <h2 className="section-heading text-2xl md:text-3xl font-bold leading-tight" style={{ color: "#000000" }}>
           {block.heading}
         </h2>
       )}

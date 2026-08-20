@@ -337,7 +337,7 @@ export default function GettingHerePage() {
                   own section; desktop keeps the alternating left/right layout. */}
               <div className="order-first md:order-none">
                 <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
-                <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
+                <h2 className="section-heading text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
                 <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000" }}>{sec.intro}</p>
                 <div className="flex flex-col divide-y" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
                   {sec.blocks.map((b) => (
@@ -361,7 +361,7 @@ export default function GettingHerePage() {
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
             <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
+            <h2 className="section-heading text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
               A few practical things worth knowing before you head into the town centre.
             </p>

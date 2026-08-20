@@ -29,7 +29,7 @@ export default function WorkCategoryPage() {
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-2xl mx-auto text-center rounded-3xl p-10 md:p-14 bg-white" style={{ boxShadow: "0 12px 44px -24px rgba(28,46,56,0.3)" }}>
           <div className="w-14 h-14 rounded-2xl mx-auto mb-5 flex items-center justify-center text-2xl" style={{ backgroundColor: "var(--mint)" }}>🌱</div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Coming soon</h2>
+          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Coming soon</h2>
           <p className="text-base leading-relaxed mb-7" style={{ color: "#000000" }}>
             We're building Maidenhead's {cat.title.toLowerCase()} marketplace — a hyper-local, community-first place to connect.
             Want to be first to list or be notified when it goes live?

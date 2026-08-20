@@ -22,7 +22,7 @@ function PlaceSection({ s, index }) {
         <p className="section-eyebrow mb-3 flex items-center gap-2" style={{ color: "var(--leaf)" }}>
           <span className="text-base">{s.icon}</span> {s.eyebrow}
         </p>
-        <h2 className="text-2xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "#000000" }}>{s.title}</h2>
+        <h2 className="section-heading text-2xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "#000000" }}>{s.title}</h2>
         <p className="text-sm font-semibold mb-4" style={{ color: "#000000" }}>{s.location}</p>
         <div className="flex flex-col gap-4 mb-5">
           {s.body.map((p, i) => (
@@ -100,7 +100,7 @@ export default function GuideDetailPage() {
         <section className="py-16 md:py-24 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             <div className="max-w-2xl mb-8">
-              <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>{guide.moreSpots.heading}</h2>
+              <h2 className="section-heading text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>{guide.moreSpots.heading}</h2>
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{guide.moreSpots.intro}</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -120,7 +120,7 @@ export default function GuideDetailPage() {
       {guide.cheatSheet && (
         <section className="px-6 md:px-12 pb-16 md:pb-20">
           <div className="max-w-6xl mx-auto rounded-3xl px-6 py-10 md:py-12" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 text-center">{guide.cheatSheet.heading}</h2>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold text-white mb-2 text-center">{guide.cheatSheet.heading}</h2>
             <p className="text-sm text-center mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>{guide.cheatSheet.intro}</p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {guide.cheatSheet.items.map((it) => (
@@ -143,7 +143,7 @@ export default function GuideDetailPage() {
           <div className="max-w-6xl mx-auto">
             <div className="max-w-2xl mb-8">
               <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Make a Morning of It</p>
-              <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{guide.combinations.heading}</h2>
+              <h2 className="section-heading text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{guide.combinations.heading}</h2>
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{guide.combinations.intro}</p>
             </div>
             <div className="grid sm:grid-cols-2 gap-5">
@@ -168,7 +168,7 @@ export default function GuideDetailPage() {
             <img src={guide.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.92), rgba(31,155,181,0.82))" }} />
             <div className="relative z-10 px-8 md:px-14 py-14 md:py-20 max-w-3xl">
-              <h2 className="text-2xl md:text-4xl font-bold text-white mb-5 leading-tight">{guide.closing.heading}</h2>
+              <h2 className="section-heading text-2xl md:text-4xl font-bold text-white mb-5 leading-tight">{guide.closing.heading}</h2>
               <div className="flex flex-col gap-4">
                 {guide.closing.body.map((p, i) => (
                   <p key={i} className="text-base md:text-lg leading-relaxed text-white/85">{p}</p>
@@ -184,7 +184,7 @@ export default function GuideDetailPage() {
         <section className="px-6 md:px-12 pb-20 md:pb-28">
           <div className="max-w-6xl mx-auto">
             <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>More Maidenhead Guides</p>
-            <h2 className="text-2xl md:text-4xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>Keep exploring</h2>
+            <h2 className="section-heading text-2xl md:text-4xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>Keep exploring</h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
               {related.map((g) => (
                 <Link

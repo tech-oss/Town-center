@@ -71,7 +71,7 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
   return (
     <div>
       {heading && (
-        <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>{heading}</h2>
+        <h2 className="section-heading text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>{heading}</h2>
       )}
       {heading && note && (
         <p className="text-base mb-6" style={{ color: "#000000" }}>{note}</p>

@@ -96,7 +96,7 @@ export default function BuildingPage() {
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
               About the development
             </p>
-            <h2 className="text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>
+            <h2 className="section-heading text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>
               About {b.name}
             </h2>
             {(b.longDescription || [b.description]).map((para, i) => (
@@ -141,7 +141,7 @@ export default function BuildingPage() {
           <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Specification
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>
+          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>
             Features
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -170,7 +170,7 @@ export default function BuildingPage() {
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
               Connectivity
             </p>
-            <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
               Getting around
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -202,7 +202,7 @@ export default function BuildingPage() {
           <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Lifestyle
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>
+          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>
             Your 15-minute town
           </h2>
           <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000" }}>
@@ -233,7 +233,7 @@ export default function BuildingPage() {
           <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Developer
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>
+          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>
             Contact {b.developer}
           </h2>
           <p className="text-base mb-8 max-w-2xl" style={{ color: "#000000" }}>
@@ -302,7 +302,7 @@ export default function BuildingPage() {
           <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Explore more
           </p>
-          <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
+          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
             More developments in Maidenhead
           </h2>
           <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">

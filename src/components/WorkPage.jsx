@@ -92,7 +92,7 @@ export default function WorkPage() {
       <section className="pb-14 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>Featured Opportunities</h2>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>Featured Opportunities</h2>
             <Link to="/work/jobs" className="group inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
               View All <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
             </Link>
@@ -125,7 +125,7 @@ export default function WorkPage() {
       <section className="px-6 md:px-12 pb-16 md:pb-20">
         <div className="max-w-6xl mx-auto rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ backgroundColor: "var(--forest)" }}>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-1.5">Are you a business or freelancer?</h2>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold text-white mb-1.5">Are you a business or freelancer?</h2>
             <p className="text-white/75 max-w-xl">Post a job, project or service and connect with local talent.</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">

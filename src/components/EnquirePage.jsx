@@ -27,7 +27,7 @@ export default function EnquirePage() {
       <section className="py-14 md:py-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_480px] gap-10 lg:gap-16">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Speak to the Maidenhead Residential team</h2>
+            <h2 className="section-heading text-2xl md:text-3xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Speak to the Maidenhead Residential team</h2>
             <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000" }}>
               Whether you're buying, renting or simply exploring your options, our team is here to help you find the
               right home in Maidenhead. Send us your details and we'll be in touch to arrange a viewing or answer any questions.

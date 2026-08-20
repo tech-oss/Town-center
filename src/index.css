@@ -145,6 +145,17 @@ h5, h6, .text-sm, .text-xs {
   letter-spacing: -0.03em;
 }
 
+/* Section heading — the bold h2 title beneath a section eyebrow (e.g.
+   "Space to breathe" on the Live page). Title Case, every word's first
+   letter capitalised, regardless of how the copy is authored in the data
+   file. One definition here so every section heading sitewide, present
+   and future, follows the same rule automatically. Size/weight/margin
+   stay on Tailwind utilities as before — this class only adds the
+   casing. */
+.section-heading {
+  text-transform: capitalize;
+}
+
 /* Section eyebrow — the small uppercase kicker label that sits above a
    heading (e.g. "FIND YOUR WAY AROUND" above the homepage's Explore
    section). One definition here so every eyebrow sitewide, present and
