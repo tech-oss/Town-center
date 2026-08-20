@@ -137,6 +137,27 @@ const Header = forwardRef(function Header(_, ref) {
             const menu = menusByLabel[nav.label];
             if (menu) {
               const isOpen = openDropdown === menu.label;
+              // Explore has no single landing page of its own — The Future
+              // and Neighbourhood Guides are two distinct pages under it —
+              // so clicking (or hovering) the word just toggles the dropdown
+              // instead of jumping straight into one of them.
+              if (menu.label === "Explore") {
+                return (
+                  <div key={nav.label} className="relative" onMouseEnter={() => openMenu(menu.label)} onMouseLeave={scheduleClose}>
+                    <button
+                      type="button"
+                      onClick={() => setOpenDropdown((d) => (d === menu.label ? null : menu.label))}
+                      className="flex items-center gap-1 text-[16px] font-medium tracking-[0.02em] transition-colors duration-150 py-1 cursor-pointer"
+                      style={{ color: isOpen ? "var(--sage)" : "#ffffff" }}
+                    >
+                      {nav.label}
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
+                  </div>
+                );
+              }
               return (
                 <div key={nav.label} className="relative" onMouseEnter={() => openMenu(menu.label)} onMouseLeave={scheduleClose}>
                   <Link
