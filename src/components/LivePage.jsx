@@ -44,28 +44,6 @@ function FlatSpotlightImage({ image, alt }) {
   );
 }
 
-// ── The same hover again, for cards that link somewhere (developments,
-// featured stays) — sharp photo insets to a blurred frame on hover/tap;
-// on touch devices the tap toggles the reveal instead of navigating, same
-// as the rest of the site's spotlight cards. ──
-function SpotlightLinkCard({ to, image, alt, aspect = "aspect-square", children, className = "", style }) {
-  const { revealed, onImageClick } = useTapReveal();
-  return (
-    <Link
-      to={to}
-      onClick={onImageClick}
-      className={`spotlight-card group block ${revealed ? "is-revealed" : ""} ${className}`}
-      style={style}
-    >
-      <div className={`relative overflow-hidden ${aspect}`} style={{ backgroundColor: "#1a1a1a" }}>
-        <img src={image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
-        <img src={image} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
-      </div>
-      {children}
-    </Link>
-  );
-}
-
 // ── One alternating story section — text column and photograph side by side
 // on desktop (text given the wider share, as on the reference layout), with
 // the sides swapping row to row. On mobile the photograph always leads, then
@@ -328,15 +306,15 @@ export default function LivePage() {
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             {(buildings ?? []).map((b) => (
-              <SpotlightLinkCard
+              <Link
                 key={b.slug}
                 to={`/live/building/${b.slug}`}
-                image={b.image}
-                alt={b.name}
-                aspect="aspect-[4/3] sm:aspect-square"
-                className="bg-white flex flex-col transition-all duration-300 hover:-translate-y-1"
+                className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
                 style={{ borderRadius: "0px", boxShadow: "0 8px 24px rgba(13,42,51,0.08)" }}
               >
+                <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
+                  <img src={b.image} alt={b.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
                 <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
                   <span
                     className="inline-flex items-center gap-1.5 text-[9px] sm:text-[9px] font-semibold uppercase tracking-[0.08em] px-2 sm:px-2 py-0.5 sm:py-0.5 rounded-full max-w-full truncate self-start"
@@ -353,7 +331,7 @@ export default function LivePage() {
                     <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
                   </span>
                 </div>
-              </SpotlightLinkCard>
+              </Link>
             ))}
           </div>
         </div>
