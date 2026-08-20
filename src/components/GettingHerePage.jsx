@@ -146,35 +146,29 @@ export default function GettingHerePage() {
   };
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* ── Hero ── */}
-      <section className="relative w-full overflow-hidden" style={{ minHeight: "62vh" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
+      {/* ── Hero — same height/layout/typography treatment as the Explore
+          "The Future" page hero (bottom-anchored, centered, hero-title
+          typeface). ── */}
+      <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
         <img src="/images/getting-here.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div
-          className="absolute inset-0"
-          style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 45%, rgba(20,33,42,0.9) 100%)" }}
-        />
-        <div
-          className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end"
-          style={{ minHeight: "62vh", paddingTop: "6rem", paddingBottom: "3rem" }}
-        >
-          <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>
-            <Link to="/" className="hover:text-white">Home</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <span className="text-white">Getting Here</span>
-          </nav>
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--sage)" }}>
-            Plan Your Visit
-          </p>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">
-            Getting Here & Good to Know
-          </h1>
-          <p className="text-base md:text-lg text-white/80 mt-4 max-w-2xl leading-relaxed">
-            By rail, road, bus or bicycle, getting to and around Maidenhead is easy — with the Elizabeth
-            Line putting central London just 25 minutes away.
-          </p>
-        </div>
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
+        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>Plan Your Visit</span>
+        <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+          Getting Here & Good to Know
+        </h1>
+        <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium text-white" style={{ letterSpacing: "-0.01em" }}>
+          By rail, road, bus or bicycle, getting to and around Maidenhead is easy — with the Elizabeth
+          Line putting central London just 25 minutes away.
+        </p>
       </section>
+
+      {/* ── Breadcrumb — below the hero image, matching the Explore page. ── */}
+      <nav className="max-w-6xl mx-auto px-6 md:px-12 pt-6 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+        <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
+        <span className="mx-2 opacity-40">/</span>
+        <span>Getting Here</span>
+      </nav>
 
       {/* ── Quick nav ── */}
       <div className="sticky top-0 z-20" style={{ backgroundColor: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", borderBottom: "1px solid rgba(28,46,56,0.08)" }}>
@@ -363,7 +357,7 @@ export default function GettingHerePage() {
       </section>
 
       {/* ── Good to know ── */}
-      <section id="good-to-know" className="scroll-mt-24 px-6 md:px-12 pt-20 pb-24 mt-20" style={{ backgroundColor: "var(--mint)" }}>
+      <section id="good-to-know" className="scroll-mt-24 px-6 md:px-12 pt-20 pb-24 mt-20" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
             <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
