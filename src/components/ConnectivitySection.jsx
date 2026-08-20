@@ -36,7 +36,7 @@ const elizabethStops = [
 function TravelCard({ icon, title, rows }) {
   return (
     <div
-      className="rounded-3xl p-6 md:p-8 flex-1 min-w-0"
+      className="p-6 md:p-8 flex-1 min-w-0"
       style={{
         backgroundColor: "white",
         boxShadow: "0 4px 32px -8px rgba(28,46,56,0.12)",
@@ -94,7 +94,7 @@ export default function ConnectivitySection() {
 
         {/* Elizabeth line diagram */}
         <div
-          className="rounded-3xl p-6 md:p-8 overflow-x-auto"
+          className="p-6 md:p-8 overflow-x-auto"
           style={{
             backgroundColor: "white",
             boxShadow: "0 4px 32px -8px rgba(28,46,56,0.12)",
