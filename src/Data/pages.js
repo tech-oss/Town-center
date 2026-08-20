@@ -407,12 +407,22 @@ const servicesItems = [
   item("riverside-estates", "Riverside Estates", "services", "estate-agents", "Estate Agents"),
   item("towncentre-recruitment", "Town Centre Recruitment", "services", "recruitment", "Recruitment"),
   item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance Brokers"),
-  // Freelancers
-  item("riverside-graphic-design", "Riverside Graphic Design", "services", "graphic-designers", "Graphic Designers"),
+  // Freelancers — each profile lists 10 skills.
+  {
+    ...item("riverside-graphic-design", "Riverside Graphic Design", "services", "graphic-designers", "Graphic Designers"),
+    servicesOffered: [
+      "Logo Design", "Brand Identity", "Print Design", "Packaging Design", "Illustration",
+      "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Social Media Graphics", "Typography",
+    ],
+  },
   {
     // Portfolio mixes photos with links out to live project sites — a
     // freelancer's work isn't always a picture (see FreelancerDetailLayout).
     ...item("thames-web-studio", "Thames Web Studio", "services", "web-developers", "Web Developers"),
+    servicesOffered: [
+      "Website Design", "Front-End Development", "WordPress", "Shopify", "E-Commerce Builds",
+      "Responsive Design", "SEO Basics", "JavaScript", "HTML & CSS", "Website Maintenance",
+    ],
     portfolio: [
       { image: img("thames-web-studio-1") },
       { link: "https://www.coppaclub.co.uk/maidenhead", title: "Coppa Club Maidenhead — restaurant website" },
@@ -421,12 +431,48 @@ const servicesItems = [
       { image: img("thames-web-studio-3") },
     ],
   },
-  item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photographers", "Photographers"),
-  item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "copywriters", "Copywriters & Content Writers"),
-  item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-consultants", "Marketing Consultants"),
-  item("towncentre-pt", "Town Centre PT", "services", "personal-trainers", "Personal Trainers"),
-  item("riverside-tutoring", "Riverside Tutoring", "services", "tutors", "Tutors"),
-  item("maidenhead-va-services", "Maidenhead VA Services", "services", "virtual-assistants", "Virtual Assistants"),
+  {
+    ...item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photographers", "Photographers"),
+    servicesOffered: [
+      "Portrait Photography", "Event Photography", "Product Photography", "Wedding Photography", "Photo Editing",
+      "Lightroom", "Photoshop", "Studio Lighting", "Drone Photography", "Headshots",
+    ],
+  },
+  {
+    ...item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "copywriters", "Copywriters & Content Writers"),
+    servicesOffered: [
+      "Website Copy", "Blog Writing", "SEO Copywriting", "Email Marketing", "Product Descriptions",
+      "Brand Voice & Tone", "Proofreading & Editing", "Social Media Copy", "Press Releases", "Content Strategy",
+    ],
+  },
+  {
+    ...item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-consultants", "Marketing Consultants"),
+    servicesOffered: [
+      "Digital Marketing Strategy", "Social Media Marketing", "SEO", "PPC & Google Ads", "Email Marketing",
+      "Brand Strategy", "Market Research", "Content Marketing", "Marketing Analytics", "Campaign Management",
+    ],
+  },
+  {
+    ...item("towncentre-pt", "Town Centre PT", "services", "personal-trainers", "Personal Trainers"),
+    servicesOffered: [
+      "Strength Training", "Weight Loss Coaching", "Nutrition Advice", "HIIT Training", "Mobility & Flexibility",
+      "Group Sessions", "One-to-One Coaching", "Sports Conditioning", "Injury Rehabilitation Support", "Online Coaching Plans",
+    ],
+  },
+  {
+    ...item("riverside-tutoring", "Riverside Tutoring", "services", "tutors", "Tutors"),
+    servicesOffered: [
+      "Maths Tutoring", "English Tutoring", "Science Tutoring", "GCSE Preparation", "A-Level Preparation",
+      "11+ Preparation", "Exam Technique", "Homework Support", "Online Tutoring", "Study Skills Coaching",
+    ],
+  },
+  {
+    ...item("maidenhead-va-services", "Maidenhead VA Services", "services", "virtual-assistants", "Virtual Assistants"),
+    servicesOffered: [
+      "Diary Management", "Email Management", "Data Entry", "Customer Support", "Social Media Scheduling",
+      "Invoicing & Bookkeeping Support", "Travel Booking", "Document Preparation", "CRM Management", "Research & Reporting",
+    ],
+  },
 ];
 
 // ─── EAT & DRINK ─────────────────────────────────────────────────────────────
