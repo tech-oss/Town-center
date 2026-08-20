@@ -99,7 +99,7 @@ export default function BlogCards() {
       <div className="relative max-w-6xl mx-auto">
         {/* Header — heading + rule, matching the reference's editorial masthead */}
         <div className="mb-14 md:mb-16">
-          <p className="text-sm font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
             {blogCards.eyebrow}
           </p>
           <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>

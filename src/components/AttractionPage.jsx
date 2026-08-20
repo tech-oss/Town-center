@@ -61,7 +61,7 @@ export default function AttractionPage() {
               <span style={{ color: "#000000" }}>Boulter's Lock</span>
             </nav>
 
-            <span className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{a.eyebrow}</span>
+            <span className="section-eyebrow" style={{ color: "var(--leaf)" }}>{a.eyebrow}</span>
             <h1 className="text-3xl md:text-5xl font-bold mt-2 mb-5 leading-tight" style={{ color: "#000000" }}>{a.title}</h1>
             {a.subtitle && (
               <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "#000000" }}>{a.subtitle}</p>

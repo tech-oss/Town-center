@@ -42,7 +42,7 @@ export default function WorkPage() {
         <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(20,33,42,0.95) 0%, rgba(20,33,42,0.78) 45%, rgba(20,33,42,0.55) 100%)" }} />
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-10 md:pb-14">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-4" style={{ color: "var(--sage)" }}>{work.hero.eyebrow}</p>
+          <p className="section-eyebrow mb-4" style={{ color: "var(--sage)" }}>{work.hero.eyebrow}</p>
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">{work.hero.title}</h1>
           <p className="text-base md:text-lg text-white/80 mt-5 max-w-xl leading-relaxed">{work.hero.intro}</p>
 

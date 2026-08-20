@@ -153,7 +153,7 @@ export default function GettingHerePage() {
       <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
         <img src="/images/getting-here.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>Plan Your Visit</span>
+        <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>Plan Your Visit</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
           Getting Here & Good to Know
         </h1>
@@ -336,7 +336,7 @@ export default function GettingHerePage() {
               {/* On mobile the heading/intro comes first so each map sits with its
                   own section; desktop keeps the alternating left/right layout. */}
               <div className="order-first md:order-none">
-                <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
+                <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{sec.eyebrow}</p>
                 <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{sec.heading}</h2>
                 <p className="text-base md:text-lg leading-relaxed mb-6" style={{ color: "#000000" }}>{sec.intro}</p>
                 <div className="flex flex-col divide-y" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
@@ -360,7 +360,7 @@ export default function GettingHerePage() {
       <section id="good-to-know" className="scroll-mt-24 px-6 md:px-12 pt-20 pb-24 mt-20" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
               A few practical things worth knowing before you head into the town centre.

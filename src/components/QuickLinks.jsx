@@ -26,7 +26,7 @@ export default function QuickLinks() {
         {/* ── Header (left-aligned) ── */}
         <div className="mb-8 md:mb-12">
           <p
-            className="text-sm font-semibold tracking-[0.2em] uppercase mb-3"
+            className="section-eyebrow mb-3"
             style={{ color: "var(--leaf)" }}
           >
             {quickLinks.eyebrow}

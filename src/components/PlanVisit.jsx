@@ -54,7 +54,7 @@ export default function PlanVisit() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="max-w-2xl mx-auto mb-10 text-center">
-          <p className="text-sm font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
             {planVisit.eyebrow}
           </p>
           <p className="text-base leading-relaxed" style={{ color: "#000000" }}>

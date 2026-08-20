@@ -44,7 +44,7 @@ export default function PressPage() {
               "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--sage)" }}>
+        <span className="section-eyebrow relative mb-4" style={{ color: "var(--sage)" }}>
           Get Involved
         </span>
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">Work With Us &amp; Enquiries</h1>

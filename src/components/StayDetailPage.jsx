@@ -89,7 +89,7 @@ function AmenitiesSection({ amenities, heading }) {
   return (
     <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-5xl mx-auto">
-        <p className="text-xs font-semibold tracking-[0.2em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Lifestyle</p>
+        <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Lifestyle</p>
         <h2 className="hero-title uppercase text-3xl md:text-5xl mb-4" style={{ color: "#000000" }}>{heading}</h2>
         <p className="text-base md:text-lg leading-relaxed mb-10 max-w-xl" style={{ color: "#000000" }}>
           Thoughtful amenities designed to elevate your comfort, convenience, and stay.

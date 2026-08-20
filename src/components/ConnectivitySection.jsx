@@ -77,7 +77,7 @@ export default function ConnectivitySection() {
 
         {/* Heading */}
         <div className="max-w-2xl mb-12">
-          <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--leaf)" }}>Connectivity</p>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Connectivity</p>
           <h2 className="text-3xl md:text-4xl font-bold leading-tight" style={{ color: "#000000" }}>
             London in minutes.<br className="hidden md:block" /> The world on your doorstep.
           </h2>

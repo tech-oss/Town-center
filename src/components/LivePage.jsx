@@ -64,7 +64,7 @@ function StorySection({ section, index }) {
 
       {/* Copy — 7 of 12 columns on desktop. */}
       <div className="md:col-span-7">
-        <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>
+        <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
           {section.eyebrow}
         </p>
         <h2 className="text-2xl md:text-4xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>
@@ -107,7 +107,7 @@ function FeaturedStays() {
       <div className="relative max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--mint)" }}>Where to Stay</p>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>Where to Stay</p>
             <h2 className="text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
           </div>
           <Link to="/live/stay/hotels" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
@@ -174,7 +174,7 @@ export default function LivePage() {
       <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
         <img src={hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>
+        <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
           {hero.eyebrow}
         </span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
@@ -241,7 +241,7 @@ export default function LivePage() {
               <StoryImage image={nicholson.image} alt={nicholson.heading} />
             </div>
             <div className="md:col-span-7">
-              <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--sage)" }}>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--sage)" }}>
                 {nicholson.eyebrow}
               </p>
               <h2 className="text-2xl md:text-4xl font-bold mb-5 leading-tight text-white">
@@ -299,7 +299,7 @@ export default function LivePage() {
           See & Do / Eat & Drink / Shop / Services listing grids. ── */}
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>New Homes</p>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>New Homes</p>
           <h2 className="text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>Developments</h2>
           <p className="text-base md:text-lg mb-10 max-w-2xl leading-relaxed" style={{ color: "#000000" }}>
             Explore Maidenhead's leading residential developments.

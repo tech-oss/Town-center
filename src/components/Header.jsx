@@ -226,7 +226,7 @@ const Header = forwardRef(function Header(_, ref) {
           >
             {menusByLabel[openDropdown].columns.map((col) => (
               <div key={col.heading}>
-                <p className="text-xs font-bold uppercase tracking-[0.02em] mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
+                <p className="section-eyebrow mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
                 <ul className="flex flex-col gap-2.5">
                   {col.links.map((l) => (
                     <li key={l.to}>

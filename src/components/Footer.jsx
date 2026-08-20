@@ -124,7 +124,7 @@ export default function Footer() {
           {/* Link columns */}
           {footer.columns.map((col) => (
             <div key={col.heading} className="flex flex-col gap-4">
-              <p className="text-xs font-semibold tracking-[0.02em] uppercase text-white">{col.heading}</p>
+              <p className="section-eyebrow text-white">{col.heading}</p>
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((l) => (
                   <li key={l.label}><NavLink href={l.href}>{l.label}</NavLink></li>

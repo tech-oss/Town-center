@@ -37,7 +37,7 @@ export default function EnquirePage() {
                 <div key={k} className="flex items-center gap-4">
                   <span className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0" style={{ backgroundColor: "var(--mint)" }}>{icon}</span>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{k}</p>
+                    <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>{k}</p>
                     <p className="text-sm font-semibold" style={{ color: "#000000" }}>{v}</p>
                   </div>
                 </div>

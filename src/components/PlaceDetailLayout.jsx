@@ -455,7 +455,7 @@ export default function PlaceDetailLayout({
           style={{ backgroundColor: "var(--forest)", color: "#fff" }}
         >
           <img src="/logo-mark.svg" alt="" aria-hidden="true" className="h-[18px] w-auto shrink-0" />
-          <span className="text-sm font-semibold uppercase tracking-[0.06em]">
+          <span className="section-eyebrow">
             The Maidenhead App
           </span>
         </Link>

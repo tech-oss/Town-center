@@ -64,7 +64,7 @@ function DevelopmentCard({ b }) {
       <section className="py-14 md:py-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>About the development</p>
+            <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>About the development</p>
             <h3 className="text-2xl md:text-3xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>About {b.name}</h3>
             {(b.longDescription || [b.description]).map((para, i) => (
               <p key={i} className="text-base leading-relaxed mb-4" style={{ color: "#000000" }}>{para}</p>
@@ -92,7 +92,7 @@ function DevelopmentCard({ b }) {
       {/* Features */}
       <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>Specification</p>
+          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Specification</p>
           <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Features</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {b.amenities.map((a) => {
@@ -113,7 +113,7 @@ function DevelopmentCard({ b }) {
       {b.nearbyPlaces?.length > 0 && (
         <section className="py-12 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>Connectivity</p>
+            <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Connectivity</p>
             <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Getting around</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {b.nearbyPlaces.map((place) => (
@@ -133,7 +133,7 @@ function DevelopmentCard({ b }) {
       {/* Contact */}
       <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>Contact</p>
+          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Contact</p>
           <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Get in touch</h3>
           <p className="text-base mb-7 max-w-xl" style={{ color: "#000000" }}>
             For availability, pricing and viewings contact the {b.developer} team directly.
@@ -207,7 +207,7 @@ export default function WorkplaceDevelopmentsPage() {
       {others.length > 0 && (
         <section className="pb-20 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>Explore more</p>
+            <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Explore more</p>
             <h3 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>Other workplace developments</h3>
             <div className="grid sm:grid-cols-2 gap-5">
               {others.map((x) => (

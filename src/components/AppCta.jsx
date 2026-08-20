@@ -14,7 +14,7 @@ export default function AppCta() {
         />
         <div className="relative flex flex-col md:flex-row md:items-center gap-8 md:justify-between">
           <div className="max-w-xl md:max-w-none md:flex-1">
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--sage)" }}>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--sage)" }}>
               Maidenhead in your pocket
             </p>
             <h2 className="hero-title app-cta-title uppercase text-3xl md:text-4xl lg:text-5xl text-white mb-4">

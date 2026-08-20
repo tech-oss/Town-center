@@ -18,7 +18,7 @@ export default function NewsOffers({ item }) {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase mb-3" style={{ color: "var(--mint)" }}>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>
               {item.name}
             </p>
             <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">News &amp; Offers</h2>

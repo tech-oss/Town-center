@@ -93,7 +93,7 @@ export default function BuildingPage() {
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
               About the development
             </p>
             <h2 className="text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>
@@ -138,7 +138,7 @@ export default function BuildingPage() {
       {/* ── 4. FEATURES GRID ────────────────────────────────────────────────── */}
       <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Specification
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>
@@ -167,7 +167,7 @@ export default function BuildingPage() {
       {b.nearbyPlaces && b.nearbyPlaces.length > 0 && (
         <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+            <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
               Connectivity
             </p>
             <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
@@ -199,7 +199,7 @@ export default function BuildingPage() {
       {/* ── 6. YOUR 15-MINUTE TOWN ──────────────────────────────────────────── */}
       <section className="py-14 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Lifestyle
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "#000000" }}>
@@ -230,7 +230,7 @@ export default function BuildingPage() {
       {/* ── 7. DEVELOPER CONTACT ────────────────────────────────────────────── */}
       <section className="py-16 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Developer
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>
@@ -299,7 +299,7 @@ export default function BuildingPage() {
       {/* ── 9. OTHER DEVELOPMENTS ───────────────────────────────────────────── */}
       <section className="pb-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-2" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
             Explore more
           </p>
           <h2 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>

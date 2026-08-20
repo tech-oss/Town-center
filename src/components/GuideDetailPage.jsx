@@ -19,7 +19,7 @@ function PlaceSection({ s, index }) {
         </div>
       </div>
       <div>
-        <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3 flex items-center gap-2" style={{ color: "var(--leaf)" }}>
+        <p className="section-eyebrow mb-3 flex items-center gap-2" style={{ color: "var(--leaf)" }}>
           <span className="text-base">{s.icon}</span> {s.eyebrow}
         </p>
         <h2 className="text-2xl md:text-4xl font-bold mb-2 leading-tight" style={{ color: "#000000" }}>{s.title}</h2>
@@ -59,7 +59,7 @@ export default function GuideDetailPage() {
       <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
         <img src={guide.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>{guide.category}</span>
+        <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{guide.category}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
           {guide.title}
         </h1>
@@ -107,7 +107,7 @@ export default function GuideDetailPage() {
               {guide.moreSpots.items.map((it) => (
                 <div key={it.title} className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
                   <h3 className="font-bold text-base leading-snug mb-1" style={{ color: "#000000" }}>{it.title}</h3>
-                  {it.location && <p className="text-xs font-semibold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--leaf)" }}>{it.location}</p>}
+                  {it.location && <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>{it.location}</p>}
                   <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{it.body}</p>
                 </div>
               ))}
@@ -142,7 +142,7 @@ export default function GuideDetailPage() {
         <section className="py-16 md:py-24 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             <div className="max-w-2xl mb-8">
-              <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>Make a Morning of It</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Make a Morning of It</p>
               <h2 className="text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{guide.combinations.heading}</h2>
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{guide.combinations.intro}</p>
             </div>
@@ -183,7 +183,7 @@ export default function GuideDetailPage() {
       {related.length > 0 && (
         <section className="px-6 md:px-12 pb-20 md:pb-28">
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-3" style={{ color: "var(--leaf)" }}>More Maidenhead Guides</p>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>More Maidenhead Guides</p>
             <h2 className="text-2xl md:text-4xl font-bold mb-8 leading-tight" style={{ color: "#000000" }}>Keep exploring</h2>
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
               {related.map((g) => (

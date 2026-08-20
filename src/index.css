@@ -145,6 +145,20 @@ h5, h6, .text-sm, .text-xs {
   letter-spacing: -0.03em;
 }
 
+/* Section eyebrow — the small uppercase kicker label that sits above a
+   heading (e.g. "FIND YOUR WAY AROUND" above the homepage's Explore
+   section). One definition here so every eyebrow sitewide, present and
+   future, shares the same size/weight/tracking without hand-copying
+   Tailwind utility strings from component to component. Colour is left to
+   each usage (it varies with the section's background), and any margin
+   utility (mb-2, mb-3, …) can still be added alongside this class. */
+.section-eyebrow {
+  font-size: 0.875rem !important; /* text-sm */
+  font-weight: 600 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase;
+}
+
 /* See & Do / Eat & Drink / Shop / Services listing cards — the h3 name
    deliberately steps up from the default light heading weight so it reads
    as the clear focal point of the card. */

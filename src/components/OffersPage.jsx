@@ -368,7 +368,7 @@ export default function OffersPage() {
               "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
-        <span className="relative text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--sage)" }}>
+        <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
           Offers &amp; Stories
         </span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>

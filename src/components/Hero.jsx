@@ -207,7 +207,7 @@ export default function Hero() {
             <img src={s.featureCard.image} alt={s.featureCard.title} className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-0.5" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
+            <p className="section-eyebrow mb-0.5" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
             <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>{s.featureCard.title}</p>
             <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>{s.featureCard.cta.label}</p>
           </div>
@@ -224,7 +224,7 @@ export default function Hero() {
           </div>
           <div className="p-4 flex items-start justify-between gap-3">
             <div>
-              <p className="text-xs font-semibold tracking-[0.02em] uppercase mb-1" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
+              <p className="section-eyebrow mb-1" style={{ color: "var(--sage)" }}>{s.featureCard.label}</p>
               <p className="text-sm font-semibold leading-snug" style={{ color: "var(--forest)" }}>{s.featureCard.title}</p>
               <p className="text-xs mt-1 font-medium" style={{ color: "var(--leaf)" }}>{s.featureCard.cta.label}</p>
             </div>
