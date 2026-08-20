@@ -205,11 +205,16 @@ export default function FreelancerDetailLayout({
                 </div>
                 {skills.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {skills.slice(0, 10).map((s) => (
+                    {skills.slice(0, 3).map((s) => (
                       <span key={s} className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
                         {s}
                       </span>
                     ))}
+                    {skills.length > 3 && (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: "var(--forest)" }}>
+                        +{skills.length - 3} more
+                      </span>
+                    )}
                   </div>
                 )}
                 {description && (
