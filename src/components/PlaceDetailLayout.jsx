@@ -178,6 +178,9 @@ export default function PlaceDetailLayout({
   // that need one more piece of at-a-glance info than the base layout.
   extraBadges,
   relatedBackground = "var(--sand)",
+  // Optional "back to listing" link rendered under the breadcrumb — used by
+  // the What's On event page to point back to the full events calendar.
+  backLink,
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -259,6 +262,16 @@ export default function PlaceDetailLayout({
               </span>
             ))}
           </nav>
+
+          {backLink && (
+            <Link
+              to={backLink.to}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold mb-5 hover:opacity-70 transition-opacity"
+              style={{ color: "#000000" }}
+            >
+              <span>←</span> {backLink.label}
+            </Link>
+          )}
 
           {(categoryLabel || extraBadges) && (
             <div className="flex flex-wrap items-center gap-3 mb-5">

@@ -107,6 +107,7 @@ export default function EventPage() {
         { label: "See & Do", to: "/see-do" },
         { label: categoryLabel, to: `/see-do?category=${categorySlug}` },
       ]}
+      backLink={{ label: "View full events calendar", to: "/whats-on" }}
       categoryLabel={event.category}
       categoryColor={dot}
       title={event.title}
