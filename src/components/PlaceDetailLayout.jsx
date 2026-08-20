@@ -185,7 +185,19 @@ export default function PlaceDetailLayout({
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(null);
+  const [showStickyBooking, setShowStickyBooking] = useState(false);
   const galleryImages = extraImages.slice(0, 6);
+
+  // Sticky "Make a booking" button — floats in once the page's own booking
+  // button (in the info card) has scrolled out of view, so it's always
+  // reachable without duplicating the CTA above the fold.
+  useEffect(() => {
+    if (extraButtonLabel !== "Booking") return;
+    const onScroll = () => setShowStickyBooking(window.scrollY > 420);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [extraButtonLabel]);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const u = encodeURIComponent(shareUrl);
@@ -599,6 +611,27 @@ export default function PlaceDetailLayout({
           onClose={() => setGalleryIndex(null)}
           onStep={(delta) => setGalleryIndex((i) => (i + delta + galleryImages.length) % galleryImages.length)}
         />
+      )}
+
+      {/* Sticky booking button — floats with the page scroll once the
+          in-card booking button is out of view. */}
+      {extraButtonLabel === "Booking" && (
+        <a
+          href={extraButtonHref || websiteHref || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed z-40 bottom-6 right-6 inline-flex items-center gap-2 text-sm font-bold px-5 py-3.5 rounded-full transition-all duration-300"
+          style={{
+            backgroundColor: "var(--leaf)",
+            color: "#ffffff",
+            boxShadow: "0 10px 30px -8px rgba(28,46,56,0.5)",
+            opacity: showStickyBooking ? 1 : 0,
+            transform: showStickyBooking ? "translateY(0)" : "translateY(16px)",
+            pointerEvents: showStickyBooking ? "auto" : "none",
+          }}
+        >
+          <TicketIcon size={18} /> Make a Booking
+        </a>
       )}
     </div>
   );
