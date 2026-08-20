@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
-import { featuredSpot, heroImage, homeCategories } from "../data/mobileMock";
+import useFetch from "../../hooks/useFetch";
+import { getStories } from "../../api";
+import { heroImage, homeCategories } from "../data/mobileMock";
 
 function CatIcon({ name }) {
   const p = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "var(--leaf)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -19,6 +21,9 @@ function CatIcon({ name }) {
 }
 
 export default function HomeScreen() {
+  const { data: stories } = useFetch(getStories, []);
+  const featured = stories?.[0];
+
   return (
     <MobileShell noPadding>
     <div className="flex flex-col gap-6 mobile-stagger" style={{ paddingBottom: 24 }}>
@@ -37,19 +42,21 @@ export default function HomeScreen() {
       </div>
 
       <div className="flex flex-col gap-6 px-5 -mt-2">
-        {/* Featured location chip */}
-        <Link to={featuredSpot.to}>
-          <MobileCard className="flex items-center gap-3 p-3 active:opacity-90">
-            <img src={featuredSpot.image} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{featuredSpot.eyebrow}</p>
-              <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{featuredSpot.title}</p>
-              <span className="text-xs font-semibold inline-flex items-center gap-1 mt-0.5" style={{ color: "var(--leaf)" }}>
-                Find Out More <span>→</span>
-              </span>
-            </div>
-          </MobileCard>
-        </Link>
+        {/* Featured story chip — real "In the Spotlight" content */}
+        {featured && (
+          <a href={`/story/${featured.slug}`}>
+            <MobileCard className="flex items-center gap-3 p-3 active:opacity-90">
+              <img src={featured.cardImage} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{featured.eyebrow}</p>
+                <p className="text-sm font-bold leading-snug line-clamp-1" style={{ color: "#000000" }}>{featured.cardHeading}</p>
+                <span className="text-xs font-semibold inline-flex items-center gap-1 mt-0.5" style={{ color: "var(--leaf)" }}>
+                  Find Out More <span>→</span>
+                </span>
+              </div>
+            </MobileCard>
+          </a>
+        )}
 
         {/* Welcome */}
         <div>
@@ -75,7 +82,7 @@ export default function HomeScreen() {
         <Link
           to="/mobile/whats-on"
           className="w-full text-center py-3.5 rounded-2xl text-sm font-bold active:opacity-80"
-          style={{ backgroundColor: "var(--sage)", color: "#000000" }}
+          style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}
         >
           Explore What's On
         </Link>

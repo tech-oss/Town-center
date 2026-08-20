@@ -117,9 +117,21 @@ export default function MapScreen() {
                 <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{active.name}</p>
                 <p className="text-xs" style={{ color: "#000000" }}>{active.category}</p>
               </div>
-              <Link to={active.to} className="text-xs font-bold px-3 py-2 rounded-xl shrink-0" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>
-                View
-              </Link>
+              {active.to ? (
+                <Link to={active.to} className="text-xs font-bold px-3 py-2 rounded-xl shrink-0" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
+                  View
+                </Link>
+              ) : (
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${active.lat},${active.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
+                  style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}
+                >
+                  Directions
+                </a>
+              )}
               <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "#000000" }} aria-label="Close">✕</button>
             </div>
           )}

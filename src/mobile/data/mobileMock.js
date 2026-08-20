@@ -1,16 +1,11 @@
-// ─── Mock content for the mobile-demo PWA screens ──────────────────────────────
-// Coordinates reused from src/Data/content.js (verified Maidenhead locations).
-// Everything links within /mobile/* so the TWA never leaves its scope.
+// ─── Mobile-app-only content ────────────────────────────────────────────────────
+// Business/place/event/guide listings now come straight from the same
+// Data/*.js the desktop site uses (see SectionScreen, PlaceDetailScreen,
+// WhatsOnScreen, HomeScreen, GuidesScreen, OffersScreen, LiveScreen). What's
+// left here is content genuinely specific to the app shell: nav tiles, the
+// map's curated pins, and the static Explore/Plan/About screens.
 
 export const heroImage = "/images/card-bridge.jpg";
-
-export const featuredSpot = {
-  eyebrow: "On the River",
-  title: "Boulter's Lock & Ray Mill Island",
-  blurb: "One of the most photographed stretches of the Thames.",
-  image: "/images/card-lock.jpg",
-  to: "/mobile/place/boulters-lock",
-};
 
 // Quick category tiles on Home
 export const homeCategories = [
@@ -23,81 +18,6 @@ export const homeCategories = [
   { id: "guides", label: "Guides", icon: "book", to: "/mobile/guides" },
   { id: "map", label: "Map", icon: "pin", to: "/mobile/map" },
 ];
-
-// ─── Events (What's On) ────────────────────────────────────────────────────────
-export const eventFilters = ["All", "Family", "Music", "Food & Drink"];
-
-export const events = [
-  { id: "e1", date: "2026-06-18", month: "JUN", day: "18", title: "Riverside Market", time: "Thu 10:00 AM", location: "Riverside Promenade", category: "Food & Drink", image: "/images/events/farmers-market-1.jpg" },
-  { id: "e2", date: "2026-06-20", month: "JUN", day: "20", title: "Live Music by the River", time: "Sat 2:00 PM", location: "Boulter's Lock", category: "Music", image: "/images/events/bands-1.jpg" },
-  { id: "e3", date: "2026-06-21", month: "JUN", day: "21", title: "Street Food Festival", time: "Sun 11:00 AM", location: "High Street", category: "Food & Drink", image: "/images/events/popup.jpg" },
-  { id: "e4", date: "2026-06-25", month: "JUN", day: "25", title: "Summer Choir Night", time: "Thu 7:00 PM", location: "Norden Farm", category: "Music", image: "/images/events/choirs-1.jpg" },
-  { id: "e5", date: "2026-06-28", month: "JUN", day: "28", title: "Family Fun Day", time: "Sun 12:00 PM", location: "Kidwells Park", category: "Family", image: "/images/events/family.jpg" },
-  { id: "e6", date: "2026-07-01", month: "JUL", day: "01", title: "Maidenhead Carnival", time: "Wed 11:00 AM", location: "Kidwells Park", category: "Family", image: "/images/events/summer-1.jpg" },
-  { id: "e7", date: "2026-07-04", month: "JUL", day: "04", title: "Jazz on the Terrace", time: "Sat 7:00 PM", location: "Coppa Club", category: "Music", image: "/images/events/bands-3.jpg" },
-  { id: "e8", date: "2026-07-05", month: "JUL", day: "05", title: "Farmers' Market", time: "Sun 9:00 AM", location: "Town Square", category: "Food & Drink", image: "/images/events/farmers-market-3.jpg" },
-];
-
-// ─── Sections (See & Do / Eat & Drink / Shop) ──────────────────────────────────
-export const sections = {
-  "see-do": {
-    title: "See & Do",
-    intro: "Explore the best attractions, green spaces, and things to do in and around Maidenhead.",
-    filters: ["All", "Attractions", "Outdoors", "Arts & Culture"],
-    items: [
-      { id: "boulters-lock", name: "Boulter's Lock", category: "Outdoors", blurb: "A scenic lock on the River Thames.", image: "/images/attractions/boulters-lock.jpg", lat: 51.5261, lng: -0.7155, address: "Ray Mill Rd E, Maidenhead SL6 8PE", hours: "Open 24 hours" },
-      { id: "heritage-centre", name: "Maidenhead Heritage Centre", category: "Arts & Culture", blurb: "Discover local history and exhibitions.", image: "/images/explore/street.jpg", lat: 51.5212, lng: -0.7198, address: "18 Park St, Maidenhead SL6 1SL", hours: "Tue–Sat 10:00–16:00" },
-      { id: "ray-mill-island", name: "Ray Mill Island", category: "Outdoors", blurb: "A tranquil island park by the weir.", image: "/images/attractions/garden-path.jpg", lat: 51.5266, lng: -0.7141, address: "Ray Mill Rd E, Maidenhead SL6 8SW", hours: "Open 24 hours" },
-      { id: "norden-farm", name: "Norden Farm Centre", category: "Arts & Culture", blurb: "Arts centre with theatre, cinema and café.", image: "/images/explore/evening.jpg", lat: 51.5189, lng: -0.7242, address: "Altwood Rd, Maidenhead SL6 4PF", hours: "Box office 10:00–18:00" },
-      { id: "kidwells-park", name: "Kidwells Park", category: "Outdoors", blurb: "Central park with play areas and events.", image: "/images/attractions/swan.jpg", lat: 51.5224, lng: -0.7268, address: "Kidwells Park Dr, Maidenhead SL6 8AA", hours: "Open 24 hours" },
-      { id: "nicholsons", name: "Nicholsons Centre", category: "Attractions", blurb: "A modern shopping & leisure destination.", image: "/images/explore/market.jpg", lat: 51.5225, lng: -0.7208, address: "Nicholsons Walk, Maidenhead SL6 1LB", hours: "Mon–Sat 9:00–18:00" },
-    ],
-  },
-  "eat-drink": {
-    title: "Eat & Drink",
-    intro: "From riverside dining to cozy cafés, explore Maidenhead's food and drink scene.",
-    filters: ["All", "Restaurants", "Cafés", "Pubs & Bars"],
-    items: [
-      { id: "coppa-club", name: "Coppa Club", category: "Restaurants", blurb: "All-day riverside dining with a view.", image: "/images/coppa/dining.jpg", lat: 51.521889, lng: -0.716051, address: "The Arches, Bridge Ave, SL6 1RR", hours: "Daily 8:00–23:00" },
-      { id: "the-fat-duck", name: "The Fat Duck", category: "Restaurants", blurb: "Heston Blumenthal's Michelin-starred icon.", image: "/images/fatduck/food-1.jpg", lat: 51.5078, lng: -0.7028, address: "High St, Bray, Maidenhead SL6 2AQ", hours: "Tue–Sat, by reservation" },
-      { id: "cocoba", name: "Cocoba Chocolate Café", category: "Cafés", blurb: "Artisan chocolate café & desserts.", image: "/images/cocoba/cafe.jpg", lat: 51.523201, lng: -0.7176, address: "2B High St, Waterside Quarter, SL6 1QJ", hours: "Daily 9:00–18:00" },
-      { id: "esquires", name: "Esquires Coffee", category: "Cafés", blurb: "Relaxed coffee house in the town centre.", image: "/images/esquires/cafe-1.jpg", lat: 51.5228, lng: -0.7188, address: "Nicholsons Walk, SL6 1LB", hours: "Mon–Sat 7:30–17:30" },
-      { id: "el-cerdo", name: "El Cerdo", category: "Pubs & Bars", blurb: "Lively tapas bar in Waterside Quarter.", image: "/images/coppa/bar.jpg", lat: 51.52348, lng: -0.71762, address: "The Colonnade, Waterside Quarter, SL6 1QG", hours: "Daily 12:00–23:00" },
-      { id: "hall-woodhouse", name: "Hall & Woodhouse", category: "Pubs & Bars", blurb: "Riverside pub & kitchen at Taplow.", image: "/images/card-taplow.jpg", lat: 51.526859, lng: -0.700343, address: "Mill Ln, Taplow, SL6 0AA", hours: "Daily 11:00–23:00" },
-    ],
-  },
-  shop: {
-    title: "Shop",
-    intro: "From high-street favourites to independent boutiques, discover Maidenhead's shops.",
-    filters: ["All", "Fashion", "Food & Grocery", "Electronics"],
-    items: [
-      { id: "nicholsons-centre", name: "Nicholsons Centre", category: "Fashion", blurb: "The town's main shopping centre.", image: "/images/explore/market.jpg", logo: null, lat: 51.5225, lng: -0.7208, address: "Nicholsons Walk, SL6 1LB", hours: "Mon–Sat 9:00–18:00" },
-      { id: "zara", name: "Zara", category: "Fashion", blurb: "Contemporary fashion for all.", image: "/images/explore/street.jpg", lat: 51.52265, lng: -0.71975, address: "High St, Maidenhead SL6 1QJ", hours: "Mon–Sat 9:30–18:00" },
-      { id: "waitrose", name: "Waitrose", category: "Food & Grocery", blurb: "Quality supermarket & café.", image: "/images/ql-food.jpg", lat: 51.52010, lng: -0.72230, address: "Stafferton Way, SL6 1AY", hours: "Daily 8:00–21:00" },
-      { id: "whsmith", name: "WHSmith", category: "Food & Grocery", blurb: "Books, stationery & news.", image: "/images/ql-shop.jpg", lat: 51.52340, lng: -0.71955, address: "Nicholsons Walk, SL6 1LB", hours: "Mon–Sat 8:30–18:00" },
-      { id: "currys", name: "Currys", category: "Electronics", blurb: "Tech, gadgets & home electronics.", image: "/images/ql-transport.jpg", lat: 51.52185, lng: -0.72090, address: "Stafferton Way, SL6 1AN", hours: "Mon–Sat 9:00–20:00" },
-      { id: "bakedd", name: "bakedd", category: "Food & Grocery", blurb: "Independent artisan bakery.", image: "/images/cocoba/storefront.jpg", lat: 51.522851, lng: -0.71774, address: "1a High St, Maidenhead SL6 1JN", hours: "Tue–Sun 8:00–16:00" },
-    ],
-  },
-  services: {
-    title: "Services",
-    intro: "Trades, professionals and local businesses serving Maidenhead.",
-    filters: ["All", "Health & Wellness", "Trades", "Professional"],
-    items: [
-      { id: "bupa-health-clinic", name: "Bupa Health Clinic", category: "Health & Wellness", blurb: "Private healthcare and wellness services.", image: "/images/explore/street.jpg", lat: 51.5222, lng: -0.7203, address: "High St, Maidenhead SL6", hours: "Mon–Fri 8:00–18:00" },
-      { id: "thames-valley-builders", name: "Thames Valley Builders", category: "Trades", blurb: "Local building and renovation specialists.", image: "/images/explore/street.jpg", lat: 51.521, lng: -0.719, address: "Maidenhead SL6", hours: "Mon–Fri 8:00–17:00" },
-      { id: "maidenhead-legal-partners", name: "Maidenhead Legal Partners", category: "Professional", blurb: "Solicitors and legal advice.", image: "/images/explore/market.jpg", lat: 51.5227, lng: -0.7205, address: "High St, Maidenhead SL6", hours: "Mon–Fri 9:00–17:30" },
-      { id: "bridgeview-financial", name: "Bridgeview Financial", category: "Professional", blurb: "Independent financial advice.", image: "/images/explore/market.jpg", lat: 51.5219, lng: -0.7211, address: "Maidenhead SL6", hours: "Mon–Fri 9:00–17:00" },
-    ],
-  },
-};
-
-// Flat lookup for the place-detail screen (across all sections).
-export const placesById = Object.fromEntries(
-  Object.entries(sections).flatMap(([sectionKey, s]) =>
-    s.items.map((it) => [it.id, { ...it, sectionKey, sectionTitle: s.title }])
-  )
-);
 
 // ─── Explore hub ───────────────────────────────────────────────────────────────
 export const exploreSections = [
@@ -161,16 +81,19 @@ export const aboutPage = {
 };
 
 // ─── Map ───────────────────────────────────────────────────────────────────────
+// `to` links into a real business's mobile detail page where one exists
+// (Data/pages.js); landmarks without a standalone business profile just show
+// their name + a "Get Directions" action in the map sheet instead.
 export const mapPins = [
   { id: 1, name: "Coppa Club", category: "Eat & Drink", type: "eat-drink", lat: 51.521889, lng: -0.716051, to: "/mobile/place/coppa-club" },
   { id: 2, name: "Cocoba", category: "Eat & Drink", type: "eat-drink", lat: 51.523201, lng: -0.7176, to: "/mobile/place/cocoba" },
   { id: 3, name: "El Cerdo", category: "Eat & Drink", type: "eat-drink", lat: 51.52348, lng: -0.71762, to: "/mobile/place/el-cerdo" },
   { id: 4, name: "Hall & Woodhouse", category: "Eat & Drink", type: "eat-drink", lat: 51.526859, lng: -0.700343, to: "/mobile/place/hall-woodhouse" },
-  { id: 5, name: "Boulter's Lock", category: "See & Do", type: "see-do", lat: 51.5261, lng: -0.7155, to: "/mobile/place/boulters-lock" },
-  { id: 6, name: "Norden Farm Centre", category: "See & Do", type: "see-do", lat: 51.5189, lng: -0.7242, to: "/mobile/place/norden-farm" },
-  { id: 7, name: "Kidwells Park", category: "See & Do", type: "see-do", lat: 51.5224, lng: -0.7268, to: "/mobile/place/kidwells-park" },
-  { id: 8, name: "Heritage Centre", category: "See & Do", type: "see-do", lat: 51.5212, lng: -0.7198, to: "/mobile/place/heritage-centre" },
-  { id: 9, name: "Nicholsons Centre", category: "Shop", type: "shop", lat: 51.5225, lng: -0.7208, to: "/mobile/place/nicholsons-centre" },
+  { id: 5, name: "Boulter's Lock", category: "See & Do", type: "see-do", lat: 51.5261, lng: -0.7155 },
+  { id: 6, name: "Norden Farm Centre", category: "See & Do", type: "see-do", lat: 51.5189, lng: -0.7242 },
+  { id: 7, name: "Kidwells Park", category: "See & Do", type: "see-do", lat: 51.5224, lng: -0.7268 },
+  { id: 8, name: "Maidenhead Heritage Centre", category: "See & Do", type: "see-do", lat: 51.5212, lng: -0.7198 },
+  { id: 9, name: "Nicholsons Centre", category: "Shop", type: "shop", lat: 51.5225, lng: -0.7208 },
   { id: 10, name: "Zara", category: "Shop", type: "shop", lat: 51.52265, lng: -0.71975, to: "/mobile/place/zara" },
   { id: 11, name: "Waitrose", category: "Shop", type: "shop", lat: 51.52010, lng: -0.72230, to: "/mobile/place/waitrose" },
 ];
