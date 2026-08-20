@@ -17,6 +17,10 @@ export const homeCategories = [
   { id: "see-do", label: "See & Do", icon: "compass", to: "/mobile/see-do" },
   { id: "eat-drink", label: "Eat & Drink", icon: "cup", to: "/mobile/eat-drink" },
   { id: "shop", label: "Shop", icon: "bag", to: "/mobile/shop" },
+  { id: "services", label: "Services", icon: "services", to: "/mobile/services" },
+  { id: "live", label: "Live & Stay", icon: "home", to: "/mobile/live" },
+  { id: "offers", label: "Offers", icon: "tag", to: "/mobile/offers" },
+  { id: "guides", label: "Guides", icon: "book", to: "/mobile/guides" },
   { id: "map", label: "Map", icon: "pin", to: "/mobile/map" },
 ];
 
@@ -75,6 +79,17 @@ export const sections = {
       { id: "bakedd", name: "bakedd", category: "Food & Grocery", blurb: "Independent artisan bakery.", image: "/images/cocoba/storefront.jpg", lat: 51.522851, lng: -0.71774, address: "1a High St, Maidenhead SL6 1JN", hours: "Tue–Sun 8:00–16:00" },
     ],
   },
+  services: {
+    title: "Services",
+    intro: "Trades, professionals and local businesses serving Maidenhead.",
+    filters: ["All", "Health & Wellness", "Trades", "Professional"],
+    items: [
+      { id: "bupa-health-clinic", name: "Bupa Health Clinic", category: "Health & Wellness", blurb: "Private healthcare and wellness services.", image: "/images/explore/street.jpg", lat: 51.5222, lng: -0.7203, address: "High St, Maidenhead SL6", hours: "Mon–Fri 8:00–18:00" },
+      { id: "thames-valley-builders", name: "Thames Valley Builders", category: "Trades", blurb: "Local building and renovation specialists.", image: "/images/explore/street.jpg", lat: 51.521, lng: -0.719, address: "Maidenhead SL6", hours: "Mon–Fri 8:00–17:00" },
+      { id: "maidenhead-legal-partners", name: "Maidenhead Legal Partners", category: "Professional", blurb: "Solicitors and legal advice.", image: "/images/explore/market.jpg", lat: 51.5227, lng: -0.7205, address: "High St, Maidenhead SL6", hours: "Mon–Fri 9:00–17:30" },
+      { id: "bridgeview-financial", name: "Bridgeview Financial", category: "Professional", blurb: "Independent financial advice.", image: "/images/explore/market.jpg", lat: 51.5219, lng: -0.7211, address: "Maidenhead SL6", hours: "Mon–Fri 9:00–17:00" },
+    ],
+  },
 };
 
 // Flat lookup for the place-detail screen (across all sections).
@@ -89,6 +104,11 @@ export const exploreSections = [
   { id: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/coppa/dining.jpg", to: "/mobile/eat-drink" },
   { id: "shop", title: "Shop", blurb: "High street & independents.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
+  { id: "services", title: "Services", blurb: "Trades, health & professionals.", image: "/images/explore/street.jpg", to: "/mobile/services" },
+  { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/ext-hero.jpg", to: "/mobile/live" },
+  { id: "offers", title: "Offers", blurb: "The latest news & offers.", image: "/images/coppa/terrace.jpg", to: "/mobile/offers" },
+  { id: "guides", title: "Neighbourhood Guides", blurb: "Curated guides to the town.", image: "/images/eat-drink-hero-desktop.png", to: "/mobile/guides" },
+  { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
 
 export const exploreInfo = [

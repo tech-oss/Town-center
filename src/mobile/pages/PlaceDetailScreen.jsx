@@ -25,7 +25,7 @@ export default function PlaceDetailScreen() {
   if (!place) {
     return (
       <MobileShell title="Not found" onBack>
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>This place could not be found.</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>This place could not be found.</p>
       </MobileShell>
     );
   }
@@ -38,16 +38,16 @@ export default function PlaceDetailScreen() {
         {/* Hero with floating back */}
         <div className="relative">
           <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.35) 0%, rgba(12,20,24,0) 40%, var(--forest) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.35) 0%, rgba(12,20,24,0) 40%, #ffffff 100%)" }} />
           <Link to={`/mobile/${place.sectionKey}`} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </Link>
         </div>
 
-        <div className="px-5 -mt-6 relative flex flex-col gap-4 pb-6">
+        <div className="px-5 -mt-2 relative flex flex-col gap-4 pb-6">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--sage)" }}>{place.sectionTitle} · {place.category}</span>
-            <h1 className="text-2xl font-bold mt-1" style={{ color: "#fff" }}>{place.name}</h1>
+            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{place.sectionTitle} · {place.category}</span>
+            <h1 className="text-2xl font-bold mt-1" style={{ color: "#000000" }}>{place.name}</h1>
           </div>
 
           <MobileCard className="p-4 flex flex-col gap-3">
@@ -59,10 +59,10 @@ export default function PlaceDetailScreen() {
           </MobileCard>
 
           <div className="grid grid-cols-2 gap-3">
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--sage)", color: "#000000" }}>
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
               Directions
             </a>
-            <Link to="/mobile/map" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#fff" }}>
+            <Link to="/mobile/map" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
               View on Map
             </Link>
           </div>

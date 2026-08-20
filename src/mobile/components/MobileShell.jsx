@@ -12,26 +12,26 @@ export default function MobileShell({ children, noPadding, title, onBack, transp
     <div className="mobile-root">
       <div className="mobile-frame">
         {/* status-bar safe area */}
-        <div style={{ height: "env(safe-area-inset-top, 0px)", flexShrink: 0, backgroundColor: "var(--forest)" }} />
+        <div style={{ height: "env(safe-area-inset-top, 0px)", flexShrink: 0, backgroundColor: "#ffffff" }} />
 
         {showHeader && (
           <header
             className="flex items-center gap-3 px-4 h-12 shrink-0 z-10"
             style={{
-              backgroundColor: transparentHeader ? "transparent" : "var(--forest)",
-              borderBottom: transparentHeader ? "none" : "1px solid rgba(255,255,255,0.06)",
+              backgroundColor: transparentHeader ? "transparent" : "#ffffff",
+              borderBottom: transparentHeader ? "none" : "1px solid rgba(28,46,56,0.08)",
             }}
           >
             <button
               onClick={() => (onBack ? onBack() : navigate(-1))}
-              className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-white/10"
+              className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-black/5"
               aria-label="Back"
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0C1418" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 18l-6-6 6-6" />
               </svg>
             </button>
-            {title && <h1 className="text-base font-bold text-white truncate">{title}</h1>}
+            {title && <h1 className="text-base font-bold truncate" style={{ color: "#000000" }}>{title}</h1>}
           </header>
         )}
 

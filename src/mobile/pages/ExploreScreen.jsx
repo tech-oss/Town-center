@@ -20,16 +20,16 @@ export default function ExploreScreen() {
     <MobileShell>
       <div className="flex flex-col gap-5 mobile-stagger">
         <div>
-          <h1 className="text-2xl font-bold mb-1.5" style={{ color: "#fff" }}>Explore</h1>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Discover more about Maidenhead and plan your visit.</p>
+          <h1 className="section-heading text-2xl font-bold mb-1.5" style={{ color: "#000000" }}>Explore</h1>
+          <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>Discover more about Maidenhead and plan your visit.</p>
         </div>
 
-        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--sage)" }}>Discover</p>
+        <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>Discover</p>
         <div className="flex flex-col gap-4">
           {exploreSections.map((l) => <BigCard key={l.id} link={l} />)}
         </div>
 
-        <p className="text-xs font-bold uppercase tracking-wide mt-1" style={{ color: "var(--sage)" }}>Plan</p>
+        <p className="section-eyebrow mt-1" style={{ color: "var(--leaf)" }}>Plan</p>
         <div className="flex flex-col gap-4">
           {exploreInfo.map((l) => <BigCard key={l.id} link={l} />)}
         </div>

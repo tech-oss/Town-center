@@ -66,8 +66,8 @@ export default function MapScreen() {
     <MobileShell noPadding>
       <div className="flex flex-col h-full">
         <div className="px-5 pt-5 pb-3">
-          <h1 className="text-2xl font-bold mb-1" style={{ color: "#fff" }}>Map</h1>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Find places, attractions and useful information around town.</p>
+          <h1 className="section-heading text-2xl font-bold mb-1" style={{ color: "#000000" }}>Map</h1>
+          <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>Find places, attractions and useful information around town.</p>
         </div>
 
         {/* Category filters */}
@@ -78,8 +78,8 @@ export default function MapScreen() {
               onClick={() => { setFilter(f.key); setActive(null); }}
               className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={filter === f.key
-                ? { backgroundColor: "var(--sage)", color: "#000000" }
-                : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)" }}
+                ? { backgroundColor: "var(--leaf)", color: "#ffffff" }
+                : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.65)" }}
             >
               {f.label}
             </button>

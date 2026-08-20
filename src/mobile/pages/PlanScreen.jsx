@@ -4,9 +4,9 @@ import MobileCard from "../components/MobileCard";
 import { planItems } from "../data/mobileMock";
 
 function PlanIcon({ name }) {
-  const p = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "var(--sage)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+  const p = { width: 20, height: 20, viewBox: "0 0 24 24", fill: "none", stroke: "var(--leaf)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
   switch (name) {
-    case "train": return <svg {...p}><rect x="5" y="3" width="14" height="13" rx="3" /><path d="M5 11h14M9 16l-2 4M15 16l2 4" /><circle cx="9" cy="13.5" r="0.5" fill="var(--sage)" stroke="none" /><circle cx="15" cy="13.5" r="0.5" fill="var(--sage)" stroke="none" /></svg>;
+    case "train": return <svg {...p}><rect x="5" y="3" width="14" height="13" rx="3" /><path d="M5 11h14M9 16l-2 4M15 16l2 4" /><circle cx="9" cy="13.5" r="0.5" fill="var(--leaf)" stroke="none" /><circle cx="15" cy="13.5" r="0.5" fill="var(--leaf)" stroke="none" /></svg>;
     case "bed": return <svg {...p}><path d="M3 18v-6h18v6M3 12V7M21 12v6M3 12h18M7 12V9h6v3" /></svg>;
     case "access": return <svg {...p}><circle cx="12" cy="5" r="1.5" /><path d="M12 7v5m0 0 4 1m-4-1-4 1m4 4 2 4m-2-4-2 4" /></svg>;
     default: return <svg {...p}><circle cx="12" cy="12" r="9" /><path d="M12 16v-5M12 8h.01" /></svg>;
@@ -17,7 +17,7 @@ export default function PlanScreen() {
   return (
     <MobileShell title="Plan Your Visit" onBack>
       <div className="flex flex-col gap-4 mobile-stagger">
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>All the information you need for a great visit to Maidenhead.</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>All the information you need for a great visit to Maidenhead.</p>
 
         {planItems.map((item) => (
           <Link key={item.id} to={item.to}>

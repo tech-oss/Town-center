@@ -16,7 +16,7 @@ export default function SectionScreen({ sectionKey }) {
   return (
     <MobileShell title={section.title} onBack>
       <div className="flex flex-col gap-5 mobile-stagger">
-        <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>{section.intro}</p>
+        <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>{section.intro}</p>
 
         {/* Filter pills */}
         <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-5 px-5">
@@ -26,8 +26,8 @@ export default function SectionScreen({ sectionKey }) {
               onClick={() => setFilter(f)}
               className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={filter === f
-                ? { backgroundColor: "var(--sage)", color: "#000000" }
-                : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)" }}
+                ? { backgroundColor: "var(--leaf)", color: "#ffffff" }
+                : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.65)" }}
             >
               {f}
             </button>

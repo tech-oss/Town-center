@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 
-const ACTIVE = "var(--sage)";
-const IDLE = "rgba(255,255,255,0.55)";
+const ACTIVE = "var(--leaf)";
+const IDLE = "rgba(28,46,56,0.45)";
 
 const TABS = [
   {
@@ -33,7 +33,7 @@ const TABS = [
     to: "/mobile/explore",
     label: "Explore",
     // Explore is the hub for the section + info screens
-    match: ["/mobile/explore", "/mobile/see-do", "/mobile/eat-drink", "/mobile/shop", "/mobile/place", "/mobile/info", "/mobile/plan", "/mobile/about"],
+    match: ["/mobile/explore", "/mobile/see-do", "/mobile/eat-drink", "/mobile/shop", "/mobile/services", "/mobile/place", "/mobile/info", "/mobile/plan", "/mobile/about", "/mobile/guides", "/mobile/offers", "/mobile/live", "/mobile/work"],
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9" />
@@ -76,9 +76,10 @@ export default function MobileTabBar() {
     <nav
       className="flex items-stretch shrink-0 z-20"
       style={{
-        backgroundColor: "rgba(15,26,32,0.98)",
-        borderTop: "1px solid rgba(255,255,255,0.08)",
+        backgroundColor: "rgba(255,255,255,0.98)",
+        borderTop: "1px solid rgba(28,46,56,0.08)",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
+        boxShadow: "0 -4px 16px -8px rgba(28,46,56,0.15)",
       }}
     >
       {TABS.map((tab) => {

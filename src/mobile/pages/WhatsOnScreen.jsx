@@ -86,8 +86,8 @@ export default function WhatsOnScreen() {
     <MobileShell>
       <div className="flex flex-col gap-5 mobile-stagger">
         <div>
-          <h1 className="text-2xl font-bold mb-1.5" style={{ color: "#fff" }}>What's On</h1>
-          <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>Find events and activities happening in Maidenhead.</p>
+          <h1 className="section-heading text-2xl font-bold mb-1.5" style={{ color: "#000000" }}>What's On</h1>
+          <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>Find events and activities happening in Maidenhead.</p>
         </div>
 
         <Calendar
@@ -104,8 +104,8 @@ export default function WhatsOnScreen() {
               onClick={() => setFilter(f)}
               className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
               style={filter === f
-                ? { backgroundColor: "var(--sage)", color: "#000000" }
-                : { backgroundColor: "rgba(255,255,255,0.08)", color: "rgba(255,255,255,0.75)" }}
+                ? { backgroundColor: "var(--leaf)", color: "#ffffff" }
+                : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.65)" }}
             >
               {f}
             </button>
@@ -113,18 +113,18 @@ export default function WhatsOnScreen() {
         </div>
 
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold" style={{ color: "#fff" }}>
+          <p className="text-sm font-bold" style={{ color: "#000000" }}>
             {selectedDate ? "Events on this day" : "Upcoming events"}
           </p>
           {selectedDate && (
-            <button onClick={() => setSelectedDate(null)} className="text-xs font-semibold" style={{ color: "var(--sage)" }}>Clear</button>
+            <button onClick={() => setSelectedDate(null)} className="text-xs font-semibold" style={{ color: "var(--leaf)" }}>Clear</button>
           )}
         </div>
 
         {/* Event listings */}
         <div className="flex flex-col gap-3">
           {listed.length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "rgba(255,255,255,0.5)" }}>No events match — try another day or filter.</p>
+            <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.4)" }}>No events match — try another day or filter.</p>
           ) : (
             listed.map((e) => (
               <MobileCard key={e.id} className="flex items-center gap-3 p-3 active:opacity-90">

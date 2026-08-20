@@ -4,11 +4,15 @@ import MobileShell from "../components/MobileShell";
 
 // `to` → navigates in-app. `soon: true` → demo placeholder (no web redirect).
 const ITEMS = [
-  { label: "Get the App", icon: "download", soon: true },
-  { label: "Newsletter", icon: "mail", soon: true },
-  { label: "Alerts & Updates", icon: "bell", to: "/mobile/whats-on" },
+  { label: "Services", icon: "list", to: "/mobile/services" },
+  { label: "Live & Stay", icon: "list", to: "/mobile/live" },
+  { label: "Offers & News", icon: "bell", to: "/mobile/offers" },
+  { label: "Neighbourhood Guides", icon: "list", to: "/mobile/guides" },
+  { label: "Work", icon: "list", to: "/mobile/work" },
   { label: "Business Directory", icon: "list", to: "/mobile/map" },
   { label: "Plan Your Visit", icon: "map", to: "/mobile/plan" },
+  { label: "Get the App", icon: "download", soon: true },
+  { label: "Newsletter", icon: "mail", soon: true },
   { label: "Settings", icon: "settings", soon: true },
   { label: "Help & Support", icon: "help", to: "/mobile/info/visitor-information" },
   { label: "About", icon: "info", to: "/mobile/about" },
@@ -40,7 +44,7 @@ export default function MoreScreen() {
   return (
     <MobileShell>
       <div className="flex flex-col gap-5 mobile-stagger">
-        <h1 className="text-2xl font-bold" style={{ color: "#fff" }}>More</h1>
+        <h1 className="section-heading text-2xl font-bold" style={{ color: "#000000" }}>More</h1>
 
         <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 24px -8px rgba(0,0,0,0.35)" }}>
           {ITEMS.map((item, i) => (
@@ -59,7 +63,7 @@ export default function MoreScreen() {
           ))}
         </div>
 
-        <p className="text-center text-[11px]" style={{ color: "rgba(255,255,255,0.4)" }}>Maidenhead Town Centre · Demo v1</p>
+        <p className="text-center text-[11px]" style={{ color: "rgba(0,0,0,0.35)" }}>Maidenhead Town Centre · Demo v1</p>
       </div>
 
       {toast && (
