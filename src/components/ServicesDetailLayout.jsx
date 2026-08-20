@@ -101,7 +101,6 @@ export default function ServicesDetailLayout({
   const t = encodeURIComponent(title);
   const waShare = `https://wa.me/?text=${t}%20${u}`;
 
-  const totalReviews = reviewsBreakdown.reduce((s, r) => s + r.count, 0) || reviewCount || 0;
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${title} reviews`)}`;
 
   const Section = ({ heading, children, className = "" }) => (
@@ -141,9 +140,6 @@ export default function ServicesDetailLayout({
                   <h1 className="text-2xl md:text-3xl" style={{ color: "#000000" }}>{title}</h1>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
-                  <StarRow value={rating} />
-                  <span className="font-semibold">{rating?.toFixed(1)}</span>
-                  <span className="opacity-40">·</span>
                   <span>{categoryLabel}</span>
                 </div>
                 {badges.length > 0 && (
@@ -272,7 +268,6 @@ export default function ServicesDetailLayout({
 
                   {/* ── 8. Customer Reviews — full main-column width ── */}
                   <Section heading="Customer Reviews">
-                    <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
                     {reviewsList[0] && <ReviewCard {...reviewsList[0]} sourceUrl={reviewsList[0].sourceUrl || defaultReviewSourceUrl} />}
                     <button type="button" onClick={() => setTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
                   </Section>
@@ -293,8 +288,7 @@ export default function ServicesDetailLayout({
 
               {tab === "Reviews" && (
                 <Section heading="Customer Reviews">
-                  <ReviewsSummary rating={rating} totalReviews={totalReviews} breakdown={reviewsBreakdown} />
-                  <div className="flex flex-col gap-4 mt-2">
+                  <div className="flex flex-col gap-4">
                     {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
                   </div>
                 </Section>
@@ -455,11 +449,6 @@ export default function ServicesDetailLayout({
                     <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   </div>
                   <div className="flex flex-col gap-1 p-3">
-                    {it.rating && (
-                      <div className="flex items-center gap-1 text-xs" style={{ color: "#000000" }}>
-                        <StarRow value={it.rating} size={11} /> <span className="opacity-70">({it.reviewCount})</span>
-                      </div>
-                    )}
                     <h3 className="font-bold text-sm leading-snug line-clamp-1" style={{ color: "#000000" }}>{it.name}</h3>
                     {it.category && <p className="text-xs opacity-70" style={{ color: "#000000" }}>{it.category}</p>}
                     <span className="text-xs font-semibold mt-1" style={{ color: "var(--leaf)" }}>View Profile</span>
@@ -517,29 +506,6 @@ export default function ServicesDetailLayout({
   );
 }
 
-function ReviewsSummary({ rating, totalReviews, breakdown }) {
-  const max = Math.max(...breakdown.map((b) => b.count), 1);
-  return (
-    <div className="flex flex-col sm:flex-row gap-6 mb-5 pb-5 border-b" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
-      <div className="text-center sm:w-28 shrink-0">
-        <div className="text-4xl font-bold" style={{ color: "#000000" }}>{rating?.toFixed(1)}</div>
-        <StarRow value={rating} size={16} />
-        <div className="text-xs opacity-60 mt-1" style={{ color: "#000000" }}>Based on {totalReviews} reviews</div>
-      </div>
-      <div className="flex-1 flex flex-col gap-1.5 justify-center">
-        {breakdown.map((b) => (
-          <div key={b.stars} className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
-            <span className="w-3">{b.stars}</span>
-            <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(28,46,56,0.08)" }}>
-              <div className="h-full rounded-full" style={{ width: `${(b.count / max) * 100}%`, backgroundColor: "#F5A623" }} />
-            </div>
-            <span className="w-6 text-right opacity-60">{b.count}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function ReviewCard({ area, stars, timeAgo, text, sourceUrl }) {
   return (

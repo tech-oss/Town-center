@@ -186,7 +186,7 @@ function item(slug, name, section, category, tag, blurb) {
     category,
     tag,
     image: img(slug),
-    gallery: [1, 2, 3, 4, 5, 6, 7].map((n) => img(n === 1 ? slug : `${slug}-${n}`)),
+    gallery: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => img(n === 1 ? slug : `${slug}-${n}`)),
     description:
       blurb ||
       `${name} is one of the many places that make Maidenhead town centre special. Drop in to discover what's on offer, from everyday essentials to something a little different — all just a short walk from the station and the riverside.`,
@@ -245,6 +245,12 @@ function item(slug, name, section, category, tag, blurb) {
     faq: [
       { q: `Does ${name} offer free quotes?`, a: "Yes — get in touch and the team will be happy to provide a free, no-obligation quote." },
       { q: "What areas do you cover?", a: "Maidenhead and the surrounding towns and villages — see the Areas Covered tab for the full list." },
+      { q: "Are you fully insured?", a: `Yes — ${name} carries full public liability insurance, so you're covered for every job.` },
+      { q: "How quickly can you start?", a: "In most cases within a few days — get in touch for the team's current availability." },
+      { q: "Do you work evenings or weekends?", a: "Where possible, yes — just ask about availability outside normal working hours." },
+      { q: "What payment methods do you accept?", a: "Cash and card, with details agreed upfront before any work begins." },
+      { q: "Do you offer any guarantees on your work?", a: "Yes — all work is carried out to a high standard and backed by a workmanship guarantee." },
+      { q: "How do I get in touch?", a: "Call, email or send a message using the contact details on this page — the team usually responds the same day." },
     ],
   };
 }
@@ -384,6 +390,11 @@ const servicesItems = [
       { q: "Are you Gas Safe registered?", a: "Yes — Elgan Davies is fully Gas Safe registered (No. 201138) and OFTEC certified for oil and solid fuel systems." },
       { q: "Do you offer emergency call-outs?", a: "Yes, the team responds to emergency plumbing and heating issues including burst pipes and boiler breakdowns." },
       { q: "What areas do you cover?", a: "Maidenhead, Fifield, Windsor, Cookham, Bray, Marlow, Slough and London — see the Areas Covered tab for the full list." },
+      { q: "Do you provide free quotes?", a: "Yes — every job starts with a free, no-obligation quote before any work is booked in." },
+      { q: "Are you insured?", a: "Yes — Elgan Davies is fully insured up to £2,000,000, so every job is covered." },
+      { q: "Do you install boilers as well as repair them?", a: "Yes — the team handles full boiler installation and replacement across gas, oil and LPG systems, alongside repairs and servicing." },
+      { q: "Can you fit smart thermostats?", a: "Yes — the team fits and configures smart thermostats including Hive and Nest as part of a heating upgrade or on their own." },
+      { q: "How do I book an appointment?", a: "Call 0800 193 1434 or email info@elgandaviesheating.co.uk and the team will arrange a convenient time." },
     ],
   },
   item("maidenhead-decorators", "Maidenhead Decorators", "services", "decorators-painters", "Decorators & Painters"),

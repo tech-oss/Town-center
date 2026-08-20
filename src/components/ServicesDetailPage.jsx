@@ -62,8 +62,9 @@ export default function ServicesDetailPage() {
   const related = [...sameCat, ...others].slice(0, 4);
 
   const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
-  const heroImage = item.gallery[0];
-  const extraImages = item.gallery.slice(1);
+  const gallery = item.gallery.slice(0, 8); // cap at 8 pictures per business
+  const heroImage = gallery[0];
+  const extraImages = gallery.slice(1);
 
   if (isFreelancer) {
     return (
@@ -87,7 +88,7 @@ export default function ServicesDetailPage() {
         aboutHeading={item.aboutHeading}
         aboutText={item.aboutText}
         skills={item.servicesOffered}
-        portfolio={item.portfolio || item.gallery.map((src) => ({ image: src }))}
+        portfolio={item.portfolio || gallery.map((src) => ({ image: src }))}
         availability={item.availability || "Accepting new projects"}
         workMode={item.workMode || "Remote & on-site"}
         responseTime={item.responseTime || "Usually within 24 hours"}
