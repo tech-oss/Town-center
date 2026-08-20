@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PinIcon,
   PhoneIcon,
@@ -104,6 +104,27 @@ export default function FreelancerDetailLayout({
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const tabsRef = useRef(null);
+  const pendingSkillsScroll = useRef(false);
+
+  // The full skills list only exists in the Overview tab's content, so
+  // clicking "+N more" from the header (visible on every tab) first has to
+  // switch to Overview, then scroll to the Skills section once it's
+  // actually in the DOM.
+  useEffect(() => {
+    if (tab === "Overview" && pendingSkillsScroll.current) {
+      pendingSkillsScroll.current = false;
+      document.getElementById("freelancer-skills")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [tab]);
+
+  const scrollToSkills = () => {
+    if (tab === "Overview") {
+      document.getElementById("freelancer-skills")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      pendingSkillsScroll.current = true;
+      setTab("Overview");
+    }
+  };
 
   // Switching tabs (including the "View all …" shortcuts below) can make the
   // page much shorter than the scroll position the user is currently at —
@@ -163,12 +184,13 @@ export default function FreelancerDetailLayout({
     return null;
   };
 
-  const Section = ({ heading, children, className = "" }) => (
-    <div className={`bg-white p-6 md:p-7 ${className}`} style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+  const Section = ({ heading, children, className = "", id }) => (
+    <div id={id} className={`bg-white p-6 md:p-7 ${className}`} style={id ? { boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)", scrollMarginTop: "96px" } : { boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
       {heading && <h3 className="text-lg font-bold mb-4" style={{ color: "#000000" }}>{heading}</h3>}
       {children}
     </div>
   );
+
 
   const infoRows = [
     availability && { icon: <SparkIcon />, label: "Availability", value: availability },
@@ -211,9 +233,14 @@ export default function FreelancerDetailLayout({
                       </span>
                     ))}
                     {skills.length > 3 && (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ color: "var(--forest)" }}>
+                      <button
+                        type="button"
+                        onClick={scrollToSkills}
+                        className="text-xs font-semibold px-2.5 py-1 rounded-full cursor-pointer hover:underline"
+                        style={{ color: "var(--forest)" }}
+                      >
                         +{skills.length - 3} more
-                      </span>
+                      </button>
                     )}
                   </div>
                 )}
@@ -267,7 +294,7 @@ export default function FreelancerDetailLayout({
                   </Section>
 
                   {skills.length > 0 && (
-                    <Section heading="Skills">
+                    <Section id="freelancer-skills" heading="Skills">
                       <div className="flex flex-wrap gap-2">
                         {skills.map((s) => (
                           <span key={s} className="text-sm font-semibold px-3.5 py-2 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>
