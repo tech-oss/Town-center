@@ -54,7 +54,7 @@ export default function MoreScreen() {
               className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-black/[0.03]"
               style={i < ITEMS.length - 1 ? { borderBottom: "1px solid rgba(0,0,0,0.06)" } : undefined}
             >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(82,199,182,0.12)" }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.045)" }}>
                 <Icon name={item.icon} />
               </div>
               <span className="flex-1 text-left text-sm font-semibold" style={{ color: "#000000" }}>{item.label}</span>

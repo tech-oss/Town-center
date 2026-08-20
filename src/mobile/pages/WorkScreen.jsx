@@ -7,7 +7,7 @@ export default function WorkScreen() {
       <div className="flex flex-col items-center text-center gap-5 pt-6 mobile-stagger">
         <span
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em]"
-          style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "var(--leaf)" }}
+          style={{ backgroundColor: "rgba(28,46,56,0.045)", color: "var(--leaf)" }}
         >
           <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--leaf)" }} />
           Coming Soon

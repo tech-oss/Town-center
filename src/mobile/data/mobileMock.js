@@ -27,7 +27,6 @@ export const exploreSections = [
   { id: "services", title: "Services", blurb: "Trades, health & professionals.", image: "/images/explore/street.jpg", to: "/mobile/services" },
   { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/ext-hero.jpg", to: "/mobile/live" },
   { id: "offers", title: "Offers", blurb: "The latest news & offers.", image: "/images/coppa/terrace.jpg", to: "/mobile/offers" },
-  { id: "guides", title: "Neighbourhood Guides", blurb: "Curated guides to the town.", image: "/images/eat-drink-hero-desktop.png", to: "/mobile/guides" },
   { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
 

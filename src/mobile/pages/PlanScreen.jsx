@@ -22,7 +22,7 @@ export default function PlanScreen() {
         {planItems.map((item) => (
           <Link key={item.id} to={item.to}>
             <MobileCard className="flex items-center gap-3.5 p-4 active:opacity-90">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(82,199,182,0.12)" }}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.045)" }}>
                 <PlanIcon name={item.icon} />
               </div>
               <div className="flex-1 min-w-0">
