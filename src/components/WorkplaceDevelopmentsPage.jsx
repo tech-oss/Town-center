@@ -117,7 +117,7 @@ function DevelopmentCard({ b }) {
               const icon = typeof a === "object" ? a.icon : "✓";
               const text = typeof a === "object" ? a.text : a;
               return (
-                <div key={text} className="flex items-start gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--sand)" }}>
+                <div key={text} className="flex items-start gap-3 p-4 rounded-2xl" style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}>
                   <span className="text-xl shrink-0 mt-0.5">{icon}</span>
                   <span className="text-sm font-medium leading-snug" style={{ color: "#000000" }}>{text}</span>
                 </div>
@@ -135,7 +135,7 @@ function DevelopmentCard({ b }) {
             <h3 className="section-heading text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Getting around</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {b.nearbyPlaces.map((place) => (
-                <div key={place.name} className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: "var(--sand)" }}>
+                <div key={place.name} className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}>
                   <span className="text-2xl shrink-0">{modeIcon(place.mode)}</span>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: "#000000" }}>{place.name}</p>
@@ -160,7 +160,7 @@ function DevelopmentCard({ b }) {
             {b.website && (
               <a href={b.website} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
-                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)", minWidth: "200px" }}>
+                style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)", minWidth: "200px" }}>
                 <span className="text-3xl">🌐</span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>Website</p>
@@ -171,7 +171,7 @@ function DevelopmentCard({ b }) {
             {b.email && (
               <a href={`mailto:${b.email}`}
                 className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
-                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)", minWidth: "200px" }}>
+                style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)", minWidth: "200px" }}>
                 <span className="text-3xl">✉️</span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>Email</p>
@@ -182,7 +182,7 @@ function DevelopmentCard({ b }) {
             {b.phone && (
               <a href={`tel:${b.phone.replace(/\s/g, "")}`}
                 className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
-                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)", minWidth: "200px" }}>
+                style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)", minWidth: "200px" }}>
                 <span className="text-3xl">📞</span>
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--leaf)" }}>Telephone</p>
