@@ -71,10 +71,22 @@ const Header = forwardRef(function Header(_, ref) {
     setOpenDropdown(null);
   };
 
+  // Lock background scroll while the mobile drawer is open — otherwise the
+  // page behind it scrolls too, which (combined with the drawer's own
+  // bounded height) let the site show through beneath the open menu.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
+
   return (
     <header
       ref={ref}
-      className="site-header fixed top-0 inset-x-0 z-[600]"
+      className={`site-header fixed top-0 inset-x-0 z-[600] ${menuOpen ? "h-screen flex flex-col" : ""}`}
       data-solid={forceSolid}
       data-hidden={isHidden}
     >
@@ -249,9 +261,16 @@ const Header = forwardRef(function Header(_, ref) {
         </div>
       )}
 
-      {/* Mobile drawer */}
+      {/* Mobile drawer — flex-1 within the header, which itself stretches to
+          the full viewport height while open (see the header's own
+          className below), so scrolling within it — including overscroll/
+          rubber-banding — never reveals the page behind it. */}
       {menuOpen && (
-        <nav className="lg:hidden px-6 pb-5 flex flex-col gap-1 max-h-[75vh] overflow-y-auto" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }} aria-label="Mobile primary">
+        <nav
+          className="lg:hidden px-6 pb-5 flex flex-col gap-1 flex-1 min-h-0 overflow-y-auto"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
+          aria-label="Mobile primary"
+        >
           {/* Search */}
           <form
             onSubmit={(e) => e.preventDefault()}
