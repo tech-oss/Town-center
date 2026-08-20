@@ -84,7 +84,7 @@ export default function OurStoryPage() {
           >
             <div className="flex-1">
               <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">Want to get involved?</h2>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
+              <p className="text-sm leading-relaxed text-white">
                 If you run a local business, organise events, or want to contribute content, we'd love to hear from you.
               </p>
             </div>

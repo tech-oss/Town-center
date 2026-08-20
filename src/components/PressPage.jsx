@@ -95,7 +95,7 @@ export default function PressPage() {
           >
             <div className="flex-1">
               <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">Get in touch</h2>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
+              <p className="text-sm leading-relaxed text-white">
                 Email us with your enquiry and a few details, and we'll get back to you.
               </p>
             </div>

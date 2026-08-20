@@ -77,7 +77,7 @@ export default function TradersPage() {
           >
             <div className="flex-1">
               <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">List your business or event</h2>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
+              <p className="text-sm leading-relaxed text-white">
                 Run a local business or organise events? Get in touch to feature on the directory.
               </p>
             </div>
