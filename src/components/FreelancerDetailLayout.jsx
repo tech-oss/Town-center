@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   PinIcon,
   PhoneIcon,
@@ -103,6 +103,16 @@ export default function FreelancerDetailLayout({
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const tabsRef = useRef(null);
+
+  // Switching tabs (including the "View all …" shortcuts below) can make the
+  // page much shorter than the scroll position the user is currently at —
+  // without this, the viewport stays at the same pixel offset and appears to
+  // jump down near the footer. Scroll the tab bar back into view instead.
+  const goToTab = (tb) => {
+    setTab(tb);
+    tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
@@ -215,7 +225,7 @@ export default function FreelancerDetailLayout({
                   ))}
                 </div>
                 {portfolio.length > 3 && (
-                  <button type="button" onClick={() => setTab("Portfolio")} className="mt-3 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>
+                  <button type="button" onClick={() => goToTab("Portfolio")} className="mt-3 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>
                     See full portfolio →
                   </button>
                 )}
@@ -223,12 +233,12 @@ export default function FreelancerDetailLayout({
             )}
 
             {/* ── Tabs ── */}
-            <div className="flex items-center gap-5 md:gap-7 mb-6 overflow-x-auto border-b" style={{ borderColor: "rgba(28,46,56,0.12)" }}>
+            <div ref={tabsRef} className="flex items-center gap-5 md:gap-7 mb-6 overflow-x-auto border-b" style={{ borderColor: "rgba(28,46,56,0.12)", scrollMarginTop: "96px" }}>
               {TABS.map((tb) => (
                 <button
                   key={tb}
                   type="button"
-                  onClick={() => setTab(tb)}
+                  onClick={() => goToTab(tb)}
                   className="pb-3 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer"
                   style={{
                     color: tab === tb ? "var(--leaf)" : "rgba(0,0,0,0.55)",
@@ -262,7 +272,7 @@ export default function FreelancerDetailLayout({
                   <Section heading="Client Reviews">
                     {reviewsList[0] && <ReviewCard {...reviewsList[0]} sourceUrl={reviewsList[0].sourceUrl || defaultReviewSourceUrl} />}
                     {reviewsList.length > 0 && (
-                      <button type="button" onClick={() => setTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
+                      <button type="button" onClick={() => goToTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
                     )}
                   </Section>
                 </>

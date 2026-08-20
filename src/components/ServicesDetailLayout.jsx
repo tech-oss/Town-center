@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import LocationMap from "./LocationMap";
 import {
   PinIcon,
@@ -93,6 +93,16 @@ export default function ServicesDetailLayout({
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const tabsRef = useRef(null);
+
+  // Switching tabs (including the "View all …" shortcuts below) can make the
+  // page much shorter than the scroll position the user is currently at —
+  // without this, the viewport stays at the same pixel offset and appears to
+  // jump down near the footer. Scroll the tab bar back into view instead.
+  const goToTab = (tb) => {
+    setTab(tb);
+    tabsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const galleryImages = [heroImage, ...extraImages].filter(Boolean);
   const websiteHref = website ? (website.startsWith("http") ? website : `https://${website}`) : null;
@@ -173,7 +183,7 @@ export default function ServicesDetailLayout({
                   ))}
                 </div>
                 {galleryImages.length > 3 && (
-                  <button type="button" onClick={() => setTab("Photos")} className="mt-3 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>
+                  <button type="button" onClick={() => goToTab("Photos")} className="mt-3 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>
                     See all {galleryImages.length} photos →
                   </button>
                 )}
@@ -181,12 +191,12 @@ export default function ServicesDetailLayout({
             )}
 
             {/* ── 4. Profile tabs — full width of the main column ── */}
-            <div className="flex items-center gap-5 md:gap-7 mb-6 overflow-x-auto border-b" style={{ borderColor: "rgba(28,46,56,0.12)" }}>
+            <div ref={tabsRef} className="flex items-center gap-5 md:gap-7 mb-6 overflow-x-auto border-b" style={{ borderColor: "rgba(28,46,56,0.12)", scrollMarginTop: "96px" }}>
               {TABS.map((tb) => (
                 <button
                   key={tb}
                   type="button"
-                  onClick={() => setTab(tb)}
+                  onClick={() => goToTab(tb)}
                   className="pb-3 text-sm font-semibold whitespace-nowrap transition-colors cursor-pointer"
                   style={{
                     color: tab === tb ? "var(--leaf)" : "rgba(0,0,0,0.55)",
@@ -227,7 +237,7 @@ export default function ServicesDetailLayout({
                         ))}
                       </ul>
                       {servicesOffered.length > 0 && (
-                        <button type="button" onClick={() => setTab("Services")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all services →</button>
+                        <button type="button" onClick={() => goToTab("Services")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all services →</button>
                       )}
                     </Section>
                     <Section heading="Why Choose Us?">
@@ -250,7 +260,7 @@ export default function ServicesDetailLayout({
                           <span key={a} className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "var(--sand)", color: "var(--forest)", boxShadow: "0 0 0 1px rgba(28,46,56,0.1)" }}>{a}</span>
                         ))}
                       </div>
-                      <button type="button" onClick={() => setTab("Areas Covered")} className="text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all areas →</button>
+                      <button type="button" onClick={() => goToTab("Areas Covered")} className="text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all areas →</button>
                     </Section>
                     {hours?.length > 0 && (
                       <Section heading="Opening Hours">
@@ -269,7 +279,7 @@ export default function ServicesDetailLayout({
                   {/* ── 8. Customer Reviews — full main-column width ── */}
                   <Section heading="Customer Reviews">
                     {reviewsList[0] && <ReviewCard {...reviewsList[0]} sourceUrl={reviewsList[0].sourceUrl || defaultReviewSourceUrl} />}
-                    <button type="button" onClick={() => setTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
+                    <button type="button" onClick={() => goToTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
                   </Section>
                 </>
               )}
