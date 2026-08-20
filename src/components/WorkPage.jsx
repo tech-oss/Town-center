@@ -38,11 +38,10 @@ export default function WorkPage() {
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Hero — same size/treatment as every other section landing page
-          (See & Do, Shop, Live & Stay, etc.): full-bleed image, gradient,
-          title only. The header floats transparently over it too. ── */}
+          (See & Do, Shop, Live & Stay, etc.): full-bleed image, title only.
+          The header floats transparently over it too. ── */}
       <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]">
         <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
             Work In Maidenhead
@@ -140,7 +139,7 @@ export default function WorkPage() {
 
       {/* ── Explore elsewhere ── */}
       <section className="pb-16 md:pb-20 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ backgroundColor: "var(--sand)" }}>
+        <div className="max-w-6xl mx-auto rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
           <div>
             <h2 className="section-heading text-xl md:text-2xl font-bold mb-1.5" style={{ color: "#000000" }}>In the meantime, explore Maidenhead</h2>
             <p className="max-w-xl" style={{ color: "#000000" }}>Discover what's already open across the town centre.</p>
@@ -151,7 +150,7 @@ export default function WorkPage() {
                 key={l.to}
                 to={l.to}
                 className="text-center px-6 py-3 rounded-full font-semibold text-sm transition-colors"
-                style={{ backgroundColor: "#ffffff", color: "#000000", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.15)" }}
+                style={{ backgroundColor: "var(--sand)", color: "#000000" }}
               >
                 {l.label}
               </Link>
