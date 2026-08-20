@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { liveStory } from "../Data/live";
+import { guides } from "../Data/guides";
 import { getBuildings } from "../api";
-import { getHotels, getAccommodations } from "../api/stay";
 import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
 import LocationMap from "./LocationMap";
@@ -82,78 +82,97 @@ function StorySection({ section, index }) {
   );
 }
 
-function FeaturedStays() {
-  const { data: hotels } = useFetch(getHotels, []);
-  const { data: accommodations } = useFetch(getAccommodations, []);
+// Three Neighbourhood Guides, shown in the same glassmorphic "News &
+// Offers" card treatment used on Eat & Drink business pages, so this reads
+// as one consistent design language across the site.
+const FEATURED_GUIDE_SLUGS = [
+  "where-to-have-breakfast-in-maidenhead",
+  "hidden-gems-of-maidenhead",
+  "date-night-in-maidenhead",
+];
 
-  const featured = [
-    ...(hotels ?? []).slice(0, 2).map((s) => ({ ...s, kind: "hotels" })),
-    ...(accommodations ?? []).slice(0, 1).map((s) => ({ ...s, kind: "accommodation" })),
-  ];
+function FeaturedArticles() {
+  const featured = FEATURED_GUIDE_SLUGS
+    .map((slug) => guides.find((g) => g.slug === slug))
+    .filter(Boolean);
   if (featured.length === 0) return null;
-  const [hero, ...rest] = featured;
-
-  const kindBadge = (kind) => (
-    <span className="absolute top-4 left-4 z-10 text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full" style={{ backgroundColor: kind === "hotels" ? "var(--forest)" : "var(--teal-deep, #1e5f5f)", color: "#fff" }}>
-      {kind === "hotels" ? "Hotel" : "Accommodation"}
-    </span>
-  );
 
   return (
     <section
-      className="relative py-20 px-6 md:px-12 mt-4 overflow-hidden"
-      style={{ background: "radial-gradient(ellipse 70% 55% at 50% 48%, rgba(150,215,211,0.22) 0%, transparent 70%), linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+      className="relative py-20 md:py-24 px-6 md:px-12 mt-4 overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse 70% 55% at 50% 48%, rgba(150,215,211,0.22) 0%, transparent 70%), linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)",
+      }}
     >
       <div className="relative max-w-6xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-12">
           <div>
-            <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>Where to Stay</p>
-            <h2 className="section-heading text-3xl md:text-5xl font-bold leading-tight text-white">In the Spotlight</h2>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>Neighbourhood Guides</p>
+            <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">Featured Articles</h2>
           </div>
-          <Link to="/live/stay/hotels" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
-            View all places to stay
+          <Link to="/guides" className="group inline-flex items-center gap-1.5 text-sm font-semibold whitespace-nowrap text-white/80 underline decoration-white/40 underline-offset-4">
+            View all guides
             <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1.4fr_1fr] gap-5">
-          <Link
-            to={`/live/stay/${hero.kind}/${hero.slug}`}
-            className="group relative overflow-hidden flex flex-col min-h-[340px] transition-all duration-300 hover:-translate-y-1"
-            style={{ borderRadius: "14px", boxShadow: "0 8px 24px rgba(13,42,51,0.08)" }}
-          >
-            <img src={hero.image} alt={hero.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-            {kindBadge(hero.kind)}
-            <div className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to top, rgba(13,42,51,0.92) 0%, rgba(13,42,51,0.55) 45%, transparent 75%)" }} />
-            <div className="relative z-10 mt-auto p-6 flex flex-col gap-1.5">
-              <p className="text-2xl font-bold text-white" style={{ textShadow: "0 1px 12px rgba(0,0,0,0.4)" }}>{hero.name}</p>
-              {hero.stars && <p className="text-base font-semibold" style={{ color: "var(--sage)" }}>{"★".repeat(hero.stars)}</p>}
-              <p className="text-sm" style={{ color: "rgba(255,255,255,0.78)" }}>{hero.tagline}</p>
-            </div>
-          </Link>
-
-          <div className="flex flex-col gap-5">
-            {rest.map((s) => (
+        {/* Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featured.map((g, i) => {
+            const isFeatured = i === 1; // middle card glows
+            return (
               <Link
-                key={s.slug}
-                to={`/live/stay/${s.kind}/${s.slug}`}
-                className="group flex flex-row overflow-hidden transition-all duration-300 hover:-translate-y-1 bg-white"
-                style={{ borderRadius: "14px", boxShadow: "0 8px 24px rgba(13,42,51,0.08)" }}
+                key={g.slug}
+                to={`/guides/${g.slug}`}
+                className="group relative flex flex-row md:flex-col overflow-hidden p-3 gap-3 md:gap-0
+                           transition-all duration-300 ease-out hover:-translate-y-1"
+                style={{
+                  backgroundColor: "rgba(240,250,250,0.62)",
+                  backdropFilter: "blur(10px)",
+                  WebkitBackdropFilter: "blur(10px)",
+                  border: isFeatured ? "1.5px solid var(--sage)" : "1px solid rgba(255,255,255,0.45)",
+                  boxShadow: isFeatured
+                    ? "0 0 0 1px var(--sage), 0 10px 40px -8px rgba(82,199,182,0.55)"
+                    : "0 8px 28px -12px rgba(22,37,46,0.45)",
+                }}
               >
-                <div className="relative shrink-0 w-32 overflow-hidden" style={{ aspectRatio: "1/1" }}>
-                  <img src={s.image} alt={s.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105" />
-                </div>
-                <div className="flex flex-col flex-1 p-4 gap-1 justify-center">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.02em] w-fit px-2 py-0.5 rounded-full" style={{ backgroundColor: s.kind === "hotels" ? "rgba(47,140,140,0.13)" : "rgba(30,95,95,0.12)", color: "var(--teal-deep, #1e5f5f)" }}>
-                    {s.kind === "hotels" ? "Hotel" : "Accommodation"}
+                {/* Image */}
+                <div className="relative shrink-0 w-28 sm:w-32 md:w-full self-stretch md:self-auto overflow-hidden">
+                  <img
+                    src={g.cardImage}
+                    alt={g.title}
+                    loading="lazy"
+                    className="w-full h-full md:h-44 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
+                  <span
+                    className="absolute top-2 left-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}
+                  >
+                    {g.category}
                   </span>
-                  <p className="text-lg font-bold mt-0.5" style={{ color: "#000000" }}>{s.name}</p>
-                  {s.stars && <p className="text-sm font-semibold leading-snug" style={{ color: "var(--leaf)" }}>{"★".repeat(s.stars)}</p>}
-                  <p className="text-xs line-clamp-2" style={{ color: "#000000" }}>{s.tagline}</p>
+                </div>
+
+                {/* Body */}
+                <div className="flex flex-col flex-1 min-w-0 md:p-3 md:pt-4">
+                  <h3
+                    className="font-bold text-sm md:text-lg leading-snug mb-2"
+                    style={{ color: "#000000", fontFamily: "var(--font-heading)" }}
+                  >
+                    {g.title}
+                  </h3>
+                  <p className="text-xs md:text-sm leading-relaxed mb-3 line-clamp-3" style={{ color: "#000000" }}>
+                    {g.summary}
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 text-xs md:text-sm font-semibold mt-auto" style={{ color: "var(--leaf)" }}>
+                    Read more
+                    <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                  </span>
                 </div>
               </Link>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -370,9 +389,9 @@ export default function LivePage() {
         </div>
       </section>
 
-      {/* ── 11. Featured stays — In the Spotlight (hotels & accommodation, in
-          place of the paused property listings). ── */}
-      <FeaturedStays />
+      {/* ── 11. Featured Articles — three Neighbourhood Guides, in the same
+          card treatment as Eat & Drink's News & Offers section. ── */}
+      <FeaturedArticles />
     </div>
   );
 }
