@@ -64,7 +64,7 @@ function PublicSite() {
   // Drink, Services and See & Do share the same transparent-over-hero header
   // treatment. Every other page keeps the measured header height as top
   // padding so content clears the fixed header.
-  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/guides', '/getting-here', '/live', '/live/stay/hotels', '/live/stay/accommodation'].includes(pathname)
+  const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/guides', '/getting-here', '/live', '/live/stay/hotels', '/live/stay/accommodation', '/work'].includes(pathname)
     || pathname.startsWith('/guides/')
     || pathname.startsWith('/work/developments/')
     || pathname.startsWith('/live/building/')

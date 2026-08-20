@@ -37,67 +37,78 @@ export default function WorkPage() {
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
-      {/* ── Hero — "Coming Soon" ── */}
-      <section
-        className="relative w-full h-[70vh] min-h-[560px] flex flex-col items-center justify-center text-center px-6 overflow-hidden"
-        style={{ backgroundColor: "var(--forest)" }}
-      >
-        <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 50% 45%, rgba(47,164,164,0.28) 0%, transparent 70%)",
-          }}
-        />
-        <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-          <span
-            className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em]"
-            style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--sage)" }} />
-            Coming Soon
-          </span>
-
-          <h1 className="hero-title uppercase text-white text-4xl md:text-6xl leading-tight mb-5" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+      {/* ── Hero — same size/treatment as every other section landing page
+          (See & Do, Shop, Live & Stay, etc.): full-bleed image, gradient,
+          title only. The header floats transparently over it too. ── */}
+      <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]">
+        <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.35) 0%, rgba(28,46,56,0.78) 100%)" }} />
+        <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
+          <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
             Work In Maidenhead
           </h1>
-          <p className="text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-9">
-            We're building a home for local jobs, freelance projects and business
-            opportunities. It isn't quite ready to launch — but it's on its way.
-          </p>
+        </div>
+      </section>
 
-          {/* Notify me */}
-          {submitted ? (
-            <p className="text-sm font-semibold" style={{ color: "var(--sage)" }}>
-              Thanks — we'll let you know the moment it's live.
-            </p>
-          ) : (
-            <form
-              onSubmit={(e) => { e.preventDefault(); if (email.trim()) setSubmitted(true); }}
-              className="w-full max-w-md flex flex-col sm:flex-row gap-3 sm:bg-white sm:rounded-full sm:p-1.5 sm:shadow-2xl"
+      {/* ── Coming Soon ── */}
+      <section className="py-14 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--forest)" }}>
+        <div className="max-w-6xl mx-auto">
+          {/* Breadcrumb */}
+          <nav className="mb-10 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
+            <Link to="/" className="transition-colors hover:text-white">Home</Link>
+            <span className="mx-2 opacity-50">/</span>
+            <span className="text-white">Work</span>
+          </nav>
+
+          <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
+            <span
+              className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em]"
+              style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
             >
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                aria-label="Email address"
-                className="flex-1 min-w-0 px-5 py-3.5 rounded-full sm:rounded-full text-sm outline-none bg-white"
-                style={{ color: "#000000" }}
-              />
-              <button
-                type="submit"
-                className="shrink-0 px-6 py-3.5 rounded-full font-semibold text-sm text-white transition-colors"
-                style={{ backgroundColor: "var(--leaf)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--sage)" }} />
+              Coming Soon
+            </span>
+
+            <h2 className="section-heading text-3xl md:text-5xl font-bold text-white leading-tight mb-5">
+              A New Home For Work In Maidenhead
+            </h2>
+            <p className="text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-9">
+              We're building a home for local jobs, freelance projects and business
+              opportunities. It isn't quite ready to launch — but it's on its way.
+            </p>
+
+            {/* Notify me */}
+            {submitted ? (
+              <p className="text-sm font-semibold" style={{ color: "var(--sage)" }}>
+                Thanks — we'll let you know the moment it's live.
+              </p>
+            ) : (
+              <form
+                onSubmit={(e) => { e.preventDefault(); if (email.trim()) setSubmitted(true); }}
+                className="w-full max-w-md flex flex-col sm:flex-row gap-3 sm:bg-white sm:rounded-full sm:p-1.5 sm:shadow-2xl"
               >
-                Notify Me
-              </button>
-            </form>
-          )}
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  aria-label="Email address"
+                  className="flex-1 min-w-0 px-5 py-3.5 rounded-full sm:rounded-full text-sm outline-none bg-white"
+                  style={{ color: "#000000" }}
+                />
+                <button
+                  type="submit"
+                  className="shrink-0 px-6 py-3.5 rounded-full font-semibold text-sm text-white transition-colors"
+                  style={{ backgroundColor: "var(--leaf)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+                >
+                  Notify Me
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </section>
 
@@ -108,7 +119,7 @@ export default function WorkPage() {
         <div className="max-w-6xl mx-auto">
           <p className="section-eyebrow mb-2 text-center" style={{ color: "var(--leaf)" }}>What's on the way</p>
           <h2 className="section-heading text-2xl md:text-3xl font-bold mb-10 text-center" style={{ color: "#000000" }}>
-            A New Home For Work In Maidenhead
+            Everything You'll Be Able To Do Here
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
             {PREVIEW_CATEGORIES.map((c) => (
