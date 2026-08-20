@@ -156,17 +156,20 @@ export default function ConnectivitySection() {
                     />
                   </div>
 
-                  {/* Minutes */}
+                  {/* Minutes — omitted for Maidenhead itself, since "0 mins"
+                      doesn't mean anything as a travel time. */}
                   <div className="mt-3 flex justify-center">
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        fontWeight: current ? 700 : 600,
-                        color: current ? "var(--forest)" : "var(--leaf)",
-                      }}
-                    >
-                      {mins} mins
-                    </span>
+                    {!current && (
+                      <span
+                        style={{
+                          fontSize: "11px",
+                          fontWeight: 600,
+                          color: "var(--leaf)",
+                        }}
+                      >
+                        {mins} mins
+                      </span>
+                    )}
                   </div>
 
                 </div>
