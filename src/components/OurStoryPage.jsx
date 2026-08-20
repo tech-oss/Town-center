@@ -37,8 +37,7 @@ export default function OurStoryPage() {
           Our Story
         </h1>
         <p
-          className="relative text-base md:text-lg max-w-xl leading-relaxed"
-          style={{ color: "var(--mint)" }}
+          className="relative text-base md:text-lg max-w-xl leading-relaxed text-white"
         >
           An independent platform built to celebrate and connect the best of Maidenhead.
         </p>
@@ -84,7 +83,7 @@ export default function OurStoryPage() {
             style={{ backgroundColor: "var(--forest)", color: "white" }}
           >
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Want to get involved?</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">Want to get involved?</h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
                 If you run a local business, organise events, or want to contribute content, we'd love to hear from you.
               </p>
