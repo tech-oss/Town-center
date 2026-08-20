@@ -136,7 +136,7 @@ export const planVisit = {
 export const blogCards = {
   eyebrow: "From the Journal",
   heading: "IN THE SPOTLIGHT",
-  cta: { label: "See All Stories", href: "/news" },
+  cta: { label: "See All Stories", href: "/offers" },
   posts: [
     {
       id: 1,

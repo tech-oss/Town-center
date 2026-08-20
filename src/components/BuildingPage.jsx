@@ -2,9 +2,26 @@ import { useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { getBuildingBySlug, getBuildings } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 import LocationMap from "./LocationMap";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
+
+// Framed-photo hover — same "In the Spotlight" treatment used on the
+// homepage and the Work Developments pages: a sharp foreground photo that
+// insets on hover/tap to reveal a blurred, dimmed frame around it.
+function SpotlightImage({ src, alt, className = "" }) {
+  const { revealed, onImageClick } = useTapReveal();
+  return (
+    <div
+      onClick={onImageClick}
+      className={`spotlight-card group/img block cursor-pointer ${revealed ? "is-revealed" : ""} ${className}`}
+    >
+      <img src={src} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+      <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+    </div>
+  );
+}
 
 const FIFTEEN_MIN = [
   { label: "Eat & Drink", to: "/eat-drink", icon: "🍽" },
@@ -29,10 +46,10 @@ export default function BuildingPage() {
   const otherBuildings = buildings.filter((x) => x.slug !== b.slug);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
 
       {/* ── 1. HERO ─────────────────────────────────────────────────────────── */}
-      <section className="relative h-[68vh] min-h-[440px] w-full overflow-hidden">
+      <section className="relative h-[70vh] min-h-[520px] w-full overflow-hidden">
         <img
           src={b.hero}
           alt={b.name}
@@ -43,20 +60,13 @@ export default function BuildingPage() {
           style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.15) 0%, rgba(28,46,56,0.88) 100%)" }}
         />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-14">
-          <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--mint)" }}>
-            <Link to="/" className="hover:text-white transition-colors">Home</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <Link to="/live" className="hover:text-white transition-colors">Live & Stay</Link>
-            <span className="mx-2 opacity-50">/</span>
-            <span className="text-white">{b.name}</span>
-          </nav>
           <span
             className="self-start inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.02em]"
             style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
           >
             {b.developer}
           </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{b.name}</h1>
+          <h1 className="section-heading text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{b.name}</h1>
           <p className="text-lg text-white/85 mt-3 max-w-2xl leading-relaxed">{b.tagline}</p>
           {b.website && (
             <div className="mt-6">
@@ -91,6 +101,18 @@ export default function BuildingPage() {
 
       {/* ── 3. ABOUT + PHOTO GALLERY ────────────────────────────────────────── */}
       <section className="py-16 md:py-24 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto">
+          {/* Breadcrumb — below the hero image, matching every other
+              detail/landing page on the site (See & Do, Eat & Drink, Work
+              Developments, etc.), rather than overlaid on the photo. */}
+          <nav className="mb-8 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
+            <Link to="/" className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>Home</Link>
+            <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+            <Link to="/live" className="transition-colors hover:opacity-70" style={{ color: "#000000" }}>Live & Stay</Link>
+            <span className="mx-2 opacity-40" style={{ color: "#000000" }}>/</span>
+            <span style={{ color: "#000000" }}>{b.name}</span>
+          </nav>
+        </div>
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
@@ -118,18 +140,12 @@ export default function BuildingPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {(b.gallery ?? [b.hero, b.hero, b.hero, b.hero]).slice(0, 4).map((src, i) => (
-              <div
+              <SpotlightImage
                 key={i}
-                className={`overflow-hidden rounded-2xl ${i === 0 ? "col-span-2 aspect-[16/9]" : "aspect-square"}`}
-                style={{ boxShadow: "0 6px 24px -10px rgba(28,46,56,0.3)" }}
-              >
-                <img
-                  src={src}
-                  alt={`${b.name} ${i + 1}`}
-                  loading="lazy"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-              </div>
+                src={src}
+                alt={`${b.name} ${i + 1}`}
+                className={`relative overflow-hidden ${i === 0 ? "col-span-2 aspect-[16/9]" : "aspect-square"}`}
+              />
             ))}
           </div>
         </div>
@@ -152,7 +168,7 @@ export default function BuildingPage() {
                 <div
                   key={text}
                   className="flex items-start gap-3 p-4 rounded-2xl transition-all hover:-translate-y-0.5"
-                  style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
+                  style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
                 >
                   <span className="text-xl leading-none shrink-0 mt-0.5">{icon}</span>
                   <span className="text-sm font-medium leading-snug" style={{ color: "#000000" }}>{text}</span>
@@ -165,7 +181,7 @@ export default function BuildingPage() {
 
       {/* ── 5. GETTING AROUND ───────────────────────────────────────────────── */}
       {b.nearbyPlaces && b.nearbyPlaces.length > 0 && (
-        <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+        <section className="py-14 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
           <div className="max-w-6xl mx-auto">
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
               Connectivity
@@ -178,7 +194,7 @@ export default function BuildingPage() {
                 <div
                   key={place.name}
                   className="flex items-center gap-4 p-4 rounded-2xl"
-                  style={{ backgroundColor: "#fff" }}
+                  style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
                 >
                   <span className="text-2xl shrink-0 leading-none">{modeIcon(place.mode)}</span>
                   <div className="min-w-0">
@@ -246,7 +262,7 @@ export default function BuildingPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
-                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
+                style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
               >
                 <span className="text-3xl shrink-0">🌐</span>
                 <div className="min-w-0">
@@ -259,7 +275,7 @@ export default function BuildingPage() {
               <a
                 href={`mailto:${b.email}`}
                 className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
-                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
+                style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
               >
                 <span className="text-3xl shrink-0">✉️</span>
                 <div className="min-w-0">
@@ -272,7 +288,7 @@ export default function BuildingPage() {
               <a
                 href={`tel:${b.phone.replace(/\s/g, "")}`}
                 className="flex items-center gap-4 p-5 rounded-2xl transition-all hover:-translate-y-0.5 group"
-                style={{ backgroundColor: "var(--sand)", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
+                style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.1)" }}
               >
                 <span className="text-3xl shrink-0">📞</span>
                 <div className="min-w-0">
@@ -296,52 +312,34 @@ export default function BuildingPage() {
         </div>
       </section>
 
-      {/* ── 9. OTHER DEVELOPMENTS ───────────────────────────────────────────── */}
-      <section className="pb-20 px-6 md:px-12">
+      {/* ── 9. OTHER DEVELOPMENTS — same squared card grid (size, spacing,
+          typography) as PlaceDetailLayout's "related" section on See & Do
+          and the Work Developments pages' "More Developments" grid. ── */}
+      <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
-          <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>
-            Explore more
-          </p>
-          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>
-            More developments in Maidenhead
-          </h2>
-          <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <h2 className="hero-title uppercase text-2xl md:text-3xl mb-8" style={{ color: "#000000" }}>More Developments In Maidenhead</h2>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:gap-8">
             {otherBuildings.map((x) => (
               <Link
                 key={x.slug}
                 to={`/live/building/${x.slug}`}
-                className="group relative rounded-3xl overflow-hidden block aspect-[4/3]"
-                style={{ boxShadow: "0 10px 40px -18px rgba(28,46,56,0.4)" }}
+                className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
               >
-                <img
-                  src={x.image}
-                  alt={x.name}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{ background: "linear-gradient(180deg, transparent 35%, rgba(28,46,56,0.88) 100%)" }}
-                />
-                {x.status && (
-                  <span
-                    className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.02em]"
-                    style={{
-                      backgroundColor: x.status === "Coming Soon" ? "rgba(245,200,66,0.9)" : "rgba(47,140,140,0.85)",
-                      color: x.status === "Coming Soon" ? "#1a3a42" : "#fff",
-                    }}
-                  >
-                    {x.status}
-                  </span>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--sage)" }}>
-                    {x.developer}
-                  </p>
-                  <h3 className="text-lg font-bold text-white leading-snug">{x.name}</h3>
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/80 mt-2">
-                    Explore <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
-                  </span>
+                <div className="relative aspect-[4/3] overflow-hidden">
+                  <img src={x.image} alt={x.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  {x.status && (
+                    <span
+                      className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
+                      style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
+                    >
+                      {x.status}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-0.5 sm:gap-2 p-2 sm:p-6">
+                  <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{x.developer}</span>
+                  <h3 className="font-bold text-xs sm:text-xl leading-snug line-clamp-2" style={{ color: "#000000" }}>{x.name}</h3>
                 </div>
               </Link>
             ))}

@@ -67,6 +67,7 @@ function PublicSite() {
   const isHome = ['/', '/see-do', '/shop', '/eat-drink', '/services', '/offers', '/explore/the-future', '/guides', '/getting-here', '/live', '/live/stay/hotels', '/live/stay/accommodation'].includes(pathname)
     || pathname.startsWith('/guides/')
     || pathname.startsWith('/work/developments/')
+    || pathname.startsWith('/live/building/')
 
   // useLayoutEffect fires synchronously BEFORE the browser paints,
   // so the correct height is used on the very first frame — no flash/gap.

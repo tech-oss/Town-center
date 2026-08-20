@@ -15,7 +15,7 @@ const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMe
 
 // Routes whose hero banner the header floats transparently over.
 const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/guides", "/getting-here", "/live", "/live/stay/hotels", "/live/stay/accommodation"];
-const TRANSPARENT_HERO_PREFIXES = ["/guides/", "/work/developments/"];
+const TRANSPARENT_HERO_PREFIXES = ["/guides/", "/work/developments/", "/live/building/"];
 
 const Header = forwardRef(function Header(_, ref) {
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
