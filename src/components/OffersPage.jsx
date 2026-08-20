@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getStories, getArticles } from "../api";
 import { blogCards } from "../Data/content";
+import { sections } from "../Data/pages";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
 import { card, pill } from "../utils/design";
+
+// The site's own section list (Shop / Eat & Drink / See & Do / Services),
+// reused here so "business type" means the exact same thing it does
+// everywhere else on the site.
+const BUSINESS_TYPES = Object.values(sections).map((s) => ({ key: s.key, label: s.label }));
 
 // Slugs currently live on the homepage's "In the Spotlight" cards, so the
 // same "On Homepage" badge used for Featured Stories can be applied here too.
@@ -205,11 +211,86 @@ function TypeFilterBar({ types, active, onChange }) {
   );
 }
 
+function ChevronIcon({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+// Business-type filter — a simple dropdown (Eat & Drink / Shop / Services /
+// See & Do) alongside the article-type bar, so results can be narrowed to
+// one part of the site as well as one kind of post. Closes on an outside
+// click/tap, same as the other dropdowns on the site (e.g. What's On).
+function BusinessTypeFilter({ active, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const activeLabel = BUSINESS_TYPES.find((b) => b.key === active)?.label;
+
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-2 pl-5 pr-4 py-3 sm:py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors"
+        style={
+          active
+            ? { backgroundColor: "var(--forest)", color: "#fff" }
+            : { backgroundColor: "#ffffff", color: "#000000", boxShadow: "0 2px 14px -6px rgba(28,46,56,0.22), 0 0 0 1px rgba(28,46,56,0.06)" }
+        }
+      >
+        {activeLabel ?? "Business Type"}
+        <ChevronIcon />
+      </button>
+
+      {open && (
+        <div
+          className="absolute z-30 top-full mt-2 right-0 sm:right-auto sm:left-0 w-56 max-w-[calc(100vw-3rem)] bg-white rounded-2xl p-2 flex flex-col gap-0.5"
+          style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}
+        >
+          <button
+            type="button"
+            onClick={() => { onChange(null); setOpen(false); }}
+            className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg hover:bg-black/5"
+            style={{ color: "#000000" }}
+          >
+            All Business Types
+            <RadioDot active={!active} />
+          </button>
+          {BUSINESS_TYPES.map((b) => (
+            <button
+              key={b.key}
+              type="button"
+              onClick={() => { onChange(b.key); setOpen(false); }}
+              className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg hover:bg-black/5"
+              style={{ color: "#000000" }}
+            >
+              {b.label}
+              <RadioDot active={active === b.key} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OffersPage() {
   const { data: allFeatures } = useFetch(getStories, []);
   const { data: allArticles } = useFetch(getArticles, []);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState(null);
+  const [activeBusinessType, setActiveBusinessType] = useState(null);
 
   // Unlike /news (which only shows the hand-written spotlight stories), this
   // page is the home hub for every business's News & Offers — so it pulls
@@ -236,6 +317,7 @@ export default function OffersPage() {
       date: s.date,
       type: "Featured",
       businessName: null,
+      businessSection: null,
       homepage: !!s.homepage,
     })),
     ...allNewsAndOffers.map((s) => ({
@@ -247,6 +329,7 @@ export default function OffersPage() {
       date: s.date,
       type: s.category,
       businessName: s.business?.name ?? null,
+      businessSection: s.business?.section ?? null,
       homepage: homepageSpotlightSlugs.has(s.slug),
     })),
   ], [featuredStories, allNewsAndOffers]);
@@ -259,6 +342,7 @@ export default function OffersPage() {
   const trimmedSearch = search.trim().toLowerCase();
   const filtered = items.filter((it) => {
     if (activeType && it.type !== activeType) return false;
+    if (activeBusinessType && it.businessSection !== activeBusinessType) return false;
     if (!trimmedSearch) return true;
     return (
       it.title?.toLowerCase().includes(trimmedSearch) ||
@@ -313,10 +397,12 @@ export default function OffersPage() {
             <span>Offers</span>
           </nav>
 
-          {/* ── Search + filter ── */}
-          <div className="mb-10 flex items-center gap-3">
+          {/* ── Search + filter — wraps onto its own rows on mobile rather
+              than squeezing three controls into one cramped line. ── */}
+          <div className="mb-10 flex flex-wrap items-center gap-3">
             <TypeFilterBar types={types} active={activeType} onChange={setActiveType} />
-            <SearchInput value={search} onChange={setSearch} className="sm:ml-auto flex-1 min-w-0 sm:flex-none sm:w-72" />
+            <BusinessTypeFilter active={activeBusinessType} onChange={setActiveBusinessType} />
+            <SearchInput value={search} onChange={setSearch} className="w-full sm:ml-auto sm:w-72" />
           </div>
 
           {/* ── Card grid — same layout/typography as the See & Do / Eat &
