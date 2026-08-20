@@ -37,7 +37,7 @@ export default function TradersPage() {
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
           Our Trades & Business Directory
         </h1>
-        <p className="relative text-base md:text-lg max-w-2xl leading-relaxed" style={{ color: "var(--mint)" }}>
+        <p className="relative text-base md:text-lg max-w-2xl leading-relaxed text-white">
           {intro}
         </p>
       </section>
@@ -76,7 +76,7 @@ export default function TradersPage() {
             style={{ backgroundColor: "var(--forest)", color: "white" }}
           >
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">List your business or event</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">List your business or event</h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
                 Run a local business or organise events? Get in touch to feature on the directory.
               </p>
