@@ -241,6 +241,17 @@ export default function PlaceDetailLayout({
       {/* ── 2. Single main hero image — full width on mobile, 60% on
           desktop, square corners ── */}
       <section className="pt-8 md:pt-10">
+        {backLink && (
+          <div className="w-[80%] sm:w-[60%] mx-auto mb-3 text-right">
+            <Link
+              to={backLink.to}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold hover:opacity-70 transition-opacity"
+              style={{ color: "#000000" }}
+            >
+              {backLink.label} <span>→</span>
+            </Link>
+          </div>
+        )}
         <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[4/3] sm:aspect-[16/10] bg-black">
           <img src={heroImage} alt={title} className="w-full h-full object-cover" />
         </div>
@@ -262,16 +273,6 @@ export default function PlaceDetailLayout({
               </span>
             ))}
           </nav>
-
-          {backLink && (
-            <Link
-              to={backLink.to}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold mb-5 hover:opacity-70 transition-opacity"
-              style={{ color: "#000000" }}
-            >
-              <span>←</span> {backLink.label}
-            </Link>
-          )}
 
           {(categoryLabel || extraBadges) && (
             <div className="flex flex-wrap items-center gap-3 mb-5">
