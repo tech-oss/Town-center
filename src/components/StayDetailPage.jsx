@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
+import NewsOffers from "./NewsOffers";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
 // category pill, same pill styling as the rest of the layout.
@@ -197,6 +198,7 @@ export default function StayDetailPage({ kind }) {
           heading={isHotels ? "Amenities" : "What This Place Offers"}
         />
       }
+      afterMap={<NewsOffers item={item} />}
     />
   );
 }

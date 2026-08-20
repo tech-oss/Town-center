@@ -10,7 +10,10 @@ import { card, pill } from "../utils/design";
 // The site's own section list (Shop / Eat & Drink / See & Do / Services),
 // reused here so "business type" means the exact same thing it does
 // everywhere else on the site.
-const BUSINESS_TYPES = Object.values(sections).map((s) => ({ key: s.key, label: s.label }));
+const BUSINESS_TYPES = [
+  ...Object.values(sections).map((s) => ({ key: s.key, label: s.label })),
+  { key: "stay", label: "Hotels & Stay" },
+];
 
 // Slugs currently live on the homepage's "In the Spotlight" cards, so the
 // same "On Homepage" badge used for Featured Stories can be applied here too.

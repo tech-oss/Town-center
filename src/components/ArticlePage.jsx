@@ -19,8 +19,13 @@ export default function ArticlePage() {
   if (!article) return <Navigate to="/" replace />;
 
   const biz = article.business;
+  // Stay (hotels/accommodation) businesses live outside the shop/eat-drink/
+  // see-do/services `sections` routing scheme, so they carry their own
+  // path/label instead of looking one up in `sections`.
   const sec = sections[biz.section];
-  const bizPath = `/${biz.section}/place/${biz.slug}`;
+  const bizPath = sec ? `/${biz.section}/place/${biz.slug}` : biz.detailPath;
+  const sectionPath = sec ? sec.path : biz.sectionPath;
+  const sectionLabel = sec ? sec.label : biz.sectionLabel;
 
   // Other articles from the same business
   const more = (biz.news ?? []).filter((a) => a.slug !== article.slug).slice(0, 3);
@@ -53,7 +58,7 @@ export default function ArticlePage() {
           <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             <Link to="/" className="hover:opacity-70 transition-opacity">Home</Link>
             <span className="mx-2 opacity-40">/</span>
-            <Link to={sec.path} className="hover:opacity-70 transition-opacity">{sec.label}</Link>
+            <Link to={sectionPath} className="hover:opacity-70 transition-opacity">{sectionLabel}</Link>
             <span className="mx-2 opacity-40">/</span>
             <Link to={bizPath} className="hover:opacity-70 transition-opacity">{biz.name}</Link>
           </nav>

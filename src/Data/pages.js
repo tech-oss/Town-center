@@ -39,7 +39,7 @@ const HOURS = [
 
 // Per-business News & Offers (unique to each item, styled like "In the Spotlight").
 // Every article has its own sub-page at /news/:slug.
-function newsFor(slug, name) {
+export function newsFor(slug, name) {
   return [
     {
       id: `${slug}-offer`,
