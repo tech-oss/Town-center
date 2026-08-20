@@ -48,7 +48,7 @@ export default function PressPage() {
           Get Involved
         </span>
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">Work With Us &amp; Enquiries</h1>
-        <p className="relative text-base md:text-lg max-w-xl leading-relaxed" style={{ color: "var(--mint)" }}>
+        <p className="relative text-base md:text-lg max-w-xl leading-relaxed text-white">
           Working on a story about Maidenhead? We're here to help.
         </p>
       </section>
@@ -94,7 +94,7 @@ export default function PressPage() {
             style={{ backgroundColor: "var(--forest)", color: "white" }}
           >
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold mb-2">Get in touch</h2>
+              <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">Get in touch</h2>
               <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>
                 Email us with your enquiry and a few details, and we'll get back to you.
               </p>
