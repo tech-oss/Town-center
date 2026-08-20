@@ -5,13 +5,11 @@ import { useEffect, useRef } from "react";
 // overlay/focus-trap/escape pattern.
 export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
   const dialogRef = useRef(null);
-  const confirmRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
 
     const previouslyFocused = document.activeElement;
-    const t = setTimeout(() => confirmRef.current?.focus(), 50);
 
     const onKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -39,7 +37,6 @@ export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
     document.body.style.overflow = "hidden";
 
     return () => {
-      clearTimeout(t);
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
       if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
@@ -78,7 +75,6 @@ export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
 
         <div className="flex items-center gap-3">
           <button
-            ref={confirmRef}
             type="button"
             onClick={onConfirm}
             className="flex-1 py-3 rounded-full text-sm font-semibold text-white transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-offset-2"

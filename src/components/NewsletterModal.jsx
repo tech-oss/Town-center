@@ -4,15 +4,12 @@ import { newsletterModal as m } from "../Data/content";
 export default function NewsletterModal({ open, onClose }) {
   const [submitted, setSubmitted] = useState(false);
   const dialogRef = useRef(null);
-  const firstFieldRef = useRef(null);
 
-  // Focus first field on open + Escape to close
+  // Escape to close + a Tab focus trap (no auto-focus on open)
   useEffect(() => {
     if (!open) return;
 
     const previouslyFocused = document.activeElement;
-    // Focus the first field once the open animation has begun
-    const t = setTimeout(() => firstFieldRef.current?.focus(), 50);
 
     const onKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -41,7 +38,6 @@ export default function NewsletterModal({ open, onClose }) {
     document.body.style.overflow = "hidden"; // lock background scroll
 
     return () => {
-      clearTimeout(t);
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
       if (previouslyFocused instanceof HTMLElement) previouslyFocused.focus();
@@ -138,7 +134,6 @@ export default function NewsletterModal({ open, onClose }) {
                     {m.fields.firstName}
                   </label>
                   <input
-                    ref={firstFieldRef}
                     type="text"
                     className={inputClasses}
                     style={inputStyle}
