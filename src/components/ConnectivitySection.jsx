@@ -72,7 +72,7 @@ function TravelCard({ icon, title, rows }) {
 
 export default function ConnectivitySection() {
   return (
-    <section className="py-16 md:py-24 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
+    <section className="py-16 md:py-24 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">
 
         {/* Heading */}

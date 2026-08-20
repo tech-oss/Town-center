@@ -202,7 +202,7 @@ export default function LivePage() {
 
       {/* ── 4. Story sections — alternating copy and photography, set on a
           soft tinted band so the run reads as one continuous chapter. ── */}
-      <section className="px-6 md:px-12 py-16 md:py-24" style={{ backgroundColor: "var(--sand)" }}>
+      <section className="px-6 md:px-12 py-16 md:py-24" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto flex flex-col gap-20 md:gap-28">
           {sections.map((s, i) => (
             <StorySection key={s.id} section={s} index={i} />
