@@ -177,12 +177,23 @@ export default function LivePage() {
         <span>Live in Maidenhead</span>
       </nav>
 
-      {/* ── 3. Lede — the opening statement, centred and set larger than body
-          copy so it reads as an introduction rather than a first section. ── */}
-      <section className="pt-10 md:pt-14 pb-16 md:pb-24 px-6 md:px-12">
-        <div className="max-w-3xl mx-auto text-center flex flex-col gap-5">
+      {/* ── 3. Lede — the opening statement, set in the same editorial serif
+          treatment as the homepage intro beneath the hero video: large,
+          right-aligned Playfair Display. ── */}
+      <section className="pt-10 md:pt-14 pb-14 md:pb-16 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto flex flex-col gap-6 md:gap-8">
           {lede.map((p, i) => (
-            <p key={i} className="text-base md:text-xl leading-relaxed" style={{ color: "#000000" }}>
+            <p
+              key={i}
+              className="text-right text-2xl md:text-[2.5rem]"
+              style={{
+                color: "#000000",
+                fontFamily: '"Playfair Display", Georgia, serif',
+                fontWeight: 400,
+                lineHeight: 1.3,
+                letterSpacing: "-0.01em",
+              }}
+            >
               {p}
             </p>
           ))}
