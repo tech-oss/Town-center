@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useParams, Navigate } from "react-router-dom";
 import { getWorkplaceDevelopments, getWorkplaceDevelopmentBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 import LocationMap from "./LocationMap";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
@@ -9,12 +10,28 @@ import ErrorState from "./ui/ErrorState";
 const modeIcon = (mode) =>
   ({ walk: "🚶", train: "🚂", car: "🚗" }[mode] ?? "📍");
 
+// Framed-photo hover — same "In the Spotlight" treatment used on the
+// homepage: a sharp foreground photo that insets on hover/tap to reveal a
+// blurred, dimmed frame around it.
+function SpotlightImage({ src, alt, className = "" }) {
+  const { revealed, onImageClick } = useTapReveal();
+  return (
+    <div
+      onClick={onImageClick}
+      className={`spotlight-card group/img block cursor-pointer ${revealed ? "is-revealed" : ""} ${className}`}
+    >
+      <img src={src} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+      <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+    </div>
+  );
+}
+
 function DevelopmentCard({ b }) {
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
 
       {/* Hero */}
-      <section className="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
+      <section className="relative h-[70vh] min-h-[520px] w-full overflow-hidden">
         <img src={b.hero} alt={b.name} className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(28,46,56,0.12) 0%, rgba(28,46,56,0.88) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
@@ -31,7 +48,7 @@ function DevelopmentCard({ b }) {
           >
             {b.developer}
           </span>
-          <h2 className="section-heading text-3xl md:text-5xl font-bold text-white leading-tight max-w-3xl">{b.name}</h2>
+          <h1 className="section-heading text-4xl md:text-6xl font-bold text-white leading-tight max-w-3xl">{b.name}</h1>
           <p className="text-lg text-white/80 mt-3 max-w-2xl leading-relaxed">{b.tagline}</p>
           {b.website && (
             <div className="mt-5">
@@ -65,7 +82,7 @@ function DevelopmentCard({ b }) {
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
           <div>
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>About the development</p>
-            <h3 className="text-2xl md:text-3xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>About {b.name}</h3>
+            <h3 className="section-heading text-2xl md:text-3xl font-bold mb-5 leading-tight" style={{ color: "#000000" }}>About {b.name}</h3>
             {(b.longDescription || [b.description]).map((para, i) => (
               <p key={i} className="text-base leading-relaxed mb-4" style={{ color: "#000000" }}>{para}</p>
             ))}
@@ -79,11 +96,12 @@ function DevelopmentCard({ b }) {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {(b.gallery ?? [b.hero, b.hero, b.hero, b.hero]).slice(0, 4).map((src, i) => (
-              <div key={i} className={`overflow-hidden rounded-2xl ${i === 0 ? "col-span-2 aspect-[16/9]" : "aspect-square"}`}
-                style={{ boxShadow: "0 6px 24px -10px rgba(28,46,56,0.3)" }}>
-                <img src={src} alt={`${b.name} ${i + 1}`} loading="lazy"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
-              </div>
+              <SpotlightImage
+                key={i}
+                src={src}
+                alt={`${b.name} ${i + 1}`}
+                className={`relative overflow-hidden ${i === 0 ? "col-span-2 aspect-[16/9]" : "aspect-square"}`}
+              />
             ))}
           </div>
         </div>
@@ -93,7 +111,7 @@ function DevelopmentCard({ b }) {
       <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
           <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Specification</p>
-          <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Features</h3>
+          <h3 className="section-heading text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Features</h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
             {b.amenities.map((a) => {
               const icon = typeof a === "object" ? a.icon : "✓";
@@ -111,10 +129,10 @@ function DevelopmentCard({ b }) {
 
       {/* Getting around */}
       {b.nearbyPlaces?.length > 0 && (
-        <section className="py-12 px-6 md:px-12">
+        <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
             <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Connectivity</p>
-            <h3 className="text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Getting around</h3>
+            <h3 className="section-heading text-2xl md:text-3xl font-bold mb-7" style={{ color: "#000000" }}>Getting around</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {b.nearbyPlaces.map((place) => (
                 <div key={place.name} className="flex items-center gap-4 p-4 rounded-2xl" style={{ backgroundColor: "#fff" }}>
@@ -134,7 +152,7 @@ function DevelopmentCard({ b }) {
       <section className="py-12 px-6 md:px-12" style={{ backgroundColor: "#fff" }}>
         <div className="max-w-6xl mx-auto">
           <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Contact</p>
-          <h3 className="text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Get in touch</h3>
+          <h3 className="section-heading text-2xl md:text-3xl font-bold mb-3" style={{ color: "#000000" }}>Get in touch</h3>
           <p className="text-base mb-7 max-w-xl" style={{ color: "#000000" }}>
             For availability, pricing and viewings contact the {b.developer} team directly.
           </p>
@@ -199,30 +217,39 @@ export default function WorkplaceDevelopmentsPage() {
   const others = developments.filter((x) => x.slug !== b.slug);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
+    <div style={{ backgroundColor: "#ffffff" }}>
       {/* The development */}
       <DevelopmentCard b={b} />
 
-      {/* Other workplace developments */}
+      {/* Other workplace developments — same squared card grid (size,
+          spacing, typography) as PlaceDetailLayout's "related" section on
+          See & Do, for mobile and desktop alike. */}
       {others.length > 0 && (
-        <section className="pb-20 px-6 md:px-12">
+        <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "var(--sand)" }}>
           <div className="max-w-6xl mx-auto">
-            <p className="section-eyebrow mb-2" style={{ color: "var(--leaf)" }}>Explore more</p>
-            <h3 className="text-2xl md:text-3xl font-bold mb-8" style={{ color: "#000000" }}>Other workplace developments</h3>
-            <div className="grid sm:grid-cols-2 gap-5">
+            <h2 className="hero-title uppercase text-2xl md:text-3xl mb-8" style={{ color: "#000000" }}>More Developments In Maidenhead</h2>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 md:gap-8">
               {others.map((x) => (
-                <Link key={x.slug} to={`/work/developments/${x.slug}`}
-                  className="group relative rounded-3xl overflow-hidden block aspect-[16/9]"
-                  style={{ boxShadow: "0 10px 40px -18px rgba(28,46,56,0.4)" }}>
-                  <img src={x.image} alt={x.name} loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, transparent 35%, rgba(28,46,56,0.88) 100%)" }} />
-                  <div className="absolute bottom-0 left-0 right-0 p-5">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.02em] mb-0.5" style={{ color: "var(--sage)" }}>{x.developer}</p>
-                    <h4 className="text-lg font-bold text-white leading-snug">{x.name}</h4>
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-white/80 mt-2">
-                      Explore <span className="transition-transform duration-200 group-hover:translate-x-1" style={{ color: "var(--sage)" }}>→</span>
-                    </span>
+                <Link
+                  key={x.slug}
+                  to={`/work/developments/${x.slug}`}
+                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
+                  style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img src={x.image} alt={x.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    {x.status && (
+                      <span
+                        className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
+                        style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
+                      >
+                        {x.status}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-0.5 sm:gap-2 p-2 sm:p-6">
+                    <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{x.developer}</span>
+                    <h3 className="font-bold text-xs sm:text-xl leading-snug line-clamp-2" style={{ color: "#000000" }}>{x.name}</h3>
                   </div>
                 </Link>
               ))}
