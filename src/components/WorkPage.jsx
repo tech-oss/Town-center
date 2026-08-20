@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { work, tagColors } from "../Data/work";
+import { work } from "../Data/work";
 
 /* ── Icons (Lucide-style line icons) ── */
 const ic = { width: 28, height: 28, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -17,124 +17,134 @@ const CategoryIcon = ({ name }) => {
   }
 };
 
-const mic = { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
-const MetaIcon = ({ name }) => {
-  switch (name) {
-    case "badge": return (<svg {...mic}><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>);
-    case "pin": return (<svg {...mic}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>);
-    case "pound": return (<svg {...mic}><path d="M18 7c0-2.2-1.8-4-4-4s-4 1.8-4 4v3" /><path d="M7 13h7" /><path d="M7 21h11a4 4 0 0 0-4-4H9a4 4 0 0 0 0-8" /></svg>);
-    case "tag": return (<svg {...mic}><path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" /><circle cx="7.5" cy="7.5" r="1" /></svg>);
-    case "clock": return (<svg {...mic}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>);
-    case "award": return (<svg {...mic}><circle cx="12" cy="8" r="6" /><path d="m9 13.5-1 8 4-2 4 2-1-8" /></svg>);
-    case "calendar": return (<svg {...mic}><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M3 10h18M8 2v4M16 2v4" /></svg>);
-    default: return null;
-  }
-};
+// What's coming when the jobs/freelance marketplace launches — reuses the
+// same category set already authored in Data/work.js so this list stays in
+// sync with the real thing once it ships.
+const PREVIEW_CATEGORIES = work.categories.slice(0, 5);
+
+// Other live parts of the site, so a visitor landing here isn't stranded.
+const EXPLORE_ELSEWHERE = [
+  { label: "See & Do", to: "/see-do" },
+  { label: "Eat & Drink", to: "/eat-drink" },
+  { label: "Shop", to: "/shop" },
+  { label: "Live & Stay", to: "/live" },
+];
 
 export default function WorkPage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
-  const [query, setQuery] = useState("");
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   return (
-    <div style={{ backgroundColor: "var(--sand)" }}>
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-        <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(20,33,42,0.95) 0%, rgba(20,33,42,0.78) 45%, rgba(20,33,42,0.55) 100%)" }} />
-        <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-10 md:pb-14">
-          <p className="section-eyebrow mb-4" style={{ color: "var(--sage)" }}>{work.hero.eyebrow}</p>
-          <h1 className="text-4xl md:text-6xl font-bold text-white leading-[1.05] max-w-3xl">{work.hero.title}</h1>
-          <p className="text-base md:text-lg text-white/80 mt-5 max-w-xl leading-relaxed">{work.hero.intro}</p>
+    <div style={{ backgroundColor: "#ffffff" }}>
+      {/* ── Hero — "Coming Soon" ── */}
+      <section
+        className="relative w-full h-[70vh] min-h-[560px] flex flex-col items-center justify-center text-center px-6 overflow-hidden"
+        style={{ backgroundColor: "var(--forest)" }}
+      >
+        <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 50% 45%, rgba(47,164,164,0.28) 0%, transparent 70%)",
+          }}
+        />
+        <div className="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+          <span
+            className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em]"
+            style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "var(--sage)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.2)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--sage)" }} />
+            Coming Soon
+          </span>
 
-          {/* Search bar */}
-          <form onSubmit={(e) => e.preventDefault()} className="mt-8 flex flex-col md:flex-row gap-3 md:gap-2 md:bg-white md:rounded-2xl md:p-2 md:shadow-2xl max-w-4xl">
-            <div className="flex items-center gap-2 flex-1 bg-white rounded-xl md:rounded-lg px-4 py-3">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7a8a90" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search jobs, projects, services..."
-                className="flex-1 outline-none text-sm bg-transparent" style={{ color: "#000000" }} />
-            </div>
-            <select className="bg-white rounded-xl md:rounded-lg px-4 py-3 text-sm outline-none md:w-44" style={{ color: "#000000" }} defaultValue="">
-              <option value="">All Categories</option>
-              {work.categories.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-            </select>
-            <select className="bg-white rounded-xl md:rounded-lg px-4 py-3 text-sm outline-none md:w-44" style={{ color: "#000000" }} defaultValue="Maidenhead">
-              {work.locations.map((l) => <option key={l} value={l}>{l}</option>)}
-            </select>
-            <button type="submit" className="rounded-xl md:rounded-lg px-7 py-3 font-semibold text-white transition-colors" style={{ backgroundColor: "var(--leaf)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}>
-              Search
-            </button>
-          </form>
+          <h1 className="hero-title uppercase text-white text-4xl md:text-6xl leading-tight mb-5" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
+            Work In Maidenhead
+          </h1>
+          <p className="text-base md:text-lg text-white/80 max-w-xl leading-relaxed mb-9">
+            We're building a home for local jobs, freelance projects and business
+            opportunities. It isn't quite ready to launch — but it's on its way.
+          </p>
+
+          {/* Notify me */}
+          {submitted ? (
+            <p className="text-sm font-semibold" style={{ color: "var(--sage)" }}>
+              Thanks — we'll let you know the moment it's live.
+            </p>
+          ) : (
+            <form
+              onSubmit={(e) => { e.preventDefault(); if (email.trim()) setSubmitted(true); }}
+              className="w-full max-w-md flex flex-col sm:flex-row gap-3 sm:bg-white sm:rounded-full sm:p-1.5 sm:shadow-2xl"
+            >
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                aria-label="Email address"
+                className="flex-1 min-w-0 px-5 py-3.5 rounded-full sm:rounded-full text-sm outline-none bg-white"
+                style={{ color: "#000000" }}
+              />
+              <button
+                type="submit"
+                className="shrink-0 px-6 py-3.5 rounded-full font-semibold text-sm text-white transition-colors"
+                style={{ backgroundColor: "var(--leaf)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}
+              >
+                Notify Me
+              </button>
+            </form>
+          )}
         </div>
       </section>
 
-      {/* ── Category tiles ── */}
-      <section className="py-12 md:py-16 px-6 md:px-12">
+      {/* ── What's coming — a teaser of the categories, greyed out (not
+          clickable) so visitors know what to expect without landing on
+          broken/empty listing pages. ── */}
+      <section className="py-16 md:py-20 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-4 md:gap-5">
-            {work.categories.map((c) => (
-              <Link key={c.id} to={`/work/${c.id}`}
-                className="group bg-white rounded-2xl p-5 md:p-6 flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1.5"
-                style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)", border: "1px solid rgba(28,46,56,0.06)" }}>
-                <span className="mb-3 transition-transform duration-300 group-hover:scale-110" style={{ color: "var(--leaf)" }}>
+          <p className="section-eyebrow mb-2 text-center" style={{ color: "var(--leaf)" }}>What's on the way</p>
+          <h2 className="section-heading text-2xl md:text-3xl font-bold mb-10 text-center" style={{ color: "#000000" }}>
+            A New Home For Work In Maidenhead
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-5">
+            {PREVIEW_CATEGORIES.map((c) => (
+              <div
+                key={c.id}
+                className="relative bg-white rounded-2xl p-5 md:p-6 flex flex-col items-center text-center overflow-hidden"
+                style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.18)", border: "1px solid rgba(28,46,56,0.06)" }}
+              >
+                <span className="mb-3" style={{ color: "rgba(28,46,56,0.35)" }}>
                   <CategoryIcon name={c.icon} />
                 </span>
-                <span className="font-bold text-sm md:text-base leading-tight" style={{ color: "#000000" }}>{c.title}</span>
-                <span className="hidden md:block text-xs mt-1.5 leading-snug" style={{ color: "#000000" }}>{c.desc}</span>
-              </Link>
+                <span className="font-bold text-sm md:text-base leading-tight" style={{ color: "rgba(28,46,56,0.55)" }}>{c.title}</span>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Featured Opportunities ── */}
-      <section className="pb-14 px-6 md:px-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="section-heading text-2xl md:text-3xl font-bold" style={{ color: "#000000" }}>Featured Opportunities</h2>
-            <Link to="/work/jobs" className="group inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
-              View All <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-            </Link>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {work.featured.map((f, i) => {
-              const c = tagColors[f.type] ?? { bg: "#E5E7EB", text: "#374151" };
-              return (
-                <Link key={i} to={f.to} className="group bg-white rounded-2xl p-5 flex flex-col transition-all duration-300 hover:-translate-y-1.5"
-                  style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)", border: "1px solid rgba(28,46,56,0.06)" }}>
-                  <span className="self-start text-[10px] font-bold uppercase tracking-[0.02em] px-2.5 py-1 rounded-full mb-3" style={{ backgroundColor: c.bg, color: c.text }}>
-                    {f.tag}
-                  </span>
-                  <h3 className="font-bold text-lg leading-snug mb-3" style={{ color: "#000000" }}>{f.title}</h3>
-                  <ul className="flex flex-col gap-2 mt-auto">
-                    {f.meta.map((m, mi) => (
-                      <li key={mi} className="flex items-center gap-2 text-xs" style={{ color: "#000000" }}>
-                        <span style={{ color: "var(--leaf)" }}><MetaIcon name={m.icon} /></span> {m.label}
-                      </li>
-                    ))}
-                  </ul>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA band ── */}
-      <section className="px-6 md:px-12 pb-16 md:pb-20">
-        <div className="max-w-6xl mx-auto rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ backgroundColor: "var(--forest)" }}>
+      {/* ── Explore elsewhere ── */}
+      <section className="pb-16 md:pb-20 px-6 md:px-12">
+        <div className="max-w-6xl mx-auto rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ backgroundColor: "var(--sand)" }}>
           <div>
-            <h2 className="section-heading text-2xl md:text-3xl font-bold text-white mb-1.5">Are you a business or freelancer?</h2>
-            <p className="text-white/75 max-w-xl">Post a job, project or service and connect with local talent.</p>
+            <h2 className="section-heading text-xl md:text-2xl font-bold mb-1.5" style={{ color: "#000000" }}>In the meantime, explore Maidenhead</h2>
+            <p className="max-w-xl" style={{ color: "#000000" }}>Discover what's already open across the town centre.</p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-            <Link to="/work/jobs" className="text-center px-7 py-3.5 rounded-full font-semibold text-white transition-transform hover:scale-105" style={{ backgroundColor: "var(--leaf)" }}>
-              Post a Job
-            </Link>
-            <Link to="/work/freelance" className="text-center px-7 py-3.5 rounded-full font-semibold text-white transition-colors" style={{ border: "1.5px solid rgba(255,255,255,0.5)" }}>
-              Post a Project
-            </Link>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            {EXPLORE_ELSEWHERE.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className="text-center px-6 py-3 rounded-full font-semibold text-sm transition-colors"
+                style={{ backgroundColor: "#ffffff", color: "#000000", boxShadow: "0 2px 8px -4px rgba(28,46,56,0.15)" }}
+              >
+                {l.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>
