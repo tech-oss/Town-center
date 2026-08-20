@@ -56,7 +56,10 @@ export default function GuideDetailPage() {
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
       {/* Hero */}
-      <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
+      <section
+        className="relative w-full flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
+        style={{ minHeight: "max(70vh, 520px)", paddingTop: "calc(var(--header-height, 96px) + 2rem)" }}
+      >
         <img src={guide.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{guide.category}</span>
