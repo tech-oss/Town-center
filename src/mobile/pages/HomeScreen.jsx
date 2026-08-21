@@ -70,7 +70,7 @@ export default function HomeScreen() {
             playsInline
             autoPlay
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.35) 0%, rgba(12,20,24,0.15) 45%, #ffffff 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.4) 0%, rgba(12,20,24,0.05) 40%, rgba(12,20,24,0.05) 65%, rgba(12,20,24,0.55) 100%)" }} />
           <div className="absolute top-3 left-5 right-5 flex items-center justify-between">
             <img src="/logo-mark.svg" alt="" className="h-7 w-auto" />
             <button className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} aria-label="Notifications">
@@ -110,10 +110,10 @@ export default function HomeScreen() {
               </div>
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {stories.slice(0, 6).map((s) => (
-                  <a key={s.slug} href={`/story/${s.slug}`} className="shrink-0 w-48 flex flex-col gap-2">
+                  <Link key={s.slug} to={`/mobile/story/${s.slug}`} className="shrink-0 w-48 flex flex-col gap-2">
                     <SpotlightImage src={s.cardImage} alt={s.cardHeading} className="w-48 h-36" />
                     <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{s.cardHeading}</p>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -129,14 +129,14 @@ export default function HomeScreen() {
               <h2 className="section-heading text-xl font-bold mb-3" style={{ color: "#000000" }}>In The Spotlight</h2>
               <div className="flex flex-col gap-3">
                 {spotlightPosts.map((post) => (
-                  <a key={post.id} href={post.href} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
+                  <Link key={post.id} to={`/mobile${post.href}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                     <img src={post.imageSrc} alt="" className="w-24 h-24 object-cover shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{post.category}</span>
                       <p className="text-sm font-bold leading-snug mt-0.5 line-clamp-2" style={{ color: "#000000" }}>{post.title}</p>
                       <p className="text-xs mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>{post.date}</p>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function HomeScreen() {
               </div>
               <div className="flex flex-col gap-3">
                 {upcomingEvents.map((e) => (
-                  <a key={e.slug} href={`/event/${e.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
+                  <Link key={e.slug} to={`/mobile/event/${e.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                     <img src={e.image} alt="" className="w-20 h-20 object-cover shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span
@@ -163,7 +163,7 @@ export default function HomeScreen() {
                       <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{e.title}</p>
                       <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{e.date}</p>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

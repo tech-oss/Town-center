@@ -31,7 +31,7 @@ export default function ExploreScreen() {
 
         <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>Explore</p>
         <div className="flex flex-col gap-4">
-          <BigCard link={{ id: "the-future", title: "The Future", blurb: "Nicholson Quarter & the town's next chapter.", image: "/images/explore/street.jpg", href: "/explore/the-future" }} />
+          <BigCard link={{ id: "the-future", title: "The Future", blurb: "Nicholson Quarter & the town's next chapter.", image: "/images/explore/street.jpg", to: "/mobile/explore/the-future" }} />
           <BigCard link={{ id: "guides", title: "Neighbourhood Guides", blurb: "Curated guides to the town.", image: "/images/eat-drink-hero-desktop.png", to: "/mobile/guides" }} />
         </div>
 

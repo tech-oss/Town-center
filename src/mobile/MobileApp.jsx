@@ -16,6 +16,11 @@ import GuideDetailScreen from "./pages/GuideDetailScreen";
 import OffersScreen from "./pages/OffersScreen";
 import LiveScreen from "./pages/LiveScreen";
 import WorkScreen from "./pages/WorkScreen";
+import StoryDetailScreen from "./pages/StoryDetailScreen";
+import EventDetailScreen from "./pages/EventDetailScreen";
+import NewsDetailScreen from "./pages/NewsDetailScreen";
+import StayDetailScreen from "./pages/StayDetailScreen";
+import FutureScreen from "./pages/FutureScreen";
 
 export default function MobileApp() {
   // Service worker scoped to /mobile/ only — never touches the rest of the site.
@@ -46,6 +51,11 @@ export default function MobileApp() {
       <Route path="offers" element={<OffersScreen />} />
       <Route path="live" element={<LiveScreen />} />
       <Route path="work" element={<WorkScreen />} />
+      <Route path="story/:slug" element={<StoryDetailScreen />} />
+      <Route path="event/:slug" element={<EventDetailScreen />} />
+      <Route path="news/:slug" element={<NewsDetailScreen />} />
+      <Route path="stay/:kind/:slug" element={<StayDetailScreen />} />
+      <Route path="explore/the-future" element={<FutureScreen />} />
       <Route path="*" element={<Navigate to="/mobile" replace />} />
     </Routes>
   );

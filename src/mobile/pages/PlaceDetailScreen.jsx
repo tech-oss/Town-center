@@ -88,9 +88,9 @@ export default function PlaceDetailScreen() {
               <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {news.map((n) => (
-                  <a
+                  <Link
                     key={n.slug}
-                    href={`/news/${n.slug}`}
+                    to={`/mobile/news/${n.slug}`}
                     className="shrink-0 w-48 overflow-hidden flex flex-col"
                     style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}
                   >
@@ -99,7 +99,7 @@ export default function PlaceDetailScreen() {
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{n.category}</span>
                       <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

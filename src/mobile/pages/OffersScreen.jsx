@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import useFetch from "../../hooks/useFetch";
@@ -15,7 +16,7 @@ export default function OffersScreen() {
 
         <div className="flex flex-col gap-3">
           {(articles ?? []).slice(0, 20).map((a) => (
-            <a key={a.slug} href={`/news/${a.slug}`}>
+            <Link key={a.slug} to={`/mobile/news/${a.slug}`}>
               <MobileCard className="flex items-stretch overflow-hidden active:opacity-90">
                 <img src={a.image} alt="" className="w-24 h-24 object-cover shrink-0" />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
@@ -24,7 +25,7 @@ export default function OffersScreen() {
                   <p className="text-xs mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>{a.date}</p>
                 </div>
               </MobileCard>
-            </a>
+            </Link>
           ))}
           {articles === null && (
             <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.45)" }}>Loading offers…</p>

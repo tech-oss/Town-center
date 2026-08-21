@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
@@ -165,7 +166,7 @@ export default function WhatsOnScreen() {
             <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.4)" }}>No events match — try another filter.</p>
           ) : (
             listed.map(({ e, date }) => (
-              <a key={`${e.slug}-${toIso(date)}`} href={`/event/${e.slug}`}>
+              <Link key={`${e.slug}-${toIso(date)}`} to={`/mobile/event/${e.slug}`}>
                 <div className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                   <EventImage src={e.image} alt={e.title} />
                   <div className="flex-1 min-w-0 p-3 flex items-center gap-3">
@@ -180,7 +181,7 @@ export default function WhatsOnScreen() {
                     </div>
                   </div>
                 </div>
-              </a>
+              </Link>
             ))
           )}
         </div>
