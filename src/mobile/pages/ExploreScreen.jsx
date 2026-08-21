@@ -31,12 +31,9 @@ const MORE_LINKS = [
 
 export default function ExploreScreen() {
   return (
-    <MobileShell>
+    <MobileShell title="Explore" onBack backFallback="/mobile/home">
       <div className="flex flex-col gap-5 mobile-stagger">
-        <div>
-          <h1 className="section-heading text-2xl font-bold mb-1.5" style={{ color: "#000000" }}>Explore</h1>
-          <p className="text-sm font-medium" style={{ color: "#000000" }}>Discover more about Maidenhead and plan your visit.</p>
-        </div>
+        <p className="text-sm font-medium" style={{ color: "#000000" }}>Discover more about Maidenhead and plan your visit.</p>
 
         <div>
           <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>Featured</p>

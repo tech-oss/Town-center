@@ -139,10 +139,9 @@ export default function MapScreen() {
   }
 
   return (
-    <MobileShell noPadding>
+    <MobileShell title="Map" onBack backFallback="/mobile/home" noPadding>
       <div className="flex flex-col h-full">
         <div className="px-5 pt-4 pb-3">
-          <h1 className="section-heading text-2xl font-bold mb-1" style={{ color: "#000000" }}>Map</h1>
           <p className="text-sm font-medium" style={{ color: "#000000" }}>Find places, attractions and useful information around town.</p>
         </div>
 
