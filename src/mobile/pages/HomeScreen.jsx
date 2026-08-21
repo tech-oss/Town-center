@@ -4,12 +4,10 @@ import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getEvents } from "../../api";
-import { hero, blogCards } from "../../Data/content";
+import { blogCards } from "../../Data/content";
 import { categoryColors } from "../../Data/events";
 import { guides } from "../../Data/guides";
 import { homeCategories } from "../data/mobileMock";
-
-const slide = hero.slides[0];
 
 function CatIcon({ name }) {
   const p = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none", stroke: "#ffffff", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -94,9 +92,14 @@ export default function HomeScreen() {
             </Link>
           </div>
           <div className="absolute bottom-4 left-5 right-5">
-            {/* Same eyebrow + headline pairing the website's hero uses. */}
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1.5 text-white">{slide.eyebrow}</p>
-            <h1 className="text-3xl font-bold leading-tight text-white" style={{ textShadow: "0 2px 16px rgba(0,0,0,0.45)" }}>{slide.headline}</h1>
+            {/* Same "Welcome to / MAIDENHEAD / Riverside · Connected ·
+                Thriving" caption the website's Hero.jsx renders — that
+                component doesn't use Data/content.js's hero.slides text at
+                all, so mirroring the slide's eyebrow/headline here was
+                showing different copy than the site actually displays. */}
+            <p className="text-xs font-medium mb-1 text-white" style={{ letterSpacing: "-0.01em", textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>Welcome to</p>
+            <h1 className="hero-title uppercase text-4xl leading-none text-white" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>Maidenhead</h1>
+            <p className="text-xs font-medium uppercase mt-2 text-white" style={{ letterSpacing: "-0.01em", textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>Riverside · Connected · Thriving</p>
           </div>
         </div>
 
