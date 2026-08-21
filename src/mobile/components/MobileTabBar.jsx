@@ -17,14 +17,14 @@ const TABS = [
     ),
   },
   {
-    key: "whats-on",
-    to: "/mobile/whats-on",
-    label: "What's On",
-    match: ["/mobile/whats-on"],
+    key: "offers",
+    to: "/mobile/offers",
+    label: "Offers",
+    match: ["/mobile/offers"],
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3.5" y="5" width="17" height="16" rx="2.5" />
-        <path d="M8 3v4M16 3v4M3.5 10h17" />
+        <path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" />
+        <circle cx="7.5" cy="7.5" r="1" />
       </svg>
     ),
   },
@@ -33,7 +33,7 @@ const TABS = [
     to: "/mobile/explore",
     label: "Explore",
     // Explore is the hub for the section + info screens
-    match: ["/mobile/explore", "/mobile/see-do", "/mobile/eat-drink", "/mobile/shop", "/mobile/services", "/mobile/place", "/mobile/info", "/mobile/plan", "/mobile/about", "/mobile/guides", "/mobile/offers", "/mobile/live", "/mobile/work"],
+    match: ["/mobile/explore", "/mobile/see-do", "/mobile/eat-drink", "/mobile/shop", "/mobile/services", "/mobile/place", "/mobile/info", "/mobile/plan", "/mobile/about", "/mobile/guides", "/mobile/whats-on", "/mobile/live", "/mobile/work"],
     icon: (c) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="9" />

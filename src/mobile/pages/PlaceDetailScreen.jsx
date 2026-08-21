@@ -24,22 +24,6 @@ function ActionButton({ icon, label, href, onClick }) {
   return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>;
 }
 
-function Row({ icon, children, href }) {
-  const p = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "var(--leaf)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
-  const icons = {
-    pin: <svg {...p}><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>,
-    phone: <svg {...p}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></svg>,
-    globe: <svg {...p}><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>,
-  };
-  const content = (
-    <div className="flex items-start gap-3">
-      <span className="shrink-0 mt-0.5">{icons[icon]}</span>
-      <span className="text-sm" style={{ color: "#000000" }}>{children}</span>
-    </div>
-  );
-  return href ? <a href={href} target={icon === "globe" ? "_blank" : undefined} rel="noopener noreferrer">{content}</a> : content;
-}
-
 export default function PlaceDetailScreen() {
   const { id } = useParams();
   const place = itemBySlug[id];
@@ -54,6 +38,7 @@ export default function PlaceDetailScreen() {
   const social = place.social
     ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k])
     : [];
+  const more = (section?.items ?? []).filter((it) => it.slug !== place.slug).slice(0, 3);
 
   async function handleShare() {
     const url = `${window.location.origin}/${place.section}/place/${place.slug}`;
@@ -85,18 +70,36 @@ export default function PlaceDetailScreen() {
           </Link>
         </div>
 
-        <div className="px-5 -mt-2 relative flex flex-col gap-4 pb-6">
+        <div className="px-5 -mt-2 relative flex flex-col gap-4 pb-8 mobile-stagger">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{section?.label} · {place.tag}</span>
-            <h1 className="text-2xl font-bold mt-1" style={{ color: "#000000" }}>{place.name}</h1>
+            <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
+              {section?.label} · {place.tag}
+            </span>
+            <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
           </div>
 
-          <MobileCard className="p-4 flex flex-col gap-3">
+          {place.description && (
             <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{place.description}</p>
-            <div className="h-px" style={{ background: "rgba(0,0,0,0.07)" }} />
-            <Row icon="pin">{place.address}</Row>
-            {place.phone && place.phone !== "—" && <Row icon="phone" href={`tel:${place.phone.replace(/[^\d+]/g, "")}`}>{place.phone}</Row>}
-            {websiteUrl && <Row icon="globe" href={websiteUrl}>{place.website}</Row>}
+          )}
+
+          <MobileCard className="p-4 flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+              <span className="text-sm" style={{ color: "#000000" }}>{place.address}</span>
+            </div>
+            {place.phone && place.phone !== "—" && (
+              <a href={`tel:${place.phone.replace(/[^\d+]/g, "")}`} className="flex items-start gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></svg>
+                <span className="text-sm" style={{ color: "#000000" }}>{place.phone}</span>
+              </a>
+            )}
+            {websiteUrl && (
+              <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
+                <span className="text-sm" style={{ color: "#000000" }}>{place.website}</span>
+              </a>
+            )}
           </MobileCard>
 
           {place.hours?.length > 0 && (
@@ -172,6 +175,23 @@ export default function PlaceDetailScreen() {
                     <div className="p-2.5 flex flex-col gap-1">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{n.category}</span>
                       <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {more.length > 0 && (
+            <div className="mt-2">
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>More {section?.label}</p>
+              <div className="flex flex-col gap-3">
+                {more.map((it) => (
+                  <Link key={it.slug} to={`/mobile/place/${it.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
+                    <img src={it.image} alt="" className="w-20 h-20 object-cover shrink-0" />
+                    <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
+                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{it.tag}</span>
+                      <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{it.name}</p>
                     </div>
                   </Link>
                 ))}
