@@ -59,6 +59,18 @@ export default function SectionScreen({ sectionKey }) {
 
         <ListSearch value={query} onChange={setQuery} placeholder={`Search ${section.label}…`} />
 
+        {sectionKey === "see-do" && (
+          <Link
+            to="/mobile/whats-on"
+            className="self-start inline-flex items-center gap-1.5 text-sm font-bold active:opacity-70"
+            style={{ color: "var(--teal-deep)" }}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
+            View on Calendar
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+          </Link>
+        )}
+
         <FilterPills options={filters} value={filter} onChange={setFilter} />
 
         <div className="flex flex-col gap-3">
