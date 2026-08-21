@@ -25,6 +25,10 @@ import FutureScreen from "./pages/FutureScreen";
 import SearchScreen from "./pages/SearchScreen";
 import TransportScreen from "./pages/TransportScreen";
 import ParkingScreen from "./pages/ParkingScreen";
+import OurStoryScreen from "./pages/OurStoryScreen";
+import WorkWithUsScreen from "./pages/WorkWithUsScreen";
+import TradersScreen from "./pages/TradersScreen";
+import LegalPlaceholderScreen from "./pages/LegalPlaceholderScreen";
 import { markMobileAppMounted } from "./lib/navHistory";
 
 export default function MobileApp() {
@@ -60,6 +64,11 @@ export default function MobileApp() {
       <Route path="transport" element={<TransportScreen />} />
       <Route path="parking" element={<ParkingScreen />} />
       <Route path="about" element={<AboutScreen />} />
+      <Route path="our-story" element={<OurStoryScreen />} />
+      <Route path="work-with-us" element={<WorkWithUsScreen />} />
+      <Route path="traders" element={<TradersScreen />} />
+      <Route path="privacy" element={<LegalPlaceholderScreen title="Privacy Policy" />} />
+      <Route path="terms" element={<LegalPlaceholderScreen title="Terms & Conditions" />} />
       <Route path="guides" element={<GuidesScreen />} />
       <Route path="guides/:slug" element={<GuideDetailScreen />} />
       <Route path="offers" element={<OffersScreen />} />

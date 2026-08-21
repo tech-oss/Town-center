@@ -41,6 +41,7 @@ const TABS = [
       "/mobile/services", "/mobile/place", "/mobile/guides", "/mobile/whats-on",
       "/mobile/event", "/mobile/live", "/mobile/stay", "/mobile/work",
       "/mobile/about", "/mobile/more", "/mobile/parking", "/mobile/transport",
+      "/mobile/our-story", "/mobile/work-with-us", "/mobile/traders", "/mobile/privacy", "/mobile/terms",
     ],
     icon: (c) => (
       <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

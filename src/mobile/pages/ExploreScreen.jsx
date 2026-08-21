@@ -22,11 +22,11 @@ function BigCard({ link, height = "h-36" }) {
 
 // Secondary destinations that no longer have their own bottom-nav tab.
 const MORE_LINKS = [
-  { label: "Neighbourhood Guides", to: "/mobile/guides" },
-  { label: "What's On Calendar", to: "/mobile/whats-on" },
-  { label: "Offers & News", to: "/mobile/offers" },
-  { label: "About Maidenhead", to: "/mobile/about" },
-  { label: "More", to: "/mobile/more" },
+  { label: "Work With Us", to: "/mobile/work-with-us" },
+  { label: "Our Story", to: "/mobile/our-story" },
+  { label: "Traders", to: "/mobile/traders" },
+  { label: "Privacy Policy", to: "/mobile/privacy" },
+  { label: "Terms & Conditions", to: "/mobile/terms" },
 ];
 
 export default function ExploreScreen() {
@@ -58,7 +58,7 @@ export default function ExploreScreen() {
         </div>
 
         <div>
-          <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>More</p>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>About &amp; Legal</p>
           <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 10px 26px -14px rgba(28,46,56,0.5)" }}>
             {MORE_LINKS.map((m, i) => (
               <Link
