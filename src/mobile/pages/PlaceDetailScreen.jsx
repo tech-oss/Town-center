@@ -137,7 +137,7 @@ export default function PlaceDetailScreen() {
             </div>
 
             {social.length > 0 && (
-              <div className="flex items-center gap-3 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+              <div className="flex items-center justify-center gap-3 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
                 {social.map(([key, href]) => (
                   <a
                     key={key}
