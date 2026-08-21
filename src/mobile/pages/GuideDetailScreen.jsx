@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -6,8 +7,28 @@ import { getGuideBySlug } from "../../Data/guides";
 export default function GuideDetailScreen() {
   const { slug } = useParams();
   const guide = getGuideBySlug(slug);
+  const [toast, setToast] = useState(false);
 
   if (!guide) return <Navigate to="/mobile/guides" replace />;
+
+  async function handleShare() {
+    const url = `${window.location.origin}/guides/${guide.slug}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: guide.title, text: guide.summary, url });
+      } catch {
+        /* user cancelled — no-op */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setToast(true);
+      setTimeout(() => setToast(false), 2000);
+    } catch {
+      /* clipboard unavailable — no-op */
+    }
+  }
 
   return (
     <MobileShell noPadding>
@@ -17,6 +38,12 @@ export default function GuideDetailScreen() {
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.3) 0%, rgba(20,33,42,0.05) 45%, #ffffff 100%)" }} />
           <button onClick={() => window.history.back()} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+          </button>
+          <button onClick={handleShare} className="absolute top-3 right-4 w-9 h-9 rounded-full flex items-center justify-center active:opacity-80" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Share this guide">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+              <path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" />
+            </svg>
           </button>
         </div>
 
@@ -49,6 +76,12 @@ export default function GuideDetailScreen() {
           </a>
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-xs font-semibold" style={{ bottom: 88, backgroundColor: "rgba(15,26,32,0.95)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)" }}>
+          Link copied to clipboard
+        </div>
+      )}
     </MobileShell>
   );
 }
