@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useMemo } from "react";
+import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
@@ -47,10 +47,21 @@ function mobileHref(to) {
 // against the teal/orange/purple category pins around it.
 const SELECTED_COLOR = "#E63946";
 
+// (section, active) fully determines a pin's appearance, so icons are cached
+// by that pair rather than rebuilt on every render. Passing react-leaflet's
+// Marker a fresh L.divIcon instance each time — even one that renders
+// identically — makes it call the underlying marker's setIcon(), which was
+// visibly juddering every pin on the map whenever any single pin's active
+// state changed elsewhere (e.g. selecting a different search result).
+const pinIconCache = new Map();
+
 function makePin(section, active) {
+  const key = `${section}|${active}`;
+  if (pinIconCache.has(key)) return pinIconCache.get(key);
+
   const fill = active ? SELECTED_COLOR : colorFor(section);
   const w = active ? 46 : 26, h = active ? 60 : 34;
-  return L.divIcon({
+  const icon = L.divIcon({
     className: "",
     html: `<svg width="${w}" height="${h}" viewBox="0 0 28 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 10px rgba(0,0,0,0.5));${active ? "animation:pinPulse 1.4s ease-out infinite;" : ""}">
       ${active ? `<circle cx="14" cy="14" r="20" fill="${fill}" fill-opacity="0.22"/>` : ""}
@@ -60,16 +71,16 @@ function makePin(section, active) {
     iconSize: [w, h],
     iconAnchor: [w / 2, h],
   });
+  pinIconCache.set(key, icon);
+  return icon;
 }
 
-function makeUserPin() {
-  return L.divIcon({
-    className: "",
-    html: `<div style="width:14px;height:14px;background:#1a6fdb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,111,219,0.3)"></div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-  });
-}
+const userPinIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:14px;height:14px;background:#1a6fdb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 4px rgba(26,111,219,0.3)"></div>`,
+  iconSize: [20, 20],
+  iconAnchor: [10, 10],
+});
 
 function LocateControl({ onLocate }) {
   const map = useMap();
@@ -94,10 +105,16 @@ function LocateControl({ onLocate }) {
   );
 }
 
-// Recentres the map when a search result is chosen.
+// Recentres the map when a search result is chosen. Must run in an effect
+// gated on the target's identity — calling map.flyTo() directly in the
+// render body re-issued it on every re-render (e.g. the active-pin state
+// change right after selection), restarting the in-flight animation and
+// making the whole map and every pin visibly judder.
 function FlyTo({ target }) {
   const map = useMap();
-  if (target) map.flyTo([target.lat, target.lng], 17, { duration: 0.7 });
+  useEffect(() => {
+    if (target) map.flyTo([target.lat, target.lng], 17, { duration: 0.7 });
+  }, [map, target?.id, target?.lat, target?.lng]);
   return null;
 }
 
@@ -208,7 +225,7 @@ export default function MapScreen() {
                 eventHandlers={{ click: () => setActive(b) }}
               />
             ))}
-            {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={makeUserPin()} />}
+            {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={userPinIcon} />}
             <FlyTo target={flyTarget} />
             <LocateControl onLocate={setUserPos} />
           </MapContainer>
