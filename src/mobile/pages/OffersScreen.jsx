@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
 import { getStories, getArticles } from "../../api";
 import { blogCards } from "../../Data/content";
@@ -23,17 +23,6 @@ const TYPE_COLORS = {
   "What's On": "var(--teal-deep)",
 };
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
-
-function RadioDot({ active }) {
-  return (
-    <span
-      className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-      style={{ border: `2px solid ${active ? "var(--leaf)" : "rgba(28,46,56,0.25)"}` }}
-    >
-      {active && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />}
-    </span>
-  );
-}
 
 function SearchInput({ value, onChange }) {
   return (
@@ -60,139 +49,6 @@ function SearchInput({ value, onChange }) {
         >
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
         </button>
-      )}
-    </div>
-  );
-}
-
-function TypeFilterButton({ types, active, onChange }) {
-  const [open, setOpen] = useState(false);
-  const activeLabel = active ?? "All Types";
-
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 pl-4 pr-3.5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"
-        style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.75)" }}
-      >
-        {activeLabel}
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-      </button>
-
-      {open && createPortal(
-        <div className="fixed inset-0 z-50 flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} onClick={() => setOpen(false)}>
-          <div className="w-full bg-white rounded-t-3xl pt-5 pb-6 max-h-[75vh] overflow-y-auto overscroll-contain" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 mb-3">
-              <h3 className="text-xs font-bold uppercase tracking-[0.08em]" style={{ color: "#000000" }}>Types</h3>
-              <button onClick={() => setOpen(false)} aria-label="Close" className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm font-bold" style={{ backgroundColor: "var(--forest)" }}>✕</button>
-            </div>
-
-            <button type="button" onClick={() => { onChange(null); setOpen(false); }} className="flex items-center justify-between gap-3 w-full px-6 py-3.5 border-t" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
-              <span className="flex items-center gap-3 text-[15px]" style={{ color: "#000000" }}>
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: "var(--forest)" }} /> All
-              </span>
-              <RadioDot active={!active} />
-            </button>
-
-            {types.map((t) => (
-              <button type="button" key={t} onClick={() => { onChange(t); setOpen(false); }} className="flex items-center justify-between gap-3 w-full px-6 py-3.5 border-t" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
-                <span className="flex items-center gap-3 text-[15px]" style={{ color: "#000000" }}>
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: TYPE_COLORS[t] ?? "var(--leaf)" }} /> {t}
-                </span>
-                <RadioDot active={active === t} />
-              </button>
-            ))}
-          </div>
-        </div>,
-        document.body
-      )}
-    </>
-  );
-}
-
-function BusinessTypeFilter({ active, onChange }) {
-  const [open, setOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState(null);
-  const btnRef = useRef(null);
-  const menuRef = useRef(null);
-  const activeLabel = BUSINESS_TYPES.find((b) => b.key === active)?.label;
-
-  // The filter row this button lives in scrolls horizontally
-  // (overflow-x-auto), which forces the browser to clip overflow-y too — an
-  // inline `absolute` dropdown would be cut off instead of floating over the
-  // page. Rendered through a portal and positioned from the button's own
-  // rect instead, matching the pattern already used for the Type filter
-  // sheet below.
-  const computePos = () => {
-    const r = btnRef.current?.getBoundingClientRect();
-    if (!r) return null;
-    const left = Math.min(r.left, window.innerWidth - 224 - 20);
-    return { top: r.bottom + 8, left: Math.max(left, 12) };
-  };
-
-  const openMenu = () => {
-    setMenuPos(computePos());
-    setOpen(true);
-  };
-
-  useEffect(() => {
-    if (!open) return;
-    const onClickOutside = (e) => {
-      if (menuRef.current?.contains(e.target) || btnRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    const onReposition = () => setMenuPos(computePos());
-    document.addEventListener("mousedown", onClickOutside);
-    document.addEventListener("touchstart", onClickOutside);
-    window.addEventListener("resize", onReposition);
-    document.querySelector(".mobile-scroll")?.addEventListener("scroll", onReposition, { passive: true });
-    return () => {
-      document.removeEventListener("mousedown", onClickOutside);
-      document.removeEventListener("touchstart", onClickOutside);
-      window.removeEventListener("resize", onReposition);
-      document.querySelector(".mobile-scroll")?.removeEventListener("scroll", onReposition);
-    };
-  }, [open]);
-
-  return (
-    <div className="relative shrink-0">
-      <button
-        ref={btnRef}
-        type="button"
-        onClick={() => (open ? setOpen(false) : openMenu())}
-        className="inline-flex items-center gap-2 pl-4 pr-3.5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"
-        style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.75)" }}
-      >
-        {activeLabel ?? "Business Type"}
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-      </button>
-
-      {open && menuPos && createPortal(
-        <div
-          ref={menuRef}
-          className="fixed z-[3000] w-56 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl p-2 flex flex-col gap-0.5"
-          style={{ top: menuPos.top, left: menuPos.left, boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}
-        >
-          <button type="button" onClick={() => { onChange(null); setOpen(false); }} className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg active:bg-black/5" style={{ color: "#000000" }}>
-            All Business Types
-            <RadioDot active={!active} />
-          </button>
-          {BUSINESS_TYPES.map((b) => (
-            <button key={b.key} type="button" onClick={() => { onChange(b.key); setOpen(false); }} className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg active:bg-black/5" style={{ color: "#000000" }}>
-              {b.label}
-              <RadioDot active={active === b.key} />
-            </button>
-          ))}
-        </div>,
-        document.body
       )}
     </div>
   );
@@ -257,8 +113,21 @@ export default function OffersScreen() {
         <SearchInput value={search} onChange={setSearch} />
 
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none -mx-5 px-5">
-          <TypeFilterButton types={types} active={activeType} onChange={setActiveType} />
-          <BusinessTypeFilter active={activeBusinessType} onChange={setActiveBusinessType} />
+          <FilterSheet
+            title="Types"
+            triggerLabel={activeType ?? "All Types"}
+            options={types.map((t) => ({ key: t, label: t, color: TYPE_COLORS[t] }))}
+            value={activeType}
+            onChange={setActiveType}
+          />
+          <FilterSheet
+            title="Business Types"
+            triggerLabel={BUSINESS_TYPES.find((b) => b.key === activeBusinessType)?.label ?? "Business Type"}
+            options={BUSINESS_TYPES}
+            value={activeBusinessType}
+            onChange={setActiveBusinessType}
+            allLabel="All Business Types"
+          />
         </div>
 
         {filtered.length === 0 ? (
