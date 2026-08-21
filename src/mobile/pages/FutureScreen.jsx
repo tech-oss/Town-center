@@ -1,3 +1,4 @@
+import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
 import useMobileBack from "../hooks/useMobileBack";
@@ -15,6 +16,27 @@ function FeatureImage({ image, alt }) {
 
 export default function FutureScreen() {
   const goBack = useMobileBack("/mobile/explore");
+  const [toast, setToast] = useState(false);
+
+  async function handleShare() {
+    const url = `${window.location.origin}/explore/the-future`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: explore.hero.title, text: explore.hero.subtitle, url });
+      } catch {
+        /* user cancelled — no-op */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setToast(true);
+      setTimeout(() => setToast(false), 2000);
+    } catch {
+      /* clipboard unavailable — no-op */
+    }
+  }
+
   return (
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
@@ -29,7 +51,15 @@ export default function FutureScreen() {
 
         <div className="px-5 pt-6 flex flex-col gap-8 pb-8 mobile-stagger">
           <div className="flex flex-col gap-3">
-            <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>The Vision</p>
+            <div className="flex items-center justify-between gap-3">
+              <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>The Vision</p>
+              <button onClick={handleShare} className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center active:opacity-80" style={{ backgroundColor: "var(--leaf)" }} aria-label="Share The Future">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                  <path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" />
+                </svg>
+              </button>
+            </div>
             <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{explore.hero.subtitle}</p>
             {explore.vision.map((p, i) => (
               <p key={i} className="text-sm leading-relaxed" style={{ color: "#000000" }}>{p}</p>
@@ -94,6 +124,12 @@ export default function FutureScreen() {
           )}
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-xs font-semibold" style={{ bottom: 88, backgroundColor: "rgba(15,26,32,0.95)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)" }}>
+          Link copied to clipboard
+        </div>
+      )}
     </MobileShell>
   );
 }

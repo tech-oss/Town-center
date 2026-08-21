@@ -37,18 +37,20 @@ export default function GuideDetailScreen() {
       <div className="flex flex-col">
         <div className="relative">
           <img src={guide.heroImage} alt="" className="w-full h-48 object-cover" />
-          <button onClick={handleShare} className="absolute top-3 right-4 w-9 h-9 rounded-full flex items-center justify-center active:opacity-80" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Share this guide">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
-              <path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" />
-            </svg>
-          </button>
         </div>
 
         <div className="px-5 pt-2 flex flex-col gap-4 pb-8 mobile-stagger">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{guide.category}</span>
-            <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{guide.title}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{guide.category}</span>
+              <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{guide.title}</h1>
+            </div>
+            <button onClick={handleShare} className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center active:opacity-80" style={{ backgroundColor: "var(--leaf)" }} aria-label="Share this guide">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+                <path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" />
+              </svg>
+            </button>
           </div>
 
           <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.72)" }}>{guide.intro[0]}</p>
