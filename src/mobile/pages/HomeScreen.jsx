@@ -3,24 +3,21 @@ import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
-import { getStories, getEvents } from "../../api";
+import { getEvents } from "../../api";
 import { hero, blogCards } from "../../Data/content";
 import { categoryColors } from "../../Data/events";
+import { guides } from "../../Data/guides";
 import { homeCategories } from "../data/mobileMock";
 
 const slide = hero.slides[0];
 
 function CatIcon({ name }) {
-  const p = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "var(--leaf)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
+  const p = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none", stroke: "#ffffff", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
   switch (name) {
     case "compass": return <svg {...p}><circle cx="12" cy="12" r="9" /><path d="M15 9l-2 6-6 2 2-6z" /></svg>;
     case "cup": return <svg {...p}><path d="M5 8h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V8Z" /><path d="M16 9h2a2 2 0 0 1 0 4h-2" /><path d="M7 3v2M11 3v2" /></svg>;
-    case "bag": return <svg {...p}><path d="M6 7h12l-1 13H7L6 7Z" /><path d="M9 7a3 3 0 0 1 6 0" /></svg>;
-    case "pin": return <svg {...p}><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>;
-    case "services": return <svg {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>;
-    case "home": return <svg {...p}><path d="M3 11.5 12 4l9 7.5" /><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9" /></svg>;
-    case "tag": return <svg {...p}><path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" /><circle cx="7.5" cy="7.5" r="1" /></svg>;
-    case "book": return <svg {...p}><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20" /><path d="M9 7h6M9 11h6" /></svg>;
+    case "bag": return <svg {...p}><path d="M5 8h14l-1.1 12.1A2 2 0 0 1 15.9 22H8.1a2 2 0 0 1-2-1.9L5 8Z" /><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2" /></svg>;
+    case "services": return <svg {...p}><path d="M14.7 6.3a4 4 0 0 0 5.1 5.1l-7 7a2.8 2.8 0 0 1-4-4l7-7Z" /><path d="m5.5 18.5 1 1" /></svg>;
     default: return null;
   }
 }
@@ -36,12 +33,23 @@ function SpotlightImage({ src, alt, className = "" }) {
   );
 }
 
+function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
+  return (
+    <div className="flex items-end justify-between mb-3">
+      <p className="section-eyebrow" style={{ color: "var(--teal-deep)" }}>{eyebrow}</p>
+      {to && (
+        <Link to={to} className="text-xs font-bold" style={{ color: "var(--teal-deep)" }}>{linkLabel}</Link>
+      )}
+    </div>
+  );
+}
+
 export default function HomeScreen() {
   const videoRef = useRef(null);
-  const { data: stories } = useFetch(getStories, []);
   const { data: events } = useFetch(getEvents, []);
-  const spotlightPosts = blogCards.posts.filter((p) => p.homepage).slice(0, 4);
+  const appOffers = blogCards.posts.filter((p) => p.homepage).slice(0, 4);
   const upcomingEvents = (events ?? []).slice(0, 3);
+  const featuredGuides = guides.slice(0, 3);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -56,10 +64,11 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <MobileShell noPadding>
-      <div className="flex flex-col gap-9 mobile-stagger" style={{ paddingBottom: 32 }}>
-        {/* ── Hero — same looping video as the website's mobile cut ── */}
-        <div className="relative h-72 overflow-hidden">
+    <MobileShell hideHeader noPadding>
+      <div className="flex flex-col gap-8 mobile-stagger" style={{ paddingBottom: 32 }}>
+        {/* ── Hero — same looping video as the website's mobile cut, kept
+            compact so the content below starts high on the screen. ── */}
+        <div className="relative h-56 overflow-hidden">
           <video
             ref={videoRef}
             className="absolute inset-0 w-full h-full object-cover"
@@ -70,71 +79,83 @@ export default function HomeScreen() {
             playsInline
             autoPlay
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.4) 0%, rgba(12,20,24,0.05) 40%, rgba(12,20,24,0.05) 65%, rgba(12,20,24,0.55) 100%)" }} />
-          <div className="absolute top-3 left-5 right-5 flex items-center justify-between">
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.45) 0%, rgba(12,20,24,0.05) 40%, rgba(12,20,24,0.15) 65%, rgba(12,20,24,0.7) 100%)" }} />
+          <div className="absolute top-3 left-5 right-4 flex items-center justify-between">
             <img src="/logo-mark.svg" alt="" className="h-7 w-auto" />
-            <button className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} aria-label="Notifications">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            <Link
+              to="/mobile/search"
+              className="w-9 h-9 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: "rgba(0,0,0,0.42)" }}
+              aria-label="Search"
+            >
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" />
               </svg>
-            </button>
+            </Link>
           </div>
-          <div className="absolute bottom-5 left-5 right-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1.5 text-white/85">{slide.eyebrow}</p>
-            <h1 className="text-3xl font-bold leading-tight text-white" style={{ textShadow: "0 2px 16px rgba(0,0,0,0.35)" }}>{slide.headline}</h1>
+          <div className="absolute bottom-4 left-5 right-5">
+            {/* Same eyebrow + headline pairing the website's hero uses. */}
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] mb-1.5 text-white">{slide.eyebrow}</p>
+            <h1 className="text-3xl font-bold leading-tight text-white" style={{ textShadow: "0 2px 16px rgba(0,0,0,0.45)" }}>{slide.headline}</h1>
           </div>
         </div>
 
-        <div className="flex flex-col gap-9 px-5">
-          {/* ── Category tiles (QuickLinks equivalent) ── */}
+        <div className="flex flex-col gap-8 px-5">
+          {/* ── Quick Links ── */}
           <div>
-            <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Find Your Way Around</p>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>Quick Links</p>
             <div className="grid grid-cols-4 gap-3">
               {homeCategories.map((c) => (
                 <Link key={c.id} to={c.to} className="flex flex-col items-center gap-2 active:opacity-70">
-                  <div className="w-full aspect-square rounded-2xl flex items-center justify-center" style={{ backgroundColor: "rgba(28,46,56,0.045)" }}>
+                  <div
+                    className="w-full aspect-square rounded-2xl flex items-center justify-center"
+                    style={{ background: "linear-gradient(140deg, var(--forest), var(--teal-deep))" }}
+                  >
                     <CatIcon name={c.icon} />
                   </div>
-                  <span className="text-[11px] font-semibold text-center" style={{ color: "#000000" }}>{c.label}</span>
+                  <span className="text-[11px] font-bold text-center leading-tight" style={{ color: "#000000" }}>{c.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* ── Featured Stories ── */}
-          {stories?.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>Featured Stories</p>
-                <Link to="/mobile/offers" className="text-xs font-semibold" style={{ color: "var(--leaf)" }}>See all</Link>
-              </div>
-              <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
-                {stories.slice(0, 6).map((s) => (
-                  <Link key={s.slug} to={`/mobile/story/${s.slug}`} className="shrink-0 w-48 flex flex-col gap-2">
-                    <SpotlightImage src={s.cardImage} alt={s.cardHeading} className="w-48 h-36" />
-                    <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{s.cardHeading}</p>
-                  </Link>
-                ))}
-              </div>
+          {/* ── Offers & Promotions — the homepage's headline CTA. ── */}
+          <Link
+            to="/mobile/offers"
+            className="relative overflow-hidden rounded-2xl px-5 py-5 flex items-center gap-4 active:opacity-90"
+            style={{ backgroundColor: "var(--teal-deep)" }}
+          >
+            {/* Decorative tag motif, echoing the reference apps' offers banner. */}
+            <svg className="absolute -right-4 -top-3 opacity-[0.13]" width="130" height="130" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.4" aria-hidden="true">
+              <path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" />
+              <circle cx="7.5" cy="7.5" r="1.2" />
+            </svg>
+            <div className="relative flex-1 min-w-0">
+              <p className="text-lg font-bold leading-tight text-white">Looking for Offers &amp; Promotions?</p>
+              <p className="text-xs mt-1 font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>
+                See what's on offer across the town centre right now.
+              </p>
             </div>
-          )}
+            <span
+              className="relative shrink-0 px-4 py-2.5 rounded-xl text-xs font-extrabold tracking-wide"
+              style={{ backgroundColor: "#ffffff", color: "var(--forest)" }}
+            >
+              SEE ALL
+            </span>
+          </Link>
 
-          {/* ── In the Spotlight ── */}
-          {spotlightPosts.length > 0 && (
+          {/* ── App Offers & News ── */}
+          {appOffers.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>{blogCards.eyebrow}</p>
-                <Link to="/mobile/offers" className="text-xs font-semibold" style={{ color: "var(--leaf)" }}>See all</Link>
-              </div>
-              <h2 className="section-heading text-xl font-bold mb-3" style={{ color: "#000000" }}>In The Spotlight</h2>
+              <SectionHead eyebrow="App Offers & News" to="/mobile/offers" />
               <div className="flex flex-col gap-3">
-                {spotlightPosts.map((post) => (
-                  <Link key={post.id} to={`/mobile${post.href}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-                    <img src={post.imageSrc} alt="" className="w-24 h-24 object-cover shrink-0" />
+                {appOffers.map((post) => (
+                  <Link key={post.id} to={`/mobile${post.href}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
+                    <img src={post.imageSrc} alt="" className="w-28 h-28 object-cover shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                      <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{post.category}</span>
+                      <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{post.category}</span>
                       <p className="text-sm font-bold leading-snug mt-0.5 line-clamp-2" style={{ color: "#000000" }}>{post.title}</p>
-                      <p className="text-xs mt-1" style={{ color: "rgba(0,0,0,0.55)" }}>{post.date}</p>
+                      <p className="text-xs mt-1 font-medium" style={{ color: "#000000", opacity: 0.7 }}>{post.date}</p>
                     </div>
                   </Link>
                 ))}
@@ -142,26 +163,23 @@ export default function HomeScreen() {
             </div>
           )}
 
-          {/* ── What's On teaser ── */}
+          {/* ── What's On ── */}
           {upcomingEvents.length > 0 && (
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <p className="section-eyebrow" style={{ color: "var(--leaf)" }}>What's On</p>
-                <Link to="/mobile/whats-on" className="text-xs font-semibold" style={{ color: "var(--leaf)" }}>See all</Link>
-              </div>
-              <div className="flex flex-col gap-3">
+              <SectionHead eyebrow="What's On" to="/mobile/whats-on" />
+              <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {upcomingEvents.map((e) => (
-                  <Link key={e.slug} to={`/mobile/event/${e.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-                    <img src={e.image} alt="" className="w-20 h-20 object-cover shrink-0" />
-                    <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
+                  <Link key={e.slug} to={`/mobile/event/${e.slug}`} className="shrink-0 w-56 flex flex-col overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
+                    <img src={e.image} alt="" className="w-full h-36 object-cover" />
+                    <div className="p-3 flex flex-col gap-1">
                       <span
-                        className="text-[9px] font-bold uppercase tracking-wide w-fit px-2 py-0.5 rounded-full mb-1"
-                        style={{ backgroundColor: `${categoryColors[e.category]}1A`, color: categoryColors[e.category] }}
+                        className="text-[9px] font-extrabold uppercase tracking-wide w-fit px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: categoryColors[e.category], color: "#ffffff" }}
                       >
                         {e.category}
                       </span>
-                      <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{e.title}</p>
-                      <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{e.date}</p>
+                      <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{e.title}</p>
+                      <p className="text-xs font-medium truncate" style={{ color: "#000000", opacity: 0.7 }}>{e.date}</p>
                     </div>
                   </Link>
                 ))}
@@ -169,13 +187,54 @@ export default function HomeScreen() {
             </div>
           )}
 
-          <Link
-            to="/mobile/whats-on"
-            className="w-full text-center py-3.5 rounded-2xl text-sm font-bold active:opacity-80"
-            style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}
-          >
-            Explore What's On
-          </Link>
+          {/* ── Neighbourhood Guides — three guides to tap straight into. ── */}
+          {featuredGuides.length > 0 && (
+            <div>
+              <SectionHead eyebrow="Neighbourhood Guides" to="/mobile/guides" />
+              <div className="flex flex-col gap-3">
+                {featuredGuides.map((g) => (
+                  <Link
+                    key={g.slug}
+                    to={`/mobile/guides/${g.slug}`}
+                    className="relative overflow-hidden rounded-2xl h-36 flex items-end active:opacity-90"
+                    style={{ boxShadow: "0 10px 26px -12px rgba(28,46,56,0.5)" }}
+                  >
+                    <img src={g.cardImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 35%, rgba(12,20,24,0.88) 100%)" }} />
+                    <div className="relative p-4">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--mint)", textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}>{g.category}</span>
+                      <p className="text-base font-bold leading-snug text-white mt-0.5">{g.title}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Parking & Transport signposting ── */}
+          <div>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>Practical Info</p>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                to="/mobile/parking"
+                className="flex flex-col gap-2 p-4 rounded-2xl active:opacity-85"
+                style={{ backgroundColor: "var(--forest)" }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--mint)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M8 18V6h4.5a3.5 3.5 0 0 1 0 7H8" /></svg>
+                <span className="text-sm font-bold text-white leading-tight">Parking</span>
+                <span className="text-[11px] font-medium leading-snug" style={{ color: "rgba(255,255,255,0.8)" }}>Car parks &amp; directions</span>
+              </Link>
+              <Link
+                to="/mobile/transport"
+                className="flex flex-col gap-2 p-4 rounded-2xl active:opacity-85"
+                style={{ backgroundColor: "var(--teal-deep)" }}
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="3" width="14" height="13" rx="3" /><path d="M5 11h14M9 16l-2 4M15 16l2 4" /></svg>
+                <span className="text-sm font-bold text-white leading-tight">Getting Here</span>
+                <span className="text-[11px] font-medium leading-snug" style={{ color: "rgba(255,255,255,0.85)" }}>Trains, buses &amp; driving</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </MobileShell>

@@ -4,9 +4,24 @@ import MobileTabBar from "./MobileTabBar";
 // Native-app shell. Root is pinned to the viewport (see .mobile-root in
 // index.css) so the body never rubber-band scrolls and the tab bar is a fixed
 // flex child that never moves. Only `.mobile-scroll` scrolls.
-export default function MobileShell({ children, noPadding, title, onBack, transparentHeader }) {
+//
+// The header is the app's one consistent navigation surface: a back button
+// wherever there is somewhere to go back to, the screen title, and the global
+// search affordance — which stays in the same place on every screen so it never
+// disappears as the user moves through the app. Screens that paint their own
+// full-bleed hero (Home, the detail screens) pass `hideHeader` and render the
+// floating back/search controls over the image instead.
+export default function MobileShell({
+  children,
+  noPadding,
+  title,
+  onBack,
+  transparentHeader,
+  hideHeader,
+  showSearch = true,
+}) {
   const navigate = useNavigate();
-  const showHeader = title != null || onBack;
+  const showHeader = !hideHeader && (title != null || onBack || showSearch);
 
   return (
     <div className="mobile-root">
@@ -16,22 +31,42 @@ export default function MobileShell({ children, noPadding, title, onBack, transp
 
         {showHeader && (
           <header
-            className="flex items-center gap-3 px-4 h-12 shrink-0 z-10"
+            className="flex items-center gap-2 px-4 h-13 shrink-0 z-10"
             style={{
+              height: 52,
               backgroundColor: transparentHeader ? "transparent" : "#ffffff",
-              borderBottom: transparentHeader ? "none" : "1px solid rgba(28,46,56,0.08)",
+              borderBottom: transparentHeader ? "none" : "1px solid rgba(28,46,56,0.1)",
             }}
           >
-            <button
-              onClick={() => (onBack ? onBack() : navigate(-1))}
-              className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-black/5"
-              aria-label="Back"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0C1418" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            {title && <h1 className="text-base font-bold truncate" style={{ color: "#000000" }}>{title}</h1>}
+            {(onBack || title != null) && (
+              <button
+                onClick={() => (onBack ? onBack() : navigate(-1))}
+                className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-black/5"
+                aria-label="Back"
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M15 18l-6-6 6-6" />
+                </svg>
+              </button>
+            )}
+            {title && (
+              <h1 className="text-base font-bold truncate flex-1" style={{ color: "#000000" }}>
+                {title}
+              </h1>
+            )}
+            {!title && <div className="flex-1" />}
+            {showSearch && (
+              <button
+                onClick={() => navigate("/mobile/search")}
+                className="w-9 h-9 -mr-1 flex items-center justify-center rounded-full active:bg-black/5"
+                aria-label="Search"
+              >
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.2-3.2" />
+                </svg>
+              </button>
+            )}
           </header>
         )}
 

@@ -1,6 +1,7 @@
 import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
+import StickyCta, { TicketIcon } from "../components/StickyCta";
 import useFetch from "../../hooks/useFetch";
 import { getEventBySlug, getEvents } from "../../api";
 import { categoryColors } from "../../Data/events";
@@ -108,6 +109,9 @@ export default function EventDetailScreen() {
           )}
         </div>
       </div>
+
+      {/* Sticky ticket CTA — only when the event has a ticket/booking link. */}
+      {websiteUrl && <StickyCta label="Buy a Ticket" href={websiteUrl} icon={<TicketIcon />} />}
     </MobileShell>
   );
 }

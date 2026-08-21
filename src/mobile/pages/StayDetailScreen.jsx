@@ -3,6 +3,8 @@ import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import useFetch from "../../hooks/useFetch";
 import { getHotelBySlug, getAccommodationBySlug } from "../../api";
+import StickyCta, { TicketIcon } from "../components/StickyCta";
+import { OffersLink } from "../components/ListSearch";
 
 export default function StayDetailScreen() {
   const { kind, slug } = useParams();
@@ -97,8 +99,13 @@ export default function StayDetailScreen() {
               </a>
             )}
           </div>
+
+          <OffersLink className="mt-1" />
         </div>
       </div>
+
+      {/* Sticky booking CTA for stays that link out to their own booking page. */}
+      {websiteUrl && <StickyCta label="Make a Booking" href={websiteUrl} icon={<TicketIcon />} />}
     </MobileShell>
   );
 }

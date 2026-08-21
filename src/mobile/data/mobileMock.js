@@ -7,16 +7,13 @@
 
 export const heroImage = "/images/card-bridge.jpg";
 
-// Quick category tiles on Home
+// Quick Links on Home — one row of four, matching the website's primary
+// directory sections.
 export const homeCategories = [
   { id: "see-do", label: "See & Do", icon: "compass", to: "/mobile/see-do" },
   { id: "eat-drink", label: "Eat & Drink", icon: "cup", to: "/mobile/eat-drink" },
   { id: "shop", label: "Shop", icon: "bag", to: "/mobile/shop" },
   { id: "services", label: "Services", icon: "services", to: "/mobile/services" },
-  { id: "live", label: "Live & Stay", icon: "home", to: "/mobile/live" },
-  { id: "offers", label: "Offers", icon: "tag", to: "/mobile/offers" },
-  { id: "guides", label: "Guides", icon: "book", to: "/mobile/guides" },
-  { id: "map", label: "Map", icon: "pin", to: "/mobile/map" },
 ];
 
 // ─── Explore hub ───────────────────────────────────────────────────────────────
@@ -30,10 +27,12 @@ export const exploreSections = [
   { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
 
+// Practical information — the two things visitors actually need before they
+// travel. (The old "Visitor Information" and "Plan Your Visit" stubs were
+// removed in favour of the website's full Getting Here and Parking content.)
 export const exploreInfo = [
-  { id: "getting-here", title: "Getting Here", blurb: "Travel and transport info.", image: "/images/getting-here.jpg", to: "/mobile/info/getting-here" },
-  { id: "visitor-info", title: "Visitor Information", blurb: "Essential visitor details.", image: "/images/card-taplow.jpg", to: "/mobile/info/visitor-information" },
-  { id: "plan", title: "Plan Your Visit", blurb: "Everything for a great trip.", image: "/images/slide-river.jpg", to: "/mobile/plan" },
+  { id: "transport", title: "Transport & Getting Here", blurb: "Trains, buses, driving and cycling.", image: "/images/getting-here.jpg", to: "/mobile/transport" },
+  { id: "parking", title: "Parking", blurb: "Town-centre car parks and directions.", image: "/images/ql-parking.jpg", to: "/mobile/parking" },
 ];
 
 // ─── Content / info pages ──────────────────────────────────────────────────────
@@ -41,36 +40,6 @@ export const aboutStats = [
   { label: "Population", value: "70K+" },
   { label: "Parks & Green Spaces", value: "45" },
   { label: "Annual Events", value: "20+" },
-];
-
-export const infoPages = {
-  "getting-here": {
-    title: "Getting Here",
-    image: "/images/getting-here.jpg",
-    intro: "Maidenhead is superbly connected by rail and road, with the Elizabeth Line putting central London within easy reach.",
-    blocks: [
-      { heading: "By Train", body: "The Elizabeth Line and GWR services run direct to London Paddington (~20 min) and Reading. Maidenhead station is a 5-minute walk from the town centre." },
-      { heading: "By Car", body: "Just off the M4 (Junction 8/9) and A404(M). Several town-centre car parks including Nicholsons and Stafferton Way." },
-      { heading: "By Bus", body: "Local bus routes connect Maidenhead with Windsor, Slough, Reading and surrounding villages." },
-    ],
-  },
-  "visitor-information": {
-    title: "Visitor Information",
-    image: "/images/card-taplow.jpg",
-    intro: "Everything you need to know to make the most of your visit to Maidenhead.",
-    blocks: [
-      { heading: "Tourist Information", body: "Find maps, leaflets and local advice at the Heritage Centre on Park Street." },
-      { heading: "Accessibility", body: "The town centre is largely step-free, with accessible parking and Changing Places facilities at Nicholsons Centre." },
-      { heading: "Opening Hours", body: "Most shops open Mon–Sat 9:00–18:00, with riverside restaurants open later through the week." },
-    ],
-  },
-};
-
-export const planItems = [
-  { id: "getting-here", title: "Getting Here", blurb: "Find the best way to reach Maidenhead.", icon: "train", to: "/mobile/info/getting-here" },
-  { id: "where-to-stay", title: "Where to Stay", blurb: "Hotels and accommodation.", icon: "bed", to: "/mobile/info/visitor-information" },
-  { id: "accessibility", title: "Accessibility", blurb: "Information for accessible travel.", icon: "access", to: "/mobile/info/visitor-information" },
-  { id: "visitor-info", title: "Visitor Information", blurb: "Essential visitor details.", icon: "info", to: "/mobile/info/visitor-information" },
 ];
 
 export const aboutPage = {

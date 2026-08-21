@@ -3,12 +3,47 @@ import { Link } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import MobileShell from "../components/MobileShell";
-import { mapPins, mapFilters, PIN_COLORS, MAP_CENTRE } from "../data/mobileMock";
+import { ListSearch } from "../components/ListSearch";
+import { brandGrid } from "../../Data/content";
+import { MAP_CENTRE } from "../data/mobileMock";
 
 const CARTO_VOYAGER = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
-function makePin(type, active) {
-  const fill = PIN_COLORS[type] ?? PIN_COLORS.default;
+// Same category filters — and the same underlying trader dataset — the
+// website's Traders map uses (components/TradersMap.jsx).
+const FILTERS = [
+  { key: "all", label: "All", sections: null },
+  { key: "eat-drink", label: "Eat & Drink", sections: ["food-drink"] },
+  { key: "shop", label: "Shop", sections: ["shopping"] },
+  { key: "services", label: "Services", sections: ["services", "health-beauty"] },
+  { key: "see-do", label: "See & Do", sections: ["see-do"] },
+  { key: "stay", label: "Stay", sections: ["stay"] },
+];
+
+const SECTION_COLORS = {
+  "food-drink": "#52C7B6",
+  shopping: "#F2A65A",
+  services: "#1F9BB5",
+  "health-beauty": "#1F9BB5",
+  "see-do": "#2FA4A4",
+  stay: "#8E6FC4",
+};
+
+const colorFor = (section) => SECTION_COLORS[section] ?? "#52C7B6";
+
+// The website's trader links are web routes — map them onto the app's own
+// native detail screens so the map never leaves the app.
+function mobileHref(to) {
+  if (!to) return null;
+  let m = to.match(/^\/(?:eat-drink|shop|see-do|services)\/place\/([^/?#]+)/);
+  if (m) return `/mobile/place/${m[1]}`;
+  m = to.match(/^\/live\/stay\/(hotels|accommodation)\/([^/?#]+)/);
+  if (m) return `/mobile/stay/${m[1]}/${m[2]}`;
+  return null;
+}
+
+function makePin(section, active) {
+  const fill = colorFor(section);
   const w = active ? 34 : 26, h = active ? 44 : 34;
   return L.divIcon({
     className: "",
@@ -54,32 +89,96 @@ function LocateControl({ onLocate }) {
   );
 }
 
+// Recentres the map when a search result is chosen.
+function FlyTo({ target }) {
+  const map = useMap();
+  if (target) map.flyTo([target.lat, target.lng], 17, { duration: 0.7 });
+  return null;
+}
+
 export default function MapScreen() {
   const [userPos, setUserPos] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
   const [active, setActive] = useState(null);
+  const [flyTarget, setFlyTarget] = useState(null);
   const mapRef = useRef(null);
 
-  const pins = useMemo(() => (filter === "all" ? mapPins : mapPins.filter((p) => p.type === filter)), [filter]);
+  const withCoords = useMemo(
+    () => brandGrid.brands.filter((b) => typeof b.lat === "number" && typeof b.lng === "number"),
+    []
+  );
+
+  const activeFilter = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
+
+  const pins = useMemo(
+    () => (activeFilter.sections === null
+      ? withCoords
+      : withCoords.filter((b) => activeFilter.sections.includes(b.section))),
+    [withCoords, activeFilter]
+  );
+
+  // Typeahead over the currently-filtered pins.
+  const suggestions = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    return pins
+      .filter((b) => b.name.toLowerCase().includes(q) || b.category.toLowerCase().includes(q))
+      .slice(0, 6);
+  }, [pins, query]);
+
+  const directionsUrl = (b) => {
+    const from = userPos ? `&origin=${userPos.lat},${userPos.lng}` : "";
+    return `https://www.google.com/maps/dir/?api=1${from}&destination=${b.lat},${b.lng}`;
+  };
+
+  function choose(b) {
+    setActive(b);
+    setFlyTarget({ lat: b.lat, lng: b.lng, id: b.id });
+    setQuery("");
+  }
 
   return (
     <MobileShell noPadding>
       <div className="flex flex-col h-full">
-        <div className="px-5 pt-5 pb-3">
+        <div className="px-5 pt-4 pb-3">
           <h1 className="section-heading text-2xl font-bold mb-1" style={{ color: "#000000" }}>Map</h1>
-          <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>Find places, attractions and useful information around town.</p>
+          <p className="text-sm font-medium" style={{ color: "#000000" }}>Find places, attractions and useful information around town.</p>
         </div>
 
-        {/* Category filters */}
+        {/* Search over the map's businesses */}
+        <div className="px-5 pb-3 relative z-[1100]">
+          <ListSearch value={query} onChange={setQuery} placeholder="Search businesses on the map…" />
+          {suggestions.length > 0 && (
+            <div className="absolute left-5 right-5 mt-1.5 rounded-2xl overflow-hidden bg-white" style={{ boxShadow: "0 14px 34px -12px rgba(28,46,56,0.55)" }}>
+              {suggestions.map((b, i) => (
+                <button
+                  key={b.id}
+                  onClick={() => choose(b)}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-left active:bg-black/[0.04]"
+                  style={i < suggestions.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.08)" } : undefined}
+                >
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colorFor(b.section) }} />
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-bold truncate" style={{ color: "#000000" }}>{b.name}</span>
+                    <span className="block text-[11px] font-medium truncate" style={{ color: "#000000", opacity: 0.7 }}>{b.category}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Category filters — same set as the website's traders map */}
         <div className="flex gap-2 overflow-x-auto scrollbar-none px-5 pb-3">
-          {mapFilters.map((f) => (
+          {FILTERS.map((f) => (
             <button
               key={f.key}
               onClick={() => { setFilter(f.key); setActive(null); }}
-              className="shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap"
+              className="shrink-0 px-4 py-1.5 rounded-full text-xs whitespace-nowrap"
               style={filter === f.key
-                ? { backgroundColor: "var(--leaf)", color: "#ffffff" }
-                : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.65)" }}
+                ? { backgroundColor: "var(--forest)", color: "#ffffff", fontWeight: 800 }
+                : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000", fontWeight: 600 }}
             >
               {f.label}
             </button>
@@ -97,42 +196,56 @@ export default function MapScreen() {
             ref={mapRef}
           >
             <TileLayer url={CARTO_VOYAGER} maxZoom={20} />
-            {pins.map((pin) => (
+            {pins.map((b) => (
               <Marker
-                key={pin.id}
-                position={[pin.lat, pin.lng]}
-                icon={makePin(pin.type, active?.id === pin.id)}
-                eventHandlers={{ click: () => setActive(pin) }}
+                key={b.id}
+                position={[b.lat, b.lng]}
+                icon={makePin(b.section, active?.id === b.id)}
+                eventHandlers={{ click: () => setActive(b) }}
               />
             ))}
             {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={makeUserPin()} />}
+            <FlyTo target={flyTarget} />
             <LocateControl onLocate={setUserPos} />
           </MapContainer>
 
-          {/* Selected place bottom sheet */}
+          {/* Selected place sheet — details, directions and a link through to
+              the business's own page when it has one. */}
           {active && (
-            <div className="absolute left-3 right-3 bottom-3 z-[1000] rounded-2xl bg-white p-3 flex items-center gap-3" style={{ boxShadow: "0 8px 28px -6px rgba(0,0,0,0.45)" }}>
-              <div className="w-2 h-12 rounded-full shrink-0" style={{ backgroundColor: PIN_COLORS[active.type] }} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{active.name}</p>
-                <p className="text-xs" style={{ color: "#000000" }}>{active.category}</p>
+            <div className="absolute left-3 right-3 bottom-3 z-[1000] rounded-2xl bg-white overflow-hidden" style={{ boxShadow: "0 10px 30px -6px rgba(28,46,56,0.55)" }}>
+              <div className="flex items-center gap-3 p-3">
+                <div className="w-2 h-12 rounded-full shrink-0" style={{ backgroundColor: colorFor(active.section) }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{active.name}</p>
+                  <p className="text-xs font-medium truncate" style={{ color: "#000000", opacity: 0.75 }}>
+                    {active.category}{active.address ? ` · ${active.address}` : ""}
+                  </p>
+                </div>
+                <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "#000000" }} aria-label="Close">✕</button>
               </div>
-              {active.to ? (
-                <Link to={active.to} className="text-xs font-bold px-3 py-2 rounded-xl shrink-0" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
-                  View
-                </Link>
-              ) : (
+              <div className="flex gap-2 px-3 pb-3">
                 <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${active.lat},${active.lng}`}
+                  href={directionsUrl(active)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-bold px-3 py-2 rounded-xl shrink-0"
-                  style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}
+                  className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 rounded-xl"
+                  style={{ backgroundColor: "var(--teal-deep)", color: "#ffffff" }}
                 >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                  </svg>
                   Directions
                 </a>
-              )}
-              <button onClick={() => setActive(null)} className="text-lg leading-none px-1 shrink-0" style={{ color: "#000000" }} aria-label="Close">✕</button>
+                {mobileHref(active.to) && (
+                  <Link
+                    to={mobileHref(active.to)}
+                    className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl"
+                    style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}
+                  >
+                    View Details
+                  </Link>
+                )}
+              </div>
             </div>
           )}
         </div>

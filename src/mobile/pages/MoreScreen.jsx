@@ -10,11 +10,11 @@ const ITEMS = [
   { label: "Neighbourhood Guides", icon: "list", to: "/mobile/guides" },
   { label: "Work", icon: "list", to: "/mobile/work" },
   { label: "Business Directory", icon: "list", to: "/mobile/map" },
-  { label: "Plan Your Visit", icon: "map", to: "/mobile/plan" },
+  { label: "Parking", icon: "map", to: "/mobile/parking" },
+  { label: "Transport & Getting Here", icon: "train", to: "/mobile/transport" },
   { label: "Get the App", icon: "download", soon: true },
   { label: "Newsletter", icon: "mail", soon: true },
   { label: "Settings", icon: "settings", soon: true },
-  { label: "Help & Support", icon: "help", to: "/mobile/info/visitor-information" },
   { label: "About", icon: "info", to: "/mobile/about" },
 ];
 
@@ -25,6 +25,7 @@ function Icon({ name }) {
     case "mail": return <svg {...p}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>;
     case "bell": return <svg {...p}><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>;
     case "list": return <svg {...p}><rect x="3" y="4" width="7" height="7" rx="1.5" /><rect x="14" y="4" width="7" height="7" rx="1.5" /><rect x="3" y="13" width="7" height="7" rx="1.5" /><rect x="14" y="13" width="7" height="7" rx="1.5" /></svg>;
+    case "train": return <svg {...p}><rect x="5" y="3" width="14" height="13" rx="3" /><path d="M5 11h14M9 16l-2 4M15 16l2 4" /></svg>;
     case "map": return <svg {...p}><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z" /><path d="M9 4v14M15 6v14" /></svg>;
     case "settings": return <svg {...p}><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" /></svg>;
     case "help": return <svg {...p}><circle cx="12" cy="12" r="9" /><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2-2.4 3.2" /><circle cx="12" cy="17" r="0.5" fill="var(--forest)" stroke="none" /></svg>;

@@ -1,29 +1,60 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
-import MobileCard from "../components/MobileCard";
+import { ListSearch, FilterPills } from "../components/ListSearch";
 import { guides } from "../../Data/guides";
 
 export default function GuidesScreen() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(guides.map((g) => g.category)))],
+    []
+  );
+
+  const list = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return guides.filter((g) => {
+      if (category !== "All" && g.category !== category) return false;
+      if (!q) return true;
+      return g.title.toLowerCase().includes(q) || (g.summary ?? "").toLowerCase().includes(q);
+    });
+  }, [query, category]);
+
   return (
     <MobileShell title="Neighbourhood Guides" onBack>
       <div className="flex flex-col gap-4 mobile-stagger">
-        <p className="text-sm" style={{ color: "rgba(0,0,0,0.65)" }}>
+        <p className="text-sm font-medium" style={{ color: "#000000" }}>
           Curated guides to eating, drinking and spending time in Maidenhead.
         </p>
 
+        <ListSearch value={query} onChange={setQuery} placeholder="Search guides…" />
+
+        <FilterPills options={categories} value={category} onChange={setCategory} />
+
         <div className="flex flex-col gap-3">
-          {guides.map((g) => (
-            <Link key={g.slug} to={`/mobile/guides/${g.slug}`}>
-              <MobileCard className="flex items-stretch overflow-hidden active:opacity-90">
-                <img src={g.cardImage} alt="" className="w-24 h-24 object-cover shrink-0" />
-                <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                  <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{g.category}</span>
-                  <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{g.title}</p>
-                  <p className="text-xs mt-1 leading-snug line-clamp-2" style={{ color: "rgba(0,0,0,0.6)" }}>{g.summary}</p>
-                </div>
-              </MobileCard>
+          {list.map((g) => (
+            <Link
+              key={g.slug}
+              to={`/mobile/guides/${g.slug}`}
+              className="relative overflow-hidden rounded-2xl h-40 flex items-end active:opacity-90"
+              style={{ boxShadow: "0 12px 30px -14px rgba(28,46,56,0.6)" }}
+            >
+              <img src={g.cardImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 30%, rgba(12,20,24,0.9) 100%)" }} />
+              <div className="relative p-4">
+                <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--mint)", textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}>{g.category}</span>
+                <p className="text-base font-bold leading-snug text-white mt-0.5">{g.title}</p>
+                <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "rgba(255,255,255,0.85)" }}>{g.summary}</p>
+              </div>
             </Link>
           ))}
+          {list.length === 0 && (
+            <p className="text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>
+              No guides{query ? ` for “${query}”` : ""}.
+            </p>
+          )}
         </div>
       </div>
     </MobileShell>

@@ -8,8 +8,6 @@ import MapScreen from "./pages/MapScreen";
 import MoreScreen from "./pages/MoreScreen";
 import SectionScreen from "./pages/SectionScreen";
 import PlaceDetailScreen from "./pages/PlaceDetailScreen";
-import InfoScreen from "./pages/InfoScreen";
-import PlanScreen from "./pages/PlanScreen";
 import AboutScreen from "./pages/AboutScreen";
 import GuidesScreen from "./pages/GuidesScreen";
 import GuideDetailScreen from "./pages/GuideDetailScreen";
@@ -21,6 +19,9 @@ import EventDetailScreen from "./pages/EventDetailScreen";
 import NewsDetailScreen from "./pages/NewsDetailScreen";
 import StayDetailScreen from "./pages/StayDetailScreen";
 import FutureScreen from "./pages/FutureScreen";
+import SearchScreen from "./pages/SearchScreen";
+import TransportScreen from "./pages/TransportScreen";
+import ParkingScreen from "./pages/ParkingScreen";
 
 export default function MobileApp() {
   // Service worker scoped to /mobile/ only — never touches the rest of the site.
@@ -43,8 +44,9 @@ export default function MobileApp() {
       <Route path="shop" element={<SectionScreen sectionKey="shop" />} />
       <Route path="services" element={<SectionScreen sectionKey="services" />} />
       <Route path="place/:id" element={<PlaceDetailScreen />} />
-      <Route path="info/:topic" element={<InfoScreen />} />
-      <Route path="plan" element={<PlanScreen />} />
+      <Route path="search" element={<SearchScreen />} />
+      <Route path="transport" element={<TransportScreen />} />
+      <Route path="parking" element={<ParkingScreen />} />
       <Route path="about" element={<AboutScreen />} />
       <Route path="guides" element={<GuidesScreen />} />
       <Route path="guides/:slug" element={<GuideDetailScreen />} />
