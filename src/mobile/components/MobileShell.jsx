@@ -53,7 +53,7 @@ export default function MobileShell({
               </button>
             )}
             {title && (
-              <h1 className="text-base font-bold truncate flex-1" style={{ color: "#000000" }}>
+              <h1 className="text-base font-bold truncate flex-1" style={{ color: "var(--teal-deep)" }}>
                 {title}
               </h1>
             )}
