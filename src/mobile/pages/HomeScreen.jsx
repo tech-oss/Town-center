@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
-import { getEvents } from "../../api";
+import { getEvents, getStories } from "../../api";
 import { blogCards } from "../../Data/content";
 import { categoryColors } from "../../Data/events";
 import { guides } from "../../Data/guides";
@@ -34,9 +34,11 @@ function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
 export default function HomeScreen() {
   const videoRef = useRef(null);
   const { data: events } = useFetch(getEvents, []);
+  const { data: stories } = useFetch(getStories, []);
   const appOffers = blogCards.posts.filter((p) => p.homepage).slice(0, 4);
   const upcomingEvents = (events ?? []).slice(0, 3);
   const featuredGuides = guides.slice(0, 3);
+  const featuredStories = (stories ?? []).filter((s) => s.homepage);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -213,6 +215,33 @@ export default function HomeScreen() {
                       <p className="text-base font-bold leading-snug text-white mt-0.5">{g.title}</p>
                     </div>
                   </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Featured Stories — the website's "In Focus" section
+              (FeatureBlocks.jsx), as a horizontal scroller like What's On
+              rather than the alternating full-width rows desktop has room
+              for. Each card links to the same /mobile/story/:slug detail
+              page the "See all" listing on Offers already surfaces. ── */}
+          {featuredStories.length > 0 && (
+            <div>
+              <SectionHead eyebrow="Featured Stories" to="/mobile/offers" />
+              <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
+                {featuredStories.map((s) => (
+                  <div key={s.slug} className="shrink-0 w-64 flex flex-col overflow-hidden bg-white" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
+                    <SpotlightImage src={s.cardImage} alt={s.cardHeading} className="w-full h-40" />
+                    <div className="p-3.5 flex flex-col gap-1.5">
+                      <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{s.eyebrow}</span>
+                      <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{s.cardHeading}</p>
+                      <p className="text-xs leading-snug line-clamp-2 font-medium" style={{ color: "#000000", opacity: 0.7 }}>{s.cardBody}</p>
+                      <Link to={`/mobile/story/${s.slug}`} className="inline-flex items-center gap-1.5 text-xs font-bold mt-1" style={{ color: "var(--teal-deep)" }}>
+                        Read more
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                      </Link>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
