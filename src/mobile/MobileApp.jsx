@@ -7,6 +7,8 @@ import ExploreScreen from "./pages/ExploreScreen";
 import MapScreen from "./pages/MapScreen";
 import MoreScreen from "./pages/MoreScreen";
 import SectionScreen from "./pages/SectionScreen";
+import ServicesPickerScreen from "./pages/ServicesPickerScreen";
+import ServicesGroupScreen from "./pages/ServicesGroupScreen";
 import PlaceDetailScreen from "./pages/PlaceDetailScreen";
 import AboutScreen from "./pages/AboutScreen";
 import GuidesScreen from "./pages/GuidesScreen";
@@ -50,7 +52,8 @@ export default function MobileApp() {
       <Route path="see-do" element={<SectionScreen sectionKey="see-do" />} />
       <Route path="eat-drink" element={<SectionScreen sectionKey="eat-drink" />} />
       <Route path="shop" element={<SectionScreen sectionKey="shop" />} />
-      <Route path="services" element={<SectionScreen sectionKey="services" />} />
+      <Route path="services" element={<ServicesPickerScreen />} />
+      <Route path="services/:group" element={<ServicesGroupScreen />} />
       <Route path="place/:id" element={<PlaceDetailScreen />} />
       <Route path="search" element={<SearchScreen />} />
       <Route path="transport" element={<TransportScreen />} />
