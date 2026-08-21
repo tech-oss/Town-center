@@ -1,8 +1,46 @@
 import { Link, useParams, Navigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getGuideBySlug, guides } from "../Data/guides";
 import { card, pill } from "../utils/design";
 import useTapReveal from "../hooks/useTapReveal";
+
+function ShareButton({ guide }) {
+  const [copied, setCopied] = useState(false);
+
+  async function handleShare() {
+    const url = `${window.location.origin}/guides/${guide.slug}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: guide.title, text: guide.summary, url });
+      } catch {
+        /* user cancelled — no-op */
+      }
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard unavailable — no-op */
+    }
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      className="relative inline-flex items-center gap-2 mt-5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide transition-colors hover:bg-white/10"
+      style={{ color: "#ffffff", border: "1px solid rgba(255,255,255,0.5)" }}
+      aria-label="Share this guide"
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
+        <path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" />
+      </svg>
+      {copied ? "Link copied" : "Share"}
+    </button>
+  );
+}
 
 function PlaceSection({ s, index }) {
   const reversed = index % 2 === 1;
@@ -69,6 +107,7 @@ export default function GuideDetailPage() {
         <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium text-white" style={{ letterSpacing: "-0.01em" }}>
           {guide.summary}
         </p>
+        <ShareButton guide={guide} />
       </section>
 
       {/* Breadcrumb */}
