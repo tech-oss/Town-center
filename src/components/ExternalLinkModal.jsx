@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 // Sitewide "Leaving our website" confirmation, shown before any external
 // link (a different hostname) is opened. Modeled on NewsletterModal's
 // overlay/focus-trap/escape pattern.
-export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
+export default function ExternalLinkModal({ open, onConfirm, onCancel, isMobileApp }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -47,7 +47,7 @@ export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[3000] flex items-center justify-center p-4 sm:p-6"
       style={{ backgroundColor: "rgba(15,28,35,0.55)", backdropFilter: "blur(4px)", WebkitBackdropFilter: "blur(4px)" }}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onCancel();
@@ -67,7 +67,7 @@ export default function ExternalLinkModal({ open, onConfirm, onCancel }) {
           className="text-xl font-bold mb-2 leading-tight"
           style={{ color: "#000000" }}
         >
-          Leaving our website
+          {isMobileApp ? "Leaving our Mobile App" : "Leaving our website"}
         </h2>
         <p id="external-link-modal-desc" className="text-sm leading-relaxed mb-6" style={{ color: "#000000" }}>
           This link will take you to an external website. We don&rsquo;t control its content.

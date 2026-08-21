@@ -159,6 +159,7 @@ function LogoAnimationDemo() {
 
 function App() {
   const { pendingHref, confirm, cancel } = useExternalLinkGuard()
+  const { pathname } = useLocation()
   return (
     <>
       <Routes>
@@ -166,7 +167,12 @@ function App() {
         <Route path="/logo-animation" element={<LogoAnimationDemo />} />
         <Route path="*" element={<PublicSite />} />
       </Routes>
-      <ExternalLinkModal open={!!pendingHref} onConfirm={confirm} onCancel={cancel} />
+      <ExternalLinkModal
+        open={!!pendingHref}
+        onConfirm={confirm}
+        onCancel={cancel}
+        isMobileApp={pathname.startsWith('/mobile')}
+      />
     </>
   )
 }
