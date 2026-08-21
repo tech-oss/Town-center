@@ -42,15 +42,20 @@ function mobileHref(to) {
   return null;
 }
 
+// A selected pin uses a distinct highlight colour rather than just a scaled
+// version of its own category colour, so it reads unmistakably as "this one"
+// against the teal/orange/purple category pins around it.
+const SELECTED_COLOR = "#E63946";
+
 function makePin(section, active) {
-  const fill = colorFor(section);
-  const w = active ? 34 : 26, h = active ? 44 : 34;
+  const fill = active ? SELECTED_COLOR : colorFor(section);
+  const w = active ? 46 : 26, h = active ? 60 : 34;
   return L.divIcon({
     className: "",
-    html: `<svg width="${w}" height="${h}" viewBox="0 0 28 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 5px rgba(0,0,0,0.4))">
-      ${active ? `<circle cx="14" cy="14" r="17" fill="${fill}" fill-opacity="0.2"/>` : ""}
-      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 24 14 24s14-14.667 14-24C28 6.268 21.732 0 14 0z" fill="${fill}"/>
-      <circle cx="14" cy="14" r="6" fill="#fff"/>
+    html: `<svg width="${w}" height="${h}" viewBox="0 0 28 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 4px 10px rgba(0,0,0,0.5));${active ? "animation:pinPulse 1.4s ease-out infinite;" : ""}">
+      ${active ? `<circle cx="14" cy="14" r="20" fill="${fill}" fill-opacity="0.22"/>` : ""}
+      <path d="M14 0C6.268 0 0 6.268 0 14c0 9.333 14 24 14 24s14-14.667 14-24C28 6.268 21.732 0 14 0z" fill="${fill}" stroke="#fff" stroke-width="${active ? 1.5 : 0}"/>
+      <circle cx="14" cy="14" r="${active ? 7 : 6}" fill="#fff"/>
     </svg>`,
     iconSize: [w, h],
     iconAnchor: [w / 2, h],
