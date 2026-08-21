@@ -35,7 +35,6 @@ export default function GuideDetailScreen() {
       <div className="flex flex-col">
         <div className="relative">
           <img src={guide.heroImage} alt="" className="w-full h-48 object-cover" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.3) 0%, rgba(20,33,42,0.05) 45%, #ffffff 100%)" }} />
           <button onClick={() => window.history.back()} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>

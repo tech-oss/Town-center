@@ -130,7 +130,7 @@ export default function WhatsOnScreen() {
         </div>
 
         {/* Event types */}
-        <div className="relative">
+        <div className="relative z-30">
           <button
             onClick={() => setTypesOpen((o) => !o)}
             className="flex items-center justify-center gap-1.5 text-xs font-bold rounded-full px-4 py-2"
