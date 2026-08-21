@@ -170,7 +170,7 @@ export default function GuideDetailPage() {
                   <span className="text-xl shrink-0">{it.icon}</span>
                   <div className="min-w-0">
                     <p className="text-xs leading-snug" style={{ color: "rgba(255,255,255,0.7)" }}>{it.label}</p>
-                    <p className="font-bold text-white leading-snug truncate">{it.answer}</p>
+                    <p className="text-sm font-bold text-white leading-snug">{it.answer}</p>
                   </div>
                 </div>
               ))}
