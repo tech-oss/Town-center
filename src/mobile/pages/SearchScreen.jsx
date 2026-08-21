@@ -1,6 +1,7 @@
 import { useMemo, useRef, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import useMobileBack from "../hooks/useMobileBack";
 import { searchAll, SEARCH_GROUPS } from "../lib/searchIndex";
 
 const SUGGESTIONS = [
@@ -13,7 +14,7 @@ const SUGGESTIONS = [
 ];
 
 export default function SearchScreen() {
-  const navigate = useNavigate();
+  const goBack = useMobileBack("/mobile/home");
   const [q, setQ] = useState("");
   const [group, setGroup] = useState("All");
   const inputRef = useRef(null);
@@ -41,7 +42,7 @@ export default function SearchScreen() {
         {/* Search bar */}
         <div className="px-4 pt-3 pb-3 sticky top-0 z-20" style={{ backgroundColor: "#ffffff", borderBottom: "1px solid rgba(28,46,56,0.1)" }}>
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate(-1)} className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-black/5" aria-label="Back">
+            <button onClick={goBack} className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-black/5" aria-label="Back">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
             </button>
             <div className="flex-1 flex items-center gap-2 px-3.5 rounded-full" style={{ height: 42, backgroundColor: "rgba(28,46,56,0.06)" }}>

@@ -51,7 +51,7 @@ export default function SectionScreen({ sectionKey }) {
   }, [section, filter, query]);
 
   return (
-    <MobileShell title={section.label} onBack>
+    <MobileShell title={section.label} onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{SECTION_INTROS[sectionKey] ?? section.landing?.intro}</p>
 

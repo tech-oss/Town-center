@@ -24,7 +24,7 @@ const MAPS = {
 
 export default function TransportScreen() {
   return (
-    <MobileShell title="Getting Here" onBack noPadding>
+    <MobileShell title="Getting Here" onBack backFallback="/mobile/explore" noPadding>
       <div className="flex flex-col">
         {/* Hero */}
         <div className="relative">

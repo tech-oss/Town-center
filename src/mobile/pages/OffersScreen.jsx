@@ -203,7 +203,7 @@ export default function OffersScreen() {
   });
 
   return (
-    <MobileShell title="Offers & Stories" onBack>
+    <MobileShell title="Offers & Stories" onBack backFallback="/mobile/home">
       <div className="flex flex-col gap-4 mobile-stagger">
         <p className="text-sm" style={{ color: "rgba(0,0,0,0.65)" }}>
           Every Featured Story and Spotlight Article — search and filter offers and the latest news from businesses around Maidenhead.

@@ -3,7 +3,7 @@ import MobileShell from "../components/MobileShell";
 
 export default function WorkScreen() {
   return (
-    <MobileShell title="Work" onBack>
+    <MobileShell title="Work" onBack backFallback="/mobile/explore">
       <div className="flex flex-col items-center text-center gap-5 pt-6 mobile-stagger">
         <span
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.08em]"

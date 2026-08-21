@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import MobileTabBar from "./MobileTabBar";
+import useMobileBack from "../hooks/useMobileBack";
 
 // Native-app shell. Root is pinned to the viewport (see .mobile-root in
 // index.css) so the body never rubber-band scrolls and the tab bar is a fixed
@@ -16,11 +17,13 @@ export default function MobileShell({
   noPadding,
   title,
   onBack,
+  backFallback = "/mobile/home",
   transparentHeader,
   hideHeader,
   showSearch = true,
 }) {
   const navigate = useNavigate();
+  const goBack = useMobileBack(backFallback);
   const showHeader = !hideHeader && (title != null || onBack || showSearch);
 
   return (
@@ -40,7 +43,7 @@ export default function MobileShell({
           >
             {(onBack || title != null) && (
               <button
-                onClick={() => (onBack ? onBack() : navigate(-1))}
+                onClick={() => (typeof onBack === "function" ? onBack() : goBack())}
                 className="w-9 h-9 -ml-2 flex items-center justify-center rounded-full active:bg-black/5"
                 aria-label="Back"
               >

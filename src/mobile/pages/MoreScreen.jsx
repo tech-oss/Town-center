@@ -43,7 +43,7 @@ export default function MoreScreen() {
   }
 
   return (
-    <MobileShell>
+    <MobileShell onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
         <h1 className="section-heading text-2xl font-bold" style={{ color: "#000000" }}>More</h1>
 

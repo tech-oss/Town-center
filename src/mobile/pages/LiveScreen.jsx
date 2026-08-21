@@ -39,7 +39,7 @@ export default function LiveScreen() {
   }, [all, filter, query]);
 
   return (
-    <MobileShell title="Live & Stay" onBack>
+    <MobileShell title="Live & Stay" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-4 mobile-stagger">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>
           Hotels and accommodation in and around Maidenhead.

@@ -1,5 +1,6 @@
 import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
+import useMobileBack from "../hooks/useMobileBack";
 import { explore } from "../../Data/explore";
 
 function FeatureImage({ image, alt }) {
@@ -13,13 +14,14 @@ function FeatureImage({ image, alt }) {
 }
 
 export default function FutureScreen() {
+  const goBack = useMobileBack("/mobile/explore");
   return (
     <MobileShell noPadding>
       <div className="flex flex-col">
         <div className="relative h-64">
           <img src={explore.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.92) 100%)" }} />
-          <button onClick={() => window.history.back()} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
+          <button onClick={goBack} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
           <div className="absolute bottom-5 left-5 right-5">

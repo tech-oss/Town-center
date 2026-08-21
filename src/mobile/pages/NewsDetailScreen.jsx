@@ -2,11 +2,13 @@ import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useFetch from "../../hooks/useFetch";
 import { getArticleBySlug } from "../../api";
+import useMobileBack from "../hooks/useMobileBack";
 
 export default function NewsDetailScreen() {
   const { slug } = useParams();
   const { data: article, loading } = useFetch(() => getArticleBySlug(slug), [slug]);
 
+  const goBack = useMobileBack("/mobile/offers");
   if (!loading && !article) return <Navigate to="/mobile/offers" replace />;
   if (loading || !article) return null;
 
@@ -19,7 +21,7 @@ export default function NewsDetailScreen() {
       <div className="flex flex-col">
         <div className="relative">
           <img src={article.image} alt={article.title} className="w-full h-56 object-cover" />
-          <button onClick={() => window.history.back()} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
+          <button onClick={goBack} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
         </div>

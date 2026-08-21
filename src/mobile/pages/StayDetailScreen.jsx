@@ -3,6 +3,7 @@ import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import useFetch from "../../hooks/useFetch";
 import { getHotelBySlug, getAccommodationBySlug } from "../../api";
+import useMobileBack from "../hooks/useMobileBack";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import { OffersLink } from "../components/ListSearch";
 
@@ -14,6 +15,7 @@ export default function StayDetailScreen() {
     [kind, slug]
   );
 
+  const goBack = useMobileBack("/mobile/live");
   if (!loading && !place) return <Navigate to="/mobile/live" replace />;
   if (loading || !place) return null;
 
@@ -28,7 +30,7 @@ export default function StayDetailScreen() {
       <div className="flex flex-col">
         <div className="relative">
           <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
-          <button onClick={() => window.history.back()} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
+          <button onClick={goBack} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
         </div>

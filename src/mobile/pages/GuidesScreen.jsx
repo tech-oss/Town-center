@@ -23,7 +23,7 @@ export default function GuidesScreen() {
   }, [query, category]);
 
   return (
-    <MobileShell title="Neighbourhood Guides" onBack>
+    <MobileShell title="Neighbourhood Guides" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-4 mobile-stagger">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>
           Curated guides to eating, drinking and spending time in Maidenhead.

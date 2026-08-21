@@ -22,6 +22,7 @@ import FutureScreen from "./pages/FutureScreen";
 import SearchScreen from "./pages/SearchScreen";
 import TransportScreen from "./pages/TransportScreen";
 import ParkingScreen from "./pages/ParkingScreen";
+import { markMobileAppMounted } from "./lib/navHistory";
 
 export default function MobileApp() {
   // Service worker scoped to /mobile/ only — never touches the rest of the site.
@@ -29,6 +30,13 @@ export default function MobileApp() {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js", { scope: "/mobile/" }).catch(() => {});
     }
+  }, []);
+
+  // Captures the history-length baseline every back button uses to tell a
+  // real in-app navigation from a deep link / relaunch straight onto a
+  // detail screen (see lib/navHistory.js).
+  useEffect(() => {
+    markMobileAppMounted();
   }, []);
 
   return (

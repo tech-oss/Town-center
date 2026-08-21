@@ -106,7 +106,7 @@ export default function WhatsOnScreen() {
     : { today: "Today", tomorrow: "Tomorrow", week: "This Week" }[quickFilter];
 
   return (
-    <MobileShell>
+    <MobileShell onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
         <div>
           <h1 className="section-heading text-2xl font-bold mb-1.5" style={{ color: "#000000" }}>What's On</h1>

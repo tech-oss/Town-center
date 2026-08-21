@@ -8,7 +8,7 @@ const accessibility = goodToKnow.find((g) => g.id === "accessibility");
 
 export default function ParkingScreen() {
   return (
-    <MobileShell title="Parking" onBack noPadding>
+    <MobileShell title="Parking" onBack backFallback="/mobile/transport" noPadding>
       <div className="flex flex-col">
         <img src={parking.image} alt="" className="w-full h-52 object-cover" />
 
