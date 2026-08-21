@@ -14,7 +14,8 @@ import AboutScreen from "./pages/AboutScreen";
 import GuidesScreen from "./pages/GuidesScreen";
 import GuideDetailScreen from "./pages/GuideDetailScreen";
 import OffersScreen from "./pages/OffersScreen";
-import LiveScreen from "./pages/LiveScreen";
+import LiveStayPickerScreen from "./pages/LiveStayPickerScreen";
+import StayListingScreen from "./pages/StayListingScreen";
 import WorkScreen from "./pages/WorkScreen";
 import StoryDetailScreen from "./pages/StoryDetailScreen";
 import EventDetailScreen from "./pages/EventDetailScreen";
@@ -62,7 +63,8 @@ export default function MobileApp() {
       <Route path="guides" element={<GuidesScreen />} />
       <Route path="guides/:slug" element={<GuideDetailScreen />} />
       <Route path="offers" element={<OffersScreen />} />
-      <Route path="live" element={<LiveScreen />} />
+      <Route path="live" element={<LiveStayPickerScreen />} />
+      <Route path="live/:kind" element={<StayListingScreen />} />
       <Route path="work" element={<WorkScreen />} />
       <Route path="story/:slug" element={<StoryDetailScreen />} />
       <Route path="event/:slug" element={<EventDetailScreen />} />

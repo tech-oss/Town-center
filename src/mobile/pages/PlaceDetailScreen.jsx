@@ -2,9 +2,14 @@ import { useParams, Link, Navigate } from "react-router-dom";
 import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
+import PhotoGallery from "../components/PhotoGallery";
+import MiniMap from "../components/MiniMap";
 import { itemBySlug, sections } from "../../Data/pages";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import useMobileBack from "../hooks/useMobileBack";
+import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
+import ServicesBusinessDetailScreen from "./ServicesBusinessDetailScreen";
+import FreelancerDetailScreen from "./FreelancerDetailScreen";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -26,22 +31,22 @@ function ActionButton({ icon, label, href, onClick }) {
   return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>;
 }
 
-export default function PlaceDetailScreen() {
-  const { id } = useParams();
-  const place = itemBySlug[id];
+// Eat & Drink / Shop / See & Do business detail — the website's
+// PlaceDetailLayout equivalent. Services (tradesperson/professional/
+// freelancer) uses its own, richer native screens below since the website
+// itself gives Services a completely different, deeper layout
+// (ServicesDetailLayout/FreelancerDetailLayout) rather than this one.
+function BusinessDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
-  const goBack = useMobileBack(place ? `/mobile/${place.section}` : "/mobile/explore");
-
-  if (!place) return <Navigate to="/mobile/explore" replace />;
-
   const section = sections[place.section];
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.address)}`;
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
   const news = place.news ?? [];
   const social = place.social
     ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k])
     : [];
   const more = (section?.items ?? []).filter((it) => it.slug !== place.slug).slice(0, 3);
+  const gallery = (place.gallery ?? []).filter((g) => g !== place.image);
 
   async function handleShare() {
     const url = `${window.location.origin}/${place.section}/place/${place.slug}`;
@@ -65,7 +70,6 @@ export default function PlaceDetailScreen() {
   return (
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
-        {/* Hero */}
         <div className="relative">
           <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
         </div>
@@ -92,6 +96,12 @@ export default function PlaceDetailScreen() {
               <a href={`tel:${place.phone.replace(/[^\d+]/g, "")}`} className="flex items-start gap-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></svg>
                 <span className="text-sm" style={{ color: "#000000" }}>{place.phone}</span>
+              </a>
+            )}
+            {place.email && (
+              <a href={`mailto:${place.email}`} className="flex items-start gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+                <span className="text-sm break-all" style={{ color: "#000000" }}>{place.email}</span>
               </a>
             )}
             {websiteUrl && (
@@ -154,6 +164,18 @@ export default function PlaceDetailScreen() {
             )}
           </MobileCard>
 
+          {/* Extra photos — matches the website's up-to-6, 2-per-row grid
+              with a tap-to-enlarge lightbox. */}
+          <PhotoGallery images={gallery} title={place.name} />
+
+          {/* Location map — the website embeds one on every detail page;
+              geocoded from the address since not every listing has stored
+              coordinates. */}
+          <div>
+            <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
+            <MiniMap query={place.mapQuery || place.address} lat={place.lat} lng={place.lng} />
+          </div>
+
           {/* News & Offers — same glassmorphic dark-teal card treatment as
               the website's Eat & Drink business pages, condensed to a
               horizontal scroller for mobile. */}
@@ -208,4 +230,26 @@ export default function PlaceDetailScreen() {
       )}
     </MobileShell>
   );
+}
+
+// Dispatcher — matches the website's own split: See & Do/Eat & Drink/Shop
+// use PlaceDetailLayout (BusinessDetailScreen here); Services splits again
+// into the local-directory profile (tradespeople/professionals) or the
+// lighter portfolio-first profile (freelancers), same FREELANCER_CATEGORIES
+// test the website's ServicesDetailPage.jsx uses.
+export default function PlaceDetailScreen() {
+  const { id } = useParams();
+  const place = itemBySlug[id];
+  const goBack = useMobileBack(place ? `/mobile/${place.section}` : "/mobile/explore");
+
+  if (!place) return <Navigate to="/mobile/explore" replace />;
+
+  if (place.section === "services") {
+    if (FREELANCER_CATEGORIES.has(place.category)) {
+      return <FreelancerDetailScreen place={place} goBack={goBack} />;
+    }
+    return <ServicesBusinessDetailScreen place={place} goBack={goBack} />;
+  }
+
+  return <BusinessDetailScreen place={place} goBack={goBack} />;
 }
