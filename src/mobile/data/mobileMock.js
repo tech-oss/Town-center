@@ -10,10 +10,10 @@ export const heroImage = "/images/card-bridge.jpg";
 // Quick Links on Home — one row of four, matching the website's primary
 // directory sections.
 export const homeCategories = [
-  { id: "see-do", label: "See & Do", icon: "compass", to: "/mobile/see-do" },
-  { id: "eat-drink", label: "Eat & Drink", icon: "cup", to: "/mobile/eat-drink" },
-  { id: "shop", label: "Shop", icon: "bag", to: "/mobile/shop" },
-  { id: "services", label: "Services", icon: "services", to: "/mobile/services" },
+  { id: "see-do", label: "See & Do", image: "/images/quick-links/see-do.jpg", to: "/mobile/see-do" },
+  { id: "eat-drink", label: "Eat & Drink", image: "/images/quick-links/eat-drink.jpg", to: "/mobile/eat-drink" },
+  { id: "shop", label: "Shop", image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
+  { id: "services", label: "Services", image: "/images/quick-links/services.jpg", to: "/mobile/services" },
 ];
 
 // ─── Explore hub ───────────────────────────────────────────────────────────────

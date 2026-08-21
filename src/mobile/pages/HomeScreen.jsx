@@ -9,17 +9,6 @@ import { categoryColors } from "../../Data/events";
 import { guides } from "../../Data/guides";
 import { homeCategories } from "../data/mobileMock";
 
-function CatIcon({ name }) {
-  const p = { width: 24, height: 24, viewBox: "0 0 24 24", fill: "none", stroke: "#ffffff", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
-  switch (name) {
-    case "compass": return <svg {...p}><circle cx="12" cy="12" r="9" /><path d="M15 9l-2 6-6 2 2-6z" /></svg>;
-    case "cup": return <svg {...p}><path d="M5 8h11v5a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V8Z" /><path d="M16 9h2a2 2 0 0 1 0 4h-2" /><path d="M7 3v2M11 3v2" /></svg>;
-    case "bag": return <svg {...p}><path d="M5 8h14l-1.1 12.1A2 2 0 0 1 15.9 22H8.1a2 2 0 0 1-2-1.9L5 8Z" /><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2" /></svg>;
-    case "services": return <svg {...p}><path d="M14.7 6.3a4 4 0 0 0 5.1 5.1l-7 7a2.8 2.8 0 0 1-4-4l7-7Z" /><path d="m5.5 18.5 1 1" /></svg>;
-    default: return null;
-  }
-}
-
 // Same framed-photo tap-reveal used throughout the desktop site.
 function SpotlightImage({ src, alt, className = "" }) {
   const { revealed, onImageClick } = useTapReveal();
@@ -125,11 +114,11 @@ export default function HomeScreen() {
             <div className="grid grid-cols-4 gap-3">
               {homeCategories.map((c) => (
                 <Link key={c.id} to={c.to} className="flex flex-col items-center gap-2 active:opacity-70">
-                  <div
-                    className="w-full aspect-square rounded-2xl flex items-center justify-center"
-                    style={{ background: "linear-gradient(140deg, var(--forest), var(--teal-deep))" }}
-                  >
-                    <CatIcon name={c.icon} />
+                  <div className="relative w-full aspect-square rounded-2xl overflow-hidden">
+                    <img src={c.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                    {/* Bottom-weighted tint so a light photo still reads as a
+                        crisp tile, matching the tab bar's dark-teal accent. */}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 45%, rgba(12,20,24,0.35) 100%)" }} />
                   </div>
                   <span className="text-[11px] font-bold text-center leading-tight" style={{ color: "#000000" }}>{c.label}</span>
                 </Link>
