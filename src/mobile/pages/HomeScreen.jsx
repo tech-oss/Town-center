@@ -98,7 +98,22 @@ export default function HomeScreen() {
                 all, so mirroring the slide's eyebrow/headline here was
                 showing different copy than the site actually displays. */}
             <p className="text-xs font-medium mb-1 text-white" style={{ letterSpacing: "-0.01em", textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>Welcome to</p>
-            <h1 className="hero-title uppercase text-4xl leading-none text-white" style={{ textShadow: "0 2px 20px rgba(0,0,0,0.5)" }}>Maidenhead</h1>
+            <h1
+              className="hero-title uppercase leading-none text-white"
+              style={{
+                // Fluid instead of a fixed text-4xl: on the narrowest phones
+                // — or with a browser/accessibility text-size boost — a flat
+                // 36px plus this face's letter-spacing pushed "MAIDENHEAD"
+                // past the right edge of the hero. Scaling with viewport
+                // width keeps it inside the same left-5/right-5 padding on
+                // every screen instead of only the ones this got tested on.
+                fontSize: "clamp(1.65rem, 9.5vw, 2.25rem)",
+                letterSpacing: "0.03em",
+                textShadow: "0 2px 20px rgba(0,0,0,0.5)",
+              }}
+            >
+              Maidenhead
+            </h1>
             <p className="text-xs font-medium uppercase mt-2 text-white" style={{ letterSpacing: "-0.01em", textShadow: "0 1px 10px rgba(0,0,0,0.45)" }}>Riverside · Connected · Thriving</p>
           </div>
         </div>
