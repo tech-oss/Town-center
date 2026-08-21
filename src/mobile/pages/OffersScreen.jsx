@@ -120,14 +120,54 @@ function TypeFilterButton({ types, active, onChange }) {
 
 function BusinessTypeFilter({ active, onChange }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [menuPos, setMenuPos] = useState(null);
+  const btnRef = useRef(null);
+  const menuRef = useRef(null);
   const activeLabel = BUSINESS_TYPES.find((b) => b.key === active)?.label;
 
+  // The filter row this button lives in scrolls horizontally
+  // (overflow-x-auto), which forces the browser to clip overflow-y too — an
+  // inline `absolute` dropdown would be cut off instead of floating over the
+  // page. Rendered through a portal and positioned from the button's own
+  // rect instead, matching the pattern already used for the Type filter
+  // sheet below.
+  const computePos = () => {
+    const r = btnRef.current?.getBoundingClientRect();
+    if (!r) return null;
+    const left = Math.min(r.left, window.innerWidth - 224 - 20);
+    return { top: r.bottom + 8, left: Math.max(left, 12) };
+  };
+
+  const openMenu = () => {
+    setMenuPos(computePos());
+    setOpen(true);
+  };
+
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (e) => {
+      if (menuRef.current?.contains(e.target) || btnRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
+    const onReposition = () => setMenuPos(computePos());
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("touchstart", onClickOutside);
+    window.addEventListener("resize", onReposition);
+    document.querySelector(".mobile-scroll")?.addEventListener("scroll", onReposition, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("touchstart", onClickOutside);
+      window.removeEventListener("resize", onReposition);
+      document.querySelector(".mobile-scroll")?.removeEventListener("scroll", onReposition);
+    };
+  }, [open]);
+
   return (
-    <div ref={ref} className="relative shrink-0 z-30">
+    <div className="relative shrink-0">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? setOpen(false) : openMenu())}
         className="inline-flex items-center gap-2 pl-4 pr-3.5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap"
         style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.75)" }}
       >
@@ -135,8 +175,12 @@ function BusinessTypeFilter({ active, onChange }) {
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
       </button>
 
-      {open && (
-        <div className="absolute z-30 top-full mt-2 left-0 w-56 bg-white rounded-2xl p-2 flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+      {open && menuPos && createPortal(
+        <div
+          ref={menuRef}
+          className="fixed z-[3000] w-56 max-w-[calc(100vw-2.5rem)] bg-white rounded-2xl p-2 flex flex-col gap-0.5"
+          style={{ top: menuPos.top, left: menuPos.left, boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}
+        >
           <button type="button" onClick={() => { onChange(null); setOpen(false); }} className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg active:bg-black/5" style={{ color: "#000000" }}>
             All Business Types
             <RadioDot active={!active} />
@@ -147,7 +191,8 @@ function BusinessTypeFilter({ active, onChange }) {
               <RadioDot active={active === b.key} />
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

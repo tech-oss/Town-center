@@ -6,13 +6,10 @@ import { aboutPage, aboutStats } from "../data/mobileMock";
 export default function AboutScreen() {
   const goBack = useMobileBack("/mobile/explore");
   return (
-    <MobileShell noPadding>
+    <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
           <img src={aboutPage.image} alt="" className="w-full h-52 object-cover" />
-          <button onClick={goBack} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
         </div>
 
         <div className="px-5 pt-5 flex flex-col gap-6 pb-6 mobile-stagger">

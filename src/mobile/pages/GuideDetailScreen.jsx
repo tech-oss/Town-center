@@ -33,13 +33,10 @@ export default function GuideDetailScreen() {
   }
 
   return (
-    <MobileShell noPadding>
+    <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
           <img src={guide.heroImage} alt="" className="w-full h-48 object-cover" />
-          <button onClick={goBack} className="absolute top-3 left-4 w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Back">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
           <button onClick={handleShare} className="absolute top-3 right-4 w-9 h-9 rounded-full flex items-center justify-center active:opacity-80" style={{ backgroundColor: "rgba(0,0,0,0.4)" }} aria-label="Share this guide">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" />
