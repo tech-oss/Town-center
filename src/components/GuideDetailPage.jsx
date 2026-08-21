@@ -145,7 +145,7 @@ export default function GuideDetailPage() {
               <h2 className="section-heading text-2xl md:text-4xl font-bold mb-3 leading-tight" style={{ color: "#000000" }}>{guide.moreSpots.heading}</h2>
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{guide.moreSpots.intro}</p>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {guide.moreSpots.items.map((it) => (
                 <div key={it.title} className="bg-white rounded-2xl p-5" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
                   <h3 className="font-bold text-base leading-snug mb-1" style={{ color: "#000000" }}>{it.title}</h3>
@@ -164,7 +164,7 @@ export default function GuideDetailPage() {
           <div className="max-w-6xl mx-auto rounded-3xl px-6 py-10 md:py-12" style={{ background: "linear-gradient(135deg, var(--forest), var(--teal-deep))" }}>
             <h2 className="section-heading text-2xl md:text-3xl font-bold text-white mb-2 text-center">{guide.cheatSheet.heading}</h2>
             <p className="text-sm text-center mb-8" style={{ color: "rgba(255,255,255,0.78)" }}>{guide.cheatSheet.intro}</p>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {guide.cheatSheet.items.map((it) => (
                 <div key={it.label} className="rounded-2xl p-4 flex items-center gap-3" style={{ backgroundColor: "rgba(255,255,255,0.08)" }}>
                   <span className="text-xl shrink-0">{it.icon}</span>
@@ -188,7 +188,7 @@ export default function GuideDetailPage() {
               <h2 className="section-heading text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{guide.combinations.heading}</h2>
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{guide.combinations.intro}</p>
             </div>
-            <div className="grid sm:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {guide.combinations.items.map((c) => (
                 <div key={c.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
                   <div className="flex items-center gap-3 mb-2">
