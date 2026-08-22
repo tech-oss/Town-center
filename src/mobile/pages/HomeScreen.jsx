@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import NotificationTray, { NOTIFICATIONS } from "../components/NotificationTray";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getEvents, getStories } from "../../api";
@@ -56,12 +57,8 @@ export default function HomeScreen() {
   const upcomingEvents = (events ?? []).slice(0, 3);
   const featuredGuides = guides.slice(0, 3);
   const featuredStories = (stories ?? []).filter((s) => s.homepage);
-  const [toast, setToast] = useState(null);
-
-  function handleBell() {
-    setToast("Notifications — coming soon in the full app");
-    setTimeout(() => setToast(null), 2000);
-  }
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
 
   useEffect(() => {
     const v = videoRef.current;
@@ -107,14 +104,22 @@ export default function HomeScreen() {
               </Link>
               <button
                 type="button"
-                onClick={handleBell}
+                onClick={() => setNotificationsOpen(true)}
                 className="relative w-9 h-9 rounded-full flex items-center justify-center"
                 style={{ backgroundColor: "rgba(0,0,0,0.42)" }}
-                aria-label="Notifications"
+                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
               >
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
+                {unreadCount > 0 && (
+                  <span
+                    className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white"
+                    style={{ backgroundColor: "var(--leaf)", border: "2px solid rgba(0,0,0,0.42)" }}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -319,11 +324,7 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      {toast && (
-        <div className="fixed left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-xs font-semibold" style={{ bottom: 88, backgroundColor: "rgba(15,26,32,0.95)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)" }}>
-          {toast}
-        </div>
-      )}
+      <NotificationTray open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
     </MobileShell>
   );
 }

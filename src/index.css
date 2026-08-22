@@ -450,6 +450,15 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
   50%  { transform: scale(1.08); }
   100% { transform: scale(1); }
 }
+/* Notification tray (mobile/components/NotificationTray.jsx) — drops in from
+   under the header the way a phone's own notification shade does, rather
+   than fading in place like a generic modal. */
+@keyframes mobileTrayDrop {
+  from { opacity: 0; transform: translateY(-14px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.mobile-tray { animation: mobileTrayDrop 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
 .mobile-stagger > * { animation: mobileFadeUp 0.45s ease both; }
 .mobile-stagger > *:nth-child(2) { animation-delay: 0.05s; }
 .mobile-stagger > *:nth-child(3) { animation-delay: 0.1s; }
