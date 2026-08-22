@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
+import { typeColor } from "../lib/typeColors";
 
 // Sample push notifications shown behind the home screen's bell. Static for
 // now — the shape (image, business, category, copy, when, where it links)
 // mirrors a real News & Offers article so a live feed can drop straight in.
+// Every entry points at content that actually exists in the app.
 export const NOTIFICATIONS = [
   {
     id: "cocoba-end-of-season-sale",
@@ -16,6 +18,37 @@ export const NOTIFICATIONS = [
     image: "/images/cocoba/truffles.jpg",
     to: "/mobile/news/cocoba-end-of-season-sale",
     unread: true,
+  },
+  {
+    id: "coppa-champagne-tasting",
+    business: "Coppa Club",
+    category: "Offer",
+    title: "Champagne & Sparkling Tasting Evening",
+    body: "Explore Champagne alongside a curated selection of sparkling wines, with light bites throughout. Booking recommended.",
+    when: "5h ago",
+    image: "/images/coppa/champagne.jpg",
+    to: "/mobile/news/coppa-champagne-tasting",
+    unread: true,
+  },
+  {
+    id: "coppa-cocktail-masterclass",
+    business: "Coppa Club",
+    category: "What's On",
+    title: "Shake, Stir & Sip: Cocktail Masterclass",
+    body: "Learn to mix Coppa Club's signature serves with the in-house bartenders. Places are limited.",
+    when: "Yesterday",
+    image: "/images/coppa/cocktail.jpg",
+    to: "/mobile/news/coppa-cocktail-masterclass",
+  },
+  {
+    id: "jetts-maidenhead",
+    business: "Jetts Maidenhead",
+    category: "Featured",
+    title: "24/7 Fitness in the Heart of Town",
+    body: "A new 24-hour gym has opened at One Maidenhead — train whenever you want, on your own terms.",
+    when: "2 days ago",
+    image: "/images/jetts/entrance.webp",
+    to: "/mobile/story/jetts-maidenhead",
   },
 ];
 
@@ -80,7 +113,9 @@ export default function NotificationTray({ open, onClose }) {
           </button>
         </div>
 
-        <div className="flex flex-col">
+        {/* Scrolls internally so a growing feed never pushes the tray past
+            the viewport or under the tab bar. */}
+        <div className="flex flex-col overflow-y-auto overscroll-contain" style={{ maxHeight: "calc(100vh - 260px)" }}>
           {NOTIFICATIONS.map((n, i) => (
             <button
               key={n.id}
@@ -94,20 +129,23 @@ export default function NotificationTray({ open, onClose }) {
             >
               <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
                 <img src={n.image} alt="" className="w-full h-full object-cover" />
-                <span
-                  className="absolute top-1 left-1 w-4.5 h-4.5 rounded-md flex items-center justify-center"
-                  style={{ width: 18, height: 18, backgroundColor: "var(--teal-deep)" }}
-                >
-                  <TagIcon />
-                </span>
+                {/* Tag badge marks offers only — same rule the listing cards use. */}
+                {n.category === "Offer" && (
+                  <span
+                    className="absolute top-1 left-1 rounded-md flex items-center justify-center"
+                    style={{ width: 18, height: 18, backgroundColor: "var(--teal-deep)" }}
+                  >
+                    <TagIcon />
+                  </span>
+                )}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide truncate" style={{ color: "var(--teal-deep)" }}>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wide truncate" style={{ color: typeColor(n.category) }}>
                     {n.business} · {n.category}
                   </span>
-                  {n.unread && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: "var(--leaf)" }} />}
+                  {n.unread && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(n.category) }} />}
                 </div>
                 <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{n.title}</p>
                 <p className="text-xs leading-snug mt-1" style={{ color: "#000000" }}>{n.body}</p>
