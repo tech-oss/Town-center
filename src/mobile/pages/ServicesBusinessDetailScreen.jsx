@@ -5,6 +5,7 @@ import MobileCard from "../components/MobileCard";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
 import { sections } from "../../Data/pages";
+import { typeColor } from "../lib/typeColors";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -275,7 +276,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
                   <Link key={n.slug} to={`/mobile/news/${n.slug}`} className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>
                     <img src={n.image} alt="" className="w-full h-28 object-cover" />
                     <div className="p-2.5 flex flex-col gap-1">
-                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{n.category}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: typeColor(n.category) }}>{n.category}</span>
                       <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
                     </div>
                   </Link>

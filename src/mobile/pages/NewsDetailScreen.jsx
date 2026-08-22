@@ -3,6 +3,7 @@ import MobileShell from "../components/MobileShell";
 import useFetch from "../../hooks/useFetch";
 import { getArticleBySlug } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
+import { typeColor } from "../lib/typeColors";
 
 export default function NewsDetailScreen() {
   const { slug } = useParams();
@@ -27,7 +28,7 @@ export default function NewsDetailScreen() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: typeColor(article.category) }} />
                 {article.category}
               </span>
               {article.date && <span className="text-xs" style={{ color: "#000000" }}>{article.date}</span>}

@@ -7,6 +7,7 @@ import MiniMap from "../components/MiniMap";
 import { itemBySlug, sections } from "../../Data/pages";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import useMobileBack from "../hooks/useMobileBack";
+import { typeColor } from "../lib/typeColors";
 import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
 import ServicesBusinessDetailScreen from "./ServicesBusinessDetailScreen";
 import FreelancerDetailScreen from "./FreelancerDetailScreen";
@@ -194,7 +195,7 @@ function BusinessDetailScreen({ place, goBack }) {
                   >
                     <img src={n.image} alt="" className="w-full h-28 object-cover" />
                     <div className="p-2.5 flex flex-col gap-1">
-                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{n.category}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: typeColor(n.category) }}>{n.category}</span>
                       <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
                     </div>
                   </Link>

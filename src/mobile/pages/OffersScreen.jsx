@@ -6,6 +6,7 @@ import useFetch from "../../hooks/useFetch";
 import { getStories, getArticles } from "../../api";
 import { blogCards } from "../../Data/content";
 import { sections } from "../../Data/pages";
+import { TYPE_COLORS, typeColor } from "../lib/typeColors";
 
 const BUSINESS_TYPES = [
   ...Object.values(sections).map((s) => ({ key: s.key, label: s.label })),
@@ -16,12 +17,6 @@ const homepageSpotlightSlugs = new Set(
   blogCards.posts.filter((p) => p.homepage).map((p) => p.href.split("/").pop())
 );
 
-const TYPE_COLORS = {
-  Featured: "var(--forest)",
-  Offer: "#F5A623",
-  News: "var(--leaf)",
-  "What's On": "var(--teal-deep)",
-};
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 
 // Small corner badge marking a card as an Offer — same tag glyph as the
@@ -172,7 +167,7 @@ export default function OffersScreen() {
                 <div className="flex flex-col gap-1 p-2.5">
                   {it.type && (
                     <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wide w-fit" style={{ color: "#000000" }}>
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: TYPE_COLORS[it.type] ?? "var(--leaf)" }} />
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(it.type) }} />
                       {it.type}
                     </span>
                   )}
