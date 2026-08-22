@@ -157,7 +157,7 @@ export default function StayDetailScreen() {
           </MobileCard>
 
           <div className="grid grid-cols-3 gap-2">
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 active:opacity-70">
+            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="flex flex-col items-center gap-2 active:opacity-70">
               <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
               </span>

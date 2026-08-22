@@ -249,6 +249,7 @@ export default function MapScreen() {
                   href={directionsUrl(active)}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-skip-external-confirm
                   className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 rounded-xl"
                   style={{ backgroundColor: "var(--teal-deep)", color: "#ffffff" }}
                 >

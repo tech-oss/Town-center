@@ -144,7 +144,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
                   Website
                 </a>
               )}
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
                 Directions
               </a>

@@ -93,6 +93,7 @@ export default function TransportScreen() {
                   href="https://www.google.com/maps/dir/?api=1&destination=Maidenhead+Town+Centre%2C+Maidenhead"
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-skip-external-confirm
                   className="inline-flex items-center justify-center gap-2 py-3 rounded-full text-sm font-bold text-white active:opacity-85"
                   style={{ backgroundColor: "var(--teal-deep)" }}
                 >

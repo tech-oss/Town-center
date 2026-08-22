@@ -32,6 +32,7 @@ export default function ParkingScreen() {
                   href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  data-skip-external-confirm
                   className="flex items-center gap-2 px-3.5 py-3 rounded-xl active:opacity-80"
                   style={{ backgroundColor: "var(--mint)" }}
                 >

@@ -78,7 +78,7 @@ export default function EventDetailScreen() {
 
           <div className="grid grid-cols-2 gap-3">
             {event.location && (
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
+              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
                 Directions
               </a>
             )}

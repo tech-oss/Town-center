@@ -17,7 +17,7 @@ const SOCIAL_ICONS = {
   x: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4l16 16M20 4L4 20" /></svg>,
 };
 
-function ActionButton({ icon, label, href, onClick }) {
+function ActionButton({ icon, label, href, onClick, skipExternalConfirm }) {
   const inner = (
     <>
       <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
@@ -28,7 +28,11 @@ function ActionButton({ icon, label, href, onClick }) {
   );
   const className = "flex flex-col items-center gap-2 active:opacity-70";
   if (onClick) return <button type="button" onClick={onClick} className={className}>{inner}</button>;
-  return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" {...(skipExternalConfirm ? { "data-skip-external-confirm": true } : {})} className={className}>
+      {inner}
+    </a>
+  );
 }
 
 // Eat & Drink / Shop / See & Do business detail — the website's
@@ -130,6 +134,7 @@ function BusinessDetailScreen({ place, goBack }) {
               <ActionButton
                 href={mapsUrl}
                 label="Get Directions"
+                skipExternalConfirm
                 icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
               />
               <ActionButton
