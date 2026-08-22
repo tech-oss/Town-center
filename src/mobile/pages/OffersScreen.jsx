@@ -24,6 +24,23 @@ const TYPE_COLORS = {
 };
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 
+// Small corner badge marking a card as an Offer — same tag glyph as the
+// bottom nav's Offers tab, so the icon language stays consistent app-wide.
+function OfferTag() {
+  return (
+    <span
+      className="absolute top-2 left-2 w-6 h-6 rounded-lg flex items-center justify-center"
+      style={{ backgroundColor: "var(--teal-deep)", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}
+      aria-label="Offer"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" />
+        <circle cx="7.5" cy="7.5" r="1.2" fill="#fff" />
+      </svg>
+    </span>
+  );
+}
+
 function SearchInput({ value, onChange }) {
   return (
     <div className="relative">
@@ -150,6 +167,7 @@ export default function OffersScreen() {
                       On Homepage
                     </span>
                   )}
+                  {it.type === "Offer" && <OfferTag />}
                 </div>
                 <div className="flex flex-col gap-1 p-2.5">
                   {it.type && (

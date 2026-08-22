@@ -20,6 +20,23 @@ function SpotlightImage({ src, alt, className = "" }) {
   );
 }
 
+// Small corner badge marking a card as an Offer — same tag glyph as the
+// bottom nav's Offers tab, so the icon language stays consistent app-wide.
+function OfferTag() {
+  return (
+    <span
+      className="absolute top-1.5 left-1.5 w-6 h-6 rounded-lg flex items-center justify-center"
+      style={{ backgroundColor: "var(--teal-deep)", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}
+      aria-label="Offer"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12.6 2.6 21 11a2 2 0 0 1 0 2.8l-7.2 7.2a2 2 0 0 1-2.8 0L2.6 12.6A2 2 0 0 1 2 11.2V4a2 2 0 0 1 2-2h7.2a2 2 0 0 1 1.4.6Z" />
+        <circle cx="7.5" cy="7.5" r="1.2" fill="#fff" />
+      </svg>
+    </span>
+  );
+}
+
 function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
   return (
     <div className="flex items-end justify-between mb-3">
@@ -179,7 +196,10 @@ export default function HomeScreen() {
               <div className="flex flex-col gap-3">
                 {appOffers.map((post) => (
                   <Link key={post.id} to={`/mobile${post.href}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
-                    <img src={post.imageSrc} alt="" className="w-28 h-28 object-cover shrink-0" />
+                    <div className="relative w-28 h-28 shrink-0">
+                      <img src={post.imageSrc} alt="" className="w-full h-full object-cover" />
+                      {post.category?.includes("Offer") && <OfferTag />}
+                    </div>
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{post.category}</span>
                       <p className="text-sm font-bold leading-snug mt-0.5 line-clamp-2" style={{ color: "#000000" }}>{post.title}</p>
