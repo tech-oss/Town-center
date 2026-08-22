@@ -52,7 +52,7 @@ export default function StoryDetailScreen() {
           <img src={story.heroImage} alt={story.title} className="w-full h-56 object-cover" />
         </div>
 
-        <div className="px-5 -mt-2 relative flex flex-col gap-5 pb-8 mobile-stagger">
+        <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{story.category}</span>
               <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{heroTitle}</h1>

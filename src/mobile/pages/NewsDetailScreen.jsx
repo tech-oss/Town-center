@@ -23,7 +23,7 @@ export default function NewsDetailScreen() {
           <img src={article.image} alt={article.title} className="w-full h-56 object-cover" />
         </div>
 
-        <div className="px-5 -mt-2 relative flex flex-col gap-5 pb-8 mobile-stagger">
+        <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>

@@ -98,7 +98,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
           <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
         </div>
 
-        <div className="px-5 -mt-2 relative flex flex-col gap-4 pb-8 mobile-stagger">
+        <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />

@@ -107,7 +107,7 @@ export default function StayDetailScreen() {
           <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
         </div>
 
-        <div className="px-5 -mt-2 relative flex flex-col gap-4 pb-8 mobile-stagger">
+        <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>
               {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}
