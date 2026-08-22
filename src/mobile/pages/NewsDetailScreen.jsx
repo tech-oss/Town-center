@@ -30,11 +30,11 @@ export default function NewsDetailScreen() {
                 <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
                 {article.category}
               </span>
-              {article.date && <span className="text-xs" style={{ color: "rgba(0,0,0,0.5)" }}>{article.date}</span>}
+              {article.date && <span className="text-xs" style={{ color: "#000000" }}>{article.date}</span>}
             </div>
             <h1 className="text-xl font-bold leading-snug" style={{ color: "#000000" }}>{article.title}</h1>
             {biz && (
-              <p className="text-sm mt-1.5" style={{ color: "rgba(0,0,0,0.6)" }}>
+              <p className="text-sm mt-1.5" style={{ color: "#000000" }}>
                 At {bizLink ? <Link to={bizLink} className="font-semibold" style={{ color: "var(--leaf)" }}>{biz.name}</Link> : biz.name} · {biz.tag}
               </p>
             )}
@@ -52,7 +52,7 @@ export default function NewsDetailScreen() {
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
                 <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{biz.name}</p>
-                {biz.address && <p className="text-xs truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{biz.address}</p>}
+                {biz.address && <p className="text-xs truncate" style={{ color: "#000000" }}>{biz.address}</p>}
               </div>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
             </Link>

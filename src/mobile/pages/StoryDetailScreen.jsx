@@ -56,8 +56,8 @@ export default function StoryDetailScreen() {
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{story.category}</span>
               <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{heroTitle}</h1>
-              {heroSubtitle && <p className="text-xs uppercase tracking-wide mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>{heroSubtitle}</p>}
-              {story.date && <p className="text-xs mt-2" style={{ color: "rgba(0,0,0,0.5)" }}>{story.date}</p>}
+              {heroSubtitle && <p className="text-xs uppercase tracking-wide mt-1" style={{ color: "#000000" }}>{heroSubtitle}</p>}
+              {story.date && <p className="text-xs mt-2" style={{ color: "#000000" }}>{story.date}</p>}
             </div>
 
             {story.standfirst && (

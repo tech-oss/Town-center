@@ -121,7 +121,7 @@ export default function SearchScreen() {
                     <img src={r.image} alt="" className="w-16 h-16 object-cover shrink-0" />
                     <div className="flex-1 min-w-0 px-3 py-2 flex flex-col justify-center">
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{r.title}</p>
-                      <p className="text-[11px] mt-0.5 truncate font-medium" style={{ color: "#000000", opacity: 0.7 }}>{r.subtitle}</p>
+                      <p className="text-[11px] mt-0.5 truncate font-medium" style={{ color: "#000000" }}>{r.subtitle}</p>
                     </div>
                   </Link>
                 ))}

@@ -104,12 +104,6 @@ function BusinessDetailScreen({ place, goBack }) {
                 <span className="text-sm break-all" style={{ color: "#000000" }}>{place.email}</span>
               </a>
             )}
-            {websiteUrl && (
-              <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-                <span className="text-sm" style={{ color: "#000000" }}>{place.website}</span>
-              </a>
-            )}
           </MobileCard>
 
           {place.hours?.length > 0 && (
@@ -117,7 +111,7 @@ function BusinessDetailScreen({ place, goBack }) {
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Opening Hours</p>
               {place.hours.map((h) => (
                 <div key={h.day} className="flex items-center justify-between text-sm">
-                  <span style={{ color: "rgba(0,0,0,0.6)" }}>{h.day}</span>
+                  <span style={{ color: "#000000" }}>{h.day}</span>
                   <span className="font-semibold" style={{ color: "#000000" }}>{h.time}</span>
                 </div>
               ))}

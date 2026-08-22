@@ -18,7 +18,7 @@ function PlaceSection({ s }) {
             <span>{s.icon}</span> {s.eyebrow}
           </p>
           <h2 className="text-lg font-bold leading-snug mt-1" style={{ color: "#000000" }}>{s.title}</h2>
-          {s.location && <p className="text-xs font-semibold mt-0.5" style={{ color: "#000000", opacity: 0.7 }}>{s.location}</p>}
+          {s.location && <p className="text-xs font-semibold mt-0.5" style={{ color: "#000000" }}>{s.location}</p>}
         </div>
 
         <div className="flex flex-col gap-2.5">
@@ -36,7 +36,7 @@ function PlaceSection({ s }) {
         )}
 
         {(s.address || s.phone) && (
-          <p className="text-xs leading-relaxed" style={{ color: "#000000", opacity: 0.6 }}>
+          <p className="text-xs leading-relaxed" style={{ color: "#000000" }}>
             {s.address}{s.address && s.phone ? " · " : ""}{s.phone}
           </p>
         )}

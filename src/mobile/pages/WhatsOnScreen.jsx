@@ -111,7 +111,7 @@ function DateRangeSheet({ start, end, onApply, onClear, active }) {
         type="button"
         onClick={openSheet}
         className="inline-flex items-center justify-center gap-1.5 text-xs font-bold rounded-full px-4 py-2.5 truncate"
-        style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.75)" }}
+        style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
         <span className="truncate">{label}</span>
@@ -231,7 +231,7 @@ export default function WhatsOnScreen() {
   return (
     <MobileShell title="What's On" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
-        <p className="text-sm" style={{ color: "rgba(0,0,0,0.6)" }}>Find events and activities happening in Maidenhead.</p>
+        <p className="text-sm" style={{ color: "#000000" }}>Find events and activities happening in Maidenhead.</p>
 
         {/* Quick date filters */}
         <div className="grid grid-cols-4 gap-2">
@@ -242,7 +242,7 @@ export default function WhatsOnScreen() {
               className="px-2 py-2 rounded-full text-xs font-bold whitespace-nowrap text-center"
               style={quickFilter === f.key
                 ? { backgroundColor: "var(--leaf)", color: "#ffffff" }
-                : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.65)" }}
+                : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}
             >
               {f.label}
             </button>
@@ -273,7 +273,7 @@ export default function WhatsOnScreen() {
         {/* Event listings */}
         <div className="flex flex-col gap-3">
           {listed.length === 0 ? (
-            <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.4)" }}>No events match — try another filter.</p>
+            <p className="text-sm text-center py-8" style={{ color: "#000000" }}>No events match — try another filter.</p>
           ) : (
             listed.map(({ e, date }) => (
               <Link key={`${e.slug}-${toIso(date)}`} to={`/mobile/event/${e.slug}`}>
@@ -287,8 +287,9 @@ export default function WhatsOnScreen() {
                     <div className="min-w-0 flex-1">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: categoryColors[e.category] ?? "var(--leaf)" }}>{e.category}</span>
                       <p className="text-sm font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
-                      {e.location && <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.6)" }}>{e.location}</p>}
+                      {e.location && <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{e.location}</p>}
                     </div>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M9 18l6-6-6-6" /></svg>
                   </div>
                 </div>
               </Link>

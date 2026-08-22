@@ -14,13 +14,13 @@ export default function AboutScreen() {
 
         <div className="px-5 pt-5 flex flex-col gap-6 pb-6 mobile-stagger">
           <h1 className="section-heading text-2xl font-bold" style={{ color: "#000000" }}>{aboutPage.title}</h1>
-          <p className="text-sm leading-relaxed -mt-3" style={{ color: "rgba(0,0,0,0.7)" }}>{aboutPage.body}</p>
+          <p className="text-sm leading-relaxed -mt-3" style={{ color: "#000000" }}>{aboutPage.body}</p>
 
           <div className="grid grid-cols-3 gap-3">
             {aboutStats.map((s) => (
               <div key={s.label} className="rounded-2xl p-3 text-center" style={{ backgroundColor: "rgba(28,46,56,0.045)" }}>
                 <p className="text-xl font-bold" style={{ color: "var(--leaf)" }}>{s.value}</p>
-                <p className="text-[10px] mt-1 leading-tight" style={{ color: "rgba(0,0,0,0.6)" }}>{s.label}</p>
+                <p className="text-[10px] mt-1 leading-tight" style={{ color: "#000000" }}>{s.label}</p>
               </div>
             ))}
           </div>

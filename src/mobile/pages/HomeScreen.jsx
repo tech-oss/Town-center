@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
@@ -39,6 +39,12 @@ export default function HomeScreen() {
   const upcomingEvents = (events ?? []).slice(0, 3);
   const featuredGuides = guides.slice(0, 3);
   const featuredStories = (stories ?? []).filter((s) => s.homepage);
+  const [toast, setToast] = useState(null);
+
+  function handleBell() {
+    setToast("Notifications — coming soon in the full app");
+    setTimeout(() => setToast(null), 2000);
+  }
 
   useEffect(() => {
     const v = videoRef.current;
@@ -69,18 +75,31 @@ export default function HomeScreen() {
             autoPlay
           />
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.45) 0%, rgba(12,20,24,0.05) 40%, rgba(12,20,24,0.15) 65%, rgba(12,20,24,0.7) 100%)" }} />
-          <div className="absolute top-3 left-5 right-4 flex items-center justify-between">
+          <div className="absolute top-3 left-5 right-3 flex items-center justify-between">
             <img src="/logo-mark.svg" alt="" className="h-7 w-auto" />
-            <Link
-              to="/mobile/search"
-              className="w-9 h-9 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "rgba(0,0,0,0.42)" }}
-              aria-label="Search"
-            >
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" />
-              </svg>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/mobile/search"
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "rgba(0,0,0,0.42)" }}
+                aria-label="Search"
+              >
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="7" /><path d="m20 20-3.2-3.2" />
+                </svg>
+              </Link>
+              <button
+                type="button"
+                onClick={handleBell}
+                className="relative w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: "rgba(0,0,0,0.42)" }}
+                aria-label="Notifications"
+              >
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+              </button>
+            </div>
           </div>
           <div className="absolute bottom-4 left-5 right-5">
             {/* Same "Welcome to / MAIDENHEAD / Riverside · Connected ·
@@ -164,7 +183,7 @@ export default function HomeScreen() {
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{post.category}</span>
                       <p className="text-sm font-bold leading-snug mt-0.5 line-clamp-2" style={{ color: "#000000" }}>{post.title}</p>
-                      <p className="text-xs mt-1 font-medium" style={{ color: "#000000", opacity: 0.7 }}>{post.date}</p>
+                      <p className="text-xs mt-1 font-medium" style={{ color: "#000000" }}>{post.date}</p>
                     </div>
                   </Link>
                 ))}
@@ -188,7 +207,7 @@ export default function HomeScreen() {
                         {e.category}
                       </span>
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{e.title}</p>
-                      <p className="text-xs font-medium truncate" style={{ color: "#000000", opacity: 0.7 }}>{e.date}</p>
+                      <p className="text-xs font-medium truncate" style={{ color: "#000000" }}>{e.date}</p>
                     </div>
                   </Link>
                 ))}
@@ -235,7 +254,7 @@ export default function HomeScreen() {
                     <div className="p-3.5 flex flex-col gap-1.5">
                       <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{s.eyebrow}</span>
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{s.cardHeading}</p>
-                      <p className="text-xs leading-snug line-clamp-2 font-medium" style={{ color: "#000000", opacity: 0.7 }}>{s.cardBody}</p>
+                      <p className="text-xs leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{s.cardBody}</p>
                       <Link to={`/mobile/story/${s.slug}`} className="inline-flex items-center gap-1.5 text-xs font-bold mt-1" style={{ color: "var(--teal-deep)" }}>
                         Read more
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
@@ -273,6 +292,12 @@ export default function HomeScreen() {
           </div>
         </div>
       </div>
+
+      {toast && (
+        <div className="fixed left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-full text-xs font-semibold" style={{ bottom: 88, backgroundColor: "rgba(15,26,32,0.95)", color: "#fff", border: "1px solid rgba(255,255,255,0.12)" }}>
+          {toast}
+        </div>
+      )}
     </MobileShell>
   );
 }

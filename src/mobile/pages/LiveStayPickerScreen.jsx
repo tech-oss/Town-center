@@ -36,7 +36,7 @@ export default function LiveStayPickerScreen() {
           <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
             What are you looking for?
           </h1>
-          <p className="text-sm font-medium" style={{ color: "#000000", opacity: 0.7 }}>
+          <p className="text-sm font-medium" style={{ color: "#000000" }}>
             Choose a category to see local listings and filters for just that group.
           </p>
         </div>
@@ -57,7 +57,7 @@ export default function LiveStayPickerScreen() {
               </span>
               <span className="flex-1 min-w-0">
                 <span className="block text-base font-bold" style={{ color: "#000000" }}>{o.label}</span>
-                <span className="block text-xs mt-0.5 leading-snug font-medium" style={{ color: "#000000", opacity: 0.65 }}>{o.description}</span>
+                <span className="block text-xs mt-0.5 leading-snug font-medium" style={{ color: "#000000" }}>{o.description}</span>
               </span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="shrink-0" style={{ opacity: 0.35 }}>
                 <path d="M9 18l6-6-6-6" />

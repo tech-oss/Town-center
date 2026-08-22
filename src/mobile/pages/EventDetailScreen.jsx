@@ -64,7 +64,7 @@ export default function EventDetailScreen() {
           {event.body?.map((b, i) => (
             <div key={i} className="flex flex-col gap-1.5">
               {b.lead && <p className="text-sm font-bold" style={{ color: "#000000" }}>{b.lead}</p>}
-              <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.75)" }}>{b.text}</p>
+              <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{b.text}</p>
             </div>
           ))}
 
@@ -99,7 +99,7 @@ export default function EventDetailScreen() {
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: categoryColors[e.category] ?? "var(--leaf)" }}>{e.category}</span>
                       <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{e.title}</p>
-                      <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{e.date}</p>
+                      <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{e.date}</p>
                     </div>
                   </Link>
                 ))}

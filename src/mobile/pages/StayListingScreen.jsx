@@ -105,7 +105,11 @@ export default function StayListingScreen() {
                     {isHotels ? `${"★".repeat(p.stars)} Hotel` : p.type}
                   </span>
                   <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{p.name}</p>
-                  <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000", opacity: 0.75 }}>{p.tagline}</p>
+                  <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{p.tagline}</p>
+                  <span className="inline-flex items-center gap-0.5 self-start text-[10px] font-bold mt-1.5" style={{ color: "var(--leaf)" }}>
+                    Read more
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                  </span>
                 </div>
               </MobileCard>
             </Link>

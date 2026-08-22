@@ -182,7 +182,7 @@ export default function MapScreen() {
                   <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colorFor(b.section) }} />
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-bold truncate" style={{ color: "#000000" }}>{b.name}</span>
-                    <span className="block text-[11px] font-medium truncate" style={{ color: "#000000", opacity: 0.7 }}>{b.category}</span>
+                    <span className="block text-[11px] font-medium truncate" style={{ color: "#000000" }}>{b.category}</span>
                   </span>
                 </button>
               ))}
@@ -238,7 +238,7 @@ export default function MapScreen() {
                 <div className="w-2 h-12 rounded-full shrink-0" style={{ backgroundColor: colorFor(active.section) }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{active.name}</p>
-                  <p className="text-xs font-medium truncate" style={{ color: "#000000", opacity: 0.75 }}>
+                  <p className="text-xs font-medium truncate" style={{ color: "#000000" }}>
                     {active.category}{active.address ? ` · ${active.address}` : ""}
                   </p>
                 </div>

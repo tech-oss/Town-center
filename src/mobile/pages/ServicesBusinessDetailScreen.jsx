@@ -46,7 +46,7 @@ function ReviewCard({ area, stars, timeAgo, text }) {
     <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
       <div className="flex items-center gap-2 flex-wrap mb-1.5">
         <StarRow value={stars} size={12} />
-        <span className="text-xs" style={{ color: "#000000", opacity: 0.5 }}>{timeAgo}{area ? ` · ${area}` : ""}</span>
+        <span className="text-xs" style={{ color: "#000000" }}>{timeAgo}{area ? ` · ${area}` : ""}</span>
       </div>
       <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{text}</p>
     </div>
@@ -109,7 +109,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
               <div className="flex items-center gap-2 mt-1.5">
                 <StarRow value={place.rating} />
                 <span className="text-sm font-bold" style={{ color: "#000000" }}>{place.rating.toFixed(1)}</span>
-                {place.reviewCount != null && <span className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>({place.reviewCount} reviews)</span>}
+                {place.reviewCount != null && <span className="text-xs" style={{ color: "#000000" }}>({place.reviewCount} reviews)</span>}
               </div>
             )}
             {place.badges?.length > 0 && (
@@ -192,7 +192,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
                   {stats.map((s) => (
                     <div key={s.label} className="text-center">
                       <div className="text-base font-bold" style={{ color: "var(--leaf)" }}>{s.value}</div>
-                      <div className="text-[11px]" style={{ color: "#000000", opacity: 0.7 }}>{s.label}</div>
+                      <div className="text-[11px]" style={{ color: "#000000" }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
@@ -236,7 +236,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Opening Hours</p>
               {place.hours.map((h) => (
                 <div key={h.day} className="flex items-center justify-between text-sm">
-                  <span style={{ color: "rgba(0,0,0,0.6)" }}>{h.day}</span>
+                  <span style={{ color: "#000000" }}>{h.day}</span>
                   <span className="font-semibold" style={{ color: h.time === "Closed" ? "#C0392B" : "#000000" }}>{h.time}</span>
                 </div>
               ))}

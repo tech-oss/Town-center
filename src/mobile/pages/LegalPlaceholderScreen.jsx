@@ -23,7 +23,7 @@ export default function LegalPlaceholderScreen({ title }) {
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v5M12 16h.01" /></svg>
           </span>
           <h2 className="text-lg font-bold" style={{ color: "#000000" }}>Coming Soon</h2>
-          <p className="text-sm leading-relaxed max-w-xs" style={{ color: "#000000", opacity: 0.7 }}>
+          <p className="text-sm leading-relaxed max-w-xs" style={{ color: "#000000" }}>
             This page hasn't been published yet. Check back soon, or get in touch if you have a question in the meantime.
           </p>
           <a

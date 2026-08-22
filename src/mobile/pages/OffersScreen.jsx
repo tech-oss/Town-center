@@ -106,7 +106,7 @@ export default function OffersScreen() {
   return (
     <MobileShell title="Offers & Stories" onBack backFallback="/mobile/home">
       <div className="flex flex-col gap-4 mobile-stagger">
-        <p className="text-sm" style={{ color: "rgba(0,0,0,0.65)" }}>
+        <p className="text-sm" style={{ color: "#000000" }}>
           Every Featured Story and Spotlight Article — search and filter offers and the latest news from businesses around Maidenhead.
         </p>
 
@@ -131,7 +131,7 @@ export default function OffersScreen() {
         </div>
 
         {filtered.length === 0 ? (
-          <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.5)" }}>
+          <p className="text-sm text-center py-12" style={{ color: "#000000" }}>
             {trimmedSearch ? `No results for "${search.trim()}" — try a different name.` : "Nothing listed here just yet — check back soon."}
           </p>
         ) : (
@@ -160,10 +160,10 @@ export default function OffersScreen() {
                   )}
                   <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{it.title}</p>
                   {it.businessName && (
-                    <span className="text-[10px] leading-snug truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{it.businessName}</span>
+                    <span className="text-[10px] leading-snug truncate" style={{ color: "#000000" }}>{it.businessName}</span>
                   )}
                   {it.date && !it.businessName && (
-                    <span className="text-[10px] leading-snug truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{it.date}</span>
+                    <span className="text-[10px] leading-snug truncate" style={{ color: "#000000" }}>{it.date}</span>
                   )}
                 </div>
               </Link>

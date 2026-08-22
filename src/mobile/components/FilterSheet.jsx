@@ -69,7 +69,7 @@ export default function FilterSheet({
         type="button"
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-2 pl-4 pr-3.5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0"
-        style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "rgba(0,0,0,0.75)" }}
+        style={active ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}
       >
         {triggerLabel}
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>

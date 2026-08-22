@@ -1,4 +1,5 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import MobileTabBar from "./MobileTabBar";
 import useMobileBack from "../hooks/useMobileBack";
 
@@ -23,8 +24,18 @@ export default function MobileShell({
   showSearch = true,
 }) {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const goBack = useMobileBack(backFallback);
   const showHeader = !hideHeader && (title != null || onBack || showSearch);
+  const scrollRef = useRef(null);
+
+  // Every screen mount (including navigating from one detail page to a
+  // related one, e.g. guide → guide) should start scrolled to the top —
+  // react-router doesn't reset scroll on its own since `.mobile-scroll`,
+  // not the window, is the actual scrolling element.
+  useEffect(() => {
+    scrollRef.current?.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <div className="mobile-root">
@@ -73,7 +84,7 @@ export default function MobileShell({
           </header>
         )}
 
-        <main className={`mobile-scroll ${noPadding ? "" : "px-5 pt-5"}`} style={{ paddingBottom: noPadding ? 0 : 24 }}>
+        <main ref={scrollRef} className={`mobile-scroll ${noPadding ? "" : "px-5 pt-5"}`} style={{ paddingBottom: noPadding ? 0 : 24 }}>
           {children}
         </main>
 

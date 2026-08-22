@@ -16,7 +16,7 @@ export default function WorkScreen() {
         <h1 className="text-2xl font-bold leading-tight" style={{ color: "#000000" }}>
           A New Home For Work In Maidenhead
         </h1>
-        <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>
+        <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>
           We're building a home for local jobs, freelance projects and business
           opportunities. It isn't quite ready to launch — but it's on its way.
         </p>

@@ -39,7 +39,7 @@ function ReviewCard({ area, stars, timeAgo, text }) {
     <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
       <div className="flex items-center gap-2 flex-wrap mb-1.5">
         <StarRow value={stars} size={12} />
-        <span className="text-xs" style={{ color: "#000000", opacity: 0.5 }}>{timeAgo}{area ? ` · ${area}` : ""}</span>
+        <span className="text-xs" style={{ color: "#000000" }}>{timeAgo}{area ? ` · ${area}` : ""}</span>
       </div>
       <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{text}</p>
     </div>
@@ -106,7 +106,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
               <div className="flex items-center gap-2 mt-1.5">
                 <StarRow value={place.rating} />
                 <span className="text-sm font-bold" style={{ color: "#000000" }}>{place.rating.toFixed(1)}</span>
-                {place.reviewCount != null && <span className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>({place.reviewCount} reviews)</span>}
+                {place.reviewCount != null && <span className="text-xs" style={{ color: "#000000" }}>({place.reviewCount} reviews)</span>}
               </div>
             )}
             {skills.length > 0 && (
@@ -169,7 +169,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
                 <div key={r.label} className="flex items-start gap-3 text-sm">
                   <span className="mt-0.5">{r.icon}</span>
                   <div className="min-w-0">
-                    <div className="text-xs" style={{ color: "#000000", opacity: 0.6 }}>{r.label}</div>
+                    <div className="text-xs" style={{ color: "#000000" }}>{r.label}</div>
                     <div className="font-semibold" style={{ color: "#000000" }}>{r.value}</div>
                   </div>
                 </div>

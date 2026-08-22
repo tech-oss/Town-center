@@ -83,8 +83,14 @@ export default function SectionScreen({ sectionKey }) {
                 <CardImage src={it.image} alt={it.name} />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                   <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{it.name}</p>
-                  <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000", opacity: 0.75 }}>{it.description}</p>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide mt-1.5" style={{ color: "var(--teal-deep)" }}>{it.tag}</span>
+                  <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{it.description}</p>
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{it.tag}</span>
+                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold" style={{ color: "var(--leaf)" }}>
+                      Read more
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                    </span>
+                  </div>
                 </div>
               </div>
             </Link>

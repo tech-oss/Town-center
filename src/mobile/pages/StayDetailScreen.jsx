@@ -113,7 +113,7 @@ export default function StayDetailScreen() {
               {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
-            {place.tagline && <p className="text-sm mt-1" style={{ color: "rgba(0,0,0,0.6)" }}>{place.tagline}</p>}
+            {place.tagline && <p className="text-sm mt-1" style={{ color: "#000000" }}>{place.tagline}</p>}
           </div>
 
           {!isHotel && (place.guests || place.bedrooms || place.host) && (
@@ -143,12 +143,6 @@ export default function StayDetailScreen() {
               <a href={`mailto:${place.email}`} className="flex items-start gap-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
                 <span className="text-sm break-all" style={{ color: "#000000" }}>{place.email}</span>
-              </a>
-            )}
-            {websiteUrl && (
-              <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-                <span className="text-sm" style={{ color: "#000000" }}>{place.website}</span>
               </a>
             )}
             {social.length > 0 && (
@@ -202,7 +196,7 @@ export default function StayDetailScreen() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold" style={{ color: "#000000" }}>{a}</p>
-                        <p className="text-xs mt-0.5 leading-snug" style={{ color: "#000000", opacity: 0.65 }}>{blurb}</p>
+                        <p className="text-xs mt-0.5 leading-snug" style={{ color: "#000000" }}>{blurb}</p>
                       </div>
                       <span className="w-6 h-6 rounded-full border flex items-center justify-center shrink-0 text-xs" style={{ borderColor: "var(--leaf)", color: "var(--leaf)" }}>✓</span>
                     </MobileCard>
