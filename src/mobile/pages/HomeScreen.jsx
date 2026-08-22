@@ -183,7 +183,13 @@ export default function HomeScreen() {
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{post.category}</span>
                       <p className="text-sm font-bold leading-snug mt-0.5 line-clamp-2" style={{ color: "#000000" }}>{post.title}</p>
-                      <p className="text-xs mt-1 font-medium" style={{ color: "#000000" }}>{post.date}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-xs font-medium" style={{ color: "#000000" }}>{post.date}</p>
+                        <span className="inline-flex items-center gap-0.5 shrink-0 text-[10px] font-bold" style={{ color: "var(--leaf)" }}>
+                          Read more
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 ))}
