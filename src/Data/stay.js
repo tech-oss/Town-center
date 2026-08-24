@@ -92,8 +92,16 @@ export const hotels = [
     email: "thamesreservations@rbhmanagement.com",
     social: { facebook: "https://www.facebook.com/thamesrivierahotel/" },
     priceFrom: null,
-    image: img("thames-riviera", 1200, 800),
-    gallery: padGallery("thames-riviera", [img("thames-riviera", 1200, 800), img("thames-riviera-2", 900, 600), img("thames-riviera-3", 900, 600)]),
+    image: "/images/stay/thames-riviera/hero.jpg",
+    gallery: [
+      "/images/stay/thames-riviera/hero.jpg",
+      "/images/stay/thames-riviera/gallery-1.jpg",
+      "/images/stay/thames-riviera/gallery-2.jpg",
+      "/images/stay/thames-riviera/gallery-3.jpg",
+      "/images/stay/thames-riviera/gallery-4.jpg",
+      "/images/stay/thames-riviera/gallery-5.jpg",
+      "/images/stay/thames-riviera/gallery-6.jpg",
+    ],
     amenities: ["Riverside setting", "On-site restaurant", "Free Wi-Fi", "On-site parking"],
   },
   {
