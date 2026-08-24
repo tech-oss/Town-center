@@ -143,7 +143,7 @@ export default function StayDetailScreen() {
               {websiteUrl && (
                 <ActionButton
                   href={websiteUrl}
-                  label="Book / Website"
+                  label="Visit Website"
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
