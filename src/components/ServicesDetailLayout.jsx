@@ -384,16 +384,16 @@ export default function ServicesDetailLayout({
 
               {(address || email) && (
                 <div className="flex flex-col gap-3 pt-3 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
-                  {email && (
-                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
-                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><MailIcon /></span>
-                      <a href={`mailto:${email}`} className="hover:underline break-all">{email}</a>
-                    </div>
-                  )}
                   {address && (
                     <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
                       <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PinIcon /></span>
                       <span className="leading-relaxed">{address}</span>
+                    </div>
+                  )}
+                  {email && (
+                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><MailIcon /></span>
+                      <a href={`mailto:${email}`} className="hover:underline break-all">{email}</a>
                     </div>
                   )}
                 </div>

@@ -2,6 +2,7 @@ import { useParams, Navigate, Link } from "react-router-dom";
 import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
+import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
 import useFetch from "../../hooks/useFetch";
@@ -127,27 +128,55 @@ export default function StayDetailScreen() {
             <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{place.description}</p>
           )}
 
+          {/* Action rail — same design as the Services/Freelancer profiles:
+              a full-width Call Now bar, then circular Website/Directions/
+              Share buttons, then address + email, then social icons, all in
+              one card. */}
           <MobileCard className="p-4 flex flex-col gap-3">
-            {(place.address ?? place.area) && (
-              <div className="flex items-start gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-                <span className="text-sm" style={{ color: "#000000" }}>{place.address ?? place.area}</span>
+            {place.phone && (
+              <a href={`tel:${place.phone.replace(/[^\d+]/g, "")}`} className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold" style={{ backgroundColor: "var(--forest)", color: "#fff" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></svg>
+                Call Now · {place.phone}
+              </a>
+            )}
+            <div className="grid grid-cols-3 gap-2">
+              {websiteUrl && (
+                <ActionButton
+                  href={websiteUrl}
+                  label="Book / Website"
+                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
+                />
+              )}
+              <ActionButton
+                href={mapsUrl}
+                label="Get Directions"
+                skipExternalConfirm
+                icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
+              />
+              <ActionButton
+                onClick={handleShare}
+                label={copied ? "Link Copied" : "Share"}
+                icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" /></svg>}
+              />
+            </div>
+            {((place.address ?? place.area) || place.email) && (
+              <div className="flex flex-col gap-2.5 pt-3" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                {(place.address ?? place.area) && (
+                  <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                    {place.address ?? place.area}
+                  </div>
+                )}
+                {place.email && (
+                  <div className="flex items-start gap-3 text-sm break-all" style={{ color: "#000000" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+                    {place.email}
+                  </div>
+                )}
               </div>
             )}
-            {place.phone && (
-              <a href={`tel:${place.phone.replace(/[^\d+]/g, "")}`} className="flex items-start gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></svg>
-                <span className="text-sm" style={{ color: "#000000" }}>{place.phone}</span>
-              </a>
-            )}
-            {place.email && (
-              <a href={`mailto:${place.email}`} className="flex items-start gap-3">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
-                <span className="text-sm break-all" style={{ color: "#000000" }}>{place.email}</span>
-              </a>
-            )}
             {social.length > 0 && (
-              <div className="flex items-center gap-3 pt-1" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+              <div className="flex items-center justify-center gap-3 pt-1">
                 {social.map(([key, href]) => (
                   <a key={key} href={href} target="_blank" rel="noopener noreferrer" aria-label={key} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)" }}>
                     {SOCIAL_ICONS[key]}
@@ -156,29 +185,6 @@ export default function StayDetailScreen() {
               </div>
             )}
           </MobileCard>
-
-          <div className="grid grid-cols-3 gap-2">
-            <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="flex flex-col items-center gap-2 active:opacity-70">
-              <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)" }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-              </span>
-              <span className="text-xs font-semibold text-center" style={{ color: "#000000" }}>Directions</span>
-            </a>
-            {websiteUrl && (
-              <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 active:opacity-70">
-                <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)" }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-                </span>
-                <span className="text-xs font-semibold text-center" style={{ color: "#000000" }}>Book / Website</span>
-              </a>
-            )}
-            <button type="button" onClick={handleShare} className="flex flex-col items-center gap-2 active:opacity-70">
-              <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)" }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" /></svg>
-              </span>
-              <span className="text-xs font-semibold text-center" style={{ color: "#000000" }}>{copied ? "Copied!" : "Share"}</span>
-            </button>
-          </div>
 
           <PhotoGallery images={gallery} title={place.name} />
 
