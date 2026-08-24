@@ -104,7 +104,10 @@ export default function StoryDetailScreen() {
                     <Link key={f.slug} to={`/mobile/story/${f.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                       <img src={f.cardImage} alt="" className="w-20 h-20 object-cover shrink-0" />
                       <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                        <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: typeColor("Featured") }}>{f.eyebrow}</span>
+                        <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wide w-fit" style={{ color: "var(--teal-deep)" }}>
+                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor("Featured") }} />
+                          {f.eyebrow}
+                        </span>
                         <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{f.cardHeading}</p>
                       </div>
                     </Link>
