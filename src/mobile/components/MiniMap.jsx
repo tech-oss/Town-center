@@ -41,6 +41,8 @@ async function geocode(query) {
 // Small embedded map for detail screens — every Eat & Drink/Shop/Services/
 // Stay business has an address but not necessarily stored coordinates, so
 // this geocodes on the fly rather than requiring lat/lng on every listing.
+// Fully interactive (drag/pinch-zoom/zoom buttons) rather than a static
+// picture, so the user can explore the area around the pin.
 export default function MiniMap({ query, lat, lng, height = 180 }) {
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);
   const [failed, setFailed] = useState(false);
@@ -74,10 +76,10 @@ export default function MiniMap({ query, lat, lng, height = 180 }) {
         center={[pos.lat, pos.lng]}
         zoom={15}
         scrollWheelZoom={false}
-        dragging={false}
-        doubleClickZoom={false}
-        touchZoom={false}
-        zoomControl={false}
+        dragging
+        doubleClickZoom
+        touchZoom
+        zoomControl
         attributionControl={false}
         style={{ width: "100%", height: "100%" }}
       >

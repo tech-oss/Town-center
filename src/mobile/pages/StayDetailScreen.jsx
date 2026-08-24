@@ -5,7 +5,8 @@ import MobileCard from "../components/MobileCard";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
 import useFetch from "../../hooks/useFetch";
-import { getHotelBySlug, getAccommodationBySlug, getHotels, getAccommodations } from "../../api";
+import { getHotelBySlug, getAccommodationBySlug } from "../../api";
+import { STAY_DISCOVER } from "../../Data/stayDiscover";
 import useMobileBack from "../hooks/useMobileBack";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import { OffersLink } from "../components/ListSearch";
@@ -73,7 +74,6 @@ export default function StayDetailScreen() {
     () => (isHotel ? getHotelBySlug(slug) : getAccommodationBySlug(slug)),
     [kind, slug]
   );
-  const { data: siblings } = useFetch(isHotel ? getHotels : getAccommodations, [kind]);
 
   const goBack = useMobileBack("/mobile/live");
   if (!loading && !place) return <Navigate to="/mobile/live" replace />;
@@ -85,7 +85,6 @@ export default function StayDetailScreen() {
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
   const gallery = (place.gallery?.length ? place.gallery : [place.image]).filter((g) => g !== place.image);
   const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
-  const related = (siblings ?? []).filter((s) => s.slug !== place.slug).slice(0, 3);
 
   async function handleShare() {
     const url = `${window.location.origin}/live/stay/${kind}/${place.slug}`;
@@ -211,18 +210,20 @@ export default function StayDetailScreen() {
             <MiniMap query={place.mapQuery || place.address || place.area} lat={place.lat} lng={place.lng} />
           </div>
 
-          {related.length > 0 && (
+          {STAY_DISCOVER.length > 0 && (
             <div className="mt-2">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
-                {isHotel ? "More Hotels in Maidenhead" : "More Accommodation in Maidenhead"}
-              </p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Stay Here &amp; Discover</p>
               <div className="flex flex-col gap-3">
-                {related.map((it) => (
-                  <Link key={it.slug} to={`/mobile/stay/${kind}/${it.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
+                {STAY_DISCOVER.map((it) => (
+                  <Link key={it.slug} to={it.mobileTo} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                     <img src={it.image} alt="" className="w-20 h-20 object-cover shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{isHotel ? `${it.stars}-Star Hotel` : it.type}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{it.tag}</span>
                       <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{it.name}</p>
+                      <span className="inline-flex items-center gap-0.5 self-start text-[10px] font-bold mt-0.5" style={{ color: "var(--leaf)" }}>
+                        Read more
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+                      </span>
                     </div>
                   </Link>
                 ))}

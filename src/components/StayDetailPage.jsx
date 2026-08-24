@@ -1,11 +1,12 @@
 import { useParams, Navigate } from "react-router-dom";
 import { useEffect } from "react";
-import { getHotelBySlug, getAccommodationBySlug, getHotels, getAccommodations } from "../api";
+import { getHotelBySlug, getAccommodationBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
 import NewsOffers from "./NewsOffers";
+import { STAY_DISCOVER } from "../Data/stayDiscover";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
 // category pill, same pill styling as the rest of the layout.
@@ -134,11 +135,10 @@ export default function StayDetailPage({ kind }) {
   const { slug } = useParams();
   const fetcher = isHotels ? () => getHotelBySlug(slug) : () => getAccommodationBySlug(slug);
   const { data: item, loading, error } = useFetch(fetcher, [slug, kind]);
-  const { data: siblings, loading: loadingSiblings } = useFetch(isHotels ? getHotels : getAccommodations, [kind]);
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
-  if (loading || loadingSiblings) return <Loading minHeight="70vh" />;
+  if (loading) return <Loading minHeight="70vh" />;
   if (error) return <ErrorState minHeight="70vh" />;
   if (!item) return <Navigate to={isHotels ? "/live/stay/hotels" : "/live/stay/accommodation"} replace />;
 
@@ -155,17 +155,6 @@ export default function StayDetailPage({ kind }) {
     ...(!isHotels ? [`${item.guests} guests · ${item.bedrooms} bedroom${item.bedrooms !== 1 ? "s" : ""} · ${item.host}`] : []),
     item.description,
   ].filter(Boolean);
-
-  const related = (siblings ?? [])
-    .filter((s) => s.slug !== item.slug)
-    .slice(0, 3)
-    .map((s) => ({
-      slug: s.slug,
-      to: `${listPath}/${s.slug}`,
-      image: s.image,
-      category: isHotels ? `${s.stars}-Star Hotel` : s.type,
-      name: s.name,
-    }));
 
   return (
     <PlaceDetailLayout
@@ -189,9 +178,9 @@ export default function StayDetailPage({ kind }) {
       extraButtonLabel={isHotels && item.website ? "Booking" : undefined}
       extraButtonHref={item.website}
       directionsQuery={item.mapQuery}
-      relatedHeading={isHotels ? "More Hotels in Maidenhead" : "More Accommodation in Maidenhead"}
+      relatedHeading="Stay Here & Discover"
       relatedBackground="#ffffff"
-      related={related}
+      related={STAY_DISCOVER}
       afterGallery={
         <AmenitiesSection
           amenities={item.amenities}
