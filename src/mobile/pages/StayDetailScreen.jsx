@@ -124,9 +124,9 @@ export default function StayDetailScreen() {
             </p>
           )}
 
-          {place.description && (
-            <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{place.description}</p>
-          )}
+          {place.description && place.description.split("\n\n").map((para, i) => (
+            <p key={i} className="text-sm leading-relaxed" style={{ color: "#000000" }}>{para}</p>
+          ))}
 
           {/* Action rail — same design as the Services/Freelancer profiles:
               a full-width Call Now bar, then circular Website/Directions/

@@ -153,7 +153,7 @@ export default function StayDetailPage({ kind }) {
   const description = [
     item.tagline,
     ...(!isHotels ? [`${item.guests} guests · ${item.bedrooms} bedroom${item.bedrooms !== 1 ? "s" : ""} · ${item.host}`] : []),
-    item.description,
+    ...(item.description ? item.description.split("\n\n") : []),
   ].filter(Boolean);
 
   return (
