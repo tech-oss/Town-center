@@ -36,6 +36,21 @@ function Pill({ children }) {
   );
 }
 
+// Accordion row — the website shows FAQ as a flat Q&A list inside its own
+// tab; collapsed-by-default rows read better on a phone where up to 8
+// questions would otherwise push everything else far down the scroll.
+function FaqItem({ q, a, open, onToggle }) {
+  return (
+    <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+      <button type="button" onClick={onToggle} className="w-full flex items-start justify-between gap-3 text-left">
+        <span className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{q}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && <p className="text-sm leading-relaxed mt-2" style={{ color: "#000000" }}>{a}</p>}
+    </div>
+  );
+}
+
 function ReviewCard({ area, stars, timeAgo, text }) {
   return (
     <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
@@ -55,6 +70,7 @@ function ReviewCard({ area, stars, timeAgo, text }) {
 // experience — before reaching out.
 export default function FreelancerDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
   const section = sections[place.section];
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
   const news = place.news ?? [];
@@ -62,6 +78,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const portfolio = (place.gallery ?? []).filter((g) => g !== place.image);
   const skills = place.servicesOffered ?? [];
   const reviewsList = place.reviewsList ?? [];
+  const faq = place.faq ?? [];
   const availability = place.availability || "Accepting new projects";
   const workMode = place.workMode || "Remote & on-site";
   const responseTime = place.responseTime || "Usually within 24 hours";
@@ -204,6 +221,15 @@ export default function FreelancerDetailScreen({ place, goBack }) {
             <MobileCard className="p-4 flex flex-col">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Client Reviews</p>
               {reviewsList.map((r, i) => <ReviewCard key={i} {...r} />)}
+            </MobileCard>
+          )}
+
+          {faq.length > 0 && (
+            <MobileCard className="p-4 flex flex-col">
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Frequently Asked Questions</p>
+              {faq.map((f, i) => (
+                <FaqItem key={i} {...f} open={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? -1 : i)} />
+              ))}
             </MobileCard>
           )}
 

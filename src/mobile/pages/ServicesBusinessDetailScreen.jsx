@@ -43,6 +43,21 @@ function Pill({ children }) {
   );
 }
 
+// Accordion row — the website shows FAQ as a flat Q&A list inside its own
+// tab; collapsed-by-default rows read better on a phone where up to 8
+// questions would otherwise push everything else far down the scroll.
+function FaqItem({ q, a, open, onToggle }) {
+  return (
+    <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+      <button type="button" onClick={onToggle} className="w-full flex items-start justify-between gap-3 text-left">
+        <span className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{q}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5" style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      {open && <p className="text-sm leading-relaxed mt-2" style={{ color: "#000000" }}>{a}</p>}
+    </div>
+  );
+}
+
 function ReviewCard({ area, stars, timeAgo, text }) {
   return (
     <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
@@ -64,6 +79,7 @@ function ReviewCard({ area, stars, timeAgo, text }) {
 // tapping between tabs.
 export default function ServicesBusinessDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
+  const [openFaq, setOpenFaq] = useState(0);
   const section = sections[place.section];
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
@@ -76,6 +92,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
   const areasCovered = place.areasCovered ?? [];
   const reviewsList = place.reviewsList ?? [];
   const accreditations = place.accreditations ?? [];
+  const faq = place.faq ?? [];
   const related = (section?.items ?? [])
     .filter((it) => it.slug !== place.slug && it.category === place.category)
     .slice(0, 3);
@@ -261,6 +278,15 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
               <div className="flex flex-wrap gap-2">
                 {accreditations.map((a) => <Pill key={a}>{a}</Pill>)}
               </div>
+            </MobileCard>
+          )}
+
+          {faq.length > 0 && (
+            <MobileCard className="p-4 flex flex-col">
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Frequently Asked Questions</p>
+              {faq.map((f, i) => (
+                <FaqItem key={i} {...f} open={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? -1 : i)} />
+              ))}
             </MobileCard>
           )}
 
