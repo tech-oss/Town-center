@@ -3,6 +3,7 @@ import MobileShell from "../components/MobileShell";
 import useFetch from "../../hooks/useFetch";
 import { getStoryBySlug, getStories } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
+import ShareButton from "../components/ShareButton";
 
 function BlockText({ block }) {
   return (
@@ -53,11 +54,14 @@ export default function StoryDetailScreen() {
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{story.category}</span>
-              <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{heroTitle}</h1>
-              {heroSubtitle && <p className="text-xs uppercase tracking-wide mt-1" style={{ color: "#000000" }}>{heroSubtitle}</p>}
-              {story.date && <p className="text-xs mt-2" style={{ color: "#000000" }}>{story.date}</p>}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{story.category}</span>
+                <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{heroTitle}</h1>
+                {heroSubtitle && <p className="text-xs uppercase tracking-wide mt-1" style={{ color: "#000000" }}>{heroSubtitle}</p>}
+                {story.date && <p className="text-xs mt-2" style={{ color: "#000000" }}>{story.date}</p>}
+              </div>
+              <ShareButton path={`/story/${story.slug}`} title={story.title} text={story.standfirst} className="mt-0.5" />
             </div>
 
             {story.standfirst && (

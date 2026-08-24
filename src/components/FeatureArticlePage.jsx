@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
+import ShareButton from "./ui/ShareButton";
 
 // Feature photo — keeps the "In the Spotlight" framed-photo hover: a sharp
 // foreground photo that insets on hover/tap to reveal a blurred, dimmed
@@ -130,7 +131,7 @@ export default function FeatureArticlePage() {
               <span>{story.eyebrow}</span>
             </nav>
 
-            <div className="flex items-center gap-3 mb-10">
+            <div className="flex items-center gap-3 mb-10 flex-wrap">
               <span
                 className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
                 style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
@@ -139,6 +140,9 @@ export default function FeatureArticlePage() {
                 {story.category}
               </span>
               <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
+              <span className="ml-auto">
+                <ShareButton path={`/story/${story.slug}`} title={story.title} text={story.standfirst} />
+              </span>
             </div>
           </div>
 

@@ -5,6 +5,7 @@ import { getArticleBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
+import ShareButton from "./ui/ShareButton";
 
 export default function ArticlePage() {
   const { articleSlug } = useParams();
@@ -63,7 +64,7 @@ export default function ArticlePage() {
             <Link to={bizPath} className="hover:opacity-70 transition-opacity">{biz.name}</Link>
           </nav>
 
-          <div className="flex items-center gap-3 mb-10">
+          <div className="flex items-center gap-3 mb-10 flex-wrap">
             <span
               className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
               style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
@@ -72,6 +73,9 @@ export default function ArticlePage() {
               {article.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
+            <span className="ml-auto">
+              <ShareButton path={`/news/${article.slug}`} title={article.title} text={article.body?.[0]} />
+            </span>
           </div>
 
           <article className="flex flex-col gap-5 text-center max-w-3xl mx-auto">

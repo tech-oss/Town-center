@@ -6,6 +6,7 @@ import useFetch from "../../hooks/useFetch";
 import { getEventBySlug, getEvents } from "../../api";
 import { categoryColors } from "../../Data/events";
 import useMobileBack from "../hooks/useMobileBack";
+import ShareButton from "../components/ShareButton";
 
 export default function EventDetailScreen() {
   const { slug } = useParams();
@@ -30,12 +31,15 @@ export default function EventDetailScreen() {
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: dot }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dot }} />
-              {event.category}
-            </span>
-            <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{event.title}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: dot }}>
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dot }} />
+                {event.category}
+              </span>
+              <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{event.title}</h1>
+            </div>
+            <ShareButton path={`/event/${event.slug}`} title={event.title} text={event.standfirst} className="mt-0.5" />
           </div>
 
           <MobileCard className="p-4 flex flex-col gap-3">

@@ -4,6 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import { getArticleBySlug } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
 import { typeColor } from "../lib/typeColors";
+import ShareButton from "../components/ShareButton";
 
 export default function NewsDetailScreen() {
   const { slug } = useParams();
@@ -25,20 +26,23 @@ export default function NewsDetailScreen() {
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: typeColor(article.category) }} />
-                {article.category}
-              </span>
-              {article.date && <span className="text-xs" style={{ color: "#000000" }}>{article.date}</span>}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: typeColor(article.category) }} />
+                  {article.category}
+                </span>
+                {article.date && <span className="text-xs" style={{ color: "#000000" }}>{article.date}</span>}
+              </div>
+              <h1 className="text-xl font-bold leading-snug" style={{ color: "#000000" }}>{article.title}</h1>
+              {biz && (
+                <p className="text-sm mt-1.5" style={{ color: "#000000" }}>
+                  At {bizLink ? <Link to={bizLink} className="font-semibold" style={{ color: "var(--leaf)" }}>{biz.name}</Link> : biz.name} · {biz.tag}
+                </p>
+              )}
             </div>
-            <h1 className="text-xl font-bold leading-snug" style={{ color: "#000000" }}>{article.title}</h1>
-            {biz && (
-              <p className="text-sm mt-1.5" style={{ color: "#000000" }}>
-                At {bizLink ? <Link to={bizLink} className="font-semibold" style={{ color: "var(--leaf)" }}>{biz.name}</Link> : biz.name} · {biz.tag}
-              </p>
-            )}
+            <ShareButton path={`/news/${article.slug}`} title={article.title} text={article.excerpt} className="mt-0.5" />
           </div>
 
           <div className="flex flex-col gap-4">
