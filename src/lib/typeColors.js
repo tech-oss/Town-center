@@ -6,7 +6,7 @@
 // (lib/categoryColors.js) so the two colour systems never collide.
 export const TYPE_COLORS = {
   Featured: "#D6336C",
-  Offer: "#C0392B",
+  Offer: "#F4D35E",
   News: "#8B5E3C",
   "What's On": "#0E9AA7",
 };
