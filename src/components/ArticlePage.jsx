@@ -6,6 +6,7 @@ import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import ShareButton from "./ui/ShareButton";
+import { typeColor } from "../lib/typeColors";
 
 export default function ArticlePage() {
   const { articleSlug } = useParams();
@@ -69,7 +70,7 @@ export default function ArticlePage() {
               className="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-1.5 rounded-full"
               style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}
             >
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: typeColor(article.category) }} />
               {article.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
@@ -133,7 +134,7 @@ export default function ArticlePage() {
                       className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
                       style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
                     >
-                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
+                      <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: typeColor(a.category) }} />
                       {a.category}
                     </span>
                   </div>

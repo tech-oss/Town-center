@@ -4,6 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import { getStoryBySlug, getStories } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
 import ShareButton from "../components/ShareButton";
+import { typeColor } from "../lib/typeColors";
 
 function BlockText({ block }) {
   return (
@@ -56,7 +57,7 @@ export default function StoryDetailScreen() {
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{story.category}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: typeColor(story.category) }}>{story.category}</span>
                 <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{heroTitle}</h1>
                 {heroSubtitle && <p className="text-xs uppercase tracking-wide mt-1" style={{ color: "#000000" }}>{heroSubtitle}</p>}
                 {story.date && <p className="text-xs mt-2" style={{ color: "#000000" }}>{story.date}</p>}
@@ -103,7 +104,7 @@ export default function StoryDetailScreen() {
                     <Link key={f.slug} to={`/mobile/story/${f.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                       <img src={f.cardImage} alt="" className="w-20 h-20 object-cover shrink-0" />
                       <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                        <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{f.eyebrow}</span>
+                        <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: typeColor("Featured") }}>{f.eyebrow}</span>
                         <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{f.cardHeading}</p>
                       </div>
                     </Link>

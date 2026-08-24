@@ -4,6 +4,7 @@ import { getStories, getArticles } from "../api";
 import { blogCards } from "../Data/content";
 import { sections } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
+import { TYPE_COLORS } from "../lib/typeColors";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
 import { card, pill } from "../utils/design";
@@ -22,14 +23,6 @@ const homepageSpotlightSlugs = new Set(
   blogCards.posts.filter((p) => p.homepage).map((p) => p.href.split("/").pop())
 );
 
-// One colour per tag, echoing the dot-colour treatment CategoryPage uses for
-// its own category pills, so this listing reads as the same design system.
-const TYPE_COLORS = {
-  Featured: "var(--forest)",
-  Offer: "#F5A623",
-  News: "var(--leaf)",
-  "What's On": "var(--teal-deep)",
-};
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 
 function HomepageBadge() {
