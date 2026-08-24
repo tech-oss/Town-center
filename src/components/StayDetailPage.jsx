@@ -175,9 +175,9 @@ export default function StayDetailPage({ kind }) {
       email={item.email}
       social={buildSocial(item)}
       website={item.website}
-      extraButtonLabel={isHotels && item.website ? "Booking" : undefined}
-      extraButtonHref={item.website}
       directionsQuery={item.mapQuery}
+      shareInActions
+      stickyBooking={isHotels && !!item.website}
       relatedHeading="Stay Here & Discover"
       relatedBackground="#ffffff"
       related={STAY_DISCOVER}

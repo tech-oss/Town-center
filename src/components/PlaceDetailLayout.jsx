@@ -201,6 +201,16 @@ export default function PlaceDetailLayout({
   // Optional "back to listing" link rendered under the breadcrumb — used by
   // the What's On event page to point back to the full events calendar.
   backLink,
+  // When true, Share is rendered as a large circular button in the action
+  // rail (Website / Get Directions / Share) instead of the small icon
+  // button next to the social icons in the Find Us column — used by Stay
+  // (hotels/accommodation) to match its mobile layout. Everything else
+  // keeps the small Find Us icon.
+  shareInActions = false,
+  // Floats a "Make a Booking" button in once the page's own website/CTA
+  // button has scrolled out of view — used by Stay hotels with a website,
+  // independently of whether a "Booking" action-rail button exists.
+  stickyBooking = false,
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -212,12 +222,12 @@ export default function PlaceDetailLayout({
   // button (in the info card) has scrolled out of view, so it's always
   // reachable without duplicating the CTA above the fold.
   useEffect(() => {
-    if (extraButtonLabel !== "Booking") return;
+    if (!stickyBooking) return;
     const onScroll = () => setShowStickyBooking(window.scrollY > 420);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [extraButtonLabel]);
+  }, [stickyBooking]);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
   const u = encodeURIComponent(shareUrl);
@@ -234,7 +244,7 @@ export default function PlaceDetailLayout({
       href: websiteHref,
       icon: <GlobeIcon size={22} />,
     },
-    extraButtonLabel && {
+    !shareInActions && extraButtonLabel && {
       label: extraButtonLabel,
       href: extraButtonHref || websiteHref || "#",
       icon: <TicketIcon size={22} />,
@@ -243,6 +253,11 @@ export default function PlaceDetailLayout({
       label: "Get Directions",
       href: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`,
       icon: <PinIcon size={22} />,
+    },
+    shareInActions && {
+      label: "Share",
+      onClick: () => setShareOpen(true),
+      icon: <ShareNodesIcon size={22} />,
     },
   ].filter(Boolean);
 
@@ -420,16 +435,18 @@ export default function PlaceDetailLayout({
                         <ShareIcon name={sl.icon} />
                       </a>
                     ))}
-                    <button
-                      type="button"
-                      onClick={() => setShareOpen(true)}
-                      aria-label="Share"
-                      title="Share"
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 cursor-pointer"
-                      style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
-                    >
-                      <ShareNodesIcon size={16} />
-                    </button>
+                    {!shareInActions && (
+                      <button
+                        type="button"
+                        onClick={() => setShareOpen(true)}
+                        aria-label="Share"
+                        title="Share"
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-80 cursor-pointer"
+                        style={{ backgroundColor: "var(--leaf)", color: "#fff" }}
+                      >
+                        <ShareNodesIcon size={16} />
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -635,9 +652,9 @@ export default function PlaceDetailLayout({
 
       {/* Sticky booking button — floats with the page scroll once the
           in-card booking button is out of view. */}
-      {extraButtonLabel === "Booking" && (
+      {stickyBooking && (
         <a
-          href={extraButtonHref || websiteHref || "#"}
+          href={websiteHref || "#"}
           target="_blank"
           rel="noopener noreferrer"
           className="fixed z-40 bottom-6 right-6 inline-flex items-center gap-2 text-sm font-bold px-5 py-3.5 rounded-full transition-all duration-300"
