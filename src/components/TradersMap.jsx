@@ -700,13 +700,14 @@ export default function TradersMap() {
                 role="tab"
                 aria-selected={on}
                 onClick={() => { setFilter(f.key); handleDeselect(); setSearchQuery(""); }}
-                className="shrink-0 px-4 sm:px-5 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer"
+                className="shrink-0 inline-flex items-center gap-2 px-4 sm:px-5 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 whitespace-nowrap cursor-pointer"
                 style={
                   on
                     ? { backgroundColor: "var(--forest)", color: "#fff", boxShadow: "0 6px 16px -6px rgba(28,46,56,0.5)" }
                     : { backgroundColor: "rgba(255,255,255,0.85)", color: "var(--forest)", border: "1px solid rgba(28,46,56,0.12)" }
                 }
               >
+                {f.sections && <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colorForSection(f.sections[0]) }} />}
                 {f.label}
               </button>
             );

@@ -199,11 +199,12 @@ export default function MapScreen() {
             <button
               key={f.key}
               onClick={() => { setFilter(f.key); setActive(null); }}
-              className="shrink-0 px-4 py-1.5 rounded-full text-xs whitespace-nowrap"
+              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs whitespace-nowrap"
               style={filter === f.key
                 ? { backgroundColor: "var(--forest)", color: "#ffffff", fontWeight: 800 }
                 : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000", fontWeight: 600 }}
             >
+              {f.sections && <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: colorFor(f.sections[0]) }} />}
               {f.label}
             </button>
           ))}
