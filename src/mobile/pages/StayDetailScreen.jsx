@@ -7,6 +7,7 @@ import MiniMap from "../components/MiniMap";
 import useFetch from "../../hooks/useFetch";
 import { getHotelBySlug, getAccommodationBySlug } from "../../api";
 import { STAY_DISCOVER } from "../../Data/stayDiscover";
+import { typeColor } from "../lib/typeColors";
 import useMobileBack from "../hooks/useMobileBack";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import { OffersLink } from "../components/ListSearch";
@@ -85,6 +86,7 @@ export default function StayDetailScreen() {
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
   const gallery = (place.gallery?.length ? place.gallery : [place.image]).filter((g) => g !== place.image);
   const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
+  const news = place.news ?? [];
 
   async function handleShare() {
     const url = `${window.location.origin}/live/stay/${kind}/${place.slug}`;
@@ -209,6 +211,26 @@ export default function StayDetailScreen() {
             <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
             <MiniMap query={place.mapQuery || place.address || place.area} lat={place.lat} lng={place.lng} />
           </div>
+
+          {news.length > 0 && (
+            <div
+              className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-4"
+              style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+            >
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
+                {news.map((n) => (
+                  <Link key={n.slug} to={`/mobile/news/${n.slug}`} className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>
+                    <img src={n.image} alt="" className="w-full h-28 object-cover" />
+                    <div className="p-2.5 flex flex-col gap-1">
+                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: typeColor(n.category) }}>{n.category}</span>
+                      <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
 
           {STAY_DISCOVER.length > 0 && (
             <div className="mt-2">
