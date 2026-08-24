@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import { hotelBySlug, accommodationBySlug } from "../../Data/stay";
+
+// One hotel + one accommodation, so "Featured Stay" reads as a genuine
+// cross-section of what Live & Stay covers rather than favouring one type.
+const FEATURED = [
+  { kind: "hotels", place: hotelBySlug["fredricks-hotel-restaurant-spa"], tag: "Hotel" },
+  { kind: "accommodation", place: accommodationBySlug["thameside-boathouse-retreat"], tag: "Accommodation" },
+].filter((f) => f.place);
 
 // Same pattern as Services: Hotels and Accommodation are genuinely different
 // listing types on the website (/live/stay/hotels vs /live/stay/accommodation,
@@ -65,6 +73,30 @@ export default function LiveStayPickerScreen() {
             </Link>
           ))}
         </div>
+
+        {FEATURED.length > 0 && (
+          <div>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>Featured Stay</p>
+            <div className="flex flex-col gap-3">
+              {FEATURED.map(({ kind, place, tag }) => (
+                <Link
+                  key={place.slug}
+                  to={`/mobile/stay/${kind}/${place.slug}`}
+                  className="relative overflow-hidden rounded-2xl h-36 flex items-end active:opacity-90"
+                  style={{ boxShadow: "0 10px 26px -12px rgba(28,46,56,0.5)" }}
+                >
+                  <img src={place.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 35%, rgba(12,20,24,0.88) 100%)" }} />
+                  <div className="relative p-4">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--mint)", textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}>{tag}</span>
+                    <p className="text-base font-bold leading-snug text-white mt-0.5">{place.name}</p>
+                    <p className="text-xs mt-0.5 leading-snug font-medium line-clamp-1" style={{ color: "rgba(255,255,255,0.85)" }}>{place.tagline}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </MobileShell>
   );
