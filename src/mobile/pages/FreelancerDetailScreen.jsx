@@ -51,7 +51,7 @@ function FaqItem({ q, a, open, onToggle }) {
   );
 }
 
-function ReviewCard({ area, stars, timeAgo, text }) {
+function ReviewCard({ area, stars, timeAgo, text, sourceUrl }) {
   return (
     <div className="py-3.5 border-t first:border-t-0" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
       <div className="flex items-center gap-2 flex-wrap mb-1.5">
@@ -59,6 +59,17 @@ function ReviewCard({ area, stars, timeAgo, text }) {
         <span className="text-xs" style={{ color: "#000000" }}>{timeAgo}{area ? ` · ${area}` : ""}</span>
       </div>
       <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{text}</p>
+      {sourceUrl && (
+        <a
+          href={sourceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full mt-2.5"
+          style={{ backgroundColor: "var(--mint)", color: "var(--forest)" }}
+        >
+          Read verified review <span>↗</span>
+        </a>
+      )}
     </div>
   );
 }
@@ -72,6 +83,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
   const section = sections[place.section];
+  const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${place.name} reviews`)}`;
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
   const news = place.news ?? [];
   const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
@@ -125,7 +137,6 @@ export default function FreelancerDetailScreen({ place, goBack }) {
               <div className="flex items-center gap-2 mt-1.5">
                 <StarRow value={place.rating} />
                 <span className="text-sm font-bold" style={{ color: "#000000" }}>{place.rating.toFixed(1)}</span>
-                {place.reviewCount != null && <span className="text-xs" style={{ color: "#000000" }}>({place.reviewCount} reviews)</span>}
               </div>
             )}
             {skills.length > 0 && (
@@ -223,7 +234,16 @@ export default function FreelancerDetailScreen({ place, goBack }) {
           {reviewsList.length > 0 && (
             <MobileCard className="p-4 flex flex-col">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Client Reviews</p>
-              {reviewsList.map((r, i) => <ReviewCard key={i} {...r} />)}
+              {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
+              <a
+                href={defaultReviewSourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-bold mt-3"
+                style={{ color: "var(--leaf)" }}
+              >
+                View all reviews →
+              </a>
             </MobileCard>
           )}
 
