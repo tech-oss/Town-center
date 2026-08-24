@@ -11,8 +11,8 @@ export const CATEGORY_COLORS = {
   "food-drink": "#F5B700",
   shop: "#2FA84F",
   shopping: "#2FA84F",
-  services: "#F2994A",
-  "health-beauty": "#F2994A",
+  services: "#C25E00",
+  "health-beauty": "#C25E00",
   "see-do": "#2E86DE",
   stay: "#8E6FC4",
 };
