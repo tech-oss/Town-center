@@ -136,12 +136,6 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
               {section?.label} · {place.tag}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
-            {place.rating != null && (
-              <div className="flex items-center gap-2 mt-1.5">
-                <StarRow value={place.rating} />
-                <span className="text-sm font-bold" style={{ color: "#000000" }}>{place.rating.toFixed(1)}</span>
-              </div>
-            )}
             {place.badges?.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2.5">
                 {place.badges.map((b) => <Pill key={b}>{b}</Pill>)}
