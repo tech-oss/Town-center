@@ -59,18 +59,61 @@ export default function HomeScreen() {
   const featuredStories = (stories ?? []).filter((s) => s.homepage);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
+  const [videoPlaying, setVideoPlaying] = useState(true);
+  const stallTimer = useRef(null);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setVideoPlaying(false);
+      return;
+    }
     v.muted = true;
     v.defaultMuted = true;
     v.playsInline = true;
     const play = () => v.play().catch(() => {});
     play();
     v.addEventListener("canplay", play, { once: true });
+
+    // If playback stalls (buffering hang, decode error, connection drop)
+    // for more than a couple of seconds, stop treating it as "playing" —
+    // pause for real and surface the play button so the user has an
+    // obvious way to retry instead of staring at a frozen frame.
+    const armStallTimer = () => {
+      clearTimeout(stallTimer.current);
+      stallTimer.current = setTimeout(() => {
+        v.pause();
+        setVideoPlaying(false);
+      }, 2500);
+    };
+    const clearStallTimer = () => clearTimeout(stallTimer.current);
+
+    v.addEventListener("waiting", armStallTimer);
+    v.addEventListener("stalled", armStallTimer);
+    v.addEventListener("error", () => { clearStallTimer(); setVideoPlaying(false); });
+    v.addEventListener("playing", () => { clearStallTimer(); setVideoPlaying(true); });
+    v.addEventListener("pause", () => setVideoPlaying(false));
+
+    return () => {
+      clearStallTimer();
+      v.removeEventListener("canplay", play);
+      v.removeEventListener("waiting", armStallTimer);
+      v.removeEventListener("stalled", armStallTimer);
+    };
   }, []);
+
+  function toggleVideo() {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.play().catch(() => {});
+      setVideoPlaying(true);
+    } else {
+      v.pause();
+      setVideoPlaying(false);
+    }
+  }
 
   return (
     <MobileShell hideHeader noPadding>
@@ -89,6 +132,23 @@ export default function HomeScreen() {
             autoPlay
           />
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.45) 0%, rgba(12,20,24,0.05) 40%, rgba(12,20,24,0.15) 65%, rgba(12,20,24,0.7) 100%)" }} />
+
+          {/* Plays by default; if playback stalls it pauses itself and this
+              button flips to "play" so the user has something to tap
+              instead of a frozen frame. Also doubles as a manual toggle. */}
+          <button
+            type="button"
+            onClick={toggleVideo}
+            aria-label={videoPlaying ? "Pause background video" : "Play background video"}
+            className="absolute top-1/2 right-6 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center active:opacity-80"
+            style={{ backgroundColor: "rgba(0,0,0,0.4)", backdropFilter: "blur(2px)" }}
+          >
+            {videoPlaying ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="4" width="4" height="16" rx="1" /><rect x="14" y="4" width="4" height="16" rx="1" /></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+            )}
+          </button>
           <div className="absolute top-3 left-5 right-3 flex items-center justify-between">
             <img src="/logo-mark.svg" alt="" className="h-7 w-auto" />
             <div className="flex items-center gap-2">
