@@ -9,6 +9,7 @@ import {
   ShareNodesIcon,
   ShareIcon,
   GalleryLightbox,
+  ActionCircle,
 } from "./PlaceDetailLayout";
 
 function StarIcon({ filled = true, size = 14 }) {
@@ -359,25 +360,26 @@ export default function ServicesDetailLayout({
                   <PhoneIcon size={16} /> Call Now {phone}
                 </a>
               )}
-              {email && (
-                <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <MailIcon size={16} /> Request a Quote
-                </a>
-              )}
-              {websiteHref && (
-                <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <GlobeIcon size={16} /> Visit Website
-                </a>
-              )}
-              <div className="grid grid-cols-2 gap-3">
-                {directionsQuery && (
-                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                    <PinIcon size={16} /> Directions
-                  </a>
+              <div className="grid grid-cols-3 gap-2">
+                {websiteHref && (
+                  <ActionCircle
+                    href={websiteHref}
+                    label="Visit Website"
+                    icon={<GlobeIcon size={20} />}
+                  />
                 )}
-                <button type="button" onClick={() => setShareOpen(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <ShareNodesIcon size={16} /> Share
-                </button>
+                {directionsQuery && (
+                  <ActionCircle
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(directionsQuery)}`}
+                    label="Get Directions"
+                    icon={<PinIcon size={20} />}
+                  />
+                )}
+                <ActionCircle
+                  onClick={() => setShareOpen(true)}
+                  label="Share"
+                  icon={<ShareNodesIcon size={18} />}
+                />
               </div>
 
               {(address || email) && (

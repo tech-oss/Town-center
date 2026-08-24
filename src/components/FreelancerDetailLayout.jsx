@@ -8,6 +8,7 @@ import {
   ShareNodesIcon,
   ShareIcon,
   GalleryLightbox,
+  ActionCircle,
 } from "./PlaceDetailLayout";
 
 function StarIcon({ filled = true, size = 14 }) {
@@ -360,20 +361,26 @@ export default function FreelancerDetailLayout({
                   <PhoneIcon size={16} /> Call Now {phone}
                 </a>
               )}
-              {email && (
-                <a href={`mailto:${email}`} className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <MailIcon size={16} /> Get in Touch
-                </a>
-              )}
-              {websiteHref && (
-                <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl font-semibold text-sm border transition-colors hover:bg-black/[0.03]" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <GlobeIcon size={16} /> Visit Website
-                </a>
-              )}
-              <div className="grid grid-cols-1">
-                <button type="button" onClick={() => setShareOpen(true)} className="flex items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold transition-colors hover:bg-black/[0.03] cursor-pointer" style={{ borderColor: "rgba(28,46,56,0.15)", color: "var(--forest)" }}>
-                  <ShareNodesIcon size={16} /> Share Profile
-                </button>
+              <div className="grid grid-cols-3 gap-2">
+                {email && (
+                  <ActionCircle
+                    href={`mailto:${email}`}
+                    label="Get in Touch"
+                    icon={<MailIcon size={20} />}
+                  />
+                )}
+                {websiteHref && (
+                  <ActionCircle
+                    href={websiteHref}
+                    label="Visit Website"
+                    icon={<GlobeIcon size={20} />}
+                  />
+                )}
+                <ActionCircle
+                  onClick={() => setShareOpen(true)}
+                  label="Share Profile"
+                  icon={<ShareNodesIcon size={18} />}
+                />
               </div>
 
               {(address || social?.length > 0) && (

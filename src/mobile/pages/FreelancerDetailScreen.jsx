@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
+import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import { sections } from "../../Data/pages";
 import { typeColor } from "../lib/typeColors";
@@ -128,23 +129,26 @@ export default function FreelancerDetailScreen({ place, goBack }) {
                 Call Now · {place.phone}
               </a>
             )}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-3 gap-2">
               {place.email && (
-                <a href={`mailto:${place.email}`} className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
-                  Get in Touch
-                </a>
+                <ActionButton
+                  href={`mailto:${place.email}`}
+                  label="Get in Touch"
+                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>}
+                />
               )}
               {websiteUrl && (
-                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>
-                  Website
-                </a>
+                <ActionButton
+                  href={websiteUrl}
+                  label="Visit Website"
+                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
+                />
               )}
-              <button type="button" onClick={handleShare} className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold col-span-2" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" /></svg>
-                {copied ? "Copied!" : "Share Profile"}
-              </button>
+              <ActionButton
+                onClick={handleShare}
+                label={copied ? "Link Copied" : "Share Profile"}
+                icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" /></svg>}
+              />
             </div>
             {place.address && (
               <div className="flex items-start gap-3 text-sm pt-3" style={{ color: "#000000", borderTop: "1px solid rgba(0,0,0,0.07)" }}>

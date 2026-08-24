@@ -3,6 +3,7 @@ import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import PhotoGallery from "../components/PhotoGallery";
+import ActionButton from "../components/ActionButton";
 import MiniMap from "../components/MiniMap";
 import { itemBySlug, sections } from "../../Data/pages";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
@@ -17,24 +18,6 @@ const SOCIAL_ICONS = {
   facebook: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h-2a4 4 0 0 0-4 4v3H7v4h2v7h4v-7h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>,
   x: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4l16 16M20 4L4 20" /></svg>,
 };
-
-function ActionButton({ icon, label, href, onClick, skipExternalConfirm }) {
-  const inner = (
-    <>
-      <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
-        {icon}
-      </span>
-      <span className="text-xs font-semibold text-center leading-snug" style={{ color: "#000000" }}>{label}</span>
-    </>
-  );
-  const className = "flex flex-col items-center gap-2 active:opacity-70";
-  if (onClick) return <button type="button" onClick={onClick} className={className}>{inner}</button>;
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" {...(skipExternalConfirm ? { "data-skip-external-confirm": true } : {})} className={className}>
-      {inner}
-    </a>
-  );
-}
 
 // Eat & Drink / Shop / See & Do business detail — the website's
 // PlaceDetailLayout equivalent. Services (tradesperson/professional/

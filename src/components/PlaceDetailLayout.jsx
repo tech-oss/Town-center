@@ -135,6 +135,26 @@ export function ShareIcon({ name }) {
   return (<svg {...p} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>);
 }
 
+// Circular icon + label action button — the sidebar-card equivalent of this
+// page's own action rail (below), reused by ServicesDetailLayout and
+// FreelancerDetailLayout so their Website/Directions/Share row reads the
+// same way as Eat & Drink/Shop/See & Do's instead of the bordered pill
+// buttons those two used to have.
+export function ActionCircle({ icon, label, to, href, onClick }) {
+  const inner = (
+    <>
+      <span className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
+        {icon}
+      </span>
+      <span className="text-xs font-semibold text-center leading-snug" style={{ color: "#000000" }}>{label}</span>
+    </>
+  );
+  const className = "flex flex-col items-center gap-2 transition-opacity hover:opacity-80";
+  if (to) return <Link to={to} className={className}>{inner}</Link>;
+  if (onClick) return <button type="button" onClick={onClick} className={className}>{inner}</button>;
+  return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>;
+}
+
 function normalizeUrl(url) {
   if (!url) return null;
   return url.startsWith("http") ? url : `https://${url}`;
