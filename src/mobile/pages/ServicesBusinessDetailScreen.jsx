@@ -170,7 +170,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
               </div>
             )}
             {social.length > 0 && (
-              <div className="flex items-center gap-3 pt-1">
+              <div className="flex items-center justify-center gap-3 pt-1">
                 {social.map(([key, href]) => (
                   <a key={key} href={href} target="_blank" rel="noopener noreferrer" aria-label={key} className="w-9 h-9 rounded-full flex items-center justify-center" style={{ backgroundColor: "var(--leaf)" }}>
                     {SOCIAL_ICONS[key]}
