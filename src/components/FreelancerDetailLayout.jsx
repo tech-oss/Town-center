@@ -362,13 +362,6 @@ export default function FreelancerDetailLayout({
                 </a>
               )}
               <div className="grid grid-cols-3 gap-2">
-                {email && (
-                  <ActionCircle
-                    href={`mailto:${email}`}
-                    label="Get in Touch"
-                    icon={<MailIcon size={20} />}
-                  />
-                )}
                 {websiteHref && (
                   <ActionCircle
                     href={websiteHref}
@@ -383,12 +376,18 @@ export default function FreelancerDetailLayout({
                 />
               </div>
 
-              {(address || social?.length > 0) && (
+              {(address || email || social?.length > 0) && (
                 <div className="flex flex-col gap-3 pt-3 border-t" style={{ borderColor: "rgba(28,46,56,0.1)" }}>
                   {address && (
                     <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
                       <span className="mt-0.5" style={{ color: "var(--leaf)" }}><PinIcon /></span>
                       <span className="leading-relaxed">{address}</span>
+                    </div>
+                  )}
+                  {email && (
+                    <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                      <span className="mt-0.5" style={{ color: "var(--leaf)" }}><MailIcon /></span>
+                      <a href={`mailto:${email}`} className="hover:underline break-all">{email}</a>
                     </div>
                   )}
                 </div>

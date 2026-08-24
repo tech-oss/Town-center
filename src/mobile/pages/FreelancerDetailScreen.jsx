@@ -147,13 +147,6 @@ export default function FreelancerDetailScreen({ place, goBack }) {
               </a>
             )}
             <div className="grid grid-cols-3 gap-2">
-              {place.email && (
-                <ActionButton
-                  href={`mailto:${place.email}`}
-                  label="Get in Touch"
-                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>}
-                />
-              )}
               {websiteUrl && (
                 <ActionButton
                   href={websiteUrl}
@@ -167,10 +160,20 @@ export default function FreelancerDetailScreen({ place, goBack }) {
                 icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 10.5l6.8-3.9M8.6 13.5l6.8 3.9" /></svg>}
               />
             </div>
-            {place.address && (
-              <div className="flex items-start gap-3 text-sm pt-3" style={{ color: "#000000", borderTop: "1px solid rgba(0,0,0,0.07)" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-                {place.address}
+            {(place.address || place.email) && (
+              <div className="flex flex-col gap-2.5 pt-3" style={{ borderTop: "1px solid rgba(0,0,0,0.07)" }}>
+                {place.address && (
+                  <div className="flex items-start gap-3 text-sm" style={{ color: "#000000" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                    {place.address}
+                  </div>
+                )}
+                {place.email && (
+                  <div className="flex items-start gap-3 text-sm break-all" style={{ color: "#000000" }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
+                    {place.email}
+                  </div>
+                )}
               </div>
             )}
             {social.length > 0 && (

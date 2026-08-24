@@ -1,7 +1,7 @@
 // Minimal service worker for the /mobile PWA demo.
 // Scope is set to /mobile/ at registration time (see main.jsx), so this never
 // touches the rest of the site.
-const CACHE = "maidenhead-mobile-v1";
+const CACHE = "maidenhead-mobile-v2";
 const APP_SHELL = ["/mobile/", "/manifest.json", "/logo-mark.svg"];
 
 self.addEventListener("install", (event) => {

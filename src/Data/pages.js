@@ -193,6 +193,7 @@ function item(slug, name, section, category, tag, blurb) {
     hours: HOURS,
     address: "The Colonnade, High Street, Maidenhead SL6 1QJ",
     phone: "01628 000 000",
+    email: `hello@${slug}.example`,
     website: "www.maidenhead.example",
     social: {
       facebook: `https://www.facebook.com/${slug}`,
