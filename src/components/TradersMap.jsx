@@ -12,6 +12,19 @@ const CENTRE = { lat: 51.5235, lng: -0.7125 };
 const EIGHT_MILES_M = 12875;
 const DETAIL_ZOOM = 17;
 
+// One colour per category, matching the mobile map's SECTION_COLORS
+// (mobile/pages/MapScreen.jsx) so a colour means the same section on both
+// the website and the app.
+const SECTION_COLORS = {
+  "food-drink": "#F5B700",
+  shopping: "#2FA84F",
+  services: "#F2994A",
+  "health-beauty": "#F2994A",
+  "see-do": "#2E86DE",
+  stay: "#8E6FC4",
+};
+const colorForSection = (section) => SECTION_COLORS[section] ?? "#1a3a42";
+
 function haversineM(a, b) {
   const R = 6371000;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
@@ -31,8 +44,8 @@ function milesLabel(metres) {
   return `${mi.toFixed(1)} mi`;
 }
 
-function makePin(active = false) {
-  const fill = active ? "#2f8c8c" : "#1a3a42";
+function makePin(active = false, section = null) {
+  const fill = colorForSection(section);
   return L.divIcon({
     className: "",
     html: `<svg width="${active ? 38 : 28}" height="${active ? 50 : 38}" viewBox="0 0 28 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 3px 5px rgba(0,0,0,0.35))">
@@ -116,7 +129,7 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
     });
 
     brands.forEach((b) => {
-      const marker = L.marker([b.lat, b.lng], { icon: makePin(false) });
+      const marker = L.marker([b.lat, b.lng], { icon: makePin(false, b.section) });
       marker.on("click", () => selectRef.current(b));
       cluster.addLayer(marker);
     });
@@ -140,7 +153,7 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
         map.setView([b.lat, b.lng], DETAIL_ZOOM, { animate: false });
 
         highlightRef.current = L.marker([b.lat, b.lng], {
-          icon: makePin(true),
+          icon: makePin(true, b.section),
           zIndexOffset: 1000,
           interactive: true,
         }).addTo(map);

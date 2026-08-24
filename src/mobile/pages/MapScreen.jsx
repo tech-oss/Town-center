@@ -20,12 +20,15 @@ const FILTERS = [
   { key: "stay", label: "Stay", sections: ["stay"] },
 ];
 
+// One colour per category, used consistently across every pin, filter dot
+// and list-row swatch on both the mobile map and the website's Traders map
+// (TradersMap.jsx) so a colour always means the same section everywhere.
 const SECTION_COLORS = {
-  "food-drink": "#52C7B6",
-  shopping: "#F2A65A",
-  services: "#1F9BB5",
-  "health-beauty": "#1F9BB5",
-  "see-do": "#2FA4A4",
+  "food-drink": "#F5B700",
+  shopping: "#2FA84F",
+  services: "#F2994A",
+  "health-beauty": "#F2994A",
+  "see-do": "#2E86DE",
   stay: "#8E6FC4",
 };
 
