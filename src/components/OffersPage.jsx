@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getStories, getArticles } from "../api";
 import { blogCards } from "../Data/content";
 import { sections } from "../Data/pages";
+import { categoryColor } from "../lib/categoryColors";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
 import { card, pill } from "../utils/design";
@@ -11,8 +12,8 @@ import { card, pill } from "../utils/design";
 // reused here so "business type" means the exact same thing it does
 // everywhere else on the site.
 const BUSINESS_TYPES = [
-  ...Object.values(sections).map((s) => ({ key: s.key, label: s.label })),
-  { key: "stay", label: "Hotels & Stay" },
+  ...Object.values(sections).map((s) => ({ key: s.key, label: s.label, color: categoryColor(s.key) })),
+  { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
 
 // Slugs currently live on the homepage's "In the Spotlight" cards, so the
@@ -267,7 +268,10 @@ function BusinessTypeFilter({ active, onChange }) {
             className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg hover:bg-black/5"
             style={{ color: "#000000" }}
           >
-            All Business Types
+            <span className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: "var(--forest)" }} />
+              All Business Types
+            </span>
             <RadioDot active={!active} />
           </button>
           {BUSINESS_TYPES.map((b) => (
@@ -278,7 +282,10 @@ function BusinessTypeFilter({ active, onChange }) {
               className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg hover:bg-black/5"
               style={{ color: "#000000" }}
             >
-              {b.label}
+              <span className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
+                {b.label}
+              </span>
               <RadioDot active={active === b.key} />
             </button>
           ))}

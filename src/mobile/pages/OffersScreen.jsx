@@ -7,10 +7,11 @@ import { getStories, getArticles } from "../../api";
 import { blogCards } from "../../Data/content";
 import { sections } from "../../Data/pages";
 import { TYPE_COLORS, typeColor } from "../lib/typeColors";
+import { categoryColor } from "../../lib/categoryColors";
 
 const BUSINESS_TYPES = [
-  ...Object.values(sections).map((s) => ({ key: s.key, label: s.label })),
-  { key: "stay", label: "Hotels & Stay" },
+  ...Object.values(sections).map((s) => ({ key: s.key, label: s.label, color: categoryColor(s.key) })),
+  { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
 
 const homepageSpotlightSlugs = new Set(

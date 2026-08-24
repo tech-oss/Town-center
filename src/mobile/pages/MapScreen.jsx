@@ -6,6 +6,7 @@ import MobileShell from "../components/MobileShell";
 import { ListSearch } from "../components/ListSearch";
 import { brandGrid } from "../../Data/content";
 import { MAP_CENTRE } from "../data/mobileMock";
+import { categoryColor } from "../../lib/categoryColors";
 
 const CARTO_VOYAGER = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
@@ -20,19 +21,9 @@ const FILTERS = [
   { key: "stay", label: "Stay", sections: ["stay"] },
 ];
 
-// One colour per category, used consistently across every pin, filter dot
-// and list-row swatch on both the mobile map and the website's Traders map
-// (TradersMap.jsx) so a colour always means the same section everywhere.
-const SECTION_COLORS = {
-  "food-drink": "#F5B700",
-  shopping: "#2FA84F",
-  services: "#F2994A",
-  "health-beauty": "#F2994A",
-  "see-do": "#2E86DE",
-  stay: "#8E6FC4",
-};
-
-const colorFor = (section) => SECTION_COLORS[section] ?? "#52C7B6";
+// Shared with the Offers "Business Type" filter and the website's Traders
+// map/Offers filter so a colour always means the same category everywhere.
+const colorFor = categoryColor;
 
 // The website's trader links are web routes — map them onto the app's own
 // native detail screens so the map never leaves the app.

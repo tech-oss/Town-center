@@ -7,23 +7,15 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { brandGrid } from "../Data/content";
 import { itemBySlug } from "../Data/pages";
+import { categoryColor } from "../lib/categoryColors";
 
 const CENTRE = { lat: 51.5235, lng: -0.7125 };
 const EIGHT_MILES_M = 12875;
 const DETAIL_ZOOM = 17;
 
-// One colour per category, matching the mobile map's SECTION_COLORS
-// (mobile/pages/MapScreen.jsx) so a colour means the same section on both
-// the website and the app.
-const SECTION_COLORS = {
-  "food-drink": "#F5B700",
-  shopping: "#2FA84F",
-  services: "#F2994A",
-  "health-beauty": "#F2994A",
-  "see-do": "#2E86DE",
-  stay: "#8E6FC4",
-};
-const colorForSection = (section) => SECTION_COLORS[section] ?? "#1a3a42";
+// Shared with the mobile map and both Offers "Business Type" filters so a
+// colour always means the same category everywhere.
+const colorForSection = categoryColor;
 
 function haversineM(a, b) {
   const R = 6371000;
