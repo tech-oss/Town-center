@@ -315,7 +315,10 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
                   <Link key={n.slug} to={`/mobile/news/${n.slug}`} className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>
                     <img src={n.image} alt="" className="w-full h-28 object-cover" />
                     <div className="p-2.5 flex flex-col gap-1">
-                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: typeColor(n.category) }}>{n.category}</span>
+                      <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wide w-fit" style={{ color: "var(--teal-deep)" }}>
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(n.category) }} />
+                        {n.category}
+                      </span>
                       <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
                     </div>
                   </Link>
