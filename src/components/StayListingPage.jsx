@@ -420,7 +420,7 @@ export default function StayListingPage({ kind }) {
                     <p className="text-xs" style={{ color: "#C0392B" }}>Postcode area not recognised — try SL6, SL4, SL1, SL7, SL8 or RG9.</p>
                   )}
                   <div className="flex items-center gap-3 mt-1">
-                    <button type="button" onClick={applyLocation} disabled={!matchedCoords} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--leaf)" }}>
+                    <button type="button" onClick={applyLocation} disabled={!matchedCoords} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--forest)" }}>
                       Apply
                     </button>
                     {appliedLocation && (
@@ -466,7 +466,7 @@ export default function StayListingPage({ kind }) {
                           type="button"
                           onClick={() => setOpenDropdown(null)}
                           className="flex-1 text-sm font-semibold py-2 rounded-full text-white"
-                          style={{ backgroundColor: "var(--leaf)" }}
+                          style={{ backgroundColor: "var(--forest)" }}
                         >
                           Show Results
                         </button>
@@ -506,7 +506,7 @@ export default function StayListingPage({ kind }) {
                         type="button"
                         onClick={() => setStarsOpen(false)}
                         className="flex-1 text-sm font-semibold py-2 rounded-full text-white"
-                        style={{ backgroundColor: "var(--leaf)" }}
+                        style={{ backgroundColor: "var(--forest)" }}
                       >
                         Show Results
                       </button>
