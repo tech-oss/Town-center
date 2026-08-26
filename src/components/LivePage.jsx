@@ -231,6 +231,26 @@ export default function LivePage() {
               {p}
             </p>
           ))}
+
+          {/* Straight into the two Stay listings — hotels vs. self catering
+              & serviced accommodation — right where the reader's attention
+              is, before the editorial story run begins. */}
+          <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
+            <Link
+              to="/live/stay/accommodation"
+              className="inline-flex items-center justify-center text-center px-8 py-4 rounded-full font-semibold border-2 transition-colors hover:bg-black hover:text-white"
+              style={{ borderColor: "#000000", color: "#000000" }}
+            >
+              Self Catering &amp; Serviced Accommodation
+            </Link>
+            <Link
+              to="/live/stay/hotels"
+              className="inline-flex items-center justify-center text-center px-8 py-4 rounded-full font-semibold border-2 transition-colors hover:bg-black hover:text-white"
+              style={{ borderColor: "#000000", color: "#000000" }}
+            >
+              Hotels
+            </Link>
+          </div>
         </div>
       </section>
 
