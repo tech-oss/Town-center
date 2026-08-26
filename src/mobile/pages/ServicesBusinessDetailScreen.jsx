@@ -271,13 +271,11 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
           </div>
 
           {reviewsList.length > 0 && (
-            <MobileCard className="p-4 flex flex-col">
+            <MobileCard id="reviews" className="p-4 flex flex-col scroll-mt-16">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Customer Reviews</p>
               {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
               <a
-                href={defaultReviewSourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#reviews"
                 className="text-sm font-bold mt-3"
                 style={{ color: "var(--leaf)" }}
               >

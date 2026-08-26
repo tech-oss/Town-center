@@ -1,4 +1,4 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { getHotelBySlug, getAccommodationBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -133,6 +133,8 @@ function AmenitiesSection({ amenities, heading }) {
 export default function StayDetailPage({ kind }) {
   const isHotels = kind === "hotels";
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
+  const backTo = searchParams.get("back");
   const fetcher = isHotels ? () => getHotelBySlug(slug) : () => getAccommodationBySlug(slug);
   const { data: item, loading, error } = useFetch(fetcher, [slug, kind]);
 
@@ -169,6 +171,7 @@ export default function StayDetailPage({ kind }) {
       title={item.name}
       heroImage={gallery[0]}
       extraImages={gallery.slice(1)}
+      backLink={backTo ? { to: backTo, label: "Back to results" } : undefined}
       description={description}
       address={address}
       phone={item.phone}

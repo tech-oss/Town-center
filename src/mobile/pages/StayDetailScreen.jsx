@@ -1,4 +1,4 @@
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -77,7 +77,14 @@ export default function StayDetailScreen() {
     [kind, slug]
   );
 
-  const goBack = useMobileBack("/mobile/live");
+  const [searchParams] = useSearchParams();
+  const backTo = searchParams.get("back");
+  const navigate = useNavigate();
+  const defaultBack = useMobileBack("/mobile/live");
+  // When we arrived here from a filtered listing (via `back`), the back
+  // button should return to that exact filtered view, not just "go back
+  // one screen" — same URL a "Back to results" link would use.
+  const goBack = backTo ? () => navigate(backTo) : defaultBack;
   if (!loading && !place) return <Navigate to="/mobile/live" replace />;
   if (loading || !place) return null;
 
@@ -110,6 +117,12 @@ export default function StayDetailScreen() {
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
+          {backTo && (
+            <Link to={backTo} className="inline-flex items-center gap-1.5 self-start text-xs font-bold" style={{ color: "var(--teal-deep)" }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
+              Back to results
+            </Link>
+          )}
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>
               {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}

@@ -234,6 +234,13 @@ export default function StayListingScreen() {
 
   if (!landing) return <Navigate to="/mobile/live" replace />;
 
+  // When any filter/search is active, carry the current filtered URL
+  // forward as a `back` param on every card link, so the detail page can
+  // offer an explicit "Back to results" that returns to this exact
+  // filtered view rather than the unfiltered listing.
+  const currentQuery = searchParams.toString();
+  const backParam = currentQuery ? `?back=${encodeURIComponent(`/mobile/live/${kind}?${currentQuery}`)}` : "";
+
   return (
     <MobileShell title={landing.title} onBack backFallback="/mobile/live" noPadding>
       <div className="flex flex-col">
@@ -288,7 +295,7 @@ export default function StayListingScreen() {
 
         <div className="flex flex-col gap-3">
           {items.map((p) => (
-            <Link key={p.slug} to={`/mobile/stay/${kind}/${p.slug}`}>
+            <Link key={p.slug} to={`/mobile/stay/${kind}/${p.slug}${backParam}`}>
               <MobileCard className="flex items-stretch overflow-hidden active:opacity-90">
                 <img src={p.image} alt="" className="w-28 h-28 object-cover shrink-0" />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">

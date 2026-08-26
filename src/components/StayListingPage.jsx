@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { getHotels, getAccommodations } from "../api";
@@ -182,6 +182,19 @@ export default function StayListingPage({ kind }) {
   };
   const [starsOpen, setStarsOpen] = useState(false);
 
+  // Close any open filter dropdown when the user clicks anywhere outside
+  // the filter bar — matching normal dropdown behaviour instead of
+  // requiring a second click on the same trigger button to dismiss it.
+  const filterBarRef = useRef(null);
+  useEffect(() => {
+    const closeAll = () => { setLocationOpen(false); setOpenDropdown(null); setStarsOpen(false); };
+    const onPointerDown = (e) => {
+      if (filterBarRef.current && !filterBarRef.current.contains(e.target)) closeAll();
+    };
+    document.addEventListener("mousedown", onPointerDown);
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
+
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const landing = LANDING[kind];
@@ -304,6 +317,13 @@ export default function StayListingPage({ kind }) {
   const checkboxFilterCount = filterDefs.reduce((n, { field }) => n + (checkboxFilters[field]?.size ?? 0), 0);
   const activeFilterCount = checkboxFilterCount + starsFilter.size + (appliedLocation ? 1 : 0);
 
+  // When any filter/search/category is active, carry the current filtered
+  // URL forward as a `back` param on every card link, so the detail page
+  // can offer an explicit "Back to results" that returns to this exact
+  // filtered view rather than the unfiltered listing.
+  const currentQuery = searchParams.toString();
+  const backParam = currentQuery ? `?back=${encodeURIComponent(`${basePath}?${currentQuery}`)}` : "";
+
   return (
     <div>
       {/* ── Hero banner — same treatment as Eat & Drink's: full-bleed photo,
@@ -358,7 +378,7 @@ export default function StayListingPage({ kind }) {
           {/* Advanced search — location/postcode + radius, amenities, and
               (hotels only) star rating. Sits above the name-search +
               category chip bar shared with every other listing page. */}
-          <div className="relative flex flex-wrap items-center gap-2.5 mb-4">
+          <div ref={filterBarRef} className="relative flex flex-wrap items-center gap-2.5 mb-4">
             <div className="relative">
               <button
                 type="button"
@@ -436,11 +456,21 @@ export default function StayListingPage({ kind }) {
                           {o}
                         </label>
                       ))}
-                      {selected.size > 0 && (
-                        <button type="button" onClick={() => clearCheckboxField(field)} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
-                          Clear
+                      <div className="flex items-center gap-3 mt-2 pt-2 px-1.5 border-t" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+                        {selected.size > 0 && (
+                          <button type="button" onClick={() => clearCheckboxField(field)} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
+                            Clear
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setOpenDropdown(null)}
+                          className="flex-1 text-sm font-semibold py-2 rounded-full text-white"
+                          style={{ backgroundColor: "var(--leaf)" }}
+                        >
+                          Show Results
                         </button>
-                      )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -466,11 +496,21 @@ export default function StayListingPage({ kind }) {
                         <span style={{ color: "#c9962c" }}>{"★".repeat(s)}</span>
                       </label>
                     ))}
-                    {starsFilter.size > 0 && (
-                      <button type="button" onClick={() => setStarsFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
-                        Clear
+                    <div className="flex items-center gap-3 mt-2 pt-2 px-1.5 border-t" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+                      {starsFilter.size > 0 && (
+                        <button type="button" onClick={() => setStarsFilter(new Set())} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
+                          Clear
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setStarsOpen(false)}
+                        className="flex-1 text-sm font-semibold py-2 rounded-full text-white"
+                        style={{ backgroundColor: "var(--leaf)" }}
+                      >
+                        Show Results
                       </button>
-                    )}
+                    </div>
                   </div>
                 )}
               </div>
@@ -518,7 +558,7 @@ export default function StayListingPage({ kind }) {
                 return (
                   <Link
                     key={it.slug}
-                    to={`${basePath}/${it.slug}`}
+                    to={`${basePath}/${it.slug}${backParam}`}
                     className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
                     style={{ borderRadius: "0px", boxShadow: card.shadow }}
                   >
