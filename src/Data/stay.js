@@ -55,6 +55,8 @@ export const hotels = [
     image: img("fredricks-hotel", 1200, 800),
     gallery: padGallery("fredricks-hotel", [img("fredricks-hotel", 1200, 800), img("fredricks-hotel-2", 900, 600), img("fredricks-hotel-3", 900, 600)]),
     amenities: ["Spa & swimming pool", "On-site restaurant", "Private gardens", "Free Wi-Fi", "On-site parking"],
+    facilities: ["Free Wi-Fi", "On-site restaurant", "Spa & wellness centre", "Swimming pool", "Private gardens", "On-site parking", "24-hour front desk", "Non-smoking rooms"],
+    roomFacilities: ["Flat-screen TV", "Tea/coffee maker", "Private bathroom", "Desk", "Ironing facilities", "Bathrobe"],
   },
   {
     slug: "premier-inn-maidenhead-town-centre",
@@ -75,6 +77,8 @@ export const hotels = [
     image: img("premier-inn-mh", 1200, 800),
     gallery: padGallery("premier-inn-mh", [img("premier-inn-mh", 1200, 800), img("premier-inn-mh-2", 900, 600), img("premier-inn-mh-3", 900, 600)]),
     amenities: ["Free Wi-Fi", "On-site restaurant/bar", "Family rooms", "Good night guarantee"],
+    facilities: ["Free Wi-Fi", "On-site restaurant/bar", "Family rooms", "24-hour front desk", "Non-smoking rooms"],
+    roomFacilities: ["Flat-screen TV", "Tea/coffee maker", "Private bathroom", "Desk", "Blackout curtains"],
   },
   {
     slug: "thames-riviera-hotel",
@@ -103,6 +107,8 @@ export const hotels = [
       "/images/stay/thames-riviera/gallery-6.jpg",
     ],
     amenities: ["Riverside setting", "On-site restaurant", "Afternoon tea", "On-site parking (charges apply)", "Meeting & events space", "Wedding venue"],
+    facilities: ["Riverside setting", "On-site restaurant", "Afternoon tea", "On-site parking (charges apply)", "Meeting & events space", "Wedding venue", "Non-smoking rooms"],
+    roomFacilities: ["Flat-screen TV", "Tea/coffee maker", "Private bathroom", "Desk", "River view (selected rooms)"],
   },
   {
     slug: "travelodge-maidenhead-central",
@@ -123,6 +129,8 @@ export const hotels = [
     image: img("travelodge-mh", 1200, 800),
     gallery: padGallery("travelodge-mh", [img("travelodge-mh", 1200, 800), img("travelodge-mh-2", 900, 600), img("travelodge-mh-3", 900, 600)]),
     amenities: ["Free Wi-Fi", "Town centre location", "Family rooms"],
+    facilities: ["Free Wi-Fi", "Town centre location", "Family rooms", "24-hour front desk", "Non-smoking rooms"],
+    roomFacilities: ["Flat-screen TV", "Tea/coffee maker", "Private bathroom", "Desk"],
   },
   {
     slug: "holiday-inn-maidenhead-windsor",
@@ -143,6 +151,8 @@ export const hotels = [
     image: img("holiday-inn-mh", 1200, 800),
     gallery: padGallery("holiday-inn-mh", [img("holiday-inn-mh", 1200, 800), img("holiday-inn-mh-2", 900, 600), img("holiday-inn-mh-3", 900, 600)]),
     amenities: ["Conference facilities", "On-site restaurant/bar", "Free parking", "Free Wi-Fi"],
+    facilities: ["Conference facilities", "On-site restaurant/bar", "Free parking", "Free Wi-Fi", "Fitness centre", "24-hour front desk", "Non-smoking rooms", "Airport shuttle"],
+    roomFacilities: ["Flat-screen TV", "Tea/coffee maker", "Private bathroom", "Desk", "Air conditioning", "Ironing facilities"],
   },
 ];
 
@@ -176,6 +186,10 @@ export const accommodations = [
     image: img("riverside-loft", 1200, 800),
     gallery: padGallery("riverside-loft", [img("riverside-loft", 1200, 800), img("riverside-loft-2", 900, 600), img("riverside-loft-3", 900, 600)]),
     amenities: ["Free Wi-Fi", "Fully equipped kitchen", "Washer/dryer", "Riverside views", "5 min walk to station"],
+    facilities: ["Free Wi-Fi", "Fully equipped kitchen", "Washer/dryer", "Riverside views", "5 min walk to station", "Non-smoking"],
+    roomFacilities: ["Flat-screen TV", "Heating", "Private bathroom", "Sofa"],
+    meals: ["Self catering"],
+    travelGroup: ["Solo travellers", "Couples"],
   },
   {
     slug: "the-old-bakery-cottage",
@@ -196,6 +210,10 @@ export const accommodations = [
     image: img("old-bakery-cottage", 1200, 800),
     gallery: padGallery("old-bakery-cottage", [img("old-bakery-cottage", 1200, 800), img("old-bakery-cottage-2", 900, 600), img("old-bakery-cottage-3", 900, 600)]),
     amenities: ["Private courtyard garden", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Pet friendly"],
+    facilities: ["Private courtyard garden", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Pet friendly", "Non-smoking"],
+    roomFacilities: ["Flat-screen TV", "Heating", "Private bathroom", "Washing machine"],
+    meals: ["Self catering"],
+    travelGroup: ["Family", "Groups"],
   },
   {
     slug: "bridge-street-studio",
@@ -216,6 +234,10 @@ export const accommodations = [
     image: img("bridge-street-studio", 1200, 800),
     gallery: padGallery("bridge-street-studio", [img("bridge-street-studio", 1200, 800), img("bridge-street-studio-2", 900, 600), img("bridge-street-studio-3", 900, 600)]),
     amenities: ["Private entrance", "Free Wi-Fi", "Kettle & microwave", "Walk to the river"],
+    facilities: ["Private entrance", "Free Wi-Fi", "Kettle & microwave", "Walk to the river", "Non-smoking"],
+    roomFacilities: ["Flat-screen TV", "Heating", "Private bathroom"],
+    meals: ["Breakfast Included", "Self catering"],
+    travelGroup: ["Solo travellers", "Couples"],
   },
   {
     slug: "thameside-boathouse-retreat",
@@ -236,6 +258,10 @@ export const accommodations = [
     image: img("thameside-boathouse", 1200, 800),
     gallery: padGallery("thameside-boathouse", [img("thameside-boathouse", 1200, 800), img("thameside-boathouse-2", 900, 600), img("thameside-boathouse-3", 900, 600)]),
     amenities: ["Private garden onto the Thames", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Garden furniture & BBQ"],
+    facilities: ["Private garden onto the Thames", "Free parking", "Free Wi-Fi", "Fully equipped kitchen", "Garden furniture & BBQ", "Non-smoking", "Pet friendly"],
+    roomFacilities: ["Flat-screen TV", "Heating", "Private bathroom", "Washing machine", "Sofa"],
+    meals: ["Self catering"],
+    travelGroup: ["Family", "Groups"],
   },
 ];
 

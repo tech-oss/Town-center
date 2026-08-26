@@ -7,6 +7,7 @@ import useTapReveal from "../hooks/useTapReveal";
 import CategoryFilterBar from "./CategoryFilterBar";
 import Loading from "./ui/Loading";
 import { featuredHotels, featuredAccommodations } from "../Data/featuredStay";
+import { POSTCODE_COORDS, RADIUS_OPTIONS, milesBetween } from "../lib/postcodeDistance";
 
 // ── Featured Hotels / Featured Accommodation — the same "In the Spotlight"
 // hover-reveal card, alternating layout, and typography as the homepage's
@@ -111,30 +112,6 @@ const TYPE_COLORS = {
 
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-// A small, local outward-code → centroid lookup for the Maidenhead area —
-// enough to power a real "search near a postcode" filter without a live
-// geocoding service. Falls back gracefully (no distance filtering) for any
-// postcode outside this list.
-const POSTCODE_COORDS = {
-  SL6: { lat: 51.522, lng: -0.72 }, // Maidenhead
-  SL4: { lat: 51.484, lng: -0.605 }, // Windsor
-  SL1: { lat: 51.511, lng: -0.595 }, // Slough
-  SL7: { lat: 51.571, lng: -0.782 }, // Marlow
-  SL8: { lat: 51.589, lng: -0.744 }, // Bourne End
-  RG9: { lat: 51.536, lng: -0.895 }, // Henley-on-Thames
-  RG10: { lat: 51.514, lng: -0.822 }, // Twyford
-};
-const RADIUS_OPTIONS = [1, 3, 5, 10];
-
-function milesBetween(lat1, lng1, lat2, lng2) {
-  const R = 3958.8; // Earth radius in miles
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1);
-  const dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-}
-
 function ChevronIcon({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -161,16 +138,17 @@ export default function StayListingPage({ kind }) {
   const activeCategory = searchParams.get("category") || undefined;
   const [search, setSearch] = useState("");
 
-  // Advanced search — postcode + radius, amenities, and (hotels only) star
-  // rating. These fields mirror what a business would configure in the
-  // admin backend (location, amenities, star rating); filtering here is
-  // done client-side against the same data already loaded for the grid.
+  // Advanced search — postcode + radius, plus a set of multi-select
+  // checkbox dropdowns (Facilities, Room facilities, and — accommodation
+  // only — Meals, Travel group), and (hotels only) property rating. These
+  // fields mirror a booking-site's filter sidebar; filtering here is done
+  // client-side against the same data already loaded for the grid.
   const [postcode, setPostcode] = useState("");
   const [radius, setRadius] = useState(RADIUS_OPTIONS[1]);
   const [locationOpen, setLocationOpen] = useState(false);
   const [appliedLocation, setAppliedLocation] = useState(null); // { lat, lng, radius } | null
-  const [amenitiesFilter, setAmenitiesFilter] = useState(() => new Set());
-  const [amenitiesOpen, setAmenitiesOpen] = useState(false);
+  const [checkboxFilters, setCheckboxFilters] = useState({}); // { [field]: Set<string> }
+  const [openDropdown, setOpenDropdown] = useState(null); // field name currently open, or null
   const [starsFilter, setStarsFilter] = useState(() => new Set());
   const [starsOpen, setStarsOpen] = useState(false);
 
@@ -179,11 +157,25 @@ export default function StayListingPage({ kind }) {
     setSearch("");
     setPostcode("");
     setAppliedLocation(null);
-    setAmenitiesFilter(new Set());
+    setCheckboxFilters({});
     setStarsFilter(new Set());
   }, [kind]);
 
   const landing = LANDING[kind];
+
+  // Filter dropdowns shown, in order, for this listing kind — each backed
+  // by a field on the hotel/accommodation data (Data/stay.js).
+  const filterDefs = isHotels
+    ? [
+        { field: "facilities", label: "Facilities" },
+        { field: "roomFacilities", label: "Room facilities" },
+      ]
+    : [
+        { field: "facilities", label: "Facilities" },
+        { field: "roomFacilities", label: "Room facilities" },
+        { field: "meals", label: "Meals" },
+        { field: "travelGroup", label: "Travel group" },
+      ];
 
   // Categories — star rating for hotels, property type for accommodation —
   // each listing type's nearest equivalent to Eat & Drink's cuisine
@@ -198,11 +190,18 @@ export default function StayListingPage({ kind }) {
     return types.map((t) => ({ value: slugify(t), label: t }));
   })();
 
-  const allAmenities = useMemo(() => {
-    const set = new Set();
-    (allItems ?? []).forEach((i) => (i.amenities ?? []).forEach((a) => set.add(a)));
-    return [...set].sort();
-  }, [allItems]);
+  // Options for each checkbox dropdown, built from whatever values are
+  // actually present in the currently-loaded hotels/accommodation data.
+  const filterOptions = useMemo(() => {
+    const out = {};
+    filterDefs.forEach(({ field }) => {
+      const set = new Set();
+      (allItems ?? []).forEach((i) => (i[field] ?? []).forEach((v) => set.add(v)));
+      out[field] = [...set].sort();
+    });
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allItems, kind]);
 
   let items = allItems ?? [];
   if (activeCategory) {
@@ -217,9 +216,12 @@ export default function StayListingPage({ kind }) {
   if (isHotels && starsFilter.size > 0) {
     items = items.filter((i) => starsFilter.has(i.stars));
   }
-  if (amenitiesFilter.size > 0) {
-    items = items.filter((i) => [...amenitiesFilter].every((a) => i.amenities?.includes(a)));
-  }
+  filterDefs.forEach(({ field }) => {
+    const set = checkboxFilters[field];
+    if (set && set.size > 0) {
+      items = items.filter((i) => [...set].every((v) => i[field]?.includes(v)));
+    }
+  });
   if (appliedLocation) {
     items = items.filter(
       (i) => typeof i.lat === "number" && milesBetween(i.lat, i.lng, appliedLocation.lat, appliedLocation.lng) <= appliedLocation.radius
@@ -252,10 +254,19 @@ export default function StayListingPage({ kind }) {
       return next;
     });
   };
-  const toggleAmenity = toggleFromSet(setAmenitiesFilter);
   const toggleStar = toggleFromSet(setStarsFilter);
+  const toggleCheckbox = (field) => (value) => {
+    setCheckboxFilters((prev) => {
+      const next = new Set(prev[field]);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return { ...prev, [field]: next };
+    });
+  };
+  const clearCheckboxField = (field) => setCheckboxFilters((prev) => ({ ...prev, [field]: new Set() }));
 
-  const activeFilterCount = amenitiesFilter.size + starsFilter.size + (appliedLocation ? 1 : 0);
+  const checkboxFilterCount = filterDefs.reduce((n, { field }) => n + (checkboxFilters[field]?.size ?? 0), 0);
+  const activeFilterCount = checkboxFilterCount + starsFilter.size + (appliedLocation ? 1 : 0);
 
   return (
     <div>
@@ -315,7 +326,7 @@ export default function StayListingPage({ kind }) {
             <div className="relative">
               <button
                 type="button"
-                onClick={() => { setLocationOpen((o) => !o); setAmenitiesOpen(false); setStarsOpen(false); }}
+                onClick={() => { setLocationOpen((o) => !o); setOpenDropdown(null); setStarsOpen(false); }}
                 className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
                 style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: appliedLocation ? "var(--sand)" : "#fff" }}
               >
@@ -366,42 +377,49 @@ export default function StayListingPage({ kind }) {
               )}
             </div>
 
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => { setAmenitiesOpen((o) => !o); setLocationOpen(false); setStarsOpen(false); }}
-                className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
-                style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: amenitiesFilter.size > 0 ? "var(--sand)" : "#fff" }}
-              >
-                Amenities{amenitiesFilter.size > 0 ? ` (${amenitiesFilter.size})` : ""}
-                <ChevronIcon />
-              </button>
-              {amenitiesOpen && (
-                <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-2 shadow-xl w-72 max-h-80 overflow-y-auto flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
-                  {allAmenities.map((a) => (
-                    <label key={a} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
-                      <input type="checkbox" checked={amenitiesFilter.has(a)} onChange={() => toggleAmenity(a)} className="accent-[var(--leaf)]" />
-                      {a}
-                    </label>
-                  ))}
-                  {amenitiesFilter.size > 0 && (
-                    <button type="button" onClick={() => setAmenitiesFilter(new Set())} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
-                      Clear
-                    </button>
+            {filterDefs.map(({ field, label }) => {
+              const selected = checkboxFilters[field] ?? new Set();
+              const options = filterOptions[field] ?? [];
+              if (options.length === 0) return null;
+              return (
+                <div className="relative" key={field}>
+                  <button
+                    type="button"
+                    onClick={() => { setOpenDropdown((o) => (o === field ? null : field)); setLocationOpen(false); setStarsOpen(false); }}
+                    className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
+                    style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: selected.size > 0 ? "var(--sand)" : "#fff" }}
+                  >
+                    {label}{selected.size > 0 ? ` (${selected.size})` : ""}
+                    <ChevronIcon />
+                  </button>
+                  {openDropdown === field && (
+                    <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-2 shadow-xl w-72 max-h-80 overflow-y-auto flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+                      {options.map((o) => (
+                        <label key={o} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                          <input type="checkbox" checked={selected.has(o)} onChange={() => toggleCheckbox(field)(o)} className="accent-[var(--leaf)]" />
+                          {o}
+                        </label>
+                      ))}
+                      {selected.size > 0 && (
+                        <button type="button" onClick={() => clearCheckboxField(field)} className="text-xs font-semibold underline mt-1 mx-2.5 self-start" style={{ color: "#000000" }}>
+                          Clear
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
+              );
+            })}
 
             {isHotels && (
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => { setStarsOpen((o) => !o); setLocationOpen(false); setAmenitiesOpen(false); }}
+                  onClick={() => { setStarsOpen((o) => !o); setLocationOpen(false); setOpenDropdown(null); }}
                   className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
                   style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: starsFilter.size > 0 ? "var(--sand)" : "#fff" }}
                 >
-                  Star rating{starsFilter.size > 0 ? ` (${starsFilter.size})` : ""}
+                  Property rating{starsFilter.size > 0 ? ` (${starsFilter.size})` : ""}
                   <ChevronIcon />
                 </button>
                 {starsOpen && (
@@ -425,7 +443,7 @@ export default function StayListingPage({ kind }) {
             {activeFilterCount > 0 && (
               <button
                 type="button"
-                onClick={() => { clearLocation(); setAmenitiesFilter(new Set()); setStarsFilter(new Set()); }}
+                onClick={() => { clearLocation(); setCheckboxFilters({}); setStarsFilter(new Set()); }}
                 className="text-xs font-semibold underline"
                 style={{ color: "#000000" }}
               >

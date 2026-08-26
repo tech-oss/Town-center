@@ -1,11 +1,111 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import { ListSearch, OffersLink } from "../components/ListSearch";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
 import { getHotels, getAccommodations } from "../../api";
+import { POSTCODE_COORDS, RADIUS_OPTIONS, milesBetween } from "../../lib/postcodeDistance";
+
+// "Near a postcode" — same postcode + radius search as the web listing
+// page, in the app's bottom-sheet pattern rather than a plain option list
+// since it also needs a text input and a radius select.
+function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
+  const [open, setOpen] = useState(false);
+  const [postcode, setPostcode] = useState("");
+  const [radius, setRadius] = useState(RADIUS_OPTIONS[1]);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  const outwardCode = postcode.trim().toUpperCase().split(/\s+/)[0];
+  const matchedCoords = POSTCODE_COORDS[outwardCode];
+
+  const apply = () => {
+    if (!matchedCoords) return;
+    onApply({ ...matchedCoords, radius, label: `Within ${radius} mi of ${outwardCode}` });
+    setOpen(false);
+  };
+  const clear = () => {
+    setPostcode("");
+    onClear();
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-2 pl-4 pr-3.5 py-2.5 rounded-full text-xs font-bold whitespace-nowrap shrink-0"
+        style={appliedLocation ? { backgroundColor: "var(--forest)", color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}
+      >
+        {appliedLocation ? appliedLocation.label : "Near a postcode"}
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+
+      {open && createPortal(
+        <div className="fixed inset-0 z-[3000] flex items-end" style={{ backgroundColor: "rgba(0,0,0,0.45)" }} onClick={() => setOpen(false)}>
+          <div className="w-full bg-white rounded-t-3xl pt-5 pb-6 px-6 flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-[0.08em]" style={{ color: "#000000" }}>Near a Postcode</h3>
+              <button onClick={() => setOpen(false)} aria-label="Close" className="w-8 h-8 flex items-center justify-center rounded-full text-white text-sm font-bold" style={{ backgroundColor: "var(--forest)" }}>✕</button>
+            </div>
+            <label className="text-xs font-semibold flex flex-col gap-1.5" style={{ color: "#000000" }}>
+              Postcode
+              <input
+                type="text"
+                value={postcode}
+                onChange={(e) => setPostcode(e.target.value)}
+                placeholder="e.g. SL6 1QJ"
+                className="text-sm rounded-xl px-3.5 py-3 outline-none border"
+                style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
+              />
+            </label>
+            <label className="text-xs font-semibold flex flex-col gap-1.5" style={{ color: "#000000" }}>
+              Radius
+              <select
+                value={radius}
+                onChange={(e) => setRadius(Number(e.target.value))}
+                className="text-sm rounded-xl px-3.5 py-3 outline-none border bg-white"
+                style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
+              >
+                {RADIUS_OPTIONS.map((r) => (
+                  <option key={r} value={r}>{r} mile{r > 1 ? "s" : ""}</option>
+                ))}
+              </select>
+            </label>
+            {postcode.trim() && !matchedCoords && (
+              <p className="text-xs" style={{ color: "#C0392B" }}>Postcode area not recognised — try SL6, SL4, SL1, SL7, SL8 or RG9.</p>
+            )}
+            <div className="flex items-center gap-3 mt-1">
+              {appliedLocation && (
+                <button type="button" onClick={clear} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
+                  Clear
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={apply}
+                disabled={!matchedCoords}
+                className="flex-1 py-3 rounded-full text-sm font-bold text-white disabled:opacity-40"
+                style={{ backgroundColor: "var(--forest)" }}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  );
+}
 
 const LANDING = {
   hotels: {
@@ -32,7 +132,23 @@ export default function StayListingScreen() {
 
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(null);
-  const [amenitiesFilter, setAmenitiesFilter] = useState(() => new Set());
+
+  // Same filter set as the web listing page — Facilities, Room facilities,
+  // and (accommodation only) Meals, Travel group — each backed by a field
+  // on the hotel/accommodation data (Data/stay.js).
+  const filterDefs = isHotels
+    ? [
+        { field: "facilities", label: "Facilities" },
+        { field: "roomFacilities", label: "Room Facilities" },
+      ]
+    : [
+        { field: "facilities", label: "Facilities" },
+        { field: "roomFacilities", label: "Room Facilities" },
+        { field: "meals", label: "Meals" },
+        { field: "travelGroup", label: "Travel Group" },
+      ];
+  const [checkboxFilters, setCheckboxFilters] = useState({}); // { [field]: Set<string> }
+  const [appliedLocation, setAppliedLocation] = useState(null); // { lat, lng, radius, label } | null
 
   const categories = useMemo(() => {
     if (!allItems) return [];
@@ -44,26 +160,40 @@ export default function StayListingScreen() {
     return types.map((t) => ({ key: slugify(t), label: t }));
   }, [allItems, isHotels]);
 
-  const allAmenities = useMemo(() => {
-    const set = new Set();
-    (allItems ?? []).forEach((i) => (i.amenities ?? []).forEach((a) => set.add(a)));
-    return [...set].sort().map((a) => ({ key: a, label: a }));
-  }, [allItems]);
+  const filterOptions = useMemo(() => {
+    const out = {};
+    filterDefs.forEach(({ field }) => {
+      const set = new Set();
+      (allItems ?? []).forEach((i) => (i[field] ?? []).forEach((v) => set.add(v)));
+      out[field] = [...set].sort().map((v) => ({ key: v, label: v }));
+    });
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allItems, kind]);
 
   const items = useMemo(() => {
     let list = allItems ?? [];
     if (category) {
       list = isHotels ? list.filter((h) => String(h.stars) === category) : list.filter((a) => slugify(a.type) === category);
     }
-    if (amenitiesFilter.size > 0) {
-      list = list.filter((i) => [...amenitiesFilter].every((a) => i.amenities?.includes(a)));
+    filterDefs.forEach(({ field }) => {
+      const set = checkboxFilters[field];
+      if (set && set.size > 0) {
+        list = list.filter((i) => [...set].every((v) => i[field]?.includes(v)));
+      }
+    });
+    if (appliedLocation) {
+      list = list.filter(
+        (i) => typeof i.lat === "number" && milesBetween(i.lat, i.lng, appliedLocation.lat, appliedLocation.lng) <= appliedLocation.radius
+      );
     }
     const q = query.trim().toLowerCase();
     if (q) {
       list = list.filter((i) => i.name.toLowerCase().includes(q) || (i.tagline ?? "").toLowerCase().includes(q));
     }
     return list;
-  }, [allItems, category, amenitiesFilter, query, isHotels]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allItems, category, checkboxFilters, appliedLocation, query, isHotels]);
 
   if (!landing) return <Navigate to="/mobile/live" replace />;
 
@@ -89,23 +219,34 @@ export default function StayListingScreen() {
 
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none -mx-5 px-5">
           <FilterSheet
-            title={isHotels ? "Star Rating" : "Property Type"}
-            triggerLabel={categories.find((c) => c.key === category)?.label ?? (isHotels ? "Star Rating" : "Property Type")}
+            title={isHotels ? "Property Rating" : "Property Type"}
+            triggerLabel={categories.find((c) => c.key === category)?.label ?? (isHotels ? "Property Rating" : "Property Type")}
             options={categories}
             value={category}
             onChange={setCategory}
             allLabel={isHotels ? "All Ratings" : "All Types"}
           />
-          {allAmenities.length > 0 && (
-            <FilterSheet
-              title="Amenities"
-              triggerLabel={`Amenities${amenitiesFilter.size > 0 ? ` (${amenitiesFilter.size})` : ""}`}
-              options={allAmenities}
-              multi
-              value={amenitiesFilter}
-              onChange={setAmenitiesFilter}
-            />
-          )}
+          <PostcodeFilterSheet
+            appliedLocation={appliedLocation}
+            onApply={setAppliedLocation}
+            onClear={() => setAppliedLocation(null)}
+          />
+          {filterDefs.map(({ field, label }) => {
+            const options = filterOptions[field] ?? [];
+            if (options.length === 0) return null;
+            const selected = checkboxFilters[field] ?? new Set();
+            return (
+              <FilterSheet
+                key={field}
+                title={label}
+                triggerLabel={`${label}${selected.size > 0 ? ` (${selected.size})` : ""}`}
+                options={options}
+                multi
+                value={selected}
+                onChange={(next) => setCheckboxFilters((prev) => ({ ...prev, [field]: next }))}
+              />
+            );
+          })}
         </div>
 
         <div className="flex flex-col gap-3">
