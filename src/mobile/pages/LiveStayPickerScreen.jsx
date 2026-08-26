@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
-import { hotelBySlug, accommodationBySlug } from "../../Data/stay";
+import { featuredHotels, featuredAccommodations } from "../../Data/featuredStay";
 
-// One hotel + one accommodation, so "Featured Stay" reads as a genuine
-// cross-section of what Live & Stay covers rather than favouring one type.
+// Same 4 properties spotlighted on the web Hotels/Accommodation listing
+// pages' "Featured" sections — shown together here since the app doesn't
+// split hotels and accommodation onto separate landing pages the way the
+// website does.
 const FEATURED = [
-  { kind: "hotels", place: hotelBySlug["fredricks-hotel-restaurant-spa"], tag: "Hotel" },
-  { kind: "accommodation", place: accommodationBySlug["thameside-boathouse-retreat"], tag: "Accommodation" },
-].filter((f) => f.place);
+  ...featuredHotels.map((place) => ({ kind: "hotels", place, tag: "Hotel" })),
+  ...featuredAccommodations.map((place) => ({ kind: "accommodation", place, tag: "Accommodation" })),
+];
 
 // Same pattern as Services: Hotels and Accommodation are genuinely different
 // listing types on the website (/live/stay/hotels vs /live/stay/accommodation,

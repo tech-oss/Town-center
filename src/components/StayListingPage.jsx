@@ -3,8 +3,85 @@ import { Link, useSearchParams } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { getHotels, getAccommodations } from "../api";
 import useFetch from "../hooks/useFetch";
+import useTapReveal from "../hooks/useTapReveal";
 import CategoryFilterBar from "./CategoryFilterBar";
 import Loading from "./ui/Loading";
+import { featuredHotels, featuredAccommodations } from "../Data/featuredStay";
+
+// ── Featured Hotels / Featured Accommodation — the same "In the Spotlight"
+// hover-reveal card, alternating layout, and typography as the homepage's
+// Featured Stories section (see FeatureBlocks.jsx), reused here so the two
+// featured runs read as one consistent design language across the site. ──
+function FeaturedStayCard({ item, basePath, tag, align }) {
+  const reversed = align === "right";
+  const { revealed, onImageClick } = useTapReveal();
+  const to = `${basePath}/${item.slug}`;
+  return (
+    <div className={`flex flex-col ${reversed ? "md:flex-row-reverse" : "md:flex-row"} md:items-center gap-6 md:gap-12 w-full`}>
+      <Link
+        to={to}
+        onClick={onImageClick}
+        className={`spotlight-card group/img shrink-0 block w-full md:w-[60vw] ${revealed ? "is-revealed" : ""}`}
+      >
+        <div className="relative w-full overflow-hidden aspect-[6/4]" style={{ backgroundColor: "#1a1a1a" }}>
+          <img src={item.image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
+          <img src={item.image} alt={item.name} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+        </div>
+      </Link>
+
+      <div className={`flex-1 min-w-0 px-6 md:px-0 ${reversed ? "md:text-right" : ""}`}>
+        <p className="text-[11px] font-medium uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>
+          {tag}
+        </p>
+        <h3 className="text-2xl md:text-3xl leading-snug mb-4" style={{ fontFamily: "var(--font-heading)", fontWeight: 600, color: "#000000" }}>
+          {item.name}
+        </h3>
+        <p className="text-sm md:text-base leading-relaxed" style={{ color: "#000000" }}>
+          {item.tagline}
+        </p>
+        <Link
+          to={to}
+          className={`group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-5 ${reversed ? "md:flex-row-reverse" : ""}`}
+          style={{ color: "#000000" }}
+        >
+          Read more
+          <span className="transition-transform duration-200 group-hover/more:translate-x-1">→</span>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function FeaturedStay({ kind, basePath }) {
+  const isHotels = kind === "hotels";
+  const items = isHotels ? featuredHotels : featuredAccommodations;
+  if (items.length === 0) return null;
+
+  return (
+    <section className="mb-14 md:mb-20">
+      <div className="mb-10 md:mb-12">
+        <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
+          Handpicked
+        </p>
+        <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
+          {isHotels ? "FEATURED HOTELS" : "FEATURED ACCOMMODATION"}
+        </h2>
+        <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
+      </div>
+      <div className="flex flex-col gap-y-12">
+        {items.map((item, i) => (
+          <FeaturedStayCard
+            key={item.slug}
+            item={item}
+            basePath={basePath}
+            tag={isHotels ? `${item.stars}-Star Hotel` : item.type}
+            align={i % 2 === 1 ? "right" : "left"}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
 
 const HERO_IMAGES = {
   hotels: "/images/live/hotels-hero.jpg",
@@ -226,7 +303,13 @@ export default function StayListingPage({ kind }) {
           >
             {landing.intro}
           </p>
+        </div>
 
+        {/* Featured Hotels / Featured Accommodation — cards break out of the
+            max-w-6xl container, same as the homepage's Featured Stories. */}
+        <FeaturedStay kind={kind} basePath={basePath} />
+
+        <div className="max-w-6xl mx-auto">
           {/* Advanced search — location/postcode + radius, amenities, and
               (hotels only) star rating. Sits above the name-search +
               category chip bar shared with every other listing page. */}
