@@ -63,7 +63,7 @@ function FeaturedStay({ kind, basePath }) {
         <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
           Handpicked
         </p>
-        <h2 className="home-section-title text-3xl md:text-5xl leading-tight" style={{ color: "#000000" }}>
+        <h2 className="hero-title uppercase text-4xl md:text-6xl lg:text-7xl leading-tight" style={{ color: "#000000" }}>
           {isHotels ? "FEATURED HOTELS" : "FEATURED ACCOMMODATION"}
         </h2>
         <div className="mt-6 border-t" style={{ borderColor: "rgba(0,0,0,0.14)" }} />
