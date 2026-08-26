@@ -16,6 +16,7 @@ const LANDING = {
   accommodation: {
     title: "Accommodation",
     intro: "Privately-owned homes and rooms to stay in around Maidenhead.",
+    heroImage: "/images/live/accommodation-hero.jpg",
   },
 };
 
