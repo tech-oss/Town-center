@@ -6,7 +6,10 @@ import useFetch from "../hooks/useFetch";
 import CategoryFilterBar from "./CategoryFilterBar";
 import Loading from "./ui/Loading";
 
-const HERO_IMAGE = "/images/live/ext-hero.jpg";
+const HERO_IMAGES = {
+  hotels: "/images/live/hotels-hero.jpg",
+  accommodation: "/images/live/ext-hero.jpg",
+};
 
 const LANDING = {
   hotels: {
@@ -182,7 +185,10 @@ export default function StayListingPage({ kind }) {
       {/* ── Hero banner — same treatment as Eat & Drink's: full-bleed photo,
           no darkening overlay, header floats transparent over it. ── */}
       <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]">
-        <img src={HERO_IMAGE} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover", objectPosition: "center" }} />
+        <img src={HERO_IMAGES[kind]} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover", objectPosition: "center" }} />
+        {isHotels && (
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.15) 0%, rgba(20,33,42,0.1) 40%, rgba(20,33,42,0.72) 100%)" }} />
+        )}
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
             {title}

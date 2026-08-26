@@ -11,6 +11,7 @@ const LANDING = {
   hotels: {
     title: "Hotels",
     intro: "Where to stay in and around the town centre, from budget chains to riverside hotels — every listing links to the hotel's own site for booking.",
+    heroImage: "/images/live/hotels-hero.jpg",
   },
   accommodation: {
     title: "Accommodation",
@@ -66,8 +67,19 @@ export default function StayListingScreen() {
   if (!landing) return <Navigate to="/mobile/live" replace />;
 
   return (
-    <MobileShell title={landing.title} onBack backFallback="/mobile/live">
-      <div className="flex flex-col gap-4 mobile-stagger">
+    <MobileShell title={landing.title} onBack backFallback="/mobile/live" noPadding>
+      <div className="flex flex-col">
+        {landing.heroImage && (
+          <div className="relative h-40 -mb-1">
+            <img src={landing.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.05) 0%, rgba(20,33,42,0.55) 100%)" }} />
+            <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+              {landing.title}
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-4 mobile-stagger px-5 pt-5 pb-6">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{landing.intro}</p>
 
         <OffersLink />
@@ -122,6 +134,7 @@ export default function StayListingScreen() {
               No results{query ? ` for “${query}”` : ""}.
             </p>
           )}
+        </div>
         </div>
       </div>
     </MobileShell>
