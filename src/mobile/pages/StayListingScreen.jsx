@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -28,7 +28,7 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
 
   const apply = () => {
     if (!matchedCoords) return;
-    onApply({ ...matchedCoords, radius, label: `Within ${radius} mi of ${outwardCode}` });
+    onApply({ ...matchedCoords, radius, outwardCode });
     setOpen(false);
   };
   const clear = () => {
@@ -130,8 +130,27 @@ export default function StayListingScreen() {
   const { data: accommodations } = useFetch(getAccommodations, []);
   const allItems = isHotels ? hotels : accommodations;
 
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState(null);
+  // Every filter lives in the URL (not plain useState) so that tapping a
+  // card, viewing the business, and pressing back restores the exact same
+  // filtered results instead of resetting to the unfiltered list.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const patchParams = (patch) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      Object.entries(patch).forEach(([k, v]) => {
+        if (v === undefined || v === null || v === "") next.delete(k);
+        else next.set(k, v);
+      });
+      return next;
+    }, { replace: true });
+  };
+  const setToParam = (set) => ([...set].join(",") || undefined);
+  const paramToSet = (v) => new Set(v ? v.split(",") : []);
+
+  const query = searchParams.get("q") ?? "";
+  const setQuery = (v) => patchParams({ q: v });
+  const category = searchParams.get("category");
+  const setCategory = (v) => patchParams({ category: v });
 
   // Same filter set as the web listing page — Facilities, Room facilities,
   // and (accommodation only) Meals, Travel group — each backed by a field
@@ -147,8 +166,26 @@ export default function StayListingScreen() {
         { field: "meals", label: "Meals" },
         { field: "travelGroup", label: "Travel Group" },
       ];
-  const [checkboxFilters, setCheckboxFilters] = useState({}); // { [field]: Set<string> }
-  const [appliedLocation, setAppliedLocation] = useState(null); // { lat, lng, radius, label } | null
+  const checkboxFilters = useMemo(() => {
+    const out = {};
+    filterDefs.forEach(({ field }) => { out[field] = paramToSet(searchParams.get(field)); });
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, kind]);
+  const setCheckboxField = (field) => (next) => patchParams({ [field]: setToParam(next) });
+
+  const postcode = searchParams.get("postcode");
+  const locParam = searchParams.get("loc"); // "lat,lng,radius"
+  const appliedLocation = useMemo(() => {
+    if (!locParam || !postcode) return null;
+    const [lat, lng, radius] = locParam.split(",").map(Number);
+    if (![lat, lng, radius].every(Number.isFinite)) return null;
+    return { lat, lng, radius, label: `Within ${radius} mi of ${postcode.toUpperCase()}` };
+  }, [locParam, postcode]);
+  const applyLocation = ({ lat, lng, radius, outwardCode }) => {
+    patchParams({ postcode: outwardCode, loc: `${lat},${lng},${radius}` });
+  };
+  const clearLocation = () => patchParams({ postcode: undefined, loc: undefined });
 
   const categories = useMemo(() => {
     if (!allItems) return [];
@@ -228,8 +265,8 @@ export default function StayListingScreen() {
           />
           <PostcodeFilterSheet
             appliedLocation={appliedLocation}
-            onApply={setAppliedLocation}
-            onClear={() => setAppliedLocation(null)}
+            onApply={applyLocation}
+            onClear={clearLocation}
           />
           {filterDefs.map(({ field, label }) => {
             const options = filterOptions[field] ?? [];
@@ -243,7 +280,7 @@ export default function StayListingScreen() {
                 options={options}
                 multi
                 value={selected}
-                onChange={(next) => setCheckboxFilters((prev) => ({ ...prev, [field]: next }))}
+                onChange={setCheckboxField(field)}
               />
             );
           })}

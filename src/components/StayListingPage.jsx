@@ -134,32 +134,55 @@ export default function StayListingPage({ kind }) {
   const { data: accommodations } = useFetch(getAccommodations, []);
   const allItems = isHotels ? hotels : accommodations;
 
-  const [searchParams] = useSearchParams();
+  // Every filter lives in the URL (not plain useState) so that clicking a
+  // card, viewing the business, and pressing back restores the exact same
+  // filtered results instead of resetting to the unfiltered list — back
+  // navigation just re-reads the same URL the grid was filtered from.
+  const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || undefined;
-  const [search, setSearch] = useState("");
+
+  // URLSearchParams encodes/decodes values on its own — join with a comma
+  // (none of the filter option strings contain one) without pre-encoding,
+  // since encoding here too would double-encode.
+  const setToParam = (set) => ([...set].join(",") || undefined);
+  const paramToSet = (v) => new Set(v ? v.split(",") : []);
+
+  // Patches the URL's query string in place (replacing history, not
+  // pushing) so toggling filters doesn't spam the back-button with dozens
+  // of intermediate states — only "go to a detail page" should be a step.
+  const patchParams = (patch) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      Object.entries(patch).forEach(([k, v]) => {
+        if (v === undefined || v === "") next.delete(k);
+        else next.set(k, v);
+      });
+      return next;
+    }, { replace: true });
+  };
+
+  const search = searchParams.get("q") ?? "";
+  const setSearch = (v) => patchParams({ q: v });
 
   // Advanced search — postcode + radius, plus a set of multi-select
   // checkbox dropdowns (Facilities, Room facilities, and — accommodation
   // only — Meals, Travel group), and (hotels only) property rating. These
   // fields mirror a booking-site's filter sidebar; filtering here is done
   // client-side against the same data already loaded for the grid.
-  const [postcode, setPostcode] = useState("");
-  const [radius, setRadius] = useState(RADIUS_OPTIONS[1]);
+  const postcode = searchParams.get("postcode") ?? "";
+  const setPostcode = (v) => patchParams({ postcode: v });
+  const radius = Number(searchParams.get("radius")) || RADIUS_OPTIONS[1];
+  const setRadius = (v) => patchParams({ radius: String(v) });
   const [locationOpen, setLocationOpen] = useState(false);
-  const [appliedLocation, setAppliedLocation] = useState(null); // { lat, lng, radius } | null
-  const [checkboxFilters, setCheckboxFilters] = useState({}); // { [field]: Set<string> }
   const [openDropdown, setOpenDropdown] = useState(null); // field name currently open, or null
-  const [starsFilter, setStarsFilter] = useState(() => new Set());
+  const starsFilter = useMemo(() => new Set([...paramToSet(searchParams.get("stars"))].map(Number)), [searchParams]);
+  const setStarsFilter = (setOrFn) => {
+    const next = typeof setOrFn === "function" ? setOrFn(starsFilter) : setOrFn;
+    patchParams({ stars: setToParam(next) });
+  };
   const [starsOpen, setStarsOpen] = useState(false);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
-  useEffect(() => {
-    setSearch("");
-    setPostcode("");
-    setAppliedLocation(null);
-    setCheckboxFilters({});
-    setStarsFilter(new Set());
-  }, [kind]);
 
   const landing = LANDING[kind];
 
@@ -203,6 +226,22 @@ export default function StayListingPage({ kind }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allItems, kind]);
 
+  // Each checkbox dropdown's selection, read straight from its own URL
+  // param (facilities=..., roomFacilities=..., meals=..., travelGroup=...).
+  const checkboxFilters = useMemo(() => {
+    const out = {};
+    filterDefs.forEach(({ field }) => { out[field] = paramToSet(searchParams.get(field)); });
+    return out;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, kind]);
+
+  const appliedLocationParam = searchParams.get("loc"); // "lat,lng,radius" | null
+  const appliedLocation = useMemo(() => {
+    if (!appliedLocationParam) return null;
+    const [lat, lng, r] = appliedLocationParam.split(",").map(Number);
+    return Number.isFinite(lat) && Number.isFinite(lng) && Number.isFinite(r) ? { lat, lng, radius: r } : null;
+  }, [appliedLocationParam]);
+
   let items = allItems ?? [];
   if (activeCategory) {
     items = isHotels
@@ -237,12 +276,11 @@ export default function StayListingPage({ kind }) {
 
   const applyLocation = () => {
     if (!matchedCoords) return;
-    setAppliedLocation({ ...matchedCoords, radius });
+    patchParams({ postcode, loc: `${matchedCoords.lat},${matchedCoords.lng},${radius}` });
     setLocationOpen(false);
   };
   const clearLocation = () => {
-    setPostcode("");
-    setAppliedLocation(null);
+    patchParams({ postcode: undefined, loc: undefined });
     setLocationOpen(false);
   };
 
@@ -256,14 +294,12 @@ export default function StayListingPage({ kind }) {
   };
   const toggleStar = toggleFromSet(setStarsFilter);
   const toggleCheckbox = (field) => (value) => {
-    setCheckboxFilters((prev) => {
-      const next = new Set(prev[field]);
-      if (next.has(value)) next.delete(value);
-      else next.add(value);
-      return { ...prev, [field]: next };
-    });
+    const next = new Set(checkboxFilters[field]);
+    if (next.has(value)) next.delete(value);
+    else next.add(value);
+    patchParams({ [field]: setToParam(next) });
   };
-  const clearCheckboxField = (field) => setCheckboxFilters((prev) => ({ ...prev, [field]: new Set() }));
+  const clearCheckboxField = (field) => patchParams({ [field]: undefined });
 
   const checkboxFilterCount = filterDefs.reduce((n, { field }) => n + (checkboxFilters[field]?.size ?? 0), 0);
   const activeFilterCount = checkboxFilterCount + starsFilter.size + (appliedLocation ? 1 : 0);
@@ -443,7 +479,12 @@ export default function StayListingPage({ kind }) {
             {activeFilterCount > 0 && (
               <button
                 type="button"
-                onClick={() => { clearLocation(); setCheckboxFilters({}); setStarsFilter(new Set()); }}
+                onClick={() => {
+                  clearLocation();
+                  const patch = { stars: undefined };
+                  filterDefs.forEach(({ field }) => { patch[field] = undefined; });
+                  patchParams(patch);
+                }}
                 className="text-xs font-semibold underline"
                 style={{ color: "#000000" }}
               >
