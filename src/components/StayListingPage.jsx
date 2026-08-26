@@ -21,7 +21,7 @@ function FeaturedStayCard({ item, basePath, tag, align }) {
       <Link
         to={to}
         onClick={onImageClick}
-        className={`spotlight-card group/img shrink-0 block w-full md:w-[60vw] ${revealed ? "is-revealed" : ""}`}
+        className={`spotlight-card group/img shrink-0 block w-full md:w-[30vw] ${revealed ? "is-revealed" : ""}`}
       >
         <div className="relative w-full overflow-hidden aspect-[6/4]" style={{ backgroundColor: "#1a1a1a" }}>
           <img src={item.image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
@@ -58,7 +58,7 @@ function FeaturedStay({ kind, basePath }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="mb-14 md:mb-20">
+    <section className="max-w-6xl mx-auto mb-14 md:mb-20">
       <div className="mb-10 md:mb-12">
         <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>
           Handpicked
@@ -305,8 +305,8 @@ export default function StayListingPage({ kind }) {
           </p>
         </div>
 
-        {/* Featured Hotels / Featured Accommodation — cards break out of the
-            max-w-6xl container, same as the homepage's Featured Stories. */}
+        {/* Featured Hotels / Featured Accommodation — same width as the rest
+            of the page, not full-bleed. */}
         <FeaturedStay kind={kind} basePath={basePath} />
 
         <div className="max-w-6xl mx-auto">
