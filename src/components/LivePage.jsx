@@ -238,17 +238,17 @@ export default function LivePage() {
           <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
             <Link
               to="/live/stay/accommodation"
-              className="inline-flex items-center justify-center text-center px-8 py-4 rounded-full font-semibold border-2 transition-colors hover:bg-black hover:text-white"
-              style={{ borderColor: "#000000", color: "#000000" }}
+              className="inline-flex items-center justify-center text-center px-8 py-4 rounded-full transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}
             >
-              Self Catering &amp; Serviced Accommodation
+              <span className="section-eyebrow">Self Catering &amp; Serviced Accommodation</span>
             </Link>
             <Link
               to="/live/stay/hotels"
-              className="inline-flex items-center justify-center text-center px-8 py-4 rounded-full font-semibold border-2 transition-colors hover:bg-black hover:text-white"
-              style={{ borderColor: "#000000", color: "#000000" }}
+              className="inline-flex items-center justify-center text-center px-8 py-4 rounded-full transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "var(--forest)", color: "#ffffff" }}
             >
-              Hotels
+              <span className="section-eyebrow">Hotels</span>
             </Link>
           </div>
         </div>
