@@ -19,7 +19,7 @@ export const homeCategories = [
 // ─── Explore hub ───────────────────────────────────────────────────────────────
 export const exploreSections = [
   { id: "offers", title: "Offers", blurb: "The latest news & offers.", image: "/images/coppa/terrace.jpg", to: "/mobile/offers" },
-  { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/ext-hero.jpg", to: "/mobile/live" },
+  { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/hotels-hero.jpg", to: "/mobile/live" },
   { id: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/coppa/dining.jpg", to: "/mobile/eat-drink" },
   { id: "shop", title: "Shop", blurb: "High street & independents.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
