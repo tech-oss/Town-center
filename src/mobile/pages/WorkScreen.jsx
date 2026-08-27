@@ -1,28 +1,17 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
-import { liveStory } from "../../Data/live";
+import { workplaceBuildings } from "../../Data/work";
 
-// While Work itself is still "coming soon", surface the two development
-// stories that already exist elsewhere on the site — Waterside Quarter (a
-// live building on /live/building/:slug) and Nicholson Quarter (the town's
-// flagship regeneration story, already mobile-friendly at
-// /mobile/explore/the-future) — so the page isn't a dead end.
-const DEVELOPMENTS = [
-  {
-    slug: "waterside-quarter",
-    title: "Waterside Quarter",
-    blurb: "Waterside living in the heart of the town centre.",
-    image: "/images/live/ext-waterside.jpg",
-    to: "/live/building/waterside-quarter",
-  },
-  {
-    slug: "nicholson-quarter",
-    title: "Nicholson Quarter",
-    blurb: liveStory.nicholson.heading,
-    image: liveStory.nicholson.image,
-    to: "/mobile/explore/the-future",
-  },
-];
+// While Work itself is still "coming soon", surface the two workplace
+// developments already added to the site — One Maidenhead and Trehus —
+// linking to their existing detail pages at /work/developments/:slug.
+const DEVELOPMENTS = workplaceBuildings.map((b) => ({
+  slug: b.slug,
+  title: b.name,
+  blurb: b.tagline,
+  image: b.image,
+  to: `/work/developments/${b.slug}`,
+}));
 
 export default function WorkScreen() {
   return (
