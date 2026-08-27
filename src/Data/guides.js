@@ -8,7 +8,7 @@ export const guidesIndex = {
   title: "Neighbourhood Guides",
   subtitle:
     "Curated guides to eating, drinking and spending time in Maidenhead — written by people who know the town, for anyone who wants to explore it properly.",
-  heroImage: "/images/eat-drink-hero.png",
+  heroImage: "/images/guides/hero.jpg",
 };
 
 export const guides = [
