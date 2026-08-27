@@ -10,7 +10,7 @@ const DEVELOPMENTS = workplaceBuildings.map((b) => ({
   title: b.name,
   blurb: b.tagline,
   image: b.image,
-  to: `/work/developments/${b.slug}`,
+  to: `/mobile/work/developments/${b.slug}`,
 }));
 
 export default function WorkScreen() {
