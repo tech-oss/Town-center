@@ -23,7 +23,7 @@ export const exploreSections = [
   { id: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/eat-drink/hero.jpg", to: "/mobile/eat-drink" },
   { id: "shop", title: "Shop", blurb: "High street & independents.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
-  { id: "services", title: "Services", blurb: "Trades, health & professionals.", image: "/images/explore/street.jpg", to: "/mobile/services" },
+  { id: "services", title: "Services", blurb: "Trades, health & professionals.", image: "/images/services/hero-desktop.jpg", to: "/mobile/services" },
   { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
 
