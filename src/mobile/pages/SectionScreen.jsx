@@ -50,9 +50,21 @@ export default function SectionScreen({ sectionKey }) {
     });
   }, [section, filter, query]);
 
+  const showHero = sectionKey === "eat-drink" && section.landing?.hero;
+
   return (
-    <MobileShell title={section.label} onBack backFallback="/mobile/explore">
-      <div className="flex flex-col gap-5 mobile-stagger">
+    <MobileShell title={section.label} onBack backFallback="/mobile/explore" noPadding={showHero}>
+      <div className="flex flex-col">
+        {showHero && (
+          <div className="relative h-40 -mb-1">
+            <img src={section.landing.hero} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+              {section.label}
+            </p>
+          </div>
+        )}
+
+        <div className={`flex flex-col gap-5 mobile-stagger ${showHero ? "px-5 pt-5 pb-6" : ""}`}>
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{SECTION_INTROS[sectionKey] ?? section.landing?.intro}</p>
 
         <OffersLink />
@@ -100,6 +112,7 @@ export default function SectionScreen({ sectionKey }) {
               No results{query ? ` for “${query}”` : ""}.
             </p>
           )}
+        </div>
         </div>
       </div>
     </MobileShell>
