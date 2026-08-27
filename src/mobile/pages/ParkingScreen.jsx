@@ -10,7 +10,7 @@ export default function ParkingScreen() {
   return (
     <MobileShell title="Parking" onBack backFallback="/mobile/transport" noPadding>
       <div className="flex flex-col">
-        <img src={parking.image} alt="" className="w-full h-52 object-cover" />
+        <img src="/images/parking/mobile-hero.jpg" alt="" className="w-full h-52 object-cover" />
 
         <div className="px-5 pt-5 pb-8 flex flex-col gap-6 mobile-stagger">
           <div>
