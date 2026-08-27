@@ -8,7 +8,12 @@ export const guidesIndex = {
   title: "Neighbourhood Guides",
   subtitle:
     "Curated guides to eating, drinking and spending time in Maidenhead — written by people who know the town, for anyone who wants to explore it properly.",
+  // heroImage — the mobile-responsive web crop (kept as the original
+  // square collage). heroImageDesktop — the wide crop shown on desktop web
+  // and the native mobile app, where the full "MAIDENHEAD" wordmark stays
+  // in frame instead of being cropped off by a narrow object-cover box.
   heroImage: "/images/guides/hero.jpg",
+  heroImageDesktop: "/images/guides/hero-wide.jpg",
 };
 
 export const guides = [

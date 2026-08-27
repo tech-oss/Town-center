@@ -13,7 +13,8 @@ export default function GuidesPage() {
         className="relative w-full flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
         style={{ minHeight: "max(70vh, 520px)", paddingTop: "calc(var(--header-height, 96px) + 2rem)" }}
       >
-        <img src={guidesIndex.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={guidesIndex.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover md:hidden" />
+        <img src={guidesIndex.heroImageDesktop} alt="" className="absolute inset-0 w-full h-full object-cover hidden md:block" />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{guidesIndex.eyebrow}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
           {guidesIndex.title}
