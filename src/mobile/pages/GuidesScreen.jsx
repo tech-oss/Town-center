@@ -27,6 +27,7 @@ export default function GuidesScreen() {
       <div className="flex flex-col">
         <div className="relative h-40 -mb-1">
           <img src={guidesIndex.heroImageDesktop} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0) 0%, rgba(20,33,42,0.6) 100%)" }} />
           <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
             Neighbourhood Guides
           </p>
