@@ -42,7 +42,7 @@ function FeaturedStayCard({ item, basePath, tag, align }) {
         </p>
         <Link
           to={to}
-          className={`group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-5 ${reversed ? "md:flex-row-reverse" : ""}`}
+          className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-5"
           style={{ color: "#000000" }}
         >
           Read more
