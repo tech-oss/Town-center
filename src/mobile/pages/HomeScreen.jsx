@@ -60,7 +60,6 @@ export default function HomeScreen() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
   const [videoPlaying, setVideoPlaying] = useState(true);
-  const stallTimer = useRef(null);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -76,30 +75,17 @@ export default function HomeScreen() {
     play();
     v.addEventListener("canplay", play, { once: true });
 
-    // If playback stalls (buffering hang, decode error, connection drop)
-    // for more than a couple of seconds, stop treating it as "playing" —
-    // pause for real and surface the play button so the user has an
-    // obvious way to retry instead of staring at a frozen frame.
-    const armStallTimer = () => {
-      clearTimeout(stallTimer.current);
-      stallTimer.current = setTimeout(() => {
-        v.pause();
-        setVideoPlaying(false);
-      }, 2500);
-    };
-    const clearStallTimer = () => clearTimeout(stallTimer.current);
-
-    v.addEventListener("waiting", armStallTimer);
-    v.addEventListener("stalled", armStallTimer);
-    v.addEventListener("error", () => { clearStallTimer(); setVideoPlaying(false); });
-    v.addEventListener("playing", () => { clearStallTimer(); setVideoPlaying(true); });
+    // Buffering (a "waiting" event) is normal on mobile networks and the
+    // browser resumes on its own once enough is downloaded — forcing a
+    // pause here was mistaking that normal hiccup for a dead stream, which
+    // made the video stop and need a manual play every few seconds. Just
+    // keep the button's state in sync with what's actually happening.
+    v.addEventListener("error", () => setVideoPlaying(false));
+    v.addEventListener("playing", () => setVideoPlaying(true));
     v.addEventListener("pause", () => setVideoPlaying(false));
 
     return () => {
-      clearStallTimer();
       v.removeEventListener("canplay", play);
-      v.removeEventListener("waiting", armStallTimer);
-      v.removeEventListener("stalled", armStallTimer);
     };
   }, []);
 
