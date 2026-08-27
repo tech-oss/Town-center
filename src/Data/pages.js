@@ -706,8 +706,8 @@ export const sections = {
       title: "Services in Maidenhead",
       intro:
         "Trusted local tradespeople and professionals – from builders and electricians to accountants and solicitors – all on hand in Maidenhead",
-      hero: "/images/services-hero.png",
-      heroDesktop: "/images/services-hero-desktop.png",
+      hero: "/images/services/hero-square.jpg",
+      heroDesktop: "/images/services/hero-desktop.jpg",
     },
     columns: [
       {
