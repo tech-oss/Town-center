@@ -32,7 +32,7 @@ export const exploreSections = [
 // removed in favour of the website's full Getting Here and Parking content.)
 export const exploreInfo = [
   { id: "transport", title: "Transport & Getting Here", blurb: "Trains, buses, driving and cycling.", image: "/images/getting-here.jpg", to: "/mobile/transport" },
-  { id: "parking", title: "Parking", blurb: "Town-centre car parks and directions.", image: "/images/ql-parking.jpg", to: "/mobile/parking" },
+  { id: "parking", title: "Parking", blurb: "Town-centre car parks and directions.", image: "/images/parking/mobile-hero.jpg", to: "/mobile/parking" },
 ];
 
 // ─── Content / info pages ──────────────────────────────────────────────────────
