@@ -92,11 +92,11 @@ const HERO_IMAGES = {
 const LANDING = {
   hotels: {
     title: "Hotels in Maidenhead",
-    intro: "Where to stay in and around the town centre, from budget chains to riverside hotels — every listing links to the hotel's own site for booking.",
+    intro: "Where to stay in Maidenhead, from the heart of the town centre to riverside retreats along the Thames — with every listing linking directly to the hotel's own website for booking.",
   },
   accommodation: {
     title: "Accommodation in Maidenhead",
-    intro: "Privately-owned homes and rooms to stay in around Maidenhead — example listings shown here; get in touch to arrange a real booking channel.",
+    intro: "Find your ideal stay in and around Maidenhead, from serviced apartments and self-catering cottages to welcoming homes and distinctive places to stay across the area.",
   },
 };
 
