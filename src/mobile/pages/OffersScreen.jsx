@@ -117,8 +117,17 @@ export default function OffersScreen() {
   });
 
   return (
-    <MobileShell title="Offers & Stories" onBack backFallback="/mobile/home">
-      <div className="flex flex-col gap-4 mobile-stagger">
+    <MobileShell title="Offers & Stories" onBack backFallback="/mobile/home" noPadding>
+      <div className="flex flex-col">
+        <div className="relative h-40 -mb-1">
+          <img src="/images/offers/hero.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.1) 0%, rgba(20,33,42,0.7) 100%)" }} />
+          <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
+            Offers &amp; Stories
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-4 mobile-stagger px-5 pt-5 pb-6">
         <p className="text-sm" style={{ color: "#000000" }}>
           Every Featured Story and Spotlight Article — search and filter offers and the latest news from businesses around Maidenhead.
         </p>
@@ -184,6 +193,7 @@ export default function OffersScreen() {
             ))}
           </div>
         )}
+        </div>
       </div>
     </MobileShell>
   );

@@ -364,11 +364,12 @@ export default function OffersPage() {
         className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
         style={{ backgroundColor: "var(--forest)" }}
       >
+        <img src="/images/offers/hero.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
+              "linear-gradient(180deg, rgba(20,33,42,0.55) 0%, rgba(20,33,42,0.45) 40%, rgba(20,33,42,0.88) 100%), radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)",
           }}
         />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
