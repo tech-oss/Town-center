@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import { exploreSections, exploreInfo } from "../data/mobileMock";
+import { guidesIndex } from "../../Data/guides";
 
 function BigCard({ link, height = "h-36" }) {
   const inner = (
@@ -39,7 +40,7 @@ export default function ExploreScreen() {
           <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>Featured</p>
           <div className="flex flex-col gap-4">
             <BigCard link={{ id: "the-future", title: "The Future", blurb: "Nicholson Quarter & the town's next chapter.", image: "/images/explore/street.jpg", to: "/mobile/explore/the-future" }} />
-            <BigCard link={{ id: "guides", title: "Neighbourhood Guides", blurb: "Curated guides to the town.", image: "/images/eat-drink-hero-desktop.png", to: "/mobile/guides" }} />
+            <BigCard link={{ id: "guides", title: "Neighbourhood Guides", blurb: "Curated guides to the town.", image: guidesIndex.heroImageDesktop, to: "/mobile/guides" }} />
           </div>
         </div>
 

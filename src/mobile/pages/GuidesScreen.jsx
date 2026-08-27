@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills } from "../components/ListSearch";
-import { guides, guidesIndex } from "../../Data/guides";
+import { guides } from "../../Data/guides";
 
 export default function GuidesScreen() {
   const [query, setQuery] = useState("");
@@ -23,17 +23,8 @@ export default function GuidesScreen() {
   }, [query, category]);
 
   return (
-    <MobileShell title="Neighbourhood Guides" onBack backFallback="/mobile/explore" noPadding>
-      <div className="flex flex-col">
-        <div className="relative h-40 -mb-1">
-          <img src={guidesIndex.heroImageDesktop} alt="" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0) 0%, rgba(20,33,42,0.6) 100%)" }} />
-          <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-            Neighbourhood Guides
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-4 mobile-stagger px-5 pt-5 pb-6">
+    <MobileShell title="Neighbourhood Guides" onBack backFallback="/mobile/explore">
+      <div className="flex flex-col gap-4 mobile-stagger">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>
           Curated guides to eating, drinking and spending time in Maidenhead.
         </p>
@@ -64,7 +55,6 @@ export default function GuidesScreen() {
               No guides{query ? ` for “${query}”` : ""}.
             </p>
           )}
-        </div>
         </div>
       </div>
     </MobileShell>
