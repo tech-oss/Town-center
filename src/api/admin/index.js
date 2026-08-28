@@ -5,6 +5,7 @@ export * from "./newsOffers";
 
 export * from "./listings";
 export * from "./content";
+export * from "./liveStay";
 export * from "./adminProperties";
 export * from "./projects";
 export * from "./adminEvents";

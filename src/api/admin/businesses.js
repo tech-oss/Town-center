@@ -6,6 +6,7 @@ export const SECTION_OPTIONS = [
   { value: "eat-drink", label: "Eat & Drink" },
   { value: "see-do",    label: "See & Do" },
   { value: "shop",      label: "Shop" },
+  { value: "services",  label: "Services" },
   { value: "live",      label: "Live" },
 ];
 
@@ -51,7 +52,33 @@ export const SUBCATEGORIES = {
     { value: "build-to-rent",    label: "Build to Rent" },
     { value: "new-development",  label: "New Development" },
   ],
+  "services": [
+    { value: "builders",             label: "Builders",                    group: "Tradespeople" },
+    { value: "electricians",         label: "Electricians",                group: "Tradespeople" },
+    { value: "plumbers",             label: "Plumbers & Heating",          group: "Tradespeople" },
+    { value: "decorators-painters",  label: "Decorators & Painters",       group: "Tradespeople" },
+    { value: "locksmiths",           label: "Locksmiths",                  group: "Tradespeople" },
+    { value: "cleaners",             label: "Cleaners",                    group: "Tradespeople" },
+    { value: "accountants",          label: "Accountants",                 group: "Professionals" },
+    { value: "solicitors",           label: "Solicitors",                  group: "Professionals" },
+    { value: "financial-advisers",   label: "Financial Advisers",          group: "Professionals" },
+    { value: "estate-agents",        label: "Estate Agents",               group: "Professionals" },
+    { value: "recruitment",          label: "Recruitment",                 group: "Professionals" },
+    { value: "insurance-brokers",    label: "Insurance Brokers",           group: "Professionals" },
+    { value: "graphic-designers",    label: "Graphic Designers",           group: "Freelancers" },
+    { value: "web-developers",       label: "Web Developers",              group: "Freelancers" },
+    { value: "photographers",        label: "Photographers",               group: "Freelancers" },
+    { value: "copywriters",          label: "Copywriters & Content Writers", group: "Freelancers" },
+    { value: "marketing-consultants",label: "Marketing Consultants",       group: "Freelancers" },
+    { value: "personal-trainers",    label: "Personal Trainers",           group: "Freelancers" },
+    { value: "tutors",               label: "Tutors",                      group: "Freelancers" },
+    { value: "virtual-assistants",   label: "Virtual Assistants",          group: "Freelancers" },
+  ],
 };
+
+// Services groups, in display order — mirrors the public /services page's
+// three columns (Tradesperson, Professionals, Freelancers).
+export const SERVICES_GROUPS = ["Tradespeople", "Professionals", "Freelancers"];
 
 export const CUISINE_OPTIONS = [
   { value: "british",  label: "British" },
@@ -154,6 +181,44 @@ let BUSINESSES = [
     status: "Rejected",
     contactName: "Sam Drake",
     email: "sam@quickfixrepairs.co.uk",
+  },
+  {
+    id: "b6",
+    name: "Elgan Davies Plumbing & Heating",
+    section: "services",
+    subcategories: ["plumbers"],
+    cuisines: [],
+    newToMaidenhead: false,
+    address: "Fifield, Maidenhead SL6 2NF",
+    phone: "01628 555 887",
+    website: "",
+    lat: 51.5147,
+    lng: -0.7431,
+    logo: null,
+    plan: "Standard",
+    submitted: "2026-06-22",
+    status: "Approved",
+    contactName: "Elgan Davies",
+    email: "info@elgandavies.co.uk",
+  },
+  {
+    id: "b7",
+    name: "Thameside Accountancy",
+    section: "services",
+    subcategories: ["accountants"],
+    cuisines: [],
+    newToMaidenhead: false,
+    address: "18 Broadway, Maidenhead SL6 1NN",
+    phone: "01628 555 940",
+    website: "",
+    lat: 51.5222,
+    lng: -0.7211,
+    logo: null,
+    plan: "Basic",
+    submitted: "2026-06-21",
+    status: "Approved",
+    contactName: "Nadia Farooq",
+    email: "hello@thamesideaccountancy.co.uk",
   },
 ];
 

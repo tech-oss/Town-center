@@ -1,10 +1,13 @@
 import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getBusinesses, SUBCATEGORIES } from "../../api/admin";
+import { getBusinesses, SUBCATEGORIES, SERVICES_GROUPS } from "../../api/admin";
 import {
   getBusinessContent, saveBusinessContent,
   getStandalonePages, saveStandalonePage, deleteStandalonePage,
   addOffer, deleteOffer,
+  getSitePages, saveSitePage,
+  getStayCategories, saveStayCategory,
+  getDevelopments, saveDevelopment, deleteDevelopment, emptyDevelopment,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import StatusTag from "../components/StatusTag";
@@ -21,6 +24,8 @@ const CATEGORY_TABS = [
   { key: "see-do",    label: "See & Do" },
   { key: "eat-drink", label: "Eat & Drink" },
   { key: "shop",      label: "Shop" },
+  { key: "services",  label: "Services" },
+  { key: "live-stay", label: "Live & Stay" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -784,6 +789,366 @@ function BizListTab({ businesses, EditorComponent }) {
   );
 }
 
+// ─── Services tab (Tradespeople / Professionals / Freelancers) ───────────────
+function ServicesTab({ businesses }) {
+  const [group, setGroup] = useState(SERVICES_GROUPS[0]);
+  const groupValues = SUBCATEGORIES.services.filter(s => s.group === group).map(s => s.value);
+  const filtered = businesses.filter(b => (b.subcategories ?? []).some(v => groupValues.includes(v)));
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex gap-2 flex-wrap">
+        {SERVICES_GROUPS.map(g => (
+          <button key={g} onClick={() => setGroup(g)}
+            className="px-4 py-2 rounded-xl text-xs font-semibold transition-all"
+            style={g === group
+              ? { backgroundColor: BLUE, color: "#fff", border: `1.5px solid ${BLUE}` }
+              : { backgroundColor: "#f8fafc", color: MUTED, border: `1.5px solid ${BORDER}` }}>
+            {g}
+          </button>
+        ))}
+      </div>
+      <BizListTab businesses={filtered} EditorComponent={ShopEditor} />
+    </div>
+  );
+}
+
+// ─── Generic "site page" editor (heading / intro / hero image) ───────────────
+// Used for both the static "Living in Maidenhead" pages and the Stay category
+// intros — same shape, different save function.
+function GenericPageEditor({ item, onBack, saveFn, onSaved }) {
+  const [form, setForm]     = useState(() => JSON.parse(JSON.stringify(item)));
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty]   = useState(false);
+
+  function set(k, v) { setForm(f => ({ ...f, [k]: v })); setDirty(true); }
+
+  async function handleSave() {
+    setSaving(true);
+    await saveFn(item.key, form);
+    setSaving(false);
+    setDirty(false);
+    onSaved?.();
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: NAVY }}>← Back</button>
+        <span className="text-sm" style={{ color: MUTED }}>/</span>
+        <span className="text-sm font-bold" style={{ color: NAVY }}>{form.label}</span>
+        <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{form.publicPath}</span>
+      </div>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-8" style={CARD}>
+        <EditorSection title="Page Content">
+          <div className="grid gap-4">
+            <Field label="Section Heading">
+              <Inp value={form.heading} onChange={e => set("heading", e.target.value)} placeholder="Page heading…" />
+            </Field>
+            <Field label="Intro / Section Text">
+              <TextArea rows={4} value={form.intro} onChange={e => set("intro", e.target.value)} placeholder="Intro paragraph shown below the heading…" />
+            </Field>
+          </div>
+        </EditorSection>
+        <EditorSection title="Hero Image">
+          <ImageStrip images={form.heroImage ? [form.heroImage] : []} max={1}
+            onChange={v => set("heroImage", v[0] ?? null)} label="Hero Image" />
+        </EditorSection>
+        <SaveBar onSave={handleSave} onCancel={onBack} saving={saving} dirty={dirty} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Key/value list editor (Quick Stats) ──────────────────────────────────────
+function KeyValueListEditor({ items, onChange, keyLabel = "Label", valLabel = "Value" }) {
+  function set(i, k, v) { onChange(items.map((it, idx) => idx === i ? { ...it, [k]: v } : it)); }
+  function add() { onChange([...items, { label: "", value: "" }]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((it, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input value={it.label} onChange={e => set(i, "label", e.target.value)} placeholder={keyLabel}
+            className="flex-1 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <input value={it.value} onChange={e => set(i, "value", e.target.value)} placeholder={valLabel}
+            className="flex-1 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={add} className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: BLUE }}>+ Add</button>
+    </div>
+  );
+}
+
+// ─── Simple text list editor (About paragraphs / Amenities) ─────────────────
+function TextListEditor({ items, onChange, placeholder = "", multiline = false }) {
+  function set(i, v) { onChange(items.map((it, idx) => idx === i ? v : it)); }
+  function add() { onChange([...items, ""]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((it, i) => (
+        <div key={i} className="flex items-start gap-2">
+          {multiline ? (
+            <TextArea rows={3} value={it} onChange={e => set(i, e.target.value)} placeholder={placeholder} />
+          ) : (
+            <input value={it} onChange={e => set(i, e.target.value)} placeholder={placeholder}
+              className="flex-1 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          )}
+          <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg mt-1" style={{ color: "#DC2626" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={add} className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: BLUE }}>+ Add</button>
+    </div>
+  );
+}
+
+// ─── Nearby places editor (Getting Around) ────────────────────────────────────
+const NEARBY_MODES = ["walk", "train", "car"];
+function NearbyPlacesEditor({ items, onChange }) {
+  function set(i, k, v) { onChange(items.map((it, idx) => idx === i ? { ...it, [k]: v } : it)); }
+  function add() { onChange([...items, { name: "", distance: "", mode: "walk" }]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+  return (
+    <div className="flex flex-col gap-2">
+      {items.map((it, i) => (
+        <div key={i} className="flex items-center gap-2 flex-wrap">
+          <input value={it.name} onChange={e => set(i, "name", e.target.value)} placeholder="Place name"
+            className="flex-1 min-w-[160px] rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <input value={it.distance} onChange={e => set(i, "distance", e.target.value)} placeholder="e.g. 5 min walk"
+            className="w-32 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <select value={it.mode} onChange={e => set(i, "mode", e.target.value)}
+            className="rounded-lg px-2 py-2 text-xs outline-none" style={INPUT}>
+            {NEARBY_MODES.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={add} className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: BLUE }}>+ Add Place</button>
+    </div>
+  );
+}
+
+// ─── Development (Live building page) editor ──────────────────────────────────
+function DevelopmentEditor({ dev, onBack, onSaved }) {
+  const [form, setForm]     = useState(() => JSON.parse(JSON.stringify(dev)));
+  const [saving, setSaving] = useState(false);
+  const [dirty, setDirty]   = useState(false);
+
+  function set(k, v) { setForm(f => ({ ...f, [k]: v })); setDirty(true); }
+
+  async function handleSave() {
+    if (!form.name?.trim()) return;
+    setSaving(true);
+    await saveDevelopment(form);
+    setSaving(false);
+    setDirty(false);
+    onSaved();
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <button onClick={onBack} className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: NAVY }}>← Back</button>
+        <span className="text-sm" style={{ color: MUTED }}>/</span>
+        <span className="text-sm font-bold" style={{ color: NAVY }}>{form.name || "New Development"}</span>
+      </div>
+      <div className="bg-white rounded-2xl p-6 flex flex-col gap-8" style={CARD}>
+
+        <EditorSection title="Page Content">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Development Name" required>
+              <Inp value={form.name} onChange={e => set("name", e.target.value)} placeholder="e.g. Waterside Quarter" />
+            </Field>
+            <Field label="Developer">
+              <Inp value={form.developer} onChange={e => set("developer", e.target.value)} placeholder="e.g. Cala Homes" />
+            </Field>
+            <Field label="Tagline" span2>
+              <Inp value={form.tagline} onChange={e => set("tagline", e.target.value)} placeholder="Short line shown under the hero title…" />
+            </Field>
+          </div>
+        </EditorSection>
+
+        <EditorSection title="Hero Image">
+          <ImageStrip images={form.heroImage ? [form.heroImage] : []} max={1}
+            onChange={v => set("heroImage", v[0] ?? null)} label="Hero Image" />
+        </EditorSection>
+
+        <EditorSection title="Quick Stats">
+          <KeyValueListEditor items={form.quickStats ?? []} onChange={v => set("quickStats", v)} keyLabel="e.g. Homes" valLabel="e.g. 212" />
+        </EditorSection>
+
+        <EditorSection title={`About ${form.name || "this development"}`}>
+          <TextListEditor items={form.aboutParagraphs ?? [""]} onChange={v => set("aboutParagraphs", v)} multiline placeholder="Paragraph text…" />
+        </EditorSection>
+
+        <EditorSection title="Photo Gallery">
+          <ImageStrip images={form.galleryImages ?? []} onChange={v => set("galleryImages", v)} max={12} label="Gallery Images" />
+        </EditorSection>
+
+        <EditorSection title="Features / Amenities">
+          <TextListEditor items={(form.amenities ?? []).map(a => a.label ?? a)}
+            onChange={v => set("amenities", v.map(label => ({ label })))} placeholder="e.g. Riverside terrace" />
+        </EditorSection>
+
+        <EditorSection title="Getting Around (Nearby Places)">
+          <NearbyPlacesEditor items={form.nearbyPlaces ?? []} onChange={v => set("nearbyPlaces", v)} />
+        </EditorSection>
+
+        <EditorSection title="Map Coordinates">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Latitude">
+              <Inp value={form.lat} onChange={e => set("lat", e.target.value)} placeholder="e.g. 51.5225" />
+            </Field>
+            <Field label="Longitude">
+              <Inp value={form.lng} onChange={e => set("lng", e.target.value)} placeholder="e.g. -0.7234" />
+            </Field>
+          </div>
+        </EditorSection>
+
+        <EditorSection title="Contact">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Website">
+              <Inp value={form.website} onChange={e => set("website", e.target.value)} placeholder="https://…" />
+            </Field>
+            <Field label="Contact Email">
+              <Inp value={form.email} onChange={e => set("email", e.target.value)} placeholder="sales@…" />
+            </Field>
+          </div>
+        </EditorSection>
+
+        <SaveBar onSave={handleSave} onCancel={onBack} saving={saving} dirty={dirty} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Live & Stay tab ───────────────────────────────────────────────────────────
+function LiveStayTab() {
+  const [tick, setTick] = useState(0);
+  const [openPage, setOpenPage]   = useState(null); // site page key/object
+  const [openStay, setOpenStay]   = useState(null); // stay category object
+  const [openDev, setOpenDev]     = useState(null); // "new" | development object
+  const [deletingId, setDeletingId] = useState(null);
+
+  const { data: sitePages, loading: pagesLoading } = useFetch(getSitePages, [tick]);
+  const { data: stayCats,  loading: stayLoading }  = useFetch(getStayCategories, [tick]);
+  const { data: devs,      loading: devsLoading }  = useFetch(getDevelopments, [tick]);
+
+  async function handleDeleteDev(id) {
+    if (!confirm("Remove this development? This cannot be undone.")) return;
+    setDeletingId(id);
+    await deleteDevelopment(id);
+    setDeletingId(null);
+    setTick(t => t + 1);
+  }
+
+  if (openPage) {
+    return <GenericPageEditor item={openPage} saveFn={saveSitePage}
+      onBack={() => setOpenPage(null)} onSaved={() => { setTick(t => t + 1); setOpenPage(null); }} />;
+  }
+  if (openStay) {
+    return <GenericPageEditor item={openStay} saveFn={saveStayCategory}
+      onBack={() => setOpenStay(null)} onSaved={() => { setTick(t => t + 1); setOpenStay(null); }} />;
+  }
+  if (openDev) {
+    const dev = openDev === "new" ? emptyDevelopment() : openDev;
+    return <DevelopmentEditor dev={dev} onBack={() => setOpenDev(null)}
+      onSaved={() => { setTick(t => t + 1); setOpenDev(null); }} />;
+  }
+
+  return (
+    <div className="flex flex-col gap-8">
+      {/* Living in Maidenhead */}
+      <div>
+        <SectionTitle title="Living in Maidenhead" />
+        {pagesLoading ? <LoadingState /> : (
+          <div className="flex flex-col gap-3">
+            {sitePages?.map(p => (
+              <div key={p.key} className="bg-white rounded-2xl p-4 flex items-center gap-4" style={CARD}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: NAVY }}>{p.label}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>{p.publicPath}</p>
+                </div>
+                <button onClick={() => setOpenPage(p)}
+                  className="shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+                  Manage Content
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Stay */}
+      <div>
+        <SectionTitle title="Stay" />
+        {stayLoading ? <LoadingState /> : (
+          <div className="flex flex-col gap-3">
+            {stayCats?.map(c => (
+              <div key={c.key} className="bg-white rounded-2xl p-4 flex items-center gap-4" style={CARD}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: NAVY }}>{c.label}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>{c.publicPath}</p>
+                </div>
+                <button onClick={() => setOpenStay(c)}
+                  className="shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
+                  style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+                  Manage Content
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Developments */}
+      <div>
+        <SectionTitle
+          title="Developments"
+          action={
+            <button onClick={() => setOpenDev("new")}
+              className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ backgroundColor: BLUE, color: "#fff" }}>
+              + Add Development
+            </button>
+          }
+        />
+        {devsLoading ? <LoadingState /> : (
+          <div className="flex flex-col gap-3">
+            {devs?.map(d => (
+              <div key={d.id} className="bg-white rounded-2xl p-4 flex items-center gap-4" style={CARD}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
+                  style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>
+                  {d.name?.[0] ?? "?"}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: NAVY }}>{d.name || "Untitled Development"}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: MUTED }}>{d.developer || "No developer set"} · /live/building/{d.slug || "…"}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button onClick={() => setOpenDev(d)}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
+                    style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+                    Manage Content
+                  </button>
+                  <button onClick={() => handleDeleteDev(d.id)} disabled={deletingId === d.id}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-70 disabled:opacity-40"
+                    style={{ color: "#991B1B", border: `1.5px solid rgba(185,28,28,0.3)` }}>
+                    {deletingId === d.id ? "…" : "Delete"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ListingsPage() {
   const [activeTab, setActiveTab] = useState("see-do");
@@ -809,10 +1174,12 @@ export default function ListingsPage() {
               marginBottom: -1,
             }}>
             {tab.label}
-            <span className="ml-1.5 text-[11px] font-bold px-1.5 py-0.5 rounded-full"
-              style={{ backgroundColor: activeTab === tab.key ? "rgba(37,99,235,0.1)" : "rgba(16,24,40,0.07)", color: activeTab === tab.key ? BLUE : MUTED }}>
-              {loading ? "…" : bySection(tab.key).length}
-            </span>
+            {tab.key !== "live-stay" && (
+              <span className="ml-1.5 text-[11px] font-bold px-1.5 py-0.5 rounded-full"
+                style={{ backgroundColor: activeTab === tab.key ? "rgba(37,99,235,0.1)" : "rgba(16,24,40,0.07)", color: activeTab === tab.key ? BLUE : MUTED }}>
+                {loading ? "…" : bySection(tab.key).length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -822,6 +1189,8 @@ export default function ListingsPage() {
           {activeTab === "see-do"    && <SeeDoTab businesses={bySection("see-do")} />}
           {activeTab === "eat-drink" && <BizListTab businesses={bySection("eat-drink")} EditorComponent={EatDrinkEditor} />}
           {activeTab === "shop"      && <BizListTab businesses={bySection("shop")}      EditorComponent={ShopEditor} />}
+          {activeTab === "services"  && <ServicesTab businesses={bySection("services")} />}
+          {activeTab === "live-stay" && <LiveStayTab />}
         </>
       )}
     </div>
