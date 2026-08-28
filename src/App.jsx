@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom'
 import MobileApp from './mobile/MobileApp'
 import AdminApp from './admin/AdminApp'
+import BusinessApp from './business/BusinessApp'
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
@@ -166,6 +167,7 @@ function App() {
       <Routes>
         <Route path="/mobile/*" element={<MobileApp />} />
         <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/business/*" element={<BusinessApp />} />
         <Route path="/logo-animation" element={<LogoAnimationDemo />} />
         <Route path="*" element={<PublicSite />} />
       </Routes>
