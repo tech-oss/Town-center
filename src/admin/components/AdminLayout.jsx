@@ -103,7 +103,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
 
       {/* ── Sidebar ── */}
       <aside
-        className={`fixed top-0 left-0 h-full z-30 flex flex-col transition-transform duration-300 md:sticky md:top-0 md:h-screen md:z-auto md:!translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed top-0 left-0 h-screen z-30 flex flex-col transition-transform duration-300 md:z-auto md:!translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
         style={{ width: 240, minWidth: 240, backgroundColor: NAVY }}
       >
         {/* Logo */}
@@ -169,7 +169,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 md:ml-[240px]">
         <header className="sticky top-0 z-10 flex items-center gap-4 px-6 py-4"
           style={{ backgroundColor: "#fff", borderBottom: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 12px rgba(16,24,40,0.05)" }}>
           <button className="md:hidden flex flex-col gap-1.5 w-5" onClick={() => setSidebarOpen((o) => !o)}>
