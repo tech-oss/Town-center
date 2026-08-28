@@ -491,3 +491,44 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
     white-space: nowrap;
   }
 }
+
+/* ─── Admin panel — Modern Blue theme ────────────────────────────────────────
+   Clean, professional look: Inter throughout, flat white cards on a light
+   blue-grey canvas (the public site keeps Playfair + Montserrat). */
+.admin-root {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  letter-spacing: 0;
+  background-color: #f5f7fb;
+}
+.admin-root h1, .admin-root h2, .admin-root h3, .admin-root h4, .admin-root h5, .admin-root h6 {
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Card-like surfaces: clean white panels with a soft, subtle shadow. */
+.admin-root .bg-white.rounded-xl,
+.admin-root .bg-white.rounded-2xl {
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.admin-root .bg-white.rounded-xl:hover,
+.admin-root .bg-white.rounded-2xl:hover {
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.06), 0 6px 16px -6px rgba(16, 24, 40, 0.12);
+}
+
+/* Subtle press feedback on buttons & pills. */
+.admin-root button,
+.admin-root a[class*="rounded-lg"],
+.admin-root a[class*="rounded-full"] {
+  transition: transform 0.12s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.admin-root button:active {
+  transform: translateY(1px);
+}
+
+/* Flat, light progress tracks (Top Performing Categories, etc.). */
+.admin-root .lux-track {
+  background: #eef1f6;
+}

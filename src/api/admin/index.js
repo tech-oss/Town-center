@@ -4,6 +4,7 @@ export * from "./approvals";
 export * from "./newsOffers";
 
 export * from "./listings";
+export * from "./content";
 export * from "./adminProperties";
 export * from "./projects";
 export * from "./adminEvents";
