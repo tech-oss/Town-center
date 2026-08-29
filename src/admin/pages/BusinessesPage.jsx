@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness,
@@ -331,6 +332,49 @@ function RegisterBusinessForm({ onSave, onCancel }) {
   );
 }
 
+// Builds the deep link into the universal Business Content Editor, carrying
+// enough info (id, name, section) for it to pre-select this business — or
+// synthesise a blank draft entry for it if no content record exists yet.
+function contentEditorPath(biz) {
+  // The registration form's "Live" section value doesn't match the content
+  // editor's "live-stay" section key — normalise it for the deep link.
+  const section = biz.section === "live" ? "live-stay" : biz.section;
+  const params = new URLSearchParams({ businessId: biz.id, name: biz.name, section });
+  return `/admin/business-content?${params.toString()}`;
+}
+
+// ─── Post-registration success panel ──────────────────────────────────────────
+function RegistrationSuccess({ biz, onAddContent, onLater }) {
+  return (
+    <div className="bg-white rounded-2xl p-8 flex flex-col items-center text-center gap-4"
+      style={{ border: `1.5px solid ${BORDER}`, boxShadow: "0 4px 24px rgba(16,24,40,0.08)" }}>
+      <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
+        style={{ backgroundColor: "rgba(16,163,74,0.12)", color: "#15803D" }}>
+        ✓
+      </div>
+      <div>
+        <p className="text-base font-bold" style={{ color: NAVY }}>Business registered successfully</p>
+        <p className="text-sm mt-1" style={{ color: MUTED }}>{biz.name}</p>
+      </div>
+      <p className="text-xs max-w-sm" style={{ color: MUTED }}>
+        This business has no page content yet. Add it now so its public page is ready to publish, or come back to it later.
+      </p>
+      <div className="flex gap-3 mt-2">
+        <button onClick={onAddContent}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: BLUE }}>
+          Add Content Now
+        </button>
+        <button onClick={onLater}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70"
+          style={{ color: MUTED, border: `1.5px solid #D1D5DB` }}>
+          Do This Later
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function Section({ title, note, children }) {
   return (
     <div className="flex flex-col gap-3">
@@ -346,7 +390,7 @@ function Section({ title, note, children }) {
 }
 
 // ─── Business card ────────────────────────────────────────────────────────────
-function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, deletingId, onConfirmDelete, onCancelDelete, busy }) {
+function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, deletingId, onConfirmDelete, onCancelDelete, busy, onAddContent }) {
   const secLabel = sectionLabel(biz.section);
   const subcatLabels = (biz.subcategories ?? []).map((v) => {
     const all = Object.values(SUBCATEGORIES).flat();
@@ -376,6 +420,10 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <span className="text-sm font-bold" style={{ color: NAVY }}>{biz.name}</span>
             <StatusTag status={biz.status} />
+            {!biz.hasContent && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
+            )}
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
               style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>{biz.plan}</span>
             {biz.newToMaidenhead && (
@@ -430,6 +478,10 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           {biz.status === "Rejected" && (
             <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>Re-approve</BizBtn>
           )}
+
+          <BizBtn color={BLUE} disabled={isBusy} onClick={() => onAddContent(biz)}>
+            {biz.hasContent ? "Edit Content" : "Add Content"}
+          </BizBtn>
 
           {/* Delete */}
           {!isDeleting ? (
@@ -518,10 +570,12 @@ const SORT_OPTIONS = [
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function BusinessesPage() {
+  const navigate = useNavigate();
   const { data: fetched, loading } = useFetch(getBusinesses, []);
   const [local, setLocal]       = useState(null);
   const [statusFilter, setStatusFilter] = useState("All");
   const [showForm, setShowForm] = useState(false);
+  const [registeredBiz, setRegisteredBiz] = useState(null); // shows the post-register success panel in place of the form
   const [toast, setToast]       = useState(null);
   const [search, setSearch]     = useState("");
   const [sortVal, setSortVal]   = useState("submitted-desc");
@@ -540,9 +594,20 @@ export default function BusinessesPage() {
   function handleRegister(form) {
     registerBusiness(form).then((saved) => {
       setLocal((prev) => [saved, ...(prev ?? fetched ?? [])]);
-      setShowForm(false);
-      notify(`"${saved.name}" registered — pending approval.`);
+      // Keep the panel open, but swap the form for the success state so
+      // admin can jump straight into adding content — or defer it.
+      setRegisteredBiz(saved);
     });
+  }
+
+  function handleAddContent(biz) {
+    navigate(contentEditorPath(biz));
+  }
+
+  function handleDismissRegistration() {
+    setShowForm(false);
+    setRegisteredBiz(null);
+    notify(`"${registeredBiz?.name}" registered — pending approval.`);
   }
 
   function handleApprove(biz) {
@@ -626,7 +691,17 @@ export default function BusinessesPage() {
         )}
       </div>
 
-      {showForm && <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)} />}
+      {showForm && (
+        registeredBiz ? (
+          <RegistrationSuccess
+            biz={registeredBiz}
+            onAddContent={() => handleAddContent(registeredBiz)}
+            onLater={handleDismissRegistration}
+          />
+        ) : (
+          <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)} />
+        )
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
@@ -706,6 +781,7 @@ export default function BusinessesPage() {
               onConfirmDelete={handleDeleteConfirm}
               onCancelDelete={handleDeleteCancel}
               busy={busy}
+              onAddContent={handleAddContent}
             />
           ))}
         </div>

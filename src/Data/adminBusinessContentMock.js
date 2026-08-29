@@ -52,9 +52,9 @@ function offers(seed) {
 }
 
 // ─── Type A: See & Do / Eat & Drink / Shop ────────────────────────────────────
-function typeABusiness({ id, name, section, status, seed }) {
+function typeABusiness({ id, name, section, status, seed, registrationId, hasContent = true }) {
   return {
-    id, name, section, status,
+    id, name, section, status, registrationId, hasContent,
     hero: { title: name, subtitle: "A local favourite in the heart of Maidenhead", image: img(seed, 1200, 700) },
     hours: DEFAULT_HOURS(),
     address: "14 High Street, Maidenhead SL6 1JF",
@@ -71,9 +71,9 @@ function typeABusiness({ id, name, section, status, seed }) {
 }
 
 // ─── Type B: Services ─────────────────────────────────────────────────────────
-function typeBBusiness({ id, name, category, status, seed }) {
+function typeBBusiness({ id, name, category, status, seed, registrationId, hasContent = true }) {
   return {
-    id, name, section: "services", status,
+    id, name, section: "services", status, registrationId, hasContent,
     logo: img(`${seed}-logo`, 200, 200),
     category,
     description: `${name} is a trusted, fully insured local ${category.toLowerCase()} serving Maidenhead and the surrounding area.`,
@@ -101,9 +101,9 @@ function typeBBusiness({ id, name, category, status, seed }) {
 }
 
 // ─── Type C: Live & Stay ───────────────────────────────────────────────────────
-function typeCBusiness({ id, name, category, subCategory, status, seed }) {
+function typeCBusiness({ id, name, category, subCategory, status, seed, registrationId, hasContent = true }) {
   return {
-    id, name, section: "live-stay", status,
+    id, name, section: "live-stay", status, registrationId, hasContent,
     category, subCategory,
     description: `${name} offers comfortable, well-appointed accommodation moments from Maidenhead town centre.`,
     heroImage: img(seed, 1200, 700),
@@ -122,9 +122,9 @@ function typeCBusiness({ id, name, category, subCategory, status, seed }) {
 }
 
 // ─── Type D: Explore ───────────────────────────────────────────────────────────
-function typeDBusiness({ id, name, status, seed }) {
+function typeDBusiness({ id, name, status, seed, registrationId, hasContent = true }) {
   return {
-    id, name, section: "explore", status,
+    id, name, section: "explore", status, registrationId, hasContent,
     title: name,
     subtitle: "Shaping the future of Maidenhead town centre",
     heroImage: img(seed, 1200, 700),
@@ -137,22 +137,81 @@ function typeDBusiness({ id, name, status, seed }) {
   };
 }
 
+// ─── Blank content shape (freshly registered business, no content yet) ───────
+// Used by the Business Content Editor to synthesise a draft entry the moment
+// admin arrives from "Add Content Now" / "Add Content" with no prior content
+// record for that business id.
+export function blankHero(name) {
+  return { title: name, subtitle: "", image: null };
+}
+
+export function createBlankBusinessContent({ id, name, section, registrationId }) {
+  const status = "Draft";
+  switch (section) {
+    case "services":
+      return {
+        id, name, section, status, registrationId, hasContent: false,
+        logo: null, category: "", description: "", bookingTag: "",
+        phone: "", address: "", email: "", website: "",
+        social: { instagram: "", facebook: "", twitter: "" },
+        lat: "", lng: "",
+        hours: DEFAULT_HOURS(),
+        photos: [],
+        stats: [{ value: "", label: "" }, { value: "", label: "" }, { value: "", label: "" }, { value: "", label: "" }],
+        services: [], whyChooseUs: [], areasCovered: [],
+        offers: [],
+      };
+    case "live-stay":
+      return {
+        id, name, section, status, registrationId, hasContent: false,
+        category: "", subCategory: "Self Catering & Serviced Accommodation",
+        description: "", heroImage: null,
+        address: "", phone: "", email: "", website: "",
+        social: { instagram: "", facebook: "", twitter: "" },
+        lat: "", lng: "",
+        availabilityInfo: "",
+        gallery: [], features: [],
+        offers: [],
+      };
+    case "explore":
+      return {
+        id, name, section, status, registrationId, hasContent: false,
+        title: name, subtitle: "", heroImage: null, body: "",
+        address: "", lat: "", lng: "", gallery: [], pageStatus: "Draft",
+      };
+    default: // see-do / eat-drink / shop — Type A
+      return {
+        id, name, section, status, registrationId, hasContent: false,
+        hero: blankHero(name),
+        hours: DEFAULT_HOURS(),
+        address: "", phone: "", email: "", website: "", bookingUrl: "",
+        social: { instagram: "", facebook: "", twitter: "" },
+        gallery: [],
+        lat: "", lng: "",
+        offers: [],
+      };
+  }
+}
+
 export const BUSINESS_CONTENT = [
   // See & Do
-  typeABusiness({ id: "sd1", name: "Riverside Yoga Studio", section: "see-do", status: "Published", seed: "riverside-yoga" }),
-  typeABusiness({ id: "sd2", name: "Maidenhead Escape Rooms", section: "see-do", status: "Draft", seed: "escape-rooms" }),
+  typeABusiness({ id: "sd1", name: "Riverside Yoga Studio", section: "see-do", status: "Published", seed: "riverside-yoga", registrationId: "b2" }),
+  // Content pending — appears in the registration list with no linked registration id (purely content-editor side "New Business").
+  typeABusiness({ id: "sd2", name: "Maidenhead Escape Rooms", section: "see-do", status: "Draft", seed: "escape-rooms", hasContent: false }),
 
   // Eat & Drink
-  typeABusiness({ id: "ed1", name: "The Velvet Lounge", section: "eat-drink", status: "Published", seed: "velvet-lounge" }),
+  typeABusiness({ id: "ed1", name: "The Velvet Lounge", section: "eat-drink", status: "Published", seed: "velvet-lounge", registrationId: "b1" }),
   typeABusiness({ id: "ed2", name: "Bakedd", section: "eat-drink", status: "Published", seed: "bakedd" }),
 
   // Shop
-  typeABusiness({ id: "sh1", name: "Maidenhead Book Nook", section: "shop", status: "Published", seed: "book-nook" }),
-  typeABusiness({ id: "sh2", name: "Quickfix Phone Repairs", section: "shop", status: "Draft", seed: "quickfix" }),
+  typeABusiness({ id: "sh1", name: "Maidenhead Book Nook", section: "shop", status: "Published", seed: "book-nook", registrationId: "b3" }),
+  // Content pending — linked to the registration record b5, so it also drives
+  // the "Content Pending" badge / Add Content button on the registrations list.
+  typeABusiness({ id: "sh2", name: "Quickfix Phone Repairs", section: "shop", status: "Draft", seed: "quickfix", registrationId: "b5", hasContent: false }),
 
   // Services
-  typeBBusiness({ id: "sv1", name: "Elgan Davies Plumbing & Heating", category: "Plumbers & Heating", status: "Published", seed: "elgan-davies" }),
-  typeBBusiness({ id: "sv2", name: "Thameside Accountancy", category: "Accountants", status: "Published", seed: "thameside-accountancy" }),
+  typeBBusiness({ id: "sv1", name: "Elgan Davies Plumbing & Heating", category: "Plumbers & Heating", status: "Published", seed: "elgan-davies", registrationId: "b6" }),
+  typeBBusiness({ id: "sv2", name: "Thameside Accountancy", category: "Accountants", status: "Published", seed: "thameside-accountancy", registrationId: "b7" }),
 
   // Live & Stay
   typeCBusiness({ id: "ls1", name: "Fredrick's Hotel, Restaurant & Spa", category: "Hotel", subCategory: "Hotels", status: "Published", seed: "fredricks-hotel" }),

@@ -124,6 +124,7 @@ let BUSINESSES = [
     status: "Pending",
     contactName: "Olivia Grant",
     email: "olivia@velvetlounge.co.uk",
+    hasContent: true,
   },
   {
     id: "b2",
@@ -143,6 +144,7 @@ let BUSINESSES = [
     status: "Pending",
     contactName: "Daniel Reeves",
     email: "hello@riversideyoga.co.uk",
+    hasContent: true,
   },
   {
     id: "b3",
@@ -162,6 +164,7 @@ let BUSINESSES = [
     status: "Approved",
     contactName: "Priya Anand",
     email: "priya@booknook.co.uk",
+    hasContent: true,
   },
   {
     id: "b5",
@@ -181,6 +184,8 @@ let BUSINESSES = [
     status: "Rejected",
     contactName: "Sam Drake",
     email: "sam@quickfixrepairs.co.uk",
+    // Content Pending — registered but no page content added yet.
+    hasContent: false,
   },
   {
     id: "b6",
@@ -200,6 +205,7 @@ let BUSINESSES = [
     status: "Approved",
     contactName: "Elgan Davies",
     email: "info@elgandavies.co.uk",
+    hasContent: true,
   },
   {
     id: "b7",
@@ -219,6 +225,29 @@ let BUSINESSES = [
     status: "Approved",
     contactName: "Nadia Farooq",
     email: "hello@thamesideaccountancy.co.uk",
+    hasContent: true,
+  },
+  {
+    id: "b8",
+    name: "Willow & Vine Florist",
+    section: "shop",
+    subcategories: ["home-furniture"],
+    cuisines: [],
+    newToMaidenhead: true,
+    address: "5 Market Street, Maidenhead SL6 1JX",
+    phone: "01628 555 774",
+    website: "",
+    lat: 51.5229,
+    lng: -0.7216,
+    logo: null,
+    plan: "Basic",
+    submitted: "2026-08-25",
+    status: "Approved",
+    contactName: "Freya Holt",
+    email: "hello@willowandvine.co.uk",
+    // Content Pending — no matching entry in the content editor's mock data
+    // at all yet, so the editor synthesises a blank draft for it on arrival.
+    hasContent: false,
   },
 ];
 
@@ -240,6 +269,10 @@ export function registerBusiness(data) {
     id: data.id || `b${Date.now()}`,
     submitted: data.submitted || new Date().toISOString().slice(0, 10),
     status: data.status || "Pending",
+    // A brand-new registration always starts with no page content — admin
+    // fills it in via the Business Content Editor afterwards.
+    // TODO: persist to Supabase on backend integration
+    hasContent: data.hasContent ?? false,
   };
   if (data.id) {
     BUSINESSES = BUSINESSES.map((b) => (b.id === data.id ? saved : b));
@@ -247,6 +280,14 @@ export function registerBusiness(data) {
     BUSINESSES = [saved, ...BUSINESSES];
   }
   return mock(saved);
+}
+
+// Flips a registration's Content Pending badge off once its page content has
+// been saved for the first time in the Business Content Editor.
+// TODO: persist to Supabase on backend integration
+export function markBusinessHasContent(id) {
+  BUSINESSES = BUSINESSES.map((x) => (x.id === id ? { ...x, hasContent: true } : x));
+  return mock({ ok: true });
 }
 
 export function approveBusiness(id) {

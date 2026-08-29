@@ -315,6 +315,83 @@ export function RepeatableList({ items, onChange, placeholder = "" }) {
   );
 }
 
+// ─── New-business onboarding: banner + progress steps ────────────────────────
+export function NewBusinessBanner({ name }) {
+  return (
+    <div className="rounded-xl px-4 py-3 mb-6 text-sm font-medium"
+      style={{ backgroundColor: "rgba(37,99,235,0.06)", border: `1.5px solid rgba(37,99,235,0.2)`, color: NAVY }}>
+      You're adding content for the first time for <strong>{name}</strong>. Fill in the fields below and click Save when ready.
+    </div>
+  );
+}
+
+function hasCoords(lat, lng) {
+  return lat !== "" && lng !== "" && lat != null && lng != null && !Number.isNaN(Number(lat)) && !Number.isNaN(Number(lng));
+}
+
+// Derives the 5-step onboarding checklist from the current form values.
+// Purely a display heuristic for a freshly-registered business — nothing
+// here is persisted; actual completeness will come from the backend once
+// content is saved to Supabase.
+export function computeProgressSteps(biz) {
+  const steps = [{ label: "Basic Info", hint: "Name, Section, Contact", done: true }];
+
+  if (biz.section === "services") {
+    steps.push({ label: "Hero & Images", hint: "Logo & photo strip", done: !!biz.logo || (biz.photos?.length ?? 0) > 0 });
+    steps.push({ label: "Opening Hours", hint: null, done: Array.isArray(biz.hours) && biz.hours.length > 0 });
+    steps.push({ label: "Location Pin", hint: null, done: hasCoords(biz.lat, biz.lng) });
+    steps.push({ label: "News & Offers", hint: null, done: (biz.offers?.length ?? 0) > 0 });
+  } else if (biz.section === "live-stay") {
+    steps.push({ label: "Hero & Images", hint: "Hero & gallery", done: !!biz.heroImage || (biz.gallery?.length ?? 0) > 0 });
+    steps.push({ label: "Opening Hours", hint: "Availability info", done: !!biz.availabilityInfo?.trim() });
+    steps.push({ label: "Location Pin", hint: null, done: hasCoords(biz.lat, biz.lng) });
+    steps.push({ label: "News & Offers", hint: null, done: (biz.offers?.length ?? 0) > 0 });
+  } else if (biz.section === "explore") {
+    steps.push({ label: "Hero & Images", hint: "Hero & gallery", done: !!biz.heroImage || (biz.gallery?.length ?? 0) > 0 });
+    steps.push({ label: "Body Content", hint: null, done: !!biz.body?.trim() });
+    steps.push({ label: "Location Pin", hint: null, done: hasCoords(biz.lat, biz.lng) });
+    // Explore pages have no News & Offers sub-section.
+  } else {
+    steps.push({ label: "Hero & Images", hint: null, done: !!biz.hero?.image || (biz.gallery?.length ?? 0) > 0 });
+    steps.push({ label: "Opening Hours", hint: null, done: Array.isArray(biz.hours) && biz.hours.length > 0 });
+    steps.push({ label: "Location Pin", hint: null, done: hasCoords(biz.lat, biz.lng) });
+    steps.push({ label: "News & Offers", hint: null, done: (biz.offers?.length ?? 0) > 0 });
+  }
+  return steps;
+}
+
+export function ProgressSteps({ steps }) {
+  return (
+    <div className="bg-white rounded-2xl p-5 mb-6" style={CARD}>
+      <div className="flex items-stretch gap-2">
+        {steps.map((s, i) => (
+          <div key={s.label} className="flex-1 flex items-center gap-2">
+            <div className="flex flex-col items-center gap-1.5 flex-1">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={s.done
+                  ? { backgroundColor: "#15803D", color: "#fff" }
+                  : { backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>
+                {s.done ? "✓" : i + 1}
+              </div>
+              <div className="text-center">
+                <p className="text-[11px] font-semibold leading-tight" style={{ color: NAVY }}>
+                  Step {i + 1} — {s.label}
+                </p>
+                <p className="text-[10px] mt-0.5" style={{ color: s.done ? "#15803D" : MUTED }}>
+                  {s.done ? "Done" : "In Progress"}
+                </p>
+              </div>
+            </div>
+            {i < steps.length - 1 && (
+              <div className="h-px flex-1 shrink-0 mb-5" style={{ backgroundColor: s.done ? "#15803D" : BORDER }} />
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Stat tile editor (4 value/label pairs) ───────────────────────────────────
 export function StatTilesEditor({ stats, onChange }) {
   function set(i, key, v) { onChange(stats.map((s, idx) => (idx === i ? { ...s, [key]: v } : s))); }
