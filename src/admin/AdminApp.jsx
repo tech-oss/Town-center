@@ -7,6 +7,7 @@ import BusinessesPage from "./pages/BusinessesPage";
 import ApprovalQueuePage from "./pages/ApprovalQueuePage";
 import ApprovalDetailPage from "./pages/ApprovalDetailPage";
 import ListingsPage from "./pages/ListingsPage";
+import BusinessContentPage from "./pages/BusinessContentPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import EventsNewsPage from "./pages/EventsNewsPage";
@@ -34,6 +35,7 @@ export default function AdminApp() {
         <Route path="approvals" element={<ApprovalQueuePage />} />
         <Route path="approvals/:id" element={<ApprovalDetailPage />} />
         <Route path="listings" element={<ListingsPage />} />
+        <Route path="business-content" element={<BusinessContentPage />} />
         <Route path="properties" element={<PropertiesPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="events-news" element={<EventsNewsPage />} />

@@ -27,7 +27,7 @@ const NAV = [
   { to: "/admin/users",              label: "Users",                 icon: I.users },
   { to: "/admin/businesses",         label: "Business Registrations",icon: I.businesses },
   { to: "/admin/approvals",          label: "Approval Queue",        icon: I.approvals,      badge: "pending" },
-  { to: "/admin/listings",           label: "Manage Business Content", icon: I.listings },
+  { to: "/admin/business-content",   label: "Manage Business Content", icon: I.listings },
   {
     label: "Home Page Featured", icon: I.featured, group: true,
     children: [
