@@ -7,6 +7,7 @@ const COLOURS = {
   Pending:       { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Trial:         { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Draft:         { bg: "rgba(107,114,128,0.13)", text: "#374151" },
+  Hidden:        { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Lapsed:        { bg: "rgba(107,114,128,0.13)", text: "#374151" },
   Rejected:      { bg: "rgba(185,28,28,0.1)",   text: "#991B1B" },
   Failed:        { bg: "rgba(185,28,28,0.1)",   text: "#991B1B" },

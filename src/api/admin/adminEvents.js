@@ -6,6 +6,7 @@ const EVENTS = [
   { id: "e3", title: "Norden Farm Summer Gala", category: "Theatre", date: "2026-07-19", status: "Published", featured: false, author: "Admin" },
   { id: "e4", title: "Thames Riverside 5K", category: "Sport", date: "2026-08-02", status: "Draft", featured: false, author: "Admin" },
   { id: "e5", title: "Maidenhead Festival Opening Night", category: "Music", date: "2026-07-04", status: "Published", featured: true, author: "Admin" },
+  { id: "e6", title: "Winter Ice Rink (cancelled)", category: "Family", date: "2026-12-01", status: "Hidden", featured: false, author: "Admin" },
 ];
 
 const NEWS = [

@@ -18,6 +18,12 @@ import NewsOffersPage from "./pages/NewsOffersPage";
 import FeaturedStoriesPage from "./pages/FeaturedStoriesPage";
 import PushNotificationsPage from "./pages/PushNotificationsPage";
 import AdminLogsPage from "./pages/AdminLogsPage";
+import SupportTicketsPage from "./pages/SupportTicketsPage";
+import ArticlesPage from "./pages/ArticlesPage";
+import ArticleEditorPage from "./pages/ArticleEditorPage";
+import NeighbourhoodGuidesPage from "./pages/NeighbourhoodGuidesPage";
+import NeighbourhoodGuideEditorPage from "./pages/NeighbourhoodGuideEditorPage";
+import SiteContentPage from "./pages/SiteContentPage";
 import useFetch from "../hooks/useFetch";
 import { getApprovals } from "../api/admin";
 
@@ -47,6 +53,14 @@ export default function AdminApp() {
         <Route path="push-notifications" element={<PushNotificationsPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="admin-logs" element={<AdminLogsPage />} />
+        <Route path="support-tickets" element={<SupportTicketsPage />} />
+        <Route path="articles" element={<ArticlesPage />} />
+        <Route path="articles/new" element={<ArticleEditorPage />} />
+        <Route path="articles/:id/edit" element={<ArticleEditorPage />} />
+        <Route path="neighbourhood-guides" element={<NeighbourhoodGuidesPage />} />
+        <Route path="neighbourhood-guides/new" element={<NeighbourhoodGuideEditorPage />} />
+        <Route path="neighbourhood-guides/:id/edit" element={<NeighbourhoodGuideEditorPage />} />
+        <Route path="site-content" element={<SiteContentPage />} />
       </Route>
     </Routes>
   );

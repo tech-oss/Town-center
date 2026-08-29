@@ -40,6 +40,15 @@ function getScheduleStatus(startDate, endDate) {
   return { state: "active", label: "Active", target: end, prefix: "Ends in" };
 }
 
+// Duration between two dates, inclusive, formatted for display.
+function durationText(startDate, endDate) {
+  if (!startDate || !endDate) return "No end date";
+  const start = new Date(startDate + "T00:00:00");
+  const end = new Date(endDate + "T00:00:00");
+  const days = Math.round((end - start) / 86400000) + 1;
+  return days > 0 ? `${days} day${days === 1 ? "" : "s"}` : "—";
+}
+
 // Human-readable countdown between now and a target date.
 function countdownText(target) {
   if (!target) return "no end date";
@@ -117,6 +126,21 @@ function SpotlightBadge({ active }) {
   );
 }
 
+// ─── Paid / Complimentary segmented toggle ────────────────────────────────────
+function PayTypeToggle({ value, onChange }) {
+  return (
+    <div className="inline-flex rounded-xl overflow-hidden w-fit" style={{ border: "1.5px solid rgba(16,24,40,0.2)" }}>
+      {["Paid", "Complimentary"].map((t) => (
+        <button key={t} type="button" onClick={() => onChange(t)}
+          className="px-3 py-1.5 text-xs font-semibold transition-colors"
+          style={value === t ? { backgroundColor: "#1E293B", color: "#fff" } : { backgroundColor: "#fff", color: "#6B7280" }}>
+          {t}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ─── Edit / Create form ───────────────────────────────────────────────────────
 function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
   const blank = {
@@ -133,6 +157,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
     endDate: "",
     status: "Published",
     featuredOnHome: false,
+    payType: "Complimentary",
   };
   const [form, setForm] = useState(initial ?? blank);
   const [saving, setSaving] = useState(false);
@@ -297,6 +322,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
           >
             <option>Published</option>
             <option>Draft</option>
+            <option>Hidden</option>
           </select>
         </label>
 
@@ -328,7 +354,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             <span className="text-sm font-bold" style={{ color: "#92400E" }}>★ Homepage Spotlight schedule</span>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(232,163,61,0.2)", color: "#92400E" }}>UK time</span>
           </div>
-          <p className="text-xs -mt-1" style={{ color: "#92400E", opacity: 0.8 }}>Set when this post appears in the "In the Spotlight" section. Leave end date empty to run indefinitely.</p>
+          <p className="text-xs -mt-1" style={{ color: "#92400E", opacity: 0.8 }}>Set when this post appears in the "In the Spotlight" section. Leave dates blank to publish immediately with no expiry.</p>
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Start date</span>
@@ -351,6 +377,14 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
                 style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
               />
             </label>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Duration</span>
+            <span className="text-sm font-medium" style={{ color: "#1E293B" }}>{durationText(form.startDate, form.endDate)}</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Type</span>
+            <PayTypeToggle value={form.payType} onChange={(v) => set("payType", v)} />
           </div>
           {(form.startDate || form.endDate) && (
             <SpotlightSchedule startDate={form.startDate} endDate={form.endDate} />
@@ -517,17 +551,27 @@ export default function NewsOffersPage() {
         </div>
         {featured.length > 0 ? (
           <div className="flex flex-col gap-2">
-            {featured.map((f, i) => (
-              <div key={f.id} className="flex items-center gap-3 rounded-xl px-3 py-2" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-                <span className="text-xs font-bold w-4 text-center" style={{ color: "#E8A33D" }}>{i + 1}</span>
-                {f.image && <img src={f.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate text-white">{f.title}</p>
-                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>{f.businessName}</p>
+            {featured.map((f, i) => {
+              const schedule = getScheduleStatus(f.startDate, f.endDate);
+              return (
+                <div key={f.id} className="flex items-center gap-3 rounded-xl px-3 py-2 flex-wrap" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+                  <span className="text-xs font-bold w-4 text-center" style={{ color: "#E8A33D" }}>{i + 1}</span>
+                  {f.image && <img src={f.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate text-white">{f.title}</p>
+                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>{f.businessName} · {durationText(f.startDate, f.endDate)}</p>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>
+                    {f.payType ?? "Complimentary"}
+                  </span>
+                  {schedule?.state === "scheduled" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: "rgba(232,163,61,0.3)", color: "#fff" }}>Scheduled</span>
+                  )}
+                  <button onClick={() => setEditing(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#fff", border: "1px solid rgba(255,255,255,0.35)" }}>Edit</button>
+                  <button onClick={() => handleToggleFeature(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#E8A33D", border: "1px solid rgba(232,163,61,0.5)" }}>Remove</button>
                 </div>
-                <button onClick={() => handleToggleFeature(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#E8A33D", border: "1px solid rgba(232,163,61,0.5)" }}>Remove</button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <p className="text-xs text-center py-2" style={{ color: "rgba(255,255,255,0.35)" }}>No items featured — toggle "Add to Homepage" on any published item below.</p>
@@ -543,7 +587,7 @@ export default function NewsOffersPage() {
           ))}
         </div>
         <div className="flex gap-2 ml-auto">
-          {["all", "Published", "Draft"].map((s) => (
+          {["all", "Published", "Draft", "Hidden"].map((s) => (
             <button key={s} onClick={() => setStatusFilter(s)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={statusFilter === s ? { backgroundColor: "#2563EB", color: "#fff" } : { backgroundColor: "#fff", color: "#374151", border: "1.5px solid rgba(16,24,40,0.15)" }}>{s === "all" ? "All statuses" : s}</button>
           ))}
         </div>

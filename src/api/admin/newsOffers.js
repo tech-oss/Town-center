@@ -30,6 +30,7 @@ let NEWS_OFFERS = [
     endDate: "2026-07-31",
     status: "Published",
     featuredOnHome: true,
+    payType: "Paid",
     createdAt: "2026-05-10",
   },
   {
@@ -48,6 +49,7 @@ let NEWS_OFFERS = [
     endDate: "2026-08-15",
     status: "Published",
     featuredOnHome: true,
+    payType: "Complimentary",
     createdAt: "2026-05-12",
   },
   {
@@ -66,6 +68,7 @@ let NEWS_OFFERS = [
     endDate: "",
     status: "Published",
     featuredOnHome: true,
+    payType: "Paid",
     createdAt: "2026-05-15",
   },
   {
@@ -112,7 +115,7 @@ let NEWS_OFFERS = [
     body: "Enjoy 20% off your entire food order when dining in Monday to Friday, 12pm–3pm. Applies to our full lunch menu including sandwiches, hot dishes, and specials.\n\nNot valid with other offers or on bank holidays. Quote LUNCH20 at the counter.",
     image: "/images/events/popup.jpg",
     date: "Mon–Fri · 12pm–3pm",
-    status: "Published",
+    status: "Hidden",
     featuredOnHome: false,
     createdAt: "2026-06-19",
   },

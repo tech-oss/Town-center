@@ -9,6 +9,7 @@ import {
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
+import { BUSINESS_TEAM_MEMBERS, TEAM_ROLES } from "../../Data/adminMissingScreensMock";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const NAVY  = "#1E293B";
@@ -375,6 +376,78 @@ function RegistrationSuccess({ biz, onAddContent, onLater }) {
   );
 }
 
+// ─── Team section (multi-user per business) ───────────────────────────────────
+const ROLE_COLOURS = { Owner: { bg: "rgba(37,99,235,0.1)", fg: "#1D4ED8" }, Manager: { bg: "rgba(22,163,74,0.12)", fg: "#15803D" }, Staff: { bg: "rgba(107,114,128,0.13)", fg: "#374151" } };
+
+function TeamSection({ bizId }) {
+  const [open, setOpen] = useState(false);
+  const [members, setMembers] = useState(() => BUSINESS_TEAM_MEMBERS[bizId] ?? []);
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState({ name: "", email: "", role: "Staff" });
+
+  function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
+
+  function handleInvite() {
+    if (!form.name.trim() || !form.email.trim()) return;
+    // TODO: create user account and send invite email via Resend
+    setMembers((prev) => [...prev, { id: `tm${Date.now()}`, ...form }]);
+    setForm({ name: "", email: "", role: "Staff" });
+    setAdding(false);
+  }
+
+  function handleRemove(id) {
+    setMembers((prev) => prev.filter((m) => m.id !== id));
+  }
+
+  return (
+    <div className="px-5 pb-5 pt-1">
+      <button onClick={() => setOpen((o) => !o)} className="text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: BLUE }}>
+        {open ? "▾" : "▸"} View Team ({members.length})
+      </button>
+      {open && (
+        <div className="mt-3 rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "#f8fafc", border: `1px solid ${BORDER}` }}>
+          {members.length === 0 && <p className="text-xs" style={{ color: MUTED }}>No team members yet.</p>}
+          {members.map((m) => (
+            <div key={m.id} className="flex items-center gap-3 flex-wrap">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>{m.name[0]}</div>
+              <div className="flex-1 min-w-[140px]">
+                <p className="text-sm font-semibold" style={{ color: NAVY }}>{m.name}</p>
+                <p className="text-xs" style={{ color: MUTED }}>{m.email}</p>
+              </div>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: ROLE_COLOURS[m.role]?.bg, color: ROLE_COLOURS[m.role]?.fg }}>{m.role}</span>
+              <button onClick={() => handleRemove(m.id)} className="text-xs font-semibold" style={{ color: "#991B1B" }}>Remove</button>
+            </div>
+          ))}
+
+          {adding ? (
+            <div className="grid sm:grid-cols-3 gap-2 pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <input value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="Name"
+                className="rounded-lg px-3 py-2 text-xs outline-none" style={FIELD_STYLE} />
+              <input value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="Email"
+                className="rounded-lg px-3 py-2 text-xs outline-none" style={FIELD_STYLE} />
+              <select value={form.role} onChange={(e) => set("role", e.target.value)}
+                className="rounded-lg px-3 py-2 text-xs outline-none" style={FIELD_STYLE}>
+                {TEAM_ROLES.map((r) => <option key={r}>{r}</option>)}
+              </select>
+              <div className="flex gap-2 sm:col-span-3">
+                <button onClick={handleInvite} disabled={!form.name.trim() || !form.email.trim()}
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: BLUE }}>Send Invite</button>
+                <button onClick={() => setAdding(false)} className="px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <button onClick={() => setAdding(true)}
+              className="self-start px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80"
+              style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+              + Add Team Member
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Section({ title, note, children }) {
   return (
     <div className="flex flex-col gap-3">
@@ -501,6 +574,8 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           )}
         </div>
       </div>
+
+      <TeamSection bizId={biz.id} />
 
       {/* Inline reason panel */}
       {isActive && (
