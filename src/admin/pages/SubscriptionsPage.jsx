@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute } from "../../api/admin";
-import { TIER_FEATURES, SUBSCRIPTION_PAYMENTS } from "../../Data/adminMissingScreensMock";
+import {
+  TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS, SUBSCRIPTION_PAYMENT_METHODS,
+  SUBSCRIPTION_BILLING_HISTORY, resolveTierFeatures,
+} from "../../Data/adminSubscriptionMock";
+import SubscriptionTabs from "../components/SubscriptionTabs";
 import DataTable, { TableAction } from "../components/DataTable";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
@@ -35,6 +39,37 @@ function ConfirmModal({ title, body, confirmLabel, onConfirm, onCancel }) {
   );
 }
 
+// ─── Manage Subscription dropdown (Upgrade / Downgrade / Cancel) ─────────────
+// TODO: fetch from Stripe customer portal API
+function ManageSubscriptionMenu({ onUpgrade, onDowngrade, onCancel }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen((o) => !o)}
+        className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
+        style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
+        Manage Subscription ▾
+      </button>
+      {open && (
+        <div className="absolute left-0 mt-1 w-44 rounded-xl overflow-hidden bg-white z-20"
+          style={{ border: "1.5px solid rgba(16,24,40,0.12)", boxShadow: "0 8px 24px rgba(16,24,40,0.12)" }}>
+          {[
+            ["Upgrade", onUpgrade],
+            ["Downgrade", onDowngrade],
+            ["Cancel", onCancel],
+          ].map(([label, fn]) => (
+            <button key={label} onClick={() => { setOpen(false); fn(); }}
+              className="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50"
+              style={{ color: label === "Cancel" ? "#991B1B" : "#1E293B" }}>
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function SubscriptionDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -44,6 +79,7 @@ export function SubscriptionDetailPage() {
   const [newTier, setNewTier] = useState(null);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [cancelled, setCancelled] = useState(false);
+  const billingHistoryRef = useRef(null);
 
   if (loading) return <LoadingState />;
   if (!sub) return <EmptyState title="Not found" />;
@@ -70,9 +106,14 @@ export function SubscriptionDetailPage() {
     // TODO: trigger Resend email on backend integration
     notify(`Renewal reminder sent to ${sub.owner}.`);
   }
+  function scrollToBillingHistory() {
+    billingHistoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
-  const payments = SUBSCRIPTION_PAYMENTS[id] ?? [];
-  const features = TIER_FEATURES[sub.tier] ?? [];
+  const payments = SUBSCRIPTION_BILLING_HISTORY[id] ?? [];
+  const features = resolveTierFeatures(sub.tier);
+  const stripeId = SUBSCRIPTION_STRIPE_IDS[id] ?? `sub_${id}`;
+  const paymentMethod = SUBSCRIPTION_PAYMENT_METHODS[id] ?? { brand: "Visa", last4: "0000" };
 
   return (
     <div className="max-w-3xl flex flex-col gap-6">
@@ -88,6 +129,8 @@ export function SubscriptionDetailPage() {
       )}
 
       <Link to="/admin/subscriptions" className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: "#1E293B" }}>← Subscriptions</Link>
+
+      <SubscriptionTabs id={id} active="subscription" />
 
       {message && (
         <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B" }}>{message}</div>
@@ -105,6 +148,7 @@ export function SubscriptionDetailPage() {
             <p className="text-sm" style={{ color: "#6B7280" }}>{sub.owner} · {sub.owner.toLowerCase().replace(/\s+/g, ".")}@{sub.business.toLowerCase().replace(/[^a-z0-9]+/g, "")}.co.uk</p>
           </div>
           <div className="flex items-center gap-2">
+            <span className="text-lg">{TIER_ICONS[sub.tier] ?? "✈️"}</span>
             <span className="text-sm font-bold px-3 py-1 rounded-full" style={{ backgroundColor: `${TIER_COLOURS[sub.tier]}20`, color: TIER_COLOURS[sub.tier] }}>{sub.tier}</span>
             <StatusTag status={cancelled ? "Rejected" : sub.status} />
           </div>
@@ -112,15 +156,19 @@ export function SubscriptionDetailPage() {
 
         <div className="grid grid-cols-2 gap-4">
           {[
-            ["Monthly Fee", sub.monthlyFee > 0 ? `£${sub.monthlyFee}` : "Free"],
-            ["Start Date", sub.startDate],
-            ["Renewal Date", sub.renewal],
-            ["Payment Status", sub.paymentStatus],
-            ["Subscription ID", sub.id],
+            ["Price per Month", sub.monthlyFee > 0 ? `£${sub.monthlyFee.toFixed(2)}` : "Free"],
+            ["Next Billing Date", sub.renewal],
+            ["Payment Method", `${paymentMethod.brand} •••• ${paymentMethod.last4}`],
+            ["Subscription ID", stripeId],
           ].map(([l, v]) => (
             <div key={l} className="flex flex-col gap-0.5">
               <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{l}</span>
-              <span className="text-sm font-medium" style={{ color: "#1E293B" }}>{v}</span>
+              <span className="text-sm font-medium flex items-center gap-2" style={{ color: "#1E293B" }}>
+                {v}
+                {l === "Payment Method" && (
+                  <span className="text-xs font-semibold cursor-pointer" style={{ color: "#2563EB" }}>Change</span>
+                )}
+              </span>
             </div>
           ))}
         </div>
@@ -131,23 +179,47 @@ export function SubscriptionDetailPage() {
           </div>
         )}
 
-        {sub.paymentStatus === "Failed" && (
-          <div className="flex gap-3 flex-wrap">
+        <div className="flex gap-3 flex-wrap">
+          <ManageSubscriptionMenu
+            onUpgrade={() => notify("Upgrade requested.")}
+            onDowngrade={() => notify("Downgrade requested.")}
+            onCancel={() => setConfirmCancel(true)}
+          />
+          <button onClick={scrollToBillingHistory} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
+            Billing History
+          </button>
+          {sub.paymentStatus === "Failed" && (
             <button onClick={handleResolve} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.3)" }}>Resolve Dispute</button>
-          </div>
-        )}
+          )}
+        </div>
+      </div>
+
+      {/* What they get */}
+      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+        <h2 className="font-bold text-base mb-4" style={{ color: "#1E293B" }}>What They Get</h2>
+        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+          {ALL_PLAN_FEATURES.map((f) => {
+            const included = features.includes(f);
+            return (
+              <div key={f} className="flex items-center gap-2 text-sm" style={{ color: included ? "#1E293B" : "#9CA3AF" }}>
+                <span style={{ color: included ? "#15803D" : "#D1D5DB" }}>{included ? "✓" : "✕"}</span>
+                {f}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Payment history */}
-      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
-        <h2 className="font-bold text-base mb-4" style={{ color: "#1E293B" }}>Payment History</h2>
+      <div ref={billingHistoryRef} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+        <h2 className="font-bold text-base mb-4" style={{ color: "#1E293B" }}>Billing History</h2>
         {payments.length === 0 ? (
           <p className="text-sm" style={{ color: "#6B7280" }}>No payments recorded yet.</p>
         ) : (
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
-                {["Date", "Amount", "Status", "Invoice"].map((h) => (
+                {["Date", "Description", "Amount", "Status", "Invoice"].map((h) => (
                   <th key={h} className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider" style={{ color: "#1E293B" }}>{h}</th>
                 ))}
               </tr>
@@ -156,6 +228,7 @@ export function SubscriptionDetailPage() {
               {payments.map((p, i) => (
                 <tr key={i} style={{ borderBottom: i < payments.length - 1 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
                   <td className="px-3 py-2.5" style={{ color: "#1E293B" }}>{p.date}</td>
+                  <td className="px-3 py-2.5" style={{ color: "#6B7280" }}>{p.description}</td>
                   <td className="px-3 py-2.5 font-medium" style={{ color: "#1E293B" }}>{p.amount}</td>
                   <td className="px-3 py-2.5"><StatusTag status={p.status} /></td>
                   <td className="px-3 py-2.5"><span className="text-xs font-semibold cursor-pointer" style={{ color: "#2563EB" }}>Download PDF</span></td>
@@ -164,18 +237,6 @@ export function SubscriptionDetailPage() {
             </tbody>
           </table>
         )}
-      </div>
-
-      {/* Features included */}
-      <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
-        <h2 className="font-bold text-base mb-4" style={{ color: "#1E293B" }}>Features Included ({sub.tier})</h2>
-        <ul className="flex flex-col gap-2">
-          {features.map((f) => (
-            <li key={f} className="flex items-center gap-2 text-sm" style={{ color: "#1E293B" }}>
-              <span style={{ color: "#15803D" }}>✓</span> {f}
-            </li>
-          ))}
-        </ul>
       </div>
 
       {/* Manual override */}

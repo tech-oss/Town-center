@@ -4,6 +4,7 @@ const COLOURS = {
   Suspended:     { bg: "rgba(217,119,6,0.14)",  text: "#92400E" },
   Published:     { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
   Paid:          { bg: "rgba(37,99,235,0.16)", text: "#1D4ED8" },
+  Refunded:      { bg: "rgba(217,119,6,0.14)",  text: "#92400E" },
   Pending:       { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Trial:         { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Draft:         { bg: "rgba(107,114,128,0.13)", text: "#374151" },

@@ -12,6 +12,7 @@ import PropertiesPage from "./pages/PropertiesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import EventsNewsPage from "./pages/EventsNewsPage";
 import SubscriptionsPage, { SubscriptionDetailPage } from "./pages/SubscriptionsPage";
+import SubscriptionDocumentsPage from "./pages/SubscriptionDocumentsPage";
 import ReportingPage from "./pages/ReportingPage";
 import SettingsPage from "./pages/SettingsPage";
 import NewsOffersPage from "./pages/NewsOffersPage";
@@ -47,6 +48,7 @@ export default function AdminApp() {
         <Route path="events-news" element={<EventsNewsPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
+        <Route path="subscriptions/:id/documents" element={<SubscriptionDocumentsPage />} />
         <Route path="news-offers" element={<NewsOffersPage />} />
         <Route path="featured-stories" element={<FeaturedStoriesPage />} />
         <Route path="reporting" element={<ReportingPage />} />
