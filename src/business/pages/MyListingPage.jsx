@@ -63,6 +63,21 @@ export default function MyListingPage() {
     // TODO: persist to Supabase on backend integration
     setToast("Reply submitted for admin approval.");
   }
+  function handleReviewAdd(form) {
+    // TODO: persist to Supabase on backend integration
+    setReviews((prev) => [{ id: `r${Date.now()}`, reply: null, ...form }, ...prev]);
+    setToast("Review added.");
+  }
+  function handleReviewUpdate(id, form) {
+    // TODO: persist to Supabase on backend integration
+    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form } : r)));
+    setToast("Review updated.");
+  }
+  function handleReviewDelete(id) {
+    // TODO: persist to Supabase on backend integration
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+    setToast("Review deleted.");
+  }
 
   const status = listing.approvalStatus?.[tab];
 
@@ -176,8 +191,8 @@ export default function MyListingPage() {
 
           {tab === "reviews" && (
             <EditorSection title="Reviews">
-              <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>Reviews are submitted by customers. You can reply to reviews — your reply goes to admin for approval before appearing.</p>
-              <ReviewsList reviews={reviews} onReply={handleReviewReply} />
+              <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and reply to reviews — your reply goes to admin for approval before appearing.</p>
+              <ReviewsList reviews={reviews} onReply={handleReviewReply} onAdd={handleReviewAdd} onUpdate={handleReviewUpdate} onDelete={handleReviewDelete} />
             </EditorSection>
           )}
 
