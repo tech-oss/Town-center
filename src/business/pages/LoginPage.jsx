@@ -1,21 +1,66 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
-import { coppaMockUser } from "../../Data/businessPortalMock";
+import { findUserByEmail, businessName } from "../hooks/useUserRegistry";
+import { coppaMockUser, hotelMockUser } from "../../Data/businessPortalMock";
 import { Field, Inp } from "../components/FormKit";
 
-const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B";
+const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+
+// Builds a full session object for a portal account. Owners of the two fully
+// seeded demo businesses reuse their rich mock records; any other business
+// (including ones only registered via "Register a User") gets a sensible
+// generic session — every page already falls back gracefully when a
+// business has no seeded listing/articles/reviews content yet.
+function buildSessionUser(portalUser) {
+  const base =
+    portalUser.businessId === "biz_coppa" ? coppaMockUser :
+    portalUser.businessId === "biz_fredricks" ? hotelMockUser :
+    {
+      id: portalUser.businessId,
+      businessName: businessName(portalUser.businessId),
+      businessType: "eat-drink",
+      plan: "standard",
+      planStatus: "Active",
+      renewalDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+      monthlyFee: 39,
+      isMultiSite: false,
+      visible: true,
+      termsAcceptedAt: new Date().toISOString(),
+      upgradePlanKey: "basic",
+    };
+  return {
+    ...base,
+    firstName: portalUser.firstName,
+    lastName: portalUser.lastName,
+    email: portalUser.email,
+    role: portalUser.role,
+  };
+}
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useBusinessAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   function handleSubmit(e) {
     e.preventDefault();
-    // Mock login — any input succeeds.
+    setError("");
+    const match = findUserByEmail(email);
+    if (match) {
+      if (match.password !== password) {
+        setError("Incorrect email or password.");
+        return;
+      }
+      login(buildSessionUser(match));
+      navigate("/business/dashboard");
+      return;
+    }
+    // Unrecognised email — mock convenience fallback so the demo stays
+    // explorable with any input, logged in as the Coppa Club owner.
     login(coppaMockUser);
     navigate("/business/dashboard");
   }
@@ -33,6 +78,8 @@ export default function LoginPage() {
           <Field label="Email"><Inp type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@business.co.uk" /></Field>
           <Field label="Password"><Inp type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></Field>
 
+          {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
+
           <div className="flex justify-end -mt-1">
             <a href="#" onClick={(e) => e.preventDefault()} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Forgot password?</a>
           </div>
@@ -41,9 +88,17 @@ export default function LoginPage() {
             Log In
           </button>
 
-          <p className="text-xs text-center" style={{ color: MUTED }}>
-            Don't have an account? <Link to="/business/signup" className="font-semibold" style={{ color: "#0F766E" }}>Register your business</Link>
-          </p>
+          <div className="flex flex-col gap-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+            <p className="text-xs text-center" style={{ color: MUTED }}>Don't have an account?</p>
+            <div className="flex gap-2">
+              <Link to="/business/signup" className="flex-1 text-center px-3 py-2.5 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80" style={{ backgroundColor: "rgba(82,199,182,0.1)", color: "#0F766E", border: "1.5px solid rgba(82,199,182,0.3)" }}>
+                Register a Business
+              </Link>
+              <Link to="/business/register-user" className="flex-1 text-center px-3 py-2.5 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>
+                Register a User
+              </Link>
+            </div>
+          </div>
         </form>
       </div>
     </div>

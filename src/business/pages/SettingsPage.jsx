@@ -4,6 +4,7 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, Select, Toggle, Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { BUSINESS_TEAM, TEAM_ROLES } from "../../Data/businessPortalMock";
+import { usePendingRequests, approveRequest, declineRequest } from "../hooks/useUserRegistry";
 
 function AccordionSection({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -34,6 +35,18 @@ export default function SettingsPage() {
   const [deleteText, setDeleteText] = useState("");
   const [profileDeleted, setProfileDeleted] = useState(false);
   const [accountDeleted, setAccountDeleted] = useState(false);
+  const isOwner = user.role !== "Content Manager";
+  const pendingRequests = usePendingRequests(user.id);
+
+  function handleApproveRequest(req) {
+    approveRequest(user.id, req.id);
+    setTeam((prev) => [...prev, { id: `u${Date.now()}`, name: `${req.firstName} ${req.lastName}`, email: req.email, role: "Content Manager" }]);
+    setToast(`${req.firstName} ${req.lastName} approved as Content Manager.`);
+  }
+  function handleDeclineRequest(req) {
+    declineRequest(user.id, req.id);
+    setToast(`Request from ${req.firstName} ${req.lastName} declined.`);
+  }
 
   function savePersonal() {
     // TODO: update Supabase auth user
@@ -148,7 +161,25 @@ export default function SettingsPage() {
           <button onClick={savePassword} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Save</button>
         </AccordionSection>
 
-        <AccordionSection title="Business User Management">
+        <AccordionSection title="Business User Management" defaultOpen={pendingRequests.length > 0}>
+          {isOwner && pendingRequests.length > 0 && (
+            <div className="flex flex-col gap-3 mb-4 rounded-xl p-3" style={{ backgroundColor: "rgba(232,163,61,0.08)", border: "1.5px solid rgba(232,163,61,0.3)" }}>
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "#92400E" }}>Pending User Approvals</p>
+              {pendingRequests.map((r) => (
+                <div key={r.id} className="flex items-center gap-3 flex-wrap rounded-xl p-3 bg-white" style={{ border: `1px solid ${BORDER}` }}>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: "#E8A33D" }}>{r.firstName[0]}</div>
+                  <div className="flex-1 min-w-[140px]">
+                    <p className="text-sm font-semibold" style={{ color: FOREST }}>{r.firstName} {r.lastName}</p>
+                    <p className="text-xs" style={{ color: MUTED }}>{r.email} · requested {r.requestedAt}</p>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(232,163,61,0.16)", color: "#92400E" }}>Content Manager</span>
+                  <button onClick={() => handleApproveRequest(r)} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white" style={{ backgroundColor: SAGE }}>Accept</button>
+                  <button onClick={() => handleDeclineRequest(r)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ color: "#991B1B", border: "1.5px solid rgba(220,38,38,0.3)" }}>Decline</button>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 mb-4">
             {team.map((m) => (
               <div key={m.id} className="flex items-center gap-3 flex-wrap rounded-xl p-3" style={{ border: `1px solid ${BORDER}` }}>
@@ -158,16 +189,18 @@ export default function SettingsPage() {
                   <p className="text-xs" style={{ color: MUTED }}>{m.email}</p>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{m.role}</span>
-                {m.role === "Owner" ? (
+                {isOwner && (m.role === "Owner" ? (
                   <button onClick={() => setTransferTarget(team.find((t) => t.role !== "Owner") ?? m)} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Transfer ownership</button>
                 ) : (
                   <button onClick={() => removeMember(m.id)} className="text-xs font-semibold" style={{ color: "#991B1B" }}>Remove</button>
-                )}
+                ))}
               </div>
             ))}
           </div>
 
-          {addingMember ? (
+          {!isOwner ? (
+            <p className="text-xs" style={{ color: "#9CA3AF" }}>Only the business owner can manage team members.</p>
+          ) : addingMember ? (
             <div className="grid sm:grid-cols-3 gap-2 mb-3">
               <Inp value={memberForm.name} onChange={(e) => setMemberForm((f) => ({ ...f, name: e.target.value }))} placeholder="Name" />
               <Inp value={memberForm.email} onChange={(e) => setMemberForm((f) => ({ ...f, email: e.target.value }))} placeholder="Email" />
@@ -182,7 +215,7 @@ export default function SettingsPage() {
           ) : (
             <button onClick={() => setAddingMember(true)} className="px-4 py-2 rounded-xl text-xs font-semibold" style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: "1.5px solid rgba(82,199,182,0.35)" }}>+ Add a user</button>
           )}
-          <p className="text-[11px] mt-3" style={{ color: "#9CA3AF" }}>If you are leaving this business, use "Transfer ownership" before removing yourself.</p>
+          {isOwner && <p className="text-[11px] mt-3" style={{ color: "#9CA3AF" }}>If you are leaving this business, use "Transfer ownership" before removing yourself.</p>}
         </AccordionSection>
 
         {/* Danger zone */}

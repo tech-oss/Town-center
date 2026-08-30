@@ -160,6 +160,10 @@ export const coppaMockUser = {
   // Current plan in the /business/upgrade flow's Basic/Premium/VIP naming —
   // distinct from `plan` above, which drives the Billing page's own tiers.
   upgradePlanKey: "basic",
+  // "Owner" registered the business and can manage billing; a "Content
+  // Manager" is a second, content-only seat (see useUserRegistry.js) that
+  // cannot access Subscriptions & Billing.
+  role: "Owner",
 };
 
 export const hotelMockUser = {
@@ -179,7 +183,24 @@ export const hotelMockUser = {
   visible: true,
   termsAcceptedAt: "2026-03-18T15:42:00",
   upgradePlanKey: "premium",
+  role: "Owner",
 };
+
+// ─── All businesses on the platform (for the "Register a User" search) ───────
+// Only biz_coppa and biz_fredricks have full seeded content above — the rest
+// exist so the search/typeahead feels realistic with a real business count.
+export const BUSINESS_DIRECTORY = [
+  { id: "biz_coppa", name: "Coppa Club" },
+  { id: "biz_fredricks", name: "Fredrick's Hotel, Restaurant & Spa" },
+  { id: "biz_velvet", name: "The Velvet Lounge" },
+  { id: "biz_booknook", name: "Maidenhead Book Nook" },
+  { id: "biz_elgandavies", name: "Elgan Davies Plumbing & Heating" },
+  { id: "biz_thameside", name: "Thameside Accountancy" },
+  { id: "biz_bakedd", name: "Bakedd" },
+  { id: "biz_willowvine", name: "Willow & Vine Florist" },
+  { id: "biz_riversideyoga", name: "Riverside Yoga Studio" },
+  { id: "biz_quickfix", name: "Quickfix Phone Repairs" },
+];
 
 // ─── Business content (My Listing) ─────────────────────────────────────────────
 export const BUSINESS_LISTING = {
@@ -318,7 +339,7 @@ export const BUSINESS_TEAM = {
     { id: "u3", name: "Sarah Coombes", email: "sarah@fredricks-hotel.co.uk", role: "Owner" },
   ],
 };
-export const TEAM_ROLES = ["Owner", "Manager", "Staff"];
+export const TEAM_ROLES = ["Owner", "Manager", "Staff", "Content Manager"];
 
 // ─── Dashboard activity feed ────────────────────────────────────────────────────
 export const DASHBOARD_ACTIVITY = {
