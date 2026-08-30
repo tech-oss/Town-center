@@ -2,7 +2,7 @@ import { useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, MUTED } from "../components/FormKit";
-import ReviewsList, { ReviewsSummary } from "../components/ReviewsList";
+import ReviewsList from "../components/ReviewsList";
 import { BUSINESS_REVIEWS } from "../../Data/businessPortalMock";
 
 // TODO: fetch from Supabase reviews table
@@ -41,8 +41,6 @@ export default function ReviewsPage() {
           <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Reviews</h1>
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your customer reviews and reply to them.</p>
         </div>
-
-        <ReviewsSummary reviews={reviews} />
 
         <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and reply to reviews — your reply goes to admin for approval before appearing.</p>
 
