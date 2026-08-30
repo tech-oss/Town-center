@@ -463,7 +463,92 @@ function Section({ title, note, children }) {
 }
 
 // ─── Business card ────────────────────────────────────────────────────────────
-function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, deletingId, onConfirmDelete, onCancelDelete, busy, onAddContent }) {
+// ─── Logo upload modal ─────────────────────────────────────────────────────────
+// TODO: upload to Supabase storage
+function LogoUploadModal({ biz, onSave, onCancel }) {
+  const [preview, setPreview] = useState(biz.logo ?? null);
+  const [dragOver, setDragOver] = useState(false);
+
+  function handleFiles(files) {
+    const file = files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div className="flex items-center justify-between">
+          <p className="text-base font-bold" style={{ color: NAVY }}>Upload Logo — {biz.name}</p>
+          <button onClick={onCancel} className="opacity-40 hover:opacity-70 text-xl leading-none" style={{ color: NAVY }}>✕</button>
+        </div>
+
+        <div
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+          className="relative overflow-hidden rounded-2xl aspect-video flex items-center justify-center"
+          style={{ border: dragOver ? `2px dashed ${BLUE}` : `1.5px dashed ${BORDER}`, backgroundColor: "#f8fafc" }}
+        >
+          {preview ? (
+            <img src={preview} alt="Logo preview" className="w-full h-full object-contain p-3" />
+          ) : (
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-2xl" style={{ color: "#9CA3AF" }}>+</span>
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>Drop an image here</span>
+            </div>
+          )}
+        </div>
+
+        <label className="w-fit px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
+          style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+          {preview ? "Replace Image" : "Choose File"}
+          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+        </label>
+
+        <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+          <button onClick={() => onSave(preview)} disabled={!preview}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40" style={{ backgroundColor: BLUE }}>
+            Save
+          </button>
+          <button onClick={onCancel} className="px-6 py-2.5 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Delete business modal (type-to-confirm) ──────────────────────────────────
+function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
+  const [typed, setTyped] = useState("");
+  const matches = typed.trim() === biz.name;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <p className="text-base font-bold" style={{ color: NAVY }}>Delete business?</p>
+        <p className="text-sm" style={{ color: MUTED }}>
+          This will permanently remove <strong>{biz.name}</strong> and all associated content. This cannot be undone.
+        </p>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: MUTED }}>Type <strong>{biz.name}</strong> to confirm</span>
+          <input value={typed} onChange={(e) => setTyped(e.target.value)}
+            className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+        </label>
+        <div className="flex gap-3 justify-end pt-2">
+          <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+          <button onClick={onConfirm} disabled={!matches || deleting}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40" style={{ backgroundColor: "#DC2626" }}>
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent }) {
   const secLabel = sectionLabel(biz.section);
   const subcatLabels = (biz.subcategories ?? []).map((v) => {
     const all = Object.values(SUBCATEGORIES).flat();
@@ -472,8 +557,8 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
 
   const isActive   = pendingAction?.id === biz.id;
   const actionType = isActive ? pendingAction.type : null;
-  const isDeleting = deletingId === biz.id;
   const isBusy     = busy === biz.id;
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden" style={CARD}>
@@ -516,6 +601,26 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
             ))}
           </div>
 
+          {/* Business Logo */}
+          <div className="flex items-center gap-3 mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-wider shrink-0" style={{ color: "#9CA3AF" }}>Business Logo</span>
+            {biz.logo ? (
+              <img src={biz.logo} alt={`${biz.name} logo`} className="w-10 h-10 rounded-lg object-cover" style={{ border: `1px solid ${BORDER}` }} />
+            ) : (
+              <span className="text-xs" style={{ color: MUTED }}>No logo uploaded</span>
+            )}
+            <button onClick={() => setUploadingLogo(true)}
+              className="text-xs font-semibold px-3 py-1 rounded-lg transition-opacity hover:opacity-80"
+              style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+              {biz.logo ? "Replace Logo" : "Upload Logo"}
+            </button>
+          </div>
+          {uploadingLogo && (
+            <LogoUploadModal biz={biz}
+              onCancel={() => setUploadingLogo(false)}
+              onSave={(dataUrl) => { onUploadLogo(biz.id, dataUrl); setUploadingLogo(false); }} />
+          )}
+
           {/* Show reason note if suspended or rejected */}
           {biz.status === "Suspended" && biz.suspendNote && (
             <p className="text-xs mb-1.5 italic" style={{ color: "#92400E" }}>Suspend reason: {biz.suspendNote}</p>
@@ -557,21 +662,7 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           </BizBtn>
 
           {/* Delete */}
-          {!isDeleting ? (
-            <BizBtn color="#991B1B" disabled={isBusy} onClick={() => onDelete(biz.id)}>Delete</BizBtn>
-          ) : (
-            <div className="flex flex-col gap-1">
-              <p className="text-[10px] font-semibold text-center" style={{ color: "#991B1B" }}>Confirm?</p>
-              <div className="flex gap-1">
-                <button disabled={isBusy} onClick={() => onConfirmDelete(biz)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40"
-                  style={{ backgroundColor: "#DC2626" }}>Yes</button>
-                <button onClick={onCancelDelete}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold"
-                  style={{ backgroundColor: "rgba(16,24,40,0.07)", color: NAVY }}>No</button>
-              </div>
-            </div>
-          )}
+          <BizBtn color="#991B1B" disabled={isBusy} onClick={() => onDelete(biz)}>Delete</BizBtn>
         </div>
       </div>
 
@@ -658,7 +749,7 @@ export default function BusinessesPage() {
   const [pendingAction, setPendingAction] = useState(null); // { id, type: "reject"|"suspend" }
   const [actionNote, setActionNote]       = useState("");
   // Delete confirm
-  const [deletingId, setDeletingId] = useState(null);
+  const [deletingBiz, setDeletingBiz] = useState(null);
   const [busy, setBusy]             = useState(null);
 
   const list = local ?? fetched ?? [];
@@ -714,16 +805,23 @@ export default function BusinessesPage() {
     });
   }
 
-  function handleDeleteStart(id)  { setDeletingId(id); }
-  function handleDeleteCancel()   { setDeletingId(null); }
-  function handleDeleteConfirm(biz) {
+  function handleDeleteStart(biz) { setDeletingBiz(biz); }
+  function handleDeleteCancel()   { setDeletingBiz(null); }
+  // TODO: delete business record from Supabase and log to audit trail
+  function handleDeleteConfirm() {
+    const biz = deletingBiz;
     setBusy(biz.id);
     deleteBusiness(biz.id).then(() => {
       setLocal((prev) => (prev ?? fetched ?? []).filter((b) => b.id !== biz.id));
       setBusy(null);
-      setDeletingId(null);
+      setDeletingBiz(null);
       notify(`"${biz.name}" permanently deleted and recorded in Admin Logs.`);
     });
+  }
+  function handleUploadLogo(id, dataUrl) {
+    // TODO: upload to Supabase storage
+    patch(id, { logo: dataUrl });
+    notify("Logo updated.");
   }
 
   const counts = {
@@ -751,6 +849,10 @@ export default function BusinessesPage() {
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
       <Toast message={toast} onDismiss={() => setToast(null)} />
+      {deletingBiz && (
+        <DeleteBusinessModal biz={deletingBiz} deleting={busy === deletingBiz.id}
+          onCancel={handleDeleteCancel} onConfirm={handleDeleteConfirm} />
+      )}
 
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -852,9 +954,7 @@ export default function BusinessesPage() {
               onSubmitAction={submitAction}
               onCancelAction={cancelAction}
               onDelete={handleDeleteStart}
-              deletingId={deletingId}
-              onConfirmDelete={handleDeleteConfirm}
-              onCancelDelete={handleDeleteCancel}
+              onUploadLogo={handleUploadLogo}
               busy={busy}
               onAddContent={handleAddContent}
             />

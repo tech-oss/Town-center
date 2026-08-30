@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ARTICLES, ARTICLE_CATEGORIES } from "../../Data/adminMissingScreensMock";
-import { getBusinesses } from "../../api/admin";
-import useFetch from "../../hooks/useFetch";
+import BusinessTypeahead from "../components/BusinessTypeahead";
 
 const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
 const CARD = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -46,7 +45,6 @@ export default function ArticleEditorPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const existing = id ? ARTICLES.find((a) => a.id === id) : null;
-  const { data: businesses } = useFetch(getBusinesses, []);
 
   const [form, setForm] = useState(() => existing
     ? { ...existing, tags: (existing.tags ?? []).join(", "), businessId: existing.businessId ?? "" }
@@ -92,12 +90,8 @@ export default function ArticleEditorPage() {
                 {ARTICLE_CATEGORIES.map((c) => <option key={c}>{c}</option>)}
               </select>
             </Field>
-            <Field label="Business Attribution" hint="Optional — assign this article to a specific business">
-              <select value={form.businessId} onChange={(e) => set("businessId", e.target.value)}
-                className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT}>
-                <option value="">— None (Admin) —</option>
-                {(businesses ?? []).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
-              </select>
+            <Field label="Business Attribution" span2 hint="Optional — assign this article to a specific business">
+              <BusinessTypeahead value={form.businessId} onChange={(v) => set("businessId", v)} />
             </Field>
           </div>
         </Section>

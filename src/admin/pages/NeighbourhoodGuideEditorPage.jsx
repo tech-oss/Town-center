@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { NEIGHBOURHOOD_GUIDES } from "../../Data/adminMissingScreensMock";
+import BusinessTypeahead from "../components/BusinessTypeahead";
 
 const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
 const CARD = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -47,7 +48,7 @@ function Toast({ message }) {
   );
 }
 
-const EMPTY = { title: "", area: "", heroImage: null, body: "", showOnHomepage: false, showOnPlatform: true, status: "Draft" };
+const EMPTY = { title: "", area: "", heroImage: null, body: "", showOnHomepage: false, showOnPlatform: true, status: "Draft", businessId: "" };
 
 export default function NeighbourhoodGuideEditorPage() {
   const navigate = useNavigate();
@@ -86,6 +87,11 @@ export default function NeighbourhoodGuideEditorPage() {
             </Field>
             <Field label="Area / Tag" hint='e.g. "Town Centre", "Riverside", "Bray"'>
               <Inp value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Area tag" />
+            </Field>
+          </div>
+          <div className="mt-4">
+            <Field label="Business Attribution" hint="Optional — assign this guide to a specific business">
+              <BusinessTypeahead value={form.businessId} onChange={(v) => set("businessId", v)} />
             </Field>
           </div>
         </Section>

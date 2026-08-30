@@ -80,6 +80,24 @@ export function suspendUser(id) {
   return mock({ ok: true });
 }
 
+// TODO: create Supabase auth user and send invite email
+export function registerUser(data) {
+  const saved = {
+    id: `u${Date.now()}`,
+    name: `${data.firstName} ${data.lastName}`.trim(),
+    email: data.email,
+    business: data.business || null,
+    role: data.role,
+    status: "Approved",
+    tier: data.tier,
+    joined: new Date().toISOString().slice(0, 10),
+    lastLogin: new Date().toISOString().slice(0, 10),
+  };
+  USERS = [saved, ...USERS];
+  addLog("Registered by admin", saved, data.sendInvite ? "Invitation email sent" : "");
+  return mock({ ok: true, user: saved });
+}
+
 export function deleteUser(id) {
   const u = USERS.find((x) => x.id === id);
   if (!u) return mock({ ok: false });

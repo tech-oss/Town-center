@@ -1,7 +1,7 @@
 import { useState, useCallback, Fragment, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getUsers, approveUser, rejectUser, suspendUser } from "../../api/admin";
+import { getUsers, approveUser, rejectUser, suspendUser, registerUser, deleteUser } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 
@@ -54,6 +54,128 @@ function SortIcon({ dir }) {
   );
 }
 
+const ROLES = ["Business Owner", "Estate Agent", "Freelancer", "Admin"];
+const TIERS = ["Free", "Basic", "Standard", "Premium"];
+
+function Toast({ message }) {
+  if (!message) return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg" style={{ backgroundColor: "#15803D", color: "#fff" }}>
+      ✓ {message}
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-semibold" style={{ color: MUTED }}>{label}</span>
+      {children}
+    </label>
+  );
+}
+const FIELD_STYLE = { border: "1.5px solid rgba(16,24,40,0.2)", color: NAVY, backgroundColor: "#fff" };
+
+const EMPTY_REGISTER = {
+  firstName: "", lastName: "", email: "", phone: "", role: "Business Owner",
+  business: "", tier: "Standard", autoPassword: true, password: "", sendInvite: true,
+};
+
+// ─── Register User modal ──────────────────────────────────────────────────────
+function RegisterUserModal({ onClose, onRegistered }) {
+  const [form, setForm] = useState(EMPTY_REGISTER);
+  const [saving, setSaving] = useState(false);
+  function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
+  const isValid = form.firstName.trim() && form.lastName.trim() && form.email.trim() && (form.autoPassword || form.password);
+
+  function handleSubmit() {
+    if (!isValid) return;
+    setSaving(true);
+    // TODO: create Supabase auth user and send invite email
+    registerUser(form).then(() => {
+      setSaving(false);
+      onRegistered();
+    });
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full flex flex-col gap-4 max-h-[90vh] overflow-y-auto" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div className="flex items-center justify-between">
+          <p className="text-base font-bold" style={{ color: NAVY }}>Register User</p>
+          <button onClick={onClose} className="opacity-40 hover:opacity-70 text-xl leading-none" style={{ color: NAVY }}>✕</button>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field label="First Name"><input value={form.firstName} onChange={(e) => set("firstName", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
+          <Field label="Last Name"><input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
+          <Field label="Email"><input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
+          <Field label="Phone"><input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
+          <Field label="Role">
+            <select value={form.role} onChange={(e) => set("role", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE}>
+              {ROLES.map((r) => <option key={r}>{r}</option>)}
+            </select>
+          </Field>
+          <Field label="Subscription Tier">
+            <select value={form.tier} onChange={(e) => set("tier", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE}>
+              {TIERS.map((t) => <option key={t}>{t}</option>)}
+            </select>
+          </Field>
+          <Field label="Business Name (optional)">
+            <input value={form.business} onChange={(e) => set("business", e.target.value)} placeholder="e.g. Coppa Club" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </Field>
+        </div>
+
+        <div className="rounded-xl p-3 flex flex-col gap-2" style={{ backgroundColor: "#f8fafc", border: "1px solid rgba(16,24,40,0.1)" }}>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={form.autoPassword} onChange={(e) => set("autoPassword", e.target.checked)} className="w-4 h-4" />
+            <span className="text-sm font-medium" style={{ color: NAVY }}>Auto-generate password</span>
+          </label>
+          {form.autoPassword ? (
+            <p className="text-xs" style={{ color: MUTED }}>A temporary password will be sent to their email.</p>
+          ) : (
+            <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password"
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          )}
+        </div>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" checked={form.sendInvite} onChange={(e) => set("sendInvite", e.target.checked)} className="w-4 h-4" />
+          <span className="text-sm" style={{ color: NAVY }}>Send invitation email</span>
+        </label>
+
+        <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+          <button onClick={handleSubmit} disabled={!isValid || saving}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40" style={{ backgroundColor: BLUE }}>
+            {saving ? "Registering…" : "Register User"}
+          </button>
+          <button onClick={onClose} className="px-6 py-2.5 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Delete confirmation modal ────────────────────────────────────────────────
+function DeleteUserModal({ user, onClose, onConfirm, deleting }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <p className="text-base font-bold" style={{ color: NAVY }}>Delete user?</p>
+        <p className="text-sm" style={{ color: MUTED }}>
+          Are you sure you want to permanently delete <strong>{user.name}</strong>? This cannot be undone. Their business profile will be unlinked.
+        </p>
+        <div className="flex gap-3 justify-end pt-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+          <button onClick={onConfirm} disabled={deleting} className="px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50" style={{ backgroundColor: "#DC2626" }}>
+            {deleting ? "Deleting…" : "Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function UsersPage() {
   const navigate = useNavigate();
   const [tab, setTab]           = useState("Pending");
@@ -64,6 +186,26 @@ export default function UsersPage() {
   const [search, setSearch]     = useState("");
   const [sortCol, setSortCol]   = useState(null);   // column key
   const [sortDir, setSortDir]   = useState("asc");  // "asc" | "desc"
+  const [showRegister, setShowRegister] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  function notify(msg) { setToast(msg); setTimeout(() => setToast(null), 3500); }
+
+  function handleRegistered() {
+    setShowRegister(false);
+    setTick((t) => t + 1);
+    notify("User registered successfully.");
+  }
+
+  async function handleDeleteConfirm() {
+    setBusy(deletingUser.id);
+    await deleteUser(deletingUser.id);
+    setBusy(null);
+    notify(`"${deletingUser.name}" deleted.`);
+    setDeletingUser(null);
+    setTick((t) => t + 1);
+  }
 
   const fetch = useCallback(() => getUsers({ status: tab }), [tab, tick]);
   const { data: rawUsers, loading } = useFetch(fetch, [tab, tick]);
@@ -131,15 +273,31 @@ export default function UsersPage() {
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Users</h1>
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage business and agent accounts — approve, reject or suspend access.</p>
         </div>
-        <button
-          onClick={() => exportCsv(users)}
-          disabled={!users.length}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 shrink-0"
-          style={{ backgroundColor: BLUE }}
-        >
-          ⬇ Export CSV
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <button
+            onClick={() => setShowRegister(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: BLUE }}
+          >
+            + Register User
+          </button>
+          <button
+            onClick={() => exportCsv(users)}
+            disabled={!users.length}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-40"
+            style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}
+          >
+            ⬇ Export CSV
+          </button>
+        </div>
       </div>
+
+      <Toast message={toast} />
+      {showRegister && <RegisterUserModal onClose={() => setShowRegister(false)} onRegistered={handleRegistered} />}
+      {deletingUser && (
+        <DeleteUserModal user={deletingUser} deleting={busy === deletingUser.id}
+          onClose={() => setDeletingUser(null)} onConfirm={handleDeleteConfirm} />
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 border-b" style={{ borderColor: BORDER }}>
@@ -240,6 +398,7 @@ export default function UsersPage() {
                             <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
                           )}
                           <ActionBtn color={BLUE} onClick={(e) => { e.stopPropagation(); navigate(`/admin/users/${u.id}`); }}>View</ActionBtn>
+                          <ActionBtn color="#991B1B" onClick={(e) => { e.stopPropagation(); setDeletingUser(u); }}>Delete</ActionBtn>
                         </div>
                       </td>
                     </tr>

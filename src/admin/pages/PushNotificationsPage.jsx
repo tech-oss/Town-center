@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ArticleTypeahead from "../components/ArticleTypeahead";
 
 const AUDIENCES = [
   { key: "all", label: "All users" },
@@ -24,26 +25,34 @@ function Toast({ message, onDismiss }) {
   );
 }
 
-// Live preview of how the push looks on a device.
-function PushPreview({ title, body, channel }) {
+// Live preview of how the push looks on a device. When an article/offer is
+// attached, its image renders above the text, matching rich push
+// notifications on iOS/Android; with no attachment it falls back to the
+// existing text-only layout.
+function PushPreview({ title, body, channel, image }) {
   const isMobile = channel === "mobile";
   return (
     <div className="flex flex-col gap-2">
       <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{isMobile ? "Mobile lock screen" : "Web / desktop"}</span>
       <div
-        className="rounded-2xl p-3.5 flex items-start gap-3"
+        className="rounded-2xl overflow-hidden"
         style={{ backgroundColor: isMobile ? "rgba(16,24,40,0.06)" : "#fff", border: "1px solid rgba(16,24,40,0.12)", boxShadow: "0 2px 10px rgba(13,42,51,0.08)" }}
       >
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: "#2563EB" }}>
-          <span>🔔</span>
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold" style={{ color: "#1E293B" }}>Maidenhead Town Centre</span>
-            <span className="text-[10px]" style={{ color: "#9CA3AF" }}>now</span>
+        {image && (
+          <img src={image} alt="" className="w-full object-cover" style={{ height: isMobile ? 120 : 140 }} />
+        )}
+        <div className="p-3.5 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: "#2563EB" }}>
+            <span>🔔</span>
           </div>
-          <p className="text-sm font-semibold mt-0.5 truncate" style={{ color: "#1E293B" }}>{title || "Notification title"}</p>
-          <p className="text-xs mt-0.5 line-clamp-2" style={{ color: "#6B7280" }}>{body || "Your message will appear here…"}</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-bold" style={{ color: "#1E293B" }}>Maidenhead Town Centre</span>
+              <span className="text-[10px]" style={{ color: "#9CA3AF" }}>now</span>
+            </div>
+            <p className="text-sm font-semibold mt-0.5 truncate" style={{ color: "#1E293B" }}>{title || "Notification title"}</p>
+            <p className="text-xs mt-0.5 line-clamp-2" style={{ color: "#6B7280" }}>{body || "Your message will appear here…"}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -51,12 +60,21 @@ function PushPreview({ title, body, channel }) {
 }
 
 export default function PushNotificationsPage() {
-  const [form, setForm] = useState({ title: "", body: "", url: "", audience: "all", web: true, mobile: true });
+  const [form, setForm] = useState({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
   const [history, setHistory] = useState(SENT_HISTORY);
   const [toast, setToast] = useState(null);
   const [confirm, setConfirm] = useState(false);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  function handleSelectArticle(article) {
+    setForm((f) => ({
+      ...f,
+      attachedArticle: article,
+      title: article ? article.title : f.title,
+      url: article ? article.link : f.url,
+    }));
+  }
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
   const isValid = form.title.trim() && form.body.trim() && channels.length > 0;
 
@@ -77,7 +95,7 @@ export default function PushNotificationsPage() {
       reach: form.audience === "all" ? 1240 : form.audience === "businesses" ? 42 : form.audience === "agents" ? 8 : 860,
     };
     setHistory((h) => [entry, ...h]);
-    setForm({ title: "", body: "", url: "", audience: "all", web: true, mobile: true });
+    setForm({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
     setConfirm(false);
     notify(`Notification sent to ${entry.audience} via ${entry.channels.join(" & ")}.`);
   }
@@ -98,6 +116,42 @@ export default function PushNotificationsPage() {
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
           <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Compose Notification</h2>
 
+          {/* Notification type */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Notification Type</span>
+            <div className="flex gap-3 flex-wrap">
+              {[["simple", "Simple text"], ["attach", "Attach article/offer"]].map(([key, label]) => (
+                <button key={key} type="button"
+                  onClick={() => { set("notifType", key); if (key === "simple") handleSelectArticle(null); }}
+                  className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                  style={form.notifType === key
+                    ? { backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B", border: "1.5px solid #1E293B" }
+                    : { backgroundColor: "#fff", color: "#6B7280", border: "1.5px solid rgba(16,24,40,0.15)" }
+                  }
+                >
+                  {form.notifType === key ? "✓ " : ""}{label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {form.notifType === "attach" && (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Article / Offer</span>
+              <ArticleTypeahead selected={form.attachedArticle} onSelect={handleSelectArticle} />
+            </label>
+          )}
+
+          {form.attachedArticle && (
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Attached Image</span>
+              <div className="flex items-center gap-3 rounded-xl p-2" style={{ ...field, backgroundColor: "#f8fafc" }}>
+                <img src={form.attachedArticle.thumbnail} alt="" className="w-14 h-10 rounded-lg object-cover" />
+                <span className="text-xs" style={{ color: "#9CA3AF" }}>Locked to the attached article's image.</span>
+              </div>
+            </label>
+          )}
+
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Title *</span>
             <input value={form.title} onChange={(e) => set("title", e.target.value)} maxLength={65} placeholder="e.g. New offers in town this week" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={field} />
@@ -113,7 +167,7 @@ export default function PushNotificationsPage() {
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Link / deep link (optional)</span>
             <input value={form.url} onChange={(e) => set("url", e.target.value)} placeholder="/news or https://…" className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono" style={field} />
-            <span className="text-[11px]" style={{ color: "#9CA3AF" }}>Where users land when they tap the notification.</span>
+            <span className="text-[11px]" style={{ color: "#9CA3AF" }}>Where users land when they tap the notification. {form.attachedArticle ? "Auto-filled from the attached article — still editable." : ""}</span>
           </label>
 
           {/* Channels */}
@@ -169,8 +223,8 @@ export default function PushNotificationsPage() {
         {/* Live preview */}
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
           <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Preview</h2>
-          {form.mobile && <PushPreview title={form.title} body={form.body} channel="mobile" />}
-          {form.web && <PushPreview title={form.title} body={form.body} channel="web" />}
+          {form.mobile && <PushPreview title={form.title} body={form.body} channel="mobile" image={form.attachedArticle?.thumbnail} />}
+          {form.web && <PushPreview title={form.title} body={form.body} channel="web" image={form.attachedArticle?.thumbnail} />}
           {!form.mobile && !form.web && (
             <p className="text-sm text-center py-6" style={{ color: "#9CA3AF" }}>Select at least one channel to preview.</p>
           )}
