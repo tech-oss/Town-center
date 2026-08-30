@@ -8,9 +8,62 @@ export const BUSINESS_TYPES = [
   { value: "eat-drink", label: "Eat & Drink" },
   { value: "shop",      label: "Shop" },
   { value: "see-do",    label: "See & Do" },
-  { value: "services",  label: "Services" },
   { value: "hotel",     label: "Hotel & Accommodation" },
   { value: "freelancer",label: "Freelancer & Trader" },
+];
+
+// ─── Freelancer & Trader — pick one ────────────────────────────────────────────
+export const FREELANCER_KINDS = [
+  { value: "tradesperson", label: "Tradesperson" },
+  { value: "professional", label: "Professional" },
+  { value: "freelancer",   label: "Freelancer" },
+];
+
+// ─── Hotel & Accommodation — pick one ──────────────────────────────────────────
+export const HOTEL_KINDS = [
+  { value: "hotel",         label: "Hotel" },
+  { value: "accommodation", label: "Accommodation" },
+];
+
+// ─── Eat & Drink — cuisine type (multi-select) ────────────────────────────────
+export const CUISINE_TYPES = [
+  { value: "british",  label: "British" },
+  { value: "italian",  label: "Italian" },
+  { value: "chinese",  label: "Chinese" },
+  { value: "indian",   label: "Indian" },
+  { value: "french",   label: "French" },
+  { value: "thai",     label: "Thai" },
+  { value: "japanese", label: "Japanese" },
+  { value: "bakery",   label: "Bakery" },
+];
+
+// ─── Eat & Drink — venue type (multi-select) ──────────────────────────────────
+export const VENUE_TYPES = [
+  { value: "bars",           label: "Bars" },
+  { value: "restaurants",    label: "Restaurants" },
+  { value: "cafes",          label: "Cafes" },
+  { value: "grab-go",        label: "Grab & Go" },
+  { value: "private-dining", label: "Private Dining" },
+];
+
+// ─── Shop — category (multi-select, grouped) ──────────────────────────────────
+export const SHOP_CATEGORIES = [
+  { value: "accessories-jewellery", label: "Accessories & Jewellery",   group: "Shops" },
+  { value: "clothing",              label: "Clothing",                  group: "Shops" },
+  { value: "electronics-phones",    label: "Electronics & Phones",      group: "Shops" },
+  { value: "groceries",             label: "Groceries",                 group: "Shops" },
+  { value: "health-beauty",         label: "Health & Beauty",           group: "Shops" },
+  { value: "home-furniture",        label: "Home & Furniture",          group: "Shops" },
+  { value: "shoes-footwear",        label: "Shoes & Footwear",          group: "Shops" },
+  { value: "sports-fitness",        label: "Sports & Fitness",          group: "Shops" },
+  { value: "banks",                 label: "Banks & Foreign Exchange",  group: "Local Services" },
+  { value: "childcare",             label: "Childcare",                 group: "Local Services" },
+  { value: "dry-cleaning",          label: "Dry Cleaning & Shoe Repair",group: "Local Services" },
+  { value: "hairdressing",          label: "Hairdressing & Beauty",     group: "Local Services" },
+  { value: "healthcare",            label: "Healthcare",                group: "Local Services" },
+  { value: "opticians",             label: "Opticians & Pharmacies",    group: "Local Services" },
+  { value: "spa",                   label: "Spa",                       group: "Local Services" },
+  { value: "travel-agents",         label: "Travel Agents",             group: "Local Services" },
 ];
 
 export const DEFAULT_HOURS = () => [

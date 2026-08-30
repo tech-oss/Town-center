@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BUSINESS_TYPES, SUBSCRIPTION_PLANS, HOTEL_SITE_TIERS, ACCOMMODATION_TIERS, TERMS_TEXT,
+  FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES,
 } from "../../Data/businessPortalMock";
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
 
@@ -14,7 +15,11 @@ const STEPS = ["Your Details", "Business Details", "Plan", "Terms"];
 const EMPTY = {
   firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "",
   businessName: "", businessType: "", website: "", businessEmail: "", businessPhone: "", businessAddress: "",
-  listingKind: "hotel", // "hotel" | "accommodation" — sub-choice for hotel & accommodation businesses
+  freelancerKind: "",   // Tradesperson | Professional | Freelancer — for businessType "freelancer"
+  hotelKind: "hotel",   // "hotel" | "accommodation" — sub-choice for businessType "hotel"
+  cuisineTypes: [],     // multi-select, for businessType "eat-drink"
+  venueTypes: [],       // multi-select, for businessType "eat-drink"
+  shopCategories: [],   // multi-select, for businessType "shop"
   siteTierKey: "1",
   planKey: "standard",
   agreeTerms: false, agreePrivacy: false,
@@ -50,6 +55,54 @@ function PricingCard({ label, price, selected, onClick }) {
   );
 }
 
+// ─── Single-select "pick one" radio cards ─────────────────────────────────────
+function RadioGroup({ options, value, onChange }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => (
+        <label key={o.value} className="flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all"
+          style={value === o.value ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+          <input type="radio" checked={value === o.value} onChange={() => onChange(o.value)} className="w-3.5 h-3.5" />
+          <span className="text-xs font-semibold" style={{ color: FOREST }}>{o.label}</span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+// ─── Multi-select checkbox chips, optionally grouped ──────────────────────────
+function CheckGroup({ options, selected, onChange, grouped }) {
+  function toggle(v) {
+    onChange(selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
+  }
+  function Chip({ o }) {
+    const checked = selected.includes(o.value);
+    return (
+      <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all"
+        style={checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+        <input type="checkbox" checked={checked} onChange={() => toggle(o.value)} className="w-3.5 h-3.5" />
+        <span className="text-xs font-medium" style={{ color: FOREST }}>{o.label}</span>
+      </label>
+    );
+  }
+  if (!grouped) {
+    return <div className="flex flex-wrap gap-2">{options.map((o) => <Chip key={o.value} o={o} />)}</div>;
+  }
+  const groups = [...new Set(options.map((o) => o.group))];
+  return (
+    <div className="flex flex-col gap-3">
+      {groups.map((g) => (
+        <div key={g}>
+          <p className="text-[10px] font-bold uppercase tracking-widest mb-1.5" style={{ color: MUTED }}>{g}</p>
+          <div className="flex flex-wrap gap-2">
+            {options.filter((o) => o.group === g).map((o) => <Chip key={o.value} o={o} />)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PlanCard({ plan, selected, onClick }) {
   return (
     <button type="button" onClick={onClick}
@@ -81,7 +134,13 @@ export default function SignUpPage() {
 
   function validStep() {
     if (step === 0) return form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.phone.trim() && form.password && form.password === form.confirmPassword;
-    if (step === 1) return form.businessName.trim() && form.businessType && form.businessAddress.trim();
+    if (step === 1) {
+      if (!(form.businessName.trim() && form.businessType && form.businessAddress.trim())) return false;
+      if (form.businessType === "freelancer" && !form.freelancerKind) return false;
+      if (form.businessType === "eat-drink" && !(form.cuisineTypes.length && form.venueTypes.length)) return false;
+      if (form.businessType === "shop" && !form.shopCategories.length) return false;
+      return true;
+    }
     if (step === 2) return true;
     if (step === 3) return form.agreeTerms && form.agreePrivacy;
     return true;
@@ -147,23 +206,48 @@ export default function SignUpPage() {
               <Field label="Business Email" hint="Can be the same as your personal email"><Inp value={form.businessEmail} onChange={(e) => set("businessEmail", e.target.value)} /></Field>
               <Field label="Business Phone"><Inp value={form.businessPhone} onChange={(e) => set("businessPhone", e.target.value)} /></Field>
               <Field label="Business Address" required span2><TextArea rows={2} value={form.businessAddress} onChange={(e) => set("businessAddress", e.target.value)} /></Field>
+
+              {form.businessType === "freelancer" && (
+                <Field label="Which best describes you?" required span2>
+                  <RadioGroup options={FREELANCER_KINDS} value={form.freelancerKind} onChange={(v) => set("freelancerKind", v)} />
+                </Field>
+              )}
+
+              {form.businessType === "hotel" && (
+                <Field label="Are you listing a hotel or an accommodation property?" required span2>
+                  <RadioGroup options={HOTEL_KINDS} value={form.hotelKind} onChange={(v) => set("hotelKind", v)} />
+                </Field>
+              )}
+
+              {form.businessType === "eat-drink" && (
+                <>
+                  <Field label="Cuisine Type" required span2 hint="Select all that apply">
+                    <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v)} />
+                  </Field>
+                  <Field label="Venue Type" required span2 hint="Select all that apply">
+                    <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v)} />
+                  </Field>
+                </>
+              )}
+
+              {form.businessType === "shop" && (
+                <Field label="Shop Category" required span2 hint="Select all that apply">
+                  <CheckGroup options={SHOP_CATEGORIES} selected={form.shopCategories} onChange={(v) => set("shopCategories", v)} grouped />
+                </Field>
+              )}
             </div>
           )}
 
           {step === 2 && (isHotel ? (
             <div className="flex flex-col gap-5">
-              <p className="text-base font-bold" style={{ color: FOREST }}>How many sites or properties do you want to list?</p>
-              <div className="flex gap-2">
-                {["hotel", "accommodation"].map((k) => (
-                  <button key={k} type="button" onClick={() => set("listingKind", k)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all"
-                    style={form.listingKind === k ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "#fff", color: MUTED, border: `1.5px solid ${BORDER}` }}>
-                    {k === "hotel" ? "Hotel sites" : "Accommodation properties"}
-                  </button>
-                ))}
-              </div>
+              <p className="text-base font-bold" style={{ color: FOREST }}>
+                How many {form.hotelKind === "hotel" ? "sites" : "properties"} do you want to list?
+              </p>
+              <p className="text-xs -mt-3" style={{ color: MUTED }}>
+                {form.hotelKind === "hotel" ? "Hotel sites" : "Accommodation properties"}
+              </p>
               <div className="grid sm:grid-cols-2 gap-3">
-                {(form.listingKind === "hotel" ? HOTEL_SITE_TIERS : ACCOMMODATION_TIERS).map((t) => (
+                {(form.hotelKind === "hotel" ? HOTEL_SITE_TIERS : ACCOMMODATION_TIERS).map((t) => (
                   <PricingCard key={t.key} label={t.label} price={t.price} selected={form.siteTierKey === t.key} onClick={() => set("siteTierKey", t.key)} />
                 ))}
               </div>
