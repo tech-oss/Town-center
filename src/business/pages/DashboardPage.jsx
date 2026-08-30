@@ -47,7 +47,10 @@ export default function DashboardPage() {
         {/* Subscription banner */}
         <div className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #245C63 60%, ${SAGE} 100%)` }}>
           <p className="text-sm text-white">Your <strong className="capitalize">{user.plan.replace(/-/g, " ")}</strong> plan renews on <strong>{new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</strong>.</p>
-          <Link to="/business/billing" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>Manage Billing</Link>
+          <div className="flex gap-2">
+            <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>Upgrade</Link>
+            <Link to="/business/billing" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>Manage Billing</Link>
+          </div>
         </div>
 
         {/* Visibility toggle */}

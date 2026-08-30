@@ -30,6 +30,24 @@ export const SUBSCRIPTION_PLANS = [
   { key: "premium", name: "Premium", price: 79, features: ["Everything in Standard", "Featured placement", "Analytics dashboard", "Homepage spotlight eligibility"] },
 ];
 
+// ─── Upgrade flow plans (/business/upgrade) ────────────────────────────────────
+// Distinct from SUBSCRIPTION_PLANS (used on the Billing page) — this is the
+// plan set shown in the dedicated 4-screen upgrade flow.
+export const UPGRADE_PLANS = [
+  {
+    key: "basic", name: "Basic", icon: "paper-plane", price: 0, tagline: "Basic listing",
+    features: ["Basic business info", "1 Photo", "Map location", "Customer reviews"],
+  },
+  {
+    key: "premium", name: "Premium", icon: "star", price: 19, tagline: "More visibility", popular: true,
+    features: ["Everything in Basic", "5 Photos", "Featured listing", "Priority in search", "Analytics"],
+  },
+  {
+    key: "vip", name: "VIP", icon: "crown", price: 39, tagline: "Maximum visibility",
+    features: ["Everything in Premium", "10 Photos", "Top of search results", "Business badge", "Advanced analytics"],
+  },
+];
+
 // ─── Hotel / accommodation multi-site tiers ───────────────────────────────────
 export const HOTEL_SITE_TIERS = [
   { key: "1", label: "1 site", price: 100 },
@@ -86,6 +104,9 @@ export const coppaMockUser = {
   isMultiSite: false,
   visible: true,
   termsAcceptedAt: "2026-04-02T10:14:00",
+  // Current plan in the /business/upgrade flow's Basic/Premium/VIP naming —
+  // distinct from `plan` above, which drives the Billing page's own tiers.
+  upgradePlanKey: "basic",
 };
 
 export const hotelMockUser = {
@@ -104,6 +125,7 @@ export const hotelMockUser = {
   siteTierKey: "5",
   visible: true,
   termsAcceptedAt: "2026-03-18T15:42:00",
+  upgradePlanKey: "premium",
 };
 
 // ─── Business content (My Listing) ─────────────────────────────────────────────

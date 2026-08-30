@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
@@ -15,6 +16,7 @@ function fmtDateTime(iso) {
 }
 
 export default function BillingPage() {
+  const navigate = useNavigate();
   const { user } = useBusinessAuth();
   const [toast, setToast] = useToast();
   const [confirmCancel, setConfirmCancel] = useState(false);
@@ -72,7 +74,7 @@ export default function BillingPage() {
             )}
           </div>
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-            <button className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Upgrade</button>
+            <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Upgrade</button>
             <button onClick={() => setConfirmCancel(true)} disabled={cancelled} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40" style={{ backgroundColor: "#DC2626" }}>Cancel Plan</button>
           </div>
         </div>
