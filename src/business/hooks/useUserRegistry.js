@@ -12,7 +12,15 @@ let PORTAL_USERS = [
   { id: "pu2", firstName: "Sarah", lastName: "Coombes", email: "sarah@fredricks-hotel.co.uk", password: "password", role: "Owner", businessId: "biz_fredricks" },
 ];
 
-let PENDING_REQUESTS = {}; // businessId -> [{ id, firstName, lastName, email, password, requestedAt }]
+// businessId -> [{ id, firstName, lastName, email, password, requestedAt }]
+// Seeded with one mock request against Coppa Club so the Accept/Decline UI
+// is visible on Settings without first walking through the full "Register
+// a User" flow in the same session.
+let PENDING_REQUESTS = {
+  biz_coppa: [
+    { id: "req_seed1", firstName: "Priya", lastName: "Anand", email: "priya.anand@example.com", password: "password", requestedAt: "2026-08-28" },
+  ],
+};
 
 const listeners = new Set();
 function emit() { listeners.forEach((l) => l()); }
