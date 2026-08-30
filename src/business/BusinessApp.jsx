@@ -1,36 +1,40 @@
-import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { getCurrentBusinessAccount } from "../api/business/auth";
+import useBusinessAuth from "./hooks/useBusinessAuth";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import MyListingPage from "./pages/MyListingPage";
+import ArticlesPage from "./pages/ArticlesPage";
+import ArticleEditorPage from "./pages/ArticleEditorPage";
+import BillingPage from "./pages/BillingPage";
+import ReviewsPage from "./pages/ReviewsPage";
+import SupportPage from "./pages/SupportPage";
+import SettingsPage from "./pages/SettingsPage";
 
-function LoadingScreen() {
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F5F7FB" }}>
-      <p className="text-sm" style={{ color: "#64748B", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>Loading…</p>
-    </div>
-  );
+function RequireAuth({ children }) {
+  const { isLoggedIn } = useBusinessAuth();
+  return isLoggedIn ? children : <Navigate to="/business/login" replace />;
 }
 
 export default function BusinessApp() {
-  const [account, setAccount] = useState(undefined); // undefined = checking, null = signed out
-
-  useEffect(() => {
-    getCurrentBusinessAccount().then(setAccount);
-  }, []);
-
-  if (account === undefined) return <LoadingScreen />;
+  const { isLoggedIn } = useBusinessAuth();
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={account ? "/business/dashboard" : "/business/login"} replace />} />
-      <Route path="signup" element={account ? <Navigate to="/business/dashboard" replace /> : <SignUpPage onAuth={setAccount} />} />
-      <Route path="login" element={account ? <Navigate to="/business/dashboard" replace /> : <LoginPage onAuth={setAccount} />} />
-      <Route
-        path="dashboard"
-        element={account ? <DashboardPage account={account} onLogout={() => setAccount(null)} /> : <Navigate to="/business/login" replace />}
-      />
+      <Route path="/" element={<Navigate to={isLoggedIn ? "/business/dashboard" : "/business/login"} replace />} />
+      <Route path="signup" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <SignUpPage />} />
+      <Route path="login" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <LoginPage />} />
+
+      <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+      <Route path="listing" element={<RequireAuth><MyListingPage /></RequireAuth>} />
+      <Route path="articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
+      <Route path="articles/new" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
+      <Route path="articles/:id/edit" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
+      <Route path="billing" element={<RequireAuth><BillingPage /></RequireAuth>} />
+      <Route path="reviews" element={<RequireAuth><ReviewsPage /></RequireAuth>} />
+      <Route path="support" element={<RequireAuth><SupportPage /></RequireAuth>} />
+      <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
+
       <Route path="*" element={<Navigate to="/business" replace />} />
     </Routes>
   );

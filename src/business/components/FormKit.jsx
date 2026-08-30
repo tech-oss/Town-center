@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-// ─── Theme — mirrors the admin panel's "Modern Blue" design system ───────────
-export const NAVY   = "#1E293B";
-export const BLUE   = "#2563EB";
-export const MUTED  = "#64748B";
-export const BORDER = "rgba(16,24,40,0.12)";
-export const CARD   = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
-export const INPUT  = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
+// ─── Theme — mirrors the public site's teal/navy design tokens ───────────────
+export const FOREST = "var(--forest)"; // #1C2E38 dark navy — headings, body text
+export const LEAF    = "var(--leaf)";   // #2FA4A4 mid teal — secondary accents
+export const SAGE     = "var(--sage)";   // #52C7B6 primary teal — CTAs
+export const MUTED    = "#64748B";
+export const BORDER   = "rgba(28,46,56,0.14)";
+export const CARD     = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+export const INPUT     = { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" };
 
 export function Field({ label, required, span2, children, hint }) {
   return (
@@ -20,79 +21,199 @@ export function Field({ label, required, span2, children, hint }) {
   );
 }
 
-export function Inp({ ...props }) {
+export function Inp(props) {
   return <input className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT} {...props} />;
 }
-
-export function TextArea({ rows = 3, ...props }) {
+export function TextArea({ rows = 4, ...props }) {
   return <textarea rows={rows} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={INPUT} {...props} />;
 }
+export function Select({ children, ...props }) {
+  return <select className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT} {...props}>{children}</select>;
+}
 
-export function Toggle({ checked, onChange, label }) {
+export function Toggle({ checked, onChange, label, sublabel }) {
   return (
-    <label className="flex items-center gap-3 cursor-pointer w-fit">
+    <label className="flex items-start gap-3 cursor-pointer w-fit">
       <div onClick={() => onChange(!checked)}
-        className="w-10 h-5 rounded-full transition-colors flex items-center px-0.5"
-        style={{ backgroundColor: checked ? BLUE : "#D1D5DB" }}>
+        className="w-10 h-5 rounded-full transition-colors flex items-center px-0.5 mt-0.5 shrink-0"
+        style={{ backgroundColor: checked ? SAGE : "#D1D5DB" }}>
         <div className="w-4 h-4 rounded-full bg-white shadow transition-transform"
           style={{ transform: checked ? "translateX(20px)" : "translateX(0)" }} />
       </div>
-      {label && <span className="text-sm" style={{ color: NAVY }}>{label}</span>}
+      {label && (
+        <div>
+          <span className="text-sm font-medium block" style={{ color: FOREST }}>{label}</span>
+          {sublabel && <span className="text-xs block mt-0.5" style={{ color: MUTED }}>{sublabel}</span>}
+        </div>
+      )}
     </label>
   );
 }
 
-export function SectionTitle({ title, action }) {
-  return (
-    <div className="flex items-center justify-between gap-4 mb-3">
-      <h3 className="text-sm font-bold" style={{ color: NAVY }}>{title}</h3>
-      {action}
-    </div>
-  );
-}
-
-export function EditorSection({ title, children }) {
+export function EditorSection({ title, hint, children, action }) {
   return (
     <div>
-      <p className="text-sm font-bold mb-4 pb-2" style={{ color: NAVY, borderBottom: `1px solid ${BORDER}` }}>{title}</p>
-      {children}
+      <div className="flex items-center justify-between gap-3 mb-1 pb-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <p className="text-sm font-bold" style={{ color: FOREST }}>{title}</p>
+        {action}
+      </div>
+      {hint && <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>{hint}</p>}
+      <div className="mt-4">{children}</div>
     </div>
   );
 }
 
-export function SaveBar({ onSave, saving, dirty, savedAt }) {
+// ─── Approval status badge (per My Listing tab) ───────────────────────────────
+export function ApprovalBadge({ status, rejectionReason }) {
+  const map = {
+    "Up to Date":       { bg: "rgba(82,199,182,0.16)", fg: "#0F766E" },
+    "Pending Approval": { bg: "rgba(232,163,61,0.16)", fg: "#92400E" },
+    "Changes Rejected": { bg: "rgba(220,38,38,0.1)",   fg: "#991B1B" },
+  };
+  const c = map[status] ?? map["Up to Date"];
   return (
-    <div className="flex items-center gap-3 pt-4 mt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-      <button onClick={onSave} disabled={saving || !dirty}
-        className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40 hover:opacity-90"
-        style={{ backgroundColor: BLUE }}>
-        {saving ? "Saving…" : "Save Changes"}
-      </button>
-      {!dirty && savedAt && (
-        <span className="text-xs" style={{ color: "#15803D" }}>✓ Saved</span>
-      )}
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"
+      style={{ backgroundColor: c.bg, color: c.fg }}
+      title={status === "Changes Rejected" ? rejectionReason ?? "Contact support for details." : undefined}>
+      {status}
+    </span>
+  );
+}
+
+// ─── Toast ──────────────────────────────────────────────────────────────────
+export function useToast() {
+  const [msg, setMsg] = useState(null);
+  useEffect(() => {
+    if (!msg) return;
+    const t = setTimeout(() => setMsg(null), 3200);
+    return () => clearTimeout(t);
+  }, [msg]);
+  return [msg, setMsg];
+}
+export function Toast({ message }) {
+  if (!message) return null;
+  return (
+    <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
+      style={{ backgroundColor: FOREST, boxShadow: "0 8px 24px -6px rgba(0,0,0,0.35)" }}>
+      <span>✓</span> {message}
     </div>
   );
 }
 
-// ─── Opening hours editor ─────────────────────────────────────────────────────
-export function HoursEditor({ hours, onChange }) {
-  function setDay(i, key, val) {
-    onChange(hours.map((h, idx) => (idx === i ? { ...h, [key]: val } : h)));
+export function SaveBar({ onSave, saving, status, rejectionReason }) {
+  return (
+    <div className="flex items-center gap-3 pt-4 mt-2 flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
+      <button onClick={onSave} disabled={saving}
+        className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-60 hover:opacity-90"
+        style={{ backgroundColor: SAGE }}>
+        {saving ? "Submitting…" : "Save Changes"}
+      </button>
+      {status && <ApprovalBadge status={status} rejectionReason={rejectionReason} />}
+    </div>
+  );
+}
+
+// ─── Image upload (hero/logo, single) ─────────────────────────────────────────
+// TODO: wire to Supabase storage bucket
+export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video" }) {
+  const [dragOver, setDragOver] = useState(false);
+  function handleFiles(files) {
+    const file = files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => onChange(ev.target.result);
+    reader.readAsDataURL(file);
   }
+  return (
+    <div>
+      {label && <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>{label}</p>}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
+        className={`relative overflow-hidden ${round ? "w-24 h-24 rounded-full" : `w-full max-w-md ${aspect} rounded-2xl`}`}
+        style={{ border: dragOver ? `2px dashed ${SAGE}` : `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
+        {src ? (
+          <img src={src} alt={label || "preview"} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1">
+            <span className="text-2xl" style={{ color: "#9CA3AF" }}>+</span>
+            <span className="text-[10px] text-center px-2" style={{ color: "#9CA3AF" }}>Drop image or click Replace</span>
+          </div>
+        )}
+      </div>
+      <label className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
+        style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: `1.5px solid rgba(82,199,182,0.35)` }}>
+        {src ? "Replace Image" : "Upload Image"}
+        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+      </label>
+    </div>
+  );
+}
+
+// ─── Gallery grid (up to N slots) ─────────────────────────────────────────────
+// TODO: Supabase storage
+export function GalleryGrid({ images, onChange, max = 6, label }) {
+  const slots = Array.from({ length: max }, (_, i) => images[i] ?? null);
+  function handleFile(i, files) {
+    const file = files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const next = [...images];
+      next[i] = ev.target.result;
+      onChange(next.filter(Boolean));
+    };
+    reader.readAsDataURL(file);
+  }
+  function remove(i) {
+    const next = [...images];
+    next.splice(i, 1);
+    onChange(next);
+  }
+  return (
+    <div>
+      {label && <p className="text-xs mb-3" style={{ color: MUTED }}>{label}</p>}
+      <div className="grid grid-cols-3 gap-3 max-w-lg">
+        {slots.map((src, i) => (
+          <div key={i} className="relative aspect-square rounded-xl overflow-hidden group"
+            style={{ border: `1.5px ${src ? "solid" : "dashed"} ${BORDER}`, backgroundColor: "#f8fafc" }}>
+            {src ? (
+              <>
+                <img src={src} alt={`gallery ${i + 1}`} className="w-full h-full object-cover" />
+                <button onClick={() => remove(i)}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ backgroundColor: "#DC2626" }}>✕</button>
+              </>
+            ) : (
+              <label className="w-full h-full flex items-center justify-center cursor-pointer">
+                <span className="text-xl" style={{ color: "#9CA3AF" }}>+</span>
+                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(i, e.target.files)} />
+              </label>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Opening hours 7-row editor ────────────────────────────────────────────────
+export function HoursEditor({ hours, onChange }) {
+  function setDay(i, key, val) { onChange(hours.map((h, idx) => (idx === i ? { ...h, [key]: val } : h))); }
   return (
     <div className="flex flex-col gap-2">
       {hours.map((h, i) => (
         <div key={h.day} className="flex items-center gap-3 flex-wrap">
-          <span className="text-xs font-medium w-24 shrink-0" style={{ color: NAVY }}>{h.day}</span>
+          <span className="text-xs font-medium w-24 shrink-0" style={{ color: FOREST }}>{h.day}</span>
           <Toggle checked={h.open} onChange={(v) => setDay(i, "open", v)} />
           {h.open ? (
             <>
               <input type="time" value={h.from} onChange={(e) => setDay(i, "from", e.target.value)}
-                className="rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" }} />
+                className="rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }} />
               <span className="text-xs" style={{ color: MUTED }}>to</span>
               <input type="time" value={h.to} onChange={(e) => setDay(i, "to", e.target.value)}
-                className="rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" }} />
+                className="rounded-lg px-2 py-1.5 text-xs outline-none" style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }} />
             </>
           ) : (
             <span className="text-xs font-medium" style={{ color: "#9CA3AF" }}>Closed</span>
@@ -103,99 +224,133 @@ export function HoursEditor({ hours, onChange }) {
   );
 }
 
-// ─── Social links editor ──────────────────────────────────────────────────────
-export function SocialEditor({ links, onChange }) {
+// ─── Social links ──────────────────────────────────────────────────────────────
+export function SocialFields({ links, onChange }) {
   function set(k, v) { onChange({ ...links, [k]: v }); }
   const fields = [
-    { key: "instagram",  label: "Instagram",  prefix: "@" },
-    { key: "facebook",   label: "Facebook",   prefix: "fb.com/" },
-    { key: "twitter",    label: "X / Twitter",prefix: "@" },
-    { key: "tripadvisor",label: "TripAdvisor",prefix: "tripadvisor.com/" },
+    { key: "instagram", label: "Instagram URL" },
+    { key: "facebook",  label: "Facebook URL" },
+    { key: "twitter",   label: "Twitter / X URL" },
   ];
   return (
     <div className="grid sm:grid-cols-2 gap-3">
-      {fields.map(({ key, label, prefix }) => (
+      {fields.map(({ key, label }) => (
         <Field key={key} label={label}>
-          <div className="flex items-center rounded-xl overflow-hidden" style={{ border: `1.5px solid ${BORDER}` }}>
-            <span className="px-3 py-2.5 text-xs shrink-0" style={{ backgroundColor: "#f8fafc", color: MUTED, borderRight: `1px solid ${BORDER}` }}>{prefix}</span>
-            <input value={links?.[key] ?? ""} onChange={(e) => set(key, e.target.value)}
-              placeholder={`${label} handle`}
-              className="flex-1 px-3 py-2.5 text-sm outline-none bg-white" style={{ color: NAVY }} />
-          </div>
+          <Inp value={links?.[key] ?? ""} onChange={(e) => set(key, e.target.value)} placeholder="https://…" />
         </Field>
       ))}
     </div>
   );
 }
 
-// ─── Image upload strip ───────────────────────────────────────────────────────
-export function ImageStrip({ images, onChange, label = "Images", max = 5 }) {
-  function handleFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onChange([...images, { src: ev.target.result, name: file.name }]);
-    reader.readAsDataURL(file);
-  }
-  function remove(i) { onChange(images.filter((_, idx) => idx !== i)); }
+// ─── Lat/Lng + static OpenStreetMap preview ───────────────────────────────────
+// TODO: Supabase storage for coordinates
+export function LocationFields({ lat, lng, onChange }) {
+  const hasCoords = lat !== "" && lng !== "" && lat != null && lng != null && !Number.isNaN(Number(lat)) && !Number.isNaN(Number(lng));
+  const mapSrc = hasCoords
+    ? `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=15&size=420x180&markers=${lat},${lng},red-pushpin`
+    : null;
   return (
     <div>
-      <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>{label}</p>
-      <div className="flex flex-wrap gap-3 items-start">
-        {images.map((img, i) => (
-          <div key={i} className="relative group">
-            <img src={img.src} alt={img.name} className="w-24 h-16 rounded-xl object-cover" style={{ border: `1.5px solid ${BORDER}` }} />
-            <button onClick={() => remove(i)}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ backgroundColor: "#DC2626" }}>✕</button>
-          </div>
-        ))}
-        {images.length < max && (
-          <label className="w-24 h-16 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors hover:bg-blue-50"
-            style={{ border: `1.5px dashed ${BORDER}`, backgroundColor: "#f8fafc" }}>
-            <span className="text-xl" style={{ color: MUTED }}>+</span>
-            <span className="text-[10px]" style={{ color: MUTED }}>Add image</span>
-            <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          </label>
+      <div className="grid sm:grid-cols-2 gap-4 mb-3">
+        <Field label="Latitude"><Inp type="number" step="0.000001" value={lat ?? ""} onChange={(e) => onChange({ lat: e.target.value, lng })} placeholder="e.g. 51.5225" /></Field>
+        <Field label="Longitude"><Inp type="number" step="0.000001" value={lng ?? ""} onChange={(e) => onChange({ lat, lng: e.target.value })} placeholder="e.g. -0.7234" /></Field>
+      </div>
+      <p className="text-[11px] mb-3" style={{ color: "#9CA3AF" }}>Right-click your location in Google Maps to copy coordinates.</p>
+      <div className="rounded-xl overflow-hidden max-w-md" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc", minHeight: 120 }}>
+        {mapSrc ? <img src={mapSrc} alt="Map preview" className="w-full h-auto block" /> : (
+          <div className="h-[120px] flex items-center justify-center text-xs" style={{ color: "#9CA3AF" }}>Enter coordinates to preview the map pin</div>
         )}
       </div>
-      <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>PNG, JPG · max {max} images</p>
     </div>
   );
 }
 
-// ─── Simple text-chip list editor (amenities / facilities) ──────────────────
-export function ChipListEditor({ items, onChange, placeholder = "Add item…" }) {
-  const [draft, setDraft] = useState("");
-  function add() {
-    const v = draft.trim();
-    if (!v) return;
-    onChange([...items, v]);
-    setDraft("");
-  }
+// ─── Repeatable list (FAQs handled separately; this is for plain text lists) ──
+export function RepeatableList({ items, onChange, placeholder = "" }) {
+  function set(i, v) { onChange(items.map((it, idx) => (idx === i ? v : it))); }
+  function add() { onChange([...items, ""]); }
   function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+  function move(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  }
   return (
-    <div>
-      <div className="flex flex-wrap gap-2 mb-2">
-        {items.map((it, i) => (
-          <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium"
-            style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.2)` }}>
-            {it}
-            <button onClick={() => remove(i)} className="font-bold" style={{ color: "#DC2626" }}>✕</button>
-          </span>
-        ))}
-        {items.length === 0 && <span className="text-xs" style={{ color: "#9CA3AF" }}>None added yet</span>}
-      </div>
-      <div className="flex gap-2">
-        <input value={draft} onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-          placeholder={placeholder}
-          className="flex-1 rounded-xl px-3 py-2 text-sm outline-none" style={INPUT} />
-        <button onClick={add} type="button" className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
-          style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
-          Add
-        </button>
+    <div className="flex flex-col gap-2">
+      {items.map((it, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <div className="flex flex-col gap-0.5 shrink-0">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-[10px] leading-none disabled:opacity-20" style={{ color: MUTED }}>▲</button>
+            <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="text-[10px] leading-none disabled:opacity-20" style={{ color: MUTED }}>▼</button>
+          </div>
+          <input value={it} onChange={(e) => set(i, e.target.value)} placeholder={placeholder}
+            className="flex-1 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={add} type="button" className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>+ Add</button>
+    </div>
+  );
+}
+
+// ─── FAQ repeatable list (question/answer pairs) ──────────────────────────────
+export function FaqListEditor({ items, onChange }) {
+  function set(i, k, v) { onChange(items.map((it, idx) => (idx === i ? { ...it, [k]: v } : it))); }
+  function add() { onChange([...items, { id: `faq${Date.now()}`, question: "", answer: "" }]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+  function move(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      {items.map((it, i) => (
+        <div key={it.id ?? i} className="rounded-xl p-4 flex flex-col gap-2" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>FAQ {i + 1}</span>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-xs disabled:opacity-20" style={{ color: MUTED }}>▲</button>
+              <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="text-xs disabled:opacity-20" style={{ color: MUTED }}>▼</button>
+              <button onClick={() => remove(i)} className="text-xs font-bold" style={{ color: "#DC2626" }}>Remove</button>
+            </div>
+          </div>
+          <Inp value={it.question} onChange={(e) => set(i, "question", e.target.value)} placeholder="Question" />
+          <TextArea rows={2} value={it.answer} onChange={(e) => set(i, "answer", e.target.value)} placeholder="Answer" />
+        </div>
+      ))}
+      <button onClick={add} type="button" className="self-start text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>+ Add FAQ</button>
+    </div>
+  );
+}
+
+// ─── Confirmation modal ────────────────────────────────────────────────────────
+export function ConfirmModal({ title, body, confirmLabel = "Confirm", danger = true, onConfirm, onCancel, children }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <p className="text-base font-bold" style={{ color: FOREST }}>{title}</p>
+        {body && <p className="text-sm" style={{ color: MUTED }}>{body}</p>}
+        {children}
+        <div className="flex gap-3 justify-end pt-2">
+          <button onClick={onCancel} className="px-4 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: danger ? "#DC2626" : SAGE }}>{confirmLabel}</button>
+        </div>
       </div>
     </div>
+  );
+}
+
+// ─── Star rating (display only) ────────────────────────────────────────────────
+export function Stars({ rating, size = 14 }) {
+  return (
+    <span style={{ fontSize: size, color: "#E8A33D", letterSpacing: 1 }}>
+      {"★".repeat(rating)}<span style={{ color: "#E5E7EB" }}>{"★".repeat(5 - rating)}</span>
+    </span>
   );
 }
