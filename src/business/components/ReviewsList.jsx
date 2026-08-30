@@ -13,7 +13,6 @@ function RatingBreakdown({ reviews }) {
           <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#EEF2F1" }}>
             <div className="h-full rounded-full" style={{ width: `${(counts[i] / total) * 100}%`, backgroundColor: "#E8A33D" }} />
           </div>
-          <span className="w-4 text-right shrink-0" style={{ color: MUTED }}>{counts[i]}</span>
         </div>
       ))}
     </div>
