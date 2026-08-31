@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import {
-  SUBSCRIPTION_PLANS, HOTEL_SITE_TIERS, ACCOMMODATION_TIERS, BUSINESS_PAYMENTS, ADD_ONS,
-} from "../../Data/businessPortalMock";
+import { SUBSCRIPTION_PLANS, HOTEL_SITE_TIERS, ADD_ONS } from "../../Data/businessPortalMock";
+import { listPayments, updateSubscription } from "../api/businessSubscription";
 
 function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -17,27 +16,45 @@ function fmtDateTime(iso) {
 
 export default function BillingPage() {
   const navigate = useNavigate();
-  const { user } = useBusinessAuth();
+  const { user, switchUser } = useBusinessAuth();
   const [toast, setToast] = useToast();
   const [confirmCancel, setConfirmCancel] = useState(false);
-  const [cancelled, setCancelled] = useState(false);
+  const [payments, setPayments] = useState([]);
 
   const isHotel = user.businessType === "hotel";
   const tiers = isHotel ? HOTEL_SITE_TIERS : null;
   const plans = isHotel ? null : SUBSCRIPTION_PLANS;
-  const payments = BUSINESS_PAYMENTS[user.id] ?? [];
+  const cancelled = !!user.cancelled || user.planStatus === "Cancelled";
 
-  function handleUpgrade(name) {
-    // TODO: Stripe checkout
-    setToast(`Switched to ${name}.`);
+  useEffect(() => {
+    let cancelledEffect = false;
+    listPayments(user.id).then((data) => { if (!cancelledEffect) setPayments(data); });
+    return () => { cancelledEffect = true; };
+  }, [user.id]);
+
+  async function handleUpgrade(plan) {
+    const patch = isHotel
+      ? { plan: `hotel-${plan.key}`, monthly_fee: plan.price, site_tier_key: plan.key, plan_status: "Active", cancelled: false }
+      : { plan: plan.key, monthly_fee: plan.price, plan_status: "Active", cancelled: false };
+    await updateSubscription(user.id, patch);
+    switchUser({
+      ...user,
+      plan: isHotel ? `hotel-${plan.key}` : plan.key,
+      monthlyFee: plan.price,
+      siteTierKey: isHotel ? plan.key : user.siteTierKey,
+      planStatus: "Active",
+      cancelled: false,
+    });
+    setToast(`Switched to ${isHotel ? plan.label : plan.name}.`);
   }
   function handlePurchaseAddon(name) {
     // TODO: Stripe one-off payment
     setToast(`"${name}" purchased.`);
   }
-  function handleCancel() {
+  async function handleCancel() {
     setConfirmCancel(false);
-    setCancelled(true);
+    await updateSubscription(user.id, { plan_status: "Cancelled", cancelled: true });
+    switchUser({ ...user, planStatus: "Cancelled", cancelled: true });
     setToast("Subscription cancelled.");
   }
 
@@ -92,7 +109,7 @@ export default function BillingPage() {
                   {current ? (
                     <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(82,199,182,0.16)", color: "#0F766E" }}>Current Plan</span>
                   ) : (
-                    <button onClick={() => handleUpgrade(t.label)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
+                    <button onClick={() => handleUpgrade(t)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
                   )}
                 </div>
               );
@@ -108,7 +125,7 @@ export default function BillingPage() {
                   {current ? (
                     <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(82,199,182,0.16)", color: "#0F766E" }}>Current Plan</span>
                   ) : (
-                    <button onClick={() => handleUpgrade(p.name)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
+                    <button onClick={() => handleUpgrade(p)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
                   )}
                 </div>
               );

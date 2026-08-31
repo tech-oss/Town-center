@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { coppaMockUser, hotelMockUser } from "../../Data/businessPortalMock";
 import { businessName } from "./useUserRegistry";
+import { getSubscription } from "../api/businessSubscription";
 
 // ─── Supabase-backed auth store ────────────────────────────────────────────
 // A single "logged in user" derived from the Supabase Auth session, shared
@@ -49,6 +50,16 @@ function buildSessionUser(row) {
   };
 }
 
+// Billing fields (plan, planStatus, renewalDate, monthlyFee, isMultiSite,
+// siteTierKey, upgradePlanKey, termsAcceptedAt) come from the real
+// business_subscriptions table when a row exists, overriding the mock base
+// built above. businessType/phone/businessName/visible stay on the mock base
+// (not billing fields, out of scope for this migration).
+async function applySubscription(user) {
+  const sub = await getSubscription(user.id);
+  return sub ? { ...user, ...sub } : user;
+}
+
 async function refreshFromSession(session) {
   if (!session) {
     currentUser = null;
@@ -66,6 +77,10 @@ async function refreshFromSession(session) {
   currentUser = error || !row ? null : buildSessionUser(row);
   restored = true;
   emit();
+  if (currentUser) {
+    currentUser = await applySubscription(currentUser);
+    emit();
+  }
 }
 
 supabase.auth.getSession().then(({ data }) => refreshFromSession(data.session));

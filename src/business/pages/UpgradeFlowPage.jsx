@@ -4,6 +4,7 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, Select, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { UPGRADE_PLANS } from "../../Data/businessPortalMock";
+import { updateSubscription, addPayment } from "../api/businessSubscription";
 
 const STEPS = ["Choose Plan", "Terms", "Payment", "Success"];
 
@@ -270,7 +271,7 @@ function ScreenSuccess({ plan }) {
 
 // ─── Main flow ──────────────────────────────────────────────────────────────────
 export default function UpgradeFlowPage() {
-  const { user } = useBusinessAuth();
+  const { user, switchUser } = useBusinessAuth();
   const [step, setStep] = useState(1);
   const [plan, setPlan] = useState(null);
   const [agreed, setAgreed] = useState(false);
@@ -282,8 +283,10 @@ export default function UpgradeFlowPage() {
   }
   function handlePay() {
     setPaying(true);
-    // TODO: call Stripe PaymentIntent API
-    setTimeout(() => {
+    setTimeout(async () => {
+      await updateSubscription(user.id, { upgrade_plan_key: plan.key, plan_status: "Active", cancelled: false });
+      await addPayment(user.id, { description: `${plan.name} listing upgrade — monthly`, amount: `£${plan.price.toFixed(2)}` });
+      switchUser({ ...user, upgradePlanKey: plan.key, planStatus: "Active", cancelled: false });
       setPaying(false);
       setStep(4);
     }, 1200);

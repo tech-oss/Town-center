@@ -76,7 +76,7 @@ export default function ArticleEditorPage() {
           </EditorSection>
 
           <EditorSection title="Hero Image">
-            <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" />
+            <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" pathPrefix={user.id} />
           </EditorSection>
 
           <EditorSection title="Article content — shown on the article page">

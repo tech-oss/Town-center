@@ -1,4 +1,12 @@
 import { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabaseClient";
+
+async function uploadToStorage(file, pathPrefix) {
+  const path = `${pathPrefix}/${Date.now()}-${file.name}`;
+  const { error } = await supabase.storage.from("business-media").upload(path, file);
+  if (error) throw error;
+  return supabase.storage.from("business-media").getPublicUrl(path).data.publicUrl;
+}
 
 // ─── Theme — mirrors the public site's teal/navy design tokens ───────────────
 export const FOREST = "var(--forest)"; // #1C2E38 dark navy — headings, body text
@@ -114,15 +122,19 @@ export function SaveBar({ onSave, saving, status, rejectionReason }) {
 }
 
 // ─── Image upload (hero/logo, single) ─────────────────────────────────────────
-// TODO: wire to Supabase storage bucket
-export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video" }) {
+export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video", pathPrefix }) {
   const [dragOver, setDragOver] = useState(false);
-  function handleFiles(files) {
+  const [uploading, setUploading] = useState(false);
+  async function handleFiles(files) {
     const file = files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onChange(ev.target.result);
-    reader.readAsDataURL(file);
+    setUploading(true);
+    try {
+      const url = await uploadToStorage(file, pathPrefix ?? "misc");
+      onChange(url);
+    } finally {
+      setUploading(false);
+    }
   }
   return (
     <div>
@@ -144,27 +156,29 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
       </div>
       <label className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
         style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: `1.5px solid rgba(82,199,182,0.35)` }}>
-        {src ? "Replace Image" : "Upload Image"}
-        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+        {uploading ? "Uploading…" : src ? "Replace Image" : "Upload Image"}
+        <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(e) => handleFiles(e.target.files)} />
       </label>
     </div>
   );
 }
 
 // ─── Gallery grid (up to N slots) ─────────────────────────────────────────────
-// TODO: Supabase storage
-export function GalleryGrid({ images, onChange, max = 6, label }) {
+export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix }) {
+  const [uploadingIndex, setUploadingIndex] = useState(null);
   const slots = Array.from({ length: max }, (_, i) => images[i] ?? null);
-  function handleFile(i, files) {
+  async function handleFile(i, files) {
     const file = files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
+    setUploadingIndex(i);
+    try {
+      const url = await uploadToStorage(file, pathPrefix ?? "misc");
       const next = [...images];
-      next[i] = ev.target.result;
+      next[i] = url;
       onChange(next.filter(Boolean));
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      setUploadingIndex(null);
+    }
   }
   function remove(i) {
     const next = [...images];
@@ -187,8 +201,8 @@ export function GalleryGrid({ images, onChange, max = 6, label }) {
               </>
             ) : (
               <label className="w-full h-full flex items-center justify-center cursor-pointer">
-                <span className="text-xl" style={{ color: "#9CA3AF" }}>+</span>
-                <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(i, e.target.files)} />
+                <span className="text-xl" style={{ color: "#9CA3AF" }}>{uploadingIndex === i ? "…" : "+"}</span>
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingIndex === i} onChange={(e) => handleFile(i, e.target.files)} />
               </label>
             )}
           </div>
