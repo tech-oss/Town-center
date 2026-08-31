@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
-import { SUBSCRIPTION_PLANS, HOTEL_SITE_TIERS, ACCOMMODATION_TIERS } from "../../Data/businessPortalMock";
+import { SUBSCRIPTION_PLANS } from "../../Data/businessPortalMock";
 
 function slugify(name) {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -64,28 +64,16 @@ export async function registerBusiness(form) {
   });
   if (listingError) return { ok: false, error: listingError.message };
 
-  let plan, monthlyFee, siteTierKey = null;
-  if (isHotel) {
-    const tiers = form.hotelKind === "hotel" ? HOTEL_SITE_TIERS : ACCOMMODATION_TIERS;
-    const tier = tiers.find((t) => t.key === form.siteTierKey) ?? tiers[0];
-    plan = `hotel-${tier.key}`;
-    monthlyFee = tier.price;
-    siteTierKey = tier.key;
-  } else {
-    const chosen = SUBSCRIPTION_PLANS.find((p) => p.key === form.planKey) ?? SUBSCRIPTION_PLANS[0];
-    plan = chosen.key;
-    monthlyFee = chosen.price;
-  }
-
+  const chosen = SUBSCRIPTION_PLANS.find((p) => p.key === form.planKey) ?? SUBSCRIPTION_PLANS[0];
   const renewalDate = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const { error: subError } = await supabase.from("business_subscriptions").insert({
     business_id: businessId,
-    plan,
+    plan: chosen.key,
     plan_status: "Active",
     renewal_date: renewalDate,
-    monthly_fee: monthlyFee,
-    is_multi_site: isHotel,
-    site_tier_key: siteTierKey,
+    monthly_fee: chosen.price,
+    is_multi_site: false,
+    site_tier_key: null,
     upgrade_plan_key: "basic",
     terms_accepted_at: new Date().toISOString(),
   });

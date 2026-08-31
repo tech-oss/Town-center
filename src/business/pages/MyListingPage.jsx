@@ -31,7 +31,7 @@ function tabsFor(user) {
   }
   if (user.businessType === "hotel") {
     base.push({ key: "amenities", label: "Amenities" });
-    if (user.isMultiSite) base.push({ key: "properties", label: "Properties" });
+    // Multi-property management is out of scope for now — deferred.
   }
   return base;
 }
@@ -276,20 +276,6 @@ export default function MyListingPage() {
             </>
           )}
 
-          {tab === "properties" && (
-            <EditorSection title="Registered Properties" action={
-              <button className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>+ Add Property</button>
-            }>
-              <div className="flex flex-col gap-3">
-                {(listing.properties ?? []).map((p) => (
-                  <div key={p.id} className="rounded-xl p-4" style={{ border: `1.5px solid ${BORDER}` }}>
-                    <p className="text-sm font-semibold" style={{ color: FOREST }}>{p.name}</p>
-                    <p className="text-xs mt-0.5" style={{ color: MUTED }}>{p.address}</p>
-                  </div>
-                ))}
-              </div>
-            </EditorSection>
-          )}
         </div>
       </div>
     </BusinessLayout>

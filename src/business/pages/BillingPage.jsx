@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { SUBSCRIPTION_PLANS, HOTEL_SITE_TIERS, ADD_ONS } from "../../Data/businessPortalMock";
+import { SUBSCRIPTION_PLANS, ADD_ONS } from "../../Data/businessPortalMock";
 import { listPayments, updateSubscription } from "../api/businessSubscription";
 
 function fmtDate(d) {
@@ -21,9 +21,6 @@ export default function BillingPage() {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [payments, setPayments] = useState([]);
 
-  const isHotel = user.businessType === "hotel";
-  const tiers = isHotel ? HOTEL_SITE_TIERS : null;
-  const plans = isHotel ? null : SUBSCRIPTION_PLANS;
   const cancelled = !!user.cancelled || user.planStatus === "Cancelled";
 
   useEffect(() => {
@@ -33,19 +30,9 @@ export default function BillingPage() {
   }, [user.id]);
 
   async function handleUpgrade(plan) {
-    const patch = isHotel
-      ? { plan: `hotel-${plan.key}`, monthly_fee: plan.price, site_tier_key: plan.key, plan_status: "Active", cancelled: false }
-      : { plan: plan.key, monthly_fee: plan.price, plan_status: "Active", cancelled: false };
-    await updateSubscription(user.id, patch);
-    switchUser({
-      ...user,
-      plan: isHotel ? `hotel-${plan.key}` : plan.key,
-      monthlyFee: plan.price,
-      siteTierKey: isHotel ? plan.key : user.siteTierKey,
-      planStatus: "Active",
-      cancelled: false,
-    });
-    setToast(`Switched to ${isHotel ? plan.label : plan.name}.`);
+    await updateSubscription(user.id, { plan: plan.key, monthly_fee: plan.price, plan_status: "Active", cancelled: false });
+    switchUser({ ...user, plan: plan.key, monthlyFee: plan.price, planStatus: "Active", cancelled: false });
+    setToast(`Switched to ${plan.name}.`);
   }
   function handlePurchaseAddon(name) {
     // TODO: Stripe one-off payment
@@ -86,9 +73,6 @@ export default function BillingPage() {
           <div className="grid sm:grid-cols-3 gap-4">
             <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Renewal Date</p><p className="text-sm font-medium" style={{ color: FOREST }}>{fmtDate(user.renewalDate)}</p></div>
             <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Monthly Fee</p><p className="text-sm font-medium" style={{ color: FOREST }}>£{user.monthlyFee}/mo</p></div>
-            {isHotel && (
-              <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Sites on Plan</p><p className="text-sm font-medium" style={{ color: FOREST }}>{HOTEL_SITE_TIERS.find((t) => t.key === user.siteTierKey)?.label}</p></div>
-            )}
           </div>
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
             <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Upgrade</button>
@@ -100,20 +84,7 @@ export default function BillingPage() {
         <div>
           <p className="text-sm font-bold mb-3" style={{ color: FOREST }}>Available Plans</p>
           <div className="grid sm:grid-cols-3 gap-4">
-            {isHotel ? tiers.map((t) => {
-              const current = t.key === user.siteTierKey;
-              return (
-                <div key={t.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={current ? { border: `2px solid ${SAGE}` } : CARD}>
-                  <p className="text-base font-bold" style={{ color: FOREST }}>{t.label}</p>
-                  <p className="text-lg font-bold" style={{ color: FOREST }}>{t.price != null ? `£${t.price}/mo` : "Contact us"}</p>
-                  {current ? (
-                    <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(82,199,182,0.16)", color: "#0F766E" }}>Current Plan</span>
-                  ) : (
-                    <button onClick={() => handleUpgrade(t)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
-                  )}
-                </div>
-              );
-            }) : plans.map((p) => {
+            {SUBSCRIPTION_PLANS.map((p) => {
               const current = p.key === user.plan;
               return (
                 <div key={p.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={current ? { border: `2px solid ${SAGE}` } : CARD}>

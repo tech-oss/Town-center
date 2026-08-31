@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BUSINESS_TYPES, SUBSCRIPTION_PLANS, HOTEL_SITE_TIERS, ACCOMMODATION_TIERS, TERMS_TEXT,
+  BUSINESS_TYPES, SUBSCRIPTION_PLANS, TERMS_TEXT,
   FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES,
 } from "../../Data/businessPortalMock";
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
@@ -21,7 +21,6 @@ const EMPTY = {
   cuisineTypes: [],     // multi-select, for businessType "eat-drink"
   venueTypes: [],       // multi-select, for businessType "eat-drink"
   shopCategories: [],   // multi-select, for businessType "shop"
-  siteTierKey: "1",
   planKey: "standard",
   agreeTerms: false, agreePrivacy: false,
 };
@@ -45,16 +44,6 @@ function StepIndicator({ step }) {
   );
 }
 
-function PricingCard({ label, price, selected, onClick }) {
-  return (
-    <button type="button" onClick={onClick}
-      className="text-left rounded-xl p-4 flex flex-col gap-1 transition-all"
-      style={selected ? { border: `2px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
-      <span className="text-sm font-bold" style={{ color: FOREST }}>{label}</span>
-      <span className="text-xs" style={{ color: MUTED }}>{price != null ? `£${price}/mo` : "Contact us for pricing"}</span>
-    </button>
-  );
-}
 
 // ─── Single-select "pick one" radio cards ─────────────────────────────────────
 function RadioGroup({ options, value, onChange }) {
@@ -132,8 +121,6 @@ export default function SignUpPage() {
   const [error, setError] = useState("");
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
-
-  const isHotel = form.businessType === "hotel";
 
   function validStep() {
     if (step === 0) return form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.phone.trim() && form.password && form.password === form.confirmPassword;
@@ -245,22 +232,7 @@ export default function SignUpPage() {
             </div>
           )}
 
-          {step === 2 && (isHotel ? (
-            <div className="flex flex-col gap-5">
-              <p className="text-base font-bold" style={{ color: FOREST }}>
-                How many {form.hotelKind === "hotel" ? "sites" : "properties"} do you want to list?
-              </p>
-              <p className="text-xs -mt-3" style={{ color: MUTED }}>
-                {form.hotelKind === "hotel" ? "Hotel sites" : "Accommodation properties"}
-              </p>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {(form.hotelKind === "hotel" ? HOTEL_SITE_TIERS : ACCOMMODATION_TIERS).map((t) => (
-                  <PricingCard key={t.key} label={t.label} price={t.price} selected={form.siteTierKey === t.key} onClick={() => set("siteTierKey", t.key)} />
-                ))}
-              </div>
-              <p className="text-xs italic" style={{ color: MUTED }}>Note: Final pricing confirmed on account approval.</p>
-            </div>
-          ) : (
+          {step === 2 && (
             <div className="flex flex-col gap-4">
               <p className="text-base font-bold" style={{ color: FOREST }}>Choose a subscription plan</p>
               <div className="grid sm:grid-cols-3 gap-3">
@@ -269,7 +241,7 @@ export default function SignUpPage() {
                 ))}
               </div>
             </div>
-          ))}
+          )}
 
           {step === 3 && (
             <div className="flex flex-col gap-4">
