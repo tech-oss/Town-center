@@ -37,6 +37,10 @@ function fromRow(row) {
     whyChooseUs: row.why_choose_us,
     stats: row.stats,
     availabilityTag: row.availability_tag,
+    businessTypeDetail: row.business_type_detail,
+    workingWithMe: row.working_with_me,
+    skills: row.skills,
+    portfolio: row.portfolio,
   };
 }
 
@@ -71,6 +75,10 @@ function toRow(listing) {
     why_choose_us: listing.whyChooseUs,
     stats: listing.stats,
     availability_tag: listing.availabilityTag,
+    business_type_detail: listing.businessTypeDetail,
+    working_with_me: listing.workingWithMe,
+    skills: listing.skills,
+    portfolio: listing.portfolio,
     updated_at: new Date().toISOString(),
   };
 }

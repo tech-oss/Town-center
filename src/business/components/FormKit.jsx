@@ -376,6 +376,58 @@ export function StatsEditor({ items, onChange }) {
   );
 }
 
+// ─── Portfolio (up to `max` items, each an image + title + optional link) ─────
+export function PortfolioEditor({ items, onChange, pathPrefix, max = 6 }) {
+  const [uploadingId, setUploadingId] = useState(null);
+
+  function set(i, k, v) { onChange(items.map((it, idx) => (idx === i ? { ...it, [k]: v } : it))); }
+  function add() { onChange([...items, { id: `pf${Date.now()}`, title: "", link: "", image: null }]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+
+  async function handleImage(i, files) {
+    const file = files?.[0];
+    if (!file) return;
+    setUploadingId(items[i].id ?? i);
+    try {
+      const url = await uploadToStorage(file, pathPrefix ?? "misc");
+      set(i, "image", url);
+    } finally {
+      setUploadingId(null);
+    }
+  }
+
+  return (
+    <div className="grid sm:grid-cols-2 gap-4">
+      {items.map((it, i) => (
+        <div key={it.id ?? i} className="rounded-xl p-3 flex flex-col gap-2" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
+          <div className="relative aspect-video rounded-lg overflow-hidden" style={{ border: `1.5px ${it.image ? "solid" : "dashed"} ${BORDER}`, backgroundColor: "#fff" }}>
+            {it.image ? (
+              <img src={it.image} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <label className="w-full h-full flex items-center justify-center cursor-pointer">
+                <span className="text-xl" style={{ color: "#9CA3AF" }}>{uploadingId === (it.id ?? i) ? "…" : "+"}</span>
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingId === (it.id ?? i)} onChange={(e) => handleImage(i, e.target.files)} />
+              </label>
+            )}
+          </div>
+          <input value={it.title} onChange={(e) => set(i, "title", e.target.value)} placeholder="Title"
+            className="rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <input value={it.link} onChange={(e) => set(i, "link", e.target.value)} placeholder="Link (optional)"
+            className="rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <button onClick={() => remove(i)} type="button" className="self-start text-xs font-bold" style={{ color: "#DC2626" }}>Remove</button>
+        </div>
+      ))}
+      {items.length < max && (
+        <button onClick={add} type="button"
+          className="rounded-xl flex items-center justify-center text-sm font-semibold aspect-video transition-opacity hover:opacity-70"
+          style={{ border: `1.5px dashed ${BORDER}`, color: "#0F766E" }}>
+          + Add Portfolio Item
+        </button>
+      )}
+    </div>
+  );
+}
+
 // ─── Confirmation modal ────────────────────────────────────────────────────────
 export function ConfirmModal({ title, body, confirmLabel = "Confirm", danger = true, onConfirm, onCancel, children }) {
   return (

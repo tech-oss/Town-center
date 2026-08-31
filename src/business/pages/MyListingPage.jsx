@@ -5,7 +5,7 @@ import BusinessLayout from "../components/BusinessLayout";
 import {
   Field, Inp, TextArea, EditorSection, SaveBar, ApprovalBadge,
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
-  RepeatableList, FaqListEditor, StatsEditor, Toggle, Toast, useToast,
+  RepeatableList, FaqListEditor, StatsEditor, PortfolioEditor, Toggle, Toast, useToast,
   CARD, BORDER, MUTED, FOREST, SAGE,
 } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
@@ -15,7 +15,7 @@ import {
   AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
 } from "../../Data/businessPortalMock";
 
-function tabsFor(user) {
+function tabsFor(user, listing) {
   const base = [
     { key: "profile", label: "Profile" },
     { key: "hours", label: user.businessType === "hotel" ? "Availability & Check-in" : "Opening Hours" },
@@ -26,7 +26,10 @@ function tabsFor(user) {
     { key: "reviews", label: "Reviews" },
     { key: "faqs", label: "FAQs" },
   ];
-  if (user.businessType === "services") {
+  const isFreelancer = listing?.businessTypeDetail?.freelancerKind === "freelancer";
+  if (user.businessType === "services" && isFreelancer) {
+    base.push({ key: "workingwithme", label: "Working With Me" }, { key: "skills", label: "Skills" }, { key: "portfolio", label: "Portfolio" });
+  } else if (user.businessType === "services") {
     base.push({ key: "services", label: "Services" }, { key: "areas", label: "Areas Covered" });
   }
   if (user.businessType === "hotel") {
@@ -43,7 +46,7 @@ export default function MyListingPage() {
   const [reviews, setReviews] = useState([]);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useToast();
-  const tabs = tabsFor(user);
+  const tabs = tabsFor(user, listing);
   const [tab, setTab] = useState(tabs[0].key);
 
   useEffect(() => {
@@ -255,6 +258,38 @@ export default function MyListingPage() {
                 <RepeatableList items={listing.areasCoveredList ?? AREAS_COVERED_LIST} onChange={(v) => set("areasCoveredList", v)} placeholder="e.g. Maidenhead" />
               </EditorSection>
               <SaveBar onSave={() => handleSave("areas")} saving={saving} status={status} />
+            </>
+          )}
+
+          {tab === "workingwithme" && (
+            <>
+              <EditorSection title="Working With Me">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="Availability" hint="e.g. Accepting new projects"><Inp value={listing.workingWithMe?.availability ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, availability: e.target.value })} /></Field>
+                  <Field label="Works" hint="e.g. Remote & on-site"><Inp value={listing.workingWithMe?.works ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, works: e.target.value })} /></Field>
+                  <Field label="Response Time" hint="e.g. Usually within 24 hours"><Inp value={listing.workingWithMe?.responseTime ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, responseTime: e.target.value })} /></Field>
+                  <Field label="Experience" hint="e.g. 10+"><Inp value={listing.workingWithMe?.experience ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, experience: e.target.value })} /></Field>
+                </div>
+              </EditorSection>
+              <SaveBar onSave={() => handleSave("workingwithme")} saving={saving} status={status} />
+            </>
+          )}
+
+          {tab === "skills" && (
+            <>
+              <EditorSection title="Skills">
+                <RepeatableList items={listing.skills ?? []} onChange={(v) => set("skills", v)} placeholder="e.g. Logo Design" />
+              </EditorSection>
+              <SaveBar onSave={() => handleSave("skills")} saving={saving} status={status} />
+            </>
+          )}
+
+          {tab === "portfolio" && (
+            <>
+              <EditorSection title="Portfolio" hint="Up to 6 items">
+                <PortfolioEditor items={listing.portfolio ?? []} onChange={(v) => set("portfolio", v)} pathPrefix={user.id} max={6} />
+              </EditorSection>
+              <SaveBar onSave={() => handleSave("portfolio")} saving={saving} status={status} />
             </>
           )}
 
