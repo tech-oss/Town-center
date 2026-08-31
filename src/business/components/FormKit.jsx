@@ -343,6 +343,38 @@ export function FaqListEditor({ items, onChange }) {
   );
 }
 
+// ─── Stats / highlights (e.g. "10+ / Years in Business") ──────────────────────
+export function StatsEditor({ items, onChange }) {
+  function set(i, k, v) { onChange(items.map((it, idx) => (idx === i ? { ...it, [k]: v } : it))); }
+  function add() { onChange([...items, { id: `stat${Date.now()}`, value: "", label: "" }]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+  function move(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= items.length) return;
+    const next = [...items];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  }
+  return (
+    <div className="flex flex-col gap-3">
+      {items.map((it, i) => (
+        <div key={it.id ?? i} className="flex items-center gap-2">
+          <div className="flex flex-col gap-0.5 shrink-0">
+            <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-[10px] leading-none disabled:opacity-20" style={{ color: MUTED }}>▲</button>
+            <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="text-[10px] leading-none disabled:opacity-20" style={{ color: MUTED }}>▼</button>
+          </div>
+          <input value={it.value} onChange={(e) => set(i, "value", e.target.value)} placeholder="e.g. 10+"
+            className="w-24 rounded-lg px-3 py-2 text-xs outline-none shrink-0" style={INPUT} />
+          <input value={it.label} onChange={(e) => set(i, "label", e.target.value)} placeholder="e.g. Years in Business"
+            className="flex-1 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+          <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
+        </div>
+      ))}
+      <button onClick={add} type="button" className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>+ Add</button>
+    </div>
+  );
+}
+
 // ─── Confirmation modal ────────────────────────────────────────────────────────
 export function ConfirmModal({ title, body, confirmLabel = "Confirm", danger = true, onConfirm, onCancel, children }) {
   return (

@@ -5,7 +5,7 @@ import BusinessLayout from "../components/BusinessLayout";
 import {
   Field, Inp, TextArea, EditorSection, SaveBar, ApprovalBadge,
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
-  RepeatableList, FaqListEditor, Toggle, Toast, useToast,
+  RepeatableList, FaqListEditor, StatsEditor, Toggle, Toast, useToast,
   CARD, BORDER, MUTED, FOREST, SAGE,
 } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
@@ -196,6 +196,11 @@ export default function MyListingPage() {
                   <Field label="Booking URL" hint="If you have a reservation system, add the URL here — it powers the &ldquo;Book a Reservation&rdquo; button on your page">
                     <Inp value={listing.bookingUrl ?? ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" />
                   </Field>
+                  {user.businessType === "services" && (
+                    <Field label="Booking / Availability Tag" hint="e.g. &ldquo;24 hour booking&rdquo; — shown as a short tag on your listing">
+                      <Inp value={listing.availabilityTag ?? ""} onChange={(e) => set("availabilityTag", e.target.value)} placeholder="e.g. 24 hour booking" />
+                    </Field>
+                  )}
                 </div>
                 <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Social Links</p>
                 <SocialFields links={listing.social} onChange={(v) => set("social", v)} />
@@ -233,6 +238,12 @@ export default function MyListingPage() {
             <>
               <EditorSection title="Services We Offer">
                 <RepeatableList items={listing.servicesList ?? SERVICES_LIST} onChange={(v) => set("servicesList", v)} placeholder="e.g. General Enquiries" />
+              </EditorSection>
+              <EditorSection title="Why Choose Us">
+                <RepeatableList items={listing.whyChooseUs ?? []} onChange={(v) => set("whyChooseUs", v)} placeholder="e.g. Fully insured & accredited" />
+              </EditorSection>
+              <EditorSection title="Stats / Highlights" hint="Shown as feature tiles on your public page">
+                <StatsEditor items={listing.stats ?? []} onChange={(v) => set("stats", v)} />
               </EditorSection>
               <SaveBar onSave={() => handleSave("services")} saving={saving} status={status} />
             </>

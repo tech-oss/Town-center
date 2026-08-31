@@ -34,6 +34,9 @@ function fromRow(row) {
     properties: row.properties,
     approvalStatus: row.approval_status,
     rejectionReason: row.rejection_reason,
+    whyChooseUs: row.why_choose_us,
+    stats: row.stats,
+    availabilityTag: row.availability_tag,
   };
 }
 
@@ -65,6 +68,9 @@ function toRow(listing) {
     properties: listing.properties,
     approval_status: listing.approvalStatus,
     rejection_reason: listing.rejectionReason,
+    why_choose_us: listing.whyChooseUs,
+    stats: listing.stats,
+    availability_tag: listing.availabilityTag,
     updated_at: new Date().toISOString(),
   };
 }

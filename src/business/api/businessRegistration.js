@@ -21,6 +21,11 @@ export async function registerBusiness(form) {
 
   const businessId = newBusinessId(form.businessName);
   const isHotel = form.businessType === "hotel";
+  // "Freelancer & Trader" (Tradesperson/Professional/Freelancer) is the
+  // Services category — stored as "services" so MyListingPage's
+  // businessType === "services" checks show the Services content editor
+  // (Services List, Areas Covered, Why Choose Us, Stats/Highlights).
+  const listingBusinessType = form.businessType === "freelancer" ? "services" : form.businessType;
 
   const { error: businessError } = await supabase
     .from("businesses")
@@ -43,7 +48,7 @@ export async function registerBusiness(form) {
   const { error: listingError } = await supabase.from("business_listings").insert({
     business_id: businessId,
     name: form.businessName,
-    business_type: form.businessType,
+    business_type: listingBusinessType,
     business_type_detail: {
       freelancerKind: form.freelancerKind || null,
       hotelKind: isHotel ? form.hotelKind : null,
