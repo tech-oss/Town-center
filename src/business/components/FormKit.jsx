@@ -245,6 +245,7 @@ export function SocialFields({ links, onChange }) {
     { key: "instagram", label: "Instagram URL" },
     { key: "facebook",  label: "Facebook URL" },
     { key: "twitter",   label: "Twitter / X URL" },
+    { key: "tiktok",    label: "TikTok URL" },
   ];
   return (
     <div className="grid sm:grid-cols-2 gap-3">

@@ -7,6 +7,8 @@ import DashboardPage from "./pages/DashboardPage";
 import MyListingPage from "./pages/MyListingPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import ArticleEditorPage from "./pages/ArticleEditorPage";
+import EventsPage from "./pages/EventsPage";
+import EventEditorPage from "./pages/EventEditorPage";
 import BillingPage from "./pages/BillingPage";
 import UpgradeFlowPage from "./pages/UpgradeFlowPage";
 import ReviewsPage from "./pages/ReviewsPage";
@@ -41,6 +43,9 @@ export default function BusinessApp() {
       <Route path="articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
       <Route path="articles/:id/edit" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
+      <Route path="events" element={<RequireAuth><EventsPage /></RequireAuth>} />
+      <Route path="events/new" element={<RequireAuth><EventEditorPage /></RequireAuth>} />
+      <Route path="events/:id/edit" element={<RequireAuth><EventEditorPage /></RequireAuth>} />
       <Route path="billing" element={<RequireOwner><BillingPage /></RequireOwner>} />
       <Route path="upgrade" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
       <Route path="reviews" element={<RequireAuth><ReviewsPage /></RequireAuth>} />

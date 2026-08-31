@@ -12,6 +12,7 @@ const NAV = [
   { to: "/business/dashboard", label: "Dashboard", icon: "🏠" },
   { to: "/business/listing",   label: "My Listing", icon: "📄" },
   { to: "/business/articles",  label: "News & Articles", icon: "📰" },
+  { to: "/business/events",    label: "Request Event", icon: "📅" },
   { to: "/business/billing",   label: "Subscriptions & Billing", icon: "💳" },
   { to: "/business/reviews",   label: "Reviews", icon: "⭐" },
   { to: "/business/support",   label: "Support", icon: "🎫" },
