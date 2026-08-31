@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast } from "../components/FormKit";
-import {
-  DASHBOARD_ACTIVITY, PROFILE_COMPLETENESS, BUSINESS_SUPPORT_TICKETS, BUSINESS_ARTICLES,
-} from "../../Data/businessPortalMock";
+import { DASHBOARD_ACTIVITY, PROFILE_COMPLETENESS } from "../../Data/businessPortalMock";
+import { listArticles } from "../api/businessArticles";
+import { listTickets } from "../api/businessTickets";
 
 const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B", BORDER = "rgba(28,46,56,0.12)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -25,9 +26,19 @@ export default function DashboardPage() {
 
   const activity = DASHBOARD_ACTIVITY[user.id] ?? [];
   const completeness = PROFILE_COMPLETENESS[user.id] ?? { percent: 100, missing: [] };
-  const openTickets = (BUSINESS_SUPPORT_TICKETS[user.id] ?? []).filter((t) => t.status !== "Resolved").length;
-  const articles = BUSINESS_ARTICLES[user.id] ?? [];
-  const liveArticles = articles.filter((a) => a.status === "Live").length;
+  const [openTickets, setOpenTickets] = useState(0);
+  const [liveArticles, setLiveArticles] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    listTickets(user.id).then((tickets) => {
+      if (!cancelled) setOpenTickets(tickets.filter((t) => t.status !== "Resolved").length);
+    });
+    listArticles(user.id).then((articles) => {
+      if (!cancelled) setLiveArticles(articles.filter((a) => a.status === "Live").length);
+    });
+    return () => { cancelled = true; };
+  }, [user.id]);
 
   function handleToggle() {
     toggleVisibility();

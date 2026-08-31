@@ -1,34 +1,43 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, MUTED } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
-import { BUSINESS_REVIEWS } from "../../Data/businessPortalMock";
+import { listReviews, addReview, updateReview, deleteReview, replyToReview } from "../api/businessReviews";
 
-// TODO: fetch from Supabase reviews table
 export default function ReviewsPage() {
   const { user } = useBusinessAuth();
-  const [reviews, setReviews] = useState(() => [...(BUSINESS_REVIEWS[user.id] ?? [])]);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useToast();
 
-  function handleReply(id, text) {
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    listReviews(user.id).then((data) => {
+      if (!cancelled) { setReviews(data); setLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [user.id]);
+
+  async function handleReply(id, text) {
+    await replyToReview(id, text);
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, reply: { text, status: "Pending Approval" } } : r)));
-    // TODO: persist to Supabase on backend integration
     setToast("Reply submitted for admin approval.");
   }
 
-  function handleAdd(form) {
-    // TODO: persist to Supabase on backend integration
-    setReviews((prev) => [{ id: `r${Date.now()}`, reply: null, ...form }, ...prev]);
+  async function handleAdd(form) {
+    const created = await addReview(user.id, form);
+    setReviews((prev) => [created, ...prev]);
     setToast("Review added.");
   }
-  function handleUpdate(id, form) {
-    // TODO: persist to Supabase on backend integration
+  async function handleUpdate(id, form) {
+    await updateReview(id, form);
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form } : r)));
     setToast("Review updated.");
   }
-  function handleDelete(id) {
-    // TODO: persist to Supabase on backend integration
+  async function handleDelete(id) {
+    await deleteReview(id);
     setReviews((prev) => prev.filter((r) => r.id !== id));
     setToast("Review deleted.");
   }
@@ -44,7 +53,11 @@ export default function ReviewsPage() {
 
         <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and reply to reviews — your reply goes to admin for approval before appearing.</p>
 
-        <ReviewsList reviews={reviews} onReply={handleReply} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} />
+        {loading ? (
+          <p className="text-sm" style={{ color: MUTED }}>Loading reviews…</p>
+        ) : (
+          <ReviewsList reviews={reviews} onReply={handleReply} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} />
+        )}
       </div>
     </BusinessLayout>
   );

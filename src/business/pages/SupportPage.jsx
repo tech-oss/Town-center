@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
-import { Field, Inp, TextArea, Select, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD, INPUT } from "../components/FormKit";
-import { BUSINESS_SUPPORT_TICKETS, TICKET_CATEGORIES } from "../../Data/businessPortalMock";
+import { Field, Inp, TextArea, Select, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
+import { TICKET_CATEGORIES } from "../../Data/businessPortalMock";
+import { listTickets, createTicket, addTicketMessage } from "../api/businessTickets";
 
 function StatusBadge({ status }) {
   const map = {
@@ -17,10 +18,12 @@ function StatusBadge({ status }) {
 function TicketDetail({ ticket, onBack, onUpdate, notify }) {
   const [reply, setReply] = useState("");
 
-  function handleSend() {
+  async function handleSend() {
     if (!reply.trim()) return;
     const msg = { from: "business", author: "You", date: new Date().toISOString().slice(0, 16).replace("T", " "), body: reply.trim() };
-    onUpdate({ ...ticket, thread: [...ticket.thread, msg] });
+    const nextThread = [...ticket.thread, msg];
+    await addTicketMessage(ticket.id, nextThread);
+    onUpdate({ ...ticket, thread: nextThread });
     setReply("");
     notify("Message sent.");
   }
@@ -60,17 +63,23 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
   );
 }
 
-function NewTicketTab({ notify }) {
+function NewTicketTab({ notify, onCreated }) {
   const [category, setCategory] = useState(TICKET_CATEGORIES[0]);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [attachment, setAttachment] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!subject.trim() || !message.trim()) return;
-    // TODO: create Supabase ticket record and trigger admin notification email
-    notify("Your support request has been submitted. We'll respond within 1-2 business days.");
-    setSubject(""); setMessage(""); setAttachment(null); setCategory(TICKET_CATEGORIES[0]);
+    setSubmitting(true);
+    try {
+      await onCreated({ subject: subject.trim(), category, message: message.trim() });
+      notify("Your support request has been submitted. We'll respond within 1-2 business days.");
+      setSubject(""); setMessage(""); setAttachment(null); setCategory(TICKET_CATEGORIES[0]);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -87,7 +96,7 @@ function NewTicketTab({ notify }) {
           className="text-sm" style={{ color: MUTED }} />
         {attachment && <span className="text-xs" style={{ color: "#0F766E" }}>{attachment}</span>}
       </Field>
-      <button onClick={handleSubmit} disabled={!subject.trim() || !message.trim()}
+      <button onClick={handleSubmit} disabled={!subject.trim() || !message.trim() || submitting}
         className="self-start px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
         Submit
       </button>
@@ -97,15 +106,29 @@ function NewTicketTab({ notify }) {
 
 export default function SupportPage() {
   const { user } = useBusinessAuth();
-  const [tickets, setTickets] = useState(() => [...(BUSINESS_SUPPORT_TICKETS[user.id] ?? [])]);
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("mine");
   const [viewing, setViewing] = useState(null);
   const [toast, setToast] = useToast();
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    listTickets(user.id).then((data) => {
+      if (!cancelled) { setTickets(data); setLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [user.id]);
 
   function notify(msg) { setToast(msg); }
   function updateTicket(updated) {
     setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
     setViewing(updated);
+  }
+  async function handleCreated(form) {
+    const created = await createTicket(user.id, { ...form, author: `${user.firstName} ${user.lastName}` });
+    setTickets((prev) => [created, ...prev]);
   }
 
   if (viewing) {
@@ -137,7 +160,9 @@ export default function SupportPage() {
         </div>
 
         {tab === "mine" ? (
-          tickets.length === 0 ? (
+          loading ? (
+            <p className="text-sm" style={{ color: MUTED }}>Loading tickets…</p>
+          ) : tickets.length === 0 ? (
             <p className="text-sm" style={{ color: MUTED }}>No support tickets yet.</p>
           ) : (
             <div className="flex flex-col gap-3">
@@ -153,7 +178,7 @@ export default function SupportPage() {
             </div>
           )
         ) : (
-          <NewTicketTab notify={notify} />
+          <NewTicketTab notify={notify} onCreated={handleCreated} />
         )}
       </div>
     </BusinessLayout>

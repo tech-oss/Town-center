@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { BUSINESS_ARTICLES } from "../../Data/businessPortalMock";
+import { listArticles, setArticleStatus, deleteArticle } from "../api/businessArticles";
 
 const STATUS_COLOURS = {
   Draft: { bg: "rgba(107,114,128,0.13)", fg: "#374151" },
@@ -20,21 +20,35 @@ function StatusBadge({ status }) {
 export default function ArticlesPage() {
   const navigate = useNavigate();
   const { user } = useBusinessAuth();
-  const [articles, setArticles] = useState(() => [...(BUSINESS_ARTICLES[user.id] ?? [])]);
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useToast();
   const [deleting, setDeleting] = useState(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    listArticles(user.id).then((data) => {
+      if (!cancelled) { setArticles(data); setLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [user.id]);
+
   const atMax = articles.length >= 3;
 
-  function handleHide(a) {
-    setArticles((prev) => prev.map((x) => (x.id === a.id ? { ...x, status: x.status === "Hidden" ? "Live" : "Hidden" } : x)));
+  async function handleHide(a) {
+    const status = a.status === "Hidden" ? "Live" : "Hidden";
+    await setArticleStatus(a.id, status);
+    setArticles((prev) => prev.map((x) => (x.id === a.id ? { ...x, status } : x)));
     setToast(a.status === "Hidden" ? `"${a.title}" is live again.` : `"${a.title}" hidden from the public site.`);
   }
-  function handleMakeLive(a) {
+  async function handleMakeLive(a) {
+    await setArticleStatus(a.id, "Live");
     setArticles((prev) => prev.map((x) => (x.id === a.id ? { ...x, status: "Live" } : x)));
     setToast(`"${a.title}" is now live.`);
   }
-  function confirmDelete() {
+  async function confirmDelete() {
+    await deleteArticle(deleting.id);
     setArticles((prev) => prev.filter((x) => x.id !== deleting.id));
     setToast(`"${deleting.title}" deleted.`);
     setDeleting(null);
@@ -69,7 +83,9 @@ export default function ArticlesPage() {
           </div>
         </div>
 
-        {articles.length === 0 ? (
+        {loading ? (
+          <p className="text-sm" style={{ color: MUTED }}>Loading articles…</p>
+        ) : articles.length === 0 ? (
           <div className="bg-white rounded-2xl p-10 text-center" style={CARD}>
             <p className="text-sm" style={{ color: MUTED }}>You haven't created any articles yet.</p>
           </div>

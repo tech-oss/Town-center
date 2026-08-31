@@ -10,8 +10,9 @@ import {
 } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
 import { getBusinessListing, saveBusinessListing } from "../api/businessListing";
+import { listReviews, addReview, updateReview, deleteReview, replyToReview } from "../api/businessReviews";
 import {
-  BUSINESS_REVIEWS, AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
+  AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
 } from "../../Data/businessPortalMock";
 
 function tabsFor(user) {
@@ -39,7 +40,7 @@ export default function MyListingPage() {
   const { user } = useBusinessAuth();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState(() => [...(BUSINESS_REVIEWS[user.id] ?? [])]);
+  const [reviews, setReviews] = useState([]);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useToast();
   const tabs = tabsFor(user);
@@ -51,6 +52,7 @@ export default function MyListingPage() {
     getBusinessListing(user.id).then((data) => {
       if (!cancelled) { setListing(data); setLoading(false); }
     });
+    listReviews(user.id).then((data) => { if (!cancelled) setReviews(data); });
     return () => { cancelled = true; };
   }, [user.id]);
 
@@ -73,23 +75,23 @@ export default function MyListingPage() {
     }
   }
 
-  function handleReviewReply(id, text) {
+  async function handleReviewReply(id, text) {
+    await replyToReview(id, text);
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, reply: { text, status: "Pending Approval" } } : r)));
-    // TODO: persist to Supabase on backend integration
     setToast("Reply submitted for admin approval.");
   }
-  function handleReviewAdd(form) {
-    // TODO: persist to Supabase on backend integration
-    setReviews((prev) => [{ id: `r${Date.now()}`, reply: null, ...form }, ...prev]);
+  async function handleReviewAdd(form) {
+    const created = await addReview(user.id, form);
+    setReviews((prev) => [created, ...prev]);
     setToast("Review added.");
   }
-  function handleReviewUpdate(id, form) {
-    // TODO: persist to Supabase on backend integration
+  async function handleReviewUpdate(id, form) {
+    await updateReview(id, form);
     setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form } : r)));
     setToast("Review updated.");
   }
-  function handleReviewDelete(id) {
-    // TODO: persist to Supabase on backend integration
+  async function handleReviewDelete(id) {
+    await deleteReview(id);
     setReviews((prev) => prev.filter((r) => r.id !== id));
     setToast("Review deleted.");
   }

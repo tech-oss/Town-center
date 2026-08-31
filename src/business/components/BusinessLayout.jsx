@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
-import { BUSINESS_SUPPORT_TICKETS } from "../../Data/businessPortalMock";
+import { listTickets } from "../api/businessTickets";
 
 const FOREST = "var(--forest)", SAGE = "var(--sage)", LEAF = "var(--leaf)";
 const TEXT_ON  = "rgba(255,255,255,0.75)";
@@ -24,9 +24,18 @@ export default function BusinessLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
-  if (!user) return null;
+  const [openTickets, setOpenTickets] = useState(0);
 
-  const openTickets = (BUSINESS_SUPPORT_TICKETS[user.id] ?? []).filter((t) => t.status !== "Resolved").length;
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    listTickets(user.id).then((tickets) => {
+      if (!cancelled) setOpenTickets(tickets.filter((t) => t.status !== "Resolved").length);
+    });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  if (!user) return null;
 
   function handleLogout() {
     logout();
