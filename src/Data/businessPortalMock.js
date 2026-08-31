@@ -9,7 +9,7 @@ export const BUSINESS_TYPES = [
   { value: "shop",      label: "Shop" },
   { value: "see-do",    label: "See & Do" },
   { value: "hotel",     label: "Hotel & Accommodation" },
-  { value: "freelancer",label: "Freelancer & Trader" },
+  { value: "freelancer",label: "Freelancers/Tradeperson/Professional" },
 ];
 
 // ─── Freelancer & Trader — pick one ────────────────────────────────────────────
