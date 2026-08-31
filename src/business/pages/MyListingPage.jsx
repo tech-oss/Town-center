@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -9,8 +9,9 @@ import {
   CARD, BORDER, MUTED, FOREST, SAGE,
 } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
+import { getBusinessListing, saveBusinessListing } from "../api/businessListing";
 import {
-  BUSINESS_LISTING, BUSINESS_REVIEWS, AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
+  BUSINESS_REVIEWS, AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
 } from "../../Data/businessPortalMock";
 
 function tabsFor(user) {
@@ -36,26 +37,40 @@ function tabsFor(user) {
 
 export default function MyListingPage() {
   const { user } = useBusinessAuth();
-  const [listing, setListing] = useState(() => ({ ...BUSINESS_LISTING[user.id] }));
+  const [listing, setListing] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState(() => [...(BUSINESS_REVIEWS[user.id] ?? [])]);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useToast();
   const tabs = tabsFor(user);
   const [tab, setTab] = useState(tabs[0].key);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    getBusinessListing(user.id).then((data) => {
+      if (!cancelled) { setListing(data); setLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [user.id]);
+
   function set(k, v) { setListing((l) => ({ ...l, [k]: v })); }
   function setStatus(tabKey, status) {
     setListing((l) => ({ ...l, approvalStatus: { ...l.approvalStatus, [tabKey]: status } }));
   }
 
-  function handleSave(tabKey) {
+  async function handleSave(tabKey) {
     setSaving(true);
-    // TODO: persist to Supabase on backend integration
-    setTimeout(() => {
-      setSaving(false);
-      setStatus(tabKey, "Pending Approval");
+    const next = { ...listing, approvalStatus: { ...listing.approvalStatus, [tabKey]: "Pending Approval" } };
+    try {
+      await saveBusinessListing(user.id, next);
+      setListing(next);
       setToast("Changes submitted for admin approval.");
-    }, 500);
+    } catch {
+      setToast("Something went wrong saving your changes.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   function handleReviewReply(id, text) {
@@ -77,6 +92,14 @@ export default function MyListingPage() {
     // TODO: persist to Supabase on backend integration
     setReviews((prev) => prev.filter((r) => r.id !== id));
     setToast("Review deleted.");
+  }
+
+  if (loading) {
+    return (
+      <BusinessLayout>
+        <p className="text-sm" style={{ color: MUTED }}>Loading your listing…</p>
+      </BusinessLayout>
+    );
   }
 
   const status = listing.approvalStatus?.[tab];
