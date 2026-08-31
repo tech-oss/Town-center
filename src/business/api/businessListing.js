@@ -33,6 +33,7 @@ function fromRow(row) {
     otherAmenities: row.other_amenities,
     properties: row.properties,
     approvalStatus: row.approval_status,
+    rejectionReason: row.rejection_reason,
   };
 }
 
@@ -63,6 +64,7 @@ function toRow(listing) {
     other_amenities: listing.otherAmenities,
     properties: listing.properties,
     approval_status: listing.approvalStatus,
+    rejection_reason: listing.rejectionReason,
     updated_at: new Date().toISOString(),
   };
 }

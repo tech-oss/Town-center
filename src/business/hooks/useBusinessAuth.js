@@ -24,10 +24,10 @@ function getSnapshot() { return currentUser; }
 // sensible generic session — every page already falls back gracefully when a
 // business has no seeded listing/articles/reviews content yet.
 function buildSessionUser(row) {
-  const base =
-    row.business_id === "biz_coppa" ? coppaMockUser :
-    row.business_id === "biz_fredricks" ? hotelMockUser :
-    {
+  const isSeeded = row.business_id === "biz_coppa" || row.business_id === "biz_fredricks";
+  const base = isSeeded
+    ? (row.business_id === "biz_coppa" ? coppaMockUser : hotelMockUser)
+    : {
       id: row.business_id,
       businessName: businessName(row.business_id),
       businessType: "eat-drink",
@@ -47,7 +47,23 @@ function buildSessionUser(row) {
     lastName: row.last_name,
     email: row.email,
     role: row.role,
+    _isSeeded: isSeeded,
   };
+}
+
+// For businesses registered via the real "Register a Business" flow (not one
+// of the two seeded demo businesses), the generic fallback above can't know
+// the real business name/type — pull them from business_listings, which now
+// exists for every registered business.
+async function applyListingIdentity(user) {
+  if (user._isSeeded) return user;
+  const { data } = await supabase
+    .from("business_listings")
+    .select("name, business_type")
+    .eq("business_id", user.id)
+    .maybeSingle();
+  if (!data) return user;
+  return { ...user, businessName: data.name ?? user.businessName, businessType: data.business_type ?? user.businessType };
 }
 
 // Billing fields (plan, planStatus, renewalDate, monthlyFee, isMultiSite,
@@ -78,6 +94,7 @@ async function refreshFromSession(session) {
   restored = true;
   emit();
   if (currentUser) {
+    currentUser = await applyListingIdentity(currentUser);
     currentUser = await applySubscription(currentUser);
     emit();
   }

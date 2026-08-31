@@ -5,6 +5,7 @@ import {
   FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES,
 } from "../../Data/businessPortalMock";
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
+import { registerBusiness } from "../api/businessRegistration";
 
 const FOREST = "var(--forest)", SAGE = "var(--sage)", LEAF = "var(--leaf)";
 const MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
@@ -127,6 +128,8 @@ export default function SignUpPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(EMPTY);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -146,8 +149,12 @@ export default function SignUpPage() {
     return true;
   }
 
-  function handleSubmit() {
-    // TODO: persist to Supabase on backend integration
+  async function handleSubmit() {
+    setError("");
+    setSubmitting(true);
+    const res = await registerBusiness(form);
+    setSubmitting(false);
+    if (!res.ok) { setError(res.error); return; }
     setSubmitted(true);
   }
 
@@ -281,6 +288,8 @@ export default function SignUpPage() {
             </div>
           )}
 
+          {error && <p className="text-xs font-medium mt-4" style={{ color: "#DC2626" }}>{error}</p>}
+
           <div className="flex gap-3 pt-6 mt-6" style={{ borderTop: `1px solid ${BORDER}` }}>
             {step > 0 && (
               <button onClick={() => setStep((s) => s - 1)} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>
@@ -293,9 +302,9 @@ export default function SignUpPage() {
                 Continue
               </button>
             ) : (
-              <button onClick={handleSubmit} disabled={!validStep()}
+              <button onClick={handleSubmit} disabled={!validStep() || submitting}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-                Create Account
+                {submitting ? "Creating Account…" : "Create Account"}
               </button>
             )}
           </div>

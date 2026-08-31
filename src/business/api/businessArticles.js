@@ -14,6 +14,7 @@ function fromRow(row) {
     thumbnail: row.thumbnail,
     heroImage: row.hero_image,
     body: row.body,
+    rejectionReason: row.rejection_reason,
   };
 }
 
