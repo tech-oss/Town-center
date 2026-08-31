@@ -3,8 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, Toggle, Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { BUSINESS_TEAM } from "../../Data/businessPortalMock";
-import { usePendingRequests, approveRequest, declineRequest } from "../hooks/useUserRegistry";
+import { usePendingRequests, useApprovedTeam, approveRequest, declineRequest } from "../hooks/useUserRegistry";
 
 function AccordionSection({ title, children, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -26,7 +25,9 @@ export default function SettingsPage() {
 
   const [personal, setPersonal] = useState({ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone });
   const [pw, setPw] = useState({ current: "", next: "", confirm: "" });
-  const [team, setTeam] = useState(() => [...(BUSINESS_TEAM[user.id] ?? [])]);
+  const fetchedTeam = useApprovedTeam(user.id);
+  const [teamOverride, setTeamOverride] = useState(null);
+  const team = teamOverride ?? fetchedTeam;
   const [addingMember, setAddingMember] = useState(false);
   const [memberForm, setMemberForm] = useState({ name: "", email: "" });
   const [transferTarget, setTransferTarget] = useState(null);
@@ -38,13 +39,12 @@ export default function SettingsPage() {
   const isOwner = user.role !== "Content Manager";
   const pendingRequests = usePendingRequests(user.id);
 
-  function handleApproveRequest(req) {
-    approveRequest(user.id, req.id);
-    setTeam((prev) => [...prev, { id: `u${Date.now()}`, name: `${req.firstName} ${req.lastName}`, email: req.email, role: "Content Manager" }]);
+  async function handleApproveRequest(req) {
+    await approveRequest(user.id, req.id);
     setToast(`${req.firstName} ${req.lastName} approved as Content Manager.`);
   }
-  function handleDeclineRequest(req) {
-    declineRequest(user.id, req.id);
+  async function handleDeclineRequest(req) {
+    await declineRequest(user.id, req.id);
     setToast(`Request from ${req.firstName} ${req.lastName} declined.`);
   }
 
@@ -60,19 +60,20 @@ export default function SettingsPage() {
   }
   function inviteMember() {
     if (!memberForm.name.trim() || !memberForm.email.trim()) return;
-    // TODO: update business_users table
-    setTeam((prev) => [...prev, { id: `u${Date.now()}`, ...memberForm, role: "Content Manager" }]);
+    // TODO: not wired to Supabase — needs a password field/UX decision to call
+    // supabase.auth.signUp + an auto-approved business_users insert. Deferred.
+    setTeamOverride((prev) => [...(prev ?? team), { id: `u${Date.now()}`, ...memberForm, role: "Content Manager" }]);
     setMemberForm({ name: "", email: "" });
     setAddingMember(false);
     setToast("Invite sent.");
   }
   function removeMember(id) {
-    setTeam((prev) => prev.filter((m) => m.id !== id));
+    setTeamOverride((prev) => (prev ?? team).filter((m) => m.id !== id));
     setToast("Team member removed.");
   }
   function confirmTransfer() {
     // TODO: update business_users table
-    setTeam((prev) => prev.map((m) => {
+    setTeamOverride((prev) => (prev ?? team).map((m) => {
       if (m.id === transferTarget.id) return { ...m, role: "Owner" };
       if (m.role === "Owner") return { ...m, role: "Manager" };
       return m;

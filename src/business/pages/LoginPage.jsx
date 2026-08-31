@@ -1,43 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
-import { findUserByEmail, businessName } from "../hooks/useUserRegistry";
-import { coppaMockUser, hotelMockUser } from "../../Data/businessPortalMock";
 import { Field, Inp } from "../components/FormKit";
 
 const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
-
-// Builds a full session object for a portal account. Owners of the two fully
-// seeded demo businesses reuse their rich mock records; any other business
-// (including ones only registered via "Register a User") gets a sensible
-// generic session — every page already falls back gracefully when a
-// business has no seeded listing/articles/reviews content yet.
-function buildSessionUser(portalUser) {
-  const base =
-    portalUser.businessId === "biz_coppa" ? coppaMockUser :
-    portalUser.businessId === "biz_fredricks" ? hotelMockUser :
-    {
-      id: portalUser.businessId,
-      businessName: businessName(portalUser.businessId),
-      businessType: "eat-drink",
-      plan: "standard",
-      planStatus: "Active",
-      renewalDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-      monthlyFee: 39,
-      isMultiSite: false,
-      visible: true,
-      termsAcceptedAt: new Date().toISOString(),
-      upgradePlanKey: "basic",
-    };
-  return {
-    ...base,
-    firstName: portalUser.firstName,
-    lastName: portalUser.lastName,
-    email: portalUser.email,
-    role: portalUser.role,
-  };
-}
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -45,23 +12,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    const match = findUserByEmail(email);
-    if (match) {
-      if (match.password !== password) {
-        setError("Incorrect email or password.");
-        return;
-      }
-      login(buildSessionUser(match));
-      navigate("/business/dashboard");
-      return;
-    }
-    // Unrecognised email — mock convenience fallback so the demo stays
-    // explorable with any input, logged in as the Coppa Club owner.
-    login(coppaMockUser);
+    setSubmitting(true);
+    const { ok, error: err } = await login(email, password);
+    setSubmitting(false);
+    if (!ok) { setError(err); return; }
     navigate("/business/dashboard");
   }
 
@@ -84,8 +43,8 @@ export default function LoginPage() {
             <a href="#" onClick={(e) => e.preventDefault()} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Forgot password?</a>
           </div>
 
-          <button type="submit" className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-            Log In
+          <button type="submit" disabled={submitting} className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
+            {submitting ? "Logging in…" : "Log In"}
           </button>
 
           <div className="flex flex-col gap-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>

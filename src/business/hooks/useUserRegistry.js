@@ -1,78 +1,125 @@
-import { useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { supabase } from "../../lib/supabaseClient";
 import { BUSINESS_DIRECTORY } from "../../Data/businessPortalMock";
 
-// ─── Mock registry: portal login accounts + pending Content Manager requests
-// A business can have exactly one Content Manager seat. This is a second
-// user attached to an existing business who can manage listing content but
-// cannot see or change Subscriptions & Billing.
-// TODO: replace with real Supabase auth + a business_users table on backend integration
-
-let PORTAL_USERS = [
-  { id: "pu1", firstName: "James", lastName: "Whitfield", email: "james@coppaclub.co.uk", password: "password", role: "Owner", businessId: "biz_coppa" },
-  { id: "pu2", firstName: "Sarah", lastName: "Coombes", email: "sarah@fredricks-hotel.co.uk", password: "password", role: "Owner", businessId: "biz_fredricks" },
-];
-
-// businessId -> [{ id, firstName, lastName, email, password, requestedAt }]
-// Seeded with one mock request against Coppa Club so the Accept/Decline UI
-// is visible on Settings without first walking through the full "Register
-// a User" flow in the same session.
-let PENDING_REQUESTS = {
-  biz_coppa: [
-    { id: "req_seed1", firstName: "Priya", lastName: "Anand", email: "priya.anand@example.com", password: "password", requestedAt: "2026-08-28" },
-  ],
-};
-
-const listeners = new Set();
-function emit() { listeners.forEach((l) => l()); }
-function subscribe(cb) { listeners.add(cb); return () => listeners.delete(cb); }
+// ─── Supabase-backed business_users registry ───────────────────────────────
+// business_users is the single source of truth for portal logins (Owner +
+// Content Manager rows) and pending Content Manager join requests. Replaces
+// the old in-memory PORTAL_USERS / PENDING_REQUESTS / BUSINESS_TEAM mocks.
 
 export function businessName(businessId) {
+  // Directory names are still read from the static mock — kept in sync
+  // manually with the seeded `businesses` table (see migration SQL). Avoids
+  // an extra round-trip for what's currently only a sync display lookup.
   return BUSINESS_DIRECTORY.find((b) => b.id === businessId)?.name ?? businessId;
 }
 
 // A business may have only one Content Manager — pending or already approved.
-export function hasContentManagerSlotTaken(businessId) {
-  const pending = PENDING_REQUESTS[businessId]?.length > 0;
-  const approved = PORTAL_USERS.some((u) => u.businessId === businessId && u.role === "Content Manager");
-  return pending || approved;
+export async function hasContentManagerSlotTaken(businessId) {
+  const { count, error } = await supabase
+    .from("business_users")
+    .select("id", { count: "exact", head: true })
+    .eq("business_id", businessId)
+    .eq("role", "Content Manager")
+    .in("status", ["pending", "approved"]);
+  return !error && count > 0;
 }
 
-export function submitUserRegistration({ businessId, firstName, lastName, email, password }) {
-  if (hasContentManagerSlotTaken(businessId)) {
-    return { ok: false, error: "This business already has a content manager registered or awaiting approval." };
+export async function submitUserRegistration({ businessId, firstName, lastName, email, password }) {
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+  if (signUpError) return { ok: false, error: signUpError.message };
+
+  const { error: insertError } = await supabase.from("business_users").insert({
+    auth_user_id: signUpData.user.id,
+    business_id: businessId,
+    role: "Content Manager",
+    first_name: firstName,
+    last_name: lastName,
+    email,
+    status: "pending",
+  });
+
+  if (insertError) {
+    if (insertError.code === "23505") {
+      return { ok: false, error: "This business already has a content manager registered or awaiting approval." };
+    }
+    return { ok: false, error: insertError.message };
   }
-  if (PORTAL_USERS.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-    return { ok: false, error: "An account with that email already exists." };
-  }
-  const req = { id: `req${Date.now()}`, firstName, lastName, email, password, requestedAt: new Date().toISOString().slice(0, 10) };
-  PENDING_REQUESTS = { ...PENDING_REQUESTS, [businessId]: [...(PENDING_REQUESTS[businessId] ?? []), req] };
-  emit();
   return { ok: true };
 }
 
-export function approveRequest(businessId, reqId) {
-  const req = (PENDING_REQUESTS[businessId] ?? []).find((r) => r.id === reqId);
-  if (!req) return;
-  PORTAL_USERS = [...PORTAL_USERS, {
-    id: `pu${Date.now()}`, firstName: req.firstName, lastName: req.lastName,
-    email: req.email, password: req.password, role: "Content Manager", businessId,
-  }];
-  PENDING_REQUESTS = { ...PENDING_REQUESTS, [businessId]: PENDING_REQUESTS[businessId].filter((r) => r.id !== reqId) };
-  emit();
+export async function approveRequest(businessId, reqId) {
+  await supabase
+    .from("business_users")
+    .update({ status: "approved", approved_at: new Date().toISOString() })
+    .eq("id", reqId)
+    .eq("business_id", businessId);
 }
 
-export function declineRequest(businessId, reqId) {
-  PENDING_REQUESTS = { ...PENDING_REQUESTS, [businessId]: (PENDING_REQUESTS[businessId] ?? []).filter((r) => r.id !== reqId) };
-  emit();
+export async function declineRequest(businessId, reqId) {
+  await supabase
+    .from("business_users")
+    .update({ status: "declined" })
+    .eq("id", reqId)
+    .eq("business_id", businessId);
 }
 
-export function findUserByEmail(email) {
-  return PORTAL_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
-}
+function useBusinessUsersByStatus(businessId, status) {
+  const [rows, setRows] = useState([]);
 
-function getSnapshot() { return PENDING_REQUESTS; }
+  const refetch = useCallback(async () => {
+    if (!businessId) { setRows([]); return; }
+    const { data } = await supabase
+      .from("business_users")
+      .select("*")
+      .eq("business_id", businessId)
+      .eq("role", "Content Manager")
+      .eq("status", status)
+      .order("requested_at");
+    setRows(data ?? []);
+  }, [businessId, status]);
+
+  useEffect(() => {
+    refetch();
+    if (!businessId) return;
+    const channel = supabase
+      .channel(`business_users:${businessId}:${status}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "business_users", filter: `business_id=eq.${businessId}` }, refetch)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [businessId, status, refetch]);
+
+  return rows;
+}
 
 export function usePendingRequests(businessId) {
-  const all = useSyncExternalStore(subscribe, getSnapshot);
-  return all[businessId] ?? [];
+  const rows = useBusinessUsersByStatus(businessId, "pending");
+  return rows.map((r) => ({ id: r.id, firstName: r.first_name, lastName: r.last_name, email: r.email, requestedAt: r.requested_at?.slice(0, 10) }));
+}
+
+export function useApprovedTeam(businessId) {
+  const [rows, setRows] = useState([]);
+
+  const refetch = useCallback(async () => {
+    if (!businessId) { setRows([]); return; }
+    const { data } = await supabase
+      .from("business_users")
+      .select("*")
+      .eq("business_id", businessId)
+      .eq("status", "approved")
+      .order("role", { ascending: false }); // Owner before Content Manager
+    setRows(data ?? []);
+  }, [businessId]);
+
+  useEffect(() => {
+    refetch();
+    if (!businessId) return;
+    const channel = supabase
+      .channel(`business_users_team:${businessId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "business_users", filter: `business_id=eq.${businessId}` }, refetch)
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [businessId, refetch]);
+
+  return rows.map((r) => ({ id: r.id, name: `${r.first_name} ${r.last_name}`, email: r.email, role: r.role }));
 }

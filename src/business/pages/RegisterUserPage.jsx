@@ -66,11 +66,15 @@ export default function RegisterUserPage() {
   const isValid = form.businessId && form.firstName.trim() && form.lastName.trim() && form.email.trim()
     && form.password && form.password === form.confirmPassword;
 
-  function handleSubmit(e) {
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     if (!isValid) { setError("Please fill in all fields — passwords must match."); return; }
-    const res = submitUserRegistration(form);
+    setSubmitting(true);
+    const res = await submitUserRegistration(form);
+    setSubmitting(false);
     if (!res.ok) { setError(res.error); return; }
     setSubmitted(true);
   }
@@ -120,8 +124,8 @@ export default function RegisterUserPage() {
 
           {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
 
-          <button type="submit" disabled={!isValid} className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-            Send Registration Request
+          <button type="submit" disabled={!isValid || submitting} className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
+            {submitting ? "Sending…" : "Send Registration Request"}
           </button>
 
           <p className="text-xs text-center" style={{ color: MUTED }}>
