@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
-import { BUSINESS_DIRECTORY } from "../../Data/businessPortalMock";
 
 // ─── Supabase-backed business_users registry ───────────────────────────────
 // business_users is the single source of truth for portal logins (Owner +
@@ -8,10 +7,19 @@ import { BUSINESS_DIRECTORY } from "../../Data/businessPortalMock";
 // the old in-memory PORTAL_USERS / PENDING_REQUESTS / BUSINESS_TEAM mocks.
 
 export function businessName(businessId) {
-  // Directory names are still read from the static mock — kept in sync
-  // manually with the seeded `businesses` table (see migration SQL). Avoids
-  // an extra round-trip for what's currently only a sync display lookup.
-  return BUSINESS_DIRECTORY.find((b) => b.id === businessId)?.name ?? businessId;
+  // Synchronous fallback only — used as a placeholder in the generic session
+  // base before the real name (from business_listings) overrides it. Not a
+  // real lookup anymore now that the businesses table is the source of truth.
+  return businessId;
+}
+
+// Real business directory, used by the "Register a User" business search —
+// replaces the old static BUSINESS_DIRECTORY mock so newly registered
+// businesses actually show up.
+export async function listBusinesses() {
+  const { data, error } = await supabase.from("businesses").select("id, name").order("name");
+  if (error) throw error;
+  return data ?? [];
 }
 
 // A business may have only one Content Manager — pending or already approved.

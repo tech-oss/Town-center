@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { BUSINESS_DIRECTORY } from "../../Data/businessPortalMock";
-import { submitUserRegistration } from "../hooks/useUserRegistry";
+import { submitUserRegistration, listBusinesses } from "../hooks/useUserRegistry";
 import { Field, Inp } from "../components/FormKit";
 
 const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
@@ -11,11 +10,16 @@ const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)",
 function BusinessPicker({ value, onChange }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [businesses, setBusinesses] = useState([]);
   const rootRef = useRef(null);
 
-  const selected = BUSINESS_DIRECTORY.find((b) => b.id === value) ?? null;
+  useEffect(() => {
+    listBusinesses().then(setBusinesses).catch(() => setBusinesses([]));
+  }, []);
+
+  const selected = businesses.find((b) => b.id === value) ?? null;
   const matches = query.trim()
-    ? BUSINESS_DIRECTORY.filter((b) => b.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
+    ? businesses.filter((b) => b.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
     : [];
 
   useEffect(() => {
