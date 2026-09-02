@@ -233,46 +233,28 @@ const Header = forwardRef(function Header(_, ref) {
       {openDropdown && menusByLabel[openDropdown] && (
         <div className="hidden lg:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
           <div
-            className="py-8 grid gap-14 mx-auto px-8 w-max max-w-[calc(100vw-4rem)]"
-            style={{ gridTemplateColumns: menusByLabel[openDropdown].columns.map(() => "max-content").join(" ") }}
+            className={`py-8 grid gap-10 ${openDropdown === "Explore" ? "ml-auto px-8 w-max" : "max-w-6xl mx-auto px-8"}`}
+            style={{ gridTemplateColumns: `repeat(${menusByLabel[openDropdown].columns.length}, minmax(0, 1fr))` }}
           >
             {menusByLabel[openDropdown].columns.map((col) => (
-              <div key={col.heading}>
+              <div key={col.heading} className={col.links.length > 8 ? "min-w-[280px]" : ""}>
                 <p className="section-eyebrow mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
-                {col.links.length > 8 ? (
-                  <div className="columns-2 gap-x-8 w-[280px]">
-                    {col.links.map((l) => (
+                <ul className={col.links.length > 8 ? "columns-2 gap-x-8" : "flex flex-col gap-2.5"}>
+                  {col.links.map((l) => (
+                    <li key={l.to} className={col.links.length > 8 ? "mb-2.5 break-inside-avoid" : ""}>
                       <Link
-                        key={l.to}
                         to={l.to}
                         onClick={() => setOpenDropdown(null)}
-                        className="block mb-2.5 break-inside-avoid text-sm whitespace-nowrap transition-colors duration-150"
+                        className="text-sm transition-colors duration-150"
                         style={{ color: "#000000" }}
                         onMouseEnter={(e) => (e.currentTarget.style.color = "var(--leaf)")}
                         onMouseLeave={(e) => (e.currentTarget.style.color = "var(--forest)")}
                       >
                         {l.label}
                       </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <ul className="flex flex-col gap-2.5">
-                    {col.links.map((l) => (
-                      <li key={l.to}>
-                        <Link
-                          to={l.to}
-                          onClick={() => setOpenDropdown(null)}
-                          className="text-sm whitespace-nowrap transition-colors duration-150"
-                          style={{ color: "#000000" }}
-                          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--leaf)")}
-                          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--forest)")}
-                        >
-                          {l.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
