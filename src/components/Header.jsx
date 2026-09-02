@@ -237,11 +237,11 @@ const Header = forwardRef(function Header(_, ref) {
             style={{ gridTemplateColumns: `repeat(${menusByLabel[openDropdown].columns.length}, minmax(0, 1fr))` }}
           >
             {menusByLabel[openDropdown].columns.map((col) => (
-              <div key={col.heading} className={col.links.length > 8 ? "min-w-[280px]" : ""}>
+              <div key={col.heading}>
                 <p className="section-eyebrow mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
-                <ul className={col.links.length > 8 ? "columns-2 gap-x-8" : "flex flex-col gap-2.5"}>
+                <ul className="flex flex-col gap-2.5">
                   {col.links.map((l) => (
-                    <li key={l.to} className={col.links.length > 8 ? "mb-2.5 break-inside-avoid" : ""}>
+                    <li key={l.to}>
                       <Link
                         to={l.to}
                         onClick={() => setOpenDropdown(null)}
