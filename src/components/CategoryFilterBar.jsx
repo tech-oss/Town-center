@@ -81,9 +81,9 @@ const CATEGORY_ICON = {
   copywriters: "feather", "marketing-consultants": "megaphone",
   "personal-trainers": "dumbbell", tutors: "cap", "virtual-assistants": "check-user",
   // See & Do
-  "art-culture": "palette", community: "users", family: "users",
-  "fashion-beauty": "sparkles", film: "clapper", gaming: "gamepad",
-  learning: "book", "sport-wellness": "dumbbell",
+  "sport-wellness": "dumbbell", gaming: "gamepad", film: "clapper",
+  "art-culture": "palette", learning: "book", "music-dance": "sparkles",
+  theatre: "clapper", community: "users", family: "users", markets: "cart",
 };
 
 // Width set aside for the "More" control when the categories don't all fit.

@@ -9,24 +9,26 @@ import CategoryFilterBar from "./CategoryFilterBar";
 // Colour key for the See & Do category dots — one fixed colour per category,
 // reused everywhere a category is shown so it reads as a consistent legend.
 const CATEGORY_COLORS = {
+  "sport-wellness": "#22c55e",
+  gaming: "#6366f1",
+  film: "#1c2e38",
   "art-culture": "#8b5cf6",
+  learning: "#2563eb",
+  "music-dance": "#d946ef",
+  theatre: "#8E44AD",
   community: "#f59e0b",
   family: "#ec4899",
-  "fashion-beauty": "#e11d48",
-  film: "#1c2e38",
-  gaming: "#6366f1",
-  learning: "#2563eb",
-  "sport-wellness": "#22c55e",
+  markets: "#4C9A2A",
 };
 
 // What's On events carry their own category system (Music, Family, Market,
 // Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
 // category so every card, event or otherwise, uses the same consistent set.
 const EVENT_CATEGORY_MAP = {
-  Music: "art-culture",
-  Theatre: "art-culture",
+  Music: "music-dance",
+  Theatre: "theatre",
   Family: "family",
-  Market: "community",
+  Market: "markets",
   Festive: "community",
   Community: "community",
   Sport: "sport-wellness",

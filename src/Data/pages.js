@@ -609,7 +609,7 @@ const seeItems = [
   item("maidenhead-heritage-walk", "Maidenhead Heritage Walk", "see-do", "art-culture", "Art & Culture"),
   item("community-garden-day", "Community Garden Day", "see-do", "community", "Community"),
   item("kids-craft-club", "Kids' Craft Club", "see-do", "family", "Family"),
-  item("style-edit-evening", "Style Edit Evening", "see-do", "fashion-beauty", "Fashion & Beauty"),
+  item("style-edit-evening", "Style Edit Evening", "see-do", "learning", "Learning"),
   item("riverside-film-nights", "Riverside Film Nights", "see-do", "film", "Film"),
   {
     ...item("odeon-luxe-maidenhead", "ODEON Luxe Maidenhead", "see-do", "film", "Film"),
@@ -844,14 +844,16 @@ export const sections = {
         heading: "Browse By Interest",
         links: [
           { label: "See All Activities", to: "/see-do" },
+          { label: "Sport & Wellness", to: "/see-do?category=sport-wellness" },
+          { label: "Gaming", to: "/see-do?category=gaming" },
+          { label: "Film", to: "/see-do?category=film" },
           { label: "Art & Culture", to: "/see-do?category=art-culture" },
+          { label: "Learning", to: "/see-do?category=learning" },
+          { label: "Music & Dance", to: "/see-do?category=music-dance" },
+          { label: "Theatre", to: "/see-do?category=theatre" },
           { label: "Community", to: "/see-do?category=community" },
           { label: "Family", to: "/see-do?category=family" },
-          { label: "Fashion & Beauty", to: "/see-do?category=fashion-beauty" },
-          { label: "Film", to: "/see-do?category=film" },
-          { label: "Gaming", to: "/see-do?category=gaming" },
-          { label: "Learning", to: "/see-do?category=learning" },
-          { label: "Sport & Wellness", to: "/see-do?category=sport-wellness" },
+          { label: "Markets", to: "/see-do?category=markets" },
         ],
       },
       {
@@ -922,14 +924,16 @@ export const categoryTitles = {
   japanese: "Japanese",
   bakery: "Bakery",
   // see & do
+  "sport-wellness": "Sport & Wellness",
+  gaming: "Gaming",
+  film: "Film",
   "art-culture": "Art & Culture",
+  learning: "Learning",
+  "music-dance": "Music & Dance",
+  theatre: "Theatre",
   community: "Community",
   family: "Family",
-  "fashion-beauty": "Fashion & Beauty",
-  film: "Film",
-  gaming: "Gaming",
-  learning: "Learning",
-  "sport-wellness": "Sport & Wellness",
+  markets: "Markets",
 };
 
 // Flat lookup of every item by slug (for detail pages)
