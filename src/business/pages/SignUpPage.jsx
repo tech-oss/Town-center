@@ -2,8 +2,15 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   BUSINESS_TYPES, SUBSCRIPTION_PLANS, TERMS_TEXT,
-  FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES,
+  FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES,
+  FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES, TRADESPERSON_CATEGORIES,
 } from "../../Data/businessPortalMock";
+
+const FREELANCER_KIND_CATEGORIES = {
+  freelancer: FREELANCER_CATEGORIES,
+  professional: PROFESSIONAL_CATEGORIES,
+  tradesperson: TRADESPERSON_CATEGORIES,
+};
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
 import { registerBusiness } from "../api/businessRegistration";
 
@@ -17,10 +24,12 @@ const EMPTY = {
   firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "",
   businessName: "", businessType: "", website: "", businessEmail: "", businessPhone: "", businessAddress: "",
   freelancerKind: "",   // Tradesperson | Professional | Freelancer — for businessType "freelancer"
+  freelancerCategories: [], // multi-select, max 2, sub-category for the chosen freelancerKind
   hotelKind: "hotel",   // "hotel" | "accommodation" — sub-choice for businessType "hotel"
-  cuisineTypes: [],     // multi-select, for businessType "eat-drink"
-  venueTypes: [],       // multi-select, for businessType "eat-drink"
-  shopCategories: [],   // multi-select, for businessType "shop"
+  cuisineTypes: [],     // multi-select, max 2, for businessType "eat-drink"
+  venueTypes: [],       // multi-select, max 2, for businessType "eat-drink"
+  shopCategories: [],   // multi-select, max 2, for businessType "shop"
+  seeDoCategories: [],  // multi-select, max 2, for businessType "see-do"
   planKey: "standard",
   agreeTerms: false, agreePrivacy: false,
   confirmFinal: false,  // "I understand this can't be changed later" — Review step
@@ -88,16 +97,24 @@ function RadioGroup({ options, value, onChange }) {
 }
 
 // ─── Multi-select checkbox chips, optionally grouped ──────────────────────────
-function CheckGroup({ options, selected, onChange, grouped }) {
+function CheckGroup({ options, selected, onChange, grouped, max }) {
+  const atMax = max != null && selected.length >= max;
   function toggle(v) {
-    onChange(selected.includes(v) ? selected.filter((x) => x !== v) : [...selected, v]);
+    if (selected.includes(v)) { onChange(selected.filter((x) => x !== v)); return; }
+    if (atMax) return;
+    onChange([...selected, v]);
   }
   function Chip({ o }) {
     const checked = selected.includes(o.value);
+    const disabled = !checked && atMax;
     return (
-      <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-all"
-        style={checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
-        <input type="checkbox" checked={checked} onChange={() => toggle(o.value)} className="w-3.5 h-3.5" />
+      <label className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
+        style={{
+          cursor: disabled ? "not-allowed" : "pointer",
+          opacity: disabled ? 0.4 : 1,
+          ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
+        }}>
+        <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(o.value)} className="w-3.5 h-3.5" />
         <span className="text-xs font-medium" style={{ color: FOREST }}>{o.label}</span>
       </label>
     );
@@ -154,8 +171,10 @@ export default function SignUpPage() {
     if (step === 1) {
       if (!(form.businessName.trim() && form.businessType && form.businessAddress.trim())) return false;
       if (form.businessType === "freelancer" && !form.freelancerKind) return false;
+      if (form.businessType === "freelancer" && form.freelancerKind && !form.freelancerCategories.length) return false;
       if (form.businessType === "eat-drink" && !(form.cuisineTypes.length && form.venueTypes.length)) return false;
       if (form.businessType === "shop" && !form.shopCategories.length) return false;
+      if (form.businessType === "see-do" && !form.seeDoCategories.length) return false;
       return true;
     }
     if (step === 2) return true;
@@ -230,9 +249,17 @@ export default function SignUpPage() {
               <Field label="Business Address" required span2><TextArea rows={2} value={form.businessAddress} onChange={(e) => set("businessAddress", e.target.value)} /></Field>
 
               {form.businessType === "freelancer" && (
-                <Field label="Which best describes you?" required span2>
-                  <RadioGroup options={FREELANCER_KINDS} value={form.freelancerKind} onChange={(v) => set("freelancerKind", v)} />
-                </Field>
+                <>
+                  <Field label="Which best describes you?" required span2>
+                    <RadioGroup options={FREELANCER_KINDS} value={form.freelancerKind}
+                      onChange={(v) => setForm((f) => ({ ...f, freelancerKind: v, freelancerCategories: [] }))} />
+                  </Field>
+                  {form.freelancerKind && (
+                    <Field label="Category" required span2 hint="Select up to 2">
+                      <CheckGroup options={FREELANCER_KIND_CATEGORIES[form.freelancerKind]} selected={form.freelancerCategories} onChange={(v) => set("freelancerCategories", v)} max={2} />
+                    </Field>
+                  )}
+                </>
               )}
 
               {form.businessType === "hotel" && (
@@ -243,18 +270,24 @@ export default function SignUpPage() {
 
               {form.businessType === "eat-drink" && (
                 <>
-                  <Field label="Cuisine Type" required span2 hint="Select all that apply">
-                    <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v)} />
+                  <Field label="Cuisine Type" required span2 hint="Select up to 2">
+                    <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v)} max={2} />
                   </Field>
-                  <Field label="Venue Type" required span2 hint="Select all that apply">
-                    <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v)} />
+                  <Field label="Venue Type" required span2 hint="Select up to 2">
+                    <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v)} max={2} />
                   </Field>
                 </>
               )}
 
               {form.businessType === "shop" && (
-                <Field label="Shop Category" required span2 hint="Select all that apply">
-                  <CheckGroup options={SHOP_CATEGORIES} selected={form.shopCategories} onChange={(v) => set("shopCategories", v)} grouped />
+                <Field label="Shop Category" required span2 hint="Select up to 2">
+                  <CheckGroup options={SHOP_CATEGORIES} selected={form.shopCategories} onChange={(v) => set("shopCategories", v)} grouped max={2} />
+                </Field>
+              )}
+
+              {form.businessType === "see-do" && (
+                <Field label="Category" required span2 hint="Select up to 2">
+                  <CheckGroup options={SEE_DO_CATEGORIES} selected={form.seeDoCategories} onChange={(v) => set("seeDoCategories", v)} max={2} />
                 </Field>
               )}
             </div>
@@ -303,10 +336,12 @@ export default function SignUpPage() {
                 <SummaryRow label="Business Name" value={form.businessName} />
                 <SummaryRow label="Business Type" value={labelFor(BUSINESS_TYPES, form.businessType)} />
                 {form.businessType === "freelancer" && <SummaryRow label="Which best describes you" value={labelFor(FREELANCER_KINDS, form.freelancerKind)} />}
+                {form.businessType === "freelancer" && form.freelancerKind && <SummaryRow label="Category" value={form.freelancerCategories.map((v) => labelFor(FREELANCER_KIND_CATEGORIES[form.freelancerKind], v)).join(", ")} />}
                 {form.businessType === "hotel" && <SummaryRow label="Hotel or Accommodation" value={labelFor(HOTEL_KINDS, form.hotelKind)} />}
                 {form.businessType === "eat-drink" && <SummaryRow label="Cuisine Type" value={form.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")} />}
                 {form.businessType === "eat-drink" && <SummaryRow label="Venue Type" value={form.venueTypes.map((v) => labelFor(VENUE_TYPES, v)).join(", ")} />}
                 {form.businessType === "shop" && <SummaryRow label="Shop Category" value={form.shopCategories.map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ")} />}
+                {form.businessType === "see-do" && <SummaryRow label="Category" value={form.seeDoCategories.map((v) => labelFor(SEE_DO_CATEGORIES, v)).join(", ")} />}
                 <SummaryRow label="Website" value={form.website} />
                 <SummaryRow label="Business Email" value={form.businessEmail} />
                 <SummaryRow label="Business Phone" value={form.businessPhone} />

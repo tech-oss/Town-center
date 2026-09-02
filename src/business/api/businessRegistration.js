@@ -51,10 +51,12 @@ export async function registerBusiness(form) {
     business_type: listingBusinessType,
     business_type_detail: {
       freelancerKind: form.freelancerKind || null,
+      freelancerCategories: form.freelancerKind ? form.freelancerCategories : [],
       hotelKind: isHotel ? form.hotelKind : null,
       cuisineTypes: form.cuisineTypes,
       venueTypes: form.venueTypes,
       shopCategories: form.shopCategories,
+      seeDoCategories: form.seeDoCategories,
     },
     address: form.businessAddress,
     phone: form.businessPhone,

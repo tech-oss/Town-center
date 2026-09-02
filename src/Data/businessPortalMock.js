@@ -9,14 +9,46 @@ export const BUSINESS_TYPES = [
   { value: "shop",      label: "Shop" },
   { value: "see-do",    label: "See & Do" },
   { value: "hotel",     label: "Hotel & Accommodation" },
-  { value: "freelancer",label: "Freelancers/Tradeperson/Professional" },
+  { value: "freelancer",label: "Services" },
 ];
 
-// ─── Freelancer & Trader — pick one ────────────────────────────────────────────
+// ─── Services — pick one ────────────────────────────────────────────
 export const FREELANCER_KINDS = [
   { value: "tradesperson", label: "Tradesperson" },
   { value: "professional", label: "Professional" },
   { value: "freelancer",   label: "Freelancer" },
+];
+
+// ─── Services — Freelancer sub-category (multi-select, max 2) ────────────────
+export const FREELANCER_CATEGORIES = [
+  { value: "graphic-designers",  label: "Graphic Designers" },
+  { value: "web-developers",     label: "Web Developers" },
+  { value: "photographers",      label: "Photographers" },
+  { value: "copywriters",        label: "Copywriters & Content Writers" },
+  { value: "marketing-consultants", label: "Marketing Consultants" },
+  { value: "personal-trainers",  label: "Personal Trainers" },
+  { value: "tutors",             label: "Tutors" },
+  { value: "virtual-assistants", label: "Virtual Assistants" },
+];
+
+// ─── Services — Professional sub-category (multi-select, max 2) ──────────────
+export const PROFESSIONAL_CATEGORIES = [
+  { value: "accountants",       label: "Accountants" },
+  { value: "solicitors",        label: "Solicitors" },
+  { value: "financial-advisers",label: "Financial Advisers" },
+  { value: "estate-agents",     label: "Estate Agents" },
+  { value: "recruitment",       label: "Recruitment" },
+  { value: "insurance-brokers", label: "Insurance Brokers" },
+];
+
+// ─── Services — Tradesperson sub-category (multi-select, max 2) ──────────────
+export const TRADESPERSON_CATEGORIES = [
+  { value: "builders",             label: "Builders" },
+  { value: "electricians",         label: "Electricians" },
+  { value: "plumbers",             label: "Plumbers & Heating" },
+  { value: "decorators-painters",  label: "Decorators & Painters" },
+  { value: "locksmiths",           label: "Locksmiths" },
+  { value: "cleaners",             label: "Cleaners" },
 ];
 
 // ─── Hotel & Accommodation — pick one ──────────────────────────────────────────
@@ -64,6 +96,18 @@ export const SHOP_CATEGORIES = [
   { value: "opticians",             label: "Opticians & Pharmacies",    group: "Local Services" },
   { value: "spa",                   label: "Spa",                       group: "Local Services" },
   { value: "travel-agents",         label: "Travel Agents",             group: "Local Services" },
+];
+
+// ─── See & Do — category (multi-select, max 2) ────────────────────────────────
+export const SEE_DO_CATEGORIES = [
+  { value: "art-culture",    label: "Art & Culture" },
+  { value: "community",      label: "Community" },
+  { value: "family",         label: "Family" },
+  { value: "fashion-beauty", label: "Fashion & Beauty" },
+  { value: "film",           label: "Film" },
+  { value: "gaming",         label: "Gaming" },
+  { value: "learning",       label: "Learning" },
+  { value: "sport-wellness", label: "Sport & Wellness" },
 ];
 
 export const DEFAULT_HOURS = () => [
