@@ -63,8 +63,10 @@ function Icon({ name, className = "", color }) {
 const CATEGORY_ICON = {
   // Eat & Drink
   bars: "martini", restaurants: "cloche", cafes: "cup", "grab-go": "bag",
-  "private-dining": "users", british: "flag", italian: "pizza", chinese: "bowl",
+  "private-dining": "users", takeaway: "bag", british: "flag", italian: "pizza", chinese: "bowl",
   indian: "flame", french: "bread", thai: "bowl", japanese: "bowl", bakery: "bread",
+  moroccan: "flame", lebanese: "bowl", bangladeshi: "flame", mediterranean: "bowl",
+  portuguese: "flag", dessert: "gem", pizza: "pizza", gastropub: "martini", "pan-european": "flag",
   // Shop
   "accessories-jewellery": "gem", clothing: "shirt", "electronics-phones": "phone",
   groceries: "cart", "health-beauty": "heart", "home-furniture": "home",
