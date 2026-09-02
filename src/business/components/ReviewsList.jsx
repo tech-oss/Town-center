@@ -36,7 +36,7 @@ export function ReviewsSummary({ reviews }) {
   );
 }
 
-const EMPTY_REVIEW = { reviewer: "", rating: 5, date: new Date().toISOString().slice(0, 10), text: "" };
+const EMPTY_REVIEW = { reviewer: "", rating: 5, date: new Date().toISOString().slice(0, 10), text: "", verificationLink: "" };
 
 // ─── Add / Edit review form ─────────────────────────────────────────────────────
 function ReviewForm({ initial, onSave, onCancel }) {
@@ -55,6 +55,9 @@ function ReviewForm({ initial, onSave, onCancel }) {
         <Field label="Date"><Inp type="date" value={form.date} onChange={(e) => set("date", e.target.value)} /></Field>
       </div>
       <Field label="Review Text"><TextArea rows={3} value={form.text} onChange={(e) => set("text", e.target.value)} placeholder="What did the customer say?" /></Field>
+      <Field label="Verification Link" hint="A link proving this review is genuine (e.g. Google/Trustpilot review URL)">
+        <Inp value={form.verificationLink} onChange={(e) => set("verificationLink", e.target.value)} placeholder="https://…" />
+      </Field>
       <div className="flex gap-2">
         <button onClick={() => form.reviewer.trim() && form.text.trim() && onSave(form)} disabled={!form.reviewer.trim() || !form.text.trim()}
           className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: SAGE }}>Save</button>
@@ -64,20 +67,10 @@ function ReviewForm({ initial, onSave, onCancel }) {
   );
 }
 
-export default function ReviewsList({ reviews, onReply, onAdd, onUpdate, onDelete }) {
-  const [replyingId, setReplyingId] = useState(null);
-  const [draft, setDraft] = useState("");
+export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
-
-  function startReply(id) { setReplyingId(id); setDraft(""); }
-  function submitReply(id) {
-    if (!draft.trim()) return;
-    onReply(id, draft.trim());
-    setReplyingId(null);
-    setDraft("");
-  }
 
   const canManage = !!onAdd;
 
@@ -124,28 +117,11 @@ export default function ReviewsList({ reviews, onReply, onAdd, onUpdate, onDelet
           </div>
           <p className="text-sm" style={{ color: FOREST }}>{r.text}</p>
 
-          {r.reply && (
-            <div className="ml-4 mt-1 rounded-xl p-3" style={{ backgroundColor: "rgba(82,199,182,0.06)", border: "1px solid rgba(82,199,182,0.2)" }}>
-              <p className="text-xs font-semibold mb-1" style={{ color: "#0F766E" }}>
-                Your reply {r.reply.status && r.reply.status !== "Published" && `· ${r.reply.status}`}
-              </p>
-              <p className="text-sm" style={{ color: FOREST }}>{r.reply.text}</p>
-            </div>
-          )}
-
-          {!r.reply && replyingId !== r.id && (
-            <button onClick={() => startReply(r.id)} className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>Reply</button>
-          )}
-
-          {replyingId === r.id && (
-            <div className="flex flex-col gap-2 mt-1">
-              <TextArea rows={2} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Write a reply…" />
-              <div className="flex gap-2">
-                <button onClick={() => submitReply(r.id)} disabled={!draft.trim()}
-                  className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: SAGE }}>Submit Reply</button>
-                <button onClick={() => setReplyingId(null)} className="px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
-              </div>
-            </div>
+          {r.verificationLink && (
+            <a href={r.verificationLink} target="_blank" rel="noreferrer"
+              className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>
+              Verification Link ↗
+            </a>
           )}
         </div>
         )

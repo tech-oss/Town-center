@@ -3,7 +3,7 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, MUTED } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
-import { listReviews, addReview, updateReview, deleteReview, replyToReview } from "../api/businessReviews";
+import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 
 export default function ReviewsPage() {
   const { user } = useBusinessAuth();
@@ -19,12 +19,6 @@ export default function ReviewsPage() {
     });
     return () => { cancelled = true; };
   }, [user.id]);
-
-  async function handleReply(id, text) {
-    await replyToReview(id, text);
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, reply: { text, status: "Pending Approval" } } : r)));
-    setToast("Reply submitted for admin approval.");
-  }
 
   async function handleAdd(form) {
     const created = await addReview(user.id, form);
@@ -48,15 +42,15 @@ export default function ReviewsPage() {
       <div className="flex flex-col gap-6 max-w-4xl">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Reviews</h1>
-          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your customer reviews and reply to them.</p>
+          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage the reviews listed for your business.</p>
         </div>
 
-        <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and reply to reviews — your reply goes to admin for approval before appearing.</p>
+        <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine.</p>
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading reviews…</p>
         ) : (
-          <ReviewsList reviews={reviews} onReply={handleReply} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} />
+          <ReviewsList reviews={reviews} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} />
         )}
       </div>
     </BusinessLayout>

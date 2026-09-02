@@ -39,6 +39,35 @@ export function Select({ children, ...props }) {
   return <select className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT} {...props}>{children}</select>;
 }
 
+// ─── Multi-select checkbox chips, optionally capped at `max` selections ──────
+export function CheckGroup({ options, selected, onChange, max }) {
+  const atMax = max != null && selected.length >= max;
+  function toggle(v) {
+    if (selected.includes(v)) { onChange(selected.filter((x) => x !== v)); return; }
+    if (atMax) return;
+    onChange([...selected, v]);
+  }
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => {
+        const checked = selected.includes(o.value);
+        const disabled = !checked && atMax;
+        return (
+          <label key={o.value} className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all"
+            style={{
+              cursor: disabled ? "not-allowed" : "pointer",
+              opacity: disabled ? 0.4 : 1,
+              ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
+            }}>
+            <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(o.value)} className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium" style={{ color: FOREST }}>{o.label}</span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 export function Toggle({ checked, onChange, label, sublabel }) {
   return (
     <label className="flex items-start gap-3 cursor-pointer w-fit">

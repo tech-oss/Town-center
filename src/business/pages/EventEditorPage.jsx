@@ -3,13 +3,15 @@ import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
-  Field, Inp, TextArea, Select, SocialFields, LocationFields, GalleryGrid,
+  Field, Inp, TextArea, Select, CheckGroup, SocialFields, LocationFields, GalleryGrid,
   EditorSection, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD,
 } from "../components/FormKit";
 import { getEvent, createEvent, updateEvent } from "../api/businessEvents";
+import { SEE_DO_CATEGORIES } from "../../Data/businessPortalMock";
 
 const EMPTY = {
   title: "", subtitle: "", description: "",
+  category: [], // event sub-category, max 2 — from SEE_DO_CATEGORIES
   eventDate: "", eventTime: "", entryType: "Free",
   location: "", lat: "", lng: "",
   social: {}, website: "", bookingUrl: "",
@@ -38,6 +40,7 @@ export default function EventEditorPage() {
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
   async function handleSave(submit) {
+    if (!form.category?.length) { setToast("Please select at least one event category."); return; }
     setSaving(true);
     const status = submit ? "Pending Approval" : "Draft";
     const next = { ...form, status };
@@ -71,6 +74,10 @@ export default function EventEditorPage() {
         <h1 className="text-2xl font-bold" style={{ color: FOREST }}>{id ? "Edit Event" : "New Event"}</h1>
 
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-8" style={CARD}>
+          <EditorSection title="Event Category" hint="Select up to 2">
+            <CheckGroup options={SEE_DO_CATEGORIES} selected={form.category ?? []} onChange={(v) => set("category", v)} max={2} />
+          </EditorSection>
+
           <EditorSection title="Event Details">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Event Title" required span2><Inp value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Event title…" /></Field>

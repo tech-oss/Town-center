@@ -92,9 +92,14 @@ function NewTicketTab({ notify, onCreated }) {
       <Field label="Subject"><Inp value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Brief summary…" /></Field>
       <Field label="Message"><TextArea rows={5} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Describe your issue or question…" /></Field>
       <Field label="Attach a screenshot if helpful" hint="Optional">
-        <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0]?.name ?? null)}
-          className="text-sm" style={{ color: MUTED }} />
-        {attachment && <span className="text-xs" style={{ color: "#0F766E" }}>{attachment}</span>}
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="cursor-pointer px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
+            style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: "1.5px solid rgba(82,199,182,0.35)" }}>
+            📎 Attach File
+            <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0]?.name ?? null)} className="hidden" />
+          </label>
+          {attachment && <span className="text-xs font-medium" style={{ color: "#0F766E" }}>{attachment}</span>}
+        </div>
       </Field>
       <button onClick={handleSubmit} disabled={!subject.trim() || !message.trim() || submitting}
         className="self-start px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>

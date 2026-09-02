@@ -4,6 +4,11 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { listEvents, setEventStatus, deleteEvent } from "../api/businessEvents";
+import { SEE_DO_CATEGORIES } from "../../Data/businessPortalMock";
+
+function categoryLabels(category) {
+  return (category ?? []).map((v) => SEE_DO_CATEGORIES.find((o) => o.value === v)?.label ?? v).join(", ");
+}
 
 const STATUS_COLOURS = {
   Draft: { bg: "rgba(107,114,128,0.13)", fg: "#374151" },
@@ -90,6 +95,7 @@ export default function EventsPage() {
                     <StatusBadge status={e.status} />
                   </div>
                   <p className="text-sm font-bold" style={{ color: FOREST }}>{e.title}</p>
+                  {e.category?.length > 0 && <p className="text-xs" style={{ color: MUTED }}>{categoryLabels(e.category)}</p>}
                   <p className="text-xs" style={{ color: "#9CA3AF" }}>{e.eventDate}{e.eventTime ? ` · ${e.eventTime}` : ""}</p>
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/events/${e.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>

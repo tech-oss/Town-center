@@ -1,7 +1,8 @@
 import { supabase } from "../../lib/supabaseClient";
 
-// business_reviews: customer reviews + owner replies. Shared by ReviewsPage
-// and MyListingPage's Reviews tab so both read/write the same data.
+// business_reviews: customer review listings with a verification link.
+// Shared by ReviewsPage and MyListingPage's Reviews tab so both read/write
+// the same data.
 
 function fromRow(row) {
   return {
@@ -10,7 +11,7 @@ function fromRow(row) {
     rating: row.rating,
     date: row.date,
     text: row.text,
-    reply: row.reply,
+    verificationLink: row.verification_link,
   };
 }
 
@@ -27,7 +28,7 @@ export async function listReviews(businessId) {
 export async function addReview(businessId, form) {
   const { data, error } = await supabase
     .from("business_reviews")
-    .insert({ business_id: businessId, reviewer: form.reviewer, rating: form.rating, date: form.date, text: form.text })
+    .insert({ business_id: businessId, reviewer: form.reviewer, rating: form.rating, date: form.date, text: form.text, verification_link: form.verificationLink || null })
     .select()
     .single();
   if (error) throw error;
@@ -37,20 +38,12 @@ export async function addReview(businessId, form) {
 export async function updateReview(id, form) {
   const { error } = await supabase
     .from("business_reviews")
-    .update({ reviewer: form.reviewer, rating: form.rating, date: form.date, text: form.text })
+    .update({ reviewer: form.reviewer, rating: form.rating, date: form.date, text: form.text, verification_link: form.verificationLink || null })
     .eq("id", id);
   if (error) throw error;
 }
 
 export async function deleteReview(id) {
   const { error } = await supabase.from("business_reviews").delete().eq("id", id);
-  if (error) throw error;
-}
-
-export async function replyToReview(id, text) {
-  const { error } = await supabase
-    .from("business_reviews")
-    .update({ reply: { text, status: "Pending Approval" } })
-    .eq("id", id);
   if (error) throw error;
 }

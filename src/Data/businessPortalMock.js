@@ -57,24 +57,34 @@ export const HOTEL_KINDS = [
   { value: "accommodation", label: "Accommodation" },
 ];
 
-// ─── Eat & Drink — cuisine type (multi-select) ────────────────────────────────
+// ─── Eat & Drink — cuisine type (multi-select, max 2) ─────────────────────────
 export const CUISINE_TYPES = [
-  { value: "british",  label: "British" },
-  { value: "italian",  label: "Italian" },
-  { value: "chinese",  label: "Chinese" },
-  { value: "indian",   label: "Indian" },
-  { value: "french",   label: "French" },
-  { value: "thai",     label: "Thai" },
-  { value: "japanese", label: "Japanese" },
-  { value: "bakery",   label: "Bakery" },
+  { value: "british",       label: "British" },
+  { value: "italian",       label: "Italian" },
+  { value: "chinese",       label: "Chinese" },
+  { value: "indian",        label: "Indian" },
+  { value: "french",        label: "French" },
+  { value: "thai",          label: "Thai" },
+  { value: "japanese",      label: "Japanese" },
+  { value: "moroccan",      label: "Moroccan" },
+  { value: "lebanese",      label: "Lebanese" },
+  { value: "bangladeshi",   label: "Bangladeshi" },
+  { value: "mediterranean", label: "Mediterranean" },
+  { value: "portuguese",    label: "Portuguese" },
+  { value: "dessert",       label: "Dessert" },
+  { value: "pizza",         label: "Pizza" },
+  { value: "gastropub",     label: "Gastropub" },
+  { value: "pan-european",  label: "Pan European" },
 ];
 
-// ─── Eat & Drink — venue type (multi-select) ──────────────────────────────────
+// ─── Eat & Drink — venue type (multi-select, max 2) ───────────────────────────
 export const VENUE_TYPES = [
-  { value: "bars",           label: "Bars" },
   { value: "restaurants",    label: "Restaurants" },
+  { value: "bars",           label: "Bars" },
   { value: "cafes",          label: "Cafes" },
   { value: "grab-go",        label: "Grab & Go" },
+  { value: "bakery",         label: "Bakery" },
+  { value: "takeaway",       label: "Takeaway" },
   { value: "private-dining", label: "Private Dining" },
 ];
 
@@ -100,14 +110,16 @@ export const SHOP_CATEGORIES = [
 
 // ─── See & Do — category (multi-select, max 2) ────────────────────────────────
 export const SEE_DO_CATEGORIES = [
+  { value: "sport-wellness", label: "Sport & Wellness" },
+  { value: "gaming",         label: "Gaming" },
+  { value: "film",           label: "Film" },
   { value: "art-culture",    label: "Art & Culture" },
+  { value: "learning",       label: "Learning" },
+  { value: "music-dance",    label: "Music & Dance" },
+  { value: "theatre",        label: "Theatre" },
   { value: "community",      label: "Community" },
   { value: "family",         label: "Family" },
-  { value: "fashion-beauty", label: "Fashion & Beauty" },
-  { value: "film",           label: "Film" },
-  { value: "gaming",         label: "Gaming" },
-  { value: "learning",       label: "Learning" },
-  { value: "sport-wellness", label: "Sport & Wellness" },
+  { value: "markets",        label: "Markets" },
 ];
 
 export const DEFAULT_HOURS = () => [

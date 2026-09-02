@@ -10,7 +10,7 @@ import {
 } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
 import { getBusinessListing, saveBusinessListing } from "../api/businessListing";
-import { listReviews, addReview, updateReview, deleteReview, replyToReview } from "../api/businessReviews";
+import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 import {
   AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
 } from "../../Data/businessPortalMock";
@@ -78,11 +78,6 @@ export default function MyListingPage() {
     }
   }
 
-  async function handleReviewReply(id, text) {
-    await replyToReview(id, text);
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, reply: { text, status: "Pending Approval" } } : r)));
-    setToast("Reply submitted for admin approval.");
-  }
   async function handleReviewAdd(form) {
     const created = await addReview(user.id, form);
     setReviews((prev) => [created, ...prev]);
@@ -223,8 +218,8 @@ export default function MyListingPage() {
 
           {tab === "reviews" && (
             <EditorSection title="Reviews">
-              <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and reply to reviews — your reply goes to admin for approval before appearing.</p>
-              <ReviewsList reviews={reviews} onReply={handleReviewReply} onAdd={handleReviewAdd} onUpdate={handleReviewUpdate} onDelete={handleReviewDelete} />
+              <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine.</p>
+              <ReviewsList reviews={reviews} onAdd={handleReviewAdd} onUpdate={handleReviewUpdate} onDelete={handleReviewDelete} />
             </EditorSection>
           )}
 
