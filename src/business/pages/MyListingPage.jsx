@@ -146,8 +146,8 @@ export default function MyListingPage() {
                   <Field label="Main Description" span2 hint="The full about section on your page"><TextArea rows={5} value={listing.description} onChange={(e) => set("description", e.target.value)} /></Field>
                 </div>
                 <div className="flex flex-wrap gap-8">
-                  <SingleImageUpload label="Business Logo" src={listing.logo} round pathPrefix={user.id} onChange={(v) => set("logo", v)} />
-                  <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} onChange={(v) => set("heroImage", v)} />
+                  <SingleImageUpload label="Business Logo" src={listing.logo} round pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
+                  <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />
                 </div>
                 <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>This image appears at the top of your public business page.</p>
               </EditorSection>

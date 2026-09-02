@@ -122,12 +122,42 @@ export function SaveBar({ onSave, saving, status, rejectionReason }) {
 }
 
 // ─── Image upload (hero/logo, single) ─────────────────────────────────────────
-export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video", pathPrefix }) {
+// Reads an image file's pixel dimensions without uploading it.
+function readImageDimensions(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => { URL.revokeObjectURL(url); resolve({ width: img.naturalWidth, height: img.naturalHeight }); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read image.")); };
+    img.src = url;
+  });
+}
+
+// Checks a file's aspect ratio against an expected ratio (width/height),
+// within a small tolerance to allow for rounding. Returns an error message
+// string if it doesn't match, or null if it's fine / no ratio was required.
+async function checkAspectRatio(file, ratio) {
+  if (!ratio) return null;
+  const { width, height } = await readImageDimensions(file);
+  const actual = width / height;
+  const tolerance = 0.05; // ±5%
+  if (Math.abs(actual - ratio) / ratio > tolerance) {
+    return `This image is ${width}×${height} (${(actual).toFixed(2)}:1) — please upload an image close to the ${ratio === 1 ? "1:1" : ratio.toFixed(2) + ":1"} aspect ratio noted above.`;
+  }
+  return null;
+}
+
+export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+
   async function handleFiles(files) {
     const file = files?.[0];
     if (!file) return;
+    setError("");
+    const mismatch = await checkAspectRatio(file, ratio).catch(() => null);
+    if (mismatch) { setError(mismatch); return; }
     setUploading(true);
     try {
       const url = await uploadToStorage(file, pathPrefix ?? "misc");
@@ -159,6 +189,8 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
         {uploading ? "Uploading…" : src ? "Replace Image" : "Upload Image"}
         <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(e) => handleFiles(e.target.files)} />
       </label>
+      {ratioLabel && <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>Best aspect ratio: {ratioLabel}</p>}
+      {error && <p className="text-[11px] mt-1 font-medium" style={{ color: "#DC2626" }}>{error}</p>}
     </div>
   );
 }

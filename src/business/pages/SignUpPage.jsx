@@ -11,7 +11,7 @@ const FOREST = "var(--forest)", SAGE = "var(--sage)", LEAF = "var(--leaf)";
 const MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 
-const STEPS = ["Your Details", "Business Details", "Plan", "Terms"];
+const STEPS = ["Your Details", "Business Details", "Plan", "Terms", "Review"];
 
 const EMPTY = {
   firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "",
@@ -23,7 +23,34 @@ const EMPTY = {
   shopCategories: [],   // multi-select, for businessType "shop"
   planKey: "standard",
   agreeTerms: false, agreePrivacy: false,
+  confirmFinal: false,  // "I understand this can't be changed later" — Review step
 };
+
+function labelFor(options, value) {
+  return options.find((o) => o.value === value)?.label ?? value;
+}
+
+function SummaryRow({ label, value }) {
+  if (!value) return null;
+  return (
+    <div className="flex justify-between gap-4 py-1.5 text-sm">
+      <span style={{ color: MUTED }}>{label}</span>
+      <span className="text-right font-medium" style={{ color: FOREST }}>{value}</span>
+    </div>
+  );
+}
+
+function SummarySection({ title, onEdit, children }) {
+  return (
+    <div className="rounded-xl p-4" style={{ border: `1.5px solid ${BORDER}` }}>
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-sm font-bold" style={{ color: FOREST }}>{title}</p>
+        <button type="button" onClick={onEdit} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Edit</button>
+      </div>
+      <div className="divide-y" style={{ borderColor: BORDER }}>{children}</div>
+    </div>
+  );
+}
 
 function StepIndicator({ step }) {
   return (
@@ -133,6 +160,7 @@ export default function SignUpPage() {
     }
     if (step === 2) return true;
     if (step === 3) return form.agreeTerms && form.agreePrivacy;
+    if (step === 4) return form.confirmFinal;
     return true;
   }
 
@@ -260,6 +288,47 @@ export default function SignUpPage() {
             </div>
           )}
 
+          {step === 4 && (
+            <div className="flex flex-col gap-4">
+              <p className="text-base font-bold" style={{ color: FOREST }}>Review your details</p>
+              <p className="text-xs -mt-2" style={{ color: MUTED }}>Please check everything carefully — this information cannot be changed once submitted.</p>
+
+              <SummarySection title="Your Details" onEdit={() => setStep(0)}>
+                <SummaryRow label="Name" value={`${form.firstName} ${form.lastName}`} />
+                <SummaryRow label="Email" value={form.email} />
+                <SummaryRow label="Phone" value={form.phone} />
+              </SummarySection>
+
+              <SummarySection title="Business Details" onEdit={() => setStep(1)}>
+                <SummaryRow label="Business Name" value={form.businessName} />
+                <SummaryRow label="Business Type" value={labelFor(BUSINESS_TYPES, form.businessType)} />
+                {form.businessType === "freelancer" && <SummaryRow label="Which best describes you" value={labelFor(FREELANCER_KINDS, form.freelancerKind)} />}
+                {form.businessType === "hotel" && <SummaryRow label="Hotel or Accommodation" value={labelFor(HOTEL_KINDS, form.hotelKind)} />}
+                {form.businessType === "eat-drink" && <SummaryRow label="Cuisine Type" value={form.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")} />}
+                {form.businessType === "eat-drink" && <SummaryRow label="Venue Type" value={form.venueTypes.map((v) => labelFor(VENUE_TYPES, v)).join(", ")} />}
+                {form.businessType === "shop" && <SummaryRow label="Shop Category" value={form.shopCategories.map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ")} />}
+                <SummaryRow label="Website" value={form.website} />
+                <SummaryRow label="Business Email" value={form.businessEmail} />
+                <SummaryRow label="Business Phone" value={form.businessPhone} />
+                <SummaryRow label="Address" value={form.businessAddress} />
+              </SummarySection>
+
+              <SummarySection title="Plan" onEdit={() => setStep(2)}>
+                <SummaryRow label="Selected Plan" value={SUBSCRIPTION_PLANS.find((p) => p.key === form.planKey)?.name} />
+              </SummarySection>
+
+              <SummarySection title="Terms" onEdit={() => setStep(3)}>
+                <SummaryRow label="Terms of Use" value={form.agreeTerms ? "Agreed" : "Not agreed"} />
+                <SummaryRow label="Privacy Policy" value={form.agreePrivacy ? "Agreed" : "Not agreed"} />
+              </SummarySection>
+
+              <label className="flex items-start gap-3 cursor-pointer rounded-xl p-3 mt-2" style={{ border: "1.5px solid rgba(232,163,61,0.35)", backgroundColor: "rgba(232,163,61,0.08)" }}>
+                <input type="checkbox" checked={form.confirmFinal} onChange={(e) => set("confirmFinal", e.target.checked)} className="mt-0.5 w-4 h-4" />
+                <span className="text-sm" style={{ color: FOREST }}>I confirm the information above is accurate. I understand it cannot be changed after submitting, and my application will be reviewed by admin before my account goes live.</span>
+              </label>
+            </div>
+          )}
+
           {error && <p className="text-xs font-medium mt-4" style={{ color: "#DC2626" }}>{error}</p>}
 
           <div className="flex gap-3 pt-6 mt-6" style={{ borderTop: `1px solid ${BORDER}` }}>
@@ -268,7 +337,7 @@ export default function SignUpPage() {
                 Back
               </button>
             )}
-            {step < 3 ? (
+            {step < 4 ? (
               <button onClick={() => setStep((s) => s + 1)} disabled={!validStep()}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
                 Continue
@@ -276,7 +345,7 @@ export default function SignUpPage() {
             ) : (
               <button onClick={handleSubmit} disabled={!validStep() || submitting}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-                {submitting ? "Creating Account…" : "Create Account"}
+                {submitting ? "Creating Account…" : "Confirm & Submit"}
               </button>
             )}
           </div>
