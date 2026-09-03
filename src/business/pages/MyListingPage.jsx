@@ -12,7 +12,7 @@ import ReviewsList from "../components/ReviewsList";
 import { getBusinessListing, saveBusinessListing } from "../api/businessListing";
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 import {
-  AMENITY_CATEGORIES, STAR_RATINGS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
+  AMENITY_CATEGORIES, ACCOMMODATION_AMENITY_CATEGORIES, STAR_RATINGS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
   BUSINESS_TYPES, FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES,
   SHOP_CATEGORIES, SEE_DO_CATEGORIES, FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES,
   TRADESPERSON_CATEGORIES,
@@ -386,7 +386,7 @@ export default function MyListingPage() {
                 </div>
               </EditorSection>
 
-              {AMENITY_CATEGORIES.map((cat) => (
+              {(listing.businessTypeDetail?.hotelKind === "accommodation" ? ACCOMMODATION_AMENITY_CATEGORIES : AMENITY_CATEGORIES).map((cat) => (
                 <EditorSection key={cat.category} title={cat.category}>
                   <div className="grid sm:grid-cols-2 gap-2">
                     {cat.options.map((a) => {

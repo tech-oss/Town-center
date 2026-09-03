@@ -347,6 +347,22 @@ export const AMENITY_CATEGORIES = [
 
 export const STAR_RATINGS = [1, 2, 3, 4, 5];
 
+// ─── Accommodation — Amenities, grouped by category (multi-select, no cap).
+// Same Property/Room/Travel categories as Hotel, plus a Property Types
+// category up front to describe what kind of accommodation it is. ──────────
+export const ACCOMMODATION_AMENITY_CATEGORIES = [
+  {
+    category: "Property Types",
+    options: [
+      "Apartments", "Resorts", "Villas", "Vacation Homes",
+      "Bed and Breakfasts", "Farm Stays", "Chalets", "Guesthouses", "Lodges",
+      "Country Houses", "Homestays", "Campgrounds", "Boats", "Luxury tents",
+      "Entire homes & apartments",
+    ],
+  },
+  ...AMENITY_CATEGORIES,
+];
+
 export const SERVICES_LIST = ["General Enquiries", "Emergency Call-Outs", "Free Quotes"];
 export const AREAS_COVERED_LIST = ["Maidenhead", "Windsor", "Marlow"];
 
