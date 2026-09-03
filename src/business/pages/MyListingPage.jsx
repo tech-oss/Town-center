@@ -12,7 +12,7 @@ import ReviewsList from "../components/ReviewsList";
 import { getBusinessListing, saveBusinessListing } from "../api/businessListing";
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 import {
-  AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
+  AMENITY_CATEGORIES, STAR_RATINGS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
   BUSINESS_TYPES, FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES,
   SHOP_CATEGORIES, SEE_DO_CATEGORIES, FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES,
   TRADESPERSON_CATEGORIES,
@@ -371,17 +371,37 @@ export default function MyListingPage() {
 
           {tab === "amenities" && (
             <>
-              <EditorSection title="Amenities">
-                <div className="grid sm:grid-cols-2 gap-2 mb-4">
-                  {AMENITY_OPTIONS.map((a) => {
-                    const checked = (listing.amenities ?? []).includes(a);
+              <EditorSection title="Star Rating">
+                <div className="flex gap-2">
+                  {STAR_RATINGS.map((n) => {
+                    const selected = listing.starRating === n;
                     return (
-                      <Toggle key={a} checked={checked} label={a}
-                        onChange={(v) => set("amenities", v ? [...(listing.amenities ?? []), a] : (listing.amenities ?? []).filter((x) => x !== a))} />
+                      <button key={n} type="button" onClick={() => set("starRating", selected ? null : n)}
+                        className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                        style={selected ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.1)", color: "#0F766E" } : { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+                        {n} {n === 1 ? "Star" : "Stars"}
+                      </button>
                     );
                   })}
                 </div>
-                <Field label="Other Amenities"><TextArea rows={2} value={listing.otherAmenities ?? ""} onChange={(e) => set("otherAmenities", e.target.value)} /></Field>
+              </EditorSection>
+
+              {AMENITY_CATEGORIES.map((cat) => (
+                <EditorSection key={cat.category} title={cat.category}>
+                  <div className="grid sm:grid-cols-2 gap-2">
+                    {cat.options.map((a) => {
+                      const checked = (listing.amenities ?? []).includes(a);
+                      return (
+                        <Toggle key={a} checked={checked} label={a}
+                          onChange={(v) => set("amenities", v ? [...(listing.amenities ?? []), a] : (listing.amenities ?? []).filter((x) => x !== a))} />
+                      );
+                    })}
+                  </div>
+                </EditorSection>
+              ))}
+
+              <EditorSection title="Other Amenities">
+                <Field label="Other Amenities" hint="Anything not listed above"><TextArea rows={2} value={listing.otherAmenities ?? ""} onChange={(e) => set("otherAmenities", e.target.value)} /></Field>
               </EditorSection>
               <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} />
             </>

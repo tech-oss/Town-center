@@ -313,6 +313,40 @@ export const BUSINESS_LISTING = {
 
 export const AMENITY_OPTIONS = ["Free WiFi", "Parking", "Restaurant", "Bar", "Gym", "Pet-friendly", "Accessible rooms", "Swimming pool", "Spa", "Room service"];
 
+// ─── Hotel & Accommodation — Amenities, grouped by category (multi-select,
+// no cap) ───────────────────────────────────────────────────────────────────
+export const AMENITY_CATEGORIES = [
+  {
+    category: "Property Facilities",
+    options: [
+      "Spa and wellness center", "Hot tub", "Sauna", "Room service", "Massage",
+      "Airport shuttle", "Garden", "24-hour front desk", "Fitness center",
+      "Swimming pool", "Restaurant", "Free Wifi", "Non-smoking rooms",
+      "Wheelchair accessible", "Electric vehicle charging station", "Bar",
+      "Air conditioning", "Business center", "Playground", "Terrace",
+      "BBQ facilities", "Parking", "Laundry", "Shared kitchen",
+    ],
+  },
+  {
+    category: "Room Facilities",
+    options: [
+      "Private bathroom", "Air conditioning", "Balcony", "Private pool",
+      "Kitchen/Kitchenette", "Washing machine", "View", "Accessible room",
+      "Private hot tub", "Terrace", "Kitchenette",
+      "Complimentary evening snacks and drinks in the executive lounge",
+      "Salt water pool", "Computer Game console", "Refrigerator", "Fax",
+      "Video games", "Kitchen", "Flat-screen TV", "Pool cover",
+      "Reading light", "Plunge pool", "Bath", "Lake view",
+    ],
+  },
+  {
+    category: "Travel Group",
+    options: ["Pet friendly", "Adults only"],
+  },
+];
+
+export const STAR_RATINGS = [1, 2, 3, 4, 5];
+
 export const SERVICES_LIST = ["General Enquiries", "Emergency Call-Outs", "Free Quotes"];
 export const AREAS_COVERED_LIST = ["Maidenhead", "Windsor", "Marlow"];
 
