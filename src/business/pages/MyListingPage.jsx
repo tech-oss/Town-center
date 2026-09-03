@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
-  Field, Inp, TextArea, EditorSection, SaveBar, ApprovalBadge,
+  Field, Inp, TextArea, CheckGroup, EditorSection, SaveBar, ApprovalBadge,
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
   RepeatableList, FaqListEditor, StatsEditor, PortfolioEditor, Toggle, Toast, useToast,
   CARD, BORDER, MUTED, FOREST, SAGE,
@@ -28,37 +28,48 @@ function labelFor(options, value) {
   return options.find((o) => o.value === value)?.label ?? value;
 }
 
-// Builds the read-only "Category" / "Sub-Category" strings shown on the
+// Builds the read-only "Business Type" / "Category" strings shown on the
 // Profile tab from what the business selected at registration
 // (listing.businessTypeDetail) — set by admin/registration, never editable
-// here.
+// here. The sub-category tier (see subCategoryEditConfig below) is the one
+// exception — the business can revise that themselves.
 function registrationCategorySummary(user, listing) {
   const detail = listing?.businessTypeDetail ?? {};
   const businessTypeLabel = labelFor(BUSINESS_TYPES, user.businessType === "services" ? "freelancer" : user.businessType);
 
   if (user.businessType === "services") {
-    const kindLabel = labelFor(FREELANCER_KINDS, detail.freelancerKind);
-    const subOptions = FREELANCER_KIND_CATEGORIES[detail.freelancerKind];
-    const subLabel = subOptions && detail.freelancerCategories?.length
-      ? detail.freelancerCategories.map((v) => labelFor(subOptions, v)).join(", ")
-      : "";
-    return { businessTypeLabel, category: kindLabel, subCategory: subLabel };
+    return { businessTypeLabel, category: labelFor(FREELANCER_KINDS, detail.freelancerKind) };
   }
   if (user.businessType === "hotel") {
-    return { businessTypeLabel, category: labelFor(HOTEL_KINDS, detail.hotelKind), subCategory: "" };
+    return { businessTypeLabel, category: labelFor(HOTEL_KINDS, detail.hotelKind) };
   }
   if (user.businessType === "eat-drink") {
-    const category = (detail.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)).join(", ");
-    const subCategory = (detail.cuisineTypes ?? []).map((v) => labelFor(CUISINE_TYPES, v)).join(", ");
-    return { businessTypeLabel, category, subCategory };
+    return { businessTypeLabel, category: (detail.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)).join(", ") };
   }
   if (user.businessType === "shop") {
-    return { businessTypeLabel, category: (detail.shopCategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v)).join(", "), subCategory: "" };
+    return { businessTypeLabel, category: (detail.shopCategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ") };
   }
   if (user.businessType === "see-do") {
-    return { businessTypeLabel, category: (detail.seeDoCategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v)).join(", "), subCategory: "" };
+    return { businessTypeLabel, category: (detail.seeDoCategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v)).join(", ") };
   }
-  return { businessTypeLabel, category: "", subCategory: "" };
+  return { businessTypeLabel, category: "" };
+}
+
+// The one editable sub-tier per business type — the specific field within
+// businessTypeDetail, its option list, and a max-selection cap. Returns
+// null when the business type has no sub-category tier (hotel, shop,
+// see & do only have a single category tier, handled above as read-only).
+function subCategoryEditConfig(user, listing) {
+  const detail = listing?.businessTypeDetail ?? {};
+  if (user.businessType === "services") {
+    const options = FREELANCER_KIND_CATEGORIES[detail.freelancerKind];
+    if (!options) return null;
+    return { key: "freelancerCategories", label: "Sub-Category", options, max: 2 };
+  }
+  if (user.businessType === "eat-drink") {
+    return { key: "cuisineTypes", label: "Cuisine Type (Sub-Category)", options: CUISINE_TYPES, max: 2 };
+  }
+  return null;
 }
 
 function tabsFor(user, listing) {
@@ -150,6 +161,10 @@ export default function MyListingPage() {
 
   const status = listing.approvalStatus?.[tab];
   const registrationSummary = registrationCategorySummary(user, listing);
+  const subCatConfig = subCategoryEditConfig(user, listing);
+  function setSubCategory(key, values) {
+    setListing((l) => ({ ...l, businessTypeDetail: { ...l.businessTypeDetail, [key]: values } }));
+  }
 
   return (
     <BusinessLayout>
@@ -191,9 +206,14 @@ export default function MyListingPage() {
                       <Inp value={registrationSummary.category} disabled style={{ opacity: 0.6 }} />
                     </Field>
                   )}
-                  {registrationSummary.subCategory && (
-                    <Field label="Sub-Category" hint="Set at registration — cannot be changed here">
-                      <Inp value={registrationSummary.subCategory} disabled style={{ opacity: 0.6 }} />
+                  {subCatConfig && (
+                    <Field label={subCatConfig.label} span2 hint="Select up to 2 — you can update this yourself">
+                      <CheckGroup
+                        options={subCatConfig.options}
+                        selected={listing.businessTypeDetail?.[subCatConfig.key] ?? []}
+                        onChange={(v) => setSubCategory(subCatConfig.key, v)}
+                        max={subCatConfig.max}
+                      />
                     </Field>
                   )}
                   <Field label="Short Tagline" span2 hint="Shown on listing cards"><Inp value={listing.tagline} onChange={(e) => set("tagline", e.target.value)} /></Field>
