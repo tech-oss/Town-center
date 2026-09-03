@@ -141,6 +141,7 @@ export default function StayDetailPage({ kind }) {
       afterGallery={
         <AmenitiesSection
           categories={[
+            { title: "Property Types", items: item.propertyTypes },
             { title: "Property Facilities", items: item.facilities },
             { title: "Room Facilities", items: item.roomFacilities },
             { title: "Travel Group", items: item.travelGroup },

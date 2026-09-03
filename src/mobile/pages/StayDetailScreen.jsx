@@ -176,12 +176,13 @@ export default function StayDetailScreen() {
 
           <PhotoGallery images={gallery} title={place.name} />
 
-          {(place.facilities?.length || place.roomFacilities?.length || place.travelGroup?.length) > 0 && (
+          {(place.propertyTypes?.length || place.facilities?.length || place.roomFacilities?.length || place.travelGroup?.length) > 0 && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>
                 {isHotel ? "Amenities" : "What This Place Offers"}
               </p>
               <div className="flex flex-col gap-3">
+                <AmenityCategory title="Property Types" items={place.propertyTypes} />
                 <AmenityCategory title="Property Facilities" items={place.facilities} />
                 <AmenityCategory title="Room Facilities" items={place.roomFacilities} />
                 <AmenityCategory title="Travel Group" items={place.travelGroup} />
