@@ -270,11 +270,11 @@ export default function SignUpPage() {
 
               {form.businessType === "eat-drink" && (
                 <>
-                  <Field label="Cuisine Type" required span2 hint="Select up to 2">
-                    <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v)} max={2} />
-                  </Field>
                   <Field label="Venue Type" required span2 hint="Select up to 2">
                     <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v)} max={2} />
+                  </Field>
+                  <Field label="Cuisine Type" required span2 hint="Select up to 2">
+                    <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v)} max={2} />
                   </Field>
                 </>
               )}
@@ -338,8 +338,8 @@ export default function SignUpPage() {
                 {form.businessType === "freelancer" && <SummaryRow label="Which best describes you" value={labelFor(FREELANCER_KINDS, form.freelancerKind)} />}
                 {form.businessType === "freelancer" && form.freelancerKind && <SummaryRow label="Category" value={form.freelancerCategories.map((v) => labelFor(FREELANCER_KIND_CATEGORIES[form.freelancerKind], v)).join(", ")} />}
                 {form.businessType === "hotel" && <SummaryRow label="Hotel or Accommodation" value={labelFor(HOTEL_KINDS, form.hotelKind)} />}
-                {form.businessType === "eat-drink" && <SummaryRow label="Cuisine Type" value={form.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")} />}
                 {form.businessType === "eat-drink" && <SummaryRow label="Venue Type" value={form.venueTypes.map((v) => labelFor(VENUE_TYPES, v)).join(", ")} />}
+                {form.businessType === "eat-drink" && <SummaryRow label="Cuisine Type" value={form.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")} />}
                 {form.businessType === "shop" && <SummaryRow label="Shop Category" value={form.shopCategories.map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ")} />}
                 {form.businessType === "see-do" && <SummaryRow label="Category" value={form.seeDoCategories.map((v) => labelFor(SEE_DO_CATEGORIES, v)).join(", ")} />}
                 <SummaryRow label="Website" value={form.website} />
