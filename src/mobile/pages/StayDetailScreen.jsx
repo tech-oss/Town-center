@@ -19,53 +19,28 @@ const SOCIAL_ICONS = {
   x: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4l16 16M20 4L4 20" /></svg>,
 };
 
-// Keyword → {icon, blurb} for each amenity label, matching the website's
-// StayDetailPage.jsx AmenitiesSection so a bare checklist reads as curated
-// feature cards instead.
-const AMENITY_META = [
-  [/wi-?fi/i, "wifi", "Stay connected with Wi-Fi throughout your stay."],
-  [/spa|pool|swim/i, "swim", "Relax and unwind with the on-site spa and pool."],
-  [/restaurant|bar/i, "restaurant", "Enjoy a meal or drink without leaving the building."],
-  [/garden/i, "garden", "Step outside to a private, landscaped garden."],
-  [/parking/i, "parking", "Secure, convenient parking on site."],
-  [/family/i, "family", "Spacious rooms well suited to families and groups."],
-  [/kitchen/i, "kitchen", "Cook your own meals in a fully equipped kitchen."],
-  [/washer|dryer/i, "laundry", "Laundry facilities on hand for longer stays."],
-  [/river|thames|waterside/i, "river", "Soak up riverside views just steps away."],
-  [/station|walk/i, "walk", "A short, easy walk from the station and town centre."],
-  [/pet/i, "pet", "Bring your pet along — this stay welcomes them."],
-  [/entrance/i, "door", "A private entrance for added privacy and ease."],
-  [/kettle|microwave/i, "cup", "Handy extras on hand for tea, coffee and quick snacks."],
-  [/bbq|furniture/i, "bbq", "Outdoor furniture and a BBQ for al fresco evenings."],
-  [/conference/i, "conference", "Well-equipped spaces for meetings and events."],
-  [/guarantee/i, "shield", "Book with confidence, backed by a satisfaction guarantee."],
-];
-function amenityMeta(label) {
-  const hit = AMENITY_META.find(([re]) => re.test(label));
-  return hit ? { icon: hit[1], blurb: hit[2] } : { icon: "star", blurb: "A thoughtful extra included with your stay." };
-}
-
-function AmenityIcon({ name }) {
-  const p = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "var(--leaf)", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round" };
-  switch (name) {
-    case "wifi": return (<svg {...p}><path d="M2 8.5a16 16 0 0 1 20 0" /><path d="M5.5 12a11 11 0 0 1 13 0" /><path d="M9 15.5a6 6 0 0 1 6 0" /><circle cx="12" cy="19" r="1" fill="var(--leaf)" stroke="none" /></svg>);
-    case "swim": return (<svg {...p}><circle cx="18" cy="6" r="1.5" fill="var(--leaf)" stroke="none" /><path d="M4 12l3-3 3 2 3-3 3 2 3-3" /><path d="M3 18c1.5 1.2 3 1.2 4.5 0s3-1.2 4.5 0 3 1.2 4.5 0 3-1.2 4.5 0" /></svg>);
-    case "restaurant": return (<svg {...p}><path d="M3 17a9 6 0 0 1 18 0" /><path d="M2 17h20M12 17V6" /></svg>);
-    case "garden": return (<svg {...p}><path d="M12 21V10" /><path d="M12 10C12 6 9 4 6 4c0 4 2.5 6.5 6 6z" /><path d="M12 13c0-3.5 2.5-5.5 6-6 0 3.5-2.5 6-6 6z" /></svg>);
-    case "parking": return (<svg {...p}><rect x="3" y="7" width="18" height="11" rx="2" /><path d="M7 18v2M17 18v2M3 12h18" /><path d="M6.5 12V9h2a1.5 1.5 0 0 1 0 3h-2z" /></svg>);
-    case "family": return (<svg {...p}><circle cx="8" cy="8" r="3" /><path d="M2 20a6 6 0 0 1 12 0" /><circle cx="17" cy="9" r="2.5" /><path d="M15 20a5 5 0 0 1 6-4.5" /></svg>);
-    case "kitchen": return (<svg {...p}><path d="M4 3v7a3 3 0 0 0 6 0V3M7 10v11" /><path d="M15 3c-1 2-1 4 0 6s1 4 0 6M15 3v18" /></svg>);
-    case "laundry": return (<svg {...p}><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="13" r="4" /><circle cx="8" cy="6.5" r="0.8" fill="var(--leaf)" stroke="none" /></svg>);
-    case "river": return (<svg {...p}><path d="M2 8c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" /><path d="M2 14c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" /><path d="M2 20c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" /></svg>);
-    case "walk": return (<svg {...p}><circle cx="14" cy="4" r="1.6" fill="var(--leaf)" stroke="none" /><path d="M10 22l1.5-6L9 14l1-5 3 1 3 4-2 1-1-2-1.5 2 2 2-1 5" /></svg>);
-    case "pet": return (<svg {...p}><circle cx="7" cy="9" r="1.6" /><circle cx="11.5" cy="6.5" r="1.6" /><circle cx="16" cy="9" r="1.6" /><circle cx="18" cy="13.5" r="1.6" /><path d="M6 19c0-3 3-4 6-4s6 1 6 4c0 1.5-1.5 2-3 1.5-2-1-4-1-6 0-1.5.5-3 0-3-1.5z" /></svg>);
-    case "door": return (<svg {...p}><rect x="5" y="2" width="14" height="20" rx="1" /><circle cx="14.5" cy="12" r="1" fill="var(--leaf)" stroke="none" /></svg>);
-    case "cup": return (<svg {...p}><path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8z" /><path d="M17 9h1.5a2.5 2.5 0 0 1 0 5H17M7 3c0 1-1 1-1 2M11 3c0 1-1 1-1 2" /></svg>);
-    case "bbq": return (<svg {...p}><path d="M12 3s5 4 5 9a5 5 0 0 1-10 0c0-1.5.5-2.5 1.5-3.5C9 10 9.5 11 9.5 11S9 6 12 3z" /></svg>);
-    case "conference": return (<svg {...p}><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><path d="M3 12h18" /></svg>);
-    case "shield": return (<svg {...p}><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" /><path d="M9 12l2 2 4-4" /></svg>);
-    default: return (<svg {...p}><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" /></svg>);
-  }
+// Categorised amenities — matches the website's StayDetailPage.jsx
+// AmenitiesSection: a clean checkmark + name row grouped under Property
+// Facilities / Room Facilities / Travel Group, no per-item icon or blurb.
+function AmenityCategory({ title, items }) {
+  if (!items?.length) return null;
+  return (
+    <MobileCard className="p-4">
+      <p className="text-[11px] font-bold uppercase tracking-wide mb-3 pb-2.5" style={{ color: "var(--leaf)", borderBottom: "1px solid rgba(28,46,56,0.1)" }}>
+        {title}
+      </p>
+      <div className="flex flex-col gap-2.5">
+        {items.map((a) => (
+          <div key={a} className="flex items-start gap-2.5 text-sm leading-snug" style={{ color: "#000000" }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>{a}</span>
+          </div>
+        ))}
+      </div>
+    </MobileCard>
+  );
 }
 
 export default function StayDetailScreen() {
@@ -201,27 +176,15 @@ export default function StayDetailScreen() {
 
           <PhotoGallery images={gallery} title={place.name} />
 
-          {place.amenities?.length > 0 && (
+          {(place.facilities?.length || place.roomFacilities?.length || place.travelGroup?.length) > 0 && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>
                 {isHotel ? "Amenities" : "What This Place Offers"}
               </p>
-              <div className="flex flex-col gap-2.5">
-                {place.amenities.map((a) => {
-                  const { icon, blurb } = amenityMeta(a);
-                  return (
-                    <MobileCard key={a} className="p-3.5 flex items-center gap-3.5">
-                      <span className="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--mint)" }}>
-                        <AmenityIcon name={icon} />
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold" style={{ color: "#000000" }}>{a}</p>
-                        <p className="text-xs mt-0.5 leading-snug" style={{ color: "#000000" }}>{blurb}</p>
-                      </div>
-                      <span className="w-6 h-6 rounded-full border flex items-center justify-center shrink-0 text-xs" style={{ borderColor: "var(--leaf)", color: "var(--leaf)" }}>✓</span>
-                    </MobileCard>
-                  );
-                })}
+              <div className="flex flex-col gap-3">
+                <AmenityCategory title="Property Facilities" items={place.facilities} />
+                <AmenityCategory title="Room Facilities" items={place.roomFacilities} />
+                <AmenityCategory title="Travel Group" items={place.travelGroup} />
               </div>
             </div>
           )}
