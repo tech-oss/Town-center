@@ -235,8 +235,8 @@ export default function SettingsPage() {
 
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-sm font-semibold" style={{ color: FOREST }}>Hide my business profile</p>
-              <p className="text-xs mt-0.5" style={{ color: MUTED }}>Your business page will be invisible to the public. You can make it live again at any time.</p>
+              <p className="text-sm font-semibold" style={{ color: FOREST }}>Make your business live or hidden</p>
+              <p className="text-xs mt-0.5" style={{ color: MUTED }}>{user.visible ? "Your business is live." : "Your business is not live."}</p>
             </div>
             <Toggle checked={user.visible} onChange={handleHideProfile} />
           </div>
