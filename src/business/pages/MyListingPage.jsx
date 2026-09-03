@@ -44,7 +44,7 @@ function registrationCategorySummary(user, listing) {
     return { businessTypeLabel, category: labelFor(HOTEL_KINDS, detail.hotelKind) };
   }
   if (user.businessType === "eat-drink") {
-    return { businessTypeLabel, category: (detail.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)).join(", ") };
+    return { businessTypeLabel, category: (detail.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)).join(", "), categoryLabel: "Venue Type" };
   }
   if (user.businessType === "shop") {
     return { businessTypeLabel, category: (detail.shopCategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ") };
@@ -66,7 +66,7 @@ function subCategoryEditConfig(user, listing) {
     return { key: "freelancerCategories", label: "Sub-Category", options, max: 2 };
   }
   if (user.businessType === "eat-drink") {
-    return { key: "cuisineTypes", label: "Cuisine Type (Sub-Category)", options: CUISINE_TYPES, max: 2 };
+    return { key: "cuisineTypes", label: "Cuisine Type", options: CUISINE_TYPES, max: 2 };
   }
   if (user.businessType === "see-do") {
     return { key: "seeDoCategories", label: "Category", options: SEE_DO_CATEGORIES, max: 2 };
@@ -204,7 +204,7 @@ export default function MyListingPage() {
                     <Inp value={registrationSummary.businessTypeLabel} disabled style={{ opacity: 0.6 }} />
                   </Field>
                   {registrationSummary.category && (
-                    <Field label="Category" hint="Set at registration — cannot be changed here">
+                    <Field label={registrationSummary.categoryLabel ?? "Category"} hint="Set at registration — cannot be changed here">
                       <Inp value={registrationSummary.category} disabled style={{ opacity: 0.6 }} />
                     </Field>
                   )}
