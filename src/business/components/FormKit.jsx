@@ -29,14 +29,14 @@ export function Field({ label, required, span2, children, hint }) {
   );
 }
 
-export function Inp(props) {
-  return <input className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT} {...props} />;
+export function Inp({ style, ...props }) {
+  return <input className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ ...INPUT, ...style }} {...props} />;
 }
-export function TextArea({ rows = 4, ...props }) {
-  return <textarea rows={rows} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={INPUT} {...props} />;
+export function TextArea({ rows = 4, style, ...props }) {
+  return <textarea rows={rows} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={{ ...INPUT, ...style }} {...props} />;
 }
-export function Select({ children, ...props }) {
-  return <select className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT} {...props}>{children}</select>;
+export function Select({ children, style, ...props }) {
+  return <select className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ ...INPUT, ...style }} {...props}>{children}</select>;
 }
 
 // ─── Multi-select checkbox chips, optionally capped at `max` selections ──────
