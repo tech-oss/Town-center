@@ -13,7 +13,53 @@ import { getBusinessListing, saveBusinessListing } from "../api/businessListing"
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 import {
   AMENITY_OPTIONS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
+  BUSINESS_TYPES, FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES,
+  SHOP_CATEGORIES, SEE_DO_CATEGORIES, FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES,
+  TRADESPERSON_CATEGORIES,
 } from "../../Data/businessPortalMock";
+
+const FREELANCER_KIND_CATEGORIES = {
+  freelancer: FREELANCER_CATEGORIES,
+  professional: PROFESSIONAL_CATEGORIES,
+  tradesperson: TRADESPERSON_CATEGORIES,
+};
+
+function labelFor(options, value) {
+  return options.find((o) => o.value === value)?.label ?? value;
+}
+
+// Builds the read-only "Category" / "Sub-Category" strings shown on the
+// Profile tab from what the business selected at registration
+// (listing.businessTypeDetail) — set by admin/registration, never editable
+// here.
+function registrationCategorySummary(user, listing) {
+  const detail = listing?.businessTypeDetail ?? {};
+  const businessTypeLabel = labelFor(BUSINESS_TYPES, user.businessType === "services" ? "freelancer" : user.businessType);
+
+  if (user.businessType === "services") {
+    const kindLabel = labelFor(FREELANCER_KINDS, detail.freelancerKind);
+    const subOptions = FREELANCER_KIND_CATEGORIES[detail.freelancerKind];
+    const subLabel = subOptions && detail.freelancerCategories?.length
+      ? detail.freelancerCategories.map((v) => labelFor(subOptions, v)).join(", ")
+      : "";
+    return { businessTypeLabel, category: kindLabel, subCategory: subLabel };
+  }
+  if (user.businessType === "hotel") {
+    return { businessTypeLabel, category: labelFor(HOTEL_KINDS, detail.hotelKind), subCategory: "" };
+  }
+  if (user.businessType === "eat-drink") {
+    const category = (detail.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)).join(", ");
+    const subCategory = (detail.cuisineTypes ?? []).map((v) => labelFor(CUISINE_TYPES, v)).join(", ");
+    return { businessTypeLabel, category, subCategory };
+  }
+  if (user.businessType === "shop") {
+    return { businessTypeLabel, category: (detail.shopCategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v)).join(", "), subCategory: "" };
+  }
+  if (user.businessType === "see-do") {
+    return { businessTypeLabel, category: (detail.seeDoCategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v)).join(", "), subCategory: "" };
+  }
+  return { businessTypeLabel, category: "", subCategory: "" };
+}
 
 function tabsFor(user, listing) {
   const base = [
@@ -103,6 +149,7 @@ export default function MyListingPage() {
   }
 
   const status = listing.approvalStatus?.[tab];
+  const registrationSummary = registrationCategorySummary(user, listing);
 
   return (
     <BusinessLayout>
@@ -136,7 +183,19 @@ export default function MyListingPage() {
               <EditorSection title="Business Profile">
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
                   <Field label="Business Name"><Inp value={listing.name} onChange={(e) => set("name", e.target.value)} /></Field>
-                  <Field label="Category" hint="Set by admin on registration"><Inp value={listing.category} disabled style={{ opacity: 0.6 }} /></Field>
+                  <Field label="Business Type" hint="Set at registration — cannot be changed here">
+                    <Inp value={registrationSummary.businessTypeLabel} disabled style={{ opacity: 0.6 }} />
+                  </Field>
+                  {registrationSummary.category && (
+                    <Field label="Category" hint="Set at registration — cannot be changed here">
+                      <Inp value={registrationSummary.category} disabled style={{ opacity: 0.6 }} />
+                    </Field>
+                  )}
+                  {registrationSummary.subCategory && (
+                    <Field label="Sub-Category" hint="Set at registration — cannot be changed here">
+                      <Inp value={registrationSummary.subCategory} disabled style={{ opacity: 0.6 }} />
+                    </Field>
+                  )}
                   <Field label="Short Tagline" span2 hint="Shown on listing cards"><Inp value={listing.tagline} onChange={(e) => set("tagline", e.target.value)} /></Field>
                   <Field label="Main Description" span2 hint="The full about section on your page"><TextArea rows={5} value={listing.description} onChange={(e) => set("description", e.target.value)} /></Field>
                 </div>
