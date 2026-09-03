@@ -20,7 +20,7 @@ function AccordionSection({ title, children, defaultOpen = false }) {
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user, logout, toggleVisibility } = useBusinessAuth();
+  const { user, logout, toggleVisibility, updatePersonalDetails } = useBusinessAuth();
   const [toast, setToast] = useToast();
 
   const [personal, setPersonal] = useState({ firstName: user.firstName, lastName: user.lastName, email: user.email, phone: user.phone });
@@ -48,9 +48,9 @@ export default function SettingsPage() {
     setToast(`Request from ${req.firstName} ${req.lastName} declined.`);
   }
 
-  function savePersonal() {
-    // TODO: update Supabase auth user
-    setToast("Personal details saved.");
+  async function savePersonal() {
+    const res = await updatePersonalDetails(personal);
+    setToast(res.ok ? "Personal details saved." : "Something went wrong saving your details.");
   }
   function savePassword() {
     if (!pw.next || pw.next !== pw.confirm) { setToast("Passwords do not match."); return; }

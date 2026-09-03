@@ -41,6 +41,7 @@ export async function registerBusiness(form) {
     first_name: form.firstName,
     last_name: form.lastName,
     email: form.email,
+    phone: form.phone,
   });
   if (ownerError) return { ok: false, error: ownerError.message };
 

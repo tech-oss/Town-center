@@ -46,6 +46,7 @@ function buildSessionUser(row) {
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
+    phone: row.phone ?? base.phone,
     role: row.role,
     _isSeeded: isSeeded,
   };
@@ -115,6 +116,21 @@ export async function logout() {
   await supabase.auth.signOut();
 }
 
+// Persists the account-holder's own name/phone to their business_users row
+// (Account Settings' Personal Details section) and updates the live session.
+export async function updatePersonalDetails({ firstName, lastName, phone }) {
+  if (!currentUser) return { ok: false, error: "Not signed in." };
+  const { data: { user: authUser } } = await supabase.auth.getUser();
+  const { error } = await supabase
+    .from("business_users")
+    .update({ first_name: firstName, last_name: lastName, phone })
+    .eq("auth_user_id", authUser.id);
+  if (error) return { ok: false, error: error.message };
+  currentUser = { ...currentUser, firstName, lastName, phone };
+  emit();
+  return { ok: true };
+}
+
 // Dev-only local override for demo-switching between seeded mock users —
 // does not touch Supabase.
 export function setMockUser(user) {
@@ -132,5 +148,5 @@ export function toggleVisibility() {
 
 export default function useBusinessAuth() {
   const user = useSyncExternalStore(subscribe, getSnapshot);
-  return { user, isLoggedIn: !!user, restored, login, logout, switchUser: setMockUser, toggleVisibility };
+  return { user, isLoggedIn: !!user, restored, login, logout, switchUser: setMockUser, toggleVisibility, updatePersonalDetails };
 }
