@@ -75,17 +75,19 @@ function subCategoryEditConfig(user, listing) {
 }
 
 function tabsFor(user, listing) {
+  const isFreelancer = listing?.businessTypeDetail?.freelancerKind === "freelancer";
   const base = [
     { key: "profile", label: "Profile" },
     { key: "hours", label: user.businessType === "hotel" ? "Availability & Check-in" : "Opening Hours" },
-    { key: "gallery", label: user.businessType === "hotel" ? "Photos" : "Gallery" },
+    // Freelancers manage their images via the Portfolio tab instead —
+    // no separate Gallery.
+    ...(isFreelancer ? [] : [{ key: "gallery", label: user.businessType === "hotel" ? "Photos" : "Gallery" }]),
     { key: "location", label: "Location" },
     { key: "contact", label: "Contact & Social" },
     { key: "articles", label: "News & Articles" },
     { key: "reviews", label: "Reviews" },
     { key: "faqs", label: "FAQs" },
   ];
-  const isFreelancer = listing?.businessTypeDetail?.freelancerKind === "freelancer";
   if (user.businessType === "services" && isFreelancer) {
     base.push({ key: "workingwithme", label: "Working With Me" }, { key: "skills", label: "Skills" }, { key: "portfolio", label: "Portfolio" });
   } else if (user.businessType === "services") {
