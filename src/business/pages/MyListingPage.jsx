@@ -400,9 +400,6 @@ export default function MyListingPage() {
                 </EditorSection>
               ))}
 
-              <EditorSection title="Other Amenities">
-                <Field label="Other Amenities" hint="Anything not listed above"><TextArea rows={2} value={listing.otherAmenities ?? ""} onChange={(e) => set("otherAmenities", e.target.value)} /></Field>
-              </EditorSection>
               <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} />
             </>
           )}
