@@ -49,16 +49,15 @@ function registrationCategorySummary(user, listing) {
   if (user.businessType === "shop") {
     return { businessTypeLabel, category: (detail.shopCategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ") };
   }
-  if (user.businessType === "see-do") {
-    return { businessTypeLabel, category: (detail.seeDoCategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v)).join(", ") };
-  }
   return { businessTypeLabel, category: "" };
 }
 
 // The one editable sub-tier per business type — the specific field within
 // businessTypeDetail, its option list, and a max-selection cap. Returns
-// null when the business type has no sub-category tier (hotel, shop,
-// see & do only have a single category tier, handled above as read-only).
+// null when the business type has no editable tier (hotel and shop only
+// have a single fixed category, handled above as read-only). See & Do has
+// no separate parent tier to keep fixed — its category selection *is* the
+// editable multi-select, same shape as Eat & Drink's Cuisine Type.
 function subCategoryEditConfig(user, listing) {
   const detail = listing?.businessTypeDetail ?? {};
   if (user.businessType === "services") {
@@ -68,6 +67,9 @@ function subCategoryEditConfig(user, listing) {
   }
   if (user.businessType === "eat-drink") {
     return { key: "cuisineTypes", label: "Cuisine Type (Sub-Category)", options: CUISINE_TYPES, max: 2 };
+  }
+  if (user.businessType === "see-do") {
+    return { key: "seeDoCategories", label: "Category", options: SEE_DO_CATEGORIES, max: 2 };
   }
   return null;
 }
