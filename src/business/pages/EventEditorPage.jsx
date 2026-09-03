@@ -108,7 +108,7 @@ export default function EventEditorPage() {
           </EditorSection>
 
           <EditorSection title="Image Gallery" hint="Up to 6 photos">
-            <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} />
+            <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
           </EditorSection>
 
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>

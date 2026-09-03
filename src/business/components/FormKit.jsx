@@ -225,12 +225,16 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
 }
 
 // ─── Gallery grid (up to N slots) ─────────────────────────────────────────────
-export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix }) {
+export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix, ratio, ratioLabel }) {
   const [uploadingIndex, setUploadingIndex] = useState(null);
+  const [error, setError] = useState("");
   const slots = Array.from({ length: max }, (_, i) => images[i] ?? null);
   async function handleFile(i, files) {
     const file = files?.[0];
     if (!file) return;
+    setError("");
+    const mismatch = await checkAspectRatio(file, ratio).catch(() => null);
+    if (mismatch) { setError(mismatch); return; }
     setUploadingIndex(i);
     try {
       const url = await uploadToStorage(file, pathPrefix ?? "misc");
@@ -269,6 +273,8 @@ export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix }) {
           </div>
         ))}
       </div>
+      {ratioLabel && <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>Best aspect ratio: {ratioLabel}</p>}
+      {error && <p className="text-[11px] mt-1 font-medium" style={{ color: "#DC2626" }}>{error}</p>}
     </div>
   );
 }

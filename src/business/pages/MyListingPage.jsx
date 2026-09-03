@@ -247,7 +247,7 @@ export default function MyListingPage() {
           {tab === "gallery" && (
             <>
               <EditorSection title={user.businessType === "hotel" ? "Photos" : "Gallery"} hint="These images appear in the gallery on your public page.">
-                <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} />
+                <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
               </EditorSection>
               <SaveBar onSave={() => handleSave("gallery")} saving={saving} status={status} />
             </>
