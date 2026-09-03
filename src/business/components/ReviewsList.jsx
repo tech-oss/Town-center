@@ -38,10 +38,34 @@ export function ReviewsSummary({ reviews }) {
 
 const EMPTY_REVIEW = { reviewer: "", rating: 5, date: new Date().toISOString().slice(0, 10), text: "", verificationLink: "" };
 
+// A valid web URL — requires an http(s) scheme so a plain word or
+// malformed text can't be saved as a "verification link".
+function isValidWebUrl(value) {
+  try {
+    const u = new URL(value.trim());
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 // ─── Add / Edit review form ─────────────────────────────────────────────────────
 function ReviewForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial ?? { ...EMPTY_REVIEW });
+  const [linkTouched, setLinkTouched] = useState(false);
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
+
+  const linkValid = isValidWebUrl(form.verificationLink || "");
+  const linkError = linkTouched && !linkValid
+    ? (form.verificationLink.trim() ? "Enter a valid web URL (e.g. https://…)" : "Verification link is required")
+    : "";
+  const canSave = form.reviewer.trim() && form.text.trim() && linkValid;
+
+  function handleSave() {
+    setLinkTouched(true);
+    if (canSave) onSave(form);
+  }
+
   return (
     <div className="rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(82,199,182,0.05)", border: "1.5px solid rgba(82,199,182,0.25)" }}>
       <p className="text-sm font-bold" style={{ color: FOREST }}>{initial ? "Edit Review" : "Add Review"}</p>
@@ -55,11 +79,18 @@ function ReviewForm({ initial, onSave, onCancel }) {
         <Field label="Date"><Inp type="date" value={form.date} onChange={(e) => set("date", e.target.value)} /></Field>
       </div>
       <Field label="Review Text"><TextArea rows={3} value={form.text} onChange={(e) => set("text", e.target.value)} placeholder="What did the customer say?" /></Field>
-      <Field label="Verification Link" hint="A link proving this review is genuine (e.g. Google/Trustpilot review URL)">
-        <Inp value={form.verificationLink} onChange={(e) => set("verificationLink", e.target.value)} placeholder="https://…" />
+      <Field label="Verification Link" required hint="A link proving this review is genuine (e.g. Google/Trustpilot review URL)">
+        <Inp
+          value={form.verificationLink}
+          onChange={(e) => set("verificationLink", e.target.value)}
+          onBlur={() => setLinkTouched(true)}
+          placeholder="https://…"
+          style={linkError ? { borderColor: "#DC2626" } : undefined}
+        />
+        {linkError && <span className="text-[10px]" style={{ color: "#DC2626" }}>{linkError}</span>}
       </Field>
       <div className="flex gap-2">
-        <button onClick={() => form.reviewer.trim() && form.text.trim() && onSave(form)} disabled={!form.reviewer.trim() || !form.text.trim()}
+        <button onClick={handleSave} disabled={!form.reviewer.trim() || !form.text.trim()}
           className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: SAGE }}>Save</button>
         <button onClick={onCancel} className="px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
       </div>
