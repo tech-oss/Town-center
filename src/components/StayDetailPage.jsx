@@ -32,62 +32,40 @@ function buildSocial(item) {
   ].filter(Boolean);
 }
 
-// ── Amenity icons — thin-line, matching the reference design's stroke
-// weight and circular mint-tinted background. ──
-function AmenityIcon({ name }) {
-  const p = { width: 26, height: 26, viewBox: "0 0 24 24", fill: "none", stroke: "var(--leaf)", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round" };
-  switch (name) {
-    case "wifi": return (<svg {...p}><path d="M2 8.5a16 16 0 0120 0" /><path d="M5.5 12a11 11 0 0113 0" /><path d="M9 15.5a6 6 0 016 0" /><circle cx="12" cy="19" r="1" fill="var(--leaf)" stroke="none" /></svg>);
-    case "swim": return (<svg {...p}><circle cx="18" cy="6" r="1.5" fill="var(--leaf)" stroke="none" /><path d="M4 12l3-3 3 2 3-3 3 2 3-3" /><path d="M3 18c1.5 1.2 3 1.2 4.5 0s3-1.2 4.5 0 3 1.2 4.5 0 3-1.2 4.5 0" /></svg>);
-    case "restaurant": return (<svg {...p}><path d="M3 17a9 6 0 0118 0" /><path d="M2 17h20M12 17V6" /></svg>);
-    case "garden": return (<svg {...p}><path d="M12 21V10" /><path d="M12 10C12 6 9 4 6 4c0 4 2.5 6.5 6 6z" /><path d="M12 13c0-3.5 2.5-5.5 6-6 0 3.5-2.5 6-6 6z" /></svg>);
-    case "parking": return (<svg {...p}><rect x="3" y="7" width="18" height="11" rx="2" /><path d="M7 18v2M17 18v2M3 12h18" /><path d="M6.5 12V9h2a1.5 1.5 0 010 3h-2z" /></svg>);
-    case "family": return (<svg {...p}><circle cx="8" cy="8" r="3" /><path d="M2 20a6 6 0 0112 0" /><circle cx="17" cy="9" r="2.5" /><path d="M15 20a5 5 0 016-4.5" /></svg>);
-    case "kitchen": return (<svg {...p}><path d="M4 3v7a3 3 0 006 0V3M7 10v11" /><path d="M15 3c-1 2-1 4 0 6s1 4 0 6M15 3v18" /></svg>);
-    case "laundry": return (<svg {...p}><rect x="4" y="3" width="16" height="18" rx="2" /><circle cx="12" cy="13" r="4" /><circle cx="8" cy="6.5" r="0.8" fill="var(--leaf)" stroke="none" /></svg>);
-    case "river": return (<svg {...p}><path d="M2 8c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" /><path d="M2 14c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" /><path d="M2 20c2-1.5 4-1.5 6 0s4 1.5 6 0 4-1.5 6 0" /></svg>);
-    case "walk": return (<svg {...p}><circle cx="14" cy="4" r="1.6" fill="var(--leaf)" stroke="none" /><path d="M10 22l1.5-6L9 14l1-5 3 1 3 4-2 1-1-2-1.5 2 2 2-1 5" /></svg>);
-    case "pet": return (<svg {...p}><circle cx="7" cy="9" r="1.6" /><circle cx="11.5" cy="6.5" r="1.6" /><circle cx="16" cy="9" r="1.6" /><circle cx="18" cy="13.5" r="1.6" /><path d="M6 19c0-3 3-4 6-4s6 1 6 4c0 1.5-1.5 2-3 1.5-2-1-4-1-6 0-1.5.5-3 0-3-1.5z" /></svg>);
-    case "door": return (<svg {...p}><rect x="5" y="2" width="14" height="20" rx="1" /><circle cx="14.5" cy="12" r="1" fill="var(--leaf)" stroke="none" /></svg>);
-    case "cup": return (<svg {...p}><path d="M4 8h13v5a5 5 0 01-5 5H9a5 5 0 01-5-5V8z" /><path d="M17 9h1.5a2.5 2.5 0 010 5H17M7 3c0 1-1 1-1 2M11 3c0 1-1 1-1 2" /></svg>);
-    case "bbq": return (<svg {...p}><path d="M12 3s5 4 5 9a5 5 0 01-10 0c0-1.5.5-2.5 1.5-3.5C9 10 9.5 11 9.5 11S9 6 12 3z" /></svg>);
-    case "conference": return (<svg {...p}><rect x="3" y="6" width="18" height="13" rx="2" /><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" /><path d="M3 12h18" /></svg>);
-    case "shield": return (<svg {...p}><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" /><path d="M9 12l2 2 4-4" /></svg>);
-    default: return (<svg {...p}><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" /></svg>);
-  }
+// Categorised amenities section — a clean checklist grouped under its own
+// category (Property Facilities / Room Facilities / Travel Group), mirroring
+// the same three categories the business owner selects from on the business
+// dashboard. No per-item icon or blurb — just the name and a checkmark, kept
+// deliberately quiet so a long list still reads as premium, not busy.
+// Rendered via PlaceDetailLayout's afterGallery slot, directly below the
+// photo grid.
+function AmenityCategory({ title, items }) {
+  if (!items?.length) return null;
+  return (
+    <div className="bg-white rounded-2xl p-6 md:p-7" style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
+      <h3
+        className="text-xs font-bold uppercase tracking-[0.08em] pb-3 mb-4"
+        style={{ color: "var(--leaf)", borderBottom: "1px solid rgba(28,46,56,0.1)" }}
+      >
+        {title}
+      </h3>
+      <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+        {items.map((a) => (
+          <li key={a} className="flex items-start gap-2.5 text-sm leading-snug" style={{ color: "#000000" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+            <span>{a}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
-// Keyword → {icon, blurb} for each amenity label, so the section reads as a
-// curated feature list rather than a bare checklist. Matched in order —
-// first hit wins — with a generic fallback for anything unmapped.
-const AMENITY_META = [
-  [/wi-?fi/i, "wifi", "Stay connected with Wi-Fi throughout your stay."],
-  [/spa|pool|swim/i, "swim", "Relax and unwind with the on-site spa and pool."],
-  [/restaurant|bar/i, "restaurant", "Enjoy a meal or drink without leaving the building."],
-  [/garden/i, "garden", "Step outside to a private, landscaped garden."],
-  [/parking/i, "parking", "Secure, convenient parking on site."],
-  [/family/i, "family", "Spacious rooms well suited to families and groups."],
-  [/kitchen/i, "kitchen", "Cook your own meals in a fully equipped kitchen."],
-  [/washer|dryer/i, "laundry", "Laundry facilities on hand for longer stays."],
-  [/river|thames|waterside/i, "river", "Soak up riverside views just steps away."],
-  [/station|walk/i, "walk", "A short, easy walk from the station and town centre."],
-  [/pet/i, "pet", "Bring your pet along — this stay welcomes them."],
-  [/entrance/i, "door", "A private entrance for added privacy and ease."],
-  [/kettle|microwave/i, "cup", "Handy extras on hand for tea, coffee and quick snacks."],
-  [/bbq|furniture/i, "bbq", "Outdoor furniture and a BBQ for al fresco evenings."],
-  [/conference/i, "conference", "Well-equipped spaces for meetings and events."],
-  [/guarantee/i, "shield", "Book with confidence, backed by a satisfaction guarantee."],
-];
-function amenityMeta(label) {
-  const hit = AMENITY_META.find(([re]) => re.test(label));
-  return hit ? { icon: hit[1], blurb: hit[2] } : { icon: "star", blurb: "A thoughtful extra included with your stay." };
-}
-
-// Feature-card amenities section — icon, title, one-line blurb and a
-// checkmark per amenity, matching the reference design exactly. Rendered via
-// PlaceDetailLayout's afterGallery slot, directly below the photo grid.
-function AmenitiesSection({ amenities, heading }) {
-  if (!amenities?.length) return null;
+function AmenitiesSection({ categories, heading }) {
+  const populated = categories.filter((c) => c.items?.length);
+  if (!populated.length) return null;
   return (
     <section className="py-16 md:py-20 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-5xl mx-auto">
@@ -96,34 +74,10 @@ function AmenitiesSection({ amenities, heading }) {
         <p className="text-base md:text-lg leading-relaxed mb-10 max-w-xl" style={{ color: "#000000" }}>
           Thoughtful amenities designed to elevate your comfort, convenience, and stay.
         </p>
-        <div className="grid sm:grid-cols-2 gap-5">
-          {amenities.map((a) => {
-            const { icon, blurb } = amenityMeta(a);
-            return (
-              <div
-                key={a}
-                className="bg-white rounded-2xl p-5 flex items-center gap-4"
-                style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}
-              >
-                <span
-                  className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: "var(--mint)" }}
-                >
-                  <AmenityIcon name={icon} />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base mb-1" style={{ color: "#000000" }}>{a}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>{blurb}</p>
-                </div>
-                <span
-                  className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0"
-                  style={{ borderColor: "var(--leaf)", color: "var(--leaf)" }}
-                >
-                  ✓
-                </span>
-              </div>
-            );
-          })}
+        <div className="flex flex-col gap-5">
+          {populated.map((c) => (
+            <AmenityCategory key={c.title} title={c.title} items={c.items} />
+          ))}
         </div>
       </div>
     </section>
@@ -186,7 +140,11 @@ export default function StayDetailPage({ kind }) {
       related={STAY_DISCOVER}
       afterGallery={
         <AmenitiesSection
-          amenities={item.amenities}
+          categories={[
+            { title: "Property Facilities", items: item.facilities },
+            { title: "Room Facilities", items: item.roomFacilities },
+            { title: "Travel Group", items: item.travelGroup },
+          ]}
           heading={isHotels ? "Amenities" : "What This Place Offers"}
         />
       }
