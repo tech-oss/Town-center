@@ -256,7 +256,12 @@ export default function MyListingPage() {
           {tab === "location" && (
             <>
               <EditorSection title="Location">
-                <Field label="Address" span2><Inp value={listing.address} onChange={(e) => set("address", e.target.value)} /></Field>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Field label="Address" span2><Inp value={listing.address} onChange={(e) => set("address", e.target.value)} /></Field>
+                  {user.businessType === "hotel" && (
+                    <Field label="Postal Code"><Inp value={listing.postalCode ?? ""} onChange={(e) => set("postalCode", e.target.value)} placeholder="e.g. SL6 1QJ" /></Field>
+                  )}
+                </div>
                 <div className="mt-4">
                   <LocationFields lat={listing.lat} lng={listing.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
                 </div>
