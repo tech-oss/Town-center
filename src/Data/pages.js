@@ -668,6 +668,7 @@ export const sections = {
           { label: "Home & Furniture", to: "/shop?category=home-furniture" },
           { label: "Shoes & Footwear", to: "/shop?category=shoes-footwear" },
           { label: "Sports & Fitness", to: "/shop?category=sports-fitness" },
+          { label: "Other", to: "/shop?category=other-shop" },
         ],
       },
       {
@@ -681,6 +682,7 @@ export const sections = {
           { label: "Opticians & Pharmacies", to: "/shop?category=opticians" },
           { label: "Spa", to: "/shop?category=spa" },
           { label: "Travel Agents", to: "/shop?category=travel-agents" },
+          { label: "Other", to: "/shop?category=other-local-services" },
         ],
       },
       {
@@ -720,6 +722,7 @@ export const sections = {
           { label: "Decorators & Painters", to: "/services/tradespeople?category=decorators-painters" },
           { label: "Locksmiths", to: "/services/tradespeople?category=locksmiths" },
           { label: "Cleaners", to: "/services/tradespeople?category=cleaners" },
+          { label: "Other", to: "/services/tradespeople?category=other-tradesperson" },
         ],
       },
       {
@@ -732,6 +735,7 @@ export const sections = {
           { label: "Estate Agents", to: "/services/professionals?category=estate-agents" },
           { label: "Recruitment", to: "/services/professionals?category=recruitment" },
           { label: "Insurance Brokers", to: "/services/professionals?category=insurance-brokers" },
+          { label: "Other", to: "/services/professionals?category=other-professional" },
         ],
       },
       {
@@ -746,6 +750,7 @@ export const sections = {
           { label: "Personal Trainers", to: "/services/freelancers?category=personal-trainers" },
           { label: "Tutors", to: "/services/freelancers?category=tutors" },
           { label: "Virtual Assistants", to: "/services/freelancers?category=virtual-assistants" },
+          { label: "Other", to: "/services/freelancers?category=other-freelancer" },
         ],
       },
     ],
@@ -798,6 +803,7 @@ export const sections = {
           { label: "Bakery", to: "/eat-drink?category=bakery" },
           { label: "Takeaway", to: "/eat-drink?category=takeaway" },
           { label: "Private Dining", to: "/eat-drink?category=private-dining" },
+          { label: "Other", to: "/eat-drink?category=other-venue" },
         ],
       },
       {
@@ -819,6 +825,7 @@ export const sections = {
           { label: "Pizza", to: "/eat-drink?category=pizza" },
           { label: "Gastropub", to: "/eat-drink?category=gastropub" },
           { label: "Pan European", to: "/eat-drink?category=pan-european" },
+          { label: "Other", to: "/eat-drink?category=other-cuisine" },
         ],
       },
       {
@@ -864,6 +871,7 @@ export const sections = {
           { label: "Community", to: "/see-do?category=community" },
           { label: "Family", to: "/see-do?category=family" },
           { label: "Markets", to: "/see-do?category=markets" },
+          { label: "Other", to: "/see-do?category=other" },
         ],
       },
       {
@@ -896,6 +904,8 @@ export const categoryTitles = {
   opticians: "Opticians & Pharmacies",
   spa: "Spa",
   "travel-agents": "Travel Agents",
+  "other-shop": "Other",
+  "other-local-services": "Other",
   // services — tradesperson
   builders: "Builders",
   electricians: "Electricians",
@@ -903,6 +913,7 @@ export const categoryTitles = {
   "decorators-painters": "Decorators & Painters",
   locksmiths: "Locksmiths",
   cleaners: "Cleaners",
+  "other-tradesperson": "Other",
   // services — professionals
   accountants: "Accountants",
   solicitors: "Solicitors",
@@ -910,6 +921,7 @@ export const categoryTitles = {
   "estate-agents": "Estate Agents",
   recruitment: "Recruitment",
   "insurance-brokers": "Insurance Brokers",
+  "other-professional": "Other",
   // services — freelancers
   "graphic-designers": "Graphic Designers",
   "web-developers": "Web Developers",
@@ -919,6 +931,7 @@ export const categoryTitles = {
   "personal-trainers": "Personal Trainers",
   tutors: "Tutors",
   "virtual-assistants": "Virtual Assistants",
+  "other-freelancer": "Other",
   // eat & drink
   restaurants: "Restaurants",
   bars: "Bars",
@@ -927,6 +940,7 @@ export const categoryTitles = {
   bakery: "Bakery",
   takeaway: "Takeaway",
   "private-dining": "Private Dining",
+  "other-venue": "Other",
   british: "British",
   italian: "Italian",
   chinese: "Chinese",
@@ -943,6 +957,7 @@ export const categoryTitles = {
   pizza: "Pizza",
   gastropub: "Gastropub",
   "pan-european": "Pan European",
+  "other-cuisine": "Other",
   // see & do
   "sport-wellness": "Sport & Wellness",
   gaming: "Gaming",
@@ -954,6 +969,7 @@ export const categoryTitles = {
   community: "Community",
   family: "Family",
   markets: "Markets",
+  other: "Other",
 };
 
 // Flat lookup of every item by slug (for detail pages)
