@@ -6,7 +6,7 @@ const img = (seed, w = 900, h = 600) => `https://picsum.photos/seed/${seed}/${w}
 
 export const BUSINESS_TYPES = [
   { value: "eat-drink", label: "Eat & Drink" },
-  { value: "shop",      label: "Shop" },
+  { value: "shop",      label: "Shop & Local Services" },
   { value: "see-do",    label: "See & Do" },
   { value: "hotel",     label: "Hotel & Accommodation" },
   { value: "freelancer",label: "Services" },
