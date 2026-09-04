@@ -10,6 +10,7 @@ const DIVIDER  = "rgba(255,255,255,0.10)";
 
 const NAV = [
   { to: "/business/dashboard", label: "Dashboard", icon: "🏠" },
+  { to: "/business/analytics", label: "Analytics", icon: "📊" },
   { to: "/business/listing",   label: "My Listing", icon: "📄" },
   { to: "/business/articles",  label: "News & Articles", icon: "📰" },
   { to: "/business/events",    label: "Request Event", icon: "📅" },

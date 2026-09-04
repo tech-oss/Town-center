@@ -4,6 +4,8 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterUserPage from "./pages/RegisterUserPage";
 import DashboardPage from "./pages/DashboardPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import ContentAnalyticsDetailPage from "./pages/ContentAnalyticsDetailPage";
 import MyListingPage from "./pages/MyListingPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import ArticleEditorPage from "./pages/ArticleEditorPage";
@@ -39,6 +41,8 @@ export default function BusinessApp() {
       <Route path="register-user" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <RegisterUserPage />} />
 
       <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
+      <Route path="analytics" element={<RequireAuth><AnalyticsPage /></RequireAuth>} />
+      <Route path="analytics/content/:id" element={<RequireAuth><ContentAnalyticsDetailPage /></RequireAuth>} />
       <Route path="listing" element={<RequireAuth><MyListingPage /></RequireAuth>} />
       <Route path="articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
