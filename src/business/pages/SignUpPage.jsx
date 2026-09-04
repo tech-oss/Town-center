@@ -14,9 +14,9 @@ const FREELANCER_KIND_CATEGORIES = {
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
 import { registerBusiness } from "../api/businessRegistration";
 
-const FOREST = "var(--forest)", SAGE = "var(--sage)", LEAF = "var(--leaf)";
-const MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
-const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
+const MUTED = "#64748B", BORDER = "rgba(16,24,40,0.14)";
+const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 
 const STEPS = ["Your Details", "Business Details", "Plan", "Terms", "Review"];
 
@@ -54,7 +54,7 @@ function SummarySection({ title, onEdit, children }) {
     <div className="rounded-xl p-4" style={{ border: `1.5px solid ${BORDER}` }}>
       <div className="flex items-center justify-between mb-1">
         <p className="text-sm font-bold" style={{ color: FOREST }}>{title}</p>
-        <button type="button" onClick={onEdit} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Edit</button>
+        <button type="button" onClick={onEdit} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Edit</button>
       </div>
       <div className="divide-y" style={{ borderColor: BORDER }}>{children}</div>
     </div>
@@ -68,7 +68,7 @@ function StepIndicator({ step }) {
         <div key={s} className="flex items-center gap-2 flex-1">
           <div className="flex flex-col items-center gap-1.5 flex-1">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-              style={i <= step ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.08)", color: MUTED }}>
+              style={i <= step ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "rgba(16,24,40,0.08)", color: MUTED }}>
               {i < step ? "✓" : i + 1}
             </div>
             <span className="text-[10px] font-semibold text-center" style={{ color: i <= step ? FOREST : MUTED }}>{s}</span>
@@ -87,7 +87,7 @@ function RadioGroup({ options, value, onChange }) {
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (
         <label key={o.value} className="flex items-center gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all"
-          style={value === o.value ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+          style={value === o.value ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.07)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
           <input type="radio" checked={value === o.value} onChange={() => onChange(o.value)} className="w-3.5 h-3.5" />
           <span className="text-xs font-semibold" style={{ color: FOREST }}>{o.label}</span>
         </label>
@@ -112,7 +112,7 @@ function CheckGroup({ options, selected, onChange, grouped, max }) {
         style={{
           cursor: disabled ? "not-allowed" : "pointer",
           opacity: disabled ? 0.4 : 1,
-          ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
+          ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.07)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
         }}>
         <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(o.value)} className="w-3.5 h-3.5" />
         <span className="text-xs font-medium" style={{ color: FOREST }}>{o.label}</span>
@@ -141,7 +141,7 @@ function PlanCard({ plan, selected, onClick }) {
   return (
     <button type="button" onClick={onClick}
       className="text-left rounded-2xl p-5 flex flex-col gap-3 transition-all"
-      style={selected ? { border: `2px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+      style={selected ? { border: `2px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
       <div>
         <span className="text-base font-bold" style={{ color: FOREST }}>{plan.name}</span>
         <p className="text-xl font-bold mt-1" style={{ color: FOREST }}>{plan.price === 0 ? "Free" : `£${plan.price}/mo`}</p>
@@ -194,9 +194,9 @@ export default function SignUpPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F4F8F7" }}>
+      <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
         <div className="max-w-md w-full bg-white rounded-2xl p-8 text-center flex flex-col items-center gap-4" style={CARD}>
-          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(82,199,182,0.16)", color: "#0F766E" }}>✓</div>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>✓</div>
           <h1 className="text-xl font-bold" style={{ color: FOREST }}>Application submitted!</h1>
           <p className="text-sm" style={{ color: MUTED }}>We'll review your details and send you a confirmation email within 1-2 business days.</p>
           <Link to="/business/login" className="mt-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
@@ -208,7 +208,7 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F4F8F7" }}>
+    <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
       <div className="max-w-2xl w-full">
         <div className="flex flex-col items-center gap-2 mb-6">
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
@@ -364,7 +364,7 @@ export default function SignUpPage() {
                 <SummaryRow label="Privacy Policy" value={form.agreePrivacy ? "Agreed" : "Not agreed"} />
               </SummarySection>
 
-              <label className="flex items-start gap-3 cursor-pointer rounded-xl p-3 mt-2" style={{ border: "1.5px solid rgba(232,163,61,0.35)", backgroundColor: "rgba(232,163,61,0.08)" }}>
+              <label className="flex items-start gap-3 cursor-pointer rounded-xl p-3 mt-2" style={{ border: "1.5px solid rgba(217,119,6,0.3)", backgroundColor: "rgba(217,119,6,0.08)" }}>
                 <input type="checkbox" checked={form.confirmFinal} onChange={(e) => set("confirmFinal", e.target.checked)} className="mt-0.5 w-4 h-4" />
                 <span className="text-sm" style={{ color: FOREST }}>I confirm the information above is accurate. I understand it cannot be changed after submitting, and my application will be reviewed by admin before my account goes live.</span>
               </label>
@@ -394,7 +394,7 @@ export default function SignUpPage() {
         </div>
 
         <p className="text-xs text-center mt-4" style={{ color: MUTED }}>
-          Already registered? <Link to="/business/login" className="font-semibold" style={{ color: "#0F766E" }}>Log in</Link>
+          Already registered? <Link to="/business/login" className="font-semibold" style={{ color: "#2563EB" }}>Log in</Link>
         </p>
       </div>
     </div>

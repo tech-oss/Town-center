@@ -164,18 +164,18 @@ export default function SettingsPage() {
 
         <AccordionSection title="Business User Management" defaultOpen>
           {isOwner && (
-            <div className="flex flex-col gap-3 mb-4 rounded-xl p-3" style={{ backgroundColor: "rgba(232,163,61,0.08)", border: "1.5px solid rgba(232,163,61,0.3)" }}>
+            <div className="flex flex-col gap-3 mb-4 rounded-xl p-3" style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)" }}>
               <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "#92400E" }}>Pending User Approvals</p>
               {pendingRequests.length === 0 ? (
                 <p className="text-xs" style={{ color: "#92400E" }}>No pending requests right now.</p>
               ) : pendingRequests.map((r) => (
                 <div key={r.id} className="flex items-center gap-3 flex-wrap rounded-xl p-3 bg-white" style={{ border: `1px solid ${BORDER}` }}>
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: "#E8A33D" }}>{r.firstName[0]}</div>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ backgroundColor: "#D97706" }}>{r.firstName[0]}</div>
                   <div className="flex-1 min-w-[140px]">
                     <p className="text-sm font-semibold" style={{ color: FOREST }}>{r.firstName} {r.lastName}</p>
                     <p className="text-xs" style={{ color: MUTED }}>{r.email} · requested {r.requestedAt}</p>
                   </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(232,163,61,0.16)", color: "#92400E" }}>Content Manager</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }}>Content Manager</span>
                   <button onClick={() => handleApproveRequest(r)} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white" style={{ backgroundColor: SAGE }}>Accept</button>
                   <button onClick={() => handleDeclineRequest(r)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ color: "#991B1B", border: "1.5px solid rgba(220,38,38,0.3)" }}>Decline</button>
                 </div>
@@ -193,7 +193,7 @@ export default function SettingsPage() {
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{m.role}</span>
                 {isOwner && (m.role === "Owner" ? (
-                  <button onClick={() => setTransferTarget(team.find((t) => t.role !== "Owner") ?? m)} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Transfer ownership</button>
+                  <button onClick={() => setTransferTarget(team.find((t) => t.role !== "Owner") ?? m)} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Transfer ownership</button>
                 ) : (
                   <button onClick={() => removeMember(m.id)} className="text-xs font-semibold" style={{ color: "#991B1B" }}>Remove</button>
                 ))}
@@ -223,7 +223,7 @@ export default function SettingsPage() {
               );
             }
             return (
-              <button onClick={() => setAddingMember(true)} className="px-4 py-2 rounded-xl text-xs font-semibold" style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: "1.5px solid rgba(82,199,182,0.35)" }}>+ Add a user</button>
+              <button onClick={() => setAddingMember(true)} className="px-4 py-2 rounded-xl text-xs font-semibold" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB", border: "1.5px solid rgba(37,99,235,0.3)" }}>+ Add a user</button>
             );
           })()}
           {isOwner && <p className="text-[11px] mt-3" style={{ color: "#9CA3AF" }}>If you are leaving this business, use "Transfer ownership" before removing yourself.</p>}

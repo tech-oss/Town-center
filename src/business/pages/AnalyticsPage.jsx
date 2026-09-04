@@ -68,7 +68,7 @@ export default function AnalyticsPage() {
             <button
               onClick={handleExportPdf}
               className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 flex items-center gap-1.5"
-              style={{ backgroundColor: "rgba(28,46,56,0.06)", color: FOREST }}
+              style={{ backgroundColor: "rgba(16,24,40,0.06)", color: FOREST }}
             >
               ⬇ Export as PDF
             </button>
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
                         className="grid grid-cols-[1fr_auto_auto] gap-4 py-3 text-left text-sm transition-colors hover:bg-gray-50"
                         style={{ borderBottom: `1px solid ${BORDER}` }}
                       >
-                        <span className="font-semibold truncate" style={{ color: "#0F766E" }}>{row.title}</span>
+                        <span className="font-semibold truncate" style={{ color: "#2563EB" }}>{row.title}</span>
                         <span className="w-20" style={{ color: MUTED }}>{row.type}</span>
                         <span className="w-20 text-right font-semibold" style={{ color: FOREST }}>{row.views.toLocaleString()}</span>
                       </button>

@@ -23,7 +23,7 @@ function StepIndicator({ step }) {
           <div key={s} className="flex items-center gap-2 flex-1">
             <div className="flex flex-col items-center gap-1.5 flex-1">
               <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                style={n <= step ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "rgba(28,46,56,0.08)", color: MUTED }}>
+                style={n <= step ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "rgba(16,24,40,0.08)", color: MUTED }}>
                 {n < step ? "✓" : n}
               </div>
               <span className="text-[10px] font-semibold text-center" style={{ color: n <= step ? FOREST : MUTED }}>{s}</span>
@@ -40,7 +40,7 @@ function StepIndicator({ step }) {
 function PlanCard({ plan, isCurrent, onChoose }) {
   return (
     <div className="relative rounded-2xl p-6 flex flex-col gap-4 bg-white"
-      style={plan.popular ? { border: `2px solid ${SAGE}`, boxShadow: "0 8px 24px -8px rgba(82,199,182,0.35)" } : CARD}>
+      style={plan.popular ? { border: `2px solid ${SAGE}`, boxShadow: "0 8px 24px -8px rgba(37,99,235,0.3)" } : CARD}>
       {plan.popular && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wide px-3 py-1 rounded-full text-white whitespace-nowrap"
           style={{ backgroundColor: SAGE }}>
@@ -64,7 +64,7 @@ function PlanCard({ plan, isCurrent, onChoose }) {
       </ul>
       <button disabled={isCurrent} onClick={() => onChoose(plan)}
         className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        style={isCurrent ? { backgroundColor: "rgba(28,46,56,0.08)", color: MUTED } : { backgroundColor: SAGE, color: "#fff" }}>
+        style={isCurrent ? { backgroundColor: "rgba(16,24,40,0.08)", color: MUTED } : { backgroundColor: SAGE, color: "#fff" }}>
         {isCurrent ? "Current Plan" : `Choose ${plan.name}`}
       </button>
     </div>
@@ -147,7 +147,7 @@ function ScreenPayment({ plan, user, onBack, onPay, paying }) {
   return (
     <div className="max-w-4xl bg-white rounded-2xl overflow-hidden grid sm:grid-cols-2" style={CARD}>
       {/* Left — order summary */}
-      <div className="p-8 flex flex-col gap-6" style={{ backgroundColor: "#F4F8F7" }}>
+      <div className="p-8 flex flex-col gap-6" style={{ backgroundColor: "#F5F7FB" }}>
         <button onClick={onBack} className="text-xl w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>‹</button>
         <div className="flex items-center gap-2">
           <img src="/logo-mark.svg" alt="" style={{ width: 28, height: 28 }} />
@@ -235,7 +235,7 @@ function ScreenSuccess({ plan }) {
           style={{
             left: `${(i * 7 + 3) % 100}%`,
             width: 6, height: 10,
-            backgroundColor: [SAGE, "#E8A33D", FOREST, "#2FA4A4"][i % 4],
+            backgroundColor: [SAGE, "#D97706", FOREST, "#3B82F6"][i % 4],
             animation: `confetti-fall ${1.6 + (i % 5) * 0.3}s ease-in ${i * 0.08}s infinite`,
           }} />
       ))}
@@ -263,7 +263,7 @@ function ScreenSuccess({ plan }) {
           className="px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
           Go to Dashboard
         </button>
-        <a href="/" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold" style={{ color: "#0F766E" }}>View Your Listing</a>
+        <a href="/" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold" style={{ color: "#2563EB" }}>View Your Listing</a>
       </div>
     </div>
   );

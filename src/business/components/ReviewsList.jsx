@@ -11,7 +11,7 @@ function RatingBreakdown({ reviews }) {
         <div key={star} className="flex items-center gap-2 text-xs">
           <span className="w-8 shrink-0" style={{ color: MUTED }}>{star}★</span>
           <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#EEF2F1" }}>
-            <div className="h-full rounded-full" style={{ width: `${(counts[i] / total) * 100}%`, backgroundColor: "#E8A33D" }} />
+            <div className="h-full rounded-full" style={{ width: `${(counts[i] / total) * 100}%`, backgroundColor: "#D97706" }} />
           </div>
         </div>
       ))}
@@ -23,7 +23,7 @@ export function ReviewsSummary({ reviews }) {
   const avg = reviews.length ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1) : "—";
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col sm:flex-row gap-6 items-start sm:items-center"
-      style={{ border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" }}>
+      style={{ border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" }}>
       <div className="text-center shrink-0">
         <p className="text-3xl font-bold" style={{ color: FOREST }}>{avg}</p>
         <Stars rating={Math.round(reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0)} size={16} />
@@ -67,7 +67,7 @@ function ReviewForm({ initial, onSave, onCancel }) {
   }
 
   return (
-    <div className="rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(82,199,182,0.05)", border: "1.5px solid rgba(82,199,182,0.25)" }}>
+    <div className="rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "rgba(37,99,235,0.05)", border: "1.5px solid rgba(37,99,235,0.2)" }}>
       <p className="text-sm font-bold" style={{ color: FOREST }}>{initial ? "Edit Review" : "Add Review"}</p>
       <div className="grid sm:grid-cols-3 gap-3">
         <Field label="Reviewer Name"><Inp value={form.reviewer} onChange={(e) => set("reviewer", e.target.value)} placeholder="e.g. Hannah B." /></Field>
@@ -110,7 +110,7 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
       {canManage && !adding && (
         <button onClick={() => setAdding(true)}
           className="self-start px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
-          style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: "1.5px solid rgba(82,199,182,0.35)" }}>
+          style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB", border: "1.5px solid rgba(37,99,235,0.3)" }}>
           + Add Review
         </button>
       )}
@@ -140,7 +140,7 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
               <span className="text-xs" style={{ color: "#9CA3AF" }}>{r.date}</span>
               {canManage && (
                 <>
-                  <button onClick={() => setEditingId(r.id)} className="text-xs font-semibold" style={{ color: "#0F766E" }}>Edit</button>
+                  <button onClick={() => setEditingId(r.id)} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Edit</button>
                   <button onClick={() => setDeletingId(r.id)} className="text-xs font-semibold" style={{ color: "#991B1B" }}>Delete</button>
                 </>
               )}
@@ -150,7 +150,7 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
 
           {r.verificationLink && (
             <a href={r.verificationLink} target="_blank" rel="noreferrer"
-              className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>
+              className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#2563EB" }}>
               Verification Link ↗
             </a>
           )}

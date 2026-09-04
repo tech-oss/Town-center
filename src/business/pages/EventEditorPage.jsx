@@ -112,7 +112,7 @@ export default function EventEditorPage() {
           </EditorSection>
 
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-            <button onClick={() => handleSave(false)} disabled={saving} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: FOREST }}>Save as Draft</button>
+            <button onClick={() => handleSave(false)} disabled={saving} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ backgroundColor: "rgba(16,24,40,0.06)", color: FOREST }}>Save as Draft</button>
             <button onClick={() => handleSave(true)} disabled={saving} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: SAGE }}>Submit for Approval</button>
             <button onClick={() => navigate("/business/events")} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
           </div>

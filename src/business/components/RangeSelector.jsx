@@ -15,7 +15,7 @@ export default function RangeSelector({ value, onChange }) {
 
   return (
     <div className="flex flex-col items-end gap-2">
-      <div className="inline-flex rounded-xl p-1 flex-wrap" style={{ backgroundColor: "rgba(28,46,56,0.05)" }}>
+      <div className="inline-flex rounded-xl p-1 flex-wrap" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
         {RANGE_PRESETS.map((opt) => {
           const active = value?.type === "preset" && opt.key === value.key;
           return (
@@ -52,7 +52,7 @@ export default function RangeSelector({ value, onChange }) {
           <input type="date" value={draftTo} min={draftFrom || undefined} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setDraftTo(e.target.value)}
             className="text-xs rounded-lg px-2 py-1.5 outline-none" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }} />
           <button type="button" onClick={applyCustom} disabled={!draftFrom || !draftTo}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: "var(--sage)" }}>
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: "#2563EB" }}>
             Apply
           </button>
         </div>

@@ -8,13 +8,18 @@ async function uploadToStorage(file, pathPrefix) {
   return supabase.storage.from("business-media").getPublicUrl(path).data.publicUrl;
 }
 
-// ─── Theme — mirrors the public site's teal/navy design tokens ───────────────
-export const FOREST = "var(--forest)"; // #1C2E38 dark navy — headings, body text
-export const LEAF    = "var(--leaf)";   // #2FA4A4 mid teal — secondary accents
-export const SAGE     = "var(--sage)";   // #52C7B6 primary teal — CTAs
+// ─── Theme — the same "Modern Blue" design system as the admin panel
+// (Inter throughout, flat white cards on a light blue-grey canvas), applied
+// here so the business dashboard and admin panel read as one consistent
+// back-office product. Names kept as FOREST/SAGE/LEAF for backward
+// compatibility with every existing `style={{ color: FOREST }}` call site —
+// only the values changed. ───────────────────────────────────────────────────
+export const FOREST = "#1E293B"; // admin body/heading navy — headings, body text
+export const LEAF    = "#3B82F6"; // admin secondary blue accent
+export const SAGE     = "#2563EB"; // admin primary blue — buttons, active states, links
 export const MUTED    = "#64748B";
-export const BORDER   = "rgba(28,46,56,0.14)";
-export const CARD     = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+export const BORDER   = "rgba(16,24,40,0.1)";
+export const CARD     = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 export const INPUT     = { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" };
 
 export function Field({ label, required, span2, children, hint }) {
@@ -57,7 +62,7 @@ export function CheckGroup({ options, selected, onChange, max }) {
             style={{
               cursor: disabled ? "not-allowed" : "pointer",
               opacity: disabled ? 0.4 : 1,
-              ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.08)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
+              ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.07)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
             }}>
             <input type="checkbox" checked={checked} disabled={disabled} onChange={() => toggle(o.value)} className="w-3.5 h-3.5" />
             <span className="text-xs font-medium" style={{ color: FOREST }}>{o.label}</span>
@@ -103,8 +108,8 @@ export function EditorSection({ title, hint, children, action }) {
 // ─── Approval status badge (per My Listing tab) ───────────────────────────────
 export function ApprovalBadge({ status, rejectionReason }) {
   const map = {
-    "Up to Date":       { bg: "rgba(82,199,182,0.16)", fg: "#0F766E" },
-    "Pending Approval": { bg: "rgba(232,163,61,0.16)", fg: "#92400E" },
+    "Up to Date":       { bg: "rgba(37,99,235,0.16)", fg: "#2563EB" },
+    "Pending Approval": { bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
     "Changes Rejected": { bg: "rgba(220,38,38,0.1)",   fg: "#991B1B" },
   };
   const c = map[status] ?? map["Up to Date"];
@@ -214,7 +219,7 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
         )}
       </div>
       <label className="inline-block mt-2 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
-        style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: `1.5px solid rgba(82,199,182,0.35)` }}>
+        style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB", border: `1.5px solid rgba(37,99,235,0.3)` }}>
         {uploading ? "Uploading…" : src ? "Replace Image" : "Upload Image"}
         <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(e) => handleFiles(e.target.files)} />
       </label>
@@ -373,7 +378,7 @@ export function RepeatableList({ items, onChange, placeholder = "" }) {
           <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
         </div>
       ))}
-      <button onClick={add} type="button" className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>+ Add</button>
+      <button onClick={add} type="button" className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#2563EB" }}>+ Add</button>
     </div>
   );
 }
@@ -406,7 +411,7 @@ export function FaqListEditor({ items, onChange }) {
           <TextArea rows={2} value={it.answer} onChange={(e) => set(i, "answer", e.target.value)} placeholder="Answer" />
         </div>
       ))}
-      <button onClick={add} type="button" className="self-start text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>+ Add FAQ</button>
+      <button onClick={add} type="button" className="self-start text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: "#2563EB" }}>+ Add FAQ</button>
     </div>
   );
 }
@@ -438,7 +443,7 @@ export function StatsEditor({ items, onChange }) {
           <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
         </div>
       ))}
-      <button onClick={add} type="button" className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>+ Add</button>
+      <button onClick={add} type="button" className="self-start text-xs font-semibold mt-1 transition-opacity hover:opacity-70" style={{ color: "#2563EB" }}>+ Add</button>
     </div>
   );
 }
@@ -487,7 +492,7 @@ export function PortfolioEditor({ items, onChange, pathPrefix, max = 6 }) {
       {items.length < max && (
         <button onClick={add} type="button"
           className="rounded-xl flex items-center justify-center text-sm font-semibold aspect-video transition-opacity hover:opacity-70"
-          style={{ border: `1.5px dashed ${BORDER}`, color: "#0F766E" }}>
+          style={{ border: `1.5px dashed ${BORDER}`, color: "#2563EB" }}>
           + Add Portfolio Item
         </button>
       )}
@@ -515,7 +520,7 @@ export function ConfirmModal({ title, body, confirmLabel = "Confirm", danger = t
 // ─── Star rating (display only) ────────────────────────────────────────────────
 export function Stars({ rating, size = 14 }) {
   return (
-    <span style={{ fontSize: size, color: "#E8A33D", letterSpacing: 1 }}>
+    <span style={{ fontSize: size, color: "#D97706", letterSpacing: 1 }}>
       {"★".repeat(rating)}<span style={{ color: "#E5E7EB" }}>{"★".repeat(5 - rating)}</span>
     </span>
   );

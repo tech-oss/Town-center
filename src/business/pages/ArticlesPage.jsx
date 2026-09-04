@@ -7,10 +7,10 @@ import { listArticles, setArticleStatus, deleteArticle } from "../api/businessAr
 
 const STATUS_COLOURS = {
   Draft: { bg: "rgba(107,114,128,0.13)", fg: "#374151" },
-  "Pending Approval": { bg: "rgba(232,163,61,0.16)", fg: "#92400E" },
-  Live: { bg: "rgba(82,199,182,0.16)", fg: "#0F766E" },
+  "Pending Approval": { bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
+  Live: { bg: "rgba(37,99,235,0.16)", fg: "#2563EB" },
   Rejected: { bg: "rgba(220,38,38,0.1)", fg: "#991B1B" },
-  Hidden: { bg: "rgba(232,163,61,0.16)", fg: "#92400E" },
+  Hidden: { bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
 };
 function StatusBadge({ status }) {
   const c = STATUS_COLOURS[status] ?? STATUS_COLOURS.Draft;
@@ -106,7 +106,7 @@ export default function ArticlesPage() {
                     {a.status === "Live" || a.status === "Hidden" ? (
                       <button onClick={() => handleHide(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>{a.status === "Hidden" ? "Make Live" : "Hide"}</button>
                     ) : a.status === "Draft" ? (
-                      <button onClick={() => handleMakeLive(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(82,199,182,0.35)", color: "#0F766E" }}>Make Live</button>
+                      <button onClick={() => handleMakeLive(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: "#2563EB" }}>Make Live</button>
                     ) : null}
                     <button onClick={() => setDeleting(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
                   </div>

@@ -8,8 +8,8 @@ import { listTickets, createTicket, addTicketMessage } from "../api/businessTick
 function StatusBadge({ status }) {
   const map = {
     Open: { bg: "rgba(220,38,38,0.1)", fg: "#991B1B" },
-    "In Progress": { bg: "rgba(232,163,61,0.16)", fg: "#92400E" },
-    Resolved: { bg: "rgba(82,199,182,0.16)", fg: "#0F766E" },
+    "In Progress": { bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
+    Resolved: { bg: "rgba(37,99,235,0.16)", fg: "#2563EB" },
   };
   const c = map[status] ?? map.Open;
   return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: c.bg, color: c.fg }}>{status}</span>;
@@ -94,11 +94,11 @@ function NewTicketTab({ notify, onCreated }) {
       <Field label="Attach a screenshot if helpful" hint="Optional">
         <div className="flex items-center gap-3 flex-wrap">
           <label className="cursor-pointer px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
-            style={{ backgroundColor: "rgba(82,199,182,0.12)", color: "#0F766E", border: "1.5px solid rgba(82,199,182,0.35)" }}>
+            style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB", border: "1.5px solid rgba(37,99,235,0.3)" }}>
             📎 Attach File
             <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0]?.name ?? null)} className="hidden" />
           </label>
-          {attachment && <span className="text-xs font-medium" style={{ color: "#0F766E" }}>{attachment}</span>}
+          {attachment && <span className="text-xs font-medium" style={{ color: "#2563EB" }}>{attachment}</span>}
         </div>
       </Field>
       <button onClick={handleSubmit} disabled={!subject.trim() || !message.trim() || submitting}
@@ -158,7 +158,7 @@ export default function SupportPage() {
           {[["mine", "My Tickets"], ["new", "New Ticket"]].map(([key, label]) => (
             <button key={key} onClick={() => setTab(key)}
               className="px-5 py-2.5 text-sm font-medium transition-all"
-              style={{ color: tab === key ? "#0F766E" : MUTED, borderBottom: tab === key ? `2px solid ${SAGE}` : "2px solid transparent", marginBottom: -1 }}>
+              style={{ color: tab === key ? "#2563EB" : MUTED, borderBottom: tab === key ? `2px solid ${SAGE}` : "2px solid transparent", marginBottom: -1 }}>
               {label}
             </button>
           ))}

@@ -7,15 +7,15 @@ import { DASHBOARD_ACTIVITY, PROFILE_COMPLETENESS } from "../../Data/businessPor
 import { listArticles } from "../api/businessArticles";
 import { listTickets } from "../api/businessTickets";
 
-const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B", BORDER = "rgba(28,46,56,0.12)";
-const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
+const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 
 function StatCard({ label, value, sub }) {
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-1" style={CARD}>
       <span className="text-2xl font-bold" style={{ color: FOREST }}>{value}</span>
       <span className="text-xs font-semibold" style={{ color: MUTED }}>{label}</span>
-      {sub && <span className="text-[11px] mt-1" style={{ color: "#0F766E" }}>{sub}</span>}
+      {sub && <span className="text-[11px] mt-1" style={{ color: "#2563EB" }}>{sub}</span>}
     </div>
   );
 }
@@ -93,7 +93,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold" style={{ color: FOREST }}>Profile Completeness</p>
-            <span className="text-sm font-bold" style={{ color: "#0F766E" }}>{completeness.percent}%</span>
+            <span className="text-sm font-bold" style={{ color: "#2563EB" }}>{completeness.percent}%</span>
           </div>
           <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#EEF2F1" }}>
             <div className="h-full rounded-full" style={{ width: `${completeness.percent}%`, backgroundColor: SAGE }} />
@@ -101,7 +101,7 @@ export default function DashboardPage() {
           {completeness.missing.length > 0 && (
             <div className="flex flex-col gap-1 mt-1">
               {completeness.missing.map((m) => (
-                <Link key={m} to="/business/listing" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: "#0F766E" }}>→ {m}</Link>
+                <Link key={m} to="/business/listing" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: "#2563EB" }}>→ {m}</Link>
               ))}
             </div>
           )}

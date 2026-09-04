@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import { submitUserRegistration, listBusinesses } from "../hooks/useUserRegistry";
 import { Field, Inp } from "../components/FormKit";
 
-const FOREST = "var(--forest)", SAGE = "var(--sage)", MUTED = "#64748B", BORDER = "rgba(28,46,56,0.14)";
-const CARD = { backgroundColor: "#fff", border: "1px solid rgba(28,46,56,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
+const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 
 // Searchable "which business are you joining" picker.
 function BusinessPicker({ value, onChange }) {
@@ -30,9 +30,9 @@ function BusinessPicker({ value, onChange }) {
 
   if (selected) {
     return (
-      <div className="flex items-center gap-2 w-fit px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(82,199,182,0.08)", border: "1.5px solid rgba(82,199,182,0.3)" }}>
+      <div className="flex items-center gap-2 w-fit px-3 py-2 rounded-xl" style={{ backgroundColor: "rgba(37,99,235,0.07)", border: "1.5px solid rgba(37,99,235,0.3)" }}>
         <span className="text-sm font-semibold" style={{ color: FOREST }}>{selected.name}</span>
-        <button type="button" onClick={() => onChange("")} className="text-xs font-bold" style={{ color: "#0F766E" }}>✕</button>
+        <button type="button" onClick={() => onChange("")} className="text-xs font-bold" style={{ color: "#2563EB" }}>✕</button>
       </div>
     );
   }
@@ -85,9 +85,9 @@ export default function RegisterUserPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F4F8F7" }}>
+      <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
         <div className="max-w-md w-full bg-white rounded-2xl p-8 text-center flex flex-col items-center gap-4" style={CARD}>
-          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(82,199,182,0.16)", color: "#0F766E" }}>✓</div>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>✓</div>
           <h1 className="text-xl font-bold" style={{ color: FOREST }}>Request sent</h1>
           <p className="text-sm" style={{ color: MUTED }}>Your registration request is sent to the business, you will be notified when you'll be approved.</p>
           <Link to="/business/login" className="mt-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
@@ -99,7 +99,7 @@ export default function RegisterUserPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F4F8F7" }}>
+    <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center gap-2 mb-6">
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
@@ -133,10 +133,10 @@ export default function RegisterUserPage() {
           </button>
 
           <p className="text-xs text-center" style={{ color: MUTED }}>
-            Registering a new business instead? <Link to="/business/signup" className="font-semibold" style={{ color: "#0F766E" }}>Register a Business</Link>
+            Registering a new business instead? <Link to="/business/signup" className="font-semibold" style={{ color: "#2563EB" }}>Register a Business</Link>
           </p>
           <p className="text-xs text-center" style={{ color: MUTED }}>
-            Already registered? <Link to="/business/login" className="font-semibold" style={{ color: "#0F766E" }}>Log in</Link>
+            Already registered? <Link to="/business/login" className="font-semibold" style={{ color: "#2563EB" }}>Log in</Link>
           </p>
         </form>
       </div>

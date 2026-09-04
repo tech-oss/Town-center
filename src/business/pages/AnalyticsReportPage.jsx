@@ -68,7 +68,7 @@ export default function AnalyticsReportPage() {
   const generatedAt = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#F4F8F7" }}>
+    <div className="business-root min-h-screen" style={{ backgroundColor: "#F5F7FB" }}>
       <style>{`
         @media print {
           @page { size: A4; margin: 16mm; }

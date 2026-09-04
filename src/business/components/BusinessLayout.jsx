@@ -3,7 +3,8 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { listTickets } from "../api/businessTickets";
 
-const FOREST = "var(--forest)", SAGE = "var(--sage)", LEAF = "var(--leaf)";
+const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
+const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
 const TEXT_ON  = "rgba(255,255,255,0.75)";
 const TEXT_DIM = "rgba(255,255,255,0.45)";
 const DIVIDER  = "rgba(255,255,255,0.10)";
@@ -45,12 +46,12 @@ export default function BusinessLayout({ children }) {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#F4F8F7", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
+    <div className="business-root min-h-screen flex" style={{ backgroundColor: "#F5F7FB", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside
         className={`fixed top-0 left-0 h-screen z-30 flex flex-col transition-transform duration-300 md:z-auto md:!translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ width: 240, minWidth: 240, backgroundColor: FOREST }}>
+        style={{ width: 240, minWidth: 240, backgroundColor: SIDEBAR_NAVY }}>
 
         <div className="px-5 py-5" style={{ borderBottom: `1px solid ${DIVIDER}` }}>
           <Link to="/" className="flex items-center gap-3">
@@ -143,8 +144,8 @@ export default function BusinessLayout({ children }) {
               </div>
             </button>
             {menuOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-xl overflow-hidden bg-white z-20" style={{ border: "1.5px solid rgba(28,46,56,0.14)", boxShadow: "0 8px 24px rgba(16,24,40,0.12)" }}>
-                <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(28,46,56,0.1)" }}>
+              <div className="absolute right-0 mt-2 w-48 rounded-xl overflow-hidden bg-white z-20" style={{ border: "1.5px solid rgba(16,24,40,0.14)", boxShadow: "0 8px 24px rgba(16,24,40,0.12)" }}>
+                <div className="px-4 py-3" style={{ borderBottom: "1px solid rgba(16,24,40,0.1)" }}>
                   <p className="text-sm font-semibold" style={{ color: FOREST }}>{user.firstName} {user.lastName}</p>
                   <p className="text-xs" style={{ color: "#64748B" }}>{user.email}</p>
                 </div>

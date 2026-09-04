@@ -179,7 +179,7 @@ export default function MyListingPage() {
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your public business page content.</p>
         </div>
 
-        <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: "rgba(82,199,182,0.08)", border: "1.5px solid rgba(82,199,182,0.25)", color: "#0F766E" }}>
+        <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: "rgba(37,99,235,0.07)", border: "1.5px solid rgba(37,99,235,0.2)", color: "#2563EB" }}>
           Changes you save here are submitted to admin for approval before going live on the public site. Approved changes usually appear within 24 hours.
         </div>
 
@@ -188,9 +188,9 @@ export default function MyListingPage() {
           {tabs.map((t) => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className="px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1.5"
-              style={{ color: tab === t.key ? "#0F766E" : MUTED, borderBottom: tab === t.key ? `2px solid ${SAGE}` : "2px solid transparent", marginBottom: -1 }}>
+              style={{ color: tab === t.key ? "#2563EB" : MUTED, borderBottom: tab === t.key ? `2px solid ${SAGE}` : "2px solid transparent", marginBottom: -1 }}>
               {t.label}
-              {listing.approvalStatus?.[t.key] === "Pending Approval" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#E8A33D" }} />}
+              {listing.approvalStatus?.[t.key] === "Pending Approval" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#D97706" }} />}
               {listing.approvalStatus?.[t.key] === "Changes Rejected" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#DC2626" }} />}
             </button>
           ))}
@@ -385,7 +385,7 @@ export default function MyListingPage() {
                     return (
                       <button key={n} type="button" onClick={() => set("starRating", selected ? null : n)}
                         className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                        style={selected ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(82,199,182,0.1)", color: "#0F766E" } : { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+                        style={selected ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB" } : { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
                         {n} {n === 1 ? "Star" : "Stars"}
                       </button>
                     );

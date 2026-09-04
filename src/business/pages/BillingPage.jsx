@@ -66,7 +66,7 @@ export default function BillingPage() {
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Current Plan</p>
               <p className="text-xl font-bold capitalize" style={{ color: FOREST }}>{user.plan.replace(/-/g, " ")}</p>
             </div>
-            <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: cancelled ? "rgba(220,38,38,0.1)" : "rgba(82,199,182,0.16)", color: cancelled ? "#991B1B" : "#0F766E" }}>
+            <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: cancelled ? "rgba(220,38,38,0.1)" : "rgba(37,99,235,0.16)", color: cancelled ? "#991B1B" : "#2563EB" }}>
               {cancelled ? "Cancelled" : user.planStatus}
             </span>
           </div>
@@ -94,7 +94,7 @@ export default function BillingPage() {
                     {p.features.map((f) => <li key={f} className="text-xs" style={{ color: MUTED }}>✓ {f}</li>)}
                   </ul>
                   {current ? (
-                    <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(82,199,182,0.16)", color: "#0F766E" }}>Current Plan</span>
+                    <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>Current Plan</span>
                   ) : (
                     <button onClick={() => handleUpgrade(p)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
                   )}
@@ -125,7 +125,7 @@ export default function BillingPage() {
           <p className="text-sm font-bold mb-3" style={{ color: FOREST }}>Payment History</p>
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr style={{ backgroundColor: "rgba(28,46,56,0.04)" }}>
+              <tr style={{ backgroundColor: "rgba(16,24,40,0.04)" }}>
                 {["Date", "Description", "Amount", "Status", "Invoice"].map((h) => (
                   <th key={h} className="px-3 py-2 text-left font-semibold text-[11px] uppercase tracking-wider" style={{ color: FOREST }}>{h}</th>
                 ))}
@@ -137,8 +137,8 @@ export default function BillingPage() {
                   <td className="px-3 py-2.5" style={{ color: FOREST }}>{p.date}</td>
                   <td className="px-3 py-2.5" style={{ color: MUTED }}>{p.description}</td>
                   <td className="px-3 py-2.5 font-medium" style={{ color: FOREST }}>{p.amount}</td>
-                  <td className="px-3 py-2.5"><span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "Paid" ? "rgba(82,199,182,0.16)" : "rgba(220,38,38,0.1)", color: p.status === "Paid" ? "#0F766E" : "#991B1B" }}>{p.status}</span></td>
-                  <td className="px-3 py-2.5"><span className="text-xs font-semibold cursor-pointer" style={{ color: "#0F766E" }}>Download PDF</span></td>
+                  <td className="px-3 py-2.5"><span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "Paid" ? "rgba(37,99,235,0.16)" : "rgba(220,38,38,0.1)", color: p.status === "Paid" ? "#2563EB" : "#991B1B" }}>{p.status}</span></td>
+                  <td className="px-3 py-2.5"><span className="text-xs font-semibold cursor-pointer" style={{ color: "#2563EB" }}>Download PDF</span></td>
                 </tr>
               ))}
             </tbody>
@@ -148,7 +148,7 @@ export default function BillingPage() {
         {/* Terms acceptance record */}
         <div className="bg-white rounded-2xl p-5" style={CARD}>
           <p className="text-sm font-bold mb-2" style={{ color: FOREST }}>Terms Acceptance Record</p>
-          <p className="text-sm" style={{ color: MUTED }}>Terms accepted on {fmtDateTime(user.termsAcceptedAt)}. <span className="font-semibold cursor-pointer" style={{ color: "#0F766E" }}>View accepted terms →</span></p>
+          <p className="text-sm" style={{ color: MUTED }}>Terms accepted on {fmtDateTime(user.termsAcceptedAt)}. <span className="font-semibold cursor-pointer" style={{ color: "#2563EB" }}>View accepted terms →</span></p>
         </div>
       </div>
     </BusinessLayout>
