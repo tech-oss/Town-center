@@ -29,6 +29,7 @@ export const FREELANCER_CATEGORIES = [
   { value: "personal-trainers",  label: "Personal Trainers" },
   { value: "tutors",             label: "Tutors" },
   { value: "virtual-assistants", label: "Virtual Assistants" },
+  { value: "other",              label: "Other" },
 ];
 
 // ─── Services — Professional sub-category (multi-select, max 2) ──────────────
@@ -39,6 +40,7 @@ export const PROFESSIONAL_CATEGORIES = [
   { value: "estate-agents",     label: "Estate Agents" },
   { value: "recruitment",       label: "Recruitment" },
   { value: "insurance-brokers", label: "Insurance Brokers" },
+  { value: "other",             label: "Other" },
 ];
 
 // ─── Services — Tradesperson sub-category (multi-select, max 2) ──────────────
@@ -49,6 +51,7 @@ export const TRADESPERSON_CATEGORIES = [
   { value: "decorators-painters",  label: "Decorators & Painters" },
   { value: "locksmiths",           label: "Locksmiths" },
   { value: "cleaners",             label: "Cleaners" },
+  { value: "other",                label: "Other" },
 ];
 
 // ─── Hotel & Accommodation — pick one ──────────────────────────────────────────
@@ -75,6 +78,7 @@ export const CUISINE_TYPES = [
   { value: "pizza",         label: "Pizza" },
   { value: "gastropub",     label: "Gastropub" },
   { value: "pan-european",  label: "Pan European" },
+  { value: "other",         label: "Other" },
 ];
 
 // ─── Eat & Drink — venue type (multi-select, max 2) ───────────────────────────
@@ -86,6 +90,7 @@ export const VENUE_TYPES = [
   { value: "bakery",         label: "Bakery" },
   { value: "takeaway",       label: "Takeaway" },
   { value: "private-dining", label: "Private Dining" },
+  { value: "other",          label: "Other" },
 ];
 
 // ─── Shop — category (multi-select, grouped) ──────────────────────────────────
@@ -98,6 +103,7 @@ export const SHOP_CATEGORIES = [
   { value: "home-furniture",        label: "Home & Furniture",          group: "Shops" },
   { value: "shoes-footwear",        label: "Shoes & Footwear",          group: "Shops" },
   { value: "sports-fitness",        label: "Sports & Fitness",          group: "Shops" },
+  { value: "other-shop",            label: "Other",                     group: "Shops" },
   { value: "banks",                 label: "Banks & Foreign Exchange",  group: "Local Services" },
   { value: "childcare",             label: "Childcare",                 group: "Local Services" },
   { value: "dry-cleaning",          label: "Dry Cleaning & Shoe Repair",group: "Local Services" },
@@ -106,6 +112,7 @@ export const SHOP_CATEGORIES = [
   { value: "opticians",             label: "Opticians & Pharmacies",    group: "Local Services" },
   { value: "spa",                   label: "Spa",                       group: "Local Services" },
   { value: "travel-agents",         label: "Travel Agents",             group: "Local Services" },
+  { value: "other-local-services",  label: "Other",                     group: "Local Services" },
 ];
 
 // ─── See & Do — category (multi-select, max 2) ────────────────────────────────
@@ -120,6 +127,7 @@ export const SEE_DO_CATEGORIES = [
   { value: "community",      label: "Community" },
   { value: "family",         label: "Family" },
   { value: "markets",        label: "Markets" },
+  { value: "other",          label: "Other" },
 ];
 
 export const DEFAULT_HOURS = () => [
