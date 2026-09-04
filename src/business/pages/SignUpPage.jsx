@@ -246,7 +246,14 @@ export default function SignUpPage() {
               <Field label="Business Website URL"><Inp value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
               <Field label="Business Email" hint="Can be the same as your personal email"><Inp value={form.businessEmail} onChange={(e) => set("businessEmail", e.target.value)} /></Field>
               <Field label="Business Phone"><Inp value={form.businessPhone} onChange={(e) => set("businessPhone", e.target.value)} /></Field>
-              <Field label="Business Address" required span2><TextArea rows={2} value={form.businessAddress} onChange={(e) => set("businessAddress", e.target.value)} /></Field>
+              <Field label="Business Address" required span2>
+                {form.businessType === "freelancer" && form.freelancerKind === "freelancer" && (
+                  <p className="text-[11px] -mt-1 mb-1" style={{ color: MUTED }}>
+                    If working remotely please type Remote Working in this field
+                  </p>
+                )}
+                <TextArea rows={2} value={form.businessAddress} onChange={(e) => set("businessAddress", e.target.value)} />
+              </Field>
 
               {form.businessType === "freelancer" && (
                 <>
