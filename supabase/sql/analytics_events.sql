@@ -53,6 +53,8 @@ create policy "business members read their analytics"
 -- Used for both the Profile Views chart (p_content_types = ['profile']) and
 -- the combined Content Views chart (p_content_types = ['article','news','offer']),
 -- and — passing p_content_id — for one content item's own detail chart.
+-- p_until is inclusive of that whole day, so a custom range picked in the UI
+-- (e.g. "1 Aug – 15 Aug") includes all of the 15th, not just up to midnight.
 --
 -- These run as security definer (so they can read analytics_events despite
 -- there being no public SELECT policy on it), which means the authorization
@@ -63,7 +65,8 @@ create or replace function public.get_daily_view_counts(
   p_business_id text,
   p_content_types text[],
   p_content_id text,
-  p_since timestamptz
+  p_since timestamptz,
+  p_until timestamptz default now()
 )
 returns table (day date, view_count bigint)
 language plpgsql
@@ -83,6 +86,7 @@ begin
       and e.content_type = any(p_content_types)
       and e.event_type = 'view'
       and e.created_at >= p_since
+      and e.created_at < (p_until::date + 1)
       and (p_content_id is null or e.content_id = p_content_id)
     group by e.created_at::date
     order by day;
@@ -92,7 +96,8 @@ $$;
 -- ─── RPC: per-content totals, joined against business_articles for title/type ──
 create or replace function public.get_content_breakdown(
   p_business_id text,
-  p_since timestamptz
+  p_since timestamptz,
+  p_until timestamptz default now()
 )
 returns table (content_id text, title text, type text, view_count bigint)
 language plpgsql
@@ -117,6 +122,7 @@ begin
       and e.content_type in ('article', 'news', 'offer')
       and e.event_type = 'view'
       and e.created_at >= p_since
+      and e.created_at < (p_until::date + 1)
     group by e.content_id, a.title, a.type
     order by view_count desc;
 end;
@@ -126,5 +132,5 @@ $$;
 -- underlying table still applies inside these security definer functions
 -- via is_approved_business_member checks on any direct table access
 -- elsewhere) — grant execute to the authenticated role:
-grant execute on function public.get_daily_view_counts(text, text[], text, timestamptz) to authenticated;
-grant execute on function public.get_content_breakdown(text, timestamptz) to authenticated;
+grant execute on function public.get_daily_view_counts(text, text[], text, timestamptz, timestamptz) to authenticated;
+grant execute on function public.get_content_breakdown(text, timestamptz, timestamptz) to authenticated;

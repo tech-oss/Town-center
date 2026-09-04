@@ -1,6 +1,15 @@
 import { useState } from "react";
 import { FOREST, SAGE, MUTED, BORDER } from "./FormKit";
 
+// `date` strings are plain "YYYY-MM-DD" calendar dates (see
+// analyticsRanges.js), not timestamps — parsing them with `new Date(str)`
+// reads them as UTC midnight, which then silently prints as the previous
+// day once formatted in a timezone ahead of UTC. Split by hand instead.
+function parseDateOnly(dateStr) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 // Hand-rolled SVG line chart — no charting dependency, matches the rest of
 // this codebase's approach of hand-drawing every icon/graphic inline.
 // series: [{ date: "2026-08-01", views: 82 }, ...]
@@ -81,7 +90,7 @@ export default function AnalyticsChart({ series, height = 220 }) {
         {points.map((p, i) => (
           (i % labelEvery === 0 || i === points.length - 1) && (
             <text key={p.date} x={p.x} y={height - 6} fontSize="10" textAnchor="middle" fill={MUTED}>
-              {new Date(p.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+              {parseDateOnly(p.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             </text>
           )
         ))}
@@ -106,7 +115,7 @@ export default function AnalyticsChart({ series, height = 220 }) {
         >
           {hovered.views.toLocaleString()} views
           <span className="block font-normal opacity-75">
-            {new Date(hovered.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            {parseDateOnly(hovered.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
           </span>
         </div>
       )}

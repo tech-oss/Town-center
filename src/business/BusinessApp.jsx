@@ -6,6 +6,7 @@ import RegisterUserPage from "./pages/RegisterUserPage";
 import DashboardPage from "./pages/DashboardPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ContentAnalyticsDetailPage from "./pages/ContentAnalyticsDetailPage";
+import AnalyticsReportPage from "./pages/AnalyticsReportPage";
 import MyListingPage from "./pages/MyListingPage";
 import ArticlesPage from "./pages/ArticlesPage";
 import ArticleEditorPage from "./pages/ArticleEditorPage";
@@ -43,6 +44,7 @@ export default function BusinessApp() {
       <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
       <Route path="analytics" element={<RequireAuth><AnalyticsPage /></RequireAuth>} />
       <Route path="analytics/content/:id" element={<RequireAuth><ContentAnalyticsDetailPage /></RequireAuth>} />
+      <Route path="analytics/report" element={<RequireAuth><AnalyticsReportPage /></RequireAuth>} />
       <Route path="listing" element={<RequireAuth><MyListingPage /></RequireAuth>} />
       <Route path="articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />

@@ -5,6 +5,7 @@ import BusinessLayout from "../components/BusinessLayout";
 import AnalyticsChart from "../components/AnalyticsChart";
 import RangeSelector from "../components/RangeSelector";
 import { EditorSection, CARD, FOREST, MUTED } from "../components/FormKit";
+import { DEFAULT_RANGE, resolveRange } from "../api/analyticsRanges";
 // Dummy data for now — see AnalyticsPage.jsx for the swap-to-live note.
 import { getContentSeries } from "../api/businessAnalyticsMock";
 
@@ -12,7 +13,7 @@ export default function ContentAnalyticsDetailPage() {
   const { user } = useBusinessAuth();
   const navigate = useNavigate();
   const { id } = useParams();
-  const [range, setRange] = useState("30d");
+  const [range, setRange] = useState(DEFAULT_RANGE);
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState({ total: 0, series: [], item: null });
 
@@ -23,9 +24,10 @@ export default function ContentAnalyticsDetailPage() {
       if (!cancelled) { setData(res); setLoading(false); }
     });
     return () => { cancelled = true; };
-  }, [user.id, id, range]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, id, JSON.stringify(range)]);
 
-  const rangeLabel = { "7d": "7 days", "30d": "30 days", "3m": "3 months", "12m": "12 months" }[range];
+  const { label: rangeLabel } = resolveRange(range);
 
   return (
     <BusinessLayout>
@@ -47,7 +49,7 @@ export default function ContentAnalyticsDetailPage() {
             <EditorSection title="Views over time">
               <div className="flex items-baseline gap-2 mb-4">
                 <span className="text-3xl font-bold" style={{ color: FOREST }}>{data.total.toLocaleString()}</span>
-                <span className="text-sm" style={{ color: MUTED }}>views · Last {rangeLabel}</span>
+                <span className="text-sm" style={{ color: MUTED }}>views · {rangeLabel}</span>
               </div>
               <AnalyticsChart series={data.series} />
             </EditorSection>

@@ -4,7 +4,8 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import AnalyticsChart from "../components/AnalyticsChart";
 import RangeSelector from "../components/RangeSelector";
-import { EditorSection, CARD, FOREST, MUTED, BORDER } from "../components/FormKit";
+import { EditorSection, CARD, FOREST, MUTED, BORDER, SAGE } from "../components/FormKit";
+import { DEFAULT_RANGE, resolveRange } from "../api/analyticsRanges";
 // Dummy data for now — swap this single import for "../api/businessAnalytics"
 // once trackView() is wired up on the public site/app and real events exist.
 // Every function name and return shape below is identical between the two.
@@ -14,7 +15,7 @@ function StatHeader({ total, rangeLabel }) {
   return (
     <div className="flex items-baseline gap-2 mb-4">
       <span className="text-3xl font-bold" style={{ color: FOREST }}>{total.toLocaleString()}</span>
-      <span className="text-sm" style={{ color: MUTED }}>views · Last {rangeLabel}</span>
+      <span className="text-sm" style={{ color: MUTED }}>views · {rangeLabel}</span>
     </div>
   );
 }
@@ -22,7 +23,7 @@ function StatHeader({ total, rangeLabel }) {
 export default function AnalyticsPage() {
   const { user } = useBusinessAuth();
   const navigate = useNavigate();
-  const [range, setRange] = useState("30d");
+  const [range, setRange] = useState(DEFAULT_RANGE);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({ total: 0, series: [] });
   const [content, setContent] = useState({ total: 0, series: [] });
@@ -43,9 +44,17 @@ export default function AnalyticsPage() {
       setLoading(false);
     });
     return () => { cancelled = true; };
-  }, [user.id, range]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id, JSON.stringify(range)]);
 
-  const rangeLabel = { "7d": "7 days", "30d": "30 days", "3m": "3 months", "12m": "12 months" }[range];
+  const { label: rangeLabel } = resolveRange(range);
+
+  function handleExportPdf() {
+    const params = range.type === "custom"
+      ? { type: "custom", from: range.from, to: range.to }
+      : { type: "preset", key: range.key };
+    navigate(`/business/analytics/report?${new URLSearchParams(params).toString()}`);
+  }
 
   return (
     <BusinessLayout>
@@ -55,6 +64,18 @@ export default function AnalyticsPage() {
             <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Analytics</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>How people are finding and viewing your business.</p>
           </div>
+          <div className="flex items-start gap-3 flex-wrap">
+            <button
+              onClick={handleExportPdf}
+              className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 flex items-center gap-1.5"
+              style={{ backgroundColor: "rgba(28,46,56,0.06)", color: FOREST }}
+            >
+              ⬇ Export as PDF
+            </button>
+          </div>
+        </div>
+
+        <div className="flex justify-end">
           <RangeSelector value={range} onChange={setRange} />
         </div>
 
