@@ -5,6 +5,7 @@ import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { listEvents, setEventStatus, deleteEvent } from "../api/businessEvents";
 import { SEE_DO_CATEGORIES } from "../../Data/businessPortalMock";
+import { describeRecurrence } from "../api/eventRecurrence";
 
 function categoryLabels(category) {
   return (category ?? []).map((v) => SEE_DO_CATEGORIES.find((o) => o.value === v)?.label ?? v).join(", ");
@@ -93,12 +94,25 @@ export default function EventsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{e.entryType}</span>
                     <StatusBadge status={e.status} />
+                    {e.isRecurring && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>↻ Recurring</span>
+                    )}
                   </div>
                   <p className="text-sm font-bold" style={{ color: FOREST }}>{e.title}</p>
                   {e.category?.length > 0 && <p className="text-xs" style={{ color: MUTED }}>{categoryLabels(e.category)}</p>}
-                  <p className="text-xs" style={{ color: "#9CA3AF" }}>{e.eventDate}{e.eventTime ? ` · ${e.eventTime}` : ""}</p>
+                  {e.isRecurring ? (
+                    <p className="text-xs" style={{ color: "#9CA3AF" }}>
+                      {describeRecurrence({ type: e.recurrenceType, days: e.recurrenceDays, ordinals: e.recurrenceOrdinals })}
+                      {e.eventTime ? ` · ${e.eventTime}` : ""}
+                    </p>
+                  ) : (
+                    <p className="text-xs" style={{ color: "#9CA3AF" }}>{e.eventDate}{e.eventTime ? ` · ${e.eventTime}` : ""}</p>
+                  )}
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/events/${e.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>
+                    {e.isRecurring && (
+                      <button onClick={() => navigate(`/business/events/${e.id}/dates`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid rgba(37,99,235,0.3)`, color: "#2563EB" }}>Manage Dates</button>
+                    )}
                     {e.status === "Live" || e.status === "Hidden" ? (
                       <button onClick={() => handleHide(e)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>{e.status === "Hidden" ? "Make Live" : "Deactivate"}</button>
                     ) : e.status === "Draft" ? (

@@ -4,10 +4,11 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
   Field, Inp, TextArea, Select, CheckGroup, SocialFields, LocationFields, GalleryGrid,
-  EditorSection, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD,
+  EditorSection, Toast, useToast, Toggle, FOREST, SAGE, MUTED, BORDER, CARD,
 } from "../components/FormKit";
 import { getEvent, createEvent, updateEvent } from "../api/businessEvents";
 import { SEE_DO_CATEGORIES } from "../../Data/businessPortalMock";
+import { WEEKDAYS, ORDINAL_OPTIONS, describeRecurrence } from "../api/eventRecurrence";
 
 const EMPTY = {
   title: "", subtitle: "", description: "",
@@ -16,7 +17,86 @@ const EMPTY = {
   location: "", lat: "", lng: "",
   social: {}, website: "", bookingUrl: "",
   gallery: [], status: "Draft",
+  isRecurring: false, recurrenceType: "weekly", recurrenceDays: [], recurrenceOrdinals: [1], recurrenceEndDate: "",
 };
+
+function RecurrenceFields({ form, set }) {
+  function toggleDay(day) {
+    const days = form.recurrenceDays ?? [];
+    set("recurrenceDays", days.includes(day) ? days.filter((d) => d !== day) : [...days, day]);
+  }
+  function toggleOrdinal(v) {
+    const ords = form.recurrenceOrdinals ?? [];
+    set("recurrenceOrdinals", ords.includes(v) ? ords.filter((o) => o !== v) : [...ords, v]);
+  }
+  const isMonthly = form.recurrenceType === "monthly_by_weekday";
+  const preview = describeRecurrence({
+    type: form.recurrenceType,
+    days: form.recurrenceDays,
+    ordinals: form.recurrenceOrdinals,
+  });
+
+  return (
+    <div className="flex flex-col gap-4 mt-4 p-4 rounded-xl" style={{ backgroundColor: "#f8fafc", border: `1.5px solid ${BORDER}` }}>
+      <Field label="Repeats">
+        <Select value={form.recurrenceType} onChange={(e) => set("recurrenceType", e.target.value)}>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Every 2 weeks</option>
+          <option value="monthly_by_weekday">Monthly, on a specific weekday</option>
+        </Select>
+      </Field>
+
+      {isMonthly && (
+        <div>
+          <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Which occurrence(s) of the month</p>
+          <div className="flex flex-wrap gap-2">
+            {ORDINAL_OPTIONS.map((o) => {
+              const checked = (form.recurrenceOrdinals ?? []).includes(o.value);
+              return (
+                <label key={o.value} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer"
+                  style={checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.07)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+                  <input type="checkbox" checked={checked} onChange={() => toggleOrdinal(o.value)} className="w-3.5 h-3.5" />
+                  <span className="text-xs font-medium" style={{ color: FOREST }}>{o.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>{isMonthly ? "Weekday" : "Day(s) of the week"}</p>
+        <div className="flex flex-wrap gap-2">
+          {WEEKDAYS.map((day) => {
+            const checked = (form.recurrenceDays ?? []).includes(day);
+            const disabled = isMonthly && checked === false && (form.recurrenceDays ?? []).length >= 1;
+            return (
+              <label key={day} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
+                style={{
+                  cursor: disabled ? "not-allowed" : "pointer",
+                  opacity: disabled ? 0.4 : 1,
+                  ...(checked ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.07)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }),
+                }}>
+                <input type="checkbox" checked={checked} disabled={disabled}
+                  onChange={() => { if (isMonthly) { set("recurrenceDays", [day]); } else { toggleDay(day); } }}
+                  className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium" style={{ color: FOREST }}>{day}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+
+      <Field label="Ends" hint="Leave blank for no end date">
+        <Inp type="date" value={form.recurrenceEndDate ?? ""} onChange={(e) => set("recurrenceEndDate", e.target.value)} />
+      </Field>
+
+      {preview && (form.recurrenceDays ?? []).length > 0 && (
+        <p className="text-xs font-semibold" style={{ color: SAGE }}>Preview: {preview}</p>
+      )}
+    </div>
+  );
+}
 
 export default function EventEditorPage() {
   const navigate = useNavigate();
@@ -41,6 +121,7 @@ export default function EventEditorPage() {
 
   async function handleSave(submit) {
     if (!form.category?.length) { setToast("Please select at least one event category."); return; }
+    if (form.isRecurring && !(form.recurrenceDays ?? []).length) { setToast("Please select at least one day for the recurring event."); return; }
     setSaving(true);
     const status = submit ? "Pending Approval" : "Draft";
     const next = { ...form, status };
@@ -83,7 +164,7 @@ export default function EventEditorPage() {
               <Field label="Event Title" required span2><Inp value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Event title…" /></Field>
               <Field label="Event Sub Title" span2><Inp value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="Short tagline…" /></Field>
               <Field label="Event Description" span2><TextArea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the event…" /></Field>
-              <Field label="Event Date"><Inp type="date" value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
+              <Field label={form.isRecurring ? "First Occurrence Date" : "Event Date"}><Inp type="date" value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
               <Field label="Event Time" hint="e.g. 7:00 PM or 10am - 4pm"><Inp value={form.eventTime ?? ""} onChange={(e) => set("eventTime", e.target.value)} /></Field>
               <Field label="Entry">
                 <Select value={form.entryType} onChange={(e) => set("entryType", e.target.value)}>
@@ -91,6 +172,18 @@ export default function EventEditorPage() {
                 </Select>
               </Field>
               <Field label="Location"><Inp value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="e.g. Maidenhead Town Hall" /></Field>
+            </div>
+
+            <div className="mt-5 pt-4" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <Toggle checked={!!form.isRecurring} onChange={(v) => set("isRecurring", v)}
+                label="This event repeats" sublabel="e.g. a weekly Sunday market — set the pattern below" />
+              {form.isRecurring && <RecurrenceFields form={form} set={set} />}
+              {form.isRecurring && id && (
+                <button type="button" onClick={() => navigate(`/business/events/${id}/dates`)}
+                  className="mt-3 text-xs font-semibold transition-opacity hover:opacity-70" style={{ color: SAGE }}>
+                  Manage individual dates →
+                </button>
+              )}
             </div>
           </EditorSection>
 
