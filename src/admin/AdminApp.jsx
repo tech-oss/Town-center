@@ -14,6 +14,8 @@ import PropertiesPage from "./pages/PropertiesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import EventsNewsPage from "./pages/EventsNewsPage";
 import EventApprovalsPage from "./pages/EventApprovalsPage";
+import ArticleApprovalsPage from "./pages/ArticleApprovalsPage";
+import ReviewModerationPage from "./pages/ReviewModerationPage";
 import SubscriptionsPage, { SubscriptionDetailPage } from "./pages/SubscriptionsPage";
 import SubscriptionDocumentsPage from "./pages/SubscriptionDocumentsPage";
 import ReportingPage from "./pages/ReportingPage";
@@ -56,6 +58,8 @@ export default function AdminApp() {
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="events-news" element={<EventsNewsPage />} />
         <Route path="event-approvals" element={<EventApprovalsPage />} />
+        <Route path="article-approvals" element={<ArticleApprovalsPage />} />
+        <Route path="review-moderation" element={<ReviewModerationPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="subscriptions/:id/documents" element={<SubscriptionDocumentsPage />} />

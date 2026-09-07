@@ -8,7 +8,9 @@ import { describeRecurrence } from "../../lib/eventRecurrence";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
-import { NAVY, BLUE, MUTED, BORDER, CARD, FIELD_STYLE } from "../theme";
+import ReviewActions from "../components/ReviewActions";
+import Toast from "../components/Toast";
+import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
 const EVENT_FILTERS = ["Pending Approval", "Live", "Rejected", "All"];
 
@@ -16,43 +18,6 @@ function formatDate(str) {
   if (!str) return "—";
   const [y, m, d] = str.split("-").map(Number);
   return new Date(y, m - 1, d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-}
-
-function Toast({ message }) {
-  if (!message) return null;
-  return (
-    <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg"
-      style={{ backgroundColor: BLUE, color: "#fff" }}>{message}</div>
-  );
-}
-
-// Approve outright, or reject with a reason the business sees on their own
-// dashboard. Shared by both the series queue and the per-date queue.
-function ReviewActions({ onApprove, onReject }) {
-  const [rejecting, setRejecting] = useState(false);
-  const [reason, setReason] = useState("");
-
-  if (rejecting) {
-    return (
-      <div className="flex flex-col gap-2 mt-3 w-full">
-        <input value={reason} onChange={(e) => setReason(e.target.value)} autoFocus
-          placeholder="Reason shown to the business…"
-          className="px-3 py-2 rounded-lg text-xs outline-none" style={FIELD_STYLE} />
-        <div className="flex gap-2">
-          <button onClick={() => { onReject(reason); setRejecting(false); setReason(""); }}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: "#B91C1C" }}>Confirm Reject</button>
-          <button onClick={() => { setRejecting(false); setReason(""); }}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: MUTED }}>Cancel</button>
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="flex gap-2 mt-3">
-      <button onClick={onApprove} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: BLUE }}>Approve</button>
-      <button onClick={() => setRejecting(true)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Reject</button>
-    </div>
-  );
 }
 
 // ─── Tab 1: whole events / recurring series ─────────────────────────────────

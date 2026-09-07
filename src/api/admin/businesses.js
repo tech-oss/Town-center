@@ -1,4 +1,4 @@
-import { mock } from "../client";
+import { supabase } from "../../lib/supabaseClient";
 import { addLog } from "./users";
 
 // ─── Category taxonomy (mirrors client site) ──────────────────────────────────
@@ -104,228 +104,155 @@ export const BUSINESS_CATEGORIES = [
   "Eat & Drink", "See & Do", "Shop", "Live",
 ];
 
-// ─── Mutable store ────────────────────────────────────────────────────────────
-let BUSINESSES = [
-  {
-    id: "b1",
-    name: "The Velvet Lounge",
-    section: "eat-drink",
-    subcategories: ["bars", "restaurants"],
-    cuisines: ["british"],
-    newToMaidenhead: true,
-    address: "14 High Street, Maidenhead SL6 1JF",
-    phone: "01628 555 102",
-    website: "",
-    lat: 51.5225,
-    lng: -0.7234,
-    logo: null,
-    plan: "Premium",
-    submitted: "2026-06-20",
-    status: "Pending",
-    contactName: "Olivia Grant",
-    email: "olivia@velvetlounge.co.uk",
-    hasContent: true,
-  },
-  {
-    id: "b2",
-    name: "Riverside Yoga Studio",
-    section: "see-do",
-    subcategories: ["sport-wellness"],
-    cuisines: [],
-    newToMaidenhead: false,
-    address: "3 Bridge Road, Maidenhead SL6 8DX",
-    phone: "01628 555 233",
-    website: "",
-    lat: 51.5218,
-    lng: -0.7198,
-    logo: null,
-    plan: "Standard",
-    submitted: "2026-06-19",
-    status: "Pending",
-    contactName: "Daniel Reeves",
-    email: "hello@riversideyoga.co.uk",
-    hasContent: true,
-  },
-  {
-    id: "b3",
-    name: "Maidenhead Book Nook",
-    section: "shop",
-    subcategories: ["accessories-jewellery", "clothing"],
-    cuisines: [],
-    newToMaidenhead: false,
-    address: "27 King Street, Maidenhead SL6 1EF",
-    phone: "01628 555 419",
-    website: "",
-    lat: 51.5231,
-    lng: -0.7201,
-    logo: null,
-    plan: "Basic",
-    submitted: "2026-06-17",
-    status: "Approved",
-    contactName: "Priya Anand",
-    email: "priya@booknook.co.uk",
-    hasContent: true,
-  },
-  {
-    id: "b5",
-    name: "Quickfix Phone Repairs",
-    section: "shop",
-    subcategories: ["electronics-phones"],
-    cuisines: [],
-    newToMaidenhead: false,
-    address: "9 Queen Street, Maidenhead SL6 1HZ",
-    phone: "01628 555 661",
-    website: "",
-    lat: null,
-    lng: null,
-    logo: null,
-    plan: "Basic",
-    submitted: "2026-06-12",
-    status: "Rejected",
-    contactName: "Sam Drake",
-    email: "sam@quickfixrepairs.co.uk",
-    // Content Pending — registered but no page content added yet.
-    hasContent: false,
-  },
-  {
-    id: "b6",
-    name: "Elgan Davies Plumbing & Heating",
-    section: "services",
-    subcategories: ["plumbers"],
-    cuisines: [],
-    newToMaidenhead: false,
-    address: "Fifield, Maidenhead SL6 2NF",
-    phone: "01628 555 887",
-    website: "",
-    lat: 51.5147,
-    lng: -0.7431,
-    logo: null,
-    plan: "Standard",
-    submitted: "2026-06-22",
-    status: "Approved",
-    contactName: "Elgan Davies",
-    email: "info@elgandavies.co.uk",
-    hasContent: true,
-  },
-  {
-    id: "b7",
-    name: "Thameside Accountancy",
-    section: "services",
-    subcategories: ["accountants"],
-    cuisines: [],
-    newToMaidenhead: false,
-    address: "18 Broadway, Maidenhead SL6 1NN",
-    phone: "01628 555 940",
-    website: "",
-    lat: 51.5222,
-    lng: -0.7211,
-    logo: null,
-    plan: "Basic",
-    submitted: "2026-06-21",
-    status: "Approved",
-    contactName: "Nadia Farooq",
-    email: "hello@thamesideaccountancy.co.uk",
-    hasContent: true,
-  },
-  {
-    id: "b8",
-    name: "Willow & Vine Florist",
-    section: "shop",
-    subcategories: ["home-furniture"],
-    cuisines: [],
-    newToMaidenhead: true,
-    address: "5 Market Street, Maidenhead SL6 1JX",
-    phone: "01628 555 774",
-    website: "",
-    lat: 51.5229,
-    lng: -0.7216,
-    logo: null,
-    plan: "Basic",
-    submitted: "2026-08-25",
-    status: "Approved",
-    contactName: "Freya Holt",
-    email: "hello@willowandvine.co.uk",
-    // Content Pending — no matching entry in the content editor's mock data
-    // at all yet, so the editor synthesises a blank draft for it on arrival.
-    hasContent: false,
-  },
-];
+// ─── Supabase-backed queries ──────────────────────────────────────────────────
+// A "business registration" is spread across three tables: `businesses` holds
+// the identity + admin approval state, `business_listings` the public-facing
+// details the owner filled in, and `business_users` the owner's own account
+// (whose status gates whether they can sign in at all).
 
-// ─── Queries ──────────────────────────────────────────────────────────────────
-export function getBusinesses({ status } = {}) {
-  let list = [...BUSINESSES];
-  if (status) list = list.filter((b) => b.status === status);
-  return mock(list);
+function fromRow(row) {
+  const listing = row.business_listings?.[0] ?? {};
+  const owner = (row.business_users ?? []).find((u) => u.role === "Owner") ?? row.business_users?.[0] ?? {};
+  const detail = listing.business_type_detail ?? {};
+  return {
+    id: row.id,
+    name: row.name,
+    status: row.status,
+    submitted: (row.submitted_at ?? "").slice(0, 10),
+    adminNote: row.admin_note,
+    rejectionNote: row.status === "Rejected" ? row.admin_note : "",
+    suspendNote: row.status === "Suspended" ? row.admin_note : "",
+    newToMaidenhead: row.new_to_maidenhead,
+
+    section: listing.business_type ?? "",
+    subcategories: listing.subcategory ?? [],
+    cuisines: detail.cuisineTypes ?? [],
+    address: listing.address ?? "",
+    phone: listing.phone ?? "",
+    website: listing.website ?? "",
+    lat: listing.lat,
+    lng: listing.lng,
+    logo: listing.logo ?? null,
+
+    contactName: [owner.first_name, owner.last_name].filter(Boolean).join(" "),
+    email: owner.email ?? listing.email ?? "",
+    ownerStatus: owner.status ?? null,
+
+    plan: row.business_subscriptions?.[0]?.plan ?? "Basic",
+    // "Content Pending" until the owner has written an actual description.
+    hasContent: !!(listing.description && listing.description.trim()),
+  };
 }
 
-export function getBusinessById(id) {
-  return mock(BUSINESSES.find((b) => b.id === id) ?? null);
+const SELECT = `
+  *,
+  business_listings(*),
+  business_users(role, first_name, last_name, email, status),
+  business_subscriptions(plan)
+`;
+
+export async function getBusinesses({ status } = {}) {
+  let q = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false });
+  if (status && status !== "All") q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []).map(fromRow);
+}
+
+export async function getBusinessById(id) {
+  const { data, error } = await supabase.from("businesses").select(SELECT).eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? fromRow(data) : null;
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
-export function registerBusiness(data) {
-  const saved = {
-    ...data,
-    id: data.id || `b${Date.now()}`,
-    submitted: data.submitted || new Date().toISOString().slice(0, 10),
-    status: data.status || "Pending",
-    // A brand-new registration always starts with no page content — admin
-    // fills it in via the Business Content Editor afterwards.
-    // TODO: persist to Supabase on backend integration
-    hasContent: data.hasContent ?? false,
-  };
-  if (data.id) {
-    BUSINESSES = BUSINESSES.map((b) => (b.id === data.id ? saved : b));
-  } else {
-    BUSINESSES = [saved, ...BUSINESSES];
-  }
-  return mock(saved);
+
+function slugify(name) {
+  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-// Flips a registration's Content Pending badge off once its page content has
-// been saved for the first time in the Business Content Editor.
-// TODO: persist to Supabase on backend integration
-export function markBusinessHasContent(id) {
-  BUSINESSES = BUSINESSES.map((x) => (x.id === id ? { ...x, hasContent: true } : x));
-  return mock({ ok: true });
+// Admin registering a business on someone's behalf. This creates the business
+// and its listing only — the owner's login is invited separately (creating an
+// Auth user needs the service-role key, which the browser must never hold).
+export async function registerBusiness(data) {
+  const id = data.id || `biz_${slugify(data.name)}-${Math.random().toString(36).slice(2, 7)}`;
+
+  const businessRow = {
+    id,
+    name: data.name,
+    new_to_maidenhead: !!data.newToMaidenhead,
+    ...(data.id ? {} : { status: data.status || "Pending" }),
+  };
+  const { error: bizError } = await supabase.from("businesses").upsert(businessRow);
+  if (bizError) throw bizError;
+
+  const { error: listingError } = await supabase.from("business_listings").upsert({
+    business_id: id,
+    name: data.name,
+    business_type: data.section || null,
+    subcategory: data.subcategories ?? [],
+    business_type_detail: { cuisineTypes: data.cuisines ?? [] },
+    address: data.address || null,
+    phone: data.phone || null,
+    website: data.website || null,
+    lat: data.lat ?? null,
+    lng: data.lng ?? null,
+    logo: data.logo ?? null,
+  }, { onConflict: "business_id" });
+  if (listingError) throw listingError;
+
+  if (data.plan) {
+    await supabase.from("business_subscriptions").upsert({ business_id: id, plan: data.plan }, { onConflict: "business_id" });
+  }
+
+  return getBusinessById(id);
+}
+
+// `hasContent` is derived from the listing's description, so there is nothing
+// to flip — kept so the Business Content Editor's existing call still works.
+export async function markBusinessHasContent() {
+  return { ok: true };
+}
+
+// Approving/suspending a registration also moves the owner's own account, so
+// the decision actually takes effect at the login screen rather than being
+// cosmetic in the admin table.
+async function setStatus(id, status, note, ownerStatus, logLabel) {
+  const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
+
+  const { error } = await supabase
+    .from("businesses")
+    .update({ status, admin_note: note || null })
+    .eq("id", id);
+  if (error) throw error;
+
+  if (ownerStatus) {
+    await supabase.from("business_users").update({ status: ownerStatus }).eq("business_id", id);
+  }
+  addLog(logLabel, { id, name: biz?.name ?? id }, note ?? "");
+  return { ok: true };
 }
 
 export function approveBusiness(id) {
-  const b = BUSINESSES.find((x) => x.id === id);
-  if (!b) return mock({ ok: false });
-  BUSINESSES = BUSINESSES.map((x) => (x.id === id ? { ...x, status: "Approved" } : x));
-  addLog("Business Approved", { id, name: b.name }, "");
-  return mock({ ok: true });
+  return setStatus(id, "Approved", null, "approved", "Business Approved");
 }
 
 export function rejectBusiness(id, note = "") {
-  const b = BUSINESSES.find((x) => x.id === id);
-  if (!b) return mock({ ok: false });
-  BUSINESSES = BUSINESSES.map((x) => (x.id === id ? { ...x, status: "Rejected", rejectionNote: note } : x));
-  addLog("Business Rejected", { id, name: b.name }, note);
-  return mock({ ok: true });
+  return setStatus(id, "Rejected", note, "rejected", "Business Rejected");
 }
 
 export function suspendBusiness(id, note = "") {
-  const b = BUSINESSES.find((x) => x.id === id);
-  if (!b) return mock({ ok: false });
-  BUSINESSES = BUSINESSES.map((x) => (x.id === id ? { ...x, status: "Suspended", suspendNote: note } : x));
-  addLog("Business Suspended", { id, name: b.name }, note);
-  return mock({ ok: true });
+  return setStatus(id, "Suspended", note, "suspended", "Business Suspended");
 }
 
 export function reinstateBusiness(id) {
-  const b = BUSINESSES.find((x) => x.id === id);
-  if (!b) return mock({ ok: false });
-  BUSINESSES = BUSINESSES.map((x) => (x.id === id ? { ...x, status: "Approved", suspendNote: "" } : x));
-  addLog("Business Reinstated", { id, name: b.name }, "");
-  return mock({ ok: true });
+  return setStatus(id, "Approved", null, "approved", "Business Reinstated");
 }
 
-export function deleteBusiness(id) {
-  const b = BUSINESSES.find((x) => x.id === id);
-  if (!b) return mock({ ok: false });
-  addLog("Business Deleted", { id, name: b.name }, "Business listing permanently removed by admin");
-  BUSINESSES = BUSINESSES.filter((x) => x.id !== id);
-  return mock({ ok: true });
+export async function deleteBusiness(id) {
+  const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
+  const { error } = await supabase.from("businesses").delete().eq("id", id);
+  if (error) throw error;
+  addLog("Business Deleted", { id, name: biz?.name ?? id }, "Business listing permanently removed by admin");
+  return { ok: true };
 }
