@@ -32,12 +32,15 @@ export async function registerBusiness(form) {
     .insert({ id: businessId, name: form.businessName });
   if (businessError) return { ok: false, error: businessError.message };
 
+  // Pending until admin approves the registration — the owner's first sign-in
+  // attempt is what surfaces this to them (useBusinessAuth only builds a
+  // session for an "approved" row).
   const { error: ownerError } = await supabase.from("business_users").insert({
     auth_user_id: signUpData.user.id,
     business_id: businessId,
     role: "Owner",
-    status: "approved",
-    approved_at: new Date().toISOString(),
+    status: "pending",
+    requested_at: new Date().toISOString(),
     first_name: form.firstName,
     last_name: form.lastName,
     email: form.email,
