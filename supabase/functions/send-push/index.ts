@@ -26,21 +26,41 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+// Called directly from the admin panel's browser session (supabase.functions.
+// invoke), so it needs to answer the browser's CORS preflight and echo these
+// headers on every response — without them the browser blocks the request
+// before it ever reaches here, which shows up client-side as a bare "Failed
+// to fetch" with no status code to debug from.
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: CORS_HEADERS });
+  }
   if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+    return new Response("Method not allowed", { status: 405, headers: CORS_HEADERS });
   }
 
   const { title, body, url, audience = "all" } = await req.json();
   if (!title) {
-    return new Response(JSON.stringify({ error: "title is required" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "title is required" }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
   }
 
   let query = supabase.from("push_subscriptions").select("*");
   if (audience !== "all") query = query.eq("audience", audience);
   const { data: subs, error } = await query;
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
   }
 
   const payload = JSON.stringify({ title, body, url });
@@ -63,7 +83,7 @@ Deno.serve(async (req) => {
 
   const sent = results.filter((r) => r.status === "fulfilled").length;
   return new Response(JSON.stringify({ sent, total: subs?.length ?? 0 }), {
-    headers: { "Content-Type": "application/json" },
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
 });
 
