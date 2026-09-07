@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ARTICLES, ARTICLE_CATEGORIES } from "../../Data/adminMissingScreensMock";
+import { ARTICLE_CATEGORIES } from "../../Data/adminMissingScreensMock";
+import { getArticleById, saveArticle } from "../../api/admin";
 import BusinessTypeahead from "../components/BusinessTypeahead";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
@@ -43,13 +44,25 @@ function Toast({ message }) {
 export default function ArticleEditorPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const existing = id ? ARTICLES.find((a) => a.id === id) : null;
-
-  const [form, setForm] = useState(() => existing
-    ? { ...existing, tags: (existing.tags ?? []).join(", "), businessId: existing.businessId ?? "" }
-    : { ...EMPTY });
+  const [existing, setExisting] = useState(null);
+  const [loading, setLoading] = useState(!!id);
+  const [form, setForm] = useState({ ...EMPTY });
   const [seoOpen, setSeoOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    getArticleById(id).then((a) => {
+      if (cancelled || !a) return;
+      setExisting(a);
+      // Tags are edited as a comma-separated string and stored as an array.
+      setForm({ ...a, tags: (a.tags ?? []).join(", "), businessId: a.businessId ?? "" });
+      setLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [id]);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -61,10 +74,22 @@ export default function ArticleEditorPage() {
     reader.readAsDataURL(file);
   }
 
-  function handleSave(status) {
-    // Mock save — persists locally only.
-    setToast(`Article ${status === "Draft" ? "saved as draft" : status === "Hidden" ? "hidden" : "published"}.`);
-    setTimeout(() => navigate("/admin/articles"), 900);
+  async function handleSave(status) {
+    setSaving(true);
+    try {
+      await saveArticle({
+        ...form,
+        id,
+        status,
+        tags: chips,
+        published: form.published || (status === "Published" ? new Date().toISOString().slice(0, 10) : null),
+      });
+      setToast(`Article ${status === "Draft" ? "saved as draft" : status === "Hidden" ? "hidden" : "published"}.`);
+      setTimeout(() => navigate("/admin/articles"), 900);
+    } catch (e) {
+      setToast(`Could not save: ${e.message}`);
+      setSaving(false);
+    }
   }
 
   const chips = form.tags.split(",").map((t) => t.trim()).filter(Boolean);

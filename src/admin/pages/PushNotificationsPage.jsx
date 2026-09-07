@@ -1,4 +1,6 @@
 import { useState } from "react";
+import useFetch from "../../hooks/useFetch";
+import { getPushHistory, sendPush } from "../../api/admin";
 import ArticleTypeahead from "../components/ArticleTypeahead";
 
 const AUDIENCES = [
@@ -61,7 +63,9 @@ function PushPreview({ title, body, channel, image }) {
 
 export default function PushNotificationsPage() {
   const [form, setForm] = useState({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
-  const [history, setHistory] = useState(SENT_HISTORY);
+  const [nonce, setNonce] = useState(0);
+  const { data: fetchedHistory } = useFetch(getPushHistory, [nonce]);
+  const history = fetchedHistory ?? [];
   const [toast, setToast] = useState(null);
   const [confirm, setConfirm] = useState(false);
 
@@ -83,21 +87,16 @@ export default function PushNotificationsPage() {
     setTimeout(() => setToast(null), 4000);
   }
 
-  function handleSend() {
+  async function handleSend() {
     if (!isValid) return;
-    const entry = {
-      id: `n${Date.now()}`,
-      title: form.title,
-      body: form.body,
-      channels,
-      audience: AUDIENCES.find((a) => a.key === form.audience)?.label ?? "All users",
-      sentAt: new Date().toISOString().slice(0, 16).replace("T", " "),
-      reach: form.audience === "all" ? 1240 : form.audience === "businesses" ? 42 : form.audience === "agents" ? 8 : 860,
-    };
-    setHistory((h) => [entry, ...h]);
+    const audienceLabel = AUDIENCES.find((a) => a.key === form.audience)?.label ?? "All users";
+    // Records the send. Delivery itself needs a push provider and device
+    // tokens — see supabase/sql/site_content_schema.sql.
+    await sendPush(form);
+    setNonce((n) => n + 1);
     setForm({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
     setConfirm(false);
-    notify(`Notification sent to ${entry.audience} via ${entry.channels.join(" & ")}.`);
+    notify(`Notification sent to ${audienceLabel} via ${channels.join(" & ")}.`);
   }
 
   const field = { border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" };

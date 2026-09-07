@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { NEIGHBOURHOOD_GUIDES } from "../../Data/adminMissingScreensMock";
+import useFetch from "../../hooks/useFetch";
+import { getGuides, saveGuide, deleteGuide } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import EmptyState from "../components/EmptyState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
@@ -28,17 +29,21 @@ function Toast({ message, onDismiss }) {
 
 export default function NeighbourhoodGuidesPage() {
   const navigate = useNavigate();
-  const [guides, setGuides] = useState(NEIGHBOURHOOD_GUIDES);
+  const [nonce, setNonce] = useState(0);
+  const { data: fetched } = useFetch(getGuides, [nonce]);
+  const guides = fetched ?? [];
+  const refresh = () => setNonce((n) => n + 1);
   const [toast, setToast] = useState(null);
 
   function notify(msg) { setToast(msg); setTimeout(() => setToast(null), 3500); }
 
   function toggle(id, key) {
-    setGuides((prev) => prev.map((g) => (g.id === id ? { ...g, [key]: !g[key] } : g)));
+    const guide = guides.find((g) => g.id === id);
+    if (guide) saveGuide({ ...guide, [key]: !guide[key] }).then(refresh);
     notify("Visibility updated.");
   }
   function handleDelete(g) {
-    setGuides((prev) => prev.filter((x) => x.id !== g.id));
+    deleteGuide(g.id).then(refresh);
     notify(`"${g.title}" deleted.`);
   }
 

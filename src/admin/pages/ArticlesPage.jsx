@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ARTICLES } from "../../Data/adminMissingScreensMock";
+import useFetch from "../../hooks/useFetch";
+import { getArticles, saveArticle, deleteArticle } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import EmptyState from "../components/EmptyState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
@@ -31,7 +32,10 @@ function Toast({ message, onDismiss }) {
 
 export default function ArticlesPage() {
   const navigate = useNavigate();
-  const [articles, setArticles] = useState(ARTICLES);
+  const [nonce, setNonce] = useState(0);
+  const { data: fetched } = useFetch(getArticles, [nonce]);
+  const articles = fetched ?? [];
+  const refresh = () => setNonce((n) => n + 1);
   const [tab, setTab] = useState("All");
   const [toast, setToast] = useState(null);
 
@@ -40,11 +44,11 @@ export default function ArticlesPage() {
   const filtered = tab === "All" ? articles : articles.filter((a) => a.status === tab);
 
   function handleHide(a) {
-    setArticles((prev) => prev.map((x) => (x.id === a.id ? { ...x, status: x.status === "Hidden" ? "Published" : "Hidden" } : x)));
+    saveArticle({ ...a, status: a.status === "Hidden" ? "Published" : "Hidden" }).then(refresh);
     notify(a.status === "Hidden" ? `"${a.title}" unhidden.` : `"${a.title}" hidden from the public site.`);
   }
   function handleDelete(a) {
-    setArticles((prev) => prev.filter((x) => x.id !== a.id));
+    deleteArticle(a.id).then(refresh);
     notify(`"${a.title}" deleted.`);
   }
 

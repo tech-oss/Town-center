@@ -1,4 +1,6 @@
 import { useState } from "react";
+import useFetch from "../../hooks/useFetch";
+import { getFeaturedStories, saveFeaturedStory, deleteFeaturedStory, reorderFeaturedStories } from "../../api/admin";
 
 // ─── Static mock stories (UI only — not wired to any data layer) ──────────────
 const MOCK_STORIES = [
@@ -360,49 +362,44 @@ function DeleteModal({ story, onConfirm, onCancel }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function FeaturedStoriesPage() {
-  const [stories, setStories] = useState(MOCK_STORIES);
+  const [nonce, setNonce] = useState(0);
+  const { data: fetched } = useFetch(getFeaturedStories, [nonce]);
+  const stories = fetched ?? [];
   const [editing, setEditing] = useState(null);   // null=list, {}=new, story=edit
   const [toDelete, setToDelete] = useState(null);
   const [previewId, setPreviewId] = useState(null);
+  const refresh = () => setNonce((n) => n + 1);
 
   const previewStory = stories.find((s) => s.id === previewId) ?? stories[0];
 
-  function handleSave(form) {
-    if (form.id) {
-      setStories((prev) => prev.map((s) => (s.id === form.id ? { ...s, ...form } : s)));
-    } else {
-      setStories((prev) => [
-        ...prev,
-        { ...form, id: Date.now(), order: prev.length + 1 },
-      ]);
-    }
+  async function handleSave(form) {
+    await saveFeaturedStory({ ...form, order: form.order ?? stories.length + 1 });
     setEditing(null);
+    refresh();
   }
 
-  function handleDelete(id) {
-    setStories((prev) => prev.filter((s) => s.id !== id).map((s, i) => ({ ...s, order: i + 1 })));
+  async function handleDelete(id) {
+    await deleteFeaturedStory(id);
     setToDelete(null);
+    // Close the gap the deletion leaves, so positions stay 1..n.
+    await reorderFeaturedStories(stories.filter((s) => s.id !== id).map((s) => s.id));
+    refresh();
   }
 
-  function moveUp(id) {
-    setStories((prev) => {
-      const idx = prev.findIndex((s) => s.id === id);
-      if (idx === 0) return prev;
-      const next = [...prev];
-      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
-      return next.map((s, i) => ({ ...s, order: i + 1 }));
-    });
+  // Reordering writes the whole visible order back, so positions can't drift
+  // out of step with what the page is showing.
+  async function swap(id, delta) {
+    const idx = stories.findIndex((s) => s.id === id);
+    const target = idx + delta;
+    if (idx < 0 || target < 0 || target >= stories.length) return;
+    const next = [...stories];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    await reorderFeaturedStories(next.map((s) => s.id));
+    refresh();
   }
 
-  function moveDown(id) {
-    setStories((prev) => {
-      const idx = prev.findIndex((s) => s.id === id);
-      if (idx === prev.length - 1) return prev;
-      const next = [...prev];
-      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
-      return next.map((s, i) => ({ ...s, order: i + 1 }));
-    });
-  }
+  const moveUp = (id) => swap(id, -1);
+  const moveDown = (id) => swap(id, 1);
 
   return (
     <>

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { NEIGHBOURHOOD_GUIDES } from "../../Data/adminMissingScreensMock";
+import { getGuideById, saveGuide } from "../../api/admin";
 import BusinessTypeahead from "../components/BusinessTypeahead";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
@@ -52,10 +52,21 @@ const EMPTY = { title: "", area: "", heroImage: null, body: "", showOnHomepage: 
 export default function NeighbourhoodGuideEditorPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const existing = id ? NEIGHBOURHOOD_GUIDES.find((g) => g.id === id) : null;
-
-  const [form, setForm] = useState(() => existing ? { ...existing } : { ...EMPTY });
+  const [existing, setExisting] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ ...EMPTY });
   const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    getGuideById(id).then((g) => {
+      if (cancelled || !g) return;
+      setExisting(g);
+      setForm({ ...g });
+    });
+    return () => { cancelled = true; };
+  }, [id]);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -67,9 +78,16 @@ export default function NeighbourhoodGuideEditorPage() {
     reader.readAsDataURL(file);
   }
 
-  function handleSave() {
-    setToast("Guide saved.");
-    setTimeout(() => navigate("/admin/neighbourhood-guides"), 900);
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await saveGuide({ ...form, id });
+      setToast("Guide saved.");
+      setTimeout(() => navigate("/admin/neighbourhood-guides"), 900);
+    } catch (e) {
+      setToast(`Could not save: ${e.message}`);
+      setSaving(false);
+    }
   }
 
   return (

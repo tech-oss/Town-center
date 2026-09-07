@@ -5,7 +5,7 @@ import {
   saveNewsOffer,
   deleteNewsOffer,
   toggleHomepageFeature,
-  EAT_DRINK_BUSINESSES,
+  getSpotlightBusinesses,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
@@ -142,10 +142,10 @@ function PayTypeToggle({ value, onChange }) {
 }
 
 // ─── Edit / Create form ───────────────────────────────────────────────────────
-function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
+function NewsOfferForm({ initial, onSave, onCancel, featuredCount, businesses = [] }) {
   const blank = {
-    businessId: EAT_DRINK_BUSINESSES[0].id,
-    businessName: EAT_DRINK_BUSINESSES[0].name,
+    businessId: businesses[0]?.id ?? "",
+    businessName: businesses[0]?.name ?? "",
     category: "News",
     type: "news",
     title: "",
@@ -175,7 +175,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
       const next = { ...f, [k]: v };
       // Keep businessName in sync with businessId
       if (k === "businessId") {
-        const biz = EAT_DRINK_BUSINESSES.find((b) => b.id === v);
+        const biz = businesses.find((b) => b.id === v);
         next.businessName = biz?.name ?? v;
       }
       return next;
@@ -209,7 +209,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount }) {
             className="rounded-xl px-3 py-2.5 text-sm outline-none"
             style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
           >
-            {EAT_DRINK_BUSINESSES.map((b) => (
+            {businesses.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
           </select>
@@ -452,6 +452,14 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function NewsOffersPage() {
   const { data: items, loading } = useFetch(getNewsOffers, []);
+  const { data: businesses } = useFetch(getSpotlightBusinesses, []);
+
+  // Only businesses that actually have a spotlight post get a filter chip —
+  // every registered business would be an unusable row of 40+.
+  const chipBusinesses = Array.from(
+    new Map((items ?? []).filter((i) => i.businessId)
+      .map((i) => [i.businessId, { id: i.businessId, name: i.businessName ?? i.businessId }])).values()
+  );
   const [localItems, setLocalItems] = useState(null);
   const [editing, setEditing] = useState(null);        // null = list, {} = new form, item = edit form
   const [bizFilter, setBizFilter] = useState("all");
@@ -513,6 +521,7 @@ export default function NewsOffersPage() {
           onSave={handleSave}
           onCancel={() => setEditing(null)}
           featuredCount={featuredCount}
+          businesses={businesses ?? []}
         />
       </div>
     );
@@ -582,7 +591,7 @@ export default function NewsOffersPage() {
       <div className="flex gap-3 flex-wrap items-center">
         <div className="flex gap-2 flex-wrap">
           <button onClick={() => setBizFilter("all")} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === "all" ? { backgroundColor: "#2563EB", color: "#fff" } : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>All businesses</button>
-          {EAT_DRINK_BUSINESSES.map((b) => (
+          {chipBusinesses.map((b) => (
             <button key={b.id} onClick={() => setBizFilter(b.id)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === b.id ? { backgroundColor: "#2563EB", color: "#fff" } : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>{b.name}</button>
           ))}
         </div>

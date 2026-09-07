@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SITE_CONTENT_SECTIONS } from "../../Data/adminMissingScreensMock";
+import { ensureSiteSections, saveSiteSection } from "../../api/admin";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 const INPUT = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
@@ -98,9 +99,20 @@ function ListingEditor({ section, onChange }) {
 }
 
 export default function SiteContentPage() {
-  const [sections, setSections] = useState(SITE_CONTENT_SECTIONS);
-  const [activeKey, setActiveKey] = useState(sections[0].key);
+  const [sections, setSections] = useState([]);
+  const [activeKey, setActiveKey] = useState(SITE_CONTENT_SECTIONS[0].key);
+  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // On a fresh database there are no rows yet, so the sections the site expects
+  // are seeded from the same defaults the screen was previously hardcoded to.
+  useEffect(() => {
+    let cancelled = false;
+    ensureSiteSections(SITE_CONTENT_SECTIONS).then((rows) => {
+      if (!cancelled) setSections(rows);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const active = sections.find((s) => s.key === activeKey);
 
@@ -108,9 +120,22 @@ export default function SiteContentPage() {
     setSections((prev) => prev.map((s) => (s.key === activeKey ? { ...s, [field]: value } : s)));
   }
 
-  function handleSave() {
-    setToast(`${active.label} content saved.`);
+  async function handleSave() {
+    if (!active) return;
+    setSaving(true);
+    try {
+      await saveSiteSection(active);
+      setToast(`${active.label} content saved.`);
+    } catch (e) {
+      setToast(`Could not save: ${e.message}`);
+    }
+    setSaving(false);
     setTimeout(() => setToast(null), 3000);
+  }
+
+  // Sections load from the database, so there is nothing to edit on first paint.
+  if (!active) {
+    return <p className="text-sm" style={{ color: MUTED }}>Loading site content…</p>;
   }
 
   return (
