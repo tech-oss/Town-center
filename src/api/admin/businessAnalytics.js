@@ -11,9 +11,20 @@ import { resolveRange } from "../../lib/analyticsRanges";
 // Function) exists and the public site/app actually calls it — there is
 // currently nothing inserting into analytics_events at all.
 
+// resolveRange gives back local-midnight Date objects for the calendar days
+// picked — `from`/`to`'s own y/m/d are what matters, not the instant they
+// represent. Going through .toISOString() converts via the *local* UTC
+// offset, which silently shifts "today" a day backwards whenever the viewer
+// is west of UTC — the RPC's p_until then excludes events that already
+// happened today in UTC. Building the UTC-midnight string by hand from the
+// date's own components sidesteps that conversion entirely.
+function utcMidnightIso(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T00:00:00.000Z`;
+}
+
 function bounds(range) {
   const { from, to } = resolveRange(range);
-  return { since: from.toISOString(), until: to.toISOString() };
+  return { since: utcMidnightIso(from), until: utcMidnightIso(to) };
 }
 
 function toSeries(rows) {
