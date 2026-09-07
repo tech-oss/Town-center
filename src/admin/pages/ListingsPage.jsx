@@ -11,13 +11,9 @@ import {
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import StatusTag from "../components/StatusTag";
+import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
-const NAVY   = "#1E293B";
-const BLUE   = "#2563EB";
-const MUTED  = "#64748B";
-const BORDER = "rgba(16,24,40,0.12)";
-const CARD   = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 const INPUT  = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
 
 const CATEGORY_TABS = [

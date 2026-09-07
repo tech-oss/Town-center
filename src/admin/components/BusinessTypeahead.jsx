@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { BUSINESS_SEARCH_DIRECTORY } from "../../Data/adminBusinessSearchMock";
-
-const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
+import { BLUE, BORDER, MUTED, NAVY } from "../theme";
 
 const CATEGORY_COLOURS = {
   "Eat & Drink": { bg: "rgba(37,99,235,0.1)", fg: "#1D4ED8" },

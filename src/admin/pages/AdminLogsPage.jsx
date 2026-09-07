@@ -2,12 +2,7 @@ import { useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import { getAdminLogs } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
-
-const NAVY  = "#1E293B";
-const BLUE  = "#2563EB";
-const MUTED = "#64748B";
-const BORDER = "rgba(16,24,40,0.08)";
-const CARD = { backgroundColor: "#ffffff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 const ACTION_STYLE = {
   Approved:        { bg: "rgba(22,163,74,0.12)",  text: "#15803D" },

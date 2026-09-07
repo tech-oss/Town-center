@@ -9,8 +9,8 @@ import SubscriptionTabs from "../components/SubscriptionTabs";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
+import { BORDER, MUTED, NAVY } from "../theme";
 
-const NAVY = "#1E293B", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
 const CARD = { boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" };
 const SUB_TABS = ["Invoices", "Receipts", "Terms Acceptance"];
 

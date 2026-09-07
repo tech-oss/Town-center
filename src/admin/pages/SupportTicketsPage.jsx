@@ -5,9 +5,8 @@ import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
+import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
-const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
-const CARD = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 const INPUT = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
 const STATUS_FILTERS = ["All", "Open", "In Progress", "Resolved"];
 

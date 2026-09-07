@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 
-// ─── Theme — matches the rest of the admin panel ──────────────────────────────
-export const NAVY   = "#1E293B";
-export const BLUE   = "#2563EB";
-export const MUTED  = "#64748B";
-export const BORDER = "rgba(16,24,40,0.12)";
-export const CARD   = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
-export const INPUT  = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
+// ─── Theme ────────────────────────────────────────────────────────────────────
+// Re-exported so the sub-editors in this folder can keep importing tokens from
+// their own shared module rather than reaching up to src/admin/theme.js.
+import { NAVY, BLUE, MUTED, BORDER, CARD, FIELD_STYLE } from "../../theme";
+export { NAVY, BLUE, MUTED, BORDER, CARD };
+export const INPUT = FIELD_STYLE;
 
 export function Field({ label, required, span2, children, hint }) {
   return (

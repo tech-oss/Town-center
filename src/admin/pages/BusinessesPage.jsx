@@ -10,14 +10,9 @@ import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import { BUSINESS_TEAM_MEMBERS, TEAM_ROLES } from "../../Data/adminMissingScreensMock";
+import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
-const NAVY  = "#1E293B";
-const BLUE  = "#2563EB";
-const MUTED = "#64748B";
-const BORDER = "rgba(16,24,40,0.12)";
-const CARD = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
-const FIELD_STYLE = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
 
 const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected"];
 

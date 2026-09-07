@@ -11,23 +11,15 @@ import {
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import InfoTip from "../components/InfoTip";
+import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
 // ─── Theme tokens ─────────────────────────────────────────────────────────────
-const NAVY    = "#1E293B";   // dark slate — headings & body text
-const BLUE    = "#2563EB";   // primary blue — actions, accents, active states
 const BRASS   = "#2563EB";   // (legacy alias) accent → blue
 const BRASS2  = "#60A5FA";   // lighter blue
 const BRASS3  = "#2563EB";   // accent text → blue
 const BRASS4  = "#3B82F6";   // mid blue
 const OFF     = "#F5F7FB";
 const CINZEL  = "'Inter', system-ui, -apple-system, sans-serif";
-const CARD    = {
-  backgroundColor: "#ffffff",
-  border: "1px solid #eef1f6",
-  boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)",
-};
-const MUTED   = "#64748B";
-const BORDER  = "rgba(16,24,40,0.08)";
 
 // Distinct colour palettes per chart — each series clearly differentiated.
 // Donut / pie segments

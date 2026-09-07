@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { PUSH_ATTACHABLE_ARTICLES } from "../../Data/adminPushArticlesMock";
-
-const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
+import { BLUE, BORDER, MUTED, NAVY } from "../theme";
 
 const CATEGORY_COLOURS = {
   News: { bg: "rgba(22,163,74,0.12)", fg: "#15803D" },

@@ -4,8 +4,8 @@ import { getAdminEvents } from "../../api/admin";
 import DataTable, { TableAction } from "../components/DataTable";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
+import { BLUE, BORDER, MUTED, NAVY } from "../theme";
 
-const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
 const TABS = ["All", "Published", "Draft", "Hidden"];
 
 export default function EventsNewsPage() {

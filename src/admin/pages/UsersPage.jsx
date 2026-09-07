@@ -4,12 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import { getUsers, approveUser, rejectUser, suspendUser, registerUser, deleteUser } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
-
-const NAVY  = "#1E293B";
-const BLUE  = "#2563EB";
-const MUTED = "#64748B";
-const BORDER = "rgba(16,24,40,0.08)";
-const CARD = { backgroundColor: "#ffffff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
+import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 const TABS = [
   { key: "Pending",   label: "Pending Approvals" },

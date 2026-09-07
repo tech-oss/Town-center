@@ -3,9 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ARTICLES } from "../../Data/adminMissingScreensMock";
 import StatusTag from "../components/StatusTag";
 import EmptyState from "../components/EmptyState";
+import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
-const NAVY = "#1E293B", BLUE = "#2563EB", MUTED = "#6B7280", BORDER = "rgba(16,24,40,0.12)";
-const CARD = { backgroundColor: "#fff", border: "1px solid #eef1f6", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 const TABS = ["All", "Published", "Draft", "Hidden"];
 
 const CATEGORY_COLOURS = {
