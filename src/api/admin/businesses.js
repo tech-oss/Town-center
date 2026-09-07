@@ -157,15 +157,45 @@ function fromRow(row) {
     shopCategories: detail.shopCategories ?? [],
     seeDoCategories: detail.seeDoCategories ?? [],
     address: listing.address ?? "",
+    postalCode: listing.postal_code ?? "",
     phone: listing.phone ?? "",
     website: listing.website ?? "",
+    bookingUrl: listing.booking_url ?? "",
     lat: listing.lat,
     lng: listing.lng,
     logo: listing.logo ?? null,
+    heroImage: listing.hero_image ?? null,
+    gallery: listing.gallery ?? [],
 
     contactName: [owner.first_name, owner.last_name].filter(Boolean).join(" "),
+    // These two are frequently different — the business's own public contact
+    // details (what shows on the listing) vs. the owner's own login email —
+    // shown as distinct fields rather than merged.
     email: owner.email ?? listing.email ?? "",
+    userEmail: owner.email ?? "",
+    businessEmail: listing.email ?? "",
     ownerStatus: owner.status ?? null,
+
+    tagline: listing.tagline ?? "",
+    description: listing.description ?? "",
+    hours: listing.hours ?? null,
+    availabilityInfo: listing.availability_info ?? "",
+    availabilityTag: listing.availability_tag ?? "",
+    social: listing.social ?? {},
+    faqs: listing.faqs ?? [],
+    // Services-type businesses
+    servicesList: listing.services_list ?? [],
+    areasCoveredList: listing.areas_covered_list ?? [],
+    whyChooseUs: listing.why_choose_us ?? "",
+    stats: listing.stats ?? [],
+    // Freelancer-type businesses
+    workingWithMe: listing.working_with_me ?? "",
+    skills: listing.skills ?? [],
+    portfolio: listing.portfolio ?? [],
+    // Live & Stay
+    amenities: listing.amenities ?? [],
+    otherAmenities: listing.other_amenities ?? "",
+    starRating: listing.star_rating ?? null,
 
     // Plans are stored lowercase ("standard"); the admin plan pickers are
     // title-cased.

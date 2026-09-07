@@ -526,6 +526,153 @@ function LogoUploadModal({ biz, onSave, onCancel }) {
   );
 }
 
+// ─── Business detail modal — everything submitted at registration ────────────
+// Renders label/value rows for whatever this business type actually collected
+// (a freelancer's Skills, a hotel's Amenities, a shop's category picks, etc.)
+// rather than a fixed layout — every field is optional and simply omitted
+// when empty, so the modal never shows a wall of blank rows.
+// A handful of these fields (working_with_me, stats, etc.) come through as
+// small objects/records rather than plain strings — render whatever text they
+// actually hold instead of the useless "[object Object]" a bare String() call
+// on an object produces.
+function displayValue(v) {
+  if (v == null) return "";
+  if (typeof v !== "object") return String(v);
+  if (Array.isArray(v)) return v.map(displayValue).filter(Boolean).join(", ");
+  if (Object.keys(v).length === 0) return ""; // {} means "not filled in", not a real value
+  return v.text ?? v.body ?? v.label ?? v.name ?? v.value ?? JSON.stringify(v);
+}
+
+function DetailRow({ label, value }) {
+  const text = displayValue(value);
+  if (!text || (Array.isArray(value) && value.length === 0)) return null;
+  return (
+    <div className="grid grid-cols-[140px_1fr] gap-3 py-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
+      <span className="text-xs font-semibold" style={{ color: MUTED }}>{label}</span>
+      <span className="text-sm" style={{ color: NAVY, wordBreak: "break-word" }}>{text}</span>
+    </div>
+  );
+}
+
+function DetailSection({ title, children }) {
+  const hasContent = Array.isArray(children) ? children.some(Boolean) : !!children;
+  if (!hasContent) return null;
+  return (
+    <div className="mb-5">
+      <p className="text-[11px] font-bold uppercase tracking-wider mb-1" style={{ color: "#9CA3AF" }}>{title}</p>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function BusinessDetailModal({ biz, onClose }) {
+  const secLabel = sectionLabel(biz.section);
+  const subcatLabels = (biz.subcategories ?? []).map((v) => {
+    const all = Object.values(SUBCATEGORIES).flat();
+    return all.find((o) => o.value === v)?.label ?? v;
+  });
+  const social = Object.entries(biz.social ?? {}).filter(([, v]) => v);
+  const hoursLines = Array.isArray(biz.hours)
+    ? biz.hours.filter((h) => h.open).map((h) => `${h.day} ${h.from}–${h.to}`)
+    : [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto flex flex-col gap-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <p className="text-lg font-bold" style={{ color: NAVY }}>{biz.name}</p>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>Everything submitted when this business was registered.</p>
+          </div>
+          <button onClick={onClose} className="opacity-40 hover:opacity-70 text-xl leading-none" style={{ color: NAVY }}>✕</button>
+        </div>
+
+        {biz.heroImage && <img src={biz.heroImage} alt="" className="w-full h-40 object-cover rounded-xl mb-4" />}
+
+        <DetailSection title="Business">
+          <DetailRow label="Name" value={biz.name} />
+          <DetailRow label="Tagline" value={biz.tagline} />
+          <DetailRow label="Description" value={biz.description} />
+          <DetailRow label="Section" value={secLabel} />
+          <DetailRow label="Categories" value={subcatLabels} />
+          <DetailRow label="Cuisines" value={biz.cuisines} />
+          <DetailRow label="Freelancer Type" value={biz.freelancerKind} />
+          <DetailRow label="Freelancer Category" value={biz.freelancerCategories} />
+          <DetailRow label="Accommodation Type" value={biz.hotelKind} />
+          <DetailRow label="Venue Type" value={biz.venueTypes} />
+          <DetailRow label="Star Rating" value={biz.starRating} />
+          <DetailRow label="New to Maidenhead" value={biz.newToMaidenhead ? "Yes" : null} />
+          <DetailRow label="Plan" value={biz.plan} />
+        </DetailSection>
+
+        <DetailSection title="Contact">
+          <DetailRow label="Owner" value={biz.contactName} />
+          <DetailRow label="Login Email" value={biz.userEmail} />
+          <DetailRow label="Business Email" value={biz.businessEmail} />
+          <DetailRow label="Phone" value={biz.phone} />
+          <DetailRow label="Website" value={biz.website} />
+          <DetailRow label="Booking URL" value={biz.bookingUrl} />
+          {social.map(([k, v]) => <DetailRow key={k} label={k[0].toUpperCase() + k.slice(1)} value={v} />)}
+        </DetailSection>
+
+        <DetailSection title="Location">
+          <DetailRow label="Address" value={biz.address} />
+          <DetailRow label="Postcode" value={biz.postalCode} />
+          <DetailRow label="Coordinates" value={biz.lat && biz.lng ? `${biz.lat}, ${biz.lng}` : null} />
+        </DetailSection>
+
+        <DetailSection title="Opening Hours">
+          <DetailRow label="Hours" value={hoursLines} />
+          <DetailRow label="Availability" value={biz.availabilityInfo} />
+          <DetailRow label="Availability Tag" value={biz.availabilityTag} />
+        </DetailSection>
+
+        {/* Services-type businesses (Tradespeople / Professionals) */}
+        <DetailSection title="Services">
+          <DetailRow label="Services" value={biz.servicesList} />
+          <DetailRow label="Areas Covered" value={biz.areasCoveredList} />
+          <DetailRow label="Why Choose Us" value={biz.whyChooseUs} />
+          <DetailRow label="Stats" value={biz.stats} />
+        </DetailSection>
+
+        {/* Freelancers */}
+        <DetailSection title="Freelance Profile">
+          <DetailRow label="Working With Me" value={biz.workingWithMe} />
+          <DetailRow label="Skills" value={biz.skills} />
+          <DetailRow label="Portfolio Items" value={biz.portfolio?.length} />
+        </DetailSection>
+
+        {/* Live & Stay */}
+        <DetailSection title="Amenities">
+          <DetailRow label="Amenities" value={biz.amenities} />
+          <DetailRow label="Other Amenities" value={biz.otherAmenities} />
+        </DetailSection>
+
+        <DetailSection title="Gallery">
+          {biz.gallery?.length > 0 && (
+            <div className="flex gap-2 flex-wrap mt-1">
+              {biz.gallery.map((src, i) => <img key={i} src={src} alt="" className="w-16 h-16 rounded-lg object-cover" style={{ border: `1px solid ${BORDER}` }} />)}
+            </div>
+          )}
+        </DetailSection>
+
+        <DetailSection title="FAQs">
+          {(biz.faqs ?? []).map((f, i) => (
+            <div key={i} className="py-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
+              <p className="text-sm font-semibold" style={{ color: NAVY }}>{f.question ?? f.q}</p>
+              <p className="text-xs mt-0.5" style={{ color: MUTED }}>{f.answer ?? f.a}</p>
+            </div>
+          ))}
+        </DetailSection>
+
+        <div className="flex justify-end pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Delete business modal (type-to-confirm) ──────────────────────────────────
 function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
   const [typed, setTyped] = useState("");
@@ -566,6 +713,7 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
   const actionType = isActive ? pendingAction.type : null;
   const isBusy     = busy === biz.id;
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden" style={CARD}>
@@ -637,10 +785,11 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           )}
 
           <div className="grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-xs" style={{ color: MUTED }}>
-            {biz.contactName && <span>👤 {biz.contactName}</span>}
-            {biz.email      && <span>✉️ {biz.email}</span>}
+            {biz.contactName && <span>👤 {biz.contactName} (owner)</span>}
+            {biz.userEmail    && <span>✉️ {biz.userEmail} (login)</span>}
+            {biz.businessEmail && biz.businessEmail !== biz.userEmail && <span>✉️ {biz.businessEmail} (business)</span>}
             {biz.phone      && <span>📞 {biz.phone}</span>}
-            {biz.address    && <span className="truncate">📍 {biz.address}</span>}
+            {biz.address    && <span className="truncate">📍 {biz.address}{biz.postalCode ? `, ${biz.postalCode}` : ""}</span>}
             {biz.website    && <span className="truncate">🔗 {biz.website}</span>}
             {biz.lat && biz.lng && <span>🗺 {Number(biz.lat).toFixed(4)}, {Number(biz.lng).toFixed(4)}</span>}
           </div>
@@ -659,6 +808,8 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
 
         {/* Action buttons */}
         <div className="flex flex-col gap-2 shrink-0">
+          <BizBtn color={NAVY} disabled={isBusy} onClick={() => setShowDetail(true)}>View Details</BizBtn>
+          {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} />}
           {biz.status === "Pending" && (
             <>
               <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>✓ Approve</BizBtn>
