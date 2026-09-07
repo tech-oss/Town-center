@@ -21,29 +21,12 @@
 -- that changes later. content_id = business_id for 'profile' rows, and
 -- business_articles.id for everything else.
 --
--- Depends on admin_users.sql having been run (public.is_admin()).
---
--- Also defines public.is_approved_business_member() — the business portal's
--- RLS policies and RPC bodies reference this name already, but it was never
--- actually created in the database (verified live: calling it errors
--- "function not found"). Defined here, matching the same business_users
--- pattern is_admin() already uses.
+-- Depends on admin_users.sql having been run (public.is_admin()) and on
+-- public.is_approved_business_member(target_business_id text) already
+-- existing (it does — created ad hoc earlier in the project's history,
+-- outside any checked-in migration; confirmed live via pg_get_functiondef).
+-- Called positionally below, so its actual parameter name doesn't matter.
 -- ═══════════════════════════════════════════════════════════════════════════
-
-create or replace function public.is_approved_business_member(p_business_id text)
-returns boolean
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select exists (
-    select 1 from public.business_users
-    where business_id = p_business_id
-      and auth_user_id = auth.uid()
-      and status = 'approved'
-  );
-$$;
 
 create table if not exists public.analytics_events (
   id           uuid primary key default gen_random_uuid(),
