@@ -372,15 +372,41 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 max-w-6xl">
 
+      {/* Print only the dashboard content — hide the sidebar/header chrome and
+          any interactive controls (filters, quick actions) that mean nothing
+          on paper. */}
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 14mm; }
+          body { background: #fff !important; }
+          aside, header { display: none !important; }
+          .print\\:hidden { display: none !important; }
+        }
+      `}</style>
+
       {/* ── Header ── */}
-      <div className="flex items-end justify-between gap-4">
+      <div className="flex items-end justify-between gap-4 print:hidden">
         <div>
           <h1 className="text-2xl font-semibold" style={{ color: NAVY, fontFamily: CINZEL }}>Dashboard</h1>
           <p className="text-sm mt-0.5" style={{ color: MUTED }}>Overview of the Maidenhead Town Centre Portal.</p>
         </div>
-        <span className="text-xs font-medium shrink-0" style={{ color: MUTED }}>
-          Today, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <span className="text-xs font-medium" style={{ color: MUTED }}>
+            Today, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+          </span>
+          <button onClick={() => window.print()}
+            className="px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
+            style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
+            Export PDF
+          </button>
+        </div>
+      </div>
+      {/* Print-only heading, since the screen header above is hidden when printing. */}
+      <div className="hidden print:block mb-2">
+        <h1 className="text-2xl font-semibold" style={{ color: NAVY }}>Maidenhead Town Centre — Dashboard</h1>
+        <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+          Generated {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+        </p>
       </div>
 
       {/* ── 6 stat cards ── */}
@@ -488,7 +514,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl p-6" style={CARD}>
+        <div className="bg-white rounded-xl p-6 print:hidden" style={CARD}>
           <h2 className="font-semibold text-sm mb-5" style={{ color: NAVY, fontFamily: CINZEL }}>Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
             <QuickAction icon="➕" label="Add Listing"  to="/admin/listings" />
