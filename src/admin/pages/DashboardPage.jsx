@@ -12,6 +12,7 @@ import {
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import InfoTip from "../components/InfoTip";
+import RangeSelector from "../components/RangeSelector";
 import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
 // ─── Theme tokens ─────────────────────────────────────────────────────────────
@@ -119,20 +120,7 @@ function BusinessBreakdownCard({ stats }) {
 const PERIODS = [{ key: 7, label: "Last 7 Days" }, { key: 15, label: "Last 15 Days" }, { key: 30, label: "Last 30 Days" }];
 
 function PeriodSelector({ days, setDays }) {
-  return (
-    <div className="flex gap-1">
-      {PERIODS.map((p) => (
-        <button key={p.key} onClick={() => setDays(p.key)}
-          className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-          style={days === p.key
-            ? { backgroundColor: BLUE, color: "#fff", border: `1px solid ${BLUE}` }
-            : { backgroundColor: "transparent", color: MUTED, border: "1px solid rgba(16,24,40,0.15)" }
-          }>
-          {p.label}
-        </button>
-      ))}
-    </div>
-  );
+  return <RangeSelector value={days} onChange={setDays} presets={PERIODS} />;
 }
 
 // ─── Revenue chart ────────────────────────────────────────────────────────────
@@ -151,7 +139,9 @@ function RevenueChart() {
   const { data } = useFetch(() => getRevenueTrend({ days }), [days]);
   const trend = data ?? { data: [], total: 0, change: 0 };
   const up = trend.change >= 0;
-  const tickInterval = days === 7 ? 0 : days === 15 ? 2 : 4;
+  const isCustom = typeof days === "object";
+  const tickInterval = isCustom ? Math.max(0, Math.floor(trend.data.length / 8)) : days === 7 ? 0 : days === 15 ? 2 : 4;
+  const periodLabel = isCustom ? `${days.from} to ${days.to}` : `previous ${days} days`;
 
   return (
     <div className="bg-white rounded-xl p-6 h-full flex flex-col" style={CARD}>
@@ -164,7 +154,7 @@ function RevenueChart() {
       </div>
       <p className="text-3xl font-bold mt-2" style={{ color: NAVY, fontFamily: CINZEL }}>£{trend.total.toLocaleString()}</p>
       <p className="text-sm mt-0.5 mb-5 font-medium" style={{ color: up ? BRASS3 : "#991B1B" }}>
-        {up ? "+" : ""}{trend.change}% on previous {days} days
+        {isCustom ? `${periodLabel}` : `${up ? "+" : ""}${trend.change}% on ${periodLabel}`}
       </p>
       <div className="flex-1 min-h-0" style={{ minHeight: 180 }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -269,7 +259,7 @@ function SignupTooltip({ active, payload, label }) {
 function SignupChart() {
   const [days, setDays] = useState(7);
   const { data: rows } = useFetch(() => getSignupTrend({ days }), [days]);
-  const tickInterval = days === 7 ? 0 : days === 15 ? 2 : 4;
+  const tickInterval = typeof days === "object" ? Math.max(0, Math.floor((rows?.length ?? 8) / 8)) : days === 7 ? 0 : days === 15 ? 2 : 4;
 
   return (
     <div className="bg-white rounded-xl p-6 h-full flex flex-col" style={CARD}>

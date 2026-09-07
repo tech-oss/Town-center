@@ -9,6 +9,7 @@ import {
 } from "../../api/admin";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import LoadingState from "../components/LoadingState";
+import RangeSelector from "../components/RangeSelector";
 import InfoTip from "../components/InfoTip";
 
 function Card({ title, subtitle, info, children }) {
@@ -91,7 +92,7 @@ export default function ReportingPage() {
   if (loadingS || loadingR || loadingT || loadingA) return <LoadingState />;
 
   const s = summary ?? {};
-  const rangeLabel = RANGES.find((r) => r.key === range)?.label ?? "";
+  const rangeLabel = typeof range === "object" ? `${range.from} to ${range.to}` : (RANGES.find((r) => r.key === range)?.label ?? "");
   const visibleTiers = tier === "All" ? Object.keys(TIER_COLOURS) : [tier];
 
   return (
@@ -110,17 +111,10 @@ export default function ReportingPage() {
 
       {/* Filter toolbar */}
       <div className="bg-white rounded-2xl p-3 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
-        <label className="flex items-center gap-2 shrink-0">
-          <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Date range</span>
-          <select
-            value={range}
-            onChange={(e) => setRange(e.target.value)}
-            className="rounded-xl px-3 py-2 text-sm font-medium outline-none"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
-          >
-            {RANGES.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
-          </select>
-        </label>
+        <div className="flex items-start gap-2 shrink-0">
+          <span className="text-xs font-semibold uppercase tracking-wide pt-2" style={{ color: "#9CA3AF" }}>Date range</span>
+          <RangeSelector value={range} onChange={setRange} presets={RANGES} />
+        </div>
 
         <span className="hidden sm:block w-px self-stretch my-1" style={{ backgroundColor: "rgba(16,24,40,0.1)" }} />
 

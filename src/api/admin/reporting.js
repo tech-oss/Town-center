@@ -17,13 +17,29 @@ const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Se
 const PLAN_LABELS = { free: "Free", basic: "Basic", standard: "Standard", premium: "Premium", agent: "Agent" };
 const label = (plan) => PLAN_LABELS[String(plan ?? "").toLowerCase()] ?? (plan || "Basic");
 
-// Trailing month buckets, oldest → newest, the last being the current month.
-function monthBuckets(count) {
-  const now = new Date();
+// `range` is either a preset key string ("6m") or { type: "custom", from, to }
+// (from/to as "YYYY-MM-DD"). Resolves both to a concrete [since, until] pair
+// so every function below works off real dates rather than a month count —
+// a custom range can span any window, not just whole trailing months.
+function resolveRange(range) {
+  if (range && typeof range === "object" && range.type === "custom" && range.from && range.to) {
+    return { since: new Date(range.from), until: new Date(range.to) };
+  }
+  const months = RANGE_MONTHS[range] ?? 6;
+  const until = new Date();
+  const since = new Date();
+  since.setMonth(since.getMonth() - months);
+  return { since, until };
+}
+
+// Month buckets spanning [since, until] inclusive, oldest → newest.
+function monthBuckets(since, until) {
   const out = [];
-  for (let i = count - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+  const d = new Date(since.getFullYear(), since.getMonth(), 1);
+  const end = new Date(until.getFullYear(), until.getMonth(), 1);
+  while (d <= end) {
     out.push({ key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`, month: MONTH_NAMES[d.getMonth()] });
+    d.setMonth(d.getMonth() + 1);
   }
   return out;
 }
@@ -45,9 +61,7 @@ async function loadPayments() {
 // ─── Summary KPIs ──────────────────────────────────────────────────────────
 
 export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
-  const months = RANGE_MONTHS[range] ?? 6;
-  const since = new Date();
-  since.setMonth(since.getMonth() - months);
+  const { since } = resolveRange(range);
   const sinceIso = since.toISOString();
 
   const [subs, listingsRes, usersRes, bizRes, occRes] = await Promise.all([
@@ -132,7 +146,8 @@ export async function getRevenueByTier({ tier = "All" } = {}) {
 
 export async function getSubscriptionTrend({ range = "6m", tier = "All" } = {}) {
   const subs = await loadSubscriptions();
-  const buckets = monthBuckets(RANGE_MONTHS[range] ?? 6);
+  const { since, until } = resolveRange(range);
+  const buckets = monthBuckets(since, until);
   const tiers = tier === "All" ? ["Premium", "Standard", "Agent", "Basic", "Free"] : [tier];
 
   // Cumulative: a subscription counts in every month from its start onward.
@@ -150,7 +165,8 @@ export async function getSubscriptionTrend({ range = "6m", tier = "All" } = {}) 
 }
 
 export async function getActivityTrend({ range = "6m" } = {}) {
-  const buckets = monthBuckets(RANGE_MONTHS[range] ?? 6);
+  const { since, until } = resolveRange(range);
+  const buckets = monthBuckets(since, until);
   const [usersRes, listingsRes] = await Promise.all([
     supabase.from("business_users").select("requested_at"),
     supabase.from("business_listings").select("updated_at"),
@@ -165,16 +181,25 @@ export async function getActivityTrend({ range = "6m" } = {}) {
   }));
 }
 
-// Trailing daily buckets — used by the revenue and signup sparklines.
-function dayBuckets(days) {
+// Daily buckets between two dates, inclusive — used by the revenue and signup
+// sparklines. `range` is either a day-count (trailing from today) or
+// { type: "custom", from, to }, matching resolveRange's two shapes.
+function dayBuckets(range) {
+  let since, until;
+  if (range && typeof range === "object" && range.type === "custom") {
+    since = new Date(range.from);
+    until = new Date(range.to);
+  } else {
+    until = new Date();
+    since = new Date();
+    since.setDate(since.getDate() - ((range ?? 30) - 1));
+  }
   const out = [];
-  const now = new Date();
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
-    out.push({
-      key: d.toISOString().slice(0, 10),
-      date: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`,
-    });
+  const d = new Date(since.getFullYear(), since.getMonth(), since.getDate());
+  const end = new Date(until.getFullYear(), until.getMonth(), until.getDate());
+  while (d <= end) {
+    out.push({ key: d.toISOString().slice(0, 10), date: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}` });
+    d.setDate(d.getDate() + 1);
   }
   return out;
 }
@@ -194,17 +219,22 @@ export async function getRevenueTrend({ days = 30 } = {}) {
   const total = data.reduce((s, d) => s + d.revenue, 0);
 
   // Previous period of equal length, for the "+N% on previous X days" line.
-  const prevStart = new Date();
-  prevStart.setDate(prevStart.getDate() - days * 2);
-  const prevEnd = new Date();
-  prevEnd.setDate(prevEnd.getDate() - days);
-  const prevTotal = payments
-    .filter((p) => {
-      const d = new Date(p.paid_at ?? p.created_at ?? 0);
-      return d >= prevStart && d < prevEnd;
-    })
-    .reduce((sum, p) => sum + Number(p.amount ?? 0), 0);
-  const change = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 1000) / 10 : 0;
+  // Only meaningful for the trailing-days form — a custom range has no
+  // natural "previous period" to compare against, so change stays 0.
+  let change = 0;
+  if (typeof days === "number") {
+    const prevStart = new Date();
+    prevStart.setDate(prevStart.getDate() - days * 2);
+    const prevEnd = new Date();
+    prevEnd.setDate(prevEnd.getDate() - days);
+    const prevTotal = payments
+      .filter((p) => {
+        const d = new Date(p.paid_at ?? p.created_at ?? 0);
+        return d >= prevStart && d < prevEnd;
+      })
+      .reduce((sum, p) => sum + Number(p.amount ?? 0), 0);
+    change = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 1000) / 10 : 0;
+  }
 
   return { data, total, change };
 }
