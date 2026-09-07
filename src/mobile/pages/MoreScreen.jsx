@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import { pushSupported, pushPermission, subscribeToPush } from "../lib/pushSubscribe";
 
 // `to` → navigates in-app. `soon: true` → demo placeholder (no web redirect).
 const ITEMS = [
   { label: "Services", icon: "list", to: "/mobile/services" },
   { label: "Live & Stay", icon: "list", to: "/mobile/live" },
   { label: "Offers & News", icon: "bell", to: "/mobile/offers" },
+  { label: "Enable Notifications", icon: "bell", key: "push" },
   { label: "Neighbourhood Guides", icon: "list", to: "/mobile/guides" },
   { label: "Work", icon: "list", to: "/mobile/work" },
   { label: "Business Directory", icon: "list", to: "/mobile/map" },
@@ -36,10 +38,23 @@ function Icon({ name }) {
 export default function MoreScreen() {
   const navigate = useNavigate();
   const [toast, setToast] = useState(null);
+  const [pushGranted, setPushGranted] = useState(pushPermission() === "granted");
 
-  function handle(item) {
+  useEffect(() => { setPushGranted(pushPermission() === "granted"); }, []);
+
+  function flash(msg) { setToast(msg); setTimeout(() => setToast(null), 2200); }
+
+  async function handle(item) {
+    if (item.key === "push") {
+      if (!pushSupported()) { flash("Notifications aren't supported on this browser."); return; }
+      if (pushGranted) { flash("Notifications are already on."); return; }
+      const res = await subscribeToPush();
+      if (res.ok) { setPushGranted(true); flash("Notifications enabled."); }
+      else flash(res.error);
+      return;
+    }
     if (item.to) navigate(item.to);
-    else { setToast(`${item.label} — coming soon in the full app`); setTimeout(() => setToast(null), 2000); }
+    else flash(`${item.label} — coming soon in the full app`);
   }
 
   return (
@@ -58,7 +73,9 @@ export default function MoreScreen() {
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.045)" }}>
                 <Icon name={item.icon} />
               </div>
-              <span className="flex-1 text-left text-sm font-semibold" style={{ color: "#000000" }}>{item.label}</span>
+              <span className="flex-1 text-left text-sm font-semibold" style={{ color: "#000000" }}>
+                {item.key === "push" && pushGranted ? "Notifications Enabled" : item.label}
+              </span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.3)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           ))}

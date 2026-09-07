@@ -384,8 +384,11 @@ export async function getPushHistory() {
   return (data ?? []).map(pushFromRow);
 }
 
-// Records a send. Actual delivery needs a push provider and device tokens —
-// this is the history the admin screen shows.
+// Records the send, then asks the send-push Edge Function to actually deliver
+// it (supabase/functions/send-push). The function isn't deployed until the
+// project owner runs the one-time CLI steps in that file's header comment —
+// until then this call 404s, which is swallowed so the history always records
+// correctly regardless of whether delivery is live yet.
 export async function sendPush(form) {
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
   const article = form.attachedArticle;
@@ -402,5 +405,16 @@ export async function sendPush(form) {
     article_link: article?.link ?? null,
   }).select().single();
   if (error) throw error;
-  return pushFromRow(data);
+
+  let delivery = null;
+  try {
+    const { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
+      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all" },
+    });
+    delivery = fnError ? { error: fnError.message } : result;
+  } catch (e) {
+    delivery = { error: e.message };
+  }
+
+  return { ...pushFromRow(data), delivery };
 }

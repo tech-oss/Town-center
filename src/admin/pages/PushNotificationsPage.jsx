@@ -90,13 +90,19 @@ export default function PushNotificationsPage() {
   async function handleSend() {
     if (!isValid) return;
     const audienceLabel = AUDIENCES.find((a) => a.key === form.audience)?.label ?? "All users";
-    // Records the send. Delivery itself needs a push provider and device
-    // tokens — see supabase/sql/site_content_schema.sql.
-    await sendPush(form);
+    const result = await sendPush(form);
     setNonce((n) => n + 1);
     setForm({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
     setConfirm(false);
-    notify(`Notification sent to ${audienceLabel} via ${channels.join(" & ")}.`);
+    // Delivery needs the send-push Edge Function deployed (see its header
+    // comment) — until then this reports as recorded-only rather than sent.
+    if (result.delivery?.error) {
+      notify(`Recorded — delivery isn't live yet (${result.delivery.error}).`);
+    } else if (result.delivery) {
+      notify(`Sent to ${result.delivery.sent}/${result.delivery.total} subscribed device(s).`);
+    } else {
+      notify(`Notification sent to ${audienceLabel} via ${channels.join(" & ")}.`);
+    }
   }
 
   const field = { border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" };

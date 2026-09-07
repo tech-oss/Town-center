@@ -2,6 +2,33 @@
 // Scope is set to /mobile/ at registration time (see main.jsx), so this never
 // touches the rest of the site.
 const CACHE = "maidenhead-mobile-v2";
+
+// Web Push delivery. The payload is set by supabase/functions/send-push.
+self.addEventListener("push", (event) => {
+  let data = {};
+  try { data = event.data?.json() ?? {}; } catch { data = { body: event.data?.text() }; }
+  const title = data.title || "Maidenhead";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body,
+      icon: "/mobile-icons/icon-192.png",
+      badge: "/mobile-icons/icon-192.png",
+      data: { url: data.url || "/mobile/" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/mobile/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window" }).then((clients) => {
+      const existing = clients.find((c) => c.url.includes(url));
+      if (existing) return existing.focus();
+      return self.clients.openWindow(url);
+    })
+  );
+});
 const APP_SHELL = ["/mobile/", "/manifest.json", "/logo-mark.svg"];
 
 self.addEventListener("install", (event) => {
