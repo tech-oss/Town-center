@@ -123,10 +123,18 @@ function one(embedded) {
   return Array.isArray(embedded) ? (embedded[0] ?? {}) : embedded;
 }
 
+// Fields shown here are deliberately scoped to what the business's own 5-step
+// signup form (business-dashboard's SignUpPage.jsx: Your Details → Business
+// Details → Plan → Terms → Review) actually collects — not the full
+// business_listings row. That row also holds content added later through the
+// separate Manage Business Content editor (description, hours, gallery,
+// FAQs, amenities, …), which belongs on that screen, not the registration
+// approval card.
 function fromRow(row) {
   const listing = one(row.business_listings);
   const users = Array.isArray(row.business_users) ? row.business_users : [row.business_users].filter(Boolean);
   const owner = users.find((u) => u.role === "Owner") ?? users[0] ?? {};
+  const subscription = one(row.business_subscriptions);
   const detail = listing.business_type_detail ?? {};
   return {
     id: row.id,
@@ -138,69 +146,54 @@ function fromRow(row) {
     suspendNote: row.status === "Suspended" ? row.admin_note : "",
     newToMaidenhead: row.new_to_maidenhead,
 
+    // ── "Business Details" step ──
     // Older listings recorded a display category ("Live & Stay"); newer ones a
     // business_type slug ("shop"). Prefer the slug the admin selects still use.
     section: listing.business_type ?? listing.category ?? "",
-    // subcategory is a single text column, not an array — the admin UI works in
-    // multiples, so a lone value is lifted into a one-item list.
-    subcategories: Array.isArray(listing.subcategory)
-      ? listing.subcategory
-      : (listing.subcategory ? [listing.subcategory] : []),
-    cuisines: detail.cuisineTypes ?? [],
-    // Sub-choices collected at signup that the admin screen never surfaced:
-    // which kind of freelancer/tradesperson/professional, which kind of
-    // accommodation, and the venue/shop/see-do category picks.
+    // The real signup form never writes the legacy `subcategory` column at
+    // all — Shop and See & Do category picks live inside business_type_detail
+    // alongside every other type-specific field, same as freelancerKind etc.
+    subcategories: (listing.business_type === "shop" ? detail.shopCategories : detail.seeDoCategories) ?? [],
+    // The type-specific picks the signup form's step 2 branches into —
+    // previously captured in the DB but never surfaced anywhere in admin.
     freelancerKind: detail.freelancerKind ?? "",
     freelancerCategories: detail.freelancerCategories ?? [],
     hotelKind: detail.hotelKind ?? "",
+    cuisineTypes: detail.cuisineTypes ?? [],
     venueTypes: detail.venueTypes ?? [],
     shopCategories: detail.shopCategories ?? [],
     seeDoCategories: detail.seeDoCategories ?? [],
-    address: listing.address ?? "",
-    postalCode: listing.postal_code ?? "",
-    phone: listing.phone ?? "",
     website: listing.website ?? "",
-    bookingUrl: listing.booking_url ?? "",
+    // The business's own public contact details (step 2) — distinct from the
+    // owner's personal details below (step 1). Frequently different emails
+    // and phone numbers.
+    businessEmail: listing.email ?? "",
+    businessPhone: listing.phone ?? "",
+    address: listing.address ?? "",
+
     lat: listing.lat,
     lng: listing.lng,
     logo: listing.logo ?? null,
-    heroImage: listing.hero_image ?? null,
-    gallery: listing.gallery ?? [],
 
+    // ── "Your Details" step (the owner's own account, not the business) ──
     contactName: [owner.first_name, owner.last_name].filter(Boolean).join(" "),
-    // These two are frequently different — the business's own public contact
-    // details (what shows on the listing) vs. the owner's own login email —
-    // shown as distinct fields rather than merged.
-    email: owner.email ?? listing.email ?? "",
+    firstName: owner.first_name ?? "",
+    lastName: owner.last_name ?? "",
     userEmail: owner.email ?? "",
-    businessEmail: listing.email ?? "",
+    ownerPhone: owner.phone ?? "",
     ownerStatus: owner.status ?? null,
+    // Kept for older call sites that read a single contact email/phone.
+    email: owner.email ?? listing.email ?? "",
+    phone: owner.phone ?? listing.phone ?? "",
 
-    tagline: listing.tagline ?? "",
-    description: listing.description ?? "",
-    hours: listing.hours ?? null,
-    availabilityInfo: listing.availability_info ?? "",
-    availabilityTag: listing.availability_tag ?? "",
-    social: listing.social ?? {},
-    faqs: listing.faqs ?? [],
-    // Services-type businesses
-    servicesList: listing.services_list ?? [],
-    areasCoveredList: listing.areas_covered_list ?? [],
-    whyChooseUs: listing.why_choose_us ?? "",
-    stats: listing.stats ?? [],
-    // Freelancer-type businesses
-    workingWithMe: listing.working_with_me ?? "",
-    skills: listing.skills ?? [],
-    portfolio: listing.portfolio ?? [],
-    // Live & Stay
-    amenities: listing.amenities ?? [],
-    otherAmenities: listing.other_amenities ?? "",
-    starRating: listing.star_rating ?? null,
+    // ── "Plan" step ──
+    // Plans are stored lowercase ("standard"); the admin UI title-cases them.
+    plan: titleCase(subscription.plan) || "Free",
+    // ── "Terms" step ──
+    termsAcceptedAt: subscription.terms_accepted_at ?? null,
 
-    // Plans are stored lowercase ("standard"); the admin plan pickers are
-    // title-cased.
-    plan: titleCase(one(row.business_subscriptions).plan) || "Basic",
-    // "Content Pending" until the owner has written an actual description.
+    // "Content Pending" until the owner has written an actual description —
+    // that's Manage Business Content data, read here only for this one badge.
     hasContent: !!(listing.description && listing.description.trim()),
   };
 }
@@ -208,8 +201,8 @@ function fromRow(row) {
 const SELECT = `
   *,
   business_listings(*),
-  business_users(role, first_name, last_name, email, status),
-  business_subscriptions(plan)
+  business_users(role, first_name, last_name, email, phone, status),
+  business_subscriptions(plan, terms_accepted_at)
 `;
 
 export async function getBusinesses({ status } = {}) {
@@ -251,10 +244,22 @@ export async function registerBusiness(data) {
     business_id: id,
     name: data.name,
     business_type: data.section || null,
-    subcategory: data.subcategories ?? [],
-    business_type_detail: { cuisineTypes: data.cuisines ?? [] },
+    // Every type-specific pick from the signup form's Business Details step —
+    // same shape the real self-serve registration writes, not a subset.
+    business_type_detail: {
+      freelancerKind: data.freelancerKind || null,
+      freelancerCategories: data.freelancerKind ? (data.freelancerCategories ?? []) : [],
+      hotelKind: data.section === "hotel" ? data.hotelKind : null,
+      cuisineTypes: data.cuisineTypes ?? [],
+      venueTypes: data.venueTypes ?? [],
+      shopCategories: data.shopCategories ?? [],
+      seeDoCategories: data.seeDoCategories ?? [],
+    },
     address: data.address || null,
-    phone: data.phone || null,
+    // Business's own public contact details — distinct from the owner's
+    // personal ones, which live on their business_users row instead.
+    phone: data.businessPhone || null,
+    email: data.businessEmail || null,
     website: data.website || null,
     lat: data.lat ?? null,
     lng: data.lng ?? null,
@@ -262,8 +267,45 @@ export async function registerBusiness(data) {
   }, { onConflict: "business_id" });
   if (listingError) throw listingError;
 
-  if (data.plan) {
-    await supabase.from("business_subscriptions").upsert({ business_id: id, plan: data.plan }, { onConflict: "business_id" });
+  if (data.planKey) {
+    await supabase.from("business_subscriptions").upsert({
+      business_id: id,
+      plan: data.planKey,
+      // Admin registering on the business's behalf stands in for their
+      // agreeing to the Terms of Use / Privacy Policy at signup.
+      terms_accepted_at: new Date().toISOString(),
+    }, { onConflict: "business_id" });
+  }
+
+  // The owner's own login — a real Supabase Auth account, not just a
+  // business_users row, so they can actually sign in. Has to go through an
+  // Edge Function: calling supabase.auth.signUp() straight from this browser
+  // would create the account AND switch the calling admin's own session over
+  // to it (this project has email confirmation off).
+  if (data.ownerEmail) {
+    const password = data.autoPassword ? crypto.randomUUID().slice(0, 12) : data.password;
+    const { data: fnResult, error: fnError } = await supabase.functions.invoke("admin-create-business", {
+      body: {
+        businessId: id,
+        email: data.ownerEmail,
+        password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.ownerPhone || null,
+        role: "Owner",
+      },
+    });
+    if (fnError || fnResult?.error) {
+      // Don't leave a business/listing/subscription behind with no owner and
+      // no way to create one through this form again (name/id would collide
+      // on retry) — a failed registration should roll back cleanly.
+      if (!data.id) {
+        await supabase.from("business_subscriptions").delete().eq("business_id", id);
+        await supabase.from("business_listings").delete().eq("business_id", id);
+        await supabase.from("businesses").delete().eq("id", id);
+      }
+      throw new Error(fnResult?.error ?? fnError.message ?? "Could not create the owner's login.");
+    }
   }
 
   return getBusinessById(id);

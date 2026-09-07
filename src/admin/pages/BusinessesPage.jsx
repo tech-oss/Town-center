@@ -4,12 +4,15 @@ import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness,
   suspendBusiness, reinstateBusiness, deleteBusiness,
-  SECTION_OPTIONS, SUBCATEGORIES, CUISINE_OPTIONS, BUSINESS_PLANS,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import { BUSINESS_TEAM_MEMBERS, TEAM_ROLES } from "../../Data/adminMissingScreensMock";
+import {
+  BUSINESS_TYPES, FREELANCER_KINDS, FREELANCER_KIND_CATEGORIES, HOTEL_KINDS,
+  CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES, SUBSCRIPTION_PLANS, labelFor,
+} from "../../Data/businessRegistrationTaxonomy";
 import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -40,8 +43,11 @@ function Toast({ message, onDismiss }) {
 }
 
 // ─── Section label helper ─────────────────────────────────────────────────────
+// Uses the same BUSINESS_TYPES taxonomy the real signup form offers, so a
+// section shows the exact label the business itself picked rather than
+// admin's own older/divergent section list.
 function sectionLabel(val) {
-  return SECTION_OPTIONS.find((s) => s.value === val)?.label ?? val;
+  return labelFor(BUSINESS_TYPES, val);
 }
 
 // ─── Multi-checkbox group ─────────────────────────────────────────────────────
@@ -89,6 +95,15 @@ function Chip({ label, checked, onClick }) {
   );
 }
 
+// ─── Single-select "pick one" chips — same shape as CheckGroup's Chip ────────
+function RadioGroup({ options, value, onChange }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((o) => <Chip key={o.value} label={o.label} checked={value === o.value} onClick={() => onChange(o.value)} />)}
+    </div>
+  );
+}
+
 // ─── Field wrapper ────────────────────────────────────────────────────────────
 function FormField({ label, required, children, hint, span2 }) {
   return (
@@ -103,33 +118,30 @@ function FormField({ label, required, children, hint, span2 }) {
 }
 
 // ─── Register form ────────────────────────────────────────────────────────────
+// Deliberately collects exactly the fields the business's own 5-step signup
+// form does (see BusinessDetailModal's comment) — admin registering on
+// someone's behalf is the same data entry, just done by admin instead of the
+// business, so the two paths must produce identical records.
 const EMPTY_FORM = {
-  // Business
-  name: "",
-  section: "",
-  subcategories: [],
-  cuisines: [],
+  // "Your Details" — the owner's own account
+  firstName: "", lastName: "", ownerEmail: "", ownerPhone: "",
+  autoPassword: true, password: "",
+  // "Business Details"
+  name: "", section: "", website: "", businessEmail: "", businessPhone: "", address: "",
+  freelancerKind: "", freelancerCategories: [], hotelKind: "hotel",
+  cuisineTypes: [], venueTypes: [], shopCategories: [], seeDoCategories: [],
   newToMaidenhead: false,
-  address: "",
-  phone: "",
-  website: "",
-  plan: "Basic",
-  // Location
-  lat: "",
-  lng: "",
-  // Logo
-  logo: null,        // base64 data URL
-  logoName: "",
-  // Optional user
-  contactName: "",
-  email: "",
-  userRole: "Business Owner",
-  createUser: false,
+  lat: "", lng: "",
+  logo: null, logoName: "",
+  // "Plan"
+  planKey: "standard",
 };
 
 function RegisterBusinessForm({ onSave, onCancel }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [logoPreview, setLogoPreview] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const fileRef = useRef(null);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
@@ -147,13 +159,41 @@ function RegisterBusinessForm({ onSave, onCancel }) {
   }
 
   function handleSectionChange(val) {
-    setForm((f) => ({ ...f, section: val, subcategories: [], cuisines: [], newToMaidenhead: false }));
+    setForm((f) => ({
+      ...f, section: val,
+      freelancerKind: "", freelancerCategories: [], hotelKind: "hotel",
+      cuisineTypes: [], venueTypes: [], shopCategories: [], seeDoCategories: [],
+      newToMaidenhead: false,
+    }));
   }
 
-  const subcats = form.section ? SUBCATEGORIES[form.section] ?? [] : [];
-  const isShop  = form.section === "shop";
-  const isEat   = form.section === "eat-drink";
-  const isValid = form.name.trim() && form.section && form.subcategories.length > 0;
+  const isFreelancer = form.section === "freelancer";
+  const isHotel = form.section === "hotel";
+  const isEat = form.section === "eat-drink";
+  const isShop = form.section === "shop";
+  const isSeeDo = form.section === "see-do";
+
+  const typeValid =
+    (!isFreelancer || (form.freelancerKind && form.freelancerCategories.length > 0)) &&
+    (!isEat || (form.cuisineTypes.length > 0 && form.venueTypes.length > 0)) &&
+    (!isShop || form.shopCategories.length > 0) &&
+    (!isSeeDo || form.seeDoCategories.length > 0);
+
+  const isValid = form.firstName.trim() && form.lastName.trim() && form.ownerEmail.trim()
+    && (form.autoPassword || form.password)
+    && form.name.trim() && form.section && form.address.trim() && typeValid;
+
+  async function handleSubmit() {
+    if (!isValid) return;
+    setSaving(true);
+    setError("");
+    try {
+      await onSave(form);
+    } catch (e) {
+      setError(e.message ?? "Something went wrong.");
+    }
+    setSaving(false);
+  }
 
   return (
     <div className="bg-white rounded-2xl p-6 flex flex-col gap-6"
@@ -164,84 +204,128 @@ function RegisterBusinessForm({ onSave, onCancel }) {
         <button onClick={onCancel} className="opacity-40 hover:opacity-70 text-xl leading-none" style={{ color: NAVY }}>✕</button>
       </div>
 
-      {/* ── Section 1: Core details ── */}
+      {/* ── Your Details (owner account) ── */}
+      <Section title="Your Details" note="The business owner's own login">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <FormField label="First Name" required>
+            <input value={form.firstName} onChange={(e) => set("firstName", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+          <FormField label="Last Name" required>
+            <input value={form.lastName} onChange={(e) => set("lastName", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+          <FormField label="Email Address" required hint="This is the owner's login.">
+            <input type="email" value={form.ownerEmail} onChange={(e) => set("ownerEmail", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+          <FormField label="Phone Number">
+            <input value={form.ownerPhone} onChange={(e) => set("ownerPhone", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+        </div>
+        <div className="rounded-xl p-3 mt-3 flex flex-col gap-2" style={{ backgroundColor: "#f8fafc", border: "1px solid rgba(16,24,40,0.1)" }}>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={form.autoPassword} onChange={(e) => set("autoPassword", e.target.checked)} className="w-4 h-4" />
+            <span className="text-sm font-medium" style={{ color: NAVY }}>Auto-generate password</span>
+          </label>
+          {form.autoPassword ? (
+            <p className="text-xs" style={{ color: MUTED }}>A temporary password will be sent to their email.</p>
+          ) : (
+            <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password"
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          )}
+        </div>
+      </Section>
+
+      {/* ── Business Details ── */}
       <Section title="Business Details">
         <div className="grid sm:grid-cols-2 gap-4">
-
           <FormField label="Business Name" required span2>
             <input value={form.name} onChange={(e) => set("name", e.target.value)}
               placeholder="e.g. Coppa Club" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
           </FormField>
 
-          <FormField label="Main Section" required>
+          <FormField label="Business Type" required>
             <select value={form.section} onChange={(e) => handleSectionChange(e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ ...FIELD_STYLE }}>
-              <option value="">— Select section —</option>
-              {SECTION_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE}>
+              <option value="">— Select a type —</option>
+              {BUSINESS_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
-          </FormField>
-
-          <FormField label="Subscription Plan">
-            <select value={form.plan} onChange={(e) => set("plan", e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ ...FIELD_STYLE }}>
-              {BUSINESS_PLANS.map((p) => <option key={p}>{p}</option>)}
-            </select>
-          </FormField>
-
-          <FormField label="Address" span2>
-            <input value={form.address} onChange={(e) => set("address", e.target.value)}
-              placeholder="High Street, Maidenhead SL6 1JF" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          </FormField>
-
-          <FormField label="Phone">
-            <input value={form.phone} onChange={(e) => set("phone", e.target.value)}
-              placeholder="01628 555 000" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
           </FormField>
 
           <FormField label="Website">
             <input value={form.website} onChange={(e) => set("website", e.target.value)}
-              placeholder="https://example.co.uk" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+              placeholder="https://…" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
           </FormField>
+          <FormField label="Business Email" hint="Shown publicly on the business profile.">
+            <input value={form.businessEmail} onChange={(e) => set("businessEmail", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+          <FormField label="Business Phone" hint="Shown publicly on the business profile.">
+            <input value={form.businessPhone} onChange={(e) => set("businessPhone", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+          <FormField label="Business Address" required span2>
+            <input value={form.address} onChange={(e) => set("address", e.target.value)}
+              placeholder="High Street, Maidenhead SL6 1JF" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+          </FormField>
+
+          {isFreelancer && (
+            <>
+              <FormField label="Which best describes them?" required span2>
+                <RadioGroup options={FREELANCER_KINDS} value={form.freelancerKind}
+                  onChange={(v) => setForm((f) => ({ ...f, freelancerKind: v, freelancerCategories: [] }))} />
+              </FormField>
+              {form.freelancerKind && (
+                <FormField label="Category" required span2 hint="Select up to 2">
+                  <CheckGroup options={FREELANCER_KIND_CATEGORIES[form.freelancerKind]} selected={form.freelancerCategories} onChange={(v) => set("freelancerCategories", v.slice(0, 2))} />
+                </FormField>
+              )}
+            </>
+          )}
+
+          {isHotel && (
+            <FormField label="Hotel or accommodation?" required span2>
+              <RadioGroup options={HOTEL_KINDS} value={form.hotelKind} onChange={(v) => set("hotelKind", v)} />
+            </FormField>
+          )}
+
+          {isEat && (
+            <>
+              <FormField label="Venue Type" required span2 hint="Select up to 2">
+                <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v.slice(0, 2))} />
+              </FormField>
+              <FormField label="Cuisine Type" required span2 hint="Select up to 2">
+                <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v.slice(0, 2))} />
+              </FormField>
+              <label className="flex items-center gap-3 cursor-pointer w-fit sm:col-span-2">
+                <div onClick={() => set("newToMaidenhead", !form.newToMaidenhead)}
+                  className="w-10 h-5 rounded-full transition-colors flex items-center px-0.5"
+                  style={{ backgroundColor: form.newToMaidenhead ? BLUE : "#D1D5DB" }}>
+                  <div className="w-4 h-4 rounded-full bg-white shadow transition-transform"
+                    style={{ transform: form.newToMaidenhead ? "translateX(20px)" : "translateX(0)" }} />
+                </div>
+                <span className="text-sm font-medium" style={{ color: NAVY }}>New to Maidenhead</span>
+              </label>
+            </>
+          )}
+
+          {isShop && (
+            <FormField label="Shop Category" required span2 hint="Select up to 2">
+              <CheckGroup options={SHOP_CATEGORIES} selected={form.shopCategories} onChange={(v) => set("shopCategories", v.slice(0, 2))} grouped />
+            </FormField>
+          )}
+
+          {isSeeDo && (
+            <FormField label="Category" required span2 hint="Select up to 2">
+              <CheckGroup options={SEE_DO_CATEGORIES} selected={form.seeDoCategories} onChange={(v) => set("seeDoCategories", v.slice(0, 2))} />
+            </FormField>
+          )}
         </div>
       </Section>
 
-      {/* ── Section 2: Sub-categories ── */}
-      {form.section && (
-        <Section title="Sub-categories" note="Select all that apply (multi-select)">
-          <CheckGroup
-            options={subcats}
-            selected={form.subcategories}
-            onChange={(v) => set("subcategories", v)}
-            grouped={isShop}
-          />
-          {form.subcategories.length === 0 && (
-            <p className="text-xs mt-1" style={{ color: "#DC2626" }}>Please select at least one sub-category.</p>
-          )}
-        </Section>
-      )}
-
-      {/* ── Section 3: Eat & Drink extras ── */}
-      {isEat && (
-        <Section title="Eat & Drink Options">
-          <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Cuisine Types (multi-select)</p>
-          <CheckGroup options={CUISINE_OPTIONS} selected={form.cuisines} onChange={(v) => set("cuisines", v)} />
-
-          <label className="flex items-center gap-3 mt-4 cursor-pointer w-fit">
-            <div
-              onClick={() => set("newToMaidenhead", !form.newToMaidenhead)}
-              className="w-10 h-5 rounded-full transition-colors flex items-center px-0.5"
-              style={{ backgroundColor: form.newToMaidenhead ? BLUE : "#D1D5DB" }}
-            >
-              <div className="w-4 h-4 rounded-full bg-white shadow transition-transform"
-                style={{ transform: form.newToMaidenhead ? "translateX(20px)" : "translateX(0)" }} />
-            </div>
-            <span className="text-sm font-medium" style={{ color: NAVY }}>New to Maidenhead</span>
-            <span className="text-xs" style={{ color: MUTED }}>— flags this business in the "New to Maidenhead" section</span>
-          </label>
-        </Section>
-      )}
-
-      {/* ── Section 4: Location ── */}
+      {/* ── Location ── */}
       <Section title="Location (for Map)" note="Used to pin this business on the interactive homepage map">
         <div className="grid sm:grid-cols-2 gap-4">
           <FormField label="Latitude" hint="e.g. 51.5220">
@@ -255,7 +339,7 @@ function RegisterBusinessForm({ onSave, onCancel }) {
         </div>
       </Section>
 
-      {/* ── Section 5: Logo ── */}
+      {/* ── Logo ── */}
       <Section title="Business Logo">
         <div className="flex items-center gap-4">
           {logoPreview ? (
@@ -280,54 +364,32 @@ function RegisterBusinessForm({ onSave, onCancel }) {
         </div>
       </Section>
 
-      {/* ── Section 6: Optional user ── */}
-      <Section title="User Account" note="Optional — add a user who will manage this business">
-        <label className="flex items-center gap-3 cursor-pointer w-fit mb-4">
-          <div
-            onClick={() => set("createUser", !form.createUser)}
-            className="w-10 h-5 rounded-full transition-colors flex items-center px-0.5"
-            style={{ backgroundColor: form.createUser ? BLUE : "#D1D5DB" }}
-          >
-            <div className="w-4 h-4 rounded-full bg-white shadow transition-transform"
-              style={{ transform: form.createUser ? "translateX(20px)" : "translateX(0)" }} />
-          </div>
-          <span className="text-sm font-medium" style={{ color: NAVY }}>Create a user account for this business</span>
-        </label>
-
-        {form.createUser && (
-          <div className="grid sm:grid-cols-2 gap-4 rounded-xl p-4" style={{ backgroundColor: "rgba(37,99,235,0.04)", border: `1px solid rgba(37,99,235,0.15)` }}>
-            <FormField label="Contact Name" required={form.createUser}>
-              <input value={form.contactName} onChange={(e) => set("contactName", e.target.value)}
-                placeholder="e.g. Olivia Grant" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-            </FormField>
-            <FormField label="Email" required={form.createUser}>
-              <input value={form.email} onChange={(e) => set("email", e.target.value)}
-                placeholder="owner@business.co.uk" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-            </FormField>
-            <FormField label="Role">
-              <select value={form.userRole} onChange={(e) => set("userRole", e.target.value)}
-                className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ ...FIELD_STYLE }}>
-                <option>Business Owner</option>
-                <option>Estate Agent</option>
-                <option>Manager</option>
-              </select>
-            </FormField>
-            <p className="sm:col-span-2 text-[11px] self-end" style={{ color: MUTED }}>
-              The user will be created with <strong>Pending</strong> status and must be approved separately in the Users tab.
-            </p>
-          </div>
-        )}
+      {/* ── Plan ── */}
+      <Section title="Plan">
+        <div className="grid sm:grid-cols-3 gap-3">
+          {SUBSCRIPTION_PLANS.map((p) => (
+            <button key={p.key} type="button" onClick={() => set("planKey", p.key)}
+              className="text-left rounded-2xl p-4 flex flex-col gap-1 transition-all"
+              style={form.planKey === p.key ? { border: `2px solid ${BLUE}`, backgroundColor: "rgba(37,99,235,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+              <span className="text-sm font-bold" style={{ color: NAVY }}>{p.name}</span>
+              <span className="text-base font-bold" style={{ color: NAVY }}>{p.price === 0 ? "Free" : `£${p.price}/mo`}</span>
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>Registering on the business's behalf counts as accepting the Terms of Use and Privacy Policy for them.</p>
       </Section>
+
+      {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
 
       {/* ── Footer ── */}
       <div className="flex gap-3 pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
         <button
-          onClick={() => onSave(form)}
-          disabled={!isValid || (form.createUser && (!form.contactName.trim() || !form.email.trim()))}
+          onClick={handleSubmit}
+          disabled={!isValid || saving}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40 hover:opacity-90"
           style={{ backgroundColor: BLUE }}
         >
-          Register Business
+          {saving ? "Registering…" : "Register Business"}
         </button>
         <button onClick={onCancel}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70"
@@ -565,104 +627,75 @@ function DetailSection({ title, children }) {
   );
 }
 
-function BusinessDetailModal({ biz, onClose }) {
-  const secLabel = sectionLabel(biz.section);
-  const subcatLabels = (biz.subcategories ?? []).map((v) => {
-    const all = Object.values(SUBCATEGORIES).flat();
-    return all.find((o) => o.value === v)?.label ?? v;
-  });
-  const social = Object.entries(biz.social ?? {}).filter(([, v]) => v);
-  const hoursLines = Array.isArray(biz.hours)
-    ? biz.hours.filter((h) => h.open).map((h) => `${h.day} ${h.from}–${h.to}`)
-    : [];
+// Mirrors exactly the 4 data-bearing steps of the business's own signup form
+// (business-dashboard's SignUpPage.jsx: Your Details / Business Details /
+// Plan / Terms — Review adds no new fields) so what admin sees here is
+// provably the same information the business submitted, not a different set.
+function typeSpecificRows(biz) {
+  switch (biz.section) {
+    case "freelancer":
+      return (
+        <>
+          <DetailRow label="Which best describes you" value={labelFor(FREELANCER_KINDS, biz.freelancerKind)} />
+          {biz.freelancerKind && (
+            <DetailRow label="Category" value={(biz.freelancerCategories ?? []).map((v) => labelFor(FREELANCER_KIND_CATEGORIES[biz.freelancerKind] ?? [], v))} />
+          )}
+        </>
+      );
+    case "hotel":
+      return <DetailRow label="Hotel or Accommodation" value={labelFor(HOTEL_KINDS, biz.hotelKind)} />;
+    case "eat-drink":
+      return (
+        <>
+          <DetailRow label="Venue Type" value={(biz.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v))} />
+          <DetailRow label="Cuisine Type" value={(biz.cuisineTypes ?? []).map((v) => labelFor(CUISINE_TYPES, v))} />
+        </>
+      );
+    case "shop":
+      return <DetailRow label="Shop Category" value={(biz.subcategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v))} />;
+    case "see-do":
+      return <DetailRow label="Category" value={(biz.subcategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v))} />;
+    default:
+      return null;
+  }
+}
 
+function BusinessDetailModal({ biz, onClose }) {
+  const plan = SUBSCRIPTION_PLANS.find((p) => p.name.toLowerCase() === (biz.plan ?? "").toLowerCase());
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
-      <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto flex flex-col gap-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-xl w-full max-h-[85vh] overflow-y-auto flex flex-col gap-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
         <div className="flex items-start justify-between mb-3">
           <div>
             <p className="text-lg font-bold" style={{ color: NAVY }}>{biz.name}</p>
-            <p className="text-xs mt-0.5" style={{ color: MUTED }}>Everything submitted when this business was registered.</p>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>Everything submitted at registration — same as the business's own 5-step signup form.</p>
           </div>
           <button onClick={onClose} className="opacity-40 hover:opacity-70 text-xl leading-none" style={{ color: NAVY }}>✕</button>
         </div>
 
-        {biz.heroImage && <img src={biz.heroImage} alt="" className="w-full h-40 object-cover rounded-xl mb-4" />}
-
-        <DetailSection title="Business">
-          <DetailRow label="Name" value={biz.name} />
-          <DetailRow label="Tagline" value={biz.tagline} />
-          <DetailRow label="Description" value={biz.description} />
-          <DetailRow label="Section" value={secLabel} />
-          <DetailRow label="Categories" value={subcatLabels} />
-          <DetailRow label="Cuisines" value={biz.cuisines} />
-          <DetailRow label="Freelancer Type" value={biz.freelancerKind} />
-          <DetailRow label="Freelancer Category" value={biz.freelancerCategories} />
-          <DetailRow label="Accommodation Type" value={biz.hotelKind} />
-          <DetailRow label="Venue Type" value={biz.venueTypes} />
-          <DetailRow label="Star Rating" value={biz.starRating} />
-          <DetailRow label="New to Maidenhead" value={biz.newToMaidenhead ? "Yes" : null} />
-          <DetailRow label="Plan" value={biz.plan} />
-        </DetailSection>
-
-        <DetailSection title="Contact">
-          <DetailRow label="Owner" value={biz.contactName} />
+        <DetailSection title="Your Details (Owner)">
+          <DetailRow label="Name" value={[biz.firstName, biz.lastName].filter(Boolean).join(" ")} />
           <DetailRow label="Login Email" value={biz.userEmail} />
-          <DetailRow label="Business Email" value={biz.businessEmail} />
-          <DetailRow label="Phone" value={biz.phone} />
+          <DetailRow label="Phone" value={biz.ownerPhone} />
+        </DetailSection>
+
+        <DetailSection title="Business Details">
+          <DetailRow label="Business Name" value={biz.name} />
+          <DetailRow label="Business Type" value={labelFor(BUSINESS_TYPES, biz.section)} />
+          {typeSpecificRows(biz)}
           <DetailRow label="Website" value={biz.website} />
-          <DetailRow label="Booking URL" value={biz.bookingUrl} />
-          {social.map(([k, v]) => <DetailRow key={k} label={k[0].toUpperCase() + k.slice(1)} value={v} />)}
-        </DetailSection>
-
-        <DetailSection title="Location">
+          <DetailRow label="Business Email" value={biz.businessEmail} />
+          <DetailRow label="Business Phone" value={biz.businessPhone} />
           <DetailRow label="Address" value={biz.address} />
-          <DetailRow label="Postcode" value={biz.postalCode} />
-          <DetailRow label="Coordinates" value={biz.lat && biz.lng ? `${biz.lat}, ${biz.lng}` : null} />
+          <DetailRow label="New to Maidenhead" value={biz.newToMaidenhead ? "Yes" : null} />
         </DetailSection>
 
-        <DetailSection title="Opening Hours">
-          <DetailRow label="Hours" value={hoursLines} />
-          <DetailRow label="Availability" value={biz.availabilityInfo} />
-          <DetailRow label="Availability Tag" value={biz.availabilityTag} />
+        <DetailSection title="Plan">
+          <DetailRow label="Selected Plan" value={plan ? `${plan.name} — ${plan.price === 0 ? "Free" : `£${plan.price}/mo`}` : biz.plan} />
         </DetailSection>
 
-        {/* Services-type businesses (Tradespeople / Professionals) */}
-        <DetailSection title="Services">
-          <DetailRow label="Services" value={biz.servicesList} />
-          <DetailRow label="Areas Covered" value={biz.areasCoveredList} />
-          <DetailRow label="Why Choose Us" value={biz.whyChooseUs} />
-          <DetailRow label="Stats" value={biz.stats} />
-        </DetailSection>
-
-        {/* Freelancers */}
-        <DetailSection title="Freelance Profile">
-          <DetailRow label="Working With Me" value={biz.workingWithMe} />
-          <DetailRow label="Skills" value={biz.skills} />
-          <DetailRow label="Portfolio Items" value={biz.portfolio?.length} />
-        </DetailSection>
-
-        {/* Live & Stay */}
-        <DetailSection title="Amenities">
-          <DetailRow label="Amenities" value={biz.amenities} />
-          <DetailRow label="Other Amenities" value={biz.otherAmenities} />
-        </DetailSection>
-
-        <DetailSection title="Gallery">
-          {biz.gallery?.length > 0 && (
-            <div className="flex gap-2 flex-wrap mt-1">
-              {biz.gallery.map((src, i) => <img key={i} src={src} alt="" className="w-16 h-16 rounded-lg object-cover" style={{ border: `1px solid ${BORDER}` }} />)}
-            </div>
-          )}
-        </DetailSection>
-
-        <DetailSection title="FAQs">
-          {(biz.faqs ?? []).map((f, i) => (
-            <div key={i} className="py-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
-              <p className="text-sm font-semibold" style={{ color: NAVY }}>{f.question ?? f.q}</p>
-              <p className="text-xs mt-0.5" style={{ color: MUTED }}>{f.answer ?? f.a}</p>
-            </div>
-          ))}
+        <DetailSection title="Terms">
+          <DetailRow label="Terms & Privacy" value={biz.termsAcceptedAt ? `Agreed ${new Date(biz.termsAcceptedAt).toLocaleDateString("en-GB")}` : "Not recorded"} />
         </DetailSection>
 
         <div className="flex justify-end pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
@@ -704,10 +737,11 @@ function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
 function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent }) {
   const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section);
-  const subcatLabels = (biz.subcategories ?? []).map((v) => {
-    const all = Object.values(SUBCATEGORIES).flat();
-    return all.find((o) => o.value === v)?.label ?? v;
-  });
+  // Shop and See & Do store their picks straight in `subcategories`; the
+  // taxonomy to label them against depends on which section this is, using
+  // the same option lists the real signup form's Business Details step uses.
+  const subcatOptions = biz.section === "shop" ? SHOP_CATEGORIES : biz.section === "see-do" ? SEE_DO_CATEGORIES : [];
+  const subcatLabels = (biz.subcategories ?? []).map((v) => labelFor(subcatOptions, v));
 
   const isActive   = pendingAction?.id === biz.id;
   const actionType = isActive ? pendingAction.type : null;
@@ -787,20 +821,21 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           <div className="grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-xs" style={{ color: MUTED }}>
             {biz.contactName && <span>👤 {biz.contactName} (owner)</span>}
             {biz.userEmail    && <span>✉️ {biz.userEmail} (login)</span>}
+            {biz.ownerPhone   && <span>📞 {biz.ownerPhone} (owner)</span>}
             {biz.businessEmail && biz.businessEmail !== biz.userEmail && <span>✉️ {biz.businessEmail} (business)</span>}
-            {biz.phone      && <span>📞 {biz.phone}</span>}
-            {biz.address    && <span className="truncate">📍 {biz.address}{biz.postalCode ? `, ${biz.postalCode}` : ""}</span>}
+            {biz.businessPhone && biz.businessPhone !== biz.ownerPhone && <span>📞 {biz.businessPhone} (business)</span>}
+            {biz.address    && <span className="truncate">📍 {biz.address}</span>}
             {biz.website    && <span className="truncate">🔗 {biz.website}</span>}
-            {biz.lat && biz.lng && <span>🗺 {Number(biz.lat).toFixed(4)}, {Number(biz.lng).toFixed(4)}</span>}
           </div>
-          {/* Sub-category detail collected at signup — freelancer/hotel kind
-              and the venue/shop/see-do picks the section-specific step asks for. */}
-          {(biz.freelancerKind || biz.hotelKind || biz.venueTypes?.length || biz.freelancerCategories?.length) && (
+          {/* Type-specific picks the signup form's Business Details step
+              branches into — same taxonomy/labels as the real signup form. */}
+          {(biz.freelancerKind || biz.hotelKind || biz.venueTypes?.length || biz.cuisineTypes?.length) && (
             <p className="text-xs mt-1" style={{ color: MUTED }}>
-              {biz.freelancerKind && <>Freelancer type: <span style={{ color: NAVY }}>{biz.freelancerKind}</span></>}
-              {biz.freelancerCategories?.length > 0 && <> · {biz.freelancerCategories.join(", ")}</>}
-              {biz.hotelKind && <>Accommodation type: <span style={{ color: NAVY }}>{biz.hotelKind}</span></>}
-              {biz.venueTypes?.length > 0 && <> · Venue: {biz.venueTypes.join(", ")}</>}
+              {biz.freelancerKind && <>{labelFor(FREELANCER_KINDS, biz.freelancerKind)}<span style={{ color: NAVY }}></span></>}
+              {biz.freelancerCategories?.length > 0 && <> · {biz.freelancerCategories.map((v) => labelFor(FREELANCER_KIND_CATEGORIES[biz.freelancerKind] ?? [], v)).join(", ")}</>}
+              {biz.hotelKind && <>{labelFor(HOTEL_KINDS, biz.hotelKind)}</>}
+              {biz.venueTypes?.length > 0 && <> · {biz.venueTypes.map((v) => labelFor(VENUE_TYPES, v)).join(", ")}</>}
+              {biz.cuisineTypes?.length > 0 && <> · {biz.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")}</>}
             </p>
           )}
           <p className="text-[11px] mt-1.5" style={{ color: "#9CA3AF" }}>Submitted {biz.submitted}</p>
@@ -930,7 +965,7 @@ export default function BusinessesPage() {
   function patch(id, changes) { setLocal((prev) => (prev ?? fetched ?? []).map((b) => b.id === id ? { ...b, ...changes } : b)); }
 
   function handleRegister(form) {
-    registerBusiness(form).then((saved) => {
+    return registerBusiness(form).then((saved) => {
       setLocal((prev) => [saved, ...(prev ?? fetched ?? [])]);
       // Keep the panel open, but swap the form for the success state so
       // admin can jump straight into adding content — or defer it.
