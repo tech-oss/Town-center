@@ -555,6 +555,7 @@ function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
 }
 
 function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent }) {
+  const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section);
   const subcatLabels = (biz.subcategories ?? []).map((v) => {
     const all = Object.values(SUBCATEGORIES).flat();
@@ -676,6 +677,9 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
 
           <BizBtn color={BLUE} disabled={isBusy} onClick={() => onAddContent(biz)}>
             {biz.hasContent ? "Edit Content" : "Add Content"}
+          </BizBtn>
+          <BizBtn color={NAVY} disabled={isBusy} onClick={() => navigate(`/admin/business-analytics/${biz.id}`)}>
+            View Analytics
           </BizBtn>
 
           {/* Delete */}
