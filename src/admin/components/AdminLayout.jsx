@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
+import useAdminAuth from "../hooks/useAdminAuth";
 
 // ─── Brass SVG line icons ─────────────────────────────────────────────────────
 const I = {
@@ -40,6 +41,7 @@ const NAV = [
     ],
   },
   { to: "/admin/events-news",        label: "Events",                icon: I.events },
+  { to: "/admin/event-approvals",    label: "Event Approvals",       icon: I.events },
   { to: "/admin/properties",         label: "Properties",            icon: I.properties },
   { to: "/admin/projects",           label: "Explore (Projects)",    icon: I.projects },
   { to: "/admin/subscriptions",      label: "Subscriptions",         icon: I.subscriptions },
@@ -104,6 +106,7 @@ function NavGroup({ item, closeSidebar }) {
 // ─── AdminLayout ──────────────────────────────────────────────────────────────
 export default function AdminLayout({ pendingCount = 0 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { admin, logout } = useAdminAuth();
 
   return (
     <div className="admin-root min-h-screen flex" style={{ backgroundColor: "#F5F7FB", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
@@ -188,8 +191,12 @@ export default function AdminLayout({ pendingCount = 0 }) {
           <div className="flex-1" />
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ backgroundColor: BRASS, color: "#fff", fontFamily: CINZEL }}>A</div>
-            <span className="text-sm font-medium hidden sm:block" style={{ color: NAVY, fontFamily: CINZEL }}>Admin</span>
+              style={{ backgroundColor: BRASS, color: "#fff", fontFamily: CINZEL }}>
+              {(admin?.name ?? "Admin").charAt(0).toUpperCase()}
+            </div>
+            <span className="text-sm font-medium hidden sm:block" style={{ color: NAVY, fontFamily: CINZEL }}>{admin?.name ?? "Admin"}</span>
+            <button onClick={logout} className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-70"
+              style={{ border: "1.5px solid rgba(16,24,40,0.12)", color: NAVY }}>Sign Out</button>
           </div>
         </header>
 

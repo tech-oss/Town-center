@@ -9,6 +9,7 @@ export * from "./liveStay";
 export * from "./adminProperties";
 export * from "./projects";
 export * from "./adminEvents";
+export * from "./eventApprovals";
 export * from "./subscriptions";
 export * from "./reporting";
 export * from "./settings";

@@ -1,5 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "./components/AdminLayout";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import useAdminAuth from "./hooks/useAdminAuth";
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import UserDetailPage from "./pages/UserDetailPage";
@@ -11,6 +13,7 @@ import BusinessContentPage from "./pages/BusinessContentPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import EventsNewsPage from "./pages/EventsNewsPage";
+import EventApprovalsPage from "./pages/EventApprovalsPage";
 import SubscriptionsPage, { SubscriptionDetailPage } from "./pages/SubscriptionsPage";
 import SubscriptionDocumentsPage from "./pages/SubscriptionDocumentsPage";
 import ReportingPage from "./pages/ReportingPage";
@@ -29,8 +32,14 @@ import useFetch from "../hooks/useFetch";
 import { getApprovals } from "../api/admin";
 
 export default function AdminApp() {
+  const { isLoggedIn, restored } = useAdminAuth();
   const { data: pending } = useFetch(() => getApprovals({ status: "Pending" }), []);
   const pendingCount = pending?.length ?? 0;
+
+  // Hold rendering until the initial Supabase getSession() resolves, otherwise
+  // a signed-in admin flashes the login screen on every page load.
+  if (!restored) return null;
+  if (!isLoggedIn) return <AdminLoginPage />;
 
   return (
     <Routes>
@@ -46,6 +55,7 @@ export default function AdminApp() {
         <Route path="properties" element={<PropertiesPage />} />
         <Route path="projects" element={<ProjectsPage />} />
         <Route path="events-news" element={<EventsNewsPage />} />
+        <Route path="event-approvals" element={<EventApprovalsPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="subscriptions/:id/documents" element={<SubscriptionDocumentsPage />} />
