@@ -7,7 +7,11 @@
 -- an admin can write. Business-submitted content keeps its existing tables and
 -- its own approval flow.
 --
--- DRAFT — NOT RUN YET. Review before applying.
+-- Safe to re-run: every statement is guarded (create ... if not exists, and
+-- drop policy if exists before each create policy). The SQL Editor runs a file
+-- as a single transaction, so one "policy already exists" error rolls back the
+-- whole thing — hence the guards.
+--
 -- Depends on admin_users.sql having been run (public.is_admin()).
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -298,26 +302,48 @@ alter table public.site_content         enable row level security;
 alter table public.push_notifications   enable row level security;
 alter table public.platform_settings    enable row level security;
 
-create policy "public reads published site_events"          on public.site_events          for select using (status = 'Published');
-create policy "public reads published site_news"            on public.site_news            for select using (status = 'Published');
-create policy "public reads live properties"                on public.properties           for select using (status in ('Approved', 'Auto-published'));
-create policy "public reads published projects"             on public.projects             for select using (published);
-create policy "public reads published news_offers"          on public.news_offers          for select using (status = 'Published');
-create policy "public reads published featured_stories"     on public.featured_stories     for select using (status = 'Published');
-create policy "public reads published articles"             on public.articles             for select using (status = 'Published');
-create policy "public reads published guides"               on public.neighbourhood_guides for select using (status = 'Published');
-create policy "public reads site_content"                   on public.site_content         for select using (true);
-create policy "public reads platform_settings"              on public.platform_settings    for select using (true);
+drop policy if exists "public reads published site_events" on public.site_events;
+create policy "public reads published site_events" on public.site_events          for select using (status = 'Published');
+drop policy if exists "public reads published site_news" on public.site_news;
+create policy "public reads published site_news" on public.site_news            for select using (status = 'Published');
+drop policy if exists "public reads live properties" on public.properties;
+create policy "public reads live properties" on public.properties           for select using (status in ('Approved', 'Auto-published'));
+drop policy if exists "public reads published projects" on public.projects;
+create policy "public reads published projects" on public.projects             for select using (published);
+drop policy if exists "public reads published news_offers" on public.news_offers;
+create policy "public reads published news_offers" on public.news_offers          for select using (status = 'Published');
+drop policy if exists "public reads published featured_stories" on public.featured_stories;
+create policy "public reads published featured_stories" on public.featured_stories     for select using (status = 'Published');
+drop policy if exists "public reads published articles" on public.articles;
+create policy "public reads published articles" on public.articles             for select using (status = 'Published');
+drop policy if exists "public reads published guides" on public.neighbourhood_guides;
+create policy "public reads published guides" on public.neighbourhood_guides for select using (status = 'Published');
+drop policy if exists "public reads site_content" on public.site_content;
+create policy "public reads site_content" on public.site_content         for select using (true);
+drop policy if exists "public reads platform_settings" on public.platform_settings;
+create policy "public reads platform_settings" on public.platform_settings    for select using (true);
 
-create policy "admins manage site_events"          on public.site_events          for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage site_news"            on public.site_news            for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage property_feeds"       on public.property_feeds       for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage properties"           on public.properties           for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage projects"             on public.projects             for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage news_offers"          on public.news_offers          for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage featured_stories"     on public.featured_stories     for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage articles"             on public.articles             for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage guides"               on public.neighbourhood_guides for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage site_content"         on public.site_content         for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage push_notifications"   on public.push_notifications   for all using (public.is_admin()) with check (public.is_admin());
-create policy "admins manage platform_settings"    on public.platform_settings    for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage site_events" on public.site_events;
+create policy "admins manage site_events" on public.site_events          for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage site_news" on public.site_news;
+create policy "admins manage site_news" on public.site_news            for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage property_feeds" on public.property_feeds;
+create policy "admins manage property_feeds" on public.property_feeds       for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage properties" on public.properties;
+create policy "admins manage properties" on public.properties           for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage projects" on public.projects;
+create policy "admins manage projects" on public.projects             for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage news_offers" on public.news_offers;
+create policy "admins manage news_offers" on public.news_offers          for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage featured_stories" on public.featured_stories;
+create policy "admins manage featured_stories" on public.featured_stories     for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage articles" on public.articles;
+create policy "admins manage articles" on public.articles             for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage guides" on public.neighbourhood_guides;
+create policy "admins manage guides" on public.neighbourhood_guides for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage site_content" on public.site_content;
+create policy "admins manage site_content" on public.site_content         for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage push_notifications" on public.push_notifications;
+create policy "admins manage push_notifications" on public.push_notifications   for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admins manage platform_settings" on public.platform_settings;
+create policy "admins manage platform_settings" on public.platform_settings    for all using (public.is_admin()) with check (public.is_admin());
