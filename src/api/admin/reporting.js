@@ -179,23 +179,51 @@ function dayBuckets(days) {
   return out;
 }
 
+// Dashboard's RevenueChart wants { data, total, change } — not the bare
+// day-array — so the big total figure and the "vs previous period" line above
+// the chart have something to render from.
 export async function getRevenueTrend({ days = 30 } = {}) {
   const payments = await loadPayments();
-  return dayBuckets(days).map(({ key, date }) => ({
+  const buckets = dayBuckets(days);
+  const data = buckets.map(({ key, date }) => ({
     date,
     revenue: payments
       .filter((p) => String(p.paid_at ?? p.created_at ?? "").slice(0, 10) === key)
       .reduce((sum, p) => sum + Number(p.amount ?? 0), 0),
   }));
+  const total = data.reduce((s, d) => s + d.revenue, 0);
+
+  // Previous period of equal length, for the "+N% on previous X days" line.
+  const prevStart = new Date();
+  prevStart.setDate(prevStart.getDate() - days * 2);
+  const prevEnd = new Date();
+  prevEnd.setDate(prevEnd.getDate() - days);
+  const prevTotal = payments
+    .filter((p) => {
+      const d = new Date(p.paid_at ?? p.created_at ?? 0);
+      return d >= prevStart && d < prevEnd;
+    })
+    .reduce((sum, p) => sum + Number(p.amount ?? 0), 0);
+  const change = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 1000) / 10 : 0;
+
+  return { data, total, change };
 }
 
+// Dashboard's Platform Overview chart plots cumulative sign-ups per plan tier
+// as separate lines (PLAN_KEYS in DashboardPage.jsx), not a single daily count.
 export async function getSignupTrend({ days = 30 } = {}) {
-  const { data, error } = await supabase.from("business_users").select("requested_at");
-  if (error) throw error;
-  return dayBuckets(days).map(({ key, date }) => ({
-    date,
-    signups: (data ?? []).filter((u) => String(u.requested_at ?? "").slice(0, 10) === key).length,
-  }));
+  const subs = await loadSubscriptions();
+  return dayBuckets(days).map(({ key, date }) => {
+    const row = { date };
+    for (const tier of ["Free", "Basic", "Standard", "Premium", "Agent"]) row[tier] = 0;
+    for (const s of subs) {
+      const started = String(s.terms_accepted_at ?? "").slice(0, 10);
+      if (!started || started > key) continue;
+      const t = label(s.plan);
+      if (row[t] !== undefined) row[t] += 1;
+    }
+    return row;
+  });
 }
 
 // ─── Breakdowns ────────────────────────────────────────────────────────────

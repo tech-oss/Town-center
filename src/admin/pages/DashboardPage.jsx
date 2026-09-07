@@ -8,6 +8,7 @@ import useFetch from "../../hooks/useFetch";
 import {
   getReportingSummary, getApprovals, getBusinesses, getUsers,
   getRevenueTrend, getSignupTrend, getPlanDistribution, getTopCategories,
+  getBusinessStats,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import InfoTip from "../components/InfoTip";
@@ -28,10 +29,11 @@ const PIE_COLOURS  = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
 const CAT_COLOURS_LIST = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#06B6D4"];
 // Platform Overview line colours (one per plan tier)
 const PLAN_COLOURS_MAP = {
-  Free:    "#2563EB",   // blue
-  "Plan 1": "#10B981",  // emerald
-  "Plan 2": "#F59E0B",  // amber
-  "Plan 3": "#8B5CF6",  // purple
+  Free:     "#2563EB",  // blue
+  Basic:    "#10B981",  // emerald
+  Standard: "#F59E0B",  // amber
+  Premium:  "#8B5CF6",  // purple
+  Agent:    "#EF4444",  // red
 };
 // kept for any remaining references
 const PASTELS = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
@@ -80,6 +82,37 @@ function StatCard({ icon, label, value, sub, pending, to }) {
     </div>
   );
   return to ? <Link to={to} className="block h-full">{inner}</Link> : inner;
+}
+
+// ─── Business profile breakdown ────────────────────────────────────────────────
+// "Claimed" isn't stored — see getBusinessStats in api/admin/businesses.js —
+// it's a business with an approved owner account attached. An admin-registered
+// listing with nobody signed in against it yet is unclaimed.
+function BusinessBreakdownCard({ stats }) {
+  const s = stats ?? {};
+  const rows = [
+    { label: "Total Business Profiles", value: s.total ?? 0, to: "/admin/businesses" },
+    { label: "Free", value: s.free ?? 0 },
+    { label: "Paid", value: s.paid ?? 0 },
+    { label: "Claimed", value: s.claimed ?? 0 },
+    { label: "Unclaimed", value: s.unclaimed ?? 0 },
+  ];
+  return (
+    <div className="bg-white rounded-xl p-5 h-full" style={CARD}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-semibold text-sm" style={{ color: NAVY, fontFamily: CINZEL }}>Business Profiles</h2>
+        <InfoTip text="Claimed means the business has an approved owner account signed in against it. Admin-registered listings with nobody signed in yet count as unclaimed." />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {rows.map((r) => (
+          <div key={r.label} className="flex flex-col gap-1">
+            <span className="text-2xl font-bold" style={{ color: NAVY }}>{r.value}</span>
+            <span className="text-[11px] font-medium" style={{ color: MUTED }}>{r.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ─── Period selector ──────────────────────────────────────────────────────────
@@ -215,7 +248,7 @@ function PlanDistributionChart() {
 
 // ─── Platform overview ────────────────────────────────────────────────────────
 const PLAN_COLOURS = PLAN_COLOURS_MAP;
-const PLAN_KEYS = ["Free", "Plan 1", "Plan 2", "Plan 3"];
+const PLAN_KEYS = ["Free", "Basic", "Standard", "Premium", "Agent"];
 
 function SignupTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -243,7 +276,7 @@ function SignupChart() {
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap gap-y-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Platform Overview</h2>
-          <InfoTip text="Cumulative business sign-ups over the selected period, with a separate line for each plan tier — Free, Plan 1, Plan 2 and Plan 3 — so you can compare growth across tiers." />
+          <InfoTip text="Cumulative business sign-ups over the selected period, with a separate line for each plan tier — Free, Basic, Standard, Premium and Agent — so you can compare growth across tiers." />
         </div>
         <PeriodSelector days={days} setDays={setDays} />
       </div>
@@ -341,6 +374,7 @@ export default function DashboardPage() {
   const { data: approvals }        = useFetch(() => getApprovals({ status: "Pending" }), []);
   const { data: pendingBusinesses } = useFetch(() => getBusinesses({ status: "Pending" }), []);
   const { data: pendingUsers }     = useFetch(() => getUsers({ status: "Pending" }), []);
+  const { data: bizStats }         = useFetch(getBusinessStats, []);
 
   if (loadingSummary) return <LoadingState />;
   const s = summary ?? {};
@@ -368,6 +402,8 @@ export default function DashboardPage() {
         <StatCard icon={Icons.business}      label="Business Approvals"   value={pendingBusinesses?.length ?? 0}        pending to="/admin/businesses" />
         <StatCard icon={Icons.user}          label="User Approvals"       value={pendingUsers?.length ?? 0}             pending to="/admin/users" />
       </div>
+
+      <BusinessBreakdownCard stats={bizStats} />
 
       {/* ── Revenue + Plan distribution ── */}
       <div className="grid lg:grid-cols-[3fr_2fr] gap-6 items-stretch">

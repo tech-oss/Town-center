@@ -17,6 +17,7 @@ const TABS = [
 const COLUMNS = [
   { label: "Name",     key: "name" },
   { label: "Email",    key: "email" },
+  { label: "Phone",    key: "phone" },
   { label: "Business", key: "business" },
   { label: "Role",     key: "role" },
   { label: "Tier",     key: "tier" },
@@ -26,9 +27,9 @@ const COLUMNS = [
 ];
 
 function exportCsv(rows) {
-  const headers = ["Name", "Email", "Business", "Role", "Tier", "Status", "Joined"];
+  const headers = ["Name", "Email", "Phone", "Business", "Role", "Tier", "Status", "Joined"];
   const esc = (v) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-  const lines = [headers.join(","), ...rows.map((u) => [u.name, u.email, u.business, u.role, u.tier ?? "", u.status, u.joined].map(esc).join(","))];
+  const lines = [headers.join(","), ...rows.map((u) => [u.name, u.email, u.phone ?? "", u.business, u.role, u.tier ?? "", u.status, u.joined].map(esc).join(","))];
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement("a"), { href: url, download: `users-${new Date().toISOString().slice(0, 10)}.csv` });
@@ -370,6 +371,7 @@ export default function UsersPage() {
                     >
                       <td className="px-4 py-3 font-medium" style={{ color: NAVY }}>{u.name}</td>
                       <td className="px-4 py-3" style={{ color: MUTED }}>{u.email}</td>
+                      <td className="px-4 py-3" style={{ color: MUTED }}>{u.phone || "—"}</td>
                       <td className="px-4 py-3" style={{ color: NAVY }}>{u.business ?? "—"}</td>
                       <td className="px-4 py-3" style={{ color: MUTED }}>{u.role}</td>
                       <td className="px-4 py-3" style={{ color: MUTED }}>{u.tier ?? "—"}</td>

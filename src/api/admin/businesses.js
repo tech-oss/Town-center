@@ -147,6 +147,15 @@ function fromRow(row) {
       ? listing.subcategory
       : (listing.subcategory ? [listing.subcategory] : []),
     cuisines: detail.cuisineTypes ?? [],
+    // Sub-choices collected at signup that the admin screen never surfaced:
+    // which kind of freelancer/tradesperson/professional, which kind of
+    // accommodation, and the venue/shop/see-do category picks.
+    freelancerKind: detail.freelancerKind ?? "",
+    freelancerCategories: detail.freelancerCategories ?? [],
+    hotelKind: detail.hotelKind ?? "",
+    venueTypes: detail.venueTypes ?? [],
+    shopCategories: detail.shopCategories ?? [],
+    seeDoCategories: detail.seeDoCategories ?? [],
     address: listing.address ?? "",
     phone: listing.phone ?? "",
     website: listing.website ?? "",
@@ -277,4 +286,35 @@ export async function deleteBusiness(id) {
   if (error) throw error;
   addLog("Business Deleted", { id, name: biz?.name ?? id }, "Business listing permanently removed by admin");
   return { ok: true };
+}
+
+// ─── Dashboard stats ────────────────────────────────────────────────────────
+// "Claimed" isn't a stored flag — a business is claimed the moment an owner
+// signs up and is approved against it (an admin-registered business starts
+// with no business_users row at all, which is exactly "unclaimed"). Computed
+// here rather than stored, so it can never drift out of sync with reality.
+export async function getBusinessStats() {
+  const [bizRes, subsRes, ownersRes] = await Promise.all([
+    supabase.from("businesses").select("id"),
+    supabase.from("business_subscriptions").select("business_id, plan, monthly_fee"),
+    supabase.from("business_users").select("business_id").eq("role", "Owner").eq("status", "approved"),
+  ]);
+  if (bizRes.error) throw bizRes.error;
+  if (subsRes.error) throw subsRes.error;
+  if (ownersRes.error) throw ownersRes.error;
+
+  const claimedIds = new Set((ownersRes.data ?? []).map((r) => r.business_id));
+  const paidByBusiness = new Map((subsRes.data ?? []).map((s) => [s.business_id, Number(s.monthly_fee ?? 0) > 0]));
+
+  const total = (bizRes.data ?? []).length;
+  const claimed = (bizRes.data ?? []).filter((b) => claimedIds.has(b.id)).length;
+  const paid = [...paidByBusiness.values()].filter(Boolean).length;
+
+  return {
+    total,
+    claimed,
+    unclaimed: total - claimed,
+    paid,
+    free: total - paid,
+  };
 }

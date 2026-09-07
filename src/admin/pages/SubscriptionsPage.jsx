@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute } from "../../api/admin";
+import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess } from "../../api/admin";
 import {
   TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS, SUBSCRIPTION_PAYMENT_METHODS,
   SUBSCRIPTION_BILLING_HISTORY, resolveTierFeatures,
@@ -89,6 +89,9 @@ export function SubscriptionDetailPage() {
   function handleGrantTrial() {
     // TODO: call Stripe API on backend integration
     grantTrial(id).then((r) => { setMessage(r.message); notify("30-day trial granted."); });
+  }
+  function handleGrantFullAccess() {
+    grantFullAccess(id).then(() => { setMessage("Full access granted — every paid feature is unlocked at no charge."); notify("Full access granted."); });
   }
   function handleResolve() { resolveDispute(id).then((r) => setMessage(r.message)); }
   function handleApplyTier() {
@@ -256,6 +259,7 @@ export function SubscriptionDetailPage() {
 
         <div className="flex gap-3 flex-wrap pt-3" style={{ borderTop: "1px solid rgba(16,24,40,0.08)" }}>
           <button onClick={handleGrantTrial} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>Grant Trial</button>
+          <button onClick={handleGrantFullAccess} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#2563EB", border: "1.5px solid rgba(37,99,235,0.3)" }}>Grant Full Access (No Charge)</button>
           <button onClick={() => setConfirmCancel(true)} disabled={cancelled}
             className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40" style={{ backgroundColor: "#DC2626" }}>
             Cancel Subscription
@@ -296,6 +300,17 @@ export function SubscriptionDetailPage() {
   );
 }
 
+function exportCsv(rows) {
+  const headers = ["Business", "Owner", "Tier", "Status", "Start Date", "Renewal", "Monthly Fee", "Payment Status"];
+  const esc = (v) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const lines = [headers.join(","), ...rows.map((s) =>
+    [s.business, s.owner, s.tier, s.status, s.startDate, s.renewal, s.monthlyFee, s.paymentStatus].map(esc).join(","))];
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: `subscriptions-${new Date().toISOString().slice(0, 10)}.csv` });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
 export default function SubscriptionsPage() {
   const navigate = useNavigate();
   const { data: subs, loading } = useFetch(getSubscriptions, []);
@@ -315,9 +330,18 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl">
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Subscriptions & Billing</h1>
-        <p className="text-sm mt-1" style={{ color: "#6B7280" }}>All business subscription accounts and payment statuses.</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Subscriptions & Billing</h1>
+          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>All business subscription accounts and payment statuses.</p>
+        </div>
+        {subs?.length > 0 && (
+          <button onClick={() => exportCsv(subs)}
+            className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 shrink-0"
+            style={{ border: "1.5px solid rgba(16,24,40,0.12)", color: "#1E293B" }}>
+            Export CSV
+          </button>
+        )}
       </div>
       {loading ? <LoadingState /> : (
         <DataTable

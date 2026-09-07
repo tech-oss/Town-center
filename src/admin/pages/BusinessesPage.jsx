@@ -16,6 +16,17 @@ import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
 const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected"];
 
+function exportCsv(rows) {
+  const headers = ["Name", "Section", "Plan", "Status", "Contact Name", "Email", "Phone", "Address", "Submitted"];
+  const esc = (v) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const lines = [headers.join(","), ...rows.map((b) =>
+    [b.name, b.section, b.plan, b.status, b.contactName, b.email, b.phone, b.address, b.submitted].map(esc).join(","))];
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: `businesses-${new Date().toISOString().slice(0, 10)}.csv` });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ message, onDismiss }) {
   if (!message) return null;
@@ -629,8 +640,19 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
             {biz.email      && <span>✉️ {biz.email}</span>}
             {biz.phone      && <span>📞 {biz.phone}</span>}
             {biz.address    && <span className="truncate">📍 {biz.address}</span>}
+            {biz.website    && <span className="truncate">🔗 {biz.website}</span>}
             {biz.lat && biz.lng && <span>🗺 {Number(biz.lat).toFixed(4)}, {Number(biz.lng).toFixed(4)}</span>}
           </div>
+          {/* Sub-category detail collected at signup — freelancer/hotel kind
+              and the venue/shop/see-do picks the section-specific step asks for. */}
+          {(biz.freelancerKind || biz.hotelKind || biz.venueTypes?.length || biz.freelancerCategories?.length) && (
+            <p className="text-xs mt-1" style={{ color: MUTED }}>
+              {biz.freelancerKind && <>Freelancer type: <span style={{ color: NAVY }}>{biz.freelancerKind}</span></>}
+              {biz.freelancerCategories?.length > 0 && <> · {biz.freelancerCategories.join(", ")}</>}
+              {biz.hotelKind && <>Accommodation type: <span style={{ color: NAVY }}>{biz.hotelKind}</span></>}
+              {biz.venueTypes?.length > 0 && <> · Venue: {biz.venueTypes.join(", ")}</>}
+            </p>
+          )}
           <p className="text-[11px] mt-1.5" style={{ color: "#9CA3AF" }}>Submitted {biz.submitted}</p>
         </div>
 
@@ -855,11 +877,18 @@ export default function BusinessesPage() {
           <p className="text-sm mt-1" style={{ color: MUTED }}>Register businesses across Eat & Drink, See & Do, Shop and Live sections.</p>
         </div>
         {!showForm && (
-          <button onClick={() => setShowForm(true)}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 shrink-0"
-            style={{ backgroundColor: BLUE }}>
-            + Register Business
-          </button>
+          <div className="flex gap-2 shrink-0">
+            <button onClick={() => exportCsv(filtered)}
+              className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80"
+              style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
+              Export CSV
+            </button>
+            <button onClick={() => setShowForm(true)}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              style={{ backgroundColor: BLUE }}>
+              + Register Business
+            </button>
+          </div>
         )}
       </div>
 

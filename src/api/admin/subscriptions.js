@@ -95,6 +95,19 @@ export async function grantTrial(id) {
   return { id, status: "Trial", message: "30-day trial granted." };
 }
 
+// Admin override: unlock every paid feature for a business without going
+// through billing — a comp account. Sets the top plan at zero cost rather than
+// adding a separate "unlocked" flag, so every feature-gate already keyed off
+// `plan`/`planStatus` throughout the business portal picks it up for free.
+export async function grantFullAccess(id) {
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .update({ plan: "premium", plan_status: "Active", monthly_fee: 0, cancelled: false, updated_at: new Date().toISOString() })
+    .eq("business_id", id);
+  if (error) throw error;
+  return { ok: true };
+}
+
 export async function resolveDispute(id) {
   const { error } = await supabase
     .from("business_subscriptions")

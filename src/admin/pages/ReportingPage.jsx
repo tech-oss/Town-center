@@ -47,6 +47,37 @@ const RANGES = [
 ];
 const TIERS = ["All", "Premium", "Standard", "Agent", "Basic"];
 
+// Exports the numbers actually on screen — the summary KPIs plus the two
+// breakdown tables — rather than raw rows, since Reporting is aggregates by
+// nature (per-business detail already has its own export on each list page).
+function exportCsv({ summary, revenueByTier, bySection, rangeLabel, tier }) {
+  const esc = (v) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  const lines = [`Reporting export — ${rangeLabel}, Tier: ${tier}`, ""];
+
+  lines.push("Summary", "Metric,Value");
+  lines.push(`MRR,£${summary.mrr ?? 0}`);
+  lines.push(`Active Subscriptions,${summary.activeSubscriptions ?? 0}`);
+  lines.push(`Total Active Listings,${summary.activeListings ?? 0}`);
+  lines.push(`Total Listings,${summary.totalListings ?? 0}`);
+  lines.push(`Total Users,${summary.totalUsers ?? 0}`);
+  lines.push(`Avg Revenue / Account,£${summary.arpa ?? 0}`);
+  lines.push(`Churn Rate,${summary.churnRate ?? 0}%`);
+  lines.push(`Pending Approvals,${summary.pendingApprovals ?? 0}`);
+  lines.push("");
+
+  lines.push("Revenue by Tier", "Tier,Revenue,Count");
+  for (const r of revenueByTier ?? []) lines.push([r.tier, r.revenue, r.count].map(esc).join(","));
+  lines.push("");
+
+  lines.push("Listings by Section", "Section,Count");
+  for (const r of bySection ?? []) lines.push([r.section, r.count].map(esc).join(","));
+
+  const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = Object.assign(document.createElement("a"), { href: url, download: `reporting-${new Date().toISOString().slice(0, 10)}.csv` });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
 export default function ReportingPage() {
   const [range, setRange] = useState("6m");
   const [tier, setTier] = useState("All");
@@ -70,6 +101,11 @@ export default function ReportingPage() {
           <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Reporting</h1>
           <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Revenue, subscriptions, listings and activity for Maidenhead Town Centre Portal.</p>
         </div>
+        <button onClick={() => exportCsv({ summary: s, revenueByTier, bySection, rangeLabel, tier })}
+          className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 shrink-0"
+          style={{ border: "1.5px solid rgba(16,24,40,0.12)", color: "#1E293B" }}>
+          Export CSV
+        </button>
       </div>
 
       {/* Filter toolbar */}
