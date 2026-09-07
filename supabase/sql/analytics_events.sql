@@ -47,8 +47,12 @@ create index if not exists analytics_events_content_idx
 -- One row per (business, content, session, day) — the Edge Function checks
 -- this before inserting so a refresh doesn't inflate the count, but the
 -- constraint is the backstop against any other write path double-counting.
+-- `created_at::date` isn't allowed in an index expression — that cast reads
+-- the session timezone, so Postgres won't call it immutable. Casting via a
+-- fixed 'utc' offset first pins the result regardless of caller timezone,
+-- which is immutable.
 create unique index if not exists analytics_events_dedup_idx
-  on public.analytics_events (business_id, content_type, content_id, session_id, (created_at::date))
+  on public.analytics_events (business_id, content_type, content_id, session_id, ((created_at at time zone 'utc')::date))
   where session_id is not null;
 
 alter table public.analytics_events enable row level security;
