@@ -1,7 +1,8 @@
 import { useState, useCallback, Fragment, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getUsers, approveUser, rejectUser, suspendUser, registerUser, deleteUser } from "../../api/admin";
+import { getUsers, approveUser, rejectUser, suspendUser, registerUser, deleteUser, getBusinesses } from "../../api/admin";
+import BusinessTypeahead from "../components/BusinessTypeahead";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
@@ -50,8 +51,7 @@ function SortIcon({ dir }) {
   );
 }
 
-const ROLES = ["Business Owner", "Estate Agent", "Freelancer", "Admin"];
-const TIERS = ["Free", "Basic", "Standard", "Premium"];
+const ROLES = ["Business Owner", "Content Manager"];
 
 function Toast({ message }) {
   if (!message) return null;
@@ -74,15 +74,17 @@ const FIELD_STYLE = { border: "1.5px solid rgba(16,24,40,0.2)", color: NAVY, bac
 
 const EMPTY_REGISTER = {
   firstName: "", lastName: "", email: "", phone: "", role: "Business Owner",
-  business: "", tier: "Standard", autoPassword: true, password: "", sendInvite: true,
+  businessId: "", autoPassword: true, password: "", sendInvite: true,
 };
 
 // ─── Register User modal ──────────────────────────────────────────────────────
 function RegisterUserModal({ onClose, onRegistered }) {
   const [form, setForm] = useState(EMPTY_REGISTER);
   const [saving, setSaving] = useState(false);
+  const { data: businesses } = useFetch(getBusinesses, []);
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
-  const isValid = form.firstName.trim() && form.lastName.trim() && form.email.trim() && (form.autoPassword || form.password);
+  const isValid = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.businessId
+    && (form.autoPassword || form.password);
 
   function handleSubmit() {
     if (!isValid) return;
@@ -112,15 +114,13 @@ function RegisterUserModal({ onClose, onRegistered }) {
               {ROLES.map((r) => <option key={r}>{r}</option>)}
             </select>
           </Field>
-          <Field label="Subscription Tier">
-            <select value={form.tier} onChange={(e) => set("tier", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE}>
-              {TIERS.map((t) => <option key={t}>{t}</option>)}
-            </select>
-          </Field>
-          <Field label="Business Name (optional)">
-            <input value={form.business} onChange={(e) => set("business", e.target.value)} placeholder="e.g. Coppa Club" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          </Field>
         </div>
+
+        {/* Subscription tier isn't chosen here — it belongs to the business
+            and follows whichever one is picked below, not the person. */}
+        <Field label="Business">
+          <BusinessTypeahead value={form.businessId} onChange={(id) => set("businessId", id)} businesses={businesses ?? []} placeholder="Search for a business…" />
+        </Field>
 
         <div className="rounded-xl p-3 flex flex-col gap-2" style={{ backgroundColor: "#f8fafc", border: "1px solid rgba(16,24,40,0.1)" }}>
           <label className="flex items-center gap-2 cursor-pointer">
@@ -203,7 +203,10 @@ export default function UsersPage() {
     setTick((t) => t + 1);
   }
 
-  const fetch = useCallback(() => getUsers({ status: tab }), [tab, tick]);
+  // Content Manager approvals belong to the business owner who invited them,
+  // not the super admin — this screen only manages Business Owner accounts,
+  // one per business registration.
+  const fetch = useCallback(() => getUsers({ status: tab, role: "Business Owner" }), [tab, tick]);
   const { data: rawUsers, loading } = useFetch(fetch, [tab, tick]);
 
   // Search + sort applied client-side after fetch
@@ -267,7 +270,7 @@ export default function UsersPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Users</h1>
-          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage business and agent accounts — approve, reject or suspend access.</p>
+          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage business owner accounts — approve, reject or suspend access. Content Managers are approved by their own business owner.</p>
         </div>
         <div className="flex gap-2 shrink-0">
           <button

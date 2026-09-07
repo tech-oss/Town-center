@@ -363,7 +363,10 @@ export default function DashboardPage() {
   const { data: summary, loading: loadingSummary } = useFetch(getReportingSummary, []);
   const { data: approvals }        = useFetch(() => getApprovals({ status: "Pending" }), []);
   const { data: pendingBusinesses } = useFetch(() => getBusinesses({ status: "Pending" }), []);
-  const { data: pendingUsers }     = useFetch(() => getUsers({ status: "Pending" }), []);
+  // Content Manager approvals belong to the business owner who invited them,
+  // not the super admin — only Business Owner signups (tied to a new business
+  // registration) show up here.
+  const { data: pendingUsers }     = useFetch(() => getUsers({ status: "Pending", role: "Business Owner" }), []);
   const { data: bizStats }         = useFetch(getBusinessStats, []);
 
   if (loadingSummary) return <LoadingState />;
