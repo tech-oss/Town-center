@@ -1,111 +1,146 @@
-import { mock } from "../client";
+import { supabase } from "../../lib/supabaseClient";
 
-// Mutable in-memory store — survives HMR within a session.
-let USERS = [
-  { id: "u1",  name: "Sarah Mitchell", email: "sarah@bloomflorist.co.uk",       business: "Bloom Florist",       role: "Business Owner", status: "Approved",  tier: "Premium",  joined: "2025-03-12", lastLogin: "2026-06-20" },
-  { id: "u2",  name: "James Okafor",   email: "james@jameskitchen.co.uk",        business: "James's Kitchen",     role: "Business Owner", status: "Approved",  tier: "Standard", joined: "2025-06-01", lastLogin: "2026-06-18" },
-  { id: "u4",  name: "Tom Whitfield",  email: "tom@whitfieldestates.co.uk",      business: "Whitfield Estates",   role: "Estate Agent",   status: "Approved",  tier: "Agent",    joined: "2024-11-08", lastLogin: "2026-06-17" },
-  { id: "u5",  name: "Anita Sharma",   email: "anita@gourmetkitchen.co.uk",      business: "Gourmet Kitchen",     role: "Business Owner", status: "Pending",   tier: "Standard", joined: "2026-06-10", lastLogin: "2026-06-10" },
-  { id: "u6",  name: "Emma Clarke",    email: "emma@thamesvalleyyoga.co.uk",     business: "Thames Valley Yoga",  role: "Business Owner", status: "Pending",   tier: "Basic",    joined: "2026-06-22", lastLogin: "2026-06-22" },
-  { id: "u7",  name: "Linda Forsythe", email: "linda@maidenheadgifts.co.uk",     business: "Maidenhead Gifts",    role: "Business Owner", status: "Suspended", tier: "Basic",    joined: "2024-08-01", lastLogin: "2025-12-01" },
-  { id: "u8",  name: "Rajiv Kapoor",   email: "rajiv@kapoorproperties.com",      business: "Kapoor Properties",   role: "Estate Agent",   status: "Approved",  tier: "Agent",    joined: "2025-02-19", lastLogin: "2026-06-15" },
-  { id: "u9",  name: "Marcus Bell",    email: "marcus@bellelectrics.co.uk",      business: "Bell Electrics",      role: "Business Owner", status: "Rejected",  tier: "Basic",    joined: "2026-05-30", lastLogin: "2026-05-30" },
-  { id: "u10", name: "Patrick Dunn",   email: "patrick@theclubhouse.co.uk",      business: "The Clubhouse",       role: "Business Owner", status: "Approved",  tier: "Premium",  joined: "2025-01-07", lastLogin: "2026-06-19" },
-];
+// Portal users are business_users rows — the people who sign in to the business
+// dashboard, either as the account Owner or as a Content Manager they invited.
+// Admin sees them all here and controls whether they can sign in at all
+// (business_users.status is what the login flow checks).
+//
+// The DB stores status lowercase ("approved"); the admin UI has always shown it
+// title-cased, so the two are mapped at this boundary.
 
-// Audit log — append-only
-let AUDIT_LOG = [
-  { id: "log1", timestamp: "2026-06-24T14:32:00Z", action: "Approved",  targetName: "Sarah Mitchell", targetId: "u1",  note: "" },
-  { id: "log2", timestamp: "2026-06-23T09:15:00Z", action: "Approved",  targetName: "James Okafor",   targetId: "u2",  note: "" },
-  { id: "log3", timestamp: "2026-06-20T11:05:00Z", action: "Suspended", targetName: "Linda Forsythe", targetId: "u7",  note: "Payment issues" },
-  { id: "log4", timestamp: "2026-06-19T16:44:00Z", action: "Rejected",  targetName: "Marcus Bell",    targetId: "u9",  note: "Incomplete registration" },
-];
+const TO_UI = { approved: "Approved", pending: "Pending", rejected: "Rejected", suspended: "Suspended" };
+const TO_DB = { Approved: "approved", Pending: "pending", Rejected: "rejected", Suspended: "suspended" };
 
-let _logCounter = AUDIT_LOG.length + 1;
+function fromRow(row) {
+  return {
+    id: row.id,
+    name: [row.first_name, row.last_name].filter(Boolean).join(" ") || row.email,
+    email: row.email,
+    phone: row.phone,
+    businessId: row.business_id,
+    business: row.businesses?.name ?? row.business_id,
+    // "Owner" / "Content Manager" is the portal role; the admin screens have
+    // always called the account holder a Business Owner.
+    role: row.role === "Owner" ? "Business Owner" : row.role,
+    status: TO_UI[row.status] ?? row.status,
+    // The plan belongs to the business, not the person — the Subscriptions
+    // screen is where it's actually managed.
+    tier: row.plan ?? "Basic",
+    joined: (row.requested_at ?? "").slice(0, 10),
+    lastLogin: (row.approved_at ?? "").slice(0, 10),
+  };
+}
 
-export function addLog(action, user, note = "") {
-  AUDIT_LOG = [
-    {
-      id: `log${_logCounter++}`,
-      timestamp: new Date().toISOString(),
-      action,
-      targetName: user.name,
-      targetId: user.id,
-      note,
-    },
-    ...AUDIT_LOG,
-  ];
+const SELECT = "*, businesses(name)";
+
+// ── Audit log ─────────────────────────────────────────────────────────────────
+
+export async function addLog(action, user, note = "") {
+  const { error } = await supabase.from("admin_logs").insert({
+    action,
+    target_id: String(user?.id ?? ""),
+    target_name: user?.name ?? "",
+    note: note || null,
+  });
+  // A failed audit write must never take down the action it was recording.
+  if (error) console.error("admin_logs insert failed:", error.message);
+}
+
+export async function getAdminLogs() {
+  const { data, error } = await supabase
+    .from("admin_logs")
+    .select("*")
+    .order("timestamp", { ascending: false })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    timestamp: r.timestamp,
+    action: r.action,
+    targetName: r.target_name,
+    targetId: r.target_id,
+    note: r.note ?? "",
+  }));
 }
 
 // ── Queries ───────────────────────────────────────────────────────────────────
 
-export function getUsers({ role, status } = {}) {
-  let list = USERS;
-  if (role)   list = list.filter((u) => u.role === role);
-  if (status) list = list.filter((u) => u.status === status);
-  return mock(list);
+export async function getUsers({ role, status } = {}) {
+  let q = supabase.from("business_users").select(SELECT).order("requested_at", { ascending: false });
+  if (status) q = q.eq("status", TO_DB[status] ?? status);
+  const { data, error } = await q;
+  if (error) throw error;
+
+  let list = (data ?? []).map(fromRow);
+  if (role) list = list.filter((u) => u.role === role);
+  return list;
 }
 
-export function getUserById(id) {
-  return mock(USERS.find((u) => u.id === id) ?? null);
-}
-
-export function getAdminLogs() {
-  return mock(AUDIT_LOG);
+export async function getUserById(id) {
+  const { data, error } = await supabase.from("business_users").select(SELECT).eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? fromRow(data) : null;
 }
 
 // ── Mutations ─────────────────────────────────────────────────────────────────
 
+async function setUserStatus(id, status, action, note = "") {
+  const { data: row } = await supabase.from("business_users").select("*, businesses(name)").eq("id", id).maybeSingle();
+  const patch = { status };
+  if (status === "approved") patch.approved_at = new Date().toISOString();
+
+  const { error } = await supabase.from("business_users").update(patch).eq("id", id);
+  if (error) throw error;
+  if (row) await addLog(action, fromRow(row), note);
+  return { ok: true };
+}
+
 export function approveUser(id) {
-  const u = USERS.find((x) => x.id === id);
-  if (!u) return mock({ ok: false });
-  u.status = "Approved";
-  addLog("Approved", u);
-  return mock({ ok: true });
+  return setUserStatus(id, "approved", "Approved");
 }
 
 export function rejectUser(id, note = "") {
-  const u = USERS.find((x) => x.id === id);
-  if (!u) return mock({ ok: false });
-  u.status = "Rejected";
-  addLog("Rejected", u, note);
-  return mock({ ok: true });
+  return setUserStatus(id, "rejected", "Rejected", note);
 }
 
 export function suspendUser(id) {
-  const u = USERS.find((x) => x.id === id);
-  if (!u) return mock({ ok: false });
-  u.status = "Suspended";
-  addLog("Suspended", u);
-  return mock({ ok: true });
+  return setUserStatus(id, "suspended", "Suspended");
 }
 
-// TODO: create Supabase auth user and send invite email
-export function registerUser(data) {
-  const saved = {
-    id: `u${Date.now()}`,
-    name: `${data.firstName} ${data.lastName}`.trim(),
-    email: data.email,
-    business: data.business || null,
-    role: data.role,
-    status: "Approved",
-    tier: data.tier,
-    joined: new Date().toISOString().slice(0, 10),
-    lastLogin: new Date().toISOString().slice(0, 10),
-  };
-  USERS = [saved, ...USERS];
-  addLog("Registered by admin", saved, data.sendInvite ? "Invitation email sent" : "");
-  return mock({ ok: true, user: saved });
+// Creating a portal login means creating a Supabase Auth account, which needs
+// the service-role key — that must never reach the browser. Admin therefore
+// records the person against the business here, and they set their own password
+// through the portal's normal "Register a User" flow using this email.
+export async function registerUser(data) {
+  const { data: inserted, error } = await supabase
+    .from("business_users")
+    .insert({
+      business_id: data.businessId ?? data.business ?? null,
+      role: data.role === "Business Owner" ? "Owner" : (data.role ?? "Content Manager"),
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email,
+      phone: data.phone ?? null,
+      status: "pending",
+      requested_at: new Date().toISOString(),
+    })
+    .select(SELECT)
+    .single();
+  if (error) throw error;
+
+  const user = fromRow(inserted);
+  await addLog("Registered by admin", user, data.sendInvite ? "Invitation email to send" : "");
+  return { ok: true, user };
 }
 
-export function deleteUser(id) {
-  const u = USERS.find((x) => x.id === id);
-  if (!u) return mock({ ok: false });
-  addLog("Deleted account", u);
-  USERS = USERS.filter((x) => x.id !== id);
-  return mock({ ok: true });
+export async function deleteUser(id) {
+  const { data: row } = await supabase.from("business_users").select("*, businesses(name)").eq("id", id).maybeSingle();
+  const { error } = await supabase.from("business_users").delete().eq("id", id);
+  if (error) throw error;
+  if (row) await addLog("Deleted account", fromRow(row));
+  return { ok: true };
 }
 
-export function getRecentActivity() {
-  return mock([]);
+export async function getRecentActivity() {
+  return [];
 }

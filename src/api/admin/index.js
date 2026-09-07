@@ -11,6 +11,7 @@ export * from "./projects";
 export * from "./adminEvents";
 export * from "./eventApprovals";
 export * from "./contentModeration";
+export * from "./supportTickets";
 export * from "./subscriptions";
 export * from "./reporting";
 export * from "./settings";

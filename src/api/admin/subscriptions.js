@@ -1,44 +1,105 @@
-import { mock } from "../client";
+import { supabase } from "../../lib/supabaseClient";
 
-const SUBSCRIPTIONS = [
-  { id: "s1", business: "Bloom Florist", owner: "Sarah Mitchell", tier: "Premium", status: "Active", startDate: "2025-09-12", renewal: "2026-09-12", monthlyFee: 79, paymentStatus: "Paid", history: [
-    { date: "2026-06-12", event: "Payment received £79", type: "payment" },
-    { date: "2026-03-12", event: "Upgraded from Standard to Premium", type: "upgrade" },
-    { date: "2025-09-12", event: "Subscription started — Standard", type: "start" },
-  ]},
-  { id: "s2", business: "James's Kitchen", owner: "James Okafor", tier: "Standard", status: "Active", startDate: "2025-06-01", renewal: "2026-07-01", monthlyFee: 39, paymentStatus: "Paid", history: [
-    { date: "2026-06-01", event: "Payment received £39", type: "payment" },
-    { date: "2025-06-01", event: "Subscription started — Standard", type: "start" },
-  ]},
-  { id: "s3", business: "Maidenhead Gifts", owner: "Linda Forsythe", tier: "Basic", status: "Downgraded", startDate: "2024-08-01", renewal: "2026-07-08", monthlyFee: 0, paymentStatus: "Failed", history: [
-    { date: "2026-01-08", event: "Payment failed — auto-downgraded to Basic", type: "downgrade" },
-    { date: "2025-12-08", event: "Payment failed (1st attempt)", type: "warning" },
-    { date: "2024-08-01", event: "Subscription started — Standard", type: "start" },
-  ]},
-  { id: "s4", business: "The Clubhouse", owner: "Patrick Dunn", tier: "Premium", status: "Active", startDate: "2025-01-07", renewal: "2027-01-07", monthlyFee: 79, paymentStatus: "Paid", history: [
-    { date: "2026-01-07", event: "Annual payment received £948", type: "payment" },
-    { date: "2025-01-07", event: "Subscription started — Premium (Annual)", type: "start" },
-  ]},
-  { id: "s5", business: "Spice Garden", owner: "Anita Sharma", tier: "Standard", status: "Trial", startDate: "2026-06-10", renewal: "2026-07-10", monthlyFee: 0, paymentStatus: "Trial", history: [
-    { date: "2026-06-10", event: "30-day trial started", type: "start" },
-  ]},
-];
+// Subscriptions are business_subscriptions rows, one per business. Payments are
+// not yet taken through Stripe, so `history` is assembled from the few dates the
+// row actually carries rather than a real ledger — the payment timeline fills in
+// once billing is wired up.
 
-export function getSubscriptions({ status, tier } = {}) {
-  let list = SUBSCRIPTIONS;
+const PLAN_LABELS = { free: "Free", basic: "Basic", standard: "Standard", premium: "Premium", agent: "Agent" };
+
+function label(plan) {
+  if (!plan) return "Basic";
+  return PLAN_LABELS[String(plan).toLowerCase()] ?? plan;
+}
+
+function fromRow(row, owner) {
+  const tier = label(row.plan);
+  const history = [];
+  if (row.terms_accepted_at) {
+    history.push({
+      date: row.terms_accepted_at.slice(0, 10),
+      event: `Subscription started — ${tier}`,
+      type: "start",
+    });
+  }
+  if (row.cancelled) {
+    history.push({ date: (row.updated_at ?? "").slice(0, 10), event: "Subscription cancelled", type: "warning" });
+  }
+
+  return {
+    id: row.business_id,
+    business: row.businesses?.name ?? row.business_id,
+    owner: owner ? [owner.first_name, owner.last_name].filter(Boolean).join(" ") || owner.email : "—",
+    tier,
+    status: row.cancelled ? "Lapsed" : (row.plan_status ?? "Active"),
+    startDate: (row.terms_accepted_at ?? "").slice(0, 10),
+    renewal: row.renewal_date ?? "",
+    monthlyFee: row.monthly_fee ?? 0,
+    // No payment provider yet, so nothing can report a real payment state.
+    paymentStatus: row.monthly_fee > 0 ? "Paid" : "Trial",
+    isMultiSite: row.is_multi_site,
+    upgradePlanKey: row.upgrade_plan_key,
+    history,
+  };
+}
+
+// business_subscriptions and business_users share `businesses` as a parent but
+// have no FK to each other, so owners are joined here rather than embedded.
+async function ownersByBusiness(ids) {
+  if (!ids.length) return {};
+  const { data, error } = await supabase
+    .from("business_users")
+    .select("business_id, role, first_name, last_name, email")
+    .in("business_id", ids);
+  if (error) throw error;
+  const map = {};
+  for (const u of data ?? []) {
+    if (!map[u.business_id] || u.role === "Owner") map[u.business_id] = u;
+  }
+  return map;
+}
+
+export async function getSubscriptions({ status, tier } = {}) {
+  const { data, error } = await supabase
+    .from("business_subscriptions")
+    .select("*, businesses(name)")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+
+  const owners = await ownersByBusiness((data ?? []).map((r) => r.business_id));
+  let list = (data ?? []).map((r) => fromRow(r, owners[r.business_id]));
   if (status) list = list.filter((s) => s.status === status);
   if (tier) list = list.filter((s) => s.tier === tier);
-  return mock(list);
+  return list;
 }
 
-export function getSubscriptionById(id) {
-  return mock(SUBSCRIPTIONS.find((s) => s.id === id) ?? null);
+export async function getSubscriptionById(id) {
+  const { data, error } = await supabase
+    .from("business_subscriptions")
+    .select("*, businesses(name)")
+    .eq("business_id", id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const owners = await ownersByBusiness([id]);
+  return fromRow(data, owners[id]);
 }
 
-export function grantTrial(id) {
-  return mock({ id, status: "Trial", message: "30-day trial granted." });
+export async function grantTrial(id) {
+  const renewal = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .update({ plan_status: "Trial", monthly_fee: 0, renewal_date: renewal, cancelled: false })
+    .eq("business_id", id);
+  if (error) throw error;
+  return { id, status: "Trial", message: "30-day trial granted." };
 }
 
-export function resolveDispute(id) {
-  return mock({ id, paymentStatus: "Paid", message: "Dispute resolved — subscription reinstated." });
+export async function resolveDispute(id) {
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .update({ plan_status: "Active", cancelled: false })
+    .eq("business_id", id);
+  if (error) throw error;
+  return { id, paymentStatus: "Paid", message: "Dispute resolved — subscription reinstated." };
 }

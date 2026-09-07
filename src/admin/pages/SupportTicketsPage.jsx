@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { SUPPORT_TICKETS, TICKET_CATEGORIES } from "../../Data/adminMissingScreensMock";
-import { getBusinesses } from "../../api/admin";
+import { TICKET_CATEGORIES } from "../../Data/adminMissingScreensMock";
+import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness } from "../../api/admin";
 import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
 import EmptyState from "../components/EmptyState";
@@ -26,22 +26,21 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
   const [status, setStatus] = useState(ticket.status);
   const [sending, setSending] = useState(false);
 
-  function handleSendReply() {
+  async function handleSendReply() {
     if (!reply.trim()) return;
     setSending(true);
     // TODO: trigger Resend email notification to business on reply
-    setTimeout(() => {
-      const msg = { from: "admin", author: "Admin Support", date: new Date().toISOString().slice(0, 16).replace("T", " "), body: reply.trim() };
-      onUpdate({ ...ticket, thread: [...ticket.thread, msg] });
-      setReply("");
-      setSending(false);
-      notify("Reply sent.");
-    }, 400);
+    await replyToTicket(ticket.id, { body: reply.trim(), author: "Admin Support" });
+    setReply("");
+    setSending(false);
+    notify("Reply sent.");
+    onUpdate();
   }
 
-  function handleUpdateStatus() {
-    onUpdate({ ...ticket, status });
+  async function handleUpdateStatus() {
+    await setTicketStatus(ticket.id, status);
     notify(`Status updated to ${status}.`);
+    onUpdate();
   }
 
   return (
@@ -103,7 +102,7 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
 }
 
 // ─── New Message tab ──────────────────────────────────────────────────────────
-function NewMessageTab({ businesses, notify }) {
+function NewMessageTab({ businesses, notify, onSent }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(null);
   const [subject, setSubject] = useState("");
@@ -117,15 +116,15 @@ function NewMessageTab({ businesses, notify }) {
       .slice(0, 6)
     : [];
 
-  function handleSend() {
+  async function handleSend() {
     if (!selected || !subject.trim() || !message.trim()) return;
     setSending(true);
-    // TODO: create ticket record in Supabase and trigger email
-    setTimeout(() => {
-      setSending(false);
-      notify(`Message sent to ${selected.name}`);
-      setSelected(null); setQuery(""); setSubject(""); setMessage(""); setCategory(TICKET_CATEGORIES[0]);
-    }, 400);
+    // TODO: trigger Resend email notification to the business
+    await createTicketForBusiness(selected.id, { subject: subject.trim(), category, message: message.trim() });
+    setSending(false);
+    notify(`Message sent to ${selected.name}`);
+    setSelected(null); setQuery(""); setSubject(""); setMessage(""); setCategory(TICKET_CATEGORIES[0]);
+    onSent?.();
   }
 
   return (
@@ -253,24 +252,31 @@ function InboxTab({ tickets, onView, onResolve }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function SupportTicketsPage() {
-  const [tickets, setTickets] = useState(SUPPORT_TICKETS);
   const [tab, setTab] = useState("inbox");
-  const [viewing, setViewing] = useState(null);
+  const [viewingId, setViewingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [nonce, setNonce] = useState(0);
   const { data: businesses, loading } = useFetch(getBusinesses, []);
+  const { data: tickets } = useFetch(getTickets, [nonce]);
 
   function notify(msg) { setToast(msg); setTimeout(() => setToast(null), 3500); }
+  function refresh() { setNonce((n) => n + 1); }
 
-  function updateTicket(updated) {
-    setTickets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-    setViewing(updated);
+  // The detail panel reads from the same fetched list, so a reply or status
+  // change shows the value that was actually written rather than a local guess.
+  const viewing = (tickets ?? []).find((t) => t.id === viewingId) ?? null;
+
+  async function resolveTicket(t) {
+    await setTicketStatus(t.id, "Resolved");
+    notify(`"${t.subject}" marked resolved.`);
+    refresh();
   }
 
   if (viewing) {
     return (
       <>
         <Toast message={toast} onDismiss={() => setToast(null)} />
-        <TicketDetail ticket={viewing} onBack={() => setViewing(null)} onUpdate={updateTicket} notify={notify} />
+        <TicketDetail ticket={viewing} onBack={() => setViewingId(null)} onUpdate={refresh} notify={notify} />
       </>
     );
   }
@@ -294,10 +300,9 @@ export default function SupportTicketsPage() {
       </div>
 
       {tab === "inbox" ? (
-        <InboxTab tickets={tickets} onView={setViewing}
-          onResolve={(t) => { updateTicket({ ...t, status: "Resolved" }); notify(`"${t.subject}" marked resolved.`); }} />
+        <InboxTab tickets={tickets ?? []} onView={(t) => setViewingId(t.id)} onResolve={resolveTicket} />
       ) : loading ? <LoadingState /> : (
-        <NewMessageTab businesses={businesses} notify={notify} />
+        <NewMessageTab businesses={businesses} notify={notify} onSent={refresh} />
       )}
     </div>
   );
