@@ -110,9 +110,23 @@ export const BUSINESS_CATEGORIES = [
 // details the owner filled in, and `business_users` the owner's own account
 // (whose status gates whether they can sign in at all).
 
+// business_listings and business_subscriptions are one-per-business, so
+// PostgREST embeds them as objects; business_users is one-to-many and comes
+// back as an array. `one()` tolerates either shape.
+function titleCase(v) {
+  if (!v) return "";
+  return String(v).charAt(0).toUpperCase() + String(v).slice(1).toLowerCase();
+}
+
+function one(embedded) {
+  if (!embedded) return {};
+  return Array.isArray(embedded) ? (embedded[0] ?? {}) : embedded;
+}
+
 function fromRow(row) {
-  const listing = row.business_listings?.[0] ?? {};
-  const owner = (row.business_users ?? []).find((u) => u.role === "Owner") ?? row.business_users?.[0] ?? {};
+  const listing = one(row.business_listings);
+  const users = Array.isArray(row.business_users) ? row.business_users : [row.business_users].filter(Boolean);
+  const owner = users.find((u) => u.role === "Owner") ?? users[0] ?? {};
   const detail = listing.business_type_detail ?? {};
   return {
     id: row.id,
@@ -124,8 +138,14 @@ function fromRow(row) {
     suspendNote: row.status === "Suspended" ? row.admin_note : "",
     newToMaidenhead: row.new_to_maidenhead,
 
-    section: listing.business_type ?? "",
-    subcategories: listing.subcategory ?? [],
+    // Older listings recorded a display category ("Live & Stay"); newer ones a
+    // business_type slug ("shop"). Prefer the slug the admin selects still use.
+    section: listing.business_type ?? listing.category ?? "",
+    // subcategory is a single text column, not an array — the admin UI works in
+    // multiples, so a lone value is lifted into a one-item list.
+    subcategories: Array.isArray(listing.subcategory)
+      ? listing.subcategory
+      : (listing.subcategory ? [listing.subcategory] : []),
     cuisines: detail.cuisineTypes ?? [],
     address: listing.address ?? "",
     phone: listing.phone ?? "",
@@ -138,7 +158,9 @@ function fromRow(row) {
     email: owner.email ?? listing.email ?? "",
     ownerStatus: owner.status ?? null,
 
-    plan: row.business_subscriptions?.[0]?.plan ?? "Basic",
+    // Plans are stored lowercase ("standard"); the admin plan pickers are
+    // title-cased.
+    plan: titleCase(one(row.business_subscriptions).plan) || "Basic",
     // "Content Pending" until the owner has written an actual description.
     hasContent: !!(listing.description && listing.description.trim()),
   };
