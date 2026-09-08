@@ -744,14 +744,49 @@ function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
   );
 }
 
+// Every section's category + sub-category picks, labelled against the same
+// taxonomy the real signup form uses — one consistent chip row regardless of
+// which business type this is, instead of shop/see-do getting chips and
+// every other type getting a plain sentence.
+function categoryChips(biz) {
+  switch (biz.section) {
+    case "freelancer":
+      return [
+        biz.freelancerKind && labelFor(FREELANCER_KINDS, biz.freelancerKind),
+        ...(biz.freelancerCategories ?? []).map((v) => labelFor(FREELANCER_KIND_CATEGORIES[biz.freelancerKind] ?? [], v)),
+      ].filter(Boolean);
+    case "hotel":
+      return [biz.hotelKind && labelFor(HOTEL_KINDS, biz.hotelKind)].filter(Boolean);
+    case "eat-drink":
+      return [
+        ...(biz.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)),
+        ...(biz.cuisineTypes ?? []).map((v) => labelFor(CUISINE_TYPES, v)),
+      ];
+    case "shop":
+      return (biz.subcategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v));
+    case "see-do":
+      return (biz.subcategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v));
+    default:
+      return [];
+  }
+}
+
+// A small labelled fact, used for the business-facing contact fields —
+// "Business Email: hello@…" rather than an emoji standing in for the label.
+function InfoField({ label, value, mono }) {
+  if (!value) return null;
+  return (
+    <div className="min-w-0">
+      <span className="text-[10px] font-bold uppercase tracking-wider block" style={{ color: "#9CA3AF" }}>{label}</span>
+      <span className="text-xs font-medium truncate block" style={{ color: NAVY, fontFamily: mono ? "monospace" : undefined }}>{value}</span>
+    </div>
+  );
+}
+
 function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent }) {
   const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section);
-  // Shop and See & Do store their picks straight in `subcategories`; the
-  // taxonomy to label them against depends on which section this is, using
-  // the same option lists the real signup form's Business Details step uses.
-  const subcatOptions = biz.section === "shop" ? SHOP_CATEGORIES : biz.section === "see-do" ? SEE_DO_CATEGORIES : [];
-  const subcatLabels = (biz.subcategories ?? []).map((v) => labelFor(subcatOptions, v));
+  const chips = categoryChips(biz);
 
   const isActive   = pendingAction?.id === biz.id;
   const actionType = isActive ? pendingAction.type : null;
@@ -761,98 +796,83 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden" style={CARD}>
-      <div className="bg-white p-5 flex items-start gap-4 flex-wrap">
-        {/* Logo / initial */}
-        {biz.logo ? (
-          <img src={biz.logo} alt={biz.name} className="w-12 h-12 rounded-xl object-cover shrink-0"
-            style={{ border: `1px solid ${BORDER}` }} />
-        ) : (
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-base font-bold shrink-0"
-            style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>
-            {biz.name[0]}
-          </div>
+      <div className="bg-white p-5 flex items-start gap-5 flex-wrap">
+        {/* Logo / initial — click to replace, no separate label row taking up space */}
+        <button onClick={() => setUploadingLogo(true)} className="relative shrink-0 group" title={biz.logo ? "Replace logo" : "Upload logo"}>
+          {biz.logo ? (
+            <img src={biz.logo} alt={biz.name} className="w-14 h-14 rounded-xl object-cover" style={{ border: `1px solid ${BORDER}` }} />
+          ) : (
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-lg font-bold"
+              style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE, border: `1.5px dashed rgba(37,99,235,0.3)` }}>
+              {biz.name[0]}
+            </div>
+          )}
+          <span className="absolute inset-0 rounded-xl flex items-center justify-center text-[9px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ backgroundColor: "rgba(16,24,40,0.55)" }}>
+            {biz.logo ? "Replace" : "Upload"}
+          </span>
+        </button>
+        {uploadingLogo && (
+          <LogoUploadModal biz={biz}
+            onCancel={() => setUploadingLogo(false)}
+            onSave={(dataUrl) => { onUploadLogo(biz.id, dataUrl); setUploadingLogo(false); }} />
         )}
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className="text-sm font-bold" style={{ color: NAVY }}>{biz.name}</span>
-            <StatusTag status={biz.status} />
-            {!biz.hasContent && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
-            )}
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-              style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>{biz.plan}</span>
-            {biz.newToMaidenhead && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: "rgba(251,191,36,0.15)", color: "#92400E" }}>New to Maidenhead</span>
-            )}
+        <div className="flex-1 min-w-0 flex flex-col gap-2.5">
+          {/* Name + status/plan badges */}
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-base font-bold" style={{ color: NAVY }}>{biz.name}</span>
+              <StatusTag status={biz.status} />
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>{biz.plan}</span>
+              {!biz.hasContent && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
+              )}
+              {biz.newToMaidenhead && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: "rgba(251,191,36,0.15)", color: "#92400E" }}>New to Maidenhead</span>
+              )}
+            </div>
+            <p className="text-[11px] mt-0.5" style={{ color: "#9CA3AF" }}>Submitted {biz.submitted}</p>
           </div>
 
-          <div className="flex flex-wrap gap-1 mb-2">
-            {secLabel && (
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded"
-                style={{ backgroundColor: "rgba(16,24,40,0.06)", color: NAVY }}>{secLabel}</span>
-            )}
-            {subcatLabels.map((l) => (
-              <span key={l} className="text-[11px] px-2 py-0.5 rounded"
-                style={{ backgroundColor: "rgba(37,99,235,0.06)", color: MUTED }}>{l}</span>
-            ))}
-          </div>
-
-          {/* Business Logo */}
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider shrink-0" style={{ color: "#9CA3AF" }}>Business Logo</span>
-            {biz.logo ? (
-              <img src={biz.logo} alt={`${biz.name} logo`} className="w-10 h-10 rounded-lg object-cover" style={{ border: `1px solid ${BORDER}` }} />
-            ) : (
-              <span className="text-xs" style={{ color: MUTED }}>No logo uploaded</span>
-            )}
-            <button onClick={() => setUploadingLogo(true)}
-              className="text-xs font-semibold px-3 py-1 rounded-lg transition-opacity hover:opacity-80"
-              style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
-              {biz.logo ? "Replace Logo" : "Upload Logo"}
-            </button>
-          </div>
-          {uploadingLogo && (
-            <LogoUploadModal biz={biz}
-              onCancel={() => setUploadingLogo(false)}
-              onSave={(dataUrl) => { onUploadLogo(biz.id, dataUrl); setUploadingLogo(false); }} />
+          {/* Category + sub-category — one consistent chip row for every
+              business type, section first then its specific picks. */}
+          {(secLabel || chips.length > 0) && (
+            <div className="flex flex-wrap gap-1.5">
+              {secLabel && (
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: NAVY, color: "#fff" }}>{secLabel}</span>
+              )}
+              {chips.map((l) => (
+                <span key={l} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
+                  style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "#1D4ED8", border: "1px solid rgba(37,99,235,0.15)" }}>{l}</span>
+              ))}
+            </div>
           )}
 
-          {/* Show reason note if suspended or rejected */}
+          {/* Suspend/reject reason */}
           {biz.status === "Suspended" && biz.suspendNote && (
-            <p className="text-xs mb-1.5 italic" style={{ color: "#92400E" }}>Suspend reason: {biz.suspendNote}</p>
+            <p className="text-xs italic" style={{ color: "#92400E" }}>Suspend reason: {biz.suspendNote}</p>
           )}
           {biz.status === "Rejected" && biz.rejectionNote && (
-            <p className="text-xs mb-1.5 italic" style={{ color: "#991B1B" }}>Rejection reason: {biz.rejectionNote}</p>
+            <p className="text-xs italic" style={{ color: "#991B1B" }}>Rejection reason: {biz.rejectionNote}</p>
           )}
 
-          {/* Business Type, Website, Business Email, Business Phone — the
-              business-facing fields from the signup form's Business Details
-              step. Owner/personal details and address live in View Details. */}
-          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-xs" style={{ color: MUTED }}>
-            {biz.website       && <span className="truncate">🔗 {biz.website}</span>}
-            {biz.businessEmail && <span className="truncate">✉️ {biz.businessEmail} (business)</span>}
-            {biz.businessPhone && <span>📞 {biz.businessPhone} (business)</span>}
-            {/* Once approved, the account that can actually sign in is the
-                more useful thing to see at a glance than the address. */}
-            {biz.status === "Approved" && biz.userEmail && (
-              <span className="truncate">✅ {biz.userEmail} (approved user)</span>
-            )}
-          </div>
-          {/* Type-specific picks the signup form's Business Details step
-              branches into — same taxonomy/labels as the real signup form. */}
-          {(biz.freelancerKind || biz.hotelKind || biz.venueTypes?.length || biz.cuisineTypes?.length) && (
-            <p className="text-xs mt-1" style={{ color: MUTED }}>
-              {biz.freelancerKind && <>{labelFor(FREELANCER_KINDS, biz.freelancerKind)}<span style={{ color: NAVY }}></span></>}
-              {biz.freelancerCategories?.length > 0 && <> · {biz.freelancerCategories.map((v) => labelFor(FREELANCER_KIND_CATEGORIES[biz.freelancerKind] ?? [], v)).join(", ")}</>}
-              {biz.hotelKind && <>{labelFor(HOTEL_KINDS, biz.hotelKind)}</>}
-              {biz.venueTypes?.length > 0 && <> · {biz.venueTypes.map((v) => labelFor(VENUE_TYPES, v)).join(", ")}</>}
-              {biz.cuisineTypes?.length > 0 && <> · {biz.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")}</>}
-            </p>
+          {/* Business-facing contact fields — clearly labelled, not left to
+              an emoji to imply what each value is. Hidden entirely rather
+              than showing an empty divider when nothing's been filled in. */}
+          {(biz.website || biz.businessEmail || biz.businessPhone || (biz.status === "Approved" && biz.userEmail)) && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 pt-2.5" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <InfoField label="Website" value={biz.website} />
+              <InfoField label="Business Email" value={biz.businessEmail} />
+              <InfoField label="Business Phone" value={biz.businessPhone} />
+              {biz.status === "Approved" && (
+                <InfoField label="Approved User" value={biz.userEmail} />
+              )}
+            </div>
           )}
-          <p className="text-[11px] mt-1.5" style={{ color: "#9CA3AF" }}>Submitted {biz.submitted}</p>
         </div>
 
         {/* Action buttons */}
