@@ -796,7 +796,7 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden" style={CARD}>
-      <div className="bg-white p-5 flex items-start gap-5 flex-wrap">
+      <div className="bg-white p-5 flex items-start gap-5">
         {/* Logo / initial — click to replace, no separate label row taking up space */}
         <button onClick={() => setUploadingLogo(true)} className="relative shrink-0 group" title={biz.logo ? "Replace logo" : "Upload logo"}>
           {biz.logo ? (
@@ -874,37 +874,38 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
             </div>
           )}
         </div>
+      </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-col gap-2 shrink-0">
-          <BizBtn color={NAVY} disabled={isBusy} onClick={() => setShowDetail(true)}>View Details</BizBtn>
-          {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} />}
-          {biz.status === "Pending" && (
-            <>
-              <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>✓ Approve</BizBtn>
-              <BizBtn color="#DC2626" disabled={isBusy} onClick={() => onOpenReject(biz)}>Reject</BizBtn>
-            </>
-          )}
-          {biz.status === "Approved" && (
-            <BizBtn color="#D97706" disabled={isBusy} onClick={() => onOpenSuspend(biz)}>Suspend</BizBtn>
-          )}
-          {biz.status === "Suspended" && (
-            <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>Reinstate</BizBtn>
-          )}
-          {biz.status === "Rejected" && (
-            <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>Re-approve</BizBtn>
-          )}
+      {/* Action buttons — one row along the bottom rather than a tall side
+          column, so the card's height follows its actual content instead of
+          however many actions happen to apply. */}
+      <div className="px-5 pb-5 flex flex-wrap gap-2" style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 16 }}>
+        <BizBtn color={NAVY} disabled={isBusy} onClick={() => setShowDetail(true)}>View Details</BizBtn>
+        {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} />}
+        <BizBtn color={BLUE} disabled={isBusy} onClick={() => navigate("/admin/users")}>Approve the User</BizBtn>
+        {biz.status === "Pending" && (
+          <>
+            <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>✓ Approve</BizBtn>
+            <BizBtn color="#DC2626" disabled={isBusy} onClick={() => onOpenReject(biz)}>Reject</BizBtn>
+          </>
+        )}
+        {biz.status === "Approved" && (
+          <BizBtn color="#D97706" disabled={isBusy} onClick={() => onOpenSuspend(biz)}>Suspend</BizBtn>
+        )}
+        {biz.status === "Suspended" && (
+          <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>Reinstate</BizBtn>
+        )}
+        {biz.status === "Rejected" && (
+          <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>Re-approve</BizBtn>
+        )}
 
-          <BizBtn color={BLUE} disabled={isBusy} onClick={() => onAddContent(biz)}>
-            {biz.hasContent ? "Edit Content" : "Add Content"}
-          </BizBtn>
-          <BizBtn color={NAVY} disabled={isBusy} onClick={() => navigate(`/admin/business-analytics/${biz.id}`)}>
-            View Analytics
-          </BizBtn>
-
-          {/* Delete */}
-          <BizBtn color="#991B1B" disabled={isBusy} onClick={() => onDelete(biz)}>Delete</BizBtn>
-        </div>
+        <BizBtn color={BLUE} disabled={isBusy} onClick={() => onAddContent(biz)}>
+          {biz.hasContent ? "Edit Content" : "Add Content"}
+        </BizBtn>
+        <BizBtn color={NAVY} disabled={isBusy} onClick={() => navigate(`/admin/business-analytics/${biz.id}`)}>
+          View Analytics
+        </BizBtn>
+        <BizBtn color="#991B1B" disabled={isBusy} onClick={() => onDelete(biz)}>Delete</BizBtn>
       </div>
 
       <TeamSection bizId={biz.id} />
