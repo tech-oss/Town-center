@@ -240,7 +240,11 @@ export async function registerBusiness(data) {
     id,
     name: data.name,
     new_to_maidenhead: !!data.newToMaidenhead,
-    ...(data.id ? {} : { status: data.status || "Pending" }),
+    // A business admin registers directly is pre-vetted by admin themselves
+    // entering the data — it doesn't need to sit in its own Pending queue the
+    // way a self-signup does. The owner login (below) is separately approved
+    // by the same Edge Function; the two are independent gates either way.
+    ...(data.id ? {} : { status: data.status || "Approved" }),
   };
   const { error: bizError } = await supabase.from("businesses").upsert(businessRow);
   if (bizError) throw bizError;
@@ -322,10 +326,16 @@ export async function markBusinessHasContent() {
   return { ok: true };
 }
 
-// Approving/suspending a registration also moves the owner's own account, so
-// the decision actually takes effect at the login screen rather than being
-// cosmetic in the admin table.
-async function setStatus(id, status, note, ownerStatus, logLabel) {
+// Business approval and the owner's own user approval are deliberately
+// independent gates — approving/rejecting/suspending a business here never
+// touches business_users.status. The business portal's login (useBusinessAuth
+// on business-dashboard) requires BOTH businesses.status = 'Approved' and the
+// owner's own business_users.status = 'approved' before it builds a session,
+// so a business being Approved with a still-Pending owner correctly still
+// can't log in — admin has to approve that person separately from Users.
+// (Same rule is enforced again at the database via is_approved_business_member,
+// not just here — see supabase/sql/dual_gate_login.sql.)
+async function setStatus(id, status, note, logLabel) {
   const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
 
   const { error } = await supabase
@@ -334,27 +344,24 @@ async function setStatus(id, status, note, ownerStatus, logLabel) {
     .eq("id", id);
   if (error) throw error;
 
-  if (ownerStatus) {
-    await supabase.from("business_users").update({ status: ownerStatus }).eq("business_id", id);
-  }
   addLog(logLabel, { id, name: biz?.name ?? id }, note ?? "");
   return { ok: true };
 }
 
 export function approveBusiness(id) {
-  return setStatus(id, "Approved", null, "approved", "Business Approved");
+  return setStatus(id, "Approved", null, "Business Approved");
 }
 
 export function rejectBusiness(id, note = "") {
-  return setStatus(id, "Rejected", note, "rejected", "Business Rejected");
+  return setStatus(id, "Rejected", note, "Business Rejected");
 }
 
 export function suspendBusiness(id, note = "") {
-  return setStatus(id, "Suspended", note, "suspended", "Business Suspended");
+  return setStatus(id, "Suspended", note, "Business Suspended");
 }
 
 export function reinstateBusiness(id) {
-  return setStatus(id, "Approved", null, "approved", "Business Reinstated");
+  return setStatus(id, "Approved", null, "Business Reinstated");
 }
 
 export async function deleteBusiness(id) {
