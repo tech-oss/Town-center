@@ -77,6 +77,27 @@ async function applySubscription(user) {
   return sub ? { ...user, ...sub } : user;
 }
 
+// Two independent gates have to both be open before a session is built: the
+// person's own account (business_users.status) and the business itself
+// (businesses.status) — admin approves each separately (Business
+// Registrations vs. Users), in either order, and both are required. Fetched
+// together via the FK from business_users -> businesses so one query settles
+// both. This mirrors is_approved_business_member() at the database level
+// (supabase/sql/dual_gate_login.sql) — the RLS on every business-scoped table
+// enforces the same rule independent of whatever this client checks.
+async function fetchOwnRow(authUserId) {
+  const { data, error } = await supabase
+    .from("business_users")
+    .select("*, businesses(status)")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+  return error ? null : data;
+}
+
+function isFullyApproved(row) {
+  return !!row && row.status === "approved" && row.businesses?.status === "Approved";
+}
+
 async function refreshFromSession(session) {
   if (!session) {
     currentUser = null;
@@ -84,14 +105,9 @@ async function refreshFromSession(session) {
     emit();
     return;
   }
-  const { data: row, error } = await supabase
-    .from("business_users")
-    .select("*")
-    .eq("auth_user_id", session.user.id)
-    .eq("status", "approved")
-    .maybeSingle();
+  const row = await fetchOwnRow(session.user.id);
 
-  currentUser = error || !row ? null : buildSessionUser(row);
+  currentUser = isFullyApproved(row) ? buildSessionUser(row) : null;
   restored = true;
   emit();
   if (currentUser) {
@@ -107,6 +123,25 @@ supabase.auth.onAuthStateChange((_event, session) => refreshFromSession(session)
 export async function login(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: error.message };
+
+  // Checked here (not just left to refreshFromSession) so a denied login can
+  // say *why* — "your account" vs. "this business" — rather than one generic
+  // message, and so credentials that are correct but not yet approved don't
+  // leave a signed-in Supabase Auth session sitting in the browser.
+  const row = await fetchOwnRow(data.session.user.id);
+  if (!row) {
+    await supabase.auth.signOut();
+    return { ok: false, error: "No business account found for this login." };
+  }
+  if (row.status !== "approved") {
+    await supabase.auth.signOut();
+    return { ok: false, error: "Your account is still awaiting admin approval." };
+  }
+  if (row.businesses?.status !== "Approved") {
+    await supabase.auth.signOut();
+    return { ok: false, error: "This business's registration is still awaiting admin approval." };
+  }
+
   await refreshFromSession(data.session);
   if (!currentUser) return { ok: false, error: "No approved business account found for this login." };
   return { ok: true };
