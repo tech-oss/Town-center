@@ -661,6 +661,7 @@ function typeSpecificRows(biz) {
 }
 
 function BusinessDetailModal({ biz, onClose }) {
+  const navigate = useNavigate();
   const plan = SUBSCRIPTION_PLANS.find((p) => p.name.toLowerCase() === (biz.plan ?? "").toLowerCase());
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
@@ -677,6 +678,7 @@ function BusinessDetailModal({ biz, onClose }) {
           <DetailRow label="Name" value={[biz.firstName, biz.lastName].filter(Boolean).join(" ")} />
           <DetailRow label="Login Email" value={biz.userEmail} />
           <DetailRow label="Phone" value={biz.ownerPhone} />
+          <DetailRow label="Account Status" value={biz.ownerStatus ? biz.ownerStatus[0].toUpperCase() + biz.ownerStatus.slice(1) : "No account yet"} />
         </DetailSection>
 
         <DetailSection title="Business Details">
@@ -686,19 +688,27 @@ function BusinessDetailModal({ biz, onClose }) {
           <DetailRow label="Website" value={biz.website} />
           <DetailRow label="Business Email" value={biz.businessEmail} />
           <DetailRow label="Business Phone" value={biz.businessPhone} />
-          <DetailRow label="Address" value={biz.address} />
+          <DetailRow label="Business Address" value={biz.address} />
           <DetailRow label="New to Maidenhead" value={biz.newToMaidenhead ? "Yes" : null} />
         </DetailSection>
 
-        <DetailSection title="Plan">
-          <DetailRow label="Selected Plan" value={plan ? `${plan.name} — ${plan.price === 0 ? "Free" : `£${plan.price}/mo`}` : biz.plan} />
+        <DetailSection title="Location (for Map)">
+          <DetailRow label="Coordinates" value={biz.lat && biz.lng ? `${biz.lat}, ${biz.lng}` : null} />
+        </DetailSection>
+
+        <DetailSection title="Current Plan">
+          <DetailRow label="Current Plan" value={plan ? `${plan.name} — ${plan.price === 0 ? "Free" : `£${plan.price}/mo`}` : biz.plan} />
         </DetailSection>
 
         <DetailSection title="Terms">
           <DetailRow label="Terms & Privacy" value={biz.termsAcceptedAt ? `Agreed ${new Date(biz.termsAcceptedAt).toLocaleDateString("en-GB")}` : "Not recorded"} />
         </DetailSection>
 
-        <div className="flex justify-end pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+        <div className="flex gap-3 justify-between items-center pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+          <button onClick={() => navigate("/admin/users")}
+            className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: BLUE }}>
+            Approve the User →
+          </button>
           <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Close</button>
         </div>
       </div>
@@ -818,14 +828,18 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
             <p className="text-xs mb-1.5 italic" style={{ color: "#991B1B" }}>Rejection reason: {biz.rejectionNote}</p>
           )}
 
+          {/* Business Type, Website, Business Email, Business Phone — the
+              business-facing fields from the signup form's Business Details
+              step. Owner/personal details and address live in View Details. */}
           <div className="grid sm:grid-cols-2 gap-x-6 gap-y-0.5 text-xs" style={{ color: MUTED }}>
-            {biz.contactName && <span>👤 {biz.contactName} (owner)</span>}
-            {biz.userEmail    && <span>✉️ {biz.userEmail} (login)</span>}
-            {biz.ownerPhone   && <span>📞 {biz.ownerPhone} (owner)</span>}
-            {biz.businessEmail && biz.businessEmail !== biz.userEmail && <span>✉️ {biz.businessEmail} (business)</span>}
-            {biz.businessPhone && biz.businessPhone !== biz.ownerPhone && <span>📞 {biz.businessPhone} (business)</span>}
-            {biz.address    && <span className="truncate">📍 {biz.address}</span>}
-            {biz.website    && <span className="truncate">🔗 {biz.website}</span>}
+            {biz.website       && <span className="truncate">🔗 {biz.website}</span>}
+            {biz.businessEmail && <span className="truncate">✉️ {biz.businessEmail} (business)</span>}
+            {biz.businessPhone && <span>📞 {biz.businessPhone} (business)</span>}
+            {/* Once approved, the account that can actually sign in is the
+                more useful thing to see at a glance than the address. */}
+            {biz.status === "Approved" && biz.userEmail && (
+              <span className="truncate">✅ {biz.userEmail} (approved user)</span>
+            )}
           </div>
           {/* Type-specific picks the signup form's Business Details step
               branches into — same taxonomy/labels as the real signup form. */}

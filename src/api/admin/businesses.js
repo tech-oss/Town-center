@@ -133,7 +133,12 @@ function one(embedded) {
 function fromRow(row) {
   const listing = one(row.business_listings);
   const users = Array.isArray(row.business_users) ? row.business_users : [row.business_users].filter(Boolean);
-  const owner = users.find((u) => u.role === "Owner") ?? users[0] ?? {};
+  // A business can have more than one Owner-role row over its lifetime (a
+  // rejected/superseded signup attempt, then a real one) — prefer whichever
+  // is actually approved, since that's the account that can really sign in.
+  const owner = users.find((u) => u.role === "Owner" && u.status === "approved")
+    ?? users.find((u) => u.role === "Owner")
+    ?? users[0] ?? {};
   const subscription = one(row.business_subscriptions);
   const detail = listing.business_type_detail ?? {};
   return {
