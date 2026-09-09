@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
+import { resolveCategory } from "../Data/taxonomy";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 import CategoryFilterBar from "./CategoryFilterBar";
@@ -60,7 +61,9 @@ export default function CategoryPage() {
   const { section: routeSection, group } = useParams();
   const section = routeSection || (group ? "services" : undefined);
   const [searchParams] = useSearchParams();
-  const category = searchParams.get("category") || undefined;
+  // Resolved through the taxonomy's alias map so links saved or shared before
+  // the category rename still land on the right filter instead of an empty page.
+  const category = searchParams.get("category") ? resolveCategory(searchParams.get("category")) : undefined;
   const sec = sections[section];
   const groupConfig = group ? sec?.groups?.find((g) => g.key === group) : null;
   const [search, setSearch] = useState("");

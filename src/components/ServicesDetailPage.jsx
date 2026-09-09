@@ -8,21 +8,17 @@ import ErrorState from "./ui/ErrorState";
 import ServicesDetailLayout from "./ServicesDetailLayout";
 import FreelancerDetailLayout from "./FreelancerDetailLayout";
 import NewsOffers from "./NewsOffers";
+import { FREELANCER_CATEGORIES as FREELANCER_CATEGORY_OPTIONS } from "../Data/taxonomy";
 
 // Categories under the Services "Freelancers" menu column — these get the
 // lighter, portfolio-first profile layout instead of the local-directory
 // business profile (opening hours, areas covered, business info) that
 // tradespeople and professionals use.
-const FREELANCER_CATEGORIES = new Set([
-  "graphic-designers",
-  "web-developers",
-  "photographers",
-  "copywriters",
-  "marketing-consultants",
-  "personal-trainers",
-  "tutors",
-  "virtual-assistants",
-]);
+// Derived from the canonical taxonomy rather than listed here — this set was
+// maintained by hand in two files (this one and the mobile app's) and went
+// stale whenever the Freelancer list changed, quietly giving new freelancer
+// categories the wrong profile layout.
+const FREELANCER_CATEGORIES = new Set(FREELANCER_CATEGORY_OPTIONS.map((c) => c.value));
 
 function buildSocial(item) {
   const s = item.social;

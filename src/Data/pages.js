@@ -16,6 +16,11 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { featuredEvents } from "./events";
+import {
+  CATEGORY_TITLES, VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES,
+  TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES, FREELANCER_CATEGORIES,
+  categoryLinks, shopGroup, categoryLabel,
+} from "./taxonomy";
 
 // Stable dummy image per slug (replace with real assets later)
 const img = (seed) => `https://picsum.photos/seed/${seed}/900/650`;
@@ -184,7 +189,12 @@ function item(slug, name, section, category, tag, blurb) {
     name,
     section,
     category,
-    tag,
+    // The card's label follows the category rather than being passed
+    // alongside it — the two used to be separate arguments and drifted apart
+    // whenever a category was relabelled, so a card could show the old name
+    // while its filter chip showed the new one. An explicit `tag` still wins
+    // for the few items that want wording of their own.
+    tag: tag ?? categoryLabel(category),
     image: img(slug),
     gallery: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => img(n === 1 ? slug : `${slug}-${n}`)),
     description:
@@ -258,38 +268,38 @@ function item(slug, name, section, category, tag, blurb) {
 
 // ─── SHOP ──────────────────────────────────────────────────────────────────
 const shopItems = [
-  item("pandora", "Pandora", "shop", "accessories-jewellery", "Accessories & Jewellery"),
-  item("watches-of-maidenhead", "Watches of Maidenhead", "shop", "accessories-jewellery", "Accessories & Jewellery"),
-  item("zara", "Zara", "shop", "clothing", "Clothing"),
-  item("m-s", "M&S", "shop", "clothing", "Clothing"),
-  item("the-riverside-tailor", "The Riverside Tailor", "shop", "clothing", "Clothing"),
+  item("pandora", "Pandora", "shop", "jewellery-watches", "Jewellery & Watches"),
+  item("watches-of-maidenhead", "Watches of Maidenhead", "shop", "jewellery-watches", "Jewellery & Watches"),
+  item("zara", "Zara", "shop", "fashion-clothing", "Fashion & Clothing"),
+  item("m-s", "M&S", "shop", "fashion-clothing", "Fashion & Clothing"),
+  item("the-riverside-tailor", "The Riverside Tailor", "shop", "fashion-clothing", "Fashion & Clothing"),
   item("currys", "Currys", "shop", "electronics-phones", "Electronics & Phones"),
   item("ee-store", "EE Store", "shop", "electronics-phones", "Electronics & Phones"),
-  item("waitrose", "Waitrose", "shop", "groceries", "Groceries"),
+  item("waitrose", "Waitrose", "shop", "food-groceries", "Food & Groceries"),
   item("boots", "Boots", "shop", "health-beauty", "Health & Beauty"),
   item("the-body-co", "The Body Co.", "shop", "health-beauty", "Health & Beauty"),
-  item("home-thames", "Home on the Thames", "shop", "home-furniture", "Home & Furniture"),
-  item("sole-mate", "Sole Mate", "shop", "shoes-footwear", "Shoes & Footwear"),
+  item("home-thames", "Home on the Thames", "shop", "home-garden", "Home & Garden"),
+  item("sole-mate", "Sole Mate", "shop", "footwear", "Footwear"),
   item("riverside-runners", "Riverside Runners", "shop", "sports-fitness", "Sports & Fitness"),
   // Services
   item("barclays", "Barclays", "shop", "banks", "Banks & Foreign Exchange"),
   item("little-acorns", "Little Acorns Childcare", "shop", "childcare", "Childcare"),
-  item("quick-clean", "Quick Clean & Repair", "shop", "dry-cleaning", "Dry Cleaning & Shoe Repair"),
-  item("the-cut-co", "The Cut Co.", "shop", "hairdressing", "Hairdressing & Beauty"),
-  item("bupa", "Bupa Health Clinic", "shop", "healthcare", "Healthcare"),
-  item("specsavers", "Specsavers", "shop", "opticians", "Opticians & Pharmacies"),
-  item("serenity-spa", "Serenity Spa", "shop", "spa", "Spa"),
+  item("quick-clean", "Quick Clean & Repair", "shop", "dry-cleaning", "Dry Cleaning & Laundry"),
+  item("the-cut-co", "The Cut Co.", "shop", "hairdressing", "Hair & Beauty"),
+  item("bupa", "Bupa Health Clinic", "shop", "health-beauty", "Health & Beauty"),
+  item("specsavers", "Specsavers", "shop", "health-beauty", "Health & Beauty"),
+  item("serenity-spa", "Serenity Spa", "shop", "spa", "Spa & Wellness"),
   item("thames-travel", "Thames Travel", "shop", "travel-agents", "Travel Agents"),
 ];
 
 // ─── SERVICES ────────────────────────────────────────────────────────────────
 const servicesItems = [
   // Tradesperson
-  item("thames-valley-builders", "Thames Valley Builders", "services", "builders", "Builders"),
+  item("thames-valley-builders", "Thames Valley Builders", "services", "builders", "Builders & General Building"),
   item("brightspark-electrical", "BrightSpark Electrical", "services", "electricians", "Electricians"),
   {
     // ── Real content: Elgan Davies Ltd, Maidenhead (plumbing & heating) ──
-    ...item("elgan-davies-plumbing-heating", "Elgan Davies Ltd", "services", "plumbers", "Plumbers & Heating"),
+    ...item("elgan-davies-plumbing-heating", "Elgan Davies Ltd", "services", "plumbers", "Plumbers"),
     description:
       "Family-run plumbing and heating engineers based in Fifield, Maidenhead, serving Berkshire for over 20 years. From emergency repairs to full boiler installations and luxury bathroom design, every job is treated with the care of a family business.",
     hours: [
@@ -398,19 +408,19 @@ const servicesItems = [
       { q: "How do I book an appointment?", a: "Call 0800 193 1434 or email info@elgandaviesheating.co.uk and the team will arrange a convenient time." },
     ],
   },
-  item("maidenhead-decorators", "Maidenhead Decorators", "services", "decorators-painters", "Decorators & Painters"),
-  item("towncentre-locksmiths", "Town Centre Locksmiths", "services", "locksmiths", "Locksmiths"),
-  item("sparkle-clean-co", "Sparkle Clean Co.", "services", "cleaners", "Cleaners"),
+  item("maidenhead-decorators", "Maidenhead Decorators", "services", "decorators-painters", "Painters & Decorators"),
+  item("towncentre-locksmiths", "Town Centre Locksmiths", "services", "locksmiths", "Locksmith"),
+  item("sparkle-clean-co", "Sparkle Clean Co.", "services", "cleaners", "Cleaning"),
   // Professionals
-  item("thames-accountancy", "Thames Accountancy", "services", "accountants", "Accountants"),
-  item("maidenhead-legal-partners", "Maidenhead Legal Partners", "services", "solicitors", "Solicitors"),
-  item("bridgeview-financial", "Bridgeview Financial", "services", "financial-advisers", "Financial Advisers"),
-  item("riverside-estates", "Riverside Estates", "services", "estate-agents", "Estate Agents"),
-  item("towncentre-recruitment", "Town Centre Recruitment", "services", "recruitment", "Recruitment"),
-  item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance Brokers"),
+  item("thames-accountancy", "Thames Accountancy", "services", "accountants", "Accountants & Finance"),
+  item("maidenhead-legal-partners", "Maidenhead Legal Partners", "services", "solicitors", "Legal Services"),
+  item("bridgeview-financial", "Bridgeview Financial", "services", "financial-advisers", "Financial & Mortgage Advice"),
+  item("riverside-estates", "Riverside Estates", "services", "estate-agents", "Property & Estate Agents"),
+  item("towncentre-recruitment", "Town Centre Recruitment", "services", "recruitment", "Recruitment & HR"),
+  item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance"),
   // Freelancers — each profile lists 10 skills.
   {
-    ...item("riverside-graphic-design", "Riverside Graphic Design", "services", "graphic-designers", "Graphic Designers"),
+    ...item("riverside-graphic-design", "Riverside Graphic Design", "services", "design-creative", "Design & Creative"),
     servicesOffered: [
       "Logo Design", "Brand Identity", "Print Design", "Packaging Design", "Illustration",
       "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Social Media Graphics", "Typography",
@@ -419,7 +429,7 @@ const servicesItems = [
   {
     // Portfolio mixes photos with links out to live project sites — a
     // freelancer's work isn't always a picture (see FreelancerDetailLayout).
-    ...item("thames-web-studio", "Thames Web Studio", "services", "web-developers", "Web Developers"),
+    ...item("thames-web-studio", "Thames Web Studio", "services", "web-digital", "Web & Digital"),
     servicesOffered: [
       "Website Design", "Front-End Development", "WordPress", "Shopify", "E-Commerce Builds",
       "Responsive Design", "SEO Basics", "JavaScript", "HTML & CSS", "Website Maintenance",
@@ -433,42 +443,42 @@ const servicesItems = [
     ],
   },
   {
-    ...item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photographers", "Photographers"),
+    ...item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photography-video", "Photography & Video"),
     servicesOffered: [
       "Portrait Photography", "Event Photography", "Product Photography", "Wedding Photography", "Photo Editing",
       "Lightroom", "Photoshop", "Studio Lighting", "Drone Photography", "Headshots",
     ],
   },
   {
-    ...item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "copywriters", "Copywriters & Content Writers"),
+    ...item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "writing-content", "Writing & Content"),
     servicesOffered: [
       "Website Copy", "Blog Writing", "SEO Copywriting", "Email Marketing", "Product Descriptions",
       "Brand Voice & Tone", "Proofreading & Editing", "Social Media Copy", "Press Releases", "Content Strategy",
     ],
   },
   {
-    ...item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-consultants", "Marketing Consultants"),
+    ...item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-social-media", "Marketing & Social Media"),
     servicesOffered: [
       "Digital Marketing Strategy", "Social Media Marketing", "SEO", "PPC & Google Ads", "Email Marketing",
       "Brand Strategy", "Market Research", "Content Marketing", "Marketing Analytics", "Campaign Management",
     ],
   },
   {
-    ...item("towncentre-pt", "Town Centre PT", "services", "personal-trainers", "Personal Trainers"),
+    ...item("towncentre-pt", "Town Centre PT", "services", "tutoring-training", "Tutoring & Training"),
     servicesOffered: [
       "Strength Training", "Weight Loss Coaching", "Nutrition Advice", "HIIT Training", "Mobility & Flexibility",
       "Group Sessions", "One-to-One Coaching", "Sports Conditioning", "Injury Rehabilitation Support", "Online Coaching Plans",
     ],
   },
   {
-    ...item("riverside-tutoring", "Riverside Tutoring", "services", "tutors", "Tutors"),
+    ...item("riverside-tutoring", "Riverside Tutoring", "services", "tutoring-training", "Tutoring & Training"),
     servicesOffered: [
       "Maths Tutoring", "English Tutoring", "Science Tutoring", "GCSE Preparation", "A-Level Preparation",
       "11+ Preparation", "Exam Technique", "Homework Support", "Online Tutoring", "Study Skills Coaching",
     ],
   },
   {
-    ...item("maidenhead-va-services", "Maidenhead VA Services", "services", "virtual-assistants", "Virtual Assistants"),
+    ...item("maidenhead-va-services", "Maidenhead VA Services", "services", "admin-virtual-assistance", "Admin & Virtual Assistance"),
     servicesOffered: [
       "Diary Management", "Email Management", "Data Entry", "Customer Support", "Social Media Scheduling",
       "Invoicing & Bookkeeping Support", "Travel Booking", "Document Preparation", "CRM Management", "Research & Reporting",
@@ -515,7 +525,7 @@ const eatItems = [
   item("riverside-tap", "Riverside Tap", "eat-drink", "bars", "Bars"),
   {
     // ── Real content: COCOBA Chocolate Café, Maidenhead ──
-    ...item("cocoba", "COCOBA Chocolate Café", "eat-drink", "cafes", "Cafés"),
+    ...item("cocoba", "COCOBA Chocolate Café", "eat-drink", "cafes", "Cafes"),
     image: "/images/cocoba/storefront.jpg",
     gallery: padGallery("cocoba", [
       "/images/cocoba/storefront.jpg",
@@ -552,7 +562,7 @@ const eatItems = [
   },
   {
     // ── Esquires Coffee — "free plan +" listing (2-image header, description, website) ──
-    ...item("esquires-coffee", "Esquires Coffee", "eat-drink", "cafes", "Café"),
+    ...item("esquires-coffee", "Esquires Coffee", "eat-drink", "cafes", "Cafes"),
     freePlan: true,
     image: "/images/esquires/hero-1.png",
     gallery: ["/images/esquires/hero-2.png", "/images/esquires/hero-1.png"],
@@ -571,7 +581,7 @@ const eatItems = [
   item("pret-a-manger", "Pret A Manger", "eat-drink", "grab-go", "Grab & Go"),
   {
     // ── Real content: Bakedd, Maidenhead — "free plan" listing (logo-only header) ──
-    ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery & Café"),
+    ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
     // Listed under both Bakery and Cafés in the Eat & Drink menu
     categories: ["bakery", "cafes"],
     freePlan: true,
@@ -657,33 +667,12 @@ export const sections = {
     },
     columns: [
       {
-        heading: "Shops",
-        links: [
-          { label: "See All Shops", to: "/shop" },
-          { label: "Accessories & Jewellery", to: "/shop?category=accessories-jewellery" },
-          { label: "Clothing", to: "/shop?category=clothing" },
-          { label: "Electronics & Phones", to: "/shop?category=electronics-phones" },
-          { label: "Groceries", to: "/shop?category=groceries" },
-          { label: "Health & Beauty", to: "/shop?category=health-beauty" },
-          { label: "Home & Furniture", to: "/shop?category=home-furniture" },
-          { label: "Shoes & Footwear", to: "/shop?category=shoes-footwear" },
-          { label: "Sports & Fitness", to: "/shop?category=sports-fitness" },
-          { label: "Other", to: "/shop?category=other-shop" },
-        ],
+        heading: "Shop",
+        links: categoryLinks("/shop", shopGroup("Shop"), { seeAll: "See All Shops" }),
       },
       {
         heading: "Local Services",
-        links: [
-          { label: "Banks & Foreign Exchange", to: "/shop?category=banks" },
-          { label: "Childcare", to: "/shop?category=childcare" },
-          { label: "Dry Cleaning & Shoe Repair", to: "/shop?category=dry-cleaning" },
-          { label: "Hairdressing & Beauty", to: "/shop?category=hairdressing" },
-          { label: "Healthcare", to: "/shop?category=healthcare" },
-          { label: "Opticians & Pharmacies", to: "/shop?category=opticians" },
-          { label: "Spa", to: "/shop?category=spa" },
-          { label: "Travel Agents", to: "/shop?category=travel-agents" },
-          { label: "Other", to: "/shop?category=other-local-services" },
-        ],
+        links: categoryLinks("/shop", shopGroup("Local Services")),
       },
       {
         heading: "Featured",
@@ -714,44 +703,15 @@ export const sections = {
     columns: [
       {
         heading: "Tradesperson",
-        links: [
-          { label: "See All Tradespeople", to: "/services/tradespeople" },
-          { label: "Builders", to: "/services/tradespeople?category=builders" },
-          { label: "Electricians", to: "/services/tradespeople?category=electricians" },
-          { label: "Plumbers & Heating", to: "/services/tradespeople?category=plumbers" },
-          { label: "Decorators & Painters", to: "/services/tradespeople?category=decorators-painters" },
-          { label: "Locksmiths", to: "/services/tradespeople?category=locksmiths" },
-          { label: "Cleaners", to: "/services/tradespeople?category=cleaners" },
-          { label: "Other", to: "/services/tradespeople?category=other-tradesperson" },
-        ],
+        links: categoryLinks("/services/tradespeople", TRADESPERSON_CATEGORIES, { seeAll: "See All Tradespeople" }),
       },
       {
         heading: "Professionals",
-        links: [
-          { label: "See All Professionals", to: "/services/professionals" },
-          { label: "Accountants", to: "/services/professionals?category=accountants" },
-          { label: "Solicitors", to: "/services/professionals?category=solicitors" },
-          { label: "Financial Advisers", to: "/services/professionals?category=financial-advisers" },
-          { label: "Estate Agents", to: "/services/professionals?category=estate-agents" },
-          { label: "Recruitment", to: "/services/professionals?category=recruitment" },
-          { label: "Insurance Brokers", to: "/services/professionals?category=insurance-brokers" },
-          { label: "Other", to: "/services/professionals?category=other-professional" },
-        ],
+        links: categoryLinks("/services/professionals", PROFESSIONAL_CATEGORIES, { seeAll: "See All Professionals" }),
       },
       {
         heading: "Freelancers",
-        links: [
-          { label: "See All Freelancers", to: "/services/freelancers" },
-          { label: "Graphic Designers", to: "/services/freelancers?category=graphic-designers" },
-          { label: "Web Developers", to: "/services/freelancers?category=web-developers" },
-          { label: "Photographers", to: "/services/freelancers?category=photographers" },
-          { label: "Copywriters & Content Writers", to: "/services/freelancers?category=copywriters" },
-          { label: "Marketing Consultants", to: "/services/freelancers?category=marketing-consultants" },
-          { label: "Personal Trainers", to: "/services/freelancers?category=personal-trainers" },
-          { label: "Tutors", to: "/services/freelancers?category=tutors" },
-          { label: "Virtual Assistants", to: "/services/freelancers?category=virtual-assistants" },
-          { label: "Other", to: "/services/freelancers?category=other-freelancer" },
-        ],
+        links: categoryLinks("/services/freelancers", FREELANCER_CATEGORIES, { seeAll: "See All Freelancers" }),
       },
     ],
     // Dedicated listing pages at /services/:key — each scoped to only its
@@ -794,39 +754,11 @@ export const sections = {
     columns: [
       {
         heading: "Venue Type",
-        links: [
-          { label: "See All", to: "/eat-drink" },
-          { label: "Restaurants", to: "/eat-drink?category=restaurants" },
-          { label: "Bars", to: "/eat-drink?category=bars" },
-          { label: "Cafes", to: "/eat-drink?category=cafes" },
-          { label: "Grab & Go", to: "/eat-drink?category=grab-go" },
-          { label: "Bakery", to: "/eat-drink?category=bakery" },
-          { label: "Takeaway", to: "/eat-drink?category=takeaway" },
-          { label: "Private Dining", to: "/eat-drink?category=private-dining" },
-          { label: "Other", to: "/eat-drink?category=other-venue" },
-        ],
+        links: categoryLinks("/eat-drink", VENUE_TYPES, { seeAll: "See All" }),
       },
       {
         heading: "Cuisine Type",
-        links: [
-          { label: "British", to: "/eat-drink?category=british" },
-          { label: "Italian", to: "/eat-drink?category=italian" },
-          { label: "Chinese", to: "/eat-drink?category=chinese" },
-          { label: "Indian", to: "/eat-drink?category=indian" },
-          { label: "French", to: "/eat-drink?category=french" },
-          { label: "Thai", to: "/eat-drink?category=thai" },
-          { label: "Japanese", to: "/eat-drink?category=japanese" },
-          { label: "Moroccan", to: "/eat-drink?category=moroccan" },
-          { label: "Lebanese", to: "/eat-drink?category=lebanese" },
-          { label: "Bangladeshi", to: "/eat-drink?category=bangladeshi" },
-          { label: "Mediterranean", to: "/eat-drink?category=mediterranean" },
-          { label: "Portuguese", to: "/eat-drink?category=portuguese" },
-          { label: "Dessert", to: "/eat-drink?category=dessert" },
-          { label: "Pizza", to: "/eat-drink?category=pizza" },
-          { label: "Gastropub", to: "/eat-drink?category=gastropub" },
-          { label: "Pan European", to: "/eat-drink?category=pan-european" },
-          { label: "Other", to: "/eat-drink?category=other-cuisine" },
-        ],
+        links: categoryLinks("/eat-drink", CUISINE_TYPES),
       },
       {
         heading: "Featured",
@@ -859,20 +791,7 @@ export const sections = {
     columns: [
       {
         heading: "Browse By Interest",
-        links: [
-          { label: "See All Activities", to: "/see-do" },
-          { label: "Sport & Wellness", to: "/see-do?category=sport-wellness" },
-          { label: "Gaming", to: "/see-do?category=gaming" },
-          { label: "Film", to: "/see-do?category=film" },
-          { label: "Art & Culture", to: "/see-do?category=art-culture" },
-          { label: "Learning", to: "/see-do?category=learning" },
-          { label: "Music & Dance", to: "/see-do?category=music-dance" },
-          { label: "Theatre", to: "/see-do?category=theatre" },
-          { label: "Community", to: "/see-do?category=community" },
-          { label: "Family", to: "/see-do?category=family" },
-          { label: "Markets", to: "/see-do?category=markets" },
-          { label: "Other", to: "/see-do?category=other" },
-        ],
+        links: categoryLinks("/see-do", SEE_DO_CATEGORIES, { seeAll: "See All Activities" }),
       },
       {
         heading: "Featured",
@@ -886,91 +805,10 @@ export const sections = {
 };
 
 // Human-readable titles for category pages, keyed by category slug
-export const categoryTitles = {
-  // shop
-  "accessories-jewellery": "Accessories & Jewellery",
-  clothing: "Clothing",
-  "electronics-phones": "Electronics & Phones",
-  groceries: "Groceries",
-  "health-beauty": "Health & Beauty",
-  "home-furniture": "Home & Furniture",
-  "shoes-footwear": "Shoes & Footwear",
-  "sports-fitness": "Sports & Fitness",
-  banks: "Banks & Foreign Exchange",
-  childcare: "Childcare",
-  "dry-cleaning": "Dry Cleaning & Shoe Repair",
-  hairdressing: "Hairdressing & Beauty",
-  healthcare: "Healthcare",
-  opticians: "Opticians & Pharmacies",
-  spa: "Spa",
-  "travel-agents": "Travel Agents",
-  "other-shop": "Other",
-  "other-local-services": "Other",
-  // services — tradesperson
-  builders: "Builders",
-  electricians: "Electricians",
-  plumbers: "Plumbers & Heating",
-  "decorators-painters": "Decorators & Painters",
-  locksmiths: "Locksmiths",
-  cleaners: "Cleaners",
-  "other-tradesperson": "Other",
-  // services — professionals
-  accountants: "Accountants",
-  solicitors: "Solicitors",
-  "financial-advisers": "Financial Advisers",
-  "estate-agents": "Estate Agents",
-  recruitment: "Recruitment",
-  "insurance-brokers": "Insurance Brokers",
-  "other-professional": "Other",
-  // services — freelancers
-  "graphic-designers": "Graphic Designers",
-  "web-developers": "Web Developers",
-  photographers: "Photographers",
-  copywriters: "Copywriters & Content Writers",
-  "marketing-consultants": "Marketing Consultants",
-  "personal-trainers": "Personal Trainers",
-  tutors: "Tutors",
-  "virtual-assistants": "Virtual Assistants",
-  "other-freelancer": "Other",
-  // eat & drink
-  restaurants: "Restaurants",
-  bars: "Bars",
-  cafes: "Cafés",
-  "grab-go": "Grab & Go",
-  bakery: "Bakery",
-  takeaway: "Takeaway",
-  "private-dining": "Private Dining",
-  "other-venue": "Other",
-  british: "British",
-  italian: "Italian",
-  chinese: "Chinese",
-  indian: "Indian",
-  french: "French",
-  thai: "Thai",
-  japanese: "Japanese",
-  moroccan: "Moroccan",
-  lebanese: "Lebanese",
-  bangladeshi: "Bangladeshi",
-  mediterranean: "Mediterranean",
-  portuguese: "Portuguese",
-  dessert: "Dessert",
-  pizza: "Pizza",
-  gastropub: "Gastropub",
-  "pan-european": "Pan European",
-  "other-cuisine": "Other",
-  // see & do
-  "sport-wellness": "Sport & Wellness",
-  gaming: "Gaming",
-  film: "Film",
-  "art-culture": "Art & Culture",
-  learning: "Learning",
-  "music-dance": "Music & Dance",
-  theatre: "Theatre",
-  community: "Community",
-  family: "Family",
-  markets: "Markets",
-  other: "Other",
-};
+// Every category label on the public site, straight off the canonical
+// taxonomy — so a category can never appear in a picker but render as a raw
+// slug here, which is what used to happen whenever the two drifted.
+export const categoryTitles = CATEGORY_TITLES;
 
 // Flat lookup of every item by slug (for detail pages)
 export const allItems = Object.values(sections).flatMap((s) => s.items);
