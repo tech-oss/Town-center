@@ -99,6 +99,11 @@ export const CUISINE_OPTIONS = [
 
 export const BUSINESS_PLANS = ["Basic", "Standard", "Premium", "Agent"];
 
+// Mirrored in supabase/sql/business_featured_and_unique_name.sql, which is what
+// actually enforces it — this copy exists so the UI can show "7 / 10" and
+// disable the control before a doomed round trip, not as the rule itself.
+export const FEATURED_LIMIT = 10;
+
 // Legacy export kept for compatibility
 export const BUSINESS_CATEGORIES = [
   "Eat & Drink", "See & Do", "Shop", "Live",
@@ -149,7 +154,7 @@ function fromRow(row) {
     adminNote: row.admin_note,
     rejectionNote: row.status === "Rejected" ? row.admin_note : "",
     suspendNote: row.status === "Suspended" ? row.admin_note : "",
-    newToMaidenhead: row.new_to_maidenhead,
+    featured: !!row.featured,
 
     // ── "Business Details" step ──
     // Older listings recorded a display category ("Live & Stay"); newer ones a
@@ -181,6 +186,10 @@ function fromRow(row) {
     logo: listing.logo ?? null,
 
     // ── "Your Details" step (the owner's own account, not the business) ──
+    // A business can legitimately have no owner at all: admin registers the
+    // listing, and whoever runs the business claims it later from the portal.
+    // `hasOwner` false is the "unclaimed" state, not missing data.
+    hasOwner: !!owner.email,
     contactName: [owner.first_name, owner.last_name].filter(Boolean).join(" "),
     firstName: owner.first_name ?? "",
     lastName: owner.last_name ?? "",
@@ -230,94 +239,163 @@ function slugify(name) {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-// Admin registering a business on someone's behalf. This creates the business
-// and its listing only — the owner's login is invited separately (creating an
-// Auth user needs the service-role key, which the browser must never hold).
+// PostgREST maps `ilike` onto SQL ILIKE, where % and _ are wildcards — so a
+// business genuinely called "50% Off" would otherwise match half the table.
+function escapeLike(value) {
+  return value.replace(/[\\%_]/g, (c) => `\\${c}`);
+}
+
+// The two table-level rules from business_featured_and_unique_name.sql come
+// back as Postgres errors, not validation results. Translate them once, here,
+// so every caller gets a sentence worth showing a person.
+function readableConstraintError(error, name) {
+  const message = String(error?.message ?? "");
+  if (error?.code === "23505" || message.includes("businesses_name_unique")) {
+    return new Error(`A business called "${name}" is already registered. Business names must be unique.`);
+  }
+  if (message.includes("Featured limit")) {
+    return new Error(`Only ${FEATURED_LIMIT} businesses can be featured at once. Un-feature one first.`);
+  }
+  return error;
+}
+
+// Admin registering a business on someone's behalf.
+//
+// The owner's login is optional. Admin can list a business with no account
+// attached at all — the business then sits unclaimed until whoever runs it
+// registers against it from the business portal. Passing ownerEmail creates
+// the login here and now instead, already approved.
 export async function registerBusiness(data) {
-  const id = data.id || `biz_${slugify(data.name)}-${Math.random().toString(36).slice(2, 7)}`;
+  const name = (data.name ?? "").trim();
+  const id = data.id || `biz_${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
+
+  // The unique index is the real guard — this pre-check only exists so a
+  // duplicate reads as a sentence rather than as a constraint violation, and
+  // so a doomed registration never reaches the point of creating an Auth user.
+  if (!data.id) {
+    const { data: clash } = await supabase
+      .from("businesses")
+      .select("id, name")
+      .ilike("name", escapeLike(name))
+      .maybeSingle();
+    if (clash) throw readableConstraintError({ code: "23505" }, name);
+  }
 
   const businessRow = {
     id,
-    name: data.name,
-    new_to_maidenhead: !!data.newToMaidenhead,
+    name,
+    featured: !!data.featured,
     // A business admin registers directly is pre-vetted by admin themselves
     // entering the data — it doesn't need to sit in its own Pending queue the
-    // way a self-signup does. The owner login (below) is separately approved
-    // by the same Edge Function; the two are independent gates either way.
+    // way a self-signup does. The owner login (below) is created already
+    // approved for the same reason, so an admin-registered business with an
+    // owner is immediately usable: nothing left for anyone to approve.
     ...(data.id ? {} : { status: data.status || "Approved" }),
   };
   const { error: bizError } = await supabase.from("businesses").upsert(businessRow);
-  if (bizError) throw bizError;
+  if (bizError) throw readableConstraintError(bizError, name);
 
-  const { error: listingError } = await supabase.from("business_listings").upsert({
-    business_id: id,
-    name: data.name,
-    business_type: data.section || null,
-    // Every type-specific pick from the signup form's Business Details step —
-    // same shape the real self-serve registration writes, not a subset.
-    business_type_detail: {
-      freelancerKind: data.freelancerKind || null,
-      freelancerCategories: data.freelancerKind ? (data.freelancerCategories ?? []) : [],
-      hotelKind: data.section === "hotel" ? data.hotelKind : null,
-      cuisineTypes: data.cuisineTypes ?? [],
-      venueTypes: data.venueTypes ?? [],
-      shopCategories: data.shopCategories ?? [],
-      seeDoCategories: data.seeDoCategories ?? [],
-    },
-    address: data.address || null,
-    // Business's own public contact details — distinct from the owner's
-    // personal ones, which live on their business_users row instead.
-    phone: data.businessPhone || null,
-    email: data.businessEmail || null,
-    website: data.website || null,
-    lat: data.lat ?? null,
-    lng: data.lng ?? null,
-    logo: data.logo ?? null,
-  }, { onConflict: "business_id" });
-  if (listingError) throw listingError;
-
-  if (data.planKey) {
-    await supabase.from("business_subscriptions").upsert({
+  // Everything past this point can fail, and a half-written registration is
+  // now worse than it used to be: the business row holds the name, and names
+  // are unique, so an orphan would permanently block admin from re-registering
+  // that business. There are no client-side transactions against PostgREST, so
+  // this stands in for one — any failure below unwinds all three tables.
+  try {
+    const { error: listingError } = await supabase.from("business_listings").upsert({
       business_id: id,
-      plan: data.planKey,
-      // Admin registering on the business's behalf stands in for their
-      // agreeing to the Terms of Use / Privacy Policy at signup.
-      terms_accepted_at: new Date().toISOString(),
-    }, { onConflict: "business_id" });
-  }
-
-  // The owner's own login — a real Supabase Auth account, not just a
-  // business_users row, so they can actually sign in. Has to go through an
-  // Edge Function: calling supabase.auth.signUp() straight from this browser
-  // would create the account AND switch the calling admin's own session over
-  // to it (this project has email confirmation off).
-  if (data.ownerEmail) {
-    const password = data.autoPassword ? crypto.randomUUID().slice(0, 12) : data.password;
-    const { data: fnResult, error: fnError } = await supabase.functions.invoke("admin-create-business", {
-      body: {
-        businessId: id,
-        email: data.ownerEmail,
-        password,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        phone: data.ownerPhone || null,
-        role: "Owner",
+      name,
+      business_type: data.section || null,
+      // Every type-specific pick from the signup form's Business Details step —
+      // same shape the real self-serve registration writes, not a subset.
+      business_type_detail: {
+        freelancerKind: data.freelancerKind || null,
+        freelancerCategories: data.freelancerKind ? (data.freelancerCategories ?? []) : [],
+        hotelKind: data.section === "hotel" ? data.hotelKind : null,
+        cuisineTypes: data.cuisineTypes ?? [],
+        venueTypes: data.venueTypes ?? [],
+        shopCategories: data.shopCategories ?? [],
+        seeDoCategories: data.seeDoCategories ?? [],
       },
-    });
-    if (fnError || fnResult?.error) {
-      // Don't leave a business/listing/subscription behind with no owner and
-      // no way to create one through this form again (name/id would collide
-      // on retry) — a failed registration should roll back cleanly.
-      if (!data.id) {
-        await supabase.from("business_subscriptions").delete().eq("business_id", id);
-        await supabase.from("business_listings").delete().eq("business_id", id);
-        await supabase.from("businesses").delete().eq("id", id);
-      }
-      throw new Error(fnResult?.error ?? fnError.message ?? "Could not create the owner's login.");
+      address: data.address || null,
+      // Business's own public contact details — distinct from the owner's
+      // personal ones, which live on their business_users row instead.
+      phone: data.businessPhone || null,
+      email: data.businessEmail || null,
+      website: data.website || null,
+      lat: data.lat ?? null,
+      lng: data.lng ?? null,
+      logo: data.logo ?? null,
+    }, { onConflict: "business_id" });
+    if (listingError) throw listingError;
+
+    if (data.planKey) {
+      const { error: subError } = await supabase.from("business_subscriptions").upsert({
+        business_id: id,
+        plan: data.planKey,
+        // Admin registering on the business's behalf stands in for their
+        // agreeing to the Terms of Use / Privacy Policy at signup.
+        terms_accepted_at: new Date().toISOString(),
+      }, { onConflict: "business_id" });
+      if (subError) throw subError;
     }
+
+    // The owner's login is optional — skipping it leaves the business
+    // unclaimed, which is a valid end state, not an incomplete one.
+    //
+    // When there is one, it's a real Supabase Auth account rather than just a
+    // business_users row, so they can actually sign in. That has to go through
+    // an Edge Function: calling supabase.auth.signUp() straight from this
+    // browser would create the account AND switch the calling admin's own
+    // session over to it (this project has email confirmation off). The
+    // function inserts the row already approved, so a business admin registers
+    // with an owner needs no further approval from anyone.
+    if (data.ownerEmail) {
+      const password = data.autoPassword ? crypto.randomUUID().slice(0, 12) : data.password;
+      const { data: fnResult, error: fnError } = await supabase.functions.invoke("admin-create-business", {
+        body: {
+          businessId: id,
+          email: data.ownerEmail,
+          password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.ownerPhone || null,
+          role: "Owner",
+        },
+      });
+      if (fnError || fnResult?.error) {
+        throw new Error(fnResult?.error ?? fnError.message ?? "Could not create the owner's login.");
+      }
+    }
+  } catch (e) {
+    // Only unwind a registration this call created. Editing an existing
+    // business must never delete it because one field failed to save.
+    if (!data.id) {
+      await supabase.from("business_subscriptions").delete().eq("business_id", id);
+      await supabase.from("business_listings").delete().eq("business_id", id);
+      await supabase.from("businesses").delete().eq("id", id);
+    }
+    throw readableConstraintError(e, name);
   }
 
   return getBusinessById(id);
+}
+
+// Featuring is its own action rather than something admin can only choose at
+// registration — the cap means it's a rota, not a one-time property, so it has
+// to be toggleable from the list. The limit is enforced by a trigger; this
+// just makes the refusal readable.
+export async function setFeatured(id, featured) {
+  const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
+
+  const { error } = await supabase.from("businesses").update({ featured }).eq("id", id);
+  if (error) throw readableConstraintError(error, biz?.name ?? id);
+
+  addLog(
+    featured ? "Business Featured" : "Business Unfeatured",
+    { id, name: biz?.name ?? id },
+    featured ? `Promoted to the featured list (max ${FEATURED_LIMIT}).` : "Removed from the featured list.",
+  );
+  return { ok: true };
 }
 
 // `hasContent` is derived from the listing's description, so there is nothing

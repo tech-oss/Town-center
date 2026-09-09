@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness,
-  suspendBusiness, reinstateBusiness, deleteBusiness,
+  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
@@ -51,6 +51,14 @@ function sectionLabel(val) {
 }
 
 // ─── Multi-checkbox group ─────────────────────────────────────────────────────
+// The only state where a person is actually waiting on admin: an owner account
+// exists and hasn't been approved yet — i.e. someone self-registered. An owner
+// admin created is approved on creation, and an unclaimed business has nobody
+// to approve, so neither should offer the action.
+function needsUserApproval(biz) {
+  return biz.hasOwner && biz.ownerStatus !== "approved";
+}
+
 function CheckGroup({ options, selected, onChange, grouped }) {
   function toggle(val) {
     onChange(selected.includes(val) ? selected.filter((v) => v !== val) : [...selected, val]);
@@ -123,21 +131,28 @@ function FormField({ label, required, children, hint, span2 }) {
 // someone's behalf is the same data entry, just done by admin instead of the
 // business, so the two paths must produce identical records.
 const EMPTY_FORM = {
-  // "Your Details" — the owner's own account
+  // "Your Details" — the owner's own account. Optional: admin can list a
+  // business with nobody attached and let the real owner claim it later from
+  // the business portal, which is the common case for directory entries admin
+  // adds themselves.
+  withOwner: false,
   firstName: "", lastName: "", ownerEmail: "", ownerPhone: "",
   autoPassword: true, password: "",
   // "Business Details"
   name: "", section: "", website: "", businessEmail: "", businessPhone: "", address: "",
   freelancerKind: "", freelancerCategories: [], hotelKind: "hotel",
   cuisineTypes: [], venueTypes: [], shopCategories: [], seeDoCategories: [],
-  newToMaidenhead: false,
   lat: "", lng: "",
   logo: null, logoName: "",
   // "Plan"
   planKey: "standard",
+  // Editorial promotion — capped platform-wide, so it isn't part of any one
+  // business type's details.
+  featured: false,
 };
 
-function RegisterBusinessForm({ onSave, onCancel }) {
+function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }) {
+  const featuredFull = featuredCount >= featuredLimit;
   const [form, setForm] = useState(EMPTY_FORM);
   const [logoPreview, setLogoPreview] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -158,12 +173,14 @@ function RegisterBusinessForm({ onSave, onCancel }) {
     reader.readAsDataURL(file);
   }
 
+  // Clears the type-specific picks, which only make sense for the type that
+  // was selected when they were made. `featured` deliberately survives — it
+  // has nothing to do with the business's type.
   function handleSectionChange(val) {
     setForm((f) => ({
       ...f, section: val,
       freelancerKind: "", freelancerCategories: [], hotelKind: "hotel",
       cuisineTypes: [], venueTypes: [], shopCategories: [], seeDoCategories: [],
-      newToMaidenhead: false,
     }));
   }
 
@@ -179,8 +196,14 @@ function RegisterBusinessForm({ onSave, onCancel }) {
     (!isShop || form.shopCategories.length > 0) &&
     (!isSeeDo || form.seeDoCategories.length > 0);
 
-  const isValid = form.firstName.trim() && form.lastName.trim() && form.ownerEmail.trim()
+  // With no owner attached, none of the "Your Details" fields are collected at
+  // all, so none of them can block the form.
+  const ownerValid = !form.withOwner || (
+    form.firstName.trim() && form.lastName.trim() && form.ownerEmail.trim()
     && (form.autoPassword || form.password)
+  );
+
+  const isValid = ownerValid
     && form.name.trim() && form.section && form.address.trim() && typeValid;
 
   async function handleSubmit() {
@@ -188,7 +211,15 @@ function RegisterBusinessForm({ onSave, onCancel }) {
     setSaving(true);
     setError("");
     try {
-      await onSave(form);
+      // Owner fields are dropped rather than sent empty when no owner is being
+      // attached — admin may have typed an address and then switched the
+      // toggle back off, and a stray ownerEmail is what decides whether a
+      // login gets created at all.
+      const { withOwner, ...rest } = form;
+      await onSave(withOwner ? rest : {
+        ...rest,
+        firstName: "", lastName: "", ownerEmail: "", ownerPhone: "", password: "",
+      });
     } catch (e) {
       setError(e.message ?? "Something went wrong.");
     }
@@ -204,38 +235,55 @@ function RegisterBusinessForm({ onSave, onCancel }) {
         <button onClick={onCancel} className="opacity-40 hover:opacity-70 text-xl leading-none" style={{ color: NAVY }}>✕</button>
       </div>
 
-      {/* ── Your Details (owner account) ── */}
-      <Section title="Your Details" note="The business owner's own login">
-        <div className="grid sm:grid-cols-2 gap-4">
-          <FormField label="First Name" required>
-            <input value={form.firstName} onChange={(e) => set("firstName", e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          </FormField>
-          <FormField label="Last Name" required>
-            <input value={form.lastName} onChange={(e) => set("lastName", e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          </FormField>
-          <FormField label="Email Address" required hint="This is the owner's login.">
-            <input type="email" value={form.ownerEmail} onChange={(e) => set("ownerEmail", e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          </FormField>
-          <FormField label="Phone Number">
-            <input value={form.ownerPhone} onChange={(e) => set("ownerPhone", e.target.value)}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          </FormField>
-        </div>
-        <div className="rounded-xl p-3 mt-3 flex flex-col gap-2" style={{ backgroundColor: "#f8fafc", border: "1px solid rgba(16,24,40,0.1)" }}>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" checked={form.autoPassword} onChange={(e) => set("autoPassword", e.target.checked)} className="w-4 h-4" />
-            <span className="text-sm font-medium" style={{ color: NAVY }}>Auto-generate password</span>
-          </label>
-          {form.autoPassword ? (
-            <p className="text-xs" style={{ color: MUTED }}>A temporary password will be sent to their email.</p>
-          ) : (
-            <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password"
-              className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
-          )}
-        </div>
+      {/* ── Owner account (optional) ── */}
+      <Section title="Owner Account" note="Optional — leave off and the business stays unclaimed until its owner registers for it themselves">
+        <label className="flex items-start gap-3 cursor-pointer rounded-xl p-3.5"
+          style={{ backgroundColor: form.withOwner ? "rgba(37,99,235,0.05)" : "#f8fafc", border: `1px solid ${form.withOwner ? "rgba(37,99,235,0.25)" : "rgba(16,24,40,0.1)"}` }}>
+          <input type="checkbox" checked={form.withOwner} onChange={(e) => set("withOwner", e.target.checked)} className="w-4 h-4 mt-0.5" />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm font-semibold" style={{ color: NAVY }}>Create a login for the owner now</span>
+            <span className="text-xs" style={{ color: MUTED }}>
+              {form.withOwner
+                ? "The account is created already approved — they can sign in straight away, and nothing needs approving in Users."
+                : "No account is created. The business appears as unclaimed until someone registers against it."}
+            </span>
+          </span>
+        </label>
+
+        {form.withOwner && (
+          <>
+            <div className="grid sm:grid-cols-2 gap-4 mt-4">
+              <FormField label="First Name" required>
+                <input value={form.firstName} onChange={(e) => set("firstName", e.target.value)}
+                  className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+              </FormField>
+              <FormField label="Last Name" required>
+                <input value={form.lastName} onChange={(e) => set("lastName", e.target.value)}
+                  className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+              </FormField>
+              <FormField label="Email Address" required hint="This is the owner's login.">
+                <input type="email" value={form.ownerEmail} onChange={(e) => set("ownerEmail", e.target.value)}
+                  className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+              </FormField>
+              <FormField label="Phone Number">
+                <input value={form.ownerPhone} onChange={(e) => set("ownerPhone", e.target.value)}
+                  className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+              </FormField>
+            </div>
+            <div className="rounded-xl p-3 mt-3 flex flex-col gap-2" style={{ backgroundColor: "#f8fafc", border: "1px solid rgba(16,24,40,0.1)" }}>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.autoPassword} onChange={(e) => set("autoPassword", e.target.checked)} className="w-4 h-4" />
+                <span className="text-sm font-medium" style={{ color: NAVY }}>Auto-generate password</span>
+              </label>
+              {form.autoPassword ? (
+                <p className="text-xs" style={{ color: MUTED }}>A temporary password will be sent to their email.</p>
+              ) : (
+                <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password"
+                  className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
+              )}
+            </div>
+          </>
+        )}
       </Section>
 
       {/* ── Business Details ── */}
@@ -299,15 +347,6 @@ function RegisterBusinessForm({ onSave, onCancel }) {
               <FormField label="Cuisine Type" required span2 hint="Select up to 2">
                 <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v.slice(0, 2))} />
               </FormField>
-              <label className="flex items-center gap-3 cursor-pointer w-fit sm:col-span-2">
-                <div onClick={() => set("newToMaidenhead", !form.newToMaidenhead)}
-                  className="w-10 h-5 rounded-full transition-colors flex items-center px-0.5"
-                  style={{ backgroundColor: form.newToMaidenhead ? BLUE : "#D1D5DB" }}>
-                  <div className="w-4 h-4 rounded-full bg-white shadow transition-transform"
-                    style={{ transform: form.newToMaidenhead ? "translateX(20px)" : "translateX(0)" }} />
-                </div>
-                <span className="text-sm font-medium" style={{ color: NAVY }}>New to Maidenhead</span>
-              </label>
             </>
           )}
 
@@ -377,6 +416,23 @@ function RegisterBusinessForm({ onSave, onCancel }) {
           ))}
         </div>
         <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>Registering on the business's behalf counts as accepting the Terms of Use and Privacy Policy for them.</p>
+      </Section>
+
+      {/* ── Featured ── */}
+      <Section title="Featured" note={`Promoted placement across the site — ${featuredCount} of ${featuredLimit} slots in use`}>
+        <label className={`flex items-start gap-3 rounded-xl p-3.5 ${featuredFull && !form.featured ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+          style={{ backgroundColor: form.featured ? "rgba(217,119,6,0.06)" : "#f8fafc", border: `1px solid ${form.featured ? "rgba(217,119,6,0.3)" : "rgba(16,24,40,0.1)"}` }}>
+          <input type="checkbox" checked={form.featured} disabled={featuredFull && !form.featured}
+            onChange={(e) => set("featured", e.target.checked)} className="w-4 h-4 mt-0.5" />
+          <span className="flex flex-col gap-0.5">
+            <span className="text-sm font-semibold" style={{ color: NAVY }}>Feature this business</span>
+            <span className="text-xs" style={{ color: MUTED }}>
+              {featuredFull && !form.featured
+                ? `All ${featuredLimit} featured slots are taken. Un-feature another business first.`
+                : `Featured businesses get promoted placement. Maximum ${featuredLimit} at any one time.`}
+            </span>
+          </span>
+        </label>
       </Section>
 
       {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
@@ -675,10 +731,18 @@ function BusinessDetailModal({ biz, onClose }) {
         </div>
 
         <DetailSection title="Your Details (Owner)">
-          <DetailRow label="Name" value={[biz.firstName, biz.lastName].filter(Boolean).join(" ")} />
-          <DetailRow label="Login Email" value={biz.userEmail} />
-          <DetailRow label="Phone" value={biz.ownerPhone} />
-          <DetailRow label="Account Status" value={biz.ownerStatus ? biz.ownerStatus[0].toUpperCase() + biz.ownerStatus.slice(1) : "No account yet"} />
+          {biz.hasOwner ? (
+            <>
+              <DetailRow label="Name" value={[biz.firstName, biz.lastName].filter(Boolean).join(" ")} />
+              <DetailRow label="Login Email" value={biz.userEmail} />
+              <DetailRow label="Phone" value={biz.ownerPhone} />
+              <DetailRow label="Account Status" value={biz.ownerStatus ? biz.ownerStatus[0].toUpperCase() + biz.ownerStatus.slice(1) : "—"} />
+            </>
+          ) : (
+            <p className="text-xs py-1" style={{ color: MUTED }}>
+              Unclaimed — no owner account is attached. Whoever runs this business can claim it by registering against it from the business portal.
+            </p>
+          )}
         </DetailSection>
 
         <DetailSection title="Business Details">
@@ -689,7 +753,7 @@ function BusinessDetailModal({ biz, onClose }) {
           <DetailRow label="Business Email" value={biz.businessEmail} />
           <DetailRow label="Business Phone" value={biz.businessPhone} />
           <DetailRow label="Business Address" value={biz.address} />
-          <DetailRow label="New to Maidenhead" value={biz.newToMaidenhead ? "Yes" : null} />
+          <DetailRow label="Featured" value={biz.featured ? "Yes" : null} />
         </DetailSection>
 
         <DetailSection title="Location (for Map)">
@@ -705,10 +769,12 @@ function BusinessDetailModal({ biz, onClose }) {
         </DetailSection>
 
         <div className="flex gap-3 justify-between items-center pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
-          <button onClick={() => navigate("/admin/users")}
-            className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: BLUE }}>
-            Approve the User →
-          </button>
+          {needsUserApproval(biz) ? (
+            <button onClick={() => navigate("/admin/users")}
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: BLUE }}>
+              Approve the User →
+            </button>
+          ) : <span />}
           <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Close</button>
         </div>
       </div>
@@ -783,7 +849,7 @@ function InfoField({ label, value, mono }) {
   );
 }
 
-function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent }) {
+function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull }) {
   const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section);
   const chips = categoryChips(biz);
@@ -830,9 +896,16 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
               )}
-              {biz.newToMaidenhead && (
+              {biz.featured && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                  style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>★ Featured</span>
+              )}
+              {/* Unclaimed is a normal, expected state now that admin can list
+                  a business without an owner — flagged so admin can see at a
+                  glance which listings nobody has taken over yet. */}
+              {!biz.hasOwner && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: "rgba(251,191,36,0.15)", color: "#92400E" }}>New to Maidenhead</span>
+                  style={{ backgroundColor: "rgba(100,116,139,0.12)", color: "#475569" }}>Unclaimed</span>
               )}
             </div>
             <p className="text-[11px] mt-0.5" style={{ color: "#9CA3AF" }}>Submitted {biz.submitted}</p>
@@ -863,13 +936,19 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           {/* Business-facing contact fields — clearly labelled, not left to
               an emoji to imply what each value is. Hidden entirely rather
               than showing an empty divider when nothing's been filled in. */}
-          {(biz.website || biz.businessEmail || biz.businessPhone || (biz.status === "Approved" && biz.userEmail)) && (
+          {(biz.website || biz.businessEmail || biz.businessPhone || biz.hasOwner) && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2 pt-2.5" style={{ borderTop: `1px solid ${BORDER}` }}>
               <InfoField label="Website" value={biz.website} />
               <InfoField label="Business Email" value={biz.businessEmail} />
               <InfoField label="Business Phone" value={biz.businessPhone} />
-              {biz.status === "Approved" && (
-                <InfoField label="Approved User" value={biz.userEmail} />
+              {/* Labelled by the owner's actual approval state rather than the
+                  business's — the two are separate gates, and calling a pending
+                  account "Approved User" was reading as done when it wasn't. */}
+              {biz.hasOwner && (
+                <InfoField
+                  label={biz.ownerStatus === "approved" ? "Owner" : "Owner (pending)"}
+                  value={biz.userEmail}
+                />
               )}
             </div>
           )}
@@ -882,7 +961,17 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
       <div className="px-5 pb-5 flex flex-wrap gap-2" style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 16 }}>
         <BizBtn color={NAVY} disabled={isBusy} onClick={() => setShowDetail(true)}>View Details</BizBtn>
         {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} />}
-        <BizBtn color={BLUE} disabled={isBusy} onClick={() => navigate("/admin/users")}>Approve the User</BizBtn>
+        {needsUserApproval(biz) && (
+          <BizBtn color={BLUE} disabled={isBusy} onClick={() => navigate("/admin/users")}>Approve the User</BizBtn>
+        )}
+        <BizBtn
+          color={biz.featured ? "#D97706" : NAVY}
+          disabled={isBusy || (!biz.featured && featuredFull)}
+          onClick={() => onToggleFeatured(biz)}
+          title={!biz.featured && featuredFull ? `All ${FEATURED_LIMIT} featured slots are in use` : undefined}
+        >
+          {biz.featured ? "★ Unfeature" : "☆ Feature"}
+        </BizBtn>
         {biz.status === "Pending" && (
           <>
             <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>✓ Approve</BizBtn>
@@ -957,9 +1046,9 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
   );
 }
 
-function BizBtn({ color, children, disabled, onClick }) {
+function BizBtn({ color, children, disabled, onClick, title }) {
   return (
-    <button disabled={disabled} onClick={onClick}
+    <button disabled={disabled} onClick={onClick} title={title}
       className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80 disabled:opacity-40 whitespace-nowrap"
       style={{ backgroundColor: `${color}18`, color, border: `1.5px solid ${color}40` }}>
       {children}
@@ -1015,7 +1104,11 @@ export default function BusinessesPage() {
   function handleDismissRegistration() {
     setShowForm(false);
     setRegisteredBiz(null);
-    notify(`"${registeredBiz?.name}" registered — pending approval.`);
+    notify(
+      registeredBiz?.hasOwner
+        ? `"${registeredBiz.name}" registered and approved — the owner can sign in now.`
+        : `"${registeredBiz?.name}" registered. It stays unclaimed until an owner registers against it.`,
+    );
   }
 
   function handleApprove(biz) {
@@ -1065,6 +1158,24 @@ export default function BusinessesPage() {
     patch(id, { logo: dataUrl });
     notify("Logo updated.");
   }
+
+  function handleToggleFeatured(biz) {
+    const next = !biz.featured;
+    setBusy(biz.id);
+    setFeatured(biz.id, next)
+      .then(() => {
+        patch(biz.id, { featured: next });
+        notify(next ? `"${biz.name}" is now featured.` : `"${biz.name}" removed from featured.`);
+      })
+      .catch((e) => notify(e.message ?? "Could not update featured status."))
+      .finally(() => setBusy(null));
+  }
+
+  // getBusinesses is called unfiltered, so `list` is every business and this
+  // count is exact — and it moves the moment a toggle patches local state,
+  // rather than waiting on a refetch.
+  const featuredCount = list.filter((b) => b.featured).length;
+  const featuredFull  = featuredCount >= FEATURED_LIMIT;
 
   const counts = {
     Pending:   list.filter((b) => b.status === "Pending").length,
@@ -1125,17 +1236,21 @@ export default function BusinessesPage() {
             onLater={handleDismissRegistration}
           />
         ) : (
-          <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)} />
+          <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)}
+            featuredCount={featuredCount} featuredLimit={FEATURED_LIMIT} />
         )
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
         {[
           { label: "Pending",   value: counts.Pending,   accent: "#D97706" },
           { label: "Approved",  value: counts.Approved,  accent: "#16A34A" },
           { label: "Suspended", value: counts.Suspended, accent: "#B45309" },
           { label: "Rejected",  value: counts.Rejected,  accent: "#991B1B" },
+          // Shown as a fraction because the ceiling is the point — admin needs
+          // to know how many slots are left before opening the form.
+          { label: "Featured",  value: `${featuredCount}/${FEATURED_LIMIT}`, accent: "#D97706" },
         ].map(({ label, value, accent }) => (
           <div key={label} className="bg-white rounded-2xl p-4 flex flex-col gap-1" style={CARD}>
             <span className="text-2xl font-bold" style={{ color: accent }}>{value}</span>
@@ -1206,6 +1321,8 @@ export default function BusinessesPage() {
               onUploadLogo={handleUploadLogo}
               busy={busy}
               onAddContent={handleAddContent}
+              onToggleFeatured={handleToggleFeatured}
+              featuredFull={featuredFull}
             />
           ))}
         </div>
