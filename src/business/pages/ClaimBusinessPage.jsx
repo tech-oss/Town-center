@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { submitUserRegistration, listBusinesses } from "../hooks/useUserRegistry";
+import { submitBusinessClaim, listUnclaimedBusinesses } from "../hooks/useUserRegistry";
 import { Field, Inp } from "../components/FormKit";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 
-// Searchable "which business are you joining" picker.
+// Searchable "which business is yours" picker — only businesses nobody has
+// claimed yet (see listUnclaimedBusinesses), so someone can't accidentally
+// request a business that already has an owner.
 function BusinessPicker({ value, onChange }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -14,7 +16,7 @@ function BusinessPicker({ value, onChange }) {
   const rootRef = useRef(null);
 
   useEffect(() => {
-    listBusinesses().then(setBusinesses).catch(() => setBusinesses([]));
+    listUnclaimedBusinesses().then(setBusinesses).catch(() => setBusinesses([]));
   }, []);
 
   const selected = businesses.find((b) => b.id === value) ?? null;
@@ -40,12 +42,14 @@ function BusinessPicker({ value, onChange }) {
   return (
     <div ref={rootRef} className="relative">
       <Inp value={query} onChange={(e) => { setQuery(e.target.value); setOpen(true); }} onFocus={() => query && setOpen(true)}
-        placeholder="Search for a business..." />
+        placeholder="Search for your business..." />
       {open && query.trim() && (
         <div className="absolute z-20 mt-1 w-full rounded-xl overflow-hidden bg-white max-h-56 overflow-y-auto"
           style={{ border: `1.5px solid ${BORDER}`, boxShadow: "0 8px 24px rgba(16,24,40,0.12)" }}>
           {matches.length === 0 ? (
-            <p className="px-3 py-2.5 text-xs" style={{ color: MUTED }}>No businesses found.</p>
+            <p className="px-3 py-2.5 text-xs" style={{ color: MUTED }}>
+              No unclaimed business found by that name — it may already be claimed, or not registered yet.
+            </p>
           ) : matches.map((b) => (
             <button key={b.id} type="button" onClick={() => { onChange(b.id); setQuery(""); setOpen(false); }}
               className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50 transition-colors" style={{ color: FOREST, borderBottom: `1px solid ${BORDER}` }}>
@@ -60,7 +64,7 @@ function BusinessPicker({ value, onChange }) {
 
 const EMPTY = { businessId: "", firstName: "", lastName: "", email: "", password: "", confirmPassword: "" };
 
-export default function RegisterUserPage() {
+export default function ClaimBusinessPage() {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -77,7 +81,7 @@ export default function RegisterUserPage() {
     setError("");
     if (!isValid) { setError("Please fill in all fields — passwords must match."); return; }
     setSubmitting(true);
-    const res = await submitUserRegistration(form);
+    const res = await submitBusinessClaim(form);
     setSubmitting(false);
     if (!res.ok) { setError(res.error); return; }
     setSubmitted(true);
@@ -88,8 +92,8 @@ export default function RegisterUserPage() {
       <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
         <div className="max-w-md w-full bg-white rounded-2xl p-8 text-center flex flex-col items-center gap-4" style={CARD}>
           <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>✓</div>
-          <h1 className="text-xl font-bold" style={{ color: FOREST }}>Request sent</h1>
-          <p className="text-sm" style={{ color: MUTED }}>Your registration request is sent to the business, you will be notified when you'll be approved.</p>
+          <h1 className="text-xl font-bold" style={{ color: FOREST }}>Claim request sent</h1>
+          <p className="text-sm" style={{ color: MUTED }}>Your request to manage this business profile has been sent to the Maidenhead team. You'll be able to log in once it's approved.</p>
           <Link to="/business/login" className="mt-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
             Go to Login
           </Link>
@@ -103,8 +107,8 @@ export default function RegisterUserPage() {
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center gap-2 mb-6">
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
-          <h1 className="text-xl font-bold" style={{ color: FOREST }}>Register as a Content Manager</h1>
-          <p className="text-sm text-center" style={{ color: MUTED }}>Join an existing business as a content manager — the business owner must approve your request.</p>
+          <h1 className="text-xl font-bold" style={{ color: FOREST }}>Claim Your Business</h1>
+          <p className="text-sm text-center" style={{ color: MUTED }}>Already showing on the platform? Claim it to manage its details — an admin will approve your request.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={CARD}>
@@ -129,11 +133,11 @@ export default function RegisterUserPage() {
           {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
 
           <button type="submit" disabled={!isValid || submitting} className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-            {submitting ? "Sending…" : "Send Registration Request"}
+            {submitting ? "Sending…" : "Send Claim Request"}
           </button>
 
           <p className="text-xs text-center" style={{ color: MUTED }}>
-            Registering a new business instead? <Link to="/business/signup" className="font-semibold" style={{ color: "#2563EB" }}>Register a Business</Link>
+            Business not listed yet? <Link to="/business/signup" className="font-semibold" style={{ color: "#2563EB" }}>Register a Business</Link>
           </p>
           <p className="text-xs text-center" style={{ color: MUTED }}>
             Already registered? <Link to="/business/login" className="font-semibold" style={{ color: "#2563EB" }}>Log in</Link>

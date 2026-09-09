@@ -12,12 +12,31 @@ function newBusinessId(name) {
 
 const ALL_TABS = ["profile", "hours", "gallery", "location", "contact", "faqs"];
 
+// Both signUp (email) and the businesses insert (name) can fail on a
+// duplicate, and both come back as terse provider/Postgres errors rather than
+// something worth showing someone mid-signup.
+function readableSignUpError(error) {
+  const message = String(error?.message ?? "");
+  if (/already registered|already exists/i.test(message)) {
+    return "An account with this email already exists. Log in instead, or use a different email address.";
+  }
+  return message;
+}
+
+function readableBusinessNameError(error, name) {
+  const message = String(error?.message ?? "");
+  if (error?.code === "23505" || message.includes("businesses_name_unique")) {
+    return `A business called "${name}" is already registered. If this is your business, use "Claim Your Business" from the login page instead.`;
+  }
+  return message;
+}
+
 export async function registerBusiness(form) {
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email: form.email,
     password: form.password,
   });
-  if (signUpError) return { ok: false, error: signUpError.message };
+  if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
 
   const businessId = newBusinessId(form.businessName);
   const isHotel = form.businessType === "hotel";
@@ -30,7 +49,7 @@ export async function registerBusiness(form) {
   const { error: businessError } = await supabase
     .from("businesses")
     .insert({ id: businessId, name: form.businessName });
-  if (businessError) return { ok: false, error: businessError.message };
+  if (businessError) return { ok: false, error: readableBusinessNameError(businessError, form.businessName) };
 
   // Pending until admin approves the registration — the owner's first sign-in
   // attempt is what surfaces this to them (useBusinessAuth only builds a

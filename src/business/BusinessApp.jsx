@@ -3,6 +3,7 @@ import useBusinessAuth from "./hooks/useBusinessAuth";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterUserPage from "./pages/RegisterUserPage";
+import ClaimBusinessPage from "./pages/ClaimBusinessPage";
 import DashboardPage from "./pages/DashboardPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ContentAnalyticsDetailPage from "./pages/ContentAnalyticsDetailPage";
@@ -41,6 +42,7 @@ export default function BusinessApp() {
       <Route path="signup" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <SignUpPage />} />
       <Route path="login" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <LoginPage />} />
       <Route path="register-user" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <RegisterUserPage />} />
+      <Route path="claim-business" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <ClaimBusinessPage />} />
 
       <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
       <Route path="analytics" element={<RequireAuth><AnalyticsPage /></RequireAuth>} />

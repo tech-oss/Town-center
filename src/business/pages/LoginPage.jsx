@@ -31,6 +31,11 @@ export default function LoginPage() {
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
           <h1 className="text-xl font-bold" style={{ color: FOREST }}>Business Login</h1>
           <p className="text-sm text-center" style={{ color: MUTED }}>Manage your business page on Maidenhead Town Centre.</p>
+          <p className="text-sm text-center" style={{ color: MUTED }}>
+            If your business profile is already showing on the platform,{" "}
+            <Link to="/business/claim-business" className="font-semibold" style={{ color: "#2563EB" }}>please claim by clicking here</Link>
+            {" "}to allow you to manage its details.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={CARD}>
@@ -54,7 +59,7 @@ export default function LoginPage() {
                 Register a Business
               </Link>
               <Link to="/business/register-user" className="flex-1 text-center px-3 py-2.5 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>
-                Register a User
+                Register a Content Manager
               </Link>
             </div>
           </div>
