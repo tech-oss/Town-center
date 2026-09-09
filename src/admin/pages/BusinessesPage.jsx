@@ -11,7 +11,7 @@ import EmptyState from "../components/EmptyState";
 import { BUSINESS_TEAM_MEMBERS, TEAM_ROLES } from "../../Data/adminMissingScreensMock";
 import {
   BUSINESS_TYPES, FREELANCER_KINDS, FREELANCER_KIND_CATEGORIES, HOTEL_KINDS,
-  CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES, SUBSCRIPTION_PLANS, labelFor,
+  CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES, SUBSCRIPTION_PLANS, labelFor, categoryLabel,
 } from "../../Data/businessRegistrationTaxonomy";
 import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
@@ -694,7 +694,7 @@ function typeSpecificRows(biz) {
         <>
           <DetailRow label="Which best describes you" value={labelFor(FREELANCER_KINDS, biz.freelancerKind)} />
           {biz.freelancerKind && (
-            <DetailRow label="Category" value={(biz.freelancerCategories ?? []).map((v) => labelFor(FREELANCER_KIND_CATEGORIES[biz.freelancerKind] ?? [], v))} />
+            <DetailRow label="Category" value={(biz.freelancerCategories ?? []).map(categoryLabel)} />
           )}
         </>
       );
@@ -703,14 +703,14 @@ function typeSpecificRows(biz) {
     case "eat-drink":
       return (
         <>
-          <DetailRow label="Venue Type" value={(biz.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v))} />
-          <DetailRow label="Cuisine Type" value={(biz.cuisineTypes ?? []).map((v) => labelFor(CUISINE_TYPES, v))} />
+          <DetailRow label="Venue Type" value={(biz.venueTypes ?? []).map(categoryLabel)} />
+          <DetailRow label="Cuisine Type" value={(biz.cuisineTypes ?? []).map(categoryLabel)} />
         </>
       );
     case "shop":
-      return <DetailRow label="Shop Category" value={(biz.subcategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v))} />;
+      return <DetailRow label="Shop Category" value={(biz.subcategories ?? []).map(categoryLabel)} />;
     case "see-do":
-      return <DetailRow label="Category" value={(biz.subcategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v))} />;
+      return <DetailRow label="Category" value={(biz.subcategories ?? []).map(categoryLabel)} />;
     default:
       return null;
   }
@@ -814,24 +814,28 @@ function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
 // taxonomy the real signup form uses — one consistent chip row regardless of
 // which business type this is, instead of shop/see-do getting chips and
 // every other type getting a plain sentence.
+// Stored category slugs go through categoryLabel rather than labelFor against
+// one specific list: it resolves retired slugs too, so a business registered
+// before the taxonomy revision still shows real chips instead of raw slugs.
+// Kinds (freelancerKind, hotelKind) aren't categories and were never renamed,
+// so they stay on labelFor.
 function categoryChips(biz) {
   switch (biz.section) {
     case "freelancer":
       return [
         biz.freelancerKind && labelFor(FREELANCER_KINDS, biz.freelancerKind),
-        ...(biz.freelancerCategories ?? []).map((v) => labelFor(FREELANCER_KIND_CATEGORIES[biz.freelancerKind] ?? [], v)),
+        ...(biz.freelancerCategories ?? []).map(categoryLabel),
       ].filter(Boolean);
     case "hotel":
       return [biz.hotelKind && labelFor(HOTEL_KINDS, biz.hotelKind)].filter(Boolean);
     case "eat-drink":
       return [
-        ...(biz.venueTypes ?? []).map((v) => labelFor(VENUE_TYPES, v)),
-        ...(biz.cuisineTypes ?? []).map((v) => labelFor(CUISINE_TYPES, v)),
+        ...(biz.venueTypes ?? []).map(categoryLabel),
+        ...(biz.cuisineTypes ?? []).map(categoryLabel),
       ];
     case "shop":
-      return (biz.subcategories ?? []).map((v) => labelFor(SHOP_CATEGORIES, v));
     case "see-do":
-      return (biz.subcategories ?? []).map((v) => labelFor(SEE_DO_CATEGORIES, v));
+      return (biz.subcategories ?? []).map(categoryLabel);
     default:
       return [];
   }

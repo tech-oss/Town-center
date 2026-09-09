@@ -1,101 +1,47 @@
 import { supabase } from "../../lib/supabaseClient";
 import { addLog } from "./users";
+import {
+  BUSINESS_TYPES, VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES,
+  SHOP_CATEGORIES, SERVICES_CATEGORIES, SERVICES_GROUPS,
+} from "../../Data/taxonomy";
 
-// ─── Category taxonomy (mirrors client site) ──────────────────────────────────
+// ─── Category taxonomy ────────────────────────────────────────────────────────
+// Re-exported from the canonical taxonomy (src/Data/taxonomy.js) rather than
+// redeclared here. These names are the shapes admin's own screens already
+// import; the lists behind them are the same ones the business portal's
+// signup form and the public site's filters use.
+
+export { SERVICES_GROUPS };
+
+// Admin's section picker covers the public site's sections, which includes
+// "live" (property listings) — not a business type anyone registers as, so it
+// has no entry in BUSINESS_TYPES.
 export const SECTION_OPTIONS = [
-  { value: "eat-drink", label: "Eat & Drink" },
-  { value: "see-do",    label: "See & Do" },
-  { value: "shop",      label: "Shop" },
-  { value: "services",  label: "Services" },
-  { value: "live",      label: "Live" },
+  ...BUSINESS_TYPES.filter((t) => t.value !== "freelancer" && t.value !== "hotel"),
+  { value: "services", label: "Services" },
+  { value: "live",     label: "Live" },
 ];
 
+// Keyed by section, the shape ListingsPage expects. Eat & Drink's two pickers
+// (venue + cuisine) flatten into one pool here because a listing filter
+// doesn't care which of the two a category came from.
 export const SUBCATEGORIES = {
-  "eat-drink": [
-    { value: "bars",           label: "Bars" },
-    { value: "restaurants",    label: "Restaurants" },
-    { value: "cafes",          label: "Cafés" },
-    { value: "grab-go",        label: "Grab & Go" },
-    { value: "private-dining", label: "Private Dining" },
-  ],
-  "see-do": [
-    { value: "art-culture",    label: "Art & Culture" },
-    { value: "community",      label: "Community" },
-    { value: "family",         label: "Family" },
-    { value: "fashion-beauty", label: "Fashion & Beauty" },
-    { value: "film",           label: "Film" },
-    { value: "gaming",         label: "Gaming" },
-    { value: "learning",       label: "Learning" },
-    { value: "sport-wellness", label: "Sport & Wellness" },
-  ],
-  "shop": [
-    { value: "accessories-jewellery", label: "Accessories & Jewellery",  group: "Shops" },
-    { value: "clothing",              label: "Clothing",                  group: "Shops" },
-    { value: "electronics-phones",    label: "Electronics & Phones",      group: "Shops" },
-    { value: "groceries",             label: "Groceries",                 group: "Shops" },
-    { value: "health-beauty",         label: "Health & Beauty",           group: "Shops" },
-    { value: "home-furniture",        label: "Home & Furniture",          group: "Shops" },
-    { value: "shoes-footwear",        label: "Shoes & Footwear",          group: "Shops" },
-    { value: "sports-fitness",        label: "Sports & Fitness",          group: "Shops" },
-    { value: "banks",                 label: "Banks & Foreign Exchange",  group: "Services" },
-    { value: "childcare",             label: "Childcare",                 group: "Services" },
-    { value: "dry-cleaning",          label: "Dry Cleaning & Shoe Repair",group: "Services" },
-    { value: "hairdressing",          label: "Hairdressing & Beauty",     group: "Services" },
-    { value: "healthcare",            label: "Healthcare",                group: "Services" },
-    { value: "opticians",             label: "Opticians & Pharmacies",    group: "Services" },
-    { value: "spa",                   label: "Spa",                       group: "Services" },
-    { value: "travel-agents",         label: "Travel Agents",             group: "Services" },
-  ],
-  "live": [
-    { value: "for-sale",         label: "For Sale" },
-    { value: "for-rent",         label: "For Rent" },
-    { value: "build-to-rent",    label: "Build to Rent" },
-    { value: "new-development",  label: "New Development" },
-  ],
-  "services": [
-    { value: "builders",             label: "Builders",                    group: "Tradespeople" },
-    { value: "electricians",         label: "Electricians",                group: "Tradespeople" },
-    { value: "plumbers",             label: "Plumbers & Heating",          group: "Tradespeople" },
-    { value: "decorators-painters",  label: "Decorators & Painters",       group: "Tradespeople" },
-    { value: "locksmiths",           label: "Locksmiths",                  group: "Tradespeople" },
-    { value: "cleaners",             label: "Cleaners",                    group: "Tradespeople" },
-    { value: "accountants",          label: "Accountants",                 group: "Professionals" },
-    { value: "solicitors",           label: "Solicitors",                  group: "Professionals" },
-    { value: "financial-advisers",   label: "Financial Advisers",          group: "Professionals" },
-    { value: "estate-agents",        label: "Estate Agents",               group: "Professionals" },
-    { value: "recruitment",          label: "Recruitment",                 group: "Professionals" },
-    { value: "insurance-brokers",    label: "Insurance Brokers",           group: "Professionals" },
-    { value: "graphic-designers",    label: "Graphic Designers",           group: "Freelancers" },
-    { value: "web-developers",       label: "Web Developers",              group: "Freelancers" },
-    { value: "photographers",        label: "Photographers",               group: "Freelancers" },
-    { value: "copywriters",          label: "Copywriters & Content Writers", group: "Freelancers" },
-    { value: "marketing-consultants",label: "Marketing Consultants",       group: "Freelancers" },
-    { value: "personal-trainers",    label: "Personal Trainers",           group: "Freelancers" },
-    { value: "tutors",               label: "Tutors",                      group: "Freelancers" },
-    { value: "virtual-assistants",   label: "Virtual Assistants",          group: "Freelancers" },
+  "eat-drink": [...VENUE_TYPES, ...CUISINE_TYPES],
+  "see-do":    SEE_DO_CATEGORIES,
+  shop:        SHOP_CATEGORIES,
+  services:    SERVICES_CATEGORIES,
+  live: [
+    { value: "for-sale",        label: "For Sale" },
+    { value: "for-rent",        label: "For Rent" },
+    { value: "build-to-rent",   label: "Build to Rent" },
+    { value: "new-development", label: "New Development" },
   ],
 };
 
-// Services groups, in display order — mirrors the public /services page's
-// three columns (Tradesperson, Professionals, Freelancers).
-export const SERVICES_GROUPS = ["Tradespeople", "Professionals", "Freelancers"];
+export const CUISINE_OPTIONS = CUISINE_TYPES;
 
-export const CUISINE_OPTIONS = [
-  { value: "british",  label: "British" },
-  { value: "italian",  label: "Italian" },
-  { value: "chinese",  label: "Chinese" },
-  { value: "indian",   label: "Indian" },
-  { value: "french",   label: "French" },
-  { value: "thai",     label: "Thai" },
-  { value: "japanese", label: "Japanese" },
-  { value: "bakery",   label: "Bakery" },
-  { value: "american", label: "American" },
-  { value: "mexican",  label: "Mexican" },
-  { value: "spanish",  label: "Spanish" },
-  { value: "greek",    label: "Greek" },
-  { value: "turkish",  label: "Turkish" },
-  { value: "lebanese", label: "Lebanese" },
-];
+// Legacy export kept for compatibility
+export const BUSINESS_CATEGORIES = ["Eat & Drink", "See & Do", "Shop", "Live"];
 
 export const BUSINESS_PLANS = ["Basic", "Standard", "Premium", "Agent"];
 
@@ -103,11 +49,6 @@ export const BUSINESS_PLANS = ["Basic", "Standard", "Premium", "Agent"];
 // actually enforces it — this copy exists so the UI can show "7 / 10" and
 // disable the control before a doomed round trip, not as the rule itself.
 export const FEATURED_LIMIT = 10;
-
-// Legacy export kept for compatibility
-export const BUSINESS_CATEGORIES = [
-  "Eat & Drink", "See & Do", "Shop", "Live",
-];
 
 // ─── Supabase-backed queries ──────────────────────────────────────────────────
 // A "business registration" is spread across three tables: `businesses` holds

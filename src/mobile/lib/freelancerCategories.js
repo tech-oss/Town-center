@@ -1,14 +1,13 @@
-// Mirrors the website's FREELANCER_CATEGORIES (components/ServicesDetailPage.jsx)
-// — Services categories that get the lighter, portfolio-first profile layout
-// instead of the local-directory business profile tradespeople/professionals
-// use. Kept in sync by hand since the desktop constant isn't exported.
-export const FREELANCER_CATEGORIES = new Set([
-  "graphic-designers",
-  "web-developers",
-  "photographers",
-  "copywriters",
-  "marketing-consultants",
-  "personal-trainers",
-  "tutors",
-  "virtual-assistants",
-]);
+import { FREELANCER_CATEGORIES } from "../../Data/taxonomy";
+
+// Services categories that get the lighter, portfolio-first profile layout
+// instead of the local-directory business profile tradespeople and
+// professionals use.
+//
+// Derived from the canonical taxonomy rather than hand-listed — this set used
+// to be kept in sync by hand and silently went stale whenever the Freelancer
+// list changed, which meant new freelancer categories quietly fell back to the
+// wrong profile layout.
+export const FREELANCER_CATEGORIES_SET = new Set(FREELANCER_CATEGORIES.map((c) => c.value));
+
+export { FREELANCER_CATEGORIES_SET as FREELANCER_CATEGORIES };
