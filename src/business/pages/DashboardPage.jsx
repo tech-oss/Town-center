@@ -40,10 +40,16 @@ export default function DashboardPage() {
     return () => { cancelled = true; };
   }, [user.id]);
 
-  function handleToggle() {
-    toggleVisibility();
-    // TODO: update Supabase visibility field
-    setToast(user.visible ? "Your profile is now hidden from the public site." : "Your profile is now live.");
+  async function handleToggle() {
+    const goingLive = !user.visible;
+    const res = await toggleVisibility();
+    if (res && !res.ok) {
+      setToast("Couldn't update your profile's visibility. Please try again.");
+      return;
+    }
+    setToast(goingLive
+      ? "Your business profile is now live on the public site."
+      : "Your business profile is now hidden from the public site.");
   }
 
   return (
@@ -71,7 +77,7 @@ export default function DashboardPage() {
         {/* Visibility toggle */}
         <div className="bg-white rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
           <div>
-            <p className="text-sm font-bold" style={{ color: FOREST }}>My profile is currently {user.visible ? "Live" : "Hidden"}</p>
+            <p className="text-sm font-bold" style={{ color: FOREST }}>Your business profile is currently {user.visible ? "Live" : "Hidden"}</p>
             <p className="text-xs mt-0.5" style={{ color: MUTED }}>{user.visible ? "Visible to everyone on the public site." : "Hidden from the public site until you switch it back on."}</p>
           </div>
           <button onClick={handleToggle}

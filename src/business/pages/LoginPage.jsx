@@ -30,7 +30,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center gap-2 mb-6">
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
           <h1 className="text-xl font-bold" style={{ color: FOREST }}>Business Login</h1>
-          <p className="text-sm text-center" style={{ color: MUTED }}>Manage your business page on Maidenhead Town Centre.</p>
+          <p className="text-sm text-center" style={{ color: MUTED }}>Manage your business page on Maidenhead.com and The Maidenhead App.</p>
           <p className="text-sm text-center" style={{ color: MUTED }}>
             If your business profile is already showing on the platform,{" "}
             <Link to="/business/claim-business" className="font-semibold" style={{ color: "#2563EB" }}>please claim by clicking here</Link>

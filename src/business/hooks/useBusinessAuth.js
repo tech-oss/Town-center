@@ -48,6 +48,20 @@ function buildSessionUser(row) {
     email: row.email,
     phone: row.phone ?? base.phone,
     role: row.role,
+    // The businesses row is already joined for the approval check, so the real
+    // name comes from there. It used to fall back to a placeholder that just
+    // returns the business id, which showed up verbatim wherever a business
+    // had no business_listings row yet — every admin-registered listing that
+    // hasn't had content added, for instance.
+    businessName: row.businesses?.name ?? base.businessName,
+    // Real, persisted visibility — this used to be a hardcoded `true` on the
+    // mock base with a TODO admitting no column existed, so toggling it did
+    // nothing beyond the current page load.
+    visible: row.businesses?.visible ?? base.visible ?? true,
+    // Null for someone who claimed a business: a claim never collected a plan
+    // or a terms acceptance, so the portal asks for them once, on first
+    // sign-in after approval.
+    onboardingCompletedAt: row.onboarding_completed_at ?? null,
     _isSeeded: isSeeded,
   };
 }
@@ -88,7 +102,7 @@ async function applySubscription(user) {
 async function fetchOwnRow(authUserId) {
   const { data, error } = await supabase
     .from("business_users")
-    .select("*, businesses(status)")
+    .select("*, businesses(status, visible, name)")
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   return error ? null : data;
@@ -115,6 +129,14 @@ async function refreshFromSession(session) {
     currentUser = await applySubscription(currentUser);
     emit();
   }
+}
+
+// Re-reads the signed-in user's row. Used after a write that changes
+// something the session is built from — completing claim onboarding sets
+// onboarding_completed_at, and the route guard reads it off the session.
+export async function refresh() {
+  const { data } = await supabase.auth.getSession();
+  await refreshFromSession(data.session);
 }
 
 supabase.auth.getSession().then(({ data }) => refreshFromSession(data.session));
@@ -173,15 +195,44 @@ export function setMockUser(user) {
   emit();
 }
 
-// TODO: `visible` is part of the still-mocked business profile — no
-// `businesses.visible` column exists yet (out of scope for this pass).
-export function toggleVisibility() {
-  if (!currentUser) return;
-  currentUser = { ...currentUser, visible: !currentUser.visible };
+// Writes through set_business_visibility rather than updating `businesses`
+// directly: owners have no UPDATE policy on that table, and giving them one
+// would also hand them status, name and featured. The optimistic flip is
+// reverted if the write fails, so the switch can't sit in a state the
+// database disagrees with.
+export async function toggleVisibility() {
+  if (!currentUser) return { ok: true };
+  const next = !currentUser.visible;
+  const previous = currentUser.visible;
+  currentUser = { ...currentUser, visible: next };
   emit();
+
+  const { error } = await supabase.rpc("set_business_visibility", {
+    target_business_id: currentUser.id,
+    is_visible: next,
+  });
+  if (error) {
+    currentUser = { ...currentUser, visible: previous };
+    emit();
+    return { ok: false, error: error.message };
+  }
+  return { ok: true };
 }
 
 export default function useBusinessAuth() {
   const user = useSyncExternalStore(subscribe, getSnapshot);
-  return { user, isLoggedIn: !!user, restored, login, logout, switchUser: setMockUser, toggleVisibility, updatePersonalDetails };
+  return {
+    user,
+    isLoggedIn: !!user,
+    restored,
+    // True only for someone who claimed a business and hasn't yet chosen a
+    // plan or accepted the terms — the two things a claim never asked for.
+    needsOnboarding: !!user && !user.onboardingCompletedAt,
+    login,
+    logout,
+    refresh,
+    switchUser: setMockUser,
+    toggleVisibility,
+    updatePersonalDetails,
+  };
 }

@@ -5,6 +5,11 @@ import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, TextArea, Select, SingleImageUpload, EditorSection, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { getArticle, createArticle, updateArticle } from "../api/businessArticles";
 
+function wordCount(text) {
+  const t = (text ?? "").trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+
 const EMPTY = { title: "", type: "News", heroImage: null, body: "", startDate: "", endDate: "", status: "Draft" };
 
 export default function ArticleEditorPage() {
@@ -57,7 +62,7 @@ export default function ArticleEditorPage() {
   return (
     <BusinessLayout>
       <Toast message={toast} />
-      <div className="flex flex-col gap-6 max-w-3xl pb-10">
+      <div className="flex flex-col gap-6 max-w-4xl pb-10">
         <button onClick={() => navigate("/business/articles")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← News & Articles</button>
         <h1 className="text-2xl font-bold" style={{ color: FOREST }}>{id ? "Edit Article" : "New Article"}</h1>
 
@@ -79,8 +84,28 @@ export default function ArticleEditorPage() {
             <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" />
           </EditorSection>
 
+          {/* The body used to be an 8-row box inside a max-w-3xl column, which
+              gave roughly six visible lines to write a whole article in. It's
+              now the tallest thing on the page, grows as you type rather than
+              scrolling inside itself, and shows how much you've written. */}
           <EditorSection title="Article content — shown on the article page">
-            <TextArea rows={8} value={form.body} onChange={(e) => set("body", e.target.value)} placeholder="Write the full article body…" />
+            <div className="flex flex-col gap-2">
+              <TextArea
+                rows={18}
+                value={form.body}
+                onChange={(e) => set("body", e.target.value)}
+                placeholder={"Write the full article body…\n\nLeave a blank line between paragraphs — they'll appear as separate paragraphs on your published page."}
+                style={{ minHeight: 380, lineHeight: 1.7, resize: "vertical" }}
+              />
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <p className="text-[11px]" style={{ color: "#9CA3AF" }}>
+                  Blank lines become paragraph breaks. Drag the bottom-right corner to make this taller.
+                </p>
+                <p className="text-[11px] tabular-nums" style={{ color: "#9CA3AF" }}>
+                  {wordCount(form.body)} {wordCount(form.body) === 1 ? "word" : "words"}
+                </p>
+              </div>
+            </div>
           </EditorSection>
 
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>

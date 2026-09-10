@@ -223,7 +223,7 @@ export default function SignUpPage() {
               <Field label="First Name" required><Inp value={form.firstName} onChange={(e) => set("firstName", e.target.value)} /></Field>
               <Field label="Last Name" required><Inp value={form.lastName} onChange={(e) => set("lastName", e.target.value)} /></Field>
               <Field label="Email Address" required span2 hint="This should be your official email linked to your business."><Inp type="email" value={form.email} onChange={(e) => set("email", e.target.value)} /></Field>
-              <Field label="Phone Number" required><Inp value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
+              <Field label="Phone Number" required hint="A number where we can contact you to verify your link to the business."><Inp value={form.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
               <Field label="Password" required><Inp type="password" value={form.password} onChange={(e) => set("password", e.target.value)} /></Field>
               <Field label="Confirm Password" required>
                 <Inp type="password" value={form.confirmPassword} onChange={(e) => set("confirmPassword", e.target.value)} />
@@ -247,7 +247,7 @@ export default function SignUpPage() {
               <Field label="Business Email" hint="This will be shown publicly on your business profile."><Inp value={form.businessEmail} onChange={(e) => set("businessEmail", e.target.value)} /></Field>
               <Field label="Business Phone" hint="This will be shown publicly on your business profile."><Inp value={form.businessPhone} onChange={(e) => set("businessPhone", e.target.value)} /></Field>
               <Field label="Business Address" required span2 hint="This will be shown publicly on your business profile.">
-                {form.businessType === "freelancer" && form.freelancerKind === "freelancer" && (
+                {form.businessType === "freelancer" && (
                   <p className="text-[11px] -mt-1 mb-1" style={{ color: MUTED }}>
                     If working remotely please type Remote Working in this field
                   </p>

@@ -1,6 +1,20 @@
 import { supabase } from "../../lib/supabaseClient";
 
-// business_articles: News & Offers, max 3 per business (app-level check).
+// business_articles: News & Offers. Drafts are unlimited; at most 3 can be
+// LIVE at once. The cap is enforced by a trigger
+// (supabase/sql/business_dashboard_ux_2026_09.sql) because three separate
+// paths set this column — the owner promoting a draft, the owner swapping one
+// in, and admin approving a submission — so a check in any one of them would
+// leave the other two unguarded.
+export const LIVE_ARTICLE_LIMIT = 3;
+
+// The trigger's refusal, turned into the sentence the business should see.
+export function isLiveLimitError(error) {
+  return String(error?.message ?? "").includes("Live article limit reached");
+}
+
+export const LIVE_LIMIT_MESSAGE =
+  `You already have ${LIVE_ARTICLE_LIMIT} articles live. Please subscribe to get it live on the site, or hide one of your live articles to make room.`;
 
 function fromRow(row) {
   return {
@@ -74,7 +88,24 @@ export async function updateArticle(id, form) {
 
 export async function setArticleStatus(id, status) {
   const { error } = await supabase.from("business_articles").update({ status }).eq("id", id);
-  if (error) throw error;
+  if (error) {
+    if (isLiveLimitError(error)) throw new Error(LIVE_LIMIT_MESSAGE);
+    throw error;
+  }
+}
+
+// Swap: take one article off the site and put another on, in that order, so
+// the pair never momentarily exceeds the cap and trips the trigger.
+export async function swapLiveArticle(hideId, showId) {
+  await setArticleStatus(hideId, "Hidden");
+  try {
+    await setArticleStatus(showId, "Live");
+  } catch (e) {
+    // Put the first one back rather than leaving the business with one fewer
+    // live article than it started with.
+    await setArticleStatus(hideId, "Live");
+    throw e;
+  }
 }
 
 export async function deleteArticle(id) {

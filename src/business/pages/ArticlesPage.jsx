@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { listArticles, setArticleStatus, deleteArticle } from "../api/businessArticles";
+import {
+  listArticles, setArticleStatus, deleteArticle, swapLiveArticle,
+  LIVE_ARTICLE_LIMIT,
+} from "../api/businessArticles";
 
 const STATUS_COLOURS = {
   Draft: { bg: "rgba(107,114,128,0.13)", fg: "#374151" },
@@ -12,9 +15,54 @@ const STATUS_COLOURS = {
   Rejected: { bg: "rgba(220,38,38,0.1)", fg: "#991B1B" },
   Hidden: { bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
 };
+
 function StatusBadge({ status }) {
   const c = STATUS_COLOURS[status] ?? STATUS_COLOURS.Draft;
   return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: c.bg, color: c.fg }}>{status}</span>;
+}
+
+// Shown when the business is already at its live limit and tries to put
+// another article on the site. It carries the subscribe message and the way
+// out of it in the same place — picking which live article to stand down —
+// so the cap isn't a dead end.
+function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-lg w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div>
+          <p className="text-base font-bold" style={{ color: FOREST }}>
+            You already have {LIVE_ARTICLE_LIMIT} articles live
+          </p>
+          <p className="text-sm mt-1.5" style={{ color: MUTED }}>
+            Please subscribe to get <strong style={{ color: FOREST }}>{candidate.title}</strong> live on the site as well —
+            or swap it in by choosing which article to take down.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {liveArticles.map((a) => (
+            <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl px-3.5 py-3" style={{ border: `1.5px solid ${BORDER}` }}>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color: FOREST }}>{a.title}</p>
+                <p className="text-[11px]" style={{ color: "#9CA3AF" }}>{a.type} · {a.date}</p>
+              </div>
+              <button onClick={() => onSwap(a)} disabled={busy}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 disabled:opacity-40"
+                style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB", border: "1.5px solid rgba(37,99,235,0.3)" }}>
+                Replace this
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3 justify-end pt-1">
+          <button onClick={onCancel} className="px-5 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>
+            Keep as is
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function ArticlesPage() {
@@ -24,6 +72,8 @@ export default function ArticlesPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useToast();
   const [deleting, setDeleting] = useState(null);
+  const [swapFor, setSwapFor] = useState(null);
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,19 +84,51 @@ export default function ArticlesPage() {
     return () => { cancelled = true; };
   }, [user.id]);
 
-  const atMax = articles.length >= 3;
+  const liveArticles = articles.filter((a) => a.status === "Live");
+  const atLiveLimit = liveArticles.length >= LIVE_ARTICLE_LIMIT;
+
+  function patch(id, changes) {
+    setArticles((prev) => prev.map((x) => (x.id === id ? { ...x, ...changes } : x)));
+  }
 
   async function handleHide(a) {
-    const status = a.status === "Hidden" ? "Live" : "Hidden";
-    await setArticleStatus(a.id, status);
-    setArticles((prev) => prev.map((x) => (x.id === a.id ? { ...x, status } : x)));
-    setToast(a.status === "Hidden" ? `"${a.title}" is live again.` : `"${a.title}" hidden from the public site.`);
+    try {
+      await setArticleStatus(a.id, "Hidden");
+      patch(a.id, { status: "Hidden" });
+      setToast(`"${a.title}" hidden from the public site.`);
+    } catch (e) {
+      setToast(e.message);
+    }
   }
+
+  // Putting an article on the site. At the limit this opens the swap modal
+  // rather than failing — the trigger would reject it anyway, and a refusal
+  // with no way forward isn't much use to the business.
   async function handleMakeLive(a) {
-    await setArticleStatus(a.id, "Live");
-    setArticles((prev) => prev.map((x) => (x.id === a.id ? { ...x, status: "Live" } : x)));
-    setToast(`"${a.title}" is now live.`);
+    if (atLiveLimit) { setSwapFor(a); return; }
+    try {
+      await setArticleStatus(a.id, "Live");
+      patch(a.id, { status: "Live" });
+      setToast(`"${a.title}" is now live.`);
+    } catch (e) {
+      setToast(e.message);
+    }
   }
+
+  async function handleSwap(toHide) {
+    setBusy(true);
+    try {
+      await swapLiveArticle(toHide.id, swapFor.id);
+      patch(toHide.id, { status: "Hidden" });
+      patch(swapFor.id, { status: "Live" });
+      setToast(`"${swapFor.title}" is now live in place of "${toHide.title}".`);
+      setSwapFor(null);
+    } catch (e) {
+      setToast(e.message);
+    }
+    setBusy(false);
+  }
+
   async function confirmDelete() {
     await deleteArticle(deleting.id);
     setArticles((prev) => prev.filter((x) => x.id !== deleting.id));
@@ -61,27 +143,40 @@ export default function ArticlesPage() {
         <ConfirmModal title="Delete this article?" body={`"${deleting.title}" will be permanently removed.`} confirmLabel="Delete"
           onConfirm={confirmDelete} onCancel={() => setDeleting(null)} />
       )}
+      {swapFor && (
+        <SwapModal candidate={swapFor} liveArticles={liveArticles} busy={busy}
+          onSwap={handleSwap} onCancel={() => setSwapFor(null)} />
+      )}
 
       <div className="flex flex-col gap-6 max-w-5xl">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>News & Articles</h1>
-            <p className="text-sm mt-1" style={{ color: MUTED }}>Write up to 3 articles that appear on your business page and in Offers.</p>
+            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>News &amp; Articles</h1>
+            <p className="text-sm mt-1" style={{ color: MUTED }}>
+              Write as many as you like. Up to {LIVE_ARTICLE_LIMIT} can be live on your business page at a time.
+            </p>
           </div>
-          <div className="relative group">
-            <button onClick={() => !atMax && navigate("/business/articles/new")} disabled={atMax}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
-              style={{ backgroundColor: SAGE }}>
-              + Create New Article
-            </button>
-            {atMax && (
-              <div className="absolute right-0 top-full mt-1 w-56 text-[11px] rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10"
-                style={{ backgroundColor: FOREST, color: "#fff" }}>
-                You've reached the maximum of 3 articles. Delete one to add a new one.
-              </div>
+          <button onClick={() => navigate("/business/articles/new")}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: SAGE }}>
+            + Create New Article
+          </button>
+        </div>
+
+        {/* Live allowance — the number that actually constrains them, shown
+            before they hit it rather than only in the refusal. */}
+        {!loading && articles.length > 0 && (
+          <div className="rounded-2xl px-5 py-3.5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
+            <p className="text-sm" style={{ color: FOREST }}>
+              <strong>{liveArticles.length} of {LIVE_ARTICLE_LIMIT}</strong> live article{liveArticles.length === 1 ? "" : "s"} in use
+            </p>
+            {atLiveLimit && (
+              <p className="text-xs" style={{ color: "#92400E" }}>
+                At your limit — subscribe for more, or swap one out when you publish something new.
+              </p>
             )}
           </div>
-        </div>
+        )}
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading articles…</p>
@@ -103,9 +198,9 @@ export default function ArticlesPage() {
                   <p className="text-xs" style={{ color: "#9CA3AF" }}>{a.date}</p>
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/articles/${a.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>
-                    {a.status === "Live" || a.status === "Hidden" ? (
-                      <button onClick={() => handleHide(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>{a.status === "Hidden" ? "Make Live" : "Hide"}</button>
-                    ) : a.status === "Draft" ? (
+                    {a.status === "Live" ? (
+                      <button onClick={() => handleHide(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>Hide</button>
+                    ) : a.status === "Hidden" || a.status === "Draft" ? (
                       <button onClick={() => handleMakeLive(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: "#2563EB" }}>Make Live</button>
                     ) : null}
                     <button onClick={() => setDeleting(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>

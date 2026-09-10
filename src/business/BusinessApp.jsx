@@ -4,6 +4,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterUserPage from "./pages/RegisterUserPage";
 import ClaimBusinessPage from "./pages/ClaimBusinessPage";
+import ClaimOnboardingPage from "./pages/ClaimOnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ContentAnalyticsDetailPage from "./pages/ContentAnalyticsDetailPage";
@@ -21,15 +22,31 @@ import SupportPage from "./pages/SupportPage";
 import SettingsPage from "./pages/SettingsPage";
 
 function RequireAuth({ children }) {
-  const { isLoggedIn } = useBusinessAuth();
-  return isLoggedIn ? children : <Navigate to="/business/login" replace />;
+  const { isLoggedIn, needsOnboarding } = useBusinessAuth();
+  if (!isLoggedIn) return <Navigate to="/business/login" replace />;
+  // Someone who claimed a business still owes us a plan and a terms
+  // acceptance. Everything behind the dashboard assumes both exist, so the
+  // guard sends them there rather than the individual pages coping with a
+  // half-set-up account.
+  if (needsOnboarding) return <Navigate to="/business/welcome" replace />;
+  return children;
 }
 
 // Content Managers cannot see or manage billing — Owner only.
 function RequireOwner({ children }) {
-  const { isLoggedIn, user } = useBusinessAuth();
+  const { isLoggedIn, user, needsOnboarding } = useBusinessAuth();
   if (!isLoggedIn) return <Navigate to="/business/login" replace />;
+  if (needsOnboarding) return <Navigate to="/business/welcome" replace />;
   if (user.role === "Content Manager") return <Navigate to="/business/dashboard" replace />;
+  return children;
+}
+
+// The one route that requires onboarding to still be outstanding — once it's
+// done, landing here again would just show a form with nothing left to save.
+function RequireOnboarding({ children }) {
+  const { isLoggedIn, needsOnboarding } = useBusinessAuth();
+  if (!isLoggedIn) return <Navigate to="/business/login" replace />;
+  if (!needsOnboarding) return <Navigate to="/business/dashboard" replace />;
   return children;
 }
 
@@ -43,6 +60,8 @@ export default function BusinessApp() {
       <Route path="login" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <LoginPage />} />
       <Route path="register-user" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <RegisterUserPage />} />
       <Route path="claim-business" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <ClaimBusinessPage />} />
+
+      <Route path="welcome" element={<RequireOnboarding><ClaimOnboardingPage /></RequireOnboarding>} />
 
       <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
       <Route path="analytics" element={<RequireAuth><AnalyticsPage /></RequireAuth>} />

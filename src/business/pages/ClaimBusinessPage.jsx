@@ -62,7 +62,7 @@ function BusinessPicker({ value, onChange }) {
   );
 }
 
-const EMPTY = { businessId: "", firstName: "", lastName: "", email: "", password: "", confirmPassword: "" };
+const EMPTY = { businessId: "", firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "" };
 
 export default function ClaimBusinessPage() {
   const [form, setForm] = useState(EMPTY);
@@ -72,7 +72,7 @@ export default function ClaimBusinessPage() {
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
   const isValid = form.businessId && form.firstName.trim() && form.lastName.trim() && form.email.trim()
-    && form.password && form.password === form.confirmPassword;
+    && form.phone.trim() && form.password && form.password === form.confirmPassword;
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -119,7 +119,12 @@ export default function ClaimBusinessPage() {
             <Field label="First Name" required><Inp value={form.firstName} onChange={(e) => set("firstName", e.target.value)} /></Field>
             <Field label="Last Name" required><Inp value={form.lastName} onChange={(e) => set("lastName", e.target.value)} /></Field>
           </div>
-          <Field label="Email" required><Inp type="email" value={form.email} onChange={(e) => set("email", e.target.value)} /></Field>
+          <Field label="Email" required hint="This should be your official email linked to your business.">
+            <Inp type="email" value={form.email} onChange={(e) => set("email", e.target.value)} />
+          </Field>
+          <Field label="Phone Number" required hint="A number where we can contact you to verify your link to the business.">
+            <Inp value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+          </Field>
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Password" required><Inp type="password" value={form.password} onChange={(e) => set("password", e.target.value)} /></Field>
             <Field label="Confirm Password" required>

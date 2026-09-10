@@ -108,7 +108,7 @@ export async function submitUserRegistration({ businessId, firstName, lastName, 
 // the role and the RLS policy it goes through (see
 // supabase/sql/fix_owner_self_register_policy.sql — "self-register as pending
 // owner" already allows exactly this insert, so no new migration is needed).
-export async function submitBusinessClaim({ businessId, firstName, lastName, email, password }) {
+export async function submitBusinessClaim({ businessId, firstName, lastName, email, phone, password }) {
   if (await hasOwnerSlotTaken(businessId)) {
     return { ok: false, error: "This business has already been claimed, or has a claim awaiting approval." };
   }
@@ -123,8 +123,14 @@ export async function submitBusinessClaim({ businessId, firstName, lastName, ema
     first_name: firstName,
     last_name: lastName,
     email,
+    phone: phone || null,
     status: "pending",
     requested_at: new Date().toISOString(),
+    // Deliberately null. A claim collects who you are, but never a plan or a
+    // terms acceptance the way registration does — so the portal asks for
+    // both on the claimer's first sign-in after approval. See
+    // ClaimOnboardingPage.
+    onboarding_completed_at: null,
   });
 
   if (insertError) {
