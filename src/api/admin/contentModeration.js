@@ -81,6 +81,11 @@ function reviewFromRow(row) {
     rating: row.rating,
     date: row.date,
     text: row.text,
+    // Whatever the reviewer left as proof this is a real, verified customer
+    // (a booking reference, an order link, etc.) — collected on the business
+    // portal's review form but never surfaced to the moderator who actually
+    // needs it to judge whether a review is genuine.
+    verificationLink: row.verification_link ?? null,
     // `reply` is jsonb — the business's response plus its own approval state,
     // so a reply is moderated separately from the review it answers.
     reply: row.reply?.text ?? "",

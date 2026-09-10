@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-export default function ApprovalActionBar({ item, onApprove, onReject, onEdit }) {
+export default function ApprovalActionBar({ item, onApprove, onReject, onEdit, disabled }) {
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
 
-  if (item.source === "xml") {
+  if (item.source === "xml" || item.source === "admin") {
     return (
       <div className="flex items-center gap-2 mt-2">
         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>
@@ -44,10 +44,10 @@ export default function ApprovalActionBar({ item, onApprove, onReject, onEdit })
 
   return (
     <div className="flex items-center gap-2 mt-2 flex-wrap">
-      <button onClick={() => onApprove?.(item)} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>
+      <button disabled={disabled} onClick={() => onApprove?.(item)} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: "#2563EB" }}>
         ✓ Approve
       </button>
-      <button onClick={() => setRejecting(true)} className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: "#991B1B", border: "1.5px solid rgba(185,28,28,0.4)" }}>
+      <button disabled={disabled} onClick={() => setRejecting(true)} className="px-4 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ color: "#991B1B", border: "1.5px solid rgba(185,28,28,0.4)" }}>
         ✕ Reject
       </button>
       {onEdit && (

@@ -339,12 +339,6 @@ export async function setFeatured(id, featured) {
   return { ok: true };
 }
 
-// `hasContent` is derived from the listing's description, so there is nothing
-// to flip — kept so the Business Content Editor's existing call still works.
-export async function markBusinessHasContent() {
-  return { ok: true };
-}
-
 // Business approval and the owner's own user approval are deliberately
 // independent gates — approving/rejecting/suspending a business here never
 // touches business_users.status. The business portal's login (useBusinessAuth

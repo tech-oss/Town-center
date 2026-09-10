@@ -26,9 +26,38 @@ function Field({ label, value, mono }) {
   );
 }
 
+// A field's "before"/"after" render as a real photo for image/gallery kinds
+// (the full picture, not a filename or a count) and as text otherwise. When
+// hasBefore is false — no snapshot exists for this section yet, e.g. a row
+// saved before this tracking existed — "before" is shown as "Unknown" rather
+// than a misleading "—" that would read as "there was nothing here".
+function ValueCell({ kind, value, hasBefore, empty }) {
+  if (empty) {
+    return <span className="text-xs px-2 py-1 rounded-lg italic" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>{hasBefore ? "Unknown" : "—"}</span>;
+  }
+  if (kind === "image") {
+    return value
+      ? <img src={value} alt="" className="w-28 h-20 rounded-lg object-cover" style={{ border: "1.5px solid rgba(16,24,40,0.15)" }} />
+      : <span className="text-xs px-2 py-1 rounded-lg italic" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>No image</span>;
+  }
+  if (kind === "gallery") {
+    const images = Array.isArray(value) ? value : [];
+    if (!images.length) return <span className="text-xs px-2 py-1 rounded-lg italic" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>No images</span>;
+    return (
+      <div className="flex flex-wrap gap-1.5">
+        {images.map((src, i) => (
+          <img key={i} src={src} alt="" className="w-16 h-14 rounded-lg object-cover" style={{ border: "1.5px solid rgba(16,24,40,0.15)" }} />
+        ))}
+      </div>
+    );
+  }
+  return <span className="text-xs px-2 py-1 rounded-lg break-words" style={{ backgroundColor: "rgba(16,24,40,0.06)", color: "#1E293B" }}>{value}</span>;
+}
+
 function ChangesTable({ changes }) {
   const changed = changes.filter((c) => c.changed);
   const unchanged = changes.filter((c) => !c.changed);
+  const isVisual = (c) => c.kind === "image" || c.kind === "gallery";
   return (
     <div className="flex flex-col gap-2">
       {changed.length > 0 && (
@@ -41,11 +70,11 @@ function ChangesTable({ changes }) {
               <span className="text-xs font-semibold" style={{ color: "#374151" }}>{c.field}</span>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Before</span>
-                <span className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: "rgba(185,28,28,0.07)", color: "#991B1B" }}>{c.before}</span>
+                <ValueCell kind={c.kind} value={c.before} hasBefore={c.hasBefore} empty={isVisual(c) ? !c.before || (Array.isArray(c.before) && !c.before.length) : c.before === "—" || c.before == null} />
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>After</span>
-                <span className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B" }}>{c.after}</span>
+                <ValueCell kind={c.kind} value={c.after} hasBefore empty={isVisual(c) ? !c.after || (Array.isArray(c.after) && !c.after.length) : c.after === "—" || c.after == null} />
               </div>
             </div>
           ))}
@@ -58,9 +87,9 @@ function ChangesTable({ changes }) {
           </summary>
           <div className="mt-2 rounded-xl overflow-hidden" style={{ border: "1px solid rgba(16,24,40,0.1)" }}>
             {unchanged.map((c, i) => (
-              <div key={c.field} className="px-4 py-2.5 flex items-center justify-between" style={{ borderTop: i > 0 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
-                <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>{c.field}</span>
-                <span className="text-xs" style={{ color: "#9CA3AF" }}>{c.after}</span>
+              <div key={c.field} className="px-4 py-2.5 flex items-center justify-between gap-4" style={{ borderTop: i > 0 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
+                <span className="text-xs font-semibold shrink-0" style={{ color: "#6B7280" }}>{c.field}</span>
+                {isVisual(c) ? <ValueCell kind={c.kind} value={c.after} hasBefore empty={!c.after || (Array.isArray(c.after) && !c.after.length)} /> : <span className="text-xs" style={{ color: "#9CA3AF" }}>{c.after}</span>}
               </div>
             ))}
           </div>
@@ -90,18 +119,6 @@ function ListingEditDetail({ detail }) {
       <Section title="Proposed changes">
         <ChangesTable changes={detail.changes} />
       </Section>
-      {detail.newImages?.length > 0 && (
-        <>
-          <hr style={{ borderColor: "rgba(16,24,40,0.1)" }} />
-          <Section title="New images submitted">
-            <div className="flex gap-3 flex-wrap">
-              {detail.newImages.map((src, i) => (
-                <img key={i} src={src} alt={`New image ${i + 1}`} className="w-32 h-24 rounded-xl object-cover" style={{ border: "2px solid rgba(16,24,40,0.2)" }} />
-              ))}
-            </div>
-          </Section>
-        </>
-      )}
     </>
   );
 }
@@ -314,6 +331,9 @@ export default function ApprovalDetailPage() {
             {item.source === "xml" && (
               <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>XML Import</span>
             )}
+            {item.source === "admin" && (
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>Auto-published by Admin</span>
+            )}
             <StatusTag status={status} />
           </div>
         </div>
@@ -375,6 +395,11 @@ export default function ApprovalDetailPage() {
         {item.source === "xml" && (
           <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.2)" }}>
             <span className="text-sm" style={{ color: "#1D4ED8" }}>⚡ Auto-published via XML feed — no manual approval action is required.</span>
+          </div>
+        )}
+        {item.source === "admin" && (
+          <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(37,99,235,0.07)", border: "1px solid rgba(37,99,235,0.2)" }}>
+            <span className="text-sm" style={{ color: "#1D4ED8" }}>⚡ Published directly by admin through Manage Business Content — no approval action is required.</span>
           </div>
         )}
       </div>

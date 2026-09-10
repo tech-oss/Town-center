@@ -113,6 +113,12 @@ export default function ReviewModerationPage() {
                   </div>
                   <p className="text-xs mt-1" style={{ color: MUTED }}>{r.businessName} · {r.date}</p>
                   {r.text && <p className="text-xs mt-2" style={{ color: NAVY }}>{r.text}</p>}
+                  {r.verificationLink && (
+                    <a href={r.verificationLink} target="_blank" rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold mt-2 hover:underline" style={{ color: BLUE }}>
+                      ✓ Verification link ↗
+                    </a>
+                  )}
                   {r.reply && (
                     <div className="mt-2 pl-3" style={{ borderLeft: `2px solid ${BORDER}` }}>
                       <p className="text-xs" style={{ color: MUTED }}>

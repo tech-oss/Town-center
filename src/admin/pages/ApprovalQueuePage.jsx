@@ -1,13 +1,22 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getApprovals, deleteItems } from "../../api/admin";
+import { getApprovals, approveItem, rejectItem, deleteItems } from "../../api/admin";
 import ApprovalActionBar from "../components/ApprovalActionBar";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
 const FILTERS = ["All", "Pending", "Approved", "Rejected", "Auto-published"];
+
+// "Auto-published" isn't a status — it's a source. Admin's own edits through
+// Manage Business Content write directly to live and are marked
+// source: "admin" (see src/api/admin/approvals.js); there's nothing to
+// approve, so they're filtered separately from the Pending/Approved/Rejected
+// decision states.
+function isAutoPublished(item) {
+  return item.source === "admin";
+}
 
 const SORTS = [
   { key: "date-desc", label: "Newest first" },
@@ -48,14 +57,36 @@ export default function ApprovalQueuePage() {
   const [deletedIds, setDeletedIds] = useState([]);
   const [selected, setSelected] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null); // null | "selected" | id
-  const { data: approvals, loading } = useFetch(getApprovals, []);
+  const [busy, setBusy] = useState(null);
+  const [tick, setTick] = useState(0);
+  const refetch = () => setTick((t) => t + 1);
+  const { data: approvals, loading } = useFetch(getApprovals, [tick]);
 
-  function handleApprove(item) {
-    setLocalStates((s) => ({ ...s, [item.id]: { status: "Approved" } }));
+  // Approve/Reject from the list used to only ever touch local component
+  // state — approveItem/rejectItem were imported by the detail page but never
+  // called from here, so a decision made from the queue list looked like it
+  // took effect and then silently reverted on the next refresh, because
+  // nothing had actually been written to business_listings.
+  async function handleApprove(item) {
+    setBusy(item.id);
+    try {
+      await approveItem(item.id);
+      setLocalStates((s) => ({ ...s, [item.id]: { status: "Approved" } }));
+      refetch();
+    } finally {
+      setBusy(null);
+    }
   }
 
-  function handleReject(item, reason) {
-    setLocalStates((s) => ({ ...s, [item.id]: { status: "Rejected", rejectionReason: reason } }));
+  async function handleReject(item, reason) {
+    setBusy(item.id);
+    try {
+      await rejectItem(item.id, reason);
+      setLocalStates((s) => ({ ...s, [item.id]: { status: "Rejected", rejectionReason: reason } }));
+      refetch();
+    } finally {
+      setBusy(null);
+    }
   }
 
   function toggleSelect(id) {
@@ -75,7 +106,16 @@ export default function ApprovalQueuePage() {
     let list = (approvals ?? [])
       .filter((a) => !deletedIds.includes(a.id))
       .map((a) => ({ ...a, ...(localStates[a.id] ?? {}) }))
-      .filter((a) => filter === "All" || a.status === filter);
+      .filter((a) => {
+        if (filter === "All") return true;
+        if (filter === "Auto-published") return isAutoPublished(a);
+        // The remaining three filters are decision states — auto-published
+        // items are always "Approved" (nothing was ever pending) but showing
+        // them under the Approved filter too would mix "admin published
+        // this directly" in with "a business's submission was reviewed and
+        // approved", which answer different questions.
+        return a.status === filter && !isAutoPublished(a);
+      });
 
     // Search by business name
     const q = search.trim().toLowerCase();
@@ -205,7 +245,7 @@ export default function ApprovalQueuePage() {
                 boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)",
                 border: isSelected
                   ? "1.5px solid #1E293B"
-                  : item.source === "xml"
+                  : isAutoPublished(item)
                     ? "1px solid rgba(37,99,235,0.25)"
                     : "1px solid rgba(16,24,40,0.08)",
               }}
@@ -225,6 +265,9 @@ export default function ApprovalQueuePage() {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <span className="text-sm font-bold" style={{ color: "#1E293B" }}>{item.business}</span>
                         <StatusTag status={item.status} />
+                        {item.source === "admin" && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>Auto-published by Admin</span>
+                        )}
                         {item.source === "xml" && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>XML Import</span>
                         )}
@@ -258,7 +301,7 @@ export default function ApprovalQueuePage() {
                     </div>
                   </div>
                   {item.status === "Pending" && (
-                    <ApprovalActionBar item={item} onApprove={handleApprove} onReject={handleReject} />
+                    <ApprovalActionBar item={item} onApprove={handleApprove} onReject={handleReject} disabled={busy === item.id} />
                   )}
                 </div>
               </div>

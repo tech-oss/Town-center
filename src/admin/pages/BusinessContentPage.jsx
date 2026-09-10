@@ -1,20 +1,28 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { BUSINESS_CONTENT, SECTION_LABELS, createBlankBusinessContent } from "../../Data/adminBusinessContentMock";
-import { markBusinessHasContent } from "../../api/admin";
+import {
+  getBusinessesForContent, getBusinessListingContent, saveBusinessListingContent,
+} from "../../api/admin/businessListingContent";
 import {
   StatusDot, NAVY, BLUE, MUTED, BORDER, useToast, Toast,
-  NewBusinessBanner, ProgressSteps, computeProgressSteps,
 } from "./businessContent/shared";
 import TypeAEditor from "./businessContent/TypeAEditor";
 import TypeBEditor from "./businessContent/TypeBEditor";
 import TypeCEditor from "./businessContent/TypeCEditor";
-import TypeDEditor from "./businessContent/TypeDEditor";
 
-const SECTION_ORDER = ["see-do", "eat-drink", "shop", "services", "live-stay", "explore"];
+// Admin's "Business Type" values (see src/Data/taxonomy.js) grouped the same
+// way the left-hand list has always been grouped. "services" and "hotel" get
+// their own editor shape below; "live" was a section on the old mock dataset
+// that has no equivalent business type any more.
+const SECTION_ORDER = ["see-do", "eat-drink", "shop", "services", "hotel"];
+const SECTION_LABELS = {
+  "see-do": "See & Do",
+  "eat-drink": "Eat & Drink",
+  shop: "Shop",
+  services: "Services",
+  hotel: "Hotel & Accommodation",
+};
 
-// Grey "No Content" badge shown in the left list for a registered business
-// that has no page content yet — replaces the usual Published/Draft dot.
 function NoContentBadge() {
   return (
     <span className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0"
@@ -26,78 +34,69 @@ function NoContentBadge() {
 
 export default function BusinessContentPage() {
   const [searchParams] = useSearchParams();
-  const searchKey = searchParams.toString();
 
-  const [businesses, setBusinesses] = useState(() => BUSINESS_CONTENT.map((b) => ({ ...b })));
+  const [businesses, setBusinesses] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  const [listing, setListing] = useState(null);
+  const [loadingListing, setLoadingListing] = useState(false);
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useToast();
 
-  // Arriving from "Add Content Now" / "Add / Edit Content" — pre-select the
-  // business the id/name/section URL params point to, synthesising a blank
-  // draft entry if no content record exists for it yet.
+  useEffect(() => {
+    getBusinessesForContent().then(setBusinesses);
+  }, []);
+
+  // Arriving from Business Registrations' "Add Content" / "Edit Content"
+  // link — pre-select the business the URL's businessId param points to.
   useEffect(() => {
     const businessId = searchParams.get("businessId");
-    if (!businessId) return;
-
-    // Resolve existing-vs-blank atomically inside the updater (reading the
-    // true current state, not a stale render-time snapshot) so this can't
-    // double-insert a duplicate draft — e.g. under React StrictMode's
-    // dev-only double effect invocation.
-    let resolvedId = businessId;
-    setBusinesses((prev) => {
-      const existing = prev.find((b) => b.id === businessId || b.registrationId === businessId);
-      if (existing) {
-        resolvedId = existing.id;
-        return prev;
-      }
-      const name = searchParams.get("name") || "New Business";
-      const rawSection = searchParams.get("section") || "shop";
-      // The registration form's "Live" section value doesn't match the
-      // content editor's "live-stay" section key — normalise it here.
-      const section = rawSection === "live" ? "live-stay" : rawSection;
-      const blank = createBlankBusinessContent({ id: businessId, name, section, registrationId: businessId });
-      resolvedId = blank.id;
-      return [blank, ...prev];
-    });
-    setSelectedId(resolvedId);
-    // Only re-run when the URL itself changes — not on every local edit.
+    if (businessId) setSelectedId(businessId);
+    // Only re-run when the URL itself changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchKey]);
+  }, [searchParams.get("businessId")]);
 
-  const selected = businesses.find((b) => b.id === selectedId) ?? null;
+  useEffect(() => {
+    if (!selectedId) { setListing(null); return; }
+    let cancelled = false;
+    setLoadingListing(true);
+    getBusinessListingContent(selectedId).then((data) => {
+      if (!cancelled) { setListing(data); setLoadingListing(false); }
+    });
+    return () => { cancelled = true; };
+  }, [selectedId]);
+
+  const selectedBusiness = (businesses ?? []).find((b) => b.id === selectedId) ?? null;
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const filtered = businesses.filter((b) => !q || b.name.toLowerCase().includes(q));
-    return SECTION_ORDER.map((section) => ({
+    const filtered = (businesses ?? []).filter((b) => !q || b.name.toLowerCase().includes(q));
+    const groups = SECTION_ORDER.map((section) => ({
       section,
       label: SECTION_LABELS[section],
       items: filtered.filter((b) => b.section === section),
     })).filter((g) => g.items.length > 0);
+    const unknown = filtered.filter((b) => !SECTION_ORDER.includes(b.section));
+    if (unknown.length) groups.push({ section: "other", label: "Other", items: unknown });
+    return groups;
   }, [businesses, query]);
 
   function set(key, value) {
-    setBusinesses((all) => all.map((b) => (b.id === selectedId ? { ...b, [key]: value } : b)));
+    setListing((l) => ({ ...l, [key]: value }));
   }
 
-  function handleSave() {
+  async function handleSave() {
     setSaving(true);
-    setTimeout(() => {
-      setSaving(false);
-      setToast("Changes saved successfully");
-      // First save on a freshly-registered business — clear its Content
-      // Pending state here and back on the Business Registrations list.
-      // TODO: persist to Supabase on backend integration
-      if (selected && !selected.hasContent) {
-        set("hasContent", true);
-        if (selected.registrationId) markBusinessHasContent(selected.registrationId);
-      }
-    }, 500);
+    try {
+      await saveBusinessListingContent(selectedId, listing);
+      setToast("Changes published to the live site.");
+      setBusinesses((prev) => prev.map((b) => (b.id === selectedId ? { ...b, hasContent: true } : b)));
+      setListing((l) => ({ ...l, hasContent: true }));
+    } catch (e) {
+      setToast(e.message ?? "Something went wrong saving this content.");
+    }
+    setSaving(false);
   }
-
-  const showProgress = selected && !selected.hasContent;
 
   return (
     <div className="flex gap-6 h-[calc(100vh-140px)] min-h-[600px]">
@@ -114,7 +113,10 @@ export default function BusinessContentPage() {
           />
         </div>
         <div className="flex-1 overflow-y-auto py-2">
-          {grouped.length === 0 && (
+          {businesses === null && (
+            <p className="text-xs text-center py-6" style={{ color: MUTED }}>Loading…</p>
+          )}
+          {businesses !== null && grouped.length === 0 && (
             <p className="text-xs text-center py-6" style={{ color: MUTED }}>No businesses match your search.</p>
           )}
           {grouped.map((g) => (
@@ -125,7 +127,7 @@ export default function BusinessContentPage() {
                   title={!b.hasContent ? "This business has no content yet. Click to start adding." : undefined}
                   className="w-full text-left px-4 py-2.5 flex items-center gap-2.5 transition-colors"
                   style={{ backgroundColor: selectedId === b.id ? "rgba(37,99,235,0.08)" : "transparent" }}>
-                  {b.hasContent ? <StatusDot status={b.status} /> : <NoContentBadge />}
+                  {b.hasContent ? <StatusDot status="Published" /> : <NoContentBadge />}
                   <span className="text-sm truncate flex-1" style={{ color: selectedId === b.id ? BLUE : NAVY, fontWeight: selectedId === b.id ? 600 : 400 }}>
                     {b.name}
                   </span>
@@ -138,7 +140,7 @@ export default function BusinessContentPage() {
 
       {/* ── Right panel: editor ── */}
       <div className="flex-1 overflow-y-auto">
-        {!selected ? (
+        {!selectedId ? (
           <div className="h-full flex items-center justify-center rounded-2xl bg-white"
             style={{ border: "1px dashed rgba(16,24,40,0.15)", minHeight: 400 }}>
             <div className="text-center">
@@ -146,33 +148,35 @@ export default function BusinessContentPage() {
               <p className="text-sm font-medium" style={{ color: MUTED }}>Select a business to edit</p>
             </div>
           </div>
+        ) : loadingListing || !listing ? (
+          <p className="text-sm py-10 text-center" style={{ color: MUTED }}>Loading content…</p>
         ) : (
           <div className="max-w-3xl pb-10">
-            <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
               <button onClick={() => setSelectedId(null)} className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: NAVY }}>← All Businesses</button>
               <span className="text-sm" style={{ color: MUTED }}>/</span>
-              <h1 className="text-lg font-bold" style={{ color: NAVY }}>{selected.name}</h1>
+              <h1 className="text-lg font-bold" style={{ color: NAVY }}>{selectedBusiness?.name}</h1>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>
-                {SECTION_LABELS[selected.section]}
+                {SECTION_LABELS[selectedBusiness?.section] ?? selectedBusiness?.section}
               </span>
-              {selected.hasContent ? <StatusDot status={selected.status} /> : <span className="text-[10px] font-bold px-2 py-0.5 rounded"
-                style={{ backgroundColor: "rgba(100,116,139,0.15)", color: "#475569" }}>No Content</span>}
             </div>
+            <p className="text-xs mb-6" style={{ color: "#9CA3AF" }}>
+              Address, phone, website and coordinates below are pulled directly from this business's registration — editing them here updates the same record, published immediately (admin edits don't need approval).
+            </p>
 
-            {showProgress && <NewBusinessBanner name={selected.name} />}
-            {showProgress && <ProgressSteps steps={computeProgressSteps(selected)} />}
-
-            {(selected.section === "see-do" || selected.section === "eat-drink" || selected.section === "shop") && (
-              <TypeAEditor form={selected} set={set} onSave={handleSave} saving={saving} />
+            {(selectedBusiness?.section === "see-do" || selectedBusiness?.section === "eat-drink" || selectedBusiness?.section === "shop") && (
+              <TypeAEditor form={listing} set={set} onSave={handleSave} saving={saving} />
             )}
-            {selected.section === "services" && (
-              <TypeBEditor form={selected} set={set} onSave={handleSave} saving={saving} />
+            {selectedBusiness?.section === "services" && (
+              <TypeBEditor form={listing} set={set} onSave={handleSave} saving={saving} />
             )}
-            {selected.section === "live-stay" && (
-              <TypeCEditor form={selected} set={set} onSave={handleSave} saving={saving} />
+            {selectedBusiness?.section === "hotel" && (
+              <TypeCEditor form={listing} set={set} onSave={handleSave} saving={saving} />
             )}
-            {selected.section === "explore" && (
-              <TypeDEditor form={selected} set={set} onSave={handleSave} saving={saving} />
+            {!["see-do", "eat-drink", "shop", "services", "hotel"].includes(selectedBusiness?.section) && (
+              <div className="bg-white rounded-2xl p-6 text-sm" style={{ color: MUTED, border: "1px solid rgba(16,24,40,0.08)" }}>
+                This business has no registered business type yet, so there's no content form to show. Approve its registration first.
+              </div>
             )}
           </div>
         )}

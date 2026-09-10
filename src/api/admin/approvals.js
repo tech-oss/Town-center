@@ -9,6 +9,18 @@ import { supabase } from "../../lib/supabaseClient";
 // produces three queue items, each approved or rejected on its own.
 //
 // rejection_reason is the matching map of section → why it was turned down.
+//
+// pending_snapshot (map of section → {camelCaseField: old value}) is written
+// by business-dashboard's saveBusinessListing right before it overwrites the
+// live columns — see supabase/sql/business_content_moderation_2026_09.sql.
+// That's the real "before" this file diffs against; approving clears it,
+// rejecting reverts the live columns to it.
+//
+// edited_by (map of section → 'business' | 'admin') tells apart a business's
+// own submission from admin's own direct edit through Manage Business
+// Content — admin approving their own edit would be meaningless, so those
+// sections are written already "Up to Date" and shown here as auto-published,
+// not as something waiting on a decision.
 
 const SECTION_LABELS = {
   profile: "Profile",
@@ -21,17 +33,25 @@ const SECTION_LABELS = {
   services: "Services",
 };
 
-// Which listing columns belong to which editable section, so the queue can show
-// what the business actually changed rather than just naming the section.
+// [db column, camelCase field (matches pending_snapshot's keys), display
+// label, kind]. kind drives how the value renders: "image" for a single
+// photo, "gallery" for an array of photos, "text" (default) for everything
+// else via describe().
 const SECTION_FIELDS = {
-  profile: [["name", "Business Name"], ["tagline", "Tagline"], ["description", "Description"], ["logo", "Logo"], ["hero_image", "Header Image"]],
-  hours: [["hours", "Opening Hours"], ["availability_info", "Availability Info"]],
-  gallery: [["gallery", "Gallery Images"]],
-  location: [["address", "Address"], ["postal_code", "Postcode"], ["lat", "Latitude"], ["lng", "Longitude"]],
-  contact: [["phone", "Phone"], ["email", "Email"], ["website", "Website"], ["booking_url", "Booking URL"], ["social", "Social Links"]],
-  faqs: [["faqs", "FAQs"]],
-  portfolio: [["portfolio", "Portfolio"], ["skills", "Skills"]],
-  services: [["services_list", "Services"], ["areas_covered_list", "Areas Covered"], ["why_choose_us", "Why Choose Us"], ["stats", "Stats"]],
+  profile: [
+    ["name", "name", "Business Name"],
+    ["tagline", "tagline", "Tagline"],
+    ["description", "description", "Description"],
+    ["logo", "logo", "Logo", "image"],
+    ["hero_image", "heroImage", "Header Image", "image"],
+  ],
+  hours: [["hours", "hours", "Opening Hours"], ["availability_info", "availabilityInfo", "Availability Info"]],
+  gallery: [["gallery", "gallery", "Gallery Images", "gallery"]],
+  location: [["address", "address", "Address"], ["postal_code", "postalCode", "Postcode"], ["lat", "lat", "Latitude"], ["lng", "lng", "Longitude"]],
+  contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"]],
+  faqs: [["faqs", "faqs", "FAQs"]],
+  portfolio: [["portfolio", "portfolio", "Portfolio"], ["skills", "skills", "Skills"]],
+  services: [["services_list", "servicesList", "Services"], ["areas_covered_list", "areasCoveredList", "Areas Covered"], ["why_choose_us", "whyChooseUs", "Why Choose Us"], ["stats", "stats", "Stats"]],
 };
 
 const PENDING = "Pending Approval";
@@ -53,32 +73,64 @@ function describe(value) {
   return String(value);
 }
 
+// Deep-ish equality good enough for the plain values/arrays/objects a listing
+// column ever holds (strings, numbers, arrays of strings, small plain
+// objects like `social`) — used to decide whether a field actually changed.
+function sameValue(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return (a ?? "") === (b ?? "");
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 function toItem(row, section, state, owner = {}) {
   const fields = SECTION_FIELDS[section] ?? [];
+  const snapshot = row.pending_snapshot?.[section] ?? null;
+  const editor = row.edited_by?.[section]; // 'business' | 'admin' | undefined
+  const isAdminEdit = editor === "admin";
+
+  const changes = fields.map(([col, camelKey, label, kind]) => {
+    const after = row[col];
+    // A snapshot only exists once a business has actually saved that section
+    // at least once since this migration shipped — for admin's own edits (no
+    // snapshot needed, admin IS the live value) and for rows saved before
+    // this existed, "before" is unknown rather than falsely "—", so it reads
+    // honestly instead of implying nothing was there.
+    const before = snapshot ? snapshot[camelKey] ?? null : undefined;
+    const changed = snapshot ? !sameValue(before, after) : (after != null && after !== "");
+    return {
+      field: label,
+      kind: kind ?? "text",
+      before: kind === "image" || kind === "gallery" ? before : describe(before),
+      after: kind === "image" || kind === "gallery" ? after : describe(after),
+      hasBefore: snapshot != null,
+      changed,
+    };
+  });
+
+  const ownerName = [owner.first_name, owner.last_name].filter(Boolean).join(" ") || owner.email || "—";
+
   return {
     id: makeId(row.business_id, section),
     type: "Listing Edit",
     section,
     business: row.name ?? row.business_id,
     businessId: row.business_id,
-    submittedBy: [owner.first_name, owner.last_name].filter(Boolean).join(" ") || owner.email || "—",
+    submittedBy: isAdminEdit ? "Site Admin" : ownerName,
     submittedAt: row.updated_at,
     status: state === PENDING ? "Pending" : state === REJECTED ? "Rejected" : "Approved",
-    source: "business portal",
-    summary: `${SECTION_LABELS[section] ?? section} updated by the business.`,
+    // Reuses the same "source" the UI already had a real, working
+    // no-action-needed treatment for (XML property imports) — admin's own
+    // edits get that same treatment instead of showing Approve/Reject
+    // buttons for a decision admin already made by saving it.
+    source: isAdminEdit ? "admin" : "business portal",
+    summary: isAdminEdit
+      ? `${SECTION_LABELS[section] ?? section} published directly by admin.`
+      : `${SECTION_LABELS[section] ?? section} updated by the business.`,
     rejectionReason: row.rejection_reason?.[section] ?? "",
     detail: {
       section: SECTION_LABELS[section] ?? section,
       category: row.business_type ?? "",
-      // The business portal overwrites the live row in place, so there is no
-      // stored "before" to diff against — show the submitted values instead.
-      changes: fields.map(([col, label]) => ({
-        field: label,
-        before: "—",
-        after: describe(row[col]),
-        changed: row[col] != null && row[col] !== "",
-      })),
-      newImages: section === "gallery" ? (row.gallery ?? []) : [],
+      changes,
       currentListing: {
         name: row.name,
         address: row.address,
@@ -111,15 +163,20 @@ async function ownersByBusiness(ids) {
 export async function getApprovals({ status } = {}) {
   const { data, error } = await supabase
     .from("business_listings")
-    .select("*")
+    .select("*, businesses(name)")
     .order("updated_at", { ascending: false });
   if (error) throw error;
 
   const owners = await ownersByBusiness((data ?? []).map((r) => r.business_id));
   const items = [];
   for (const row of data ?? []) {
+    // businesses.name is the source of truth for the business's current
+    // name — business_listings.name can itself be mid-edit/pending, which
+    // would otherwise make the queue's own "business" column show a name
+    // that hasn't been approved yet.
+    const named = { ...row, name: row.businesses?.name ?? row.name };
     for (const [section, state] of Object.entries(row.approval_status ?? {})) {
-      items.push(toItem(row, section, state, owners[row.business_id]));
+      items.push(toItem(named, section, state, owners[row.business_id]));
     }
   }
   return status ? items.filter((i) => i.status === status) : items;
@@ -129,7 +186,7 @@ export async function getApprovalById(id) {
   const { businessId, section } = parseId(id);
   const { data, error } = await supabase
     .from("business_listings")
-    .select("*")
+    .select("*, businesses(name)")
     .eq("business_id", businessId)
     .maybeSingle();
   if (error) throw error;
@@ -137,49 +194,86 @@ export async function getApprovalById(id) {
   const state = data.approval_status?.[section];
   if (!state) return null;
   const owners = await ownersByBusiness([businessId]);
-  return toItem(data, section, state, owners[businessId]);
+  const named = { ...data, name: data.businesses?.name ?? data.name };
+  return toItem(named, section, state, owners[businessId]);
 }
 
-// Approval flips one key of the jsonb map, leaving the other sections' states
-// untouched — read-modify-write, since Postgres can't merge a single key
-// through PostgREST without a stored function.
-async function setSectionState(id, state, reason) {
-  const { businessId, section } = parseId(id);
+// Approval clears the section's snapshot (no longer needed — the live
+// columns already hold the approved values) and marks it Up to Date.
+async function approveSection(businessId, section) {
   const { data, error: readError } = await supabase
     .from("business_listings")
-    .select("approval_status, rejection_reason")
+    .select("approval_status, rejection_reason, pending_snapshot")
     .eq("business_id", businessId)
     .maybeSingle();
   if (readError) throw readError;
 
-  const approval = { ...(data?.approval_status ?? {}), [section]: state };
+  const approval = { ...(data?.approval_status ?? {}), [section]: APPROVED };
   const reasons = { ...(data?.rejection_reason ?? {}) };
-  if (state === REJECTED) reasons[section] = reason || null;
-  else delete reasons[section];
+  delete reasons[section];
+  const snapshots = { ...(data?.pending_snapshot ?? {}) };
+  delete snapshots[section];
 
   const { error } = await supabase
     .from("business_listings")
-    .update({ approval_status: approval, rejection_reason: reasons })
+    .update({ approval_status: approval, rejection_reason: reasons, pending_snapshot: snapshots })
+    .eq("business_id", businessId);
+  if (error) throw error;
+  return { ok: true };
+}
+
+// Rejection reverts the live columns back to the section's snapshot — a
+// declined change no longer sits live indefinitely with just a status flag
+// saying it shouldn't be. If no snapshot exists (nothing was ever captured
+// for this section, e.g. an old row saved before this existed), there is
+// nothing safe to revert to, so only the status/reason are recorded, same
+// as the previous behaviour.
+async function rejectSection(businessId, section, reason) {
+  const { data, error: readError } = await supabase
+    .from("business_listings")
+    .select("approval_status, rejection_reason, pending_snapshot")
+    .eq("business_id", businessId)
+    .maybeSingle();
+  if (readError) throw readError;
+
+  const approval = { ...(data?.approval_status ?? {}), [section]: REJECTED };
+  const reasons = { ...(data?.rejection_reason ?? {}), [section]: reason || null };
+  const snapshots = { ...(data?.pending_snapshot ?? {}) };
+  const snapshot = snapshots[section];
+  delete snapshots[section];
+
+  const revertPatch = {};
+  if (snapshot) {
+    for (const [col, camelKey] of SECTION_FIELDS[section] ?? []) {
+      if (camelKey in snapshot) revertPatch[col] = snapshot[camelKey];
+    }
+  }
+
+  const { error } = await supabase
+    .from("business_listings")
+    .update({ ...revertPatch, approval_status: approval, rejection_reason: reasons, pending_snapshot: snapshots })
     .eq("business_id", businessId);
   if (error) throw error;
   return { ok: true };
 }
 
 export function approveItem(id) {
-  return setSectionState(id, APPROVED);
+  const { businessId, section } = parseId(id);
+  return approveSection(businessId, section);
 }
 
 export function rejectItem(id, reason) {
-  return setSectionState(id, REJECTED, reason);
+  const { businessId, section } = parseId(id);
+  return rejectSection(businessId, section, reason);
 }
 
 // There is no queue row to delete — an item exists only while its section sits
 // in a non-default state, so "dismissing" one marks the section up to date.
 export function deleteItem(id) {
-  return setSectionState(id, APPROVED);
+  return approveItem(id);
 }
 
 export async function deleteItems(ids) {
-  for (const id of ids) await setSectionState(id, APPROVED);
+  for (const id of ids) await approveItem(id);
   return { ok: true };
 }
