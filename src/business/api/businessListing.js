@@ -43,8 +43,26 @@ function fromRow(row) {
     workingWithMe: row.working_with_me,
     skills: row.skills,
     portfolio: row.portfolio,
+    pendingSnapshot: row.pending_snapshot ?? {},
+    editedBy: row.edited_by ?? {},
   };
 }
+
+// Which camelCase fields belong to which approval-status tab — mirrors
+// admin-panel's SECTION_FIELDS in src/api/admin/approvals.js, since both
+// sides need to agree on what "the hours section" actually consists of.
+// Used to snapshot only the fields a save is about to touch, not the whole
+// row, so two tabs saved back-to-back don't clobber each other's snapshot.
+const SECTION_FIELDS = {
+  profile: ["name", "tagline", "description", "logo", "heroImage"],
+  hours: ["hours", "availabilityInfo"],
+  gallery: ["gallery"],
+  location: ["address", "postalCode", "lat", "lng"],
+  contact: ["phone", "email", "website", "bookingUrl", "social"],
+  faqs: ["faqs"],
+  portfolio: ["portfolio", "skills"],
+  services: ["servicesList", "areasCoveredList", "whyChooseUs", "stats"],
+};
 
 function toRow(listing) {
   return {
@@ -97,10 +115,26 @@ export async function getBusinessListing(businessId) {
   return fromRow(data);
 }
 
-export async function saveBusinessListing(businessId, listing) {
+// tabKey identifies which section this save belongs to (see SECTION_FIELDS).
+// Before writing the new values, the section's CURRENT database values are
+// captured into pending_snapshot[tabKey] — reading fresh from the database
+// rather than trusting client state, since the page's own state may already
+// reflect in-progress edits to fields this exact save doesn't touch. That
+// snapshot is what lets the approval queue show a real before/after instead
+// of "—", and what a rejection reverts the live columns back to.
+export async function saveBusinessListing(businessId, listing, tabKey) {
+  const current = await getBusinessListing(businessId);
+  const fields = SECTION_FIELDS[tabKey] ?? [];
+  const snapshot = {};
+  for (const f of fields) snapshot[f] = current[f] ?? null;
+
   const { error } = await supabase
     .from("business_listings")
-    .update(toRow(listing))
+    .update({
+      ...toRow(listing),
+      pending_snapshot: { ...(current.pendingSnapshot ?? {}), [tabKey]: snapshot },
+      edited_by: { ...(current.editedBy ?? {}), [tabKey]: "business" },
+    })
     .eq("business_id", businessId);
   if (error) throw error;
 }

@@ -129,7 +129,7 @@ export default function MyListingPage() {
     setSaving(true);
     const next = { ...listing, approvalStatus: { ...listing.approvalStatus, [tabKey]: "Pending Approval" } };
     try {
-      await saveBusinessListing(user.id, next);
+      await saveBusinessListing(user.id, next, tabKey);
       setListing(next);
       setToast("Changes submitted for admin approval.");
     } catch {
@@ -201,7 +201,9 @@ export default function MyListingPage() {
             <>
               <EditorSection title="Business Profile">
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                  <Field label="Business Name"><Inp value={listing.name} onChange={(e) => set("name", e.target.value)} /></Field>
+                  <Field label="Business Name" hint={`${(listing.name ?? "").length}/60`}>
+                    <Inp value={listing.name} maxLength={60} onChange={(e) => set("name", e.target.value)} />
+                  </Field>
                   <Field label="Business Type" hint="Set at registration — cannot be changed here">
                     <Inp value={registrationSummary.businessTypeLabel} disabled style={{ opacity: 0.6 }} />
                   </Field>
@@ -220,8 +222,12 @@ export default function MyListingPage() {
                       />
                     </Field>
                   )}
-                  <Field label="Short Tagline" span2 hint="Shown on listing cards"><Inp value={listing.tagline} onChange={(e) => set("tagline", e.target.value)} /></Field>
-                  <Field label="Main Description" span2 hint="The full about section on your page"><TextArea rows={5} value={listing.description} onChange={(e) => set("description", e.target.value)} /></Field>
+                  <Field label="Short Tagline" span2 hint={`Shown on listing cards · ${(listing.tagline ?? "").length}/80`}>
+                    <Inp value={listing.tagline} maxLength={80} onChange={(e) => set("tagline", e.target.value)} />
+                  </Field>
+                  <Field label="Main Description" span2 hint={`The full about section on your page · ${(listing.description ?? "").length}/600`}>
+                    <TextArea rows={5} value={listing.description} maxLength={600} onChange={(e) => set("description", e.target.value)} />
+                  </Field>
                 </div>
                 <div className="flex flex-wrap gap-8">
                   <SingleImageUpload label="Business Logo" src={listing.logo} round pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
