@@ -23,8 +23,10 @@ export default function ArticleApprovalsPage() {
   }
 
   async function handleApprove(a) {
-    await approveArticle(a.id);
-    flash(`"${a.title}" is now live.`);
+    const res = await approveArticle(a.id);
+    flash(res.live
+      ? `"${a.title}" is now live.`
+      : `"${a.title}" approved. ${a.businessName} already has 3 articles live, so it's held until they swap one out.`);
     refresh();
   }
   async function handleReject(a, reason) {

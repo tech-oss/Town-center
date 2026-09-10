@@ -36,12 +36,30 @@ export async function getBusinessArticles({ status } = {}) {
   return (data ?? []).map(articleFromRow);
 }
 
+// Approving is a judgement about the content, not about whether the business
+// has a free slot for it — so a business already at its 3-live limit still
+// gets approved, the article just lands as Hidden rather than Live. The owner
+// then swaps it in from their own News & Articles page (or subscribes for
+// more room). Without this, admin's approve button would simply fail with the
+// trigger's error on any business that happens to be full, which reads as
+// admin being unable to approve rather than the business being at capacity.
 export async function approveArticle(id) {
   const { error } = await supabase
     .from("business_articles")
     .update({ status: "Live", rejection_reason: null })
     .eq("id", id);
-  if (error) throw error;
+
+  if (!error) return { ok: true, live: true };
+
+  if (!String(error.message ?? "").includes("Live article limit reached")) throw error;
+
+  const { error: hiddenError } = await supabase
+    .from("business_articles")
+    .update({ status: "Hidden", rejection_reason: null })
+    .eq("id", id);
+  if (hiddenError) throw hiddenError;
+
+  return { ok: true, live: false };
 }
 
 export async function rejectArticle(id, reason) {
