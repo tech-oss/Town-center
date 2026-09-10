@@ -31,9 +31,13 @@ function Field({ label, value, mono }) {
 // hasBefore is false — no snapshot exists for this section yet, e.g. a row
 // saved before this tracking existed — "before" is shown as "Unknown" rather
 // than a misleading "—" that would read as "there was nothing here".
+// hasBefore means a real snapshot exists for this section — so an empty
+// value here is a known fact ("(empty)": the field genuinely had nothing in
+// it), not an unknown. Only a row saved before snapshotting existed has no
+// snapshot at all, which is the one case "Unknown" is honest.
 function ValueCell({ kind, value, hasBefore, empty }) {
   if (empty) {
-    return <span className="text-xs px-2 py-1 rounded-lg italic" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>{hasBefore ? "Unknown" : "—"}</span>;
+    return <span className="text-xs px-2 py-1 rounded-lg italic" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>{hasBefore ? "(empty)" : "Unknown"}</span>;
   }
   if (kind === "image") {
     return value

@@ -33,6 +33,22 @@ const SECTION_FIELDS = {
 // way the business portal's is — it's one page, one Save).
 const ALL_SECTIONS = Object.keys(SECTION_FIELDS);
 
+// HoursEditor (shared.jsx) unconditionally maps over `hours` — it expects
+// the full 7-day array business-dashboard's DEFAULT_HOURS() produces, not
+// null. A business with no hours saved yet needs this same default, or the
+// editor crashes the moment its business is selected.
+function defaultHours() {
+  return [
+    { day: "Monday", open: true, from: "09:00", to: "17:00" },
+    { day: "Tuesday", open: true, from: "09:00", to: "17:00" },
+    { day: "Wednesday", open: true, from: "09:00", to: "17:00" },
+    { day: "Thursday", open: true, from: "09:00", to: "17:00" },
+    { day: "Friday", open: true, from: "09:00", to: "17:00" },
+    { day: "Saturday", open: true, from: "10:00", to: "16:00" },
+    { day: "Sunday", open: false, from: "10:00", to: "16:00" },
+  ];
+}
+
 function fromRow(row) {
   if (!row) return null;
   return {
@@ -43,7 +59,7 @@ function fromRow(row) {
     description: row.description ?? "",
     logo: row.logo ?? null,
     heroImage: row.hero_image ?? null,
-    hours: row.hours ?? null,
+    hours: row.hours ?? defaultHours(),
     availabilityInfo: row.availability_info ?? "",
     gallery: row.gallery ?? [],
     address: row.address ?? "",
