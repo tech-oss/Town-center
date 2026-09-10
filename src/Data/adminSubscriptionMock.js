@@ -39,15 +39,6 @@ export const SUBSCRIPTION_STRIPE_IDS = {
   s5: "sub_1RBX2kL8eZvKYlo2C2Spice",
 };
 
-// Mock payment method on file, keyed by subscription id.
-export const SUBSCRIPTION_PAYMENT_METHODS = {
-  s1: { brand: "Visa", last4: "4242" },
-  s2: { brand: "Mastercard", last4: "4444" },
-  s3: { brand: "Visa", last4: "1881" },
-  s4: { brand: "Amex", last4: "0005" },
-  s5: { brand: "Visa", last4: "4242" },
-};
-
 // ─── Billing History table (Screen 5) ─────────────────────────────────────────
 // Date / Description / Amount / Status (Paid / Failed / Refunded) / Invoice.
 export const SUBSCRIPTION_BILLING_HISTORY = {

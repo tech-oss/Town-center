@@ -39,8 +39,18 @@ function fromRow(row, owner) {
     paymentStatus: row.monthly_fee > 0 ? "Paid" : "Trial",
     isMultiSite: row.is_multi_site,
     upgradePlanKey: row.upgrade_plan_key,
+    // 'trial' | 'full' | null — set only by grantTrial/grantFullAccess below,
+    // so a comp account admin granted can be told apart from a real paid one.
+    grantedByAdmin: row.granted_by_admin ?? null,
+    grantedAt: row.granted_at ? row.granted_at.slice(0, 10) : null,
     history,
   };
+}
+
+export function grantedLabel(grantedByAdmin) {
+  if (grantedByAdmin === "trial") return "30 Day Trial";
+  if (grantedByAdmin === "full") return "Unlimited Access";
+  return null;
 }
 
 // business_subscriptions and business_users share `businesses` as a parent but
@@ -86,10 +96,14 @@ export async function getSubscriptionById(id) {
 }
 
 export async function grantTrial(id) {
-  const renewal = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+  const now = new Date();
+  const renewal = new Date(now.getTime() + 30 * 86400000).toISOString().slice(0, 10);
   const { error } = await supabase
     .from("business_subscriptions")
-    .update({ plan_status: "Trial", monthly_fee: 0, renewal_date: renewal, cancelled: false })
+    .update({
+      plan_status: "Trial", monthly_fee: 0, renewal_date: renewal, cancelled: false,
+      granted_by_admin: "trial", granted_at: now.toISOString(),
+    })
     .eq("business_id", id);
   if (error) throw error;
   return { id, status: "Trial", message: "30-day trial granted." };
@@ -99,10 +113,16 @@ export async function grantTrial(id) {
 // through billing — a comp account. Sets the top plan at zero cost rather than
 // adding a separate "unlocked" flag, so every feature-gate already keyed off
 // `plan`/`planStatus` throughout the business portal picks it up for free.
+// There's no renewal — granted_by_admin: "full" is what tells the UI to stop
+// showing a renewal/end date that doesn't apply.
 export async function grantFullAccess(id) {
   const { error } = await supabase
     .from("business_subscriptions")
-    .update({ plan: "premium", plan_status: "Active", monthly_fee: 0, cancelled: false, updated_at: new Date().toISOString() })
+    .update({
+      plan: "premium", plan_status: "Active", monthly_fee: 0, cancelled: false,
+      granted_by_admin: "full", granted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
     .eq("business_id", id);
   if (error) throw error;
   return { ok: true };

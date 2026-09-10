@@ -1,9 +1,9 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess } from "../../api/admin";
+import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess, grantedLabel } from "../../api/admin";
 import {
-  TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS, SUBSCRIPTION_PAYMENT_METHODS,
+  TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS,
   SUBSCRIPTION_BILLING_HISTORY, resolveTierFeatures,
 } from "../../Data/adminSubscriptionMock";
 import SubscriptionTabs from "../components/SubscriptionTabs";
@@ -116,7 +116,8 @@ export function SubscriptionDetailPage() {
   const payments = SUBSCRIPTION_BILLING_HISTORY[id] ?? [];
   const features = resolveTierFeatures(sub.tier);
   const stripeId = SUBSCRIPTION_STRIPE_IDS[id] ?? `sub_${id}`;
-  const paymentMethod = SUBSCRIPTION_PAYMENT_METHODS[id] ?? { brand: "Visa", last4: "0000" };
+  const isTrial = sub.grantedByAdmin === "trial";
+  const isFullAccess = sub.grantedByAdmin === "full";
 
   return (
     <div className="max-w-3xl flex flex-col gap-6">
@@ -157,21 +158,33 @@ export function SubscriptionDetailPage() {
           </div>
         </div>
 
+        {isFullAccess && (
+          <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "#1D4ED8" }}>
+            ✦ Unlimited access granted by admin{sub.grantedAt ? ` on ${sub.grantedAt}` : ""} — no renewal date, no charge.
+          </div>
+        )}
+        {isTrial && (
+          <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "#1D4ED8" }}>
+            ✦ 30-day trial granted by admin.
+          </div>
+        )}
+
+        {/* Payment method / card details are deliberately never shown here —
+            no payment processor is wired up yet (see this file's header
+            comment on `history`), so there is no real card on file to
+            display, and a placeholder one would misrepresent a business's
+            actual billing state. */}
         <div className="grid grid-cols-2 gap-4">
           {[
             ["Price per Month", sub.monthlyFee > 0 ? `£${sub.monthlyFee.toFixed(2)}` : "Free"],
-            ["Next Billing Date", sub.renewal],
-            ["Payment Method", `${paymentMethod.brand} •••• ${paymentMethod.last4}`],
+            ...(isTrial ? [["Trial Start Date", sub.grantedAt ?? "—"], ["Trial Ends", sub.renewal]]
+              : isFullAccess ? []
+              : [["Next Billing Date", sub.renewal]]),
             ["Subscription ID", stripeId],
           ].map(([l, v]) => (
             <div key={l} className="flex flex-col gap-0.5">
               <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{l}</span>
-              <span className="text-sm font-medium flex items-center gap-2" style={{ color: "#1E293B" }}>
-                {v}
-                {l === "Payment Method" && (
-                  <span className="text-xs font-semibold cursor-pointer" style={{ color: "#2563EB" }}>Change</span>
-                )}
-              </span>
+              <span className="text-sm font-medium" style={{ color: "#1E293B" }}>{v}</span>
             </div>
           ))}
         </div>
@@ -267,16 +280,19 @@ export function SubscriptionDetailPage() {
         </div>
       </div>
 
-      {/* Renewal */}
-      <div className="bg-white rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Renewal Date</p>
-          <p className="text-lg font-bold" style={{ color: "#1E293B" }}>{sub.renewal}</p>
+      {/* Renewal — meaningless for a full-access grant, since there's no
+          renewal to remind anyone about. */}
+      {!isFullAccess && (
+        <div className="bg-white rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{isTrial ? "Trial Ends" : "Renewal Date"}</p>
+            <p className="text-lg font-bold" style={{ color: "#1E293B" }}>{sub.renewal}</p>
+          </div>
+          <button onClick={handleSendReminder} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
+            Send Renewal Reminder
+          </button>
         </div>
-        <button onClick={handleSendReminder} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
-          Send Renewal Reminder
-        </button>
-      </div>
+      )}
 
       {/* History timeline */}
       <div className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
@@ -301,10 +317,10 @@ export function SubscriptionDetailPage() {
 }
 
 function exportCsv(rows) {
-  const headers = ["Business", "Owner", "Tier", "Status", "Start Date", "Renewal", "Monthly Fee", "Payment Status"];
+  const headers = ["Business", "Owner", "Tier", "Status", "Start Date", "Renewal", "Monthly Fee", "Payment Status", "Admin Granted"];
   const esc = (v) => { const s = v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const lines = [headers.join(","), ...rows.map((s) =>
-    [s.business, s.owner, s.tier, s.status, s.startDate, s.renewal, s.monthlyFee, s.paymentStatus].map(esc).join(","))];
+    [s.business, s.owner, s.tier, s.status, s.startDate, s.renewal, s.monthlyFee, s.paymentStatus, grantedLabel(s.grantedByAdmin) ?? ""].map(esc).join(","))];
   const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement("a"), { href: url, download: `subscriptions-${new Date().toISOString().slice(0, 10)}.csv` });
@@ -326,6 +342,12 @@ export default function SubscriptionsPage() {
     { key: "renewal", label: "Renewal", muted: true },
     { key: "monthlyFee", label: "Fee", render: (v) => v > 0 ? `£${v}/mo` : <span style={{ color: "#9CA3AF" }}>Free</span> },
     { key: "paymentStatus", label: "Payment", render: (v) => <StatusTag status={v} /> },
+    {
+      key: "grantedByAdmin", label: "Admin Granted",
+      render: (v) => v
+        ? <span className="text-xs font-bold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.12)", color: "#1D4ED8" }}>{grantedLabel(v)}</span>
+        : <span style={{ color: "#9CA3AF" }}>—</span>,
+    },
   ];
 
   return (
