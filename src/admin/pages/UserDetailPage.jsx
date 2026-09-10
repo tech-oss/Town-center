@@ -7,11 +7,23 @@ import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
-function Field({ label, value }) {
+// Matches the en-GB "10 Sep 2026" format already used across the admin
+// panel's other date displays (AnalyticsChart, ApprovalQueuePage, …) — this
+// card was the one place still showing the raw YYYY-MM-DD the API returns.
+function formatDateUK(value) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function Field({ label, value, warn }) {
   return (
     <div className="flex flex-col gap-0.5">
       <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{label}</span>
-      <span className="text-sm font-medium" style={{ color: NAVY }}>{value ?? "—"}</span>
+      <span className="text-sm font-medium" style={{ color: warn && !value ? "#B45309" : NAVY }}>
+        {value ?? (warn ? "Not provided" : "—")}
+      </span>
     </div>
   );
 }
@@ -39,25 +51,36 @@ export default function UserDetailPage() {
   const [rejectNote, setRejectNote] = useState("");
 
   const { data: user, loading } = useFetch(() => getUserById(id), [id, tick]);
+  const [actionError, setActionError] = useState("");
 
   if (loading) return <LoadingState />;
   if (!user) return <EmptyState title="User not found" message="This account may have been removed." />;
 
   async function act(fn, ...args) {
     setBusy(true);
-    await fn(id, ...args);
+    setActionError("");
+    try {
+      await fn(id, ...args);
+      setTick((t) => t + 1);
+    } catch (err) {
+      setActionError(err.message ?? "Something went wrong. Please try again.");
+    }
     setBusy(false);
-    setTick((t) => t + 1);
   }
 
   async function handleRejectSubmit() {
     if (!rejectNote.trim()) return;
     setBusy(true);
-    await rejectUser(id, rejectNote.trim());
+    setActionError("");
+    try {
+      await rejectUser(id, rejectNote.trim());
+      setShowReject(false);
+      setRejectNote("");
+      setTick((t) => t + 1);
+    } catch (err) {
+      setActionError(err.message ?? "Something went wrong. Please try again.");
+    }
     setBusy(false);
-    setShowReject(false);
-    setRejectNote("");
-    setTick((t) => t + 1);
   }
 
   async function handleDelete() {
@@ -102,8 +125,13 @@ export default function UserDetailPage() {
           <Field label="Role"       value={user.role} />
           <Field label="Tier"       value={user.tier ?? "N/A"} />
           <Field label="Status"     value={user.status} />
-          <Field label="Joined"     value={user.joined} />
-          <Field label="Last Login" value={user.lastLogin} />
+          {/* A missing phone number matters here specifically — it's the
+              number admin would use to verify this person's link to the
+              business, so it's called out rather than rendered as a plain
+              "—" indistinguishable from any other empty field. */}
+          <Field label="Phone"      value={user.phone} warn />
+          <Field label="Joined"     value={formatDateUK(user.joined)} />
+          <Field label="Last Login" value={formatDateUK(user.lastLogin)} />
         </div>
 
         <hr style={{ borderColor: BORDER }} />
@@ -125,6 +153,10 @@ export default function UserDetailPage() {
               <ActionBtn color="#16A34A" disabled={busy} onClick={() => act(approveUser)}>Reinstate Account</ActionBtn>
             )}
           </div>
+
+          {actionError && (
+            <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{actionError}</p>
+          )}
 
           {/* Rejection reason form */}
           {showReject && isPending && (

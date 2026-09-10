@@ -3,13 +3,6 @@ import useFetch from "../../hooks/useFetch";
 import { getPushHistory, sendPush } from "../../api/admin";
 import ArticleTypeahead from "../components/ArticleTypeahead";
 
-const AUDIENCES = [
-  { key: "all", label: "All users" },
-  { key: "businesses", label: "Business owners" },
-  { key: "agents", label: "Estate agents" },
-  { key: "subscribers", label: "Newsletter subscribers" },
-];
-
 // UI-only mock of previously sent notifications.
 const SENT_HISTORY = [
   { id: "n1", title: "Summer in the Spotlight", body: "New offers from Coppa Club & COCOBA are live — see what's on this week.", channels: ["Web", "Mobile"], audience: "All users", sentAt: "2026-06-20 09:00", reach: 1240 },
@@ -89,7 +82,6 @@ export default function PushNotificationsPage() {
 
   async function handleSend() {
     if (!isValid) return;
-    const audienceLabel = AUDIENCES.find((a) => a.key === form.audience)?.label ?? "All users";
     const result = await sendPush(form);
     setNonce((n) => n + 1);
     setForm({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
@@ -101,7 +93,7 @@ export default function PushNotificationsPage() {
     } else if (result.delivery) {
       notify(`Sent to ${result.delivery.sent}/${result.delivery.total} subscribed device(s).`);
     } else {
-      notify(`Notification sent to ${audienceLabel} via ${channels.join(" & ")}.`);
+      notify(`Notification sent via ${channels.join(" & ")}.`);
     }
   }
 
@@ -196,14 +188,6 @@ export default function PushNotificationsPage() {
             </div>
           </div>
 
-          {/* Audience */}
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Audience</span>
-            <select value={form.audience} onChange={(e) => set("audience", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={field}>
-              {AUDIENCES.map((a) => <option key={a.key} value={a.key}>{a.label}</option>)}
-            </select>
-          </label>
-
           <div className="flex items-center gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
             {!confirm ? (
               <button
@@ -217,7 +201,7 @@ export default function PushNotificationsPage() {
               </button>
             ) : (
               <>
-                <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Send to {AUDIENCES.find((a) => a.key === form.audience)?.label}?</span>
+                <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Send to everyone subscribed?</span>
                 <button type="button" onClick={handleSend} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: "#2563EB" }}>Confirm Send</button>
                 <button type="button" onClick={() => setConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>Cancel</button>
               </>

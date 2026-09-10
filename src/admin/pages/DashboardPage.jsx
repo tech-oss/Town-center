@@ -302,7 +302,7 @@ function TopCategoriesCard() {
     <div className="bg-white rounded-xl p-6 h-full flex flex-col" style={CARD}>
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Top Performing Categories</h2>
+          <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>No of Listings for Categories</h2>
           <InfoTip text="Business categories ranked by number of active listings. Each bar and percentage show that category's share of all listings on the platform." />
         </div>
         <Link to="/admin/listings" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: BRASS }}>View All</Link>

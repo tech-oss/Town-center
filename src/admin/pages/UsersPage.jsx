@@ -242,9 +242,17 @@ export default function UsersPage() {
   async function action(fn, id, e, ...args) {
     e.stopPropagation();
     setBusy(id);
-    await fn(id, ...args);
+    try {
+      await fn(id, ...args);
+      setTick((t) => t + 1);
+    } catch (err) {
+      // A failed write here used to be an unhandled promise rejection —
+      // nothing told the admin it hadn't worked, and busy stayed stuck on
+      // that row forever. Surfacing it is what makes the failure visible
+      // instead of it just quietly not happening.
+      notify(err.message ?? "Something went wrong. Please try again.");
+    }
     setBusy(null);
-    setTick((t) => t + 1);
   }
 
   function openReject(id, e) {
@@ -257,15 +265,19 @@ export default function UsersPage() {
     e.stopPropagation();
     if (!rejectNote.trim()) return;
     setBusy(id);
-    await rejectUser(id, rejectNote.trim());
+    try {
+      await rejectUser(id, rejectNote.trim());
+      setRejectingId(null);
+      setRejectNote("");
+      setTick((t) => t + 1);
+    } catch (err) {
+      notify(err.message ?? "Something went wrong. Please try again.");
+    }
     setBusy(null);
-    setRejectingId(null);
-    setRejectNote("");
-    setTick((t) => t + 1);
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl">
+    <div className="flex flex-col gap-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -342,13 +354,20 @@ export default function UsersPage() {
 
       {/* Table */}
       {loading ? <LoadingState /> : (
-        <div className="bg-white rounded-xl overflow-hidden" style={CARD}>
+        <div className="bg-white rounded-xl" style={CARD}>
           {!users.length ? (
             <p className="text-sm text-center py-12" style={{ color: MUTED }}>
               {search ? `No results for "${search}"` : `No ${tab.toLowerCase()} users.`}
             </p>
           ) : (
-            <table className="w-full text-sm border-collapse">
+            // Nine columns (including a multi-button Actions column) don't fit
+            // this table's own width on anything but a very wide screen — it
+            // was clipped with no way to reach the columns past the edge.
+            // overflow-x-auto on this wrapper (not on the table itself) lets
+            // the table render at its natural full width and scroll within the
+            // card, instead of being crushed to fit.
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse" style={{ minWidth: 920 }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${BORDER}` }}>
                   {COLUMNS.map(({ label, key }) => (
@@ -443,6 +462,7 @@ export default function UsersPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}

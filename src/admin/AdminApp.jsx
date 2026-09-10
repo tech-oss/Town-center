@@ -12,7 +12,6 @@ import ListingsPage from "./pages/ListingsPage";
 import BusinessContentPage from "./pages/BusinessContentPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import ProjectsPage from "./pages/ProjectsPage";
-import EventsNewsPage from "./pages/EventsNewsPage";
 import EventApprovalsPage from "./pages/EventApprovalsPage";
 import BusinessAnalyticsPage from "./pages/BusinessAnalyticsPage";
 import ArticleApprovalsPage from "./pages/ArticleApprovalsPage";
@@ -26,8 +25,6 @@ import FeaturedStoriesPage from "./pages/FeaturedStoriesPage";
 import PushNotificationsPage from "./pages/PushNotificationsPage";
 import AdminLogsPage from "./pages/AdminLogsPage";
 import SupportTicketsPage from "./pages/SupportTicketsPage";
-import ArticlesPage from "./pages/ArticlesPage";
-import ArticleEditorPage from "./pages/ArticleEditorPage";
 import NeighbourhoodGuidesPage from "./pages/NeighbourhoodGuidesPage";
 import NeighbourhoodGuideEditorPage from "./pages/NeighbourhoodGuideEditorPage";
 import SiteContentPage from "./pages/SiteContentPage";
@@ -57,7 +54,6 @@ export default function AdminApp() {
         <Route path="business-content" element={<BusinessContentPage />} />
         <Route path="properties" element={<PropertiesPage />} />
         <Route path="projects" element={<ProjectsPage />} />
-        <Route path="events-news" element={<EventsNewsPage />} />
         <Route path="event-approvals" element={<EventApprovalsPage />} />
         <Route path="business-analytics" element={<BusinessAnalyticsPage />} />
         <Route path="business-analytics/:businessId" element={<BusinessAnalyticsPage />} />
@@ -73,9 +69,6 @@ export default function AdminApp() {
         <Route path="settings" element={<SettingsPage />} />
         <Route path="admin-logs" element={<AdminLogsPage />} />
         <Route path="support-tickets" element={<SupportTicketsPage />} />
-        <Route path="articles" element={<ArticlesPage />} />
-        <Route path="articles/new" element={<ArticleEditorPage />} />
-        <Route path="articles/:id/edit" element={<ArticleEditorPage />} />
         <Route path="neighbourhood-guides" element={<NeighbourhoodGuidesPage />} />
         <Route path="neighbourhood-guides/new" element={<NeighbourhoodGuideEditorPage />} />
         <Route path="neighbourhood-guides/:id/edit" element={<NeighbourhoodGuideEditorPage />} />
