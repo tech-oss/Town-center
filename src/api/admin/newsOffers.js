@@ -110,28 +110,35 @@ export async function deleteNewsOffer(id) {
   return { id, deleted: true };
 }
 
-// The homepage shows three spotlight slots, so featuring a fourth is refused
-// rather than silently pushing one off.
-export async function toggleHomepageFeature(id) {
-  const { data: item, error: readError } = await supabase
-    .from("news_offers").select("featured_on_home").eq("id", id).maybeSingle();
-  if (readError) throw readError;
-  if (!item) return null;
-
-  if (!item.featured_on_home) {
-    const { count, error: countError } = await supabase
-      .from("news_offers")
-      .select("id", { count: "exact", head: true })
-      .eq("featured_on_home", true)
-      .neq("id", id);
-    if (countError) throw countError;
-    if ((count ?? 0) >= 3) {
-      return { error: "Maximum 3 items can be featured on the homepage at once. Remove one first." };
-    }
+// The homepage shows three spotlight slots. Turning a slot off always
+// succeeds; turning one on when all three are taken returns { full: true }
+// instead of erroring, so the UI can offer a swap rather than a dead end.
+export async function setHomepageFeature(id, featured) {
+  if (!featured) {
+    const { error } = await supabase.from("news_offers").update({ featured_on_home: false }).eq("id", id);
+    if (error) throw error;
+    return { id, featuredOnHome: false };
   }
 
-  const next = !item.featured_on_home;
-  const { error } = await supabase.from("news_offers").update({ featured_on_home: next }).eq("id", id);
+  const { count, error: countError } = await supabase
+    .from("news_offers")
+    .select("id", { count: "exact", head: true })
+    .eq("featured_on_home", true)
+    .neq("id", id);
+  if (countError) throw countError;
+  if ((count ?? 0) >= 3) return { full: true };
+
+  const { error } = await supabase.from("news_offers").update({ featured_on_home: true }).eq("id", id);
   if (error) throw error;
-  return { id, featuredOnHome: next };
+  return { id, featuredOnHome: true };
+}
+
+// Swaps one homepage slot: takes `removeId` offline and puts `addId` live in
+// its place. Used both when a 4th item is featured and swap.
+export async function swapHomepageFeature(addId, removeId) {
+  const { error: offErr } = await supabase.from("news_offers").update({ featured_on_home: false }).eq("id", removeId);
+  if (offErr) throw offErr;
+  const { error: onErr } = await supabase.from("news_offers").update({ featured_on_home: true }).eq("id", addId);
+  if (onErr) throw onErr;
+  return { addId, removeId };
 }

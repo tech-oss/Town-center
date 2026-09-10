@@ -4,7 +4,8 @@ import {
   getNewsOffers,
   saveNewsOffer,
   deleteNewsOffer,
-  toggleHomepageFeature,
+  setHomepageFeature,
+  swapHomepageFeature,
   getSpotlightBusinesses,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
@@ -117,12 +118,51 @@ function SpotlightBadge({ active }) {
     <span
       className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap"
       style={active
-        ? { backgroundColor: "rgba(232,163,61,0.18)", color: "#92400E" }
+        ? { backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }
         : { backgroundColor: "rgba(16,24,40,0.07)", color: "#9CA3AF" }
       }
     >
-      {active ? "★ On Homepage" : "Not featured"}
+      {active ? "● LIVE ON HOME PAGE" : "Not featured"}
     </span>
+  );
+}
+
+// ─── Swap picker modal ─────────────────────────────────────────────────────────
+// Shown whenever adding a 4th item to the 3 homepage slots — lets the admin
+// pick which currently-live item gets swapped out for the new one, rather
+// than just refusing the action.
+function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(16,24,40,0.55)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(16,24,40,0.3)" }}>
+        <div>
+          <h3 className="font-bold text-base" style={{ color: "#1E293B" }}>{title ?? "Homepage is full (3/3)"}</h3>
+          <p className="text-xs mt-1" style={{ color: "#6B7280" }}>{description ?? "Do you want to show this on the homepage? Pick one of the three live items below to swap it out with."}</p>
+        </div>
+        <div className="flex flex-col gap-2">
+          {candidates.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => onPick(c.id)}
+              className="flex items-center gap-3 rounded-xl p-3 text-left transition-colors hover:opacity-80"
+              style={{ border: "1.5px solid rgba(16,24,40,0.15)" }}
+            >
+              {c.image && <img src={c.image} alt="" className="w-12 h-10 rounded-lg object-cover shrink-0" />}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color: "#1E293B" }}>{c.title}</p>
+                <p className="text-xs truncate" style={{ color: "#6B7280" }}>{c.businessName}</p>
+              </div>
+              <span className="text-xs font-semibold shrink-0" style={{ color: "#2563EB" }}>Swap →</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-3 pt-1 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+          <button onClick={onCancel} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -142,7 +182,7 @@ function PayTypeToggle({ value, onChange }) {
 }
 
 // ─── Edit / Create form ───────────────────────────────────────────────────────
-function NewsOfferForm({ initial, onSave, onCancel, featuredCount, businesses = [] }) {
+function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
   const blank = {
     businessId: businesses[0]?.id ?? "",
     businessName: businesses[0]?.name ?? "",
@@ -161,6 +201,12 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount, businesses = 
   };
   const [form, setForm] = useState(initial ?? blank);
   const [saving, setSaving] = useState(false);
+  const [swapOutId, setSwapOutId] = useState(null);
+  const [showSwapPicker, setShowSwapPicker] = useState(false);
+
+  // Other live items, excluding this one if it's already featured itself.
+  const swapCandidates = featuredItems.filter((f) => f.id !== initial?.id);
+  const swapOutItem = swapCandidates.find((f) => f.id === swapOutId);
 
   // Read an uploaded image file and store it as a data URL for preview (UI only).
   function handleImageUpload(file) {
@@ -185,13 +231,31 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount, businesses = 
   function handleSave() {
     if (!form.title.trim() || !form.excerpt.trim()) return;
     setSaving(true);
-    saveNewsOffer(form).then((saved) => {
+    saveNewsOffer(form).then(async (saved) => {
+      if (swapOutId) await setHomepageFeature(swapOutId, false);
       setSaving(false);
-      onSave(saved);
+      onSave(saved, swapOutId);
     });
   }
 
-  const canFeature = form.featuredOnHome || featuredCount < 3;
+  function handleToggleFeatureClick() {
+    if (form.featuredOnHome) {
+      set("featuredOnHome", false);
+      setSwapOutId(null);
+      return;
+    }
+    if (swapCandidates.length < 3) {
+      set("featuredOnHome", true);
+      return;
+    }
+    setShowSwapPicker(true);
+  }
+
+  function handleSwapPick(id) {
+    set("featuredOnHome", true);
+    setSwapOutId(id);
+    setShowSwapPicker(false);
+  }
 
   return (
     <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1.5px solid rgba(16,24,40,0.12)" }}>
@@ -330,22 +394,33 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount, businesses = 
         <div className="flex flex-col gap-1">
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Homepage Spotlight</span>
           <label className="flex items-start gap-3 mt-1 cursor-pointer">
-            <div className="relative mt-0.5 shrink-0" onClick={() => canFeature && set("featuredOnHome", !form.featuredOnHome)}>
+            <div className="relative mt-0.5 shrink-0" onClick={handleToggleFeatureClick}>
               <div className="w-10 h-5 rounded-full transition-colors" style={{ backgroundColor: form.featuredOnHome ? "#E8A33D" : "#D1D5DB" }} />
               <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ transform: form.featuredOnHome ? "translateX(20px)" : "none" }} />
             </div>
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Feature in "In the Spotlight"</span>
-              {!canFeature && !form.featuredOnHome && (
-                <span className="text-xs" style={{ color: "#E8A33D" }}>Max 3 items — remove one to add this</span>
+              {!form.featuredOnHome && (
+                <span className="text-xs" style={{ color: "#9CA3AF" }}>Appears on the public homepage ({swapCandidates.length}/3 slots used)</span>
               )}
-              {canFeature && (
-                <span className="text-xs" style={{ color: "#9CA3AF" }}>Appears on the public homepage ({featuredCount}/3 slots used)</span>
+              {form.featuredOnHome && swapOutItem && (
+                <span className="text-xs" style={{ color: "#92400E" }}>Will swap out "{swapOutItem.title}" when saved</span>
+              )}
+              {form.featuredOnHome && !swapOutItem && (
+                <span className="text-xs" style={{ color: "#9CA3AF" }}>Appears on the public homepage</span>
               )}
             </div>
           </label>
         </div>
       </div>
+
+      {showSwapPicker && (
+        <SwapPickerModal
+          candidates={swapCandidates}
+          onPick={handleSwapPick}
+          onCancel={() => setShowSwapPicker(false)}
+        />
+      )}
 
       {/* Homepage featured schedule — only relevant when featured */}
       {form.featuredOnHome && (
@@ -410,9 +485,9 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredCount, businesses = 
 }
 
 // ─── Single row card ──────────────────────────────────────────────────────────
-function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
+function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
   return (
-    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: item.featuredOnHome ? "1.5px solid rgba(232,163,61,0.4)" : "1px solid rgba(16,24,40,0.08)" }}>
+    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: item.featuredOnHome ? "1.5px solid rgba(220,38,38,0.35)" : "1px solid rgba(16,24,40,0.08)" }}>
       {item.image && (
         <img src={item.image} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />
       )}
@@ -430,16 +505,32 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature }) {
         )}
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
-        <button
-          onClick={() => onToggleFeature(item)}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
-          style={item.featuredOnHome
-            ? { backgroundColor: "rgba(232,163,61,0.15)", color: "#92400E", border: "1.5px solid rgba(232,163,61,0.4)" }
-            : { backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }
-          }
-        >
-          {item.featuredOnHome ? "★ Remove from Homepage" : "☆ Add to Homepage"}
-        </button>
+        {item.featuredOnHome ? (
+          <div className="flex gap-2">
+            <button
+              onClick={() => onToggleFeature(item)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+              style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#B91C1C", border: "1.5px solid rgba(220,38,38,0.3)" }}
+            >
+              Make Offline
+            </button>
+            <button
+              onClick={() => onOpenSwap(item)}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+              style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}
+            >
+              Swap →
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => onToggleFeature(item)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
+            style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}
+          >
+            ☆ Add to Homepage
+          </button>
+        )}
         <div className="flex gap-2">
           <button onClick={() => onEdit(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>Edit</button>
           <button onClick={() => onDelete(item.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
@@ -465,6 +556,7 @@ export default function NewsOffersPage() {
   const [bizFilter, setBizFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [toast, setToast] = useState(null);
+  const [swapPicker, setSwapPicker] = useState(null);   // { item, candidates } — a live item picking its replacement
 
   const list = localItems ?? items ?? [];
   const featuredCount = list.filter((n) => n.featuredOnHome && n.status === "Published").length;
@@ -482,14 +574,16 @@ export default function NewsOffersPage() {
     setTimeout(() => setToast(null), 4000);
   }
 
-  function handleSave(saved) {
+  function handleSave(saved, swappedOutId) {
     setLocalItems((prev) => {
-      const base = prev ?? items ?? [];
+      let base = prev ?? items ?? [];
       const idx = base.findIndex((n) => n.id === saved.id);
-      return idx >= 0 ? base.map((n) => n.id === saved.id ? saved : n) : [...base, saved];
+      base = idx >= 0 ? base.map((n) => n.id === saved.id ? saved : n) : [...base, saved];
+      if (swappedOutId) base = base.map((n) => n.id === swappedOutId ? { ...n, featuredOnHome: false } : n);
+      return base;
     });
     setEditing(null);
-    showToast(editing?.id ? "Changes saved." : "News / offer created.");
+    showToast(swappedOutId ? "Saved and swapped onto the homepage." : (editing?.id ? "Changes saved." : "News / offer created."));
   }
 
   function handleDelete(id) {
@@ -500,12 +594,44 @@ export default function NewsOffersPage() {
   }
 
   function handleToggleFeature(item) {
-    toggleHomepageFeature(item.id).then((res) => {
-      if (res?.error) { showToast(res.error, true); return; }
+    setHomepageFeature(item.id, !item.featuredOnHome).then((res) => {
+      if (res?.full) {
+        setSwapPicker({ item, candidates: list.filter((n) => n.featuredOnHome && n.status === "Published") });
+        return;
+      }
       setLocalItems((prev) =>
         (prev ?? items ?? []).map((n) => n.id === item.id ? { ...n, featuredOnHome: res.featuredOnHome } : n)
       );
       showToast(res.featuredOnHome ? `"${item.title}" added to homepage spotlight.` : `"${item.title}" removed from spotlight.`);
+    });
+  }
+
+  // Opened from a live item's own "Swap →" — offers other published, non-live
+  // items as the replacement instead of the usual "pick which slot to free".
+  function handleOpenSwap(item) {
+    const candidates = list.filter((n) => !n.featuredOnHome && n.status === "Published" && n.id !== item.id);
+    if (candidates.length === 0) {
+      showToast("No other published items available to swap in.", true);
+      return;
+    }
+    setSwapPicker({ item, candidates, replacing: true });
+  }
+
+  function handleSwapConfirm(pickedId) {
+    if (!swapPicker) return;
+    const { item, replacing } = swapPicker;
+    const addId = replacing ? pickedId : item.id;
+    const removeId = replacing ? item.id : pickedId;
+    swapHomepageFeature(addId, removeId).then(() => {
+      setLocalItems((prev) =>
+        (prev ?? items ?? []).map((n) => {
+          if (n.id === addId) return { ...n, featuredOnHome: true };
+          if (n.id === removeId) return { ...n, featuredOnHome: false };
+          return n;
+        })
+      );
+      showToast("Homepage spotlight swapped.");
+      setSwapPicker(null);
     });
   }
 
@@ -520,7 +646,7 @@ export default function NewsOffersPage() {
           initial={editing?.id ? editing : null}
           onSave={handleSave}
           onCancel={() => setEditing(null)}
-          featuredCount={featuredCount}
+          featuredItems={list.filter((n) => n.featuredOnHome && n.status === "Published")}
           businesses={businesses ?? []}
         />
       </div>
@@ -614,9 +740,22 @@ export default function NewsOffersPage() {
               onEdit={setEditing}
               onDelete={handleDelete}
               onToggleFeature={handleToggleFeature}
+              onOpenSwap={handleOpenSwap}
             />
           ))}
         </div>
+      )}
+
+      {swapPicker && (
+        <SwapPickerModal
+          candidates={swapPicker.candidates}
+          onPick={handleSwapConfirm}
+          onCancel={() => setSwapPicker(null)}
+          title={swapPicker.replacing ? `Swap out "${swapPicker.item.title}"` : "Homepage is full (3/3)"}
+          description={swapPicker.replacing
+            ? "Pick a published item below to put live in its place."
+            : "Do you want to show this on the homepage? Pick one of the three live items below to swap it out with."}
+        />
       )}
     </div>
   );
