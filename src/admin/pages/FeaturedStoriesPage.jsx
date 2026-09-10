@@ -1,334 +1,395 @@
 import { useState } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getFeaturedStories, saveFeaturedStory, deleteFeaturedStory, reorderFeaturedStories } from "../../api/admin";
+import {
+  getFeatureArticles,
+  saveFeatureArticle,
+  deleteFeatureArticle,
+  setArticleHomepageFeature,
+  swapArticleHomepageFeature,
+} from "../../api/admin";
+import LoadingState from "../components/LoadingState";
+import EmptyState from "../components/EmptyState";
 
-// ─── Static mock stories (UI only — not wired to any data layer) ──────────────
-const MOCK_STORIES = [
-  {
-    id: 1,
-    category: "Fitness & Wellbeing",
-    title: "Jetts Maidenhead: 24/7 Fitness in the Heart of Town",
-    excerpt:
-      "A modern, results-driven gym built around one simple idea — train whenever you want, on your own terms, with no barriers.",
-    image: "/images/jetts/exterior.jpg",
-    href: "/news/jetts-maidenhead",
-    order: 1,
-    status: "Published",
-  },
-  {
-    id: 2,
-    category: "Shopping",
-    title: "New Season Arrivals at Maidenhead's Independent Boutiques",
-    excerpt:
-      "Discover the latest collections landing in town this month — from contemporary fashion to handcrafted homewares.",
-    image: "/images/shopping/boutique.jpg",
-    href: "/news/new-season-arrivals",
-    order: 2,
-    status: "Published",
-  },
-  {
-    id: 3,
-    category: "Eat & Drink",
-    title: "Coppa Club Opens its Terrace for Summer",
-    excerpt:
-      "Riverside dining returns — Coppa Club's outdoor terrace is open for al fresco lunches, sunset cocktails and lazy weekend brunches.",
-    image: "/images/coppa/terrace.jpg",
-    href: "/news/coppa-club-terrace",
-    order: 3,
-    status: "Draft",
-  },
-];
+// Real editor for public.feature_articles — the homepage "FEATURED STORIES"
+// / "In Focus" section (src/components/FeatureBlocks.jsx) and its detail
+// pages at /story/:slug (src/components/FeatureArticlePage.jsx). Field names
+// mirror that component's expectations exactly (see src/api/stories.js).
 
-const CATEGORIES = [
-  "Fitness & Wellbeing",
-  "Shopping",
-  "Eat & Drink",
-  "Arts & Culture",
-  "Community",
-  "Property",
-  "Events",
-  "News",
-];
+function slugify(text) {
+  return String(text ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function StatusPill({ status }) {
-  const isPublished = status === "Published";
+function linesToArray(text) {
+  return String(text ?? "").split("\n").map((s) => s.trim()).filter(Boolean);
+}
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function Toast({ message, error, onDismiss }) {
+  if (!message) return null;
+  return (
+    <div
+      className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-3 max-w-sm"
+      style={{ backgroundColor: error ? "#991B1B" : "#1E293B", color: "#fff" }}
+    >
+      <span className="flex-1">{message}</span>
+      <button onClick={onDismiss} className="opacity-60 hover:opacity-100 text-lg leading-none">✕</button>
+    </div>
+  );
+}
+
+// ─── Homepage badge ─────────────────────────────────────────────────────────────
+function HomeBadge({ active }) {
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-      style={
-        isPublished
-          ? { backgroundColor: "rgba(16,24,40,0.12)", color: "#1E293B" }
-          : { backgroundColor: "rgba(107,114,128,0.1)", color: "#6B7280" }
+      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap"
+      style={active
+        ? { backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }
+        : { backgroundColor: "rgba(16,24,40,0.07)", color: "#9CA3AF" }
       }
     >
-      <span
-        className="w-1.5 h-1.5 rounded-full inline-block"
-        style={{ backgroundColor: isPublished ? "#1E293B" : "#9CA3AF" }}
-      />
-      {status}
+      {active ? "● LIVE ON HOME PAGE" : "Not featured"}
     </span>
   );
 }
 
-// ─── Story card (list view) ───────────────────────────────────────────────────
-function StoryCard({ story, index, total, onEdit, onDelete, onMoveUp, onMoveDown }) {
+// ─── Swap picker modal (max 2 homepage slots) ───────────────────────────────────
+function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
   return (
-    <div
-      className="bg-white rounded-2xl overflow-hidden flex flex-col sm:flex-row"
-      style={{
-        boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)",
-        border: "1px solid rgba(16,24,40,0.09)",
-      }}
-    >
-      {/* Image */}
-      <div
-        className="relative shrink-0 w-full sm:w-52 h-40 sm:h-auto bg-gray-100 overflow-hidden"
-        style={{ minHeight: 140 }}
-      >
-        {story.image ? (
-          <img
-            src={story.image}
-            alt={story.title}
-            className="w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.style.display = "none"; }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl" style={{ backgroundColor: "rgba(16,24,40,0.06)" }}>
-            🖼
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(16,24,40,0.55)" }}>
+      <div className="bg-white rounded-2xl p-6 max-w-md w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(16,24,40,0.3)" }}>
+        <div>
+          <h3 className="font-bold text-base" style={{ color: "#1E293B" }}>{title}</h3>
+          <p className="text-xs mt-1" style={{ color: "#6B7280" }}>{description}</p>
+        </div>
+        <div className="flex flex-col gap-2">
+          {candidates.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => onPick(c.id)}
+              className="flex items-center gap-3 rounded-xl p-3 text-left transition-colors hover:opacity-80"
+              style={{ border: "1.5px solid rgba(16,24,40,0.15)" }}
+            >
+              {c.cardImage && <img src={c.cardImage} alt="" className="w-12 h-10 rounded-lg object-cover shrink-0" />}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate" style={{ color: "#1E293B" }}>{c.cardHeading || c.title}</p>
+                <p className="text-xs truncate" style={{ color: "#6B7280" }}>{c.category}</p>
+              </div>
+              <span className="text-xs font-semibold shrink-0" style={{ color: "#2563EB" }}>Swap →</span>
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-3 pt-1 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+          <button onClick={onCancel} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Image upload field (data-URL preview, matches NewsOffersPage's pattern) ───
+function ImageField({ label, value, onChange }) {
+  function handleUpload(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onChange(reader.result);
+    reader.readAsDataURL(file);
+  }
+  return (
+    <label className="flex flex-col gap-1">
+      <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>{label}</span>
+      <div className="flex items-center gap-3 flex-wrap">
+        <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
+          <span>⬆</span> {value ? "Change Image" : "Upload Image"}
+          <input type="file" accept="image/*" onChange={(e) => handleUpload(e.target.files?.[0])} className="hidden" />
+        </label>
+        {value && (
+          <div className="relative">
+            <img src={value} alt="" className="w-24 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(16,24,40,0.1)" }} />
+            <button type="button" onClick={() => onChange("")} className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center" style={{ backgroundColor: "#991B1B" }} title="Remove image">✕</button>
           </div>
         )}
-        {/* Order badge */}
-        <div
-          className="absolute top-3 left-3 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
-          style={{ backgroundColor: "#2563EB" }}
-        >
-          {story.order}
-        </div>
       </div>
-
-      {/* Body */}
-      <div className="flex-1 p-5 flex flex-col gap-2 min-w-0">
-        <div className="flex items-start gap-2 flex-wrap">
-          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "#1E293B" }}>
-            {story.category}
-          </span>
-          <StatusPill status={story.status} />
-        </div>
-        <h3 className="text-base font-bold leading-snug" style={{ color: "#1E293B", fontFamily: "var(--font-heading, Georgia, serif)" }}>
-          {story.title}
-        </h3>
-        <p className="text-sm leading-relaxed line-clamp-2" style={{ color: "#6B7280" }}>
-          {story.excerpt}
-        </p>
-        <p className="text-xs font-mono mt-auto pt-1" style={{ color: "#9CA3AF" }}>{story.href}</p>
-      </div>
-
-      {/* Actions */}
-      <div className="flex sm:flex-col items-center justify-end gap-2 p-4 border-t sm:border-t-0 sm:border-l" style={{ borderColor: "rgba(16,24,40,0.08)" }}>
-        {/* Reorder */}
-        <div className="flex sm:flex-col gap-1">
-          <button
-            onClick={() => onMoveUp(story.id)}
-            disabled={index === 0}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-opacity disabled:opacity-25 hover:opacity-70"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-            title="Move up"
-          >
-            ↑
-          </button>
-          <button
-            onClick={() => onMoveDown(story.id)}
-            disabled={index === total - 1}
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition-opacity disabled:opacity-25 hover:opacity-70"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-            title="Move down"
-          >
-            ↓
-          </button>
-        </div>
-
-        <div className="flex sm:flex-col gap-1 ml-auto sm:ml-0">
-          <button
-            onClick={() => onEdit(story)}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-opacity hover:opacity-70"
-            style={{ border: "1.5px solid rgba(16,24,40,0.22)", color: "#1E293B" }}
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(story.id)}
-            className="px-3 py-1.5 rounded-xl text-xs font-semibold transition-opacity hover:opacity-70"
-            style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}
-          >
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
+    </label>
   );
 }
 
-// ─── Preview card (mirrors the public site layout) ────────────────────────────
-function PublicPreviewCard({ story }) {
+// ─── Body block editor ───────────────────────────────────────────────────────────
+function BodyBlockEditor({ blocks, onChange }) {
+  function updateBlock(i, patch) {
+    onChange(blocks.map((b, bi) => (bi === i ? { ...b, ...patch } : b)));
+  }
+  function addBlock() {
+    onChange([...blocks, { heading: "", paras: [] }]);
+  }
+  function removeBlock(i) {
+    onChange(blocks.filter((_, bi) => bi !== i));
+  }
+  function moveBlock(i, dir) {
+    const j = i + dir;
+    if (j < 0 || j >= blocks.length) return;
+    const next = [...blocks];
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  }
+
   return (
-    <div
-      className="rounded-2xl overflow-hidden flex flex-col md:flex-row gap-0 bg-white"
-      style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}
-    >
-      <div className="md:w-1/2 h-52 md:h-auto bg-gray-100 overflow-hidden">
-        {story.image ? (
-          <img src={story.image} alt={story.title} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>🖼</div>
-        )}
-      </div>
-      <div className="flex-1 p-8 flex flex-col justify-center gap-4">
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1E293B" }}>{story.category}</p>
-        <h3 className="text-2xl font-bold leading-snug" style={{ color: "#0D2A33", fontFamily: "var(--font-heading, Georgia, serif)" }}>{story.title}</h3>
-        <p className="text-sm leading-relaxed" style={{ color: "#4B5563" }}>{story.excerpt}</p>
-        <button
-          className="self-start px-5 py-2.5 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#2563EB" }}
-        >
-          Read more →
-        </button>
+    <div className="flex flex-col gap-4">
+      {blocks.map((block, i) => (
+        <div key={i} className="rounded-xl p-4 flex flex-col gap-3" style={{ border: "1.5px solid rgba(16,24,40,0.15)" }}>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Section {i + 1}</span>
+            <div className="flex gap-1.5">
+              <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0} className="w-7 h-7 rounded-lg text-xs disabled:opacity-25" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>↑</button>
+              <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1} className="w-7 h-7 rounded-lg text-xs disabled:opacity-25" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>↓</button>
+              <button type="button" onClick={() => removeBlock(i)} className="px-2.5 h-7 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Remove</button>
+            </div>
+          </div>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Section heading (optional — first section is often headless)</span>
+            <input
+              value={block.heading ?? ""}
+              onChange={(e) => updateBlock(i, { heading: e.target.value })}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none"
+              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Paragraphs (one per line)</span>
+            <textarea
+              value={(block.paras ?? []).join("\n")}
+              onChange={(e) => updateBlock(i, { paras: linesToArray(e.target.value) })}
+              rows={4}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
+              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Bullet points (optional, one per line)</span>
+            <textarea
+              value={(block.bullets ?? []).join("\n")}
+              onChange={(e) => updateBlock(i, { bullets: linesToArray(e.target.value) })}
+              rows={2}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
+              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
+            />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Paragraphs after bullets (optional, one per line)</span>
+            <textarea
+              value={(block.parasAfter ?? []).join("\n")}
+              onChange={(e) => updateBlock(i, { parasAfter: linesToArray(e.target.value) })}
+              rows={2}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
+              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
+            />
+          </label>
+        </div>
+      ))}
+      <button type="button" onClick={addBlock} className="self-start px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB" }}>
+        + Add Section
+      </button>
+    </div>
+  );
+}
+
+// ─── Gallery editor ───────────────────────────────────────────────────────────────
+function GalleryEditor({ images, onChange }) {
+  function handleAdd(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => onChange([...images, reader.result]);
+    reader.readAsDataURL(file);
+  }
+  function remove(i) {
+    onChange(images.filter((_, gi) => gi !== i));
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Gallery images (woven into the article body)</span>
+      <div className="flex items-center gap-3 flex-wrap">
+        {images.map((src, i) => (
+          <div key={i} className="relative">
+            <img src={src} alt="" className="w-20 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(16,24,40,0.1)" }} />
+            <button type="button" onClick={() => remove(i)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center" style={{ backgroundColor: "#991B1B" }}>✕</button>
+          </div>
+        ))}
+        <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
+          <span>⬆</span> Add Image
+          <input type="file" accept="image/*" onChange={(e) => handleAdd(e.target.files?.[0])} className="hidden" />
+        </label>
       </div>
     </div>
   );
 }
 
-// ─── Add / Edit form ──────────────────────────────────────────────────────────
-function StoryForm({ initial, onSave, onCancel }) {
+// ─── Edit / Create form ───────────────────────────────────────────────────────
+function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
   const blank = {
-    category: CATEGORIES[0],
-    title: "",
-    excerpt: "",
-    image: "",
-    href: "",
-    status: "Published",
+    eyebrow: "", category: "", date: "",
+    cardHeading: "", cardBody: "", cardImage: "",
+    title: "", heroImage: "", standfirst: "", location: "", website: "",
+    body: [], gallery: [], homepage: false,
   };
   const [form, setForm] = useState(initial ?? blank);
+  const [saving, setSaving] = useState(false);
+  const [swapOutId, setSwapOutId] = useState(null);
+  const [showSwapPicker, setShowSwapPicker] = useState(false);
+
+  const swapCandidates = featuredItems.filter((f) => f.id !== initial?.id);
+  const swapOutItem = swapCandidates.find((f) => f.id === swapOutId);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
-  const isValid = form.title.trim() && form.excerpt.trim();
+  function handleToggleFeatureClick() {
+    if (form.homepage) {
+      set("homepage", false);
+      setSwapOutId(null);
+      return;
+    }
+    if (swapCandidates.length < 2) {
+      set("homepage", true);
+      return;
+    }
+    setShowSwapPicker(true);
+  }
+
+  function handleSwapPick(id) {
+    set("homepage", true);
+    setSwapOutId(id);
+    setShowSwapPicker(false);
+  }
+
+  function handleSave() {
+    if (!form.title.trim() || !form.cardHeading.trim()) return;
+    setSaving(true);
+    saveFeatureArticle(form).then(async (saved) => {
+      if (swapOutId) await setArticleHomepageFeature(swapOutId, false);
+      setSaving(false);
+      onSave(saved, swapOutId);
+    });
+  }
+
+  const titleSplit = form.title.split(/:\s+/);
+  const heroTitle = titleSplit[0];
+  const heroSubtitle = titleSplit.length > 1 ? titleSplit.slice(1).join(": ") : null;
 
   return (
-    <div
-      className="bg-white rounded-2xl p-6 flex flex-col gap-5"
-      style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1.5px solid rgba(16,24,40,0.12)" }}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <h3 className="text-base font-bold" style={{ color: "#1E293B" }}>
-          {initial?.id ? "Edit Story" : "Add Featured Story"}
-        </h3>
-        <button onClick={onCancel} className="text-lg leading-none opacity-40 hover:opacity-70" style={{ color: "#1E293B" }}>✕</button>
-      </div>
+    <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1.5px solid rgba(16,24,40,0.12)" }}>
+      <h3 className="font-bold text-base" style={{ color: "#1E293B" }}>
+        {initial?.id ? "Edit Featured Story" : "Add Featured Story"}
+      </h3>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {/* Category */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Category *</span>
-          <select
-            value={form.category}
-            onChange={(e) => set("category", e.target.value)}
-            className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
-          >
-            {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
-          </select>
-        </label>
-
-        {/* Status */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Status</span>
-          <select
-            value={form.status}
-            onChange={(e) => set("status", e.target.value)}
-            className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
-          >
-            <option>Published</option>
-            <option>Draft</option>
-          </select>
-        </label>
-
-        {/* Title */}
-        <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Title *</span>
-          <input
-            value={form.title}
-            onChange={(e) => set("title", e.target.value)}
-            placeholder="e.g. Jetts Maidenhead: 24/7 Fitness in the Heart of Town"
-            className="rounded-xl px-3 py-2.5 text-sm outline-none"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-          />
-        </label>
-
-        {/* Excerpt */}
-        <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Summary / excerpt *</span>
-          <textarea
-            value={form.excerpt}
-            onChange={(e) => set("excerpt", e.target.value)}
-            rows={3}
-            placeholder="Short description shown on the homepage card…"
-            className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-          />
-        </label>
-
-        {/* Image URL */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Image URL</span>
-          <input
-            value={form.image}
-            onChange={(e) => set("image", e.target.value)}
-            placeholder="/images/..."
-            className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-          />
-          {form.image && (
-            <img src={form.image} alt="" className="mt-1.5 w-28 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(16,24,40,0.1)" }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
-          )}
-        </label>
-
-        {/* Link / slug */}
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Link (page URL)</span>
-          <input
-            value={form.href}
-            onChange={(e) => set("href", e.target.value)}
-            placeholder="/news/story-slug"
-            className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono"
-            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-          />
-        </label>
-      </div>
-
-      {/* Live mini-preview */}
-      {(form.title || form.excerpt) && (
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>Preview</p>
-          <PublicPreviewCard story={form} />
+      {/* ── Homepage card ── */}
+      <div className="flex flex-col gap-4">
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>Homepage card</p>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Eyebrow (small label)</span>
+            <input value={form.eyebrow} onChange={(e) => set("eyebrow", e.target.value)} placeholder="e.g. Eat & Drink" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Category</span>
+            <input value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="e.g. Fine Dining" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Date / tag text</span>
+            <input value={form.date} onChange={(e) => set("date", e.target.value)} placeholder="e.g. Now open · One Maidenhead" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+          </label>
         </div>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Card heading *</span>
+          <input value={form.cardHeading} onChange={(e) => set("cardHeading", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Card summary</span>
+          <textarea value={form.cardBody} onChange={(e) => set("cardBody", e.target.value)} rows={2} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+        </label>
+        <ImageField label="Card image" value={form.cardImage} onChange={(v) => set("cardImage", v)} />
+      </div>
+
+      {/* ── Detail page ── */}
+      <div className="flex flex-col gap-4 pt-4 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>Detail page (/story/…)</p>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Title * — written as "Name: subtitle" (subtitle is optional)</span>
+          <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="e.g. Jetts Maidenhead: A New Era of 24/7 Fitness" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+          <span className="text-[11px] mt-0.5" style={{ color: "#9CA3AF" }}>
+            Hero title: <strong>{heroTitle || "—"}</strong>{heroSubtitle ? <> · Subtitle: <strong>{heroSubtitle}</strong></> : ""}
+          </span>
+        </label>
+        <ImageField label="Hero image" value={form.heroImage} onChange={(v) => set("heroImage", v)} />
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Standfirst (intro paragraph under the hero)</span>
+          <textarea value={form.standfirst} onChange={(e) => set("standfirst", e.target.value)} rows={3} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+        </label>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Location</span>
+            <input value={form.location} onChange={(e) => set("location", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Website (no https://)</span>
+            <input value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="example.co.uk" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+          </label>
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="flex flex-col gap-4 pt-4 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>Article body</p>
+        <BodyBlockEditor blocks={form.body ?? []} onChange={(v) => set("body", v)} />
+      </div>
+
+      {/* ── Gallery ── */}
+      <div className="pt-4 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+        <GalleryEditor images={form.gallery ?? []} onChange={(v) => set("gallery", v)} />
+      </div>
+
+      {/* ── Homepage feature ── */}
+      <div className="pt-4 border-t flex flex-col gap-1" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
+        <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Homepage Featured Stories</span>
+        <label className="flex items-start gap-3 mt-1 cursor-pointer">
+          <div className="relative mt-0.5 shrink-0" onClick={handleToggleFeatureClick}>
+            <div className="w-10 h-5 rounded-full transition-colors" style={{ backgroundColor: form.homepage ? "#E8A33D" : "#D1D5DB" }} />
+            <div className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform" style={{ transform: form.homepage ? "translateX(20px)" : "none" }} />
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Show in "FEATURED STORIES" on the homepage</span>
+            {!form.homepage && (
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>{swapCandidates.length}/2 slots used</span>
+            )}
+            {form.homepage && swapOutItem && (
+              <span className="text-xs" style={{ color: "#92400E" }}>Will swap out "{swapOutItem.cardHeading || swapOutItem.title}" when saved</span>
+            )}
+            {form.homepage && !swapOutItem && (
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>Appears on the public homepage</span>
+            )}
+          </div>
+        </label>
+      </div>
+
+      {showSwapPicker && (
+        <SwapPickerModal
+          candidates={swapCandidates}
+          onPick={handleSwapPick}
+          onCancel={() => setShowSwapPicker(false)}
+          title="Homepage is full (2/2)"
+          description="Featured Stories shows a maximum of two. Pick one of the two live stories below to swap it out with."
+        />
       )}
 
       <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
         <button
-          onClick={() => onSave(form)}
-          disabled={!isValid}
+          onClick={handleSave}
+          disabled={saving || !form.title.trim() || !form.cardHeading.trim()}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
           style={{ backgroundColor: "#2563EB" }}
         >
-          {initial?.id ? "Save Changes" : "Add Story"}
+          {saving ? "Saving…" : "Save"}
         </button>
-        <button
-          onClick={onCancel}
-          className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70"
-          style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}
-        >
+        <button onClick={onCancel} className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>
           Cancel
         </button>
       </div>
@@ -336,24 +397,38 @@ function StoryForm({ initial, onSave, onCancel }) {
   );
 }
 
-// ─── Delete confirm modal ─────────────────────────────────────────────────────
-function DeleteModal({ story, onConfirm, onCancel }) {
-  if (!story) return null;
+// ─── Single row card ──────────────────────────────────────────────────────────
+function StoryRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
-      <div className="bg-white rounded-2xl p-6 w-full max-w-sm flex flex-col gap-4" style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.18)" }}>
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg" style={{ backgroundColor: "rgba(185,28,28,0.1)" }}>🗑</div>
-          <div>
-            <h3 className="font-bold text-sm mb-1" style={{ color: "#1E293B" }}>Remove Featured Story?</h3>
-            <p className="text-xs leading-relaxed" style={{ color: "#6B7280" }}>
-              "<span className="font-semibold">{story.title}</span>" will be removed from the Featured Stories section on the homepage.
-            </p>
-          </div>
+    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: item.homepage ? "1.5px solid rgba(220,38,38,0.35)" : "1px solid rgba(16,24,40,0.08)" }}>
+      {item.cardImage && <img src={item.cardImage} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap mb-1">
+          <span className="text-sm font-bold truncate" style={{ color: "#1E293B" }}>{item.cardHeading || item.title}</span>
+          <HomeBadge active={item.homepage} />
         </div>
-        <div className="flex gap-3 pt-2">
-          <button onClick={onConfirm} className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: "#991B1B" }}>Remove</button>
-          <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl text-sm font-semibold" style={{ border: "1.5px solid #D1D5DB", color: "#374151" }}>Cancel</button>
+        <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>{item.eyebrow} · {item.category}</p>
+        <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.cardBody}</p>
+        <p className="text-[11px] mt-1 font-mono" style={{ color: "#9CA3AF" }}>/story/{item.slug}</p>
+      </div>
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        {item.homepage ? (
+          <div className="flex gap-2">
+            <button onClick={() => onToggleFeature(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#B91C1C", border: "1.5px solid rgba(220,38,38,0.3)" }}>
+              Make Offline
+            </button>
+            <button onClick={() => onOpenSwap(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}>
+              Swap →
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => onToggleFeature(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}>
+            ☆ Add to Homepage
+          </button>
+        )}
+        <div className="flex gap-2">
+          <button onClick={() => onEdit(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>Edit</button>
+          <button onClick={() => onDelete(item.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
         </div>
       </div>
     </div>
@@ -362,160 +437,168 @@ function DeleteModal({ story, onConfirm, onCancel }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function FeaturedStoriesPage() {
-  const [nonce, setNonce] = useState(0);
-  const { data: fetched } = useFetch(getFeaturedStories, [nonce]);
-  const stories = fetched ?? [];
-  const [editing, setEditing] = useState(null);   // null=list, {}=new, story=edit
-  const [toDelete, setToDelete] = useState(null);
-  const [previewId, setPreviewId] = useState(null);
-  const refresh = () => setNonce((n) => n + 1);
+  const { data: items, loading } = useFetch(getFeatureArticles, []);
+  const [localItems, setLocalItems] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [swapPicker, setSwapPicker] = useState(null);
 
-  const previewStory = stories.find((s) => s.id === previewId) ?? stories[0];
+  const list = localItems ?? items ?? [];
+  const featured = list.filter((n) => n.homepage);
 
-  async function handleSave(form) {
-    await saveFeaturedStory({ ...form, order: form.order ?? stories.length + 1 });
+  function showToast(msg, error = false) {
+    setToast({ msg, error });
+    setTimeout(() => setToast(null), 4000);
+  }
+
+  function handleSave(saved, swappedOutId) {
+    setLocalItems((prev) => {
+      let base = prev ?? items ?? [];
+      const idx = base.findIndex((n) => n.id === saved.id);
+      base = idx >= 0 ? base.map((n) => n.id === saved.id ? saved : n) : [...base, saved];
+      if (swappedOutId) base = base.map((n) => n.id === swappedOutId ? { ...n, homepage: false } : n);
+      return base;
+    });
     setEditing(null);
-    refresh();
+    showToast(swappedOutId ? "Saved and swapped onto the homepage." : (editing?.id ? "Changes saved." : "Featured story created."));
   }
 
-  async function handleDelete(id) {
-    await deleteFeaturedStory(id);
-    setToDelete(null);
-    // Close the gap the deletion leaves, so positions stay 1..n.
-    await reorderFeaturedStories(stories.filter((s) => s.id !== id).map((s) => s.id));
-    refresh();
+  function handleDelete(id) {
+    if (!confirm("Remove this featured story? This also removes its detail page.")) return;
+    deleteFeatureArticle(id).then(() => {
+      setLocalItems((prev) => (prev ?? items ?? []).filter((n) => n.id !== id));
+      showToast("Deleted.");
+    });
   }
 
-  // Reordering writes the whole visible order back, so positions can't drift
-  // out of step with what the page is showing.
-  async function swap(id, delta) {
-    const idx = stories.findIndex((s) => s.id === id);
-    const target = idx + delta;
-    if (idx < 0 || target < 0 || target >= stories.length) return;
-    const next = [...stories];
-    [next[idx], next[target]] = [next[target], next[idx]];
-    await reorderFeaturedStories(next.map((s) => s.id));
-    refresh();
+  function handleToggleFeature(item) {
+    setArticleHomepageFeature(item.id, !item.homepage).then((res) => {
+      if (res?.full) {
+        setSwapPicker({ item, candidates: list.filter((n) => n.homepage) });
+        return;
+      }
+      setLocalItems((prev) => (prev ?? items ?? []).map((n) => n.id === item.id ? { ...n, homepage: res.homepage } : n));
+      showToast(res.homepage ? `"${item.cardHeading}" added to Featured Stories.` : `"${item.cardHeading}" removed from Featured Stories.`);
+    });
   }
 
-  const moveUp = (id) => swap(id, -1);
-  const moveDown = (id) => swap(id, 1);
+  function handleOpenSwap(item) {
+    const candidates = list.filter((n) => !n.homepage && n.id !== item.id);
+    if (candidates.length === 0) {
+      showToast("No other stories available to swap in.", true);
+      return;
+    }
+    setSwapPicker({ item, candidates, replacing: true });
+  }
+
+  function handleSwapConfirm(pickedId) {
+    if (!swapPicker) return;
+    const { item, replacing } = swapPicker;
+    const addId = replacing ? pickedId : item.id;
+    const removeId = replacing ? item.id : pickedId;
+    swapArticleHomepageFeature(addId, removeId).then(() => {
+      setLocalItems((prev) => (prev ?? items ?? []).map((n) => {
+        if (n.id === addId) return { ...n, homepage: true };
+        if (n.id === removeId) return { ...n, homepage: false };
+        return n;
+      }));
+      showToast("Homepage story swapped.");
+      setSwapPicker(null);
+    });
+  }
+
+  if (loading) return <LoadingState />;
+
+  if (editing !== null) {
+    return (
+      <div className="max-w-3xl flex flex-col gap-4">
+        <button onClick={() => setEditing(null)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: "#1E293B" }}>← Back to list</button>
+        <StoryForm
+          initial={editing?.id ? editing : null}
+          onSave={handleSave}
+          onCancel={() => setEditing(null)}
+          featuredItems={featured}
+        />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <DeleteModal
-        story={toDelete}
-        onConfirm={() => handleDelete(toDelete.id)}
-        onCancel={() => setToDelete(null)}
-      />
+    <div className="flex flex-col gap-6 max-w-5xl">
+      <Toast message={toast?.msg} error={toast?.error} onDismiss={() => setToast(null)} />
 
-      <div className="flex flex-col gap-6 max-w-5xl">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Featured Stories</h1>
+          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage the long-form "FEATURED STORIES" section and its /story/ detail pages on the homepage. Max 2 live at once.</p>
+        </div>
+        <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>
+          + Add Story
+        </button>
+      </div>
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 60%, #2F8C8C 100%)" }}>
+        <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Featured Stories</h1>
-            <p className="text-sm mt-1" style={{ color: "#6B7280" }}>
-              Manage the featured story cards shown on the Maidenhead homepage. Drag to reorder or use the arrows.
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "rgba(216,243,220,0.7)" }}>Homepage</p>
+            <h2 className="text-lg font-bold text-white">Featured Stories</h2>
+            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{featured.length}/2 slots used.</p>
           </div>
-          {editing === null && (
-            <button
-              onClick={() => setEditing({})}
-              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 shrink-0"
-              style={{ backgroundColor: "#2563EB" }}
-            >
-              + Add Story
-            </button>
-          )}
-        </div>
-
-        {/* Add / Edit form */}
-        {editing !== null && (
-          <StoryForm
-            initial={editing?.id ? editing : null}
-            onSave={handleSave}
-            onCancel={() => setEditing(null)}
-          />
-        )}
-
-        {/* Stats bar */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: "Total stories", value: stories.length },
-            { label: "Published", value: stories.filter((s) => s.status === "Published").length, accent: true },
-            { label: "Drafts", value: stories.filter((s) => s.status === "Draft").length },
-          ].map(({ label, value, accent }) => (
-            <div
-              key={label}
-              className="bg-white rounded-2xl p-4 flex flex-col gap-1"
-              style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}
-            >
-              <span className="text-2xl font-bold" style={{ color: accent ? "#1E293B" : "#1E293B" }}>{value}</span>
-              <span className="text-xs" style={{ color: "#9CA3AF" }}>{label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Stories list */}
-        {stories.length === 0 ? (
-          <div
-            className="bg-white rounded-2xl p-12 flex flex-col items-center gap-3 text-center"
-            style={{ border: "2px dashed rgba(16,24,40,0.15)" }}
-          >
-            <span className="text-4xl">📰</span>
-            <p className="font-semibold" style={{ color: "#1E293B" }}>No featured stories yet</p>
-            <p className="text-sm" style={{ color: "#9CA3AF" }}>Click "Add Story" to create the first one.</p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {stories.map((story, i) => (
-              <StoryCard
-                key={story.id}
-                story={story}
-                index={i}
-                total={stories.length}
-                onEdit={(s) => setEditing(s)}
-                onDelete={(id) => setToDelete(stories.find((s) => s.id === id))}
-                onMoveUp={moveUp}
-                onMoveDown={moveDown}
-              />
+          <div className="flex items-center gap-1">
+            {[0, 1].map((i) => (
+              <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={i < featured.length ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
+                {i < featured.length ? "★" : "○"}
+              </div>
             ))}
           </div>
-        )}
-
-        {/* Public preview panel */}
-        {stories.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: "#9CA3AF" }}>Homepage Preview</p>
-                <p className="text-sm font-semibold" style={{ color: "#1E293B" }}>How it looks on the public site</p>
+        </div>
+        {featured.length > 0 ? (
+          <div className="flex flex-col gap-2">
+            {featured.map((f) => (
+              <div key={f.id} className="flex items-center gap-3 rounded-xl px-3 py-2 flex-wrap" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
+                {f.cardImage && <img src={f.cardImage} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />}
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold truncate text-white">{f.cardHeading}</p>
+                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>{f.eyebrow}</p>
+                </div>
+                <button onClick={() => setEditing(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#fff", border: "1px solid rgba(255,255,255,0.35)" }}>Edit</button>
+                <button onClick={() => handleToggleFeature(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#E8A33D", border: "1px solid rgba(232,163,61,0.5)" }}>Remove</button>
               </div>
-              <div className="flex gap-1.5 flex-wrap">
-                {stories.map((s) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setPreviewId(s.id)}
-                    className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
-                    style={
-                      (previewId ?? stories[0].id) === s.id
-                        ? { backgroundColor: "#2563EB", color: "#fff" }
-                        : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }
-                    }
-                  >
-                    Story {s.order}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <PublicPreviewCard story={previewStory} />
-            <p className="text-xs mt-3 text-center" style={{ color: "#9CA3AF" }}>
-              This is a live preview of how the selected story will appear on the Maidenhead homepage.
-            </p>
+            ))}
           </div>
+        ) : (
+          <p className="text-xs text-center py-2" style={{ color: "rgba(255,255,255,0.35)" }}>No stories featured — toggle "Add to Homepage" on any story below.</p>
         )}
       </div>
-    </>
+
+      {list.length === 0 ? (
+        <EmptyState title="No featured stories yet" message='Click "Add Story" to create the first one.' icon="📰" />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {list.map((item) => (
+            <StoryRow
+              key={item.id}
+              item={item}
+              onEdit={setEditing}
+              onDelete={handleDelete}
+              onToggleFeature={handleToggleFeature}
+              onOpenSwap={handleOpenSwap}
+            />
+          ))}
+        </div>
+      )}
+
+      {swapPicker && (
+        <SwapPickerModal
+          candidates={swapPicker.candidates}
+          onPick={handleSwapConfirm}
+          onCancel={() => setSwapPicker(null)}
+          title={swapPicker.replacing ? `Swap out "${swapPicker.item.cardHeading}"` : "Homepage is full (2/2)"}
+          description={swapPicker.replacing
+            ? "Pick a story below to put live in its place."
+            : "Featured Stories shows a maximum of two. Pick one of the two live stories below to swap it out with."}
+        />
+      )}
+    </div>
   );
 }

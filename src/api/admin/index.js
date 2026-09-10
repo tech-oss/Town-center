@@ -2,6 +2,7 @@ export * from "./users";
 export * from "./businesses";
 export * from "./approvals";
 export * from "./newsOffers";
+export * from "./featuredArticles";
 
 export * from "./listings";
 export * from "./content";

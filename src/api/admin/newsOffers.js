@@ -110,8 +110,8 @@ export async function deleteNewsOffer(id) {
   return { id, deleted: true };
 }
 
-// The homepage shows three spotlight slots. Turning a slot off always
-// succeeds; turning one on when all three are taken returns { full: true }
+// The homepage shows four spotlight slots. Turning a slot off always
+// succeeds; turning one on when all four are taken returns { full: true }
 // instead of erroring, so the UI can offer a swap rather than a dead end.
 export async function setHomepageFeature(id, featured) {
   if (!featured) {
@@ -126,7 +126,7 @@ export async function setHomepageFeature(id, featured) {
     .eq("featured_on_home", true)
     .neq("id", id);
   if (countError) throw countError;
-  if ((count ?? 0) >= 3) return { full: true };
+  if ((count ?? 0) >= 4) return { full: true };
 
   const { error } = await supabase.from("news_offers").update({ featured_on_home: true }).eq("id", id);
   if (error) throw error;

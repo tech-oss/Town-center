@@ -12,7 +12,7 @@ import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
-const CATEGORIES = ["News", "Offer", "What's On", "Featured"];
+const CATEGORIES = ["News", "Offer", "What's On"];
 const TYPES = ["news", "offer"];
 
 // ─── UK-time schedule helpers ─────────────────────────────────────────────────
@@ -128,7 +128,7 @@ function SpotlightBadge({ active }) {
 }
 
 // ─── Swap picker modal ─────────────────────────────────────────────────────────
-// Shown whenever adding a 4th item to the 3 homepage slots — lets the admin
+// Shown whenever adding a 5th item to the 4 homepage slots — lets the admin
 // pick which currently-live item gets swapped out for the new one, rather
 // than just refusing the action.
 function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
@@ -136,8 +136,8 @@ function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(16,24,40,0.55)" }}>
       <div className="bg-white rounded-2xl p-6 max-w-md w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(16,24,40,0.3)" }}>
         <div>
-          <h3 className="font-bold text-base" style={{ color: "#1E293B" }}>{title ?? "Homepage is full (3/3)"}</h3>
-          <p className="text-xs mt-1" style={{ color: "#6B7280" }}>{description ?? "Do you want to show this on the homepage? Pick one of the three live items below to swap it out with."}</p>
+          <h3 className="font-bold text-base" style={{ color: "#1E293B" }}>{title ?? "Homepage is full (4/4)"}</h3>
+          <p className="text-xs mt-1" style={{ color: "#6B7280" }}>{description ?? "Do you want to show this on the homepage? Pick one of the four live items below to swap it out with."}</p>
         </div>
         <div className="flex flex-col gap-2">
           {candidates.map((c) => (
@@ -244,7 +244,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
       setSwapOutId(null);
       return;
     }
-    if (swapCandidates.length < 3) {
+    if (swapCandidates.length < 4) {
       set("featuredOnHome", true);
       return;
     }
@@ -401,7 +401,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
             <div className="flex flex-col gap-0.5">
               <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Feature in "In the Spotlight"</span>
               {!form.featuredOnHome && (
-                <span className="text-xs" style={{ color: "#9CA3AF" }}>Appears on the public homepage ({swapCandidates.length}/3 slots used)</span>
+                <span className="text-xs" style={{ color: "#9CA3AF" }}>Appears on the public homepage ({swapCandidates.length}/4 slots used)</span>
               )}
               {form.featuredOnHome && swapOutItem && (
                 <span className="text-xs" style={{ color: "#92400E" }}>Will swap out "{swapOutItem.title}" when saved</span>
@@ -674,10 +674,10 @@ export default function NewsOffersPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "rgba(216,243,220,0.7)" }}>Homepage</p>
             <h2 className="text-lg font-bold text-white">In the Spotlight</h2>
-            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{featuredCount}/3 slots used — the first 3 published, featured items appear on the homepage.</p>
+            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{featuredCount}/4 slots used — the first 4 published, featured items appear on the homepage.</p>
           </div>
           <div className="flex items-center gap-1">
-            {[0, 1, 2].map((i) => (
+            {[0, 1, 2, 3].map((i) => (
               <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={i < featuredCount ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
                 {i < featuredCount ? "★" : "○"}
               </div>
@@ -751,10 +751,10 @@ export default function NewsOffersPage() {
           candidates={swapPicker.candidates}
           onPick={handleSwapConfirm}
           onCancel={() => setSwapPicker(null)}
-          title={swapPicker.replacing ? `Swap out "${swapPicker.item.title}"` : "Homepage is full (3/3)"}
+          title={swapPicker.replacing ? `Swap out "${swapPicker.item.title}"` : "Homepage is full (4/4)"}
           description={swapPicker.replacing
             ? "Pick a published item below to put live in its place."
-            : "Do you want to show this on the homepage? Pick one of the three live items below to swap it out with."}
+            : "Do you want to show this on the homepage? Pick one of the four live items below to swap it out with."}
         />
       )}
     </div>
