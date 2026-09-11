@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadImage } from "../../../lib/uploadImage";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 // Re-exported so the sub-editors in this folder can keep importing tokens from
@@ -120,9 +121,7 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
   function handleFiles(files) {
     const file = files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => onChange(ev.target.result);
-    reader.readAsDataURL(file);
+    uploadImage(file, "listings").then(onChange).catch((e) => alert(e.message));
   }
 
   return (
@@ -161,13 +160,13 @@ export function GalleryGrid({ images, onChange, max = 6, label }) {
   function handleFile(i, files) {
     const file = files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const next = [...images];
-      next[i] = ev.target.result;
-      onChange(next.filter(Boolean));
-    };
-    reader.readAsDataURL(file);
+    uploadImage(file, "listings")
+      .then((url) => {
+        const next = [...images];
+        next[i] = url;
+        onChange(next.filter(Boolean));
+      })
+      .catch((e) => alert(e.message));
   }
   function remove(i) {
     const next = [...images];

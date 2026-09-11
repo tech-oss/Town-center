@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import { getBusinesses, SUBCATEGORIES, SERVICES_GROUPS } from "../../api/admin";
 import {
@@ -150,9 +151,9 @@ function ImageStrip({ images, onChange, label = "Header Images", max = 5 }) {
   function handleFile(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => onChange([...images, { src: ev.target.result, name: file.name }]);
-    reader.readAsDataURL(file);
+    uploadImage(file, "listings")
+      .then(url => onChange([...images, { src: url, name: file.name }]))
+      .catch(err => alert(err.message));
   }
   function remove(i) { onChange(images.filter((_, idx) => idx !== i)); }
   return (
@@ -251,9 +252,7 @@ function OffersEditor({ bizId, offers, onRefresh }) {
                 <input type="file" accept="image/*" className="hidden" onChange={e => {
                   const file = e.target.files[0];
                   if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = ev => setF("image", ev.target.result);
-                  reader.readAsDataURL(file);
+                  uploadImage(file, "listings").then(url => setF("image", url)).catch(err => alert(err.message));
                 }} />
               </label>
               <span className="text-[10px]" style={{ color: "#9CA3AF" }}>PNG, JPG · recommended 800×400px</span>

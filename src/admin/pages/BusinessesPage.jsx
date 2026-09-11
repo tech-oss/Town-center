@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from "react";
+import { uploadImage } from "../../lib/uploadImage";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
@@ -164,13 +165,13 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
   function handleLogoChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      set("logo", ev.target.result);
-      set("logoName", file.name);
-      setLogoPreview(ev.target.result);
-    };
-    reader.readAsDataURL(file);
+    uploadImage(file, "businesses")
+      .then((url) => {
+        set("logo", url);
+        set("logoName", file.name);
+        setLogoPreview(url);
+      })
+      .catch((e) => alert(e.message));
   }
 
   // Clears the type-specific picks, which only make sense for the type that
@@ -596,9 +597,7 @@ function LogoUploadModal({ biz, onSave, onCancel }) {
   function handleFiles(files) {
     const file = files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setPreview(ev.target.result);
-    reader.readAsDataURL(file);
+    uploadImage(file, "businesses").then(setPreview).catch((e) => alert(e.message));
   }
 
   return (

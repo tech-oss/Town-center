@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadImage } from "../../lib/uploadImage";
 import { SITE_CONTENT_SECTIONS } from "../../Data/adminMissingScreensMock";
 import { ensureSiteSections, saveSiteSection } from "../../api/admin";
 import GettingHereEditor from "./siteContent/GettingHereEditor";
@@ -76,9 +77,7 @@ function ListingEditor({ section, onChange }) {
             <input type="file" accept="image/*" className="hidden" onChange={(e) => {
               const file = e.target.files?.[0];
               if (!file) return;
-              const reader = new FileReader();
-              reader.onload = (ev) => onChange("headerImage", ev.target.result);
-              reader.readAsDataURL(file);
+              uploadImage(file, "site-content").then((url) => onChange("headerImage", url)).catch((err) => alert(err.message));
             }} />
           </label>
         </div>

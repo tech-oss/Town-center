@@ -1,3 +1,4 @@
+import { uploadImage } from "../../../lib/uploadImage";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../../theme";
 
 // Content and media editor for the public /getting-here page. Deliberately
@@ -41,9 +42,7 @@ function Card({ title, hint, children, action }) {
 function ImageField({ label, value, onChange }) {
   function upload(file) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => onChange(e.target.result);
-    reader.readAsDataURL(file);
+    uploadImage(file, "getting-here").then(onChange).catch((e) => alert(e.message));
   }
   return (
     <Field label={label}>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import {
   getNewsOffers,
@@ -208,12 +209,9 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
   const swapCandidates = featuredItems.filter((f) => f.id !== initial?.id);
   const swapOutItem = swapCandidates.find((f) => f.id === swapOutId);
 
-  // Read an uploaded image file and store it as a data URL for preview (UI only).
   function handleImageUpload(file) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => set("image", reader.result);
-    reader.readAsDataURL(file);
+    uploadImage(file, "news-offers").then((url) => set("image", url)).catch((e) => alert(e.message));
   }
 
   function set(k, v) {

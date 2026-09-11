@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { uploadImage } from "../../../lib/uploadImage";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../../theme";
 
 // Shared form primitives for the Explore content editors (The Future page and
@@ -52,12 +54,15 @@ export function Card({ title, hint, children, action }) {
   );
 }
 
-export function ImageField({ label, value, onChange, hint }) {
+export function ImageField({ label, value, onChange, hint, folder = "explore" }) {
+  const [busy, setBusy] = useState(false);
   function upload(file) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => onChange(e.target.result);
-    reader.readAsDataURL(file);
+    setBusy(true);
+    uploadImage(file, folder)
+      .then(onChange)
+      .catch((e) => alert(e.message))
+      .finally(() => setBusy(false));
   }
   return (
     <Field label={label} hint={hint}>
@@ -65,7 +70,7 @@ export function ImageField({ label, value, onChange, hint }) {
         {value && <img src={value} alt="" className="w-28 h-20 rounded-xl object-cover" style={{ border: `1.5px solid ${BORDER}` }} />}
         <label className="px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
           style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: "1.5px solid rgba(37,99,235,0.25)" }}>
-          {value ? "Replace Image" : "Upload Image"}
+          {busy ? "Uploading…" : value ? "Replace Image" : "Upload Image"}
           <input type="file" accept="image/*" className="hidden" onChange={(e) => upload(e.target.files?.[0])} />
         </label>
       </div>

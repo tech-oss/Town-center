@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import {
   getFeatureArticles,
@@ -88,13 +89,11 @@ function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
   );
 }
 
-// ─── Image upload field (data-URL preview, matches NewsOffersPage's pattern) ───
+// ─── Image upload field ───────────────────────────────────────────────────────
 function ImageField({ label, value, onChange }) {
   function handleUpload(file) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onChange(reader.result);
-    reader.readAsDataURL(file);
+    uploadImage(file, "stories").then(onChange).catch((e) => alert(e.message));
   }
   return (
     <label className="flex flex-col gap-1">
@@ -198,9 +197,7 @@ function BodyBlockEditor({ blocks, onChange }) {
 function GalleryEditor({ images, onChange }) {
   function handleAdd(file) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => onChange([...images, reader.result]);
-    reader.readAsDataURL(file);
+    uploadImage(file, "stories").then((url) => onChange([...images, url])).catch((e) => alert(e.message));
   }
   function remove(i) {
     onChange(images.filter((_, gi) => gi !== i));
