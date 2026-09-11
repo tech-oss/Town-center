@@ -14,18 +14,32 @@ function eventFromRow(row) {
   return {
     id: row.id,
     businessId: row.business_id,
-    businessName: row.businesses?.name ?? row.business_id,
+    // An admin-authored event can stand alone with no business attached, so
+    // there's no name to fall back to — don't leak a raw id into the UI.
+    businessName: row.businesses?.name ?? (row.business_id ? row.business_id : null),
+    slug: row.slug,
     title: row.title,
     subtitle: row.subtitle,
     description: row.description,
+    excerpt: row.excerpt,
+    body: row.body ?? [],
     category: row.category ?? [],
     eventDate: row.event_date,
+    dateLabel: row.date_label,
     eventTime: row.event_time,
     entryType: row.entry_type,
+    tickets: row.tickets,
     location: row.location,
+    lat: row.lat,
+    lng: row.lng,
+    phone: row.phone,
+    email: row.email,
     website: row.website,
     bookingUrl: row.booking_url,
+    heroImage: row.hero_image,
     gallery: row.gallery ?? [],
+    social: row.social ?? {},
+    homepage: row.homepage ?? false,
     status: row.status,
     rejectionReason: row.rejection_reason,
     isRecurring: row.is_recurring,
@@ -82,6 +96,96 @@ export async function rejectEvent(id, reason) {
     .update({ status: "Rejected", rejection_reason: reason || null })
     .eq("id", id);
   if (error) throw error;
+}
+
+// ── Admin-authored events ──────────────────────────────────────────────────
+// Admin writes straight to Live: an admin approving their own submission
+// would be meaningless, the same bypass the business content editor uses.
+// `businessId` is optional — a town event with no business behind it still
+// gets a page and still shows in See & Do.
+
+function slugify(text) {
+  return String(text ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function eventToRow(item) {
+  return {
+    id: item.id || undefined,
+    business_id: item.businessId || null,
+    slug: item.slug || slugify(item.title),
+    title: item.title,
+    subtitle: item.subtitle || null,
+    description: item.description || null,
+    excerpt: item.excerpt || null,
+    body: item.body ?? [],
+    category: item.category ?? [],
+    event_date: item.eventDate || null,
+    date_label: item.dateLabel || null,
+    event_time: item.eventTime || null,
+    entry_type: item.entryType || null,
+    tickets: item.tickets || null,
+    location: item.location || null,
+    lat: item.lat ?? null,
+    lng: item.lng ?? null,
+    phone: item.phone || null,
+    email: item.email || null,
+    website: item.website || null,
+    booking_url: item.bookingUrl || null,
+    hero_image: item.heroImage || null,
+    gallery: item.gallery ?? [],
+    social: item.social ?? {},
+    status: item.status || "Live",
+    updated_at: new Date().toISOString(),
+  };
+}
+
+export async function saveBusinessEvent(item) {
+  const { data, error } = await supabase
+    .from("business_events")
+    .upsert(eventToRow(item))
+    .select("*, businesses(name)")
+    .single();
+  if (error) throw error;
+  return eventFromRow(data);
+}
+
+export async function deleteBusinessEvent(id) {
+  const { error } = await supabase.from("business_events").delete().eq("id", id);
+  if (error) throw error;
+  return { id, deleted: true };
+}
+
+// ── Homepage "What's On" selection ─────────────────────────────────────────
+// Three slots on the homepage grid. Turning one off always succeeds; turning
+// one on when all three are taken returns { full: true } so the UI can offer
+// a swap rather than a dead end (same pattern as news_offers/feature_articles).
+
+export async function setEventHomepageFeature(id, featured) {
+  if (!featured) {
+    const { error } = await supabase.from("business_events").update({ homepage: false }).eq("id", id);
+    if (error) throw error;
+    return { id, homepage: false };
+  }
+
+  const { count, error: countError } = await supabase
+    .from("business_events")
+    .select("id", { count: "exact", head: true })
+    .eq("homepage", true)
+    .neq("id", id);
+  if (countError) throw countError;
+  if ((count ?? 0) >= 3) return { full: true };
+
+  const { error } = await supabase.from("business_events").update({ homepage: true }).eq("id", id);
+  if (error) throw error;
+  return { id, homepage: true };
+}
+
+export async function swapEventHomepageFeature(addId, removeId) {
+  const { error: offErr } = await supabase.from("business_events").update({ homepage: false }).eq("id", removeId);
+  if (offErr) throw offErr;
+  const { error: onErr } = await supabase.from("business_events").update({ homepage: true }).eq("id", addId);
+  if (onErr) throw onErr;
+  return { addId, removeId };
 }
 
 // ── Individual dates of a recurring series ─────────────────────────────────

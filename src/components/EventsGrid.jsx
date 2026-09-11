@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { featuredEvents } from "../Data/events";
+import { getHomepageEvents } from "../api";
+import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
 
 // ── One event card — image + caption (title left / excerpt right), matching
@@ -102,7 +103,9 @@ function EventCard({ event }) {
 }
 
 export default function EventsGrid() {
-  const upcomingEvents = featuredEvents;
+  const { data } = useFetch(getHomepageEvents, []);
+  const upcomingEvents = data ?? [];
+  if (upcomingEvents.length === 0) return null;
   return (
     <section id="events" className="py-14 md:py-16 px-6 md:px-12" style={{ backgroundColor: "#ffffff" }}>
       <div className="max-w-6xl mx-auto">

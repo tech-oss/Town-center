@@ -22,6 +22,7 @@ import ReportingPage from "./pages/ReportingPage";
 import SettingsPage from "./pages/SettingsPage";
 import NewsOffersPage from "./pages/NewsOffersPage";
 import FeaturedStoriesPage from "./pages/FeaturedStoriesPage";
+import FeaturedSeeDoPage from "./pages/FeaturedSeeDoPage";
 import PushNotificationsPage from "./pages/PushNotificationsPage";
 import AdminLogsPage from "./pages/AdminLogsPage";
 import SupportTicketsPage from "./pages/SupportTicketsPage";
@@ -64,6 +65,7 @@ export default function AdminApp() {
         <Route path="subscriptions/:id/documents" element={<SubscriptionDocumentsPage />} />
         <Route path="news-offers" element={<NewsOffersPage />} />
         <Route path="featured-stories" element={<FeaturedStoriesPage />} />
+        <Route path="featured-see-do" element={<FeaturedSeeDoPage />} />
         <Route path="reporting" element={<ReportingPage />} />
         <Route path="push-notifications" element={<PushNotificationsPage />} />
         <Route path="settings" element={<SettingsPage />} />

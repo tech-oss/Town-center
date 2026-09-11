@@ -38,6 +38,7 @@ const NAV = [
     children: [
       { to: "/admin/news-offers",      label: "In the Spotlight", icon: I.spotlight },
       { to: "/admin/featured-stories", label: "Featured Stories", icon: I.stories },
+      { to: "/admin/featured-see-do",  label: "See & Do",         icon: I.events },
     ],
   },
   { to: "/admin/event-approvals",    label: "Events",                icon: I.events },

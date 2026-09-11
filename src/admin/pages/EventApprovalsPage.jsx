@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
-  getBusinessEvents, approveEvent, rejectEvent,
+  getBusinessEvents, approveEvent, rejectEvent, deleteBusinessEvent,
   getPendingOccurrences, approveOccurrence, rejectOccurrence,
 } from "../../api/admin";
+import EventEditor from "./EventEditor";
 import { describeRecurrence } from "../../lib/eventRecurrence";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
@@ -21,11 +22,9 @@ function formatDate(str) {
 }
 
 // ─── Tab 1: whole events / recurring series ─────────────────────────────────
-function EventsTab({ setToast }) {
-  const [filter, setFilter] = useState("Pending Approval");
-  const [nonce, setNonce] = useState(0);
+function EventsTab({ setToast, onEdit, nonce, refresh }) {
+  const [filter, setFilter] = useState("All");
   const { data: events, loading } = useFetch(() => getBusinessEvents({ status: filter }), [filter, nonce]);
-  const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   async function handleApprove(e) {
     await approveEvent(e.id);
@@ -35,6 +34,12 @@ function EventsTab({ setToast }) {
   async function handleReject(e, reason) {
     await rejectEvent(e.id, reason);
     setToast(`"${e.title}" rejected.`);
+    refresh();
+  }
+  async function handleDelete(e) {
+    if (!confirm(`Delete "${e.title}"? This also removes its public event page.`)) return;
+    await deleteBusinessEvent(e.id);
+    setToast(`"${e.title}" deleted.`);
     refresh();
   }
 
@@ -67,7 +72,7 @@ function EventsTab({ setToast }) {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: BLUE }}>↻ Recurring</span>
                     )}
                   </div>
-                  <p className="text-xs mt-1" style={{ color: MUTED }}>{e.businessName}</p>
+                  <p className="text-xs mt-1" style={{ color: MUTED }}>{e.businessName ?? "Town event"}</p>
                   <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>
                     {e.isRecurring
                       ? describeRecurrence({ type: e.recurrenceType, days: e.recurrenceDays, ordinals: e.recurrenceOrdinals })
@@ -81,11 +86,20 @@ function EventsTab({ setToast }) {
                     <p className="text-[11px] mt-2" style={{ color: "#991B1B" }}>Rejected: {e.rejectionReason}</p>
                   )}
                 </div>
-                {e.gallery?.[0] && <img src={e.gallery[0]} alt="" className="w-24 h-24 rounded-xl object-cover" />}
+                {(e.heroImage || e.gallery?.[0]) && <img src={e.heroImage || e.gallery[0]} alt="" className="w-24 h-24 rounded-xl object-cover" />}
               </div>
               {e.status === "Pending Approval" && (
                 <ReviewActions onApprove={() => handleApprove(e)} onReject={(r) => handleReject(e, r)} />
               )}
+              <div className="flex gap-2 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+                {e.homepage && (
+                  <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide self-center" style={{ backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }}>
+                    ● Live on home page
+                  </span>
+                )}
+                <button onClick={() => onEdit(e)} className="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Edit</button>
+                <button onClick={() => handleDelete(e)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
+              </div>
             </div>
           ))}
         </div>
@@ -176,19 +190,46 @@ function Override({ label, from, to }) {
 export default function EventApprovalsPage() {
   const [tab, setTab] = useState("events");
   const [toast, setToast] = useState("");
+  const [editing, setEditing] = useState(null);   // null = list, {} = new, event = edit
+  const [nonce, setNonce] = useState(0);
+  const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   function flash(msg) {
     setToast(msg);
     setTimeout(() => setToast(""), 2600);
   }
 
+  if (editing !== null) {
+    return (
+      <>
+        <Toast message={toast} />
+        <EventEditor
+          initial={editing?.id ? editing : null}
+          onCancel={() => setEditing(null)}
+          onSaved={(saved, isNew) => {
+            setEditing(null);
+            refresh();
+            flash(isNew ? `"${saved.title}" created and live.` : `"${saved.title}" updated.`);
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="max-w-5xl">
       <Toast message={toast} />
-      <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Event Approvals</h1>
-      <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
-        Review events submitted by businesses. Recurring series are approved once; individual dates come back here whenever a business edits or cancels one.
-      </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Events</h1>
+          <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
+            Create event pages for See &amp; Do, and review events submitted by businesses. Recurring series are approved once; individual dates come back here whenever a business edits or cancels one.
+          </p>
+        </div>
+        <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 shrink-0" style={{ backgroundColor: BLUE }}>
+          + Create Event
+        </button>
+      </div>
 
       <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
         {[["events", "Events & Series"], ["occurrences", "Individual Dates"]].map(([key, label]) => (
@@ -200,7 +241,9 @@ export default function EventApprovalsPage() {
         ))}
       </div>
 
-      {tab === "events" ? <EventsTab setToast={flash} /> : <OccurrencesTab setToast={flash} />}
+      {tab === "events"
+        ? <EventsTab setToast={flash} onEdit={setEditing} nonce={nonce} refresh={refresh} />
+        : <OccurrencesTab setToast={flash} />}
     </div>
   );
 }
