@@ -2,7 +2,8 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useMobileBack from "../hooks/useMobileBack";
-import { searchAll, SEARCH_GROUPS } from "../lib/searchIndex";
+import { searchAll, buildSearchIndex } from "../lib/searchIndex";
+import useFetch from "../../hooks/useFetch";
 
 const SUGGESTIONS = [
   { label: "Parking", to: "/mobile/parking" },
@@ -15,6 +16,7 @@ const SUGGESTIONS = [
 
 export default function SearchScreen() {
   const goBack = useMobileBack("/mobile/home");
+  const { data: index } = useFetch(buildSearchIndex, []);
   const [q, setQ] = useState("");
   const [group, setGroup] = useState("All");
   const inputRef = useRef(null);
@@ -23,7 +25,12 @@ export default function SearchScreen() {
     inputRef.current?.focus();
   }, []);
 
-  const results = useMemo(() => searchAll(q, group), [q, group]);
+  const results = useMemo(() => searchAll(index ?? [], q, group), [index, q, group]);
+
+  const groupNames = useMemo(
+    () => Array.from(new Set((index ?? []).map((r) => r.group))),
+    [index]
+  );
 
   // Group headings only make sense while browsing everything at once.
   const grouped = useMemo(() => {
@@ -67,7 +74,7 @@ export default function SearchScreen() {
 
           {/* Result-type filters */}
           <div className="flex gap-2 overflow-x-auto scrollbar-none mt-3 -mx-4 px-4">
-            {["All", ...SEARCH_GROUPS].map((g) => (
+            {["All", ...groupNames].map((g) => (
               <button
                 key={g}
                 onClick={() => setGroup(g)}

@@ -4,19 +4,29 @@
 //  Flattens every piece of content the app already ships — businesses, places,
 //  services, events, offers/news, features, guides and stays — into one list of
 //  { id, title, subtitle, group, image, to } records the SearchScreen can match
-//  against. Everything here is derived from the same Data/*.js the website
-//  uses; nothing is invented.
+//  against.
+//
+//  Events, guides, featured stories and the travel copy are admin-editable and
+//  live in Supabase, so the index is built on demand rather than at import
+//  time — otherwise a renamed guide kept showing its old title in search. The
+//  rest still comes from the Data/*.js the website uses.
 // ════════════════════════════════════════════════════════════════════════════
 
 import { sections, allArticles } from "../../Data/pages";
-import { events } from "../../Data/events";
-import { guides } from "../../Data/guides";
-import { features } from "../../Data/features";
 import { hotels, accommodations, allStayArticles } from "../../Data/stay";
-import { travelSections } from "../../Data/gettingHere";
+import { getEvents, getStories, getGuides, getGettingHere } from "../../api";
 
-function build() {
+export async function buildSearchIndex() {
   const out = [];
+
+  // A search box is not worth breaking the screen over: if one source fails,
+  // index everything else.
+  const [events, features, guides, gettingHere] = await Promise.all([
+    getEvents().catch(() => []),
+    getStories().catch(() => []),
+    getGuides().catch(() => []),
+    getGettingHere().catch(() => null),
+  ]);
 
   // Businesses / places / services, grouped by their section label.
   for (const section of Object.values(sections)) {
@@ -119,7 +129,7 @@ function build() {
   out.push({
     id: "info-transport",
     title: "Transport & Getting Here",
-    subtitle: travelSections[0].intro.slice(0, 60) + "…",
+    subtitle: (gettingHere?.sections?.[0]?.intro ?? "").slice(0, 60) + "…",
     keywords: "train elizabeth line gwr bus car m4 cycling walking directions",
     group: "Practical Info",
     image: "/images/getting-here.jpg",
@@ -129,13 +139,9 @@ function build() {
   return out;
 }
 
-export const searchIndex = build();
-
-export const SEARCH_GROUPS = Array.from(new Set(searchIndex.map((r) => r.group)));
-
-export function searchAll(query, group = "All") {
+export function searchAll(index, query, group = "All") {
   const q = query.trim().toLowerCase();
-  const pool = group === "All" ? searchIndex : searchIndex.filter((r) => r.group === group);
+  const pool = group === "All" ? index : index.filter((r) => r.group === group);
   if (!q) return [];
   return pool
     .map((r) => {
