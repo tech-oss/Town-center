@@ -100,7 +100,11 @@ export default function StayDetailScreen() {
           )}
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>
-              {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}
+              {isHotel
+                ? (place.stars
+                    ? <><span style={{ color: "#c9962c" }}>{"★".repeat(place.stars) + "☆".repeat(5 - place.stars)}</span> {place.stars}-Star Hotel</>
+                    : "Hotel")
+                : place.type}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
             {place.tagline && <p className="text-sm mt-1" style={{ color: "#000000" }}>{place.tagline}</p>}
@@ -243,7 +247,7 @@ export default function StayDetailScreen() {
         </div>
       </div>
 
-      {websiteUrl && <StickyCta label="Make a Booking" href={websiteUrl} icon={<TicketIcon />} />}
+      {isHotel && websiteUrl && <StickyCta label="Make a Booking" href={websiteUrl} icon={<TicketIcon />} />}
     </MobileShell>
   );
 }

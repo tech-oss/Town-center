@@ -6,6 +6,7 @@ import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
 import { sections } from "../../Data/pages";
+import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
 import { typeColor } from "../lib/typeColors";
 
 const SOCIAL_ICONS = {
@@ -95,9 +96,11 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${place.name} reviews`)}`;
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
-  const news = place.news ?? [];
+  // Free-plan listings don't get News & Offers — the website's gate.
+  const news = place.freePlan ? [] : place.news ?? [];
   const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
-  const gallery = (place.gallery ?? []).filter((g) => g !== place.image);
+  // The website caps a services gallery at 8 photos, hero included.
+  const gallery = (place.gallery ?? []).slice(0, 8).filter((g) => g !== place.image);
   const stats = place.stats ?? [];
   const servicesOffered = place.servicesOffered ?? [];
   const whyChooseUs = place.whyChooseUs ?? [];
@@ -105,9 +108,13 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
   const reviewsList = place.reviewsList ?? [];
   const accreditations = place.accreditations ?? [];
   const faq = place.faq ?? [];
-  const related = (section?.items ?? [])
-    .filter((it) => it.slug !== place.slug && it.category === place.category)
-    .slice(0, 3);
+  // "Similar Businesses", as on the website: four, never freelancers, same
+  // category first and topped up from the rest.
+  const pool = (section?.items ?? []).filter((it) => it.slug !== place.slug && !FREELANCER_CATEGORIES.has(it.category));
+  const related = [
+    ...pool.filter((it) => it.category === place.category),
+    ...pool.filter((it) => it.category !== place.category),
+  ].slice(0, 4);
 
   async function handleShare() {
     const url = `${window.location.origin}/${place.section}/place/${place.slug}`;
@@ -202,7 +209,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
             )}
           </MobileCard>
 
-          <PhotoGallery images={gallery} title={place.name} />
+          <PhotoGallery images={gallery} title={place.name} max={8} />
 
           {/* About + stats */}
           {(place.aboutText || stats.length > 0) && (
@@ -274,13 +281,6 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
             <MobileCard id="reviews" className="p-4 flex flex-col scroll-mt-16">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Customer Reviews</p>
               {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
-              <a
-                href="#reviews"
-                className="text-sm font-bold mt-3"
-                style={{ color: "var(--leaf)" }}
-              >
-                View all reviews →
-              </a>
             </MobileCard>
           )}
 

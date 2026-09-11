@@ -5,6 +5,7 @@ import MobileCard from "../components/MobileCard";
 import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import { sections } from "../../Data/pages";
+import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
 import { typeColor } from "../lib/typeColors";
 
 const SOCIAL_ICONS = {
@@ -85,9 +86,15 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const section = sections[place.section];
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${place.name} reviews`)}`;
   const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
-  const news = place.news ?? [];
+  const news = place.freePlan ? [] : place.news ?? [];
   const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
-  const portfolio = (place.gallery ?? []).filter((g) => g !== place.image);
+  // The website's portfolio: `portfolio` when the freelancer has set one,
+  // else their gallery (capped at 8). An entry can be a photo or just a link
+  // to work hosted elsewhere — a live site, a case study, a reel — and link
+  // entries were being dropped entirely here.
+  const portfolio = place.portfolio ?? (place.gallery ?? []).slice(0, 8).map((src) => ({ image: src }));
+  const portfolioImages = portfolio.filter((p) => p.image).map((p) => p.image);
+  const portfolioLinks = portfolio.filter((p) => !p.image && p.link);
   const skills = place.servicesOffered ?? [];
   const reviewsList = place.reviewsList ?? [];
   const faq = place.faq ?? [];
@@ -95,9 +102,12 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const workMode = place.workMode || "Remote & on-site";
   const responseTime = place.responseTime || "Usually within 24 hours";
   const experience = place.experience || place.stats?.[0]?.value;
-  const related = (section?.items ?? [])
-    .filter((it) => it.slug !== place.slug && it.category === place.category)
-    .slice(0, 3);
+  // "Similar Freelancers": four, freelancers only, same category first.
+  const pool = (section?.items ?? []).filter((it) => it.slug !== place.slug && FREELANCER_CATEGORIES.has(it.category));
+  const related = [
+    ...pool.filter((it) => it.category === place.category),
+    ...pool.filter((it) => it.category !== place.category),
+  ].slice(0, 4);
 
   const infoRows = [
     availability && { label: "Availability", value: availability, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" /></svg> },
@@ -207,7 +217,28 @@ export default function FreelancerDetailScreen({ place, goBack }) {
             </MobileCard>
           )}
 
-          <PhotoGallery images={portfolio} title={`${place.name} portfolio`} max={9} />
+          <PhotoGallery images={portfolioImages} title={`${place.name} portfolio`} max={9} />
+
+          {portfolioLinks.length > 0 && (
+            <div>
+              <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>{portfolioImages.length > 0 ? "More Work" : "Portfolio"}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {portfolioLinks.map((p, i) => (
+                  <a
+                    key={i}
+                    href={p.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="aspect-square rounded-xl flex flex-col items-center justify-center gap-2 text-center p-3 active:opacity-80"
+                    style={{ backgroundColor: "var(--sand)" }}
+                  >
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--forest)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" /><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></svg>
+                    <span className="text-xs font-semibold leading-snug line-clamp-3" style={{ color: "var(--forest)" }}>{p.title || p.link}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           {place.aboutText && (
             <MobileCard className="p-4 flex flex-col gap-2">

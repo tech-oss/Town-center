@@ -27,14 +27,43 @@ const SOCIAL_ICONS = {
 function BusinessDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
   const section = sections[place.section];
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
-  const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
-  const news = place.news ?? [];
-  const social = place.social
+
+  // Content and visibility follow the website's DetailPage exactly, so a
+  // field an admin or business edits shows on both surfaces or on neither:
+  //  • hero: the logo when the listing uses a logo header, else gallery[0]
+  //  • description: `paragraphs` when present, else description +
+  //    description2; nothing at all when `hideDescription` is set
+  //  • email, social, directions, the map and News & Offers are free-plan
+  //    gated; the website link is hidden by `hideWeb`
+  const heroImage = place.logoHeader ? place.logo : (place.gallery?.[0] ?? place.image);
+  const gallery = place.logoHeader ? [] : (place.gallery ?? []).slice(1);
+  const description = place.hideDescription
+    ? []
+    : place.paragraphs ?? [place.description, place.description2].filter(Boolean);
+  // The website sets the first paragraph as the tagline under the title and
+  // the rest below it — nothing has to be authored twice.
+  const paraText = (p) => (typeof p === "string" ? p : p?.text);
+  const tagline = paraText(description[0]);
+  const bodyParas = description.slice(1);
+
+  const free = Boolean(place.freePlan);
+  const mapQuery = place.mapQuery || `${place.name}, Maidenhead`;
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapQuery)}`;
+  const websiteUrl = place.website && !place.hideWeb ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  // The website's booking button uses the listing's website regardless of
+  // `hideWeb` (DetailPage's extraButtonHref), so this does too.
+  const bookingUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  const news = free ? [] : place.news ?? [];
+  const social = !free && place.social
     ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k])
     : [];
-  const more = (section?.items ?? []).filter((it) => it.slug !== place.slug).slice(0, 3);
-  const gallery = (place.gallery ?? []).filter((g) => g !== place.image);
+
+  // Same-category listings first, topped up from the rest of the section.
+  const sectionItems = (section?.items ?? []).filter((it) => it.slug !== place.slug);
+  const more = [
+    ...sectionItems.filter((it) => it.category === place.category),
+    ...sectionItems.filter((it) => it.category !== place.category),
+  ].slice(0, 3);
 
   async function handleShare() {
     const url = `${window.location.origin}/${place.section}/place/${place.slug}`;
@@ -59,7 +88,7 @@ function BusinessDetailScreen({ place, goBack }) {
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
-          <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
+          <img src={heroImage} alt={place.name} className={`w-full h-56 ${place.logoHeader ? "object-contain bg-white" : "object-cover"}`} />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
@@ -69,24 +98,35 @@ function BusinessDetailScreen({ place, goBack }) {
               {section?.label} · {place.tag}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
+            {tagline && (
+              <p className="text-xs uppercase tracking-[0.08em] leading-relaxed mt-2 font-medium" style={{ color: "#000000" }}>{tagline}</p>
+            )}
           </div>
 
-          {place.description && (
-            <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{place.description}</p>
+          {bodyParas.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {bodyParas.map((p, i) => (
+                <p key={i} className="text-sm leading-relaxed" style={{ color: "#000000" }}>
+                  {typeof p === "string" ? p : (<>{p.lead && <strong>{p.lead} </strong>}{p.text}</>)}
+                </p>
+              ))}
+            </div>
           )}
 
           <MobileCard className="p-4 flex flex-col gap-3">
-            <div className="flex items-start gap-3">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-              <span className="text-sm" style={{ color: "#000000" }}>{place.address}</span>
-            </div>
+            {place.address && (
+              <div className="flex items-start gap-3">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                <span className="text-sm" style={{ color: "#000000" }}>{place.address}</span>
+              </div>
+            )}
             {place.phone && place.phone !== "—" && (
               <a href={`tel:${place.phone.replace(/[^\d+]/g, "")}`} className="flex items-start gap-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z" /></svg>
                 <span className="text-sm" style={{ color: "#000000" }}>{place.phone}</span>
               </a>
             )}
-            {place.email && (
+            {place.email && !free && (
               <a href={`mailto:${place.email}`} className="flex items-start gap-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>
                 <span className="text-sm break-all" style={{ color: "#000000" }}>{place.email}</span>
@@ -115,12 +155,14 @@ function BusinessDetailScreen({ place, goBack }) {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              <ActionButton
-                href={mapsUrl}
-                label="Get Directions"
-                skipExternalConfirm
-                icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
-              />
+              {!free && (
+                <ActionButton
+                  href={mapsUrl}
+                  label="Get Directions"
+                  skipExternalConfirm
+                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
+                />
+              )}
               <ActionButton
                 onClick={handleShare}
                 label={copied ? "Link Copied" : "Share"}
@@ -154,10 +196,12 @@ function BusinessDetailScreen({ place, goBack }) {
           {/* Location map — the website embeds one on every detail page;
               geocoded from the address since not every listing has stored
               coordinates. */}
-          <div>
-            <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
-            <MiniMap query={place.mapQuery || place.address} lat={place.lat} lng={place.lng} />
-          </div>
+          {!free && (
+            <div>
+              <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
+              <MiniMap query={mapQuery} lat={place.lat} lng={place.lng} />
+            </div>
+          )}
 
           {/* News & Offers — same glassmorphic dark-teal card treatment as
               the website's Eat & Drink business pages, condensed to a
@@ -211,8 +255,8 @@ function BusinessDetailScreen({ place, goBack }) {
 
       {/* Sticky booking CTA — shown only for listings whose subscription
           enables it, matching the website's gate (DetailPage.jsx). */}
-      {place.section === "eat-drink" && websiteUrl && (
-        <StickyCta label="Make a Booking" href={websiteUrl} icon={<TicketIcon />} />
+      {place.section === "eat-drink" && bookingUrl && (
+        <StickyCta label="Make a Booking" href={bookingUrl} icon={<TicketIcon />} />
       )}
     </MobileShell>
   );
