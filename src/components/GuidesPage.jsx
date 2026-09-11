@@ -1,10 +1,18 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
-import { guidesIndex, guides } from "../Data/guides";
+import { getGuides, getGuidesIndex } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
 import { card, pill } from "../utils/design";
 
 export default function GuidesPage() {
+  const { data: guidesIndex } = useFetch(getGuidesIndex, []);
+  const { data: guideList, loading } = useFetch(getGuides, []);
+  const guides = guideList ?? [];
+
   useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  if (loading || !guidesIndex) return <Loading minHeight="70vh" />;
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>

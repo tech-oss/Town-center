@@ -2,15 +2,18 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills } from "../components/ListSearch";
-import { guides } from "../../Data/guides";
+import { getGuides } from "../../api";
+import useFetch from "../../hooks/useFetch";
 
 export default function GuidesScreen() {
+  const { data: guideList } = useFetch(getGuides, []);
+  const guides = guideList ?? [];
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
 
   const categories = useMemo(
     () => ["All", ...Array.from(new Set(guides.map((g) => g.category)))],
-    []
+    [guides]
   );
 
   const list = useMemo(() => {
@@ -20,7 +23,7 @@ export default function GuidesScreen() {
       if (!q) return true;
       return g.title.toLowerCase().includes(q) || (g.summary ?? "").toLowerCase().includes(q);
     });
-  }, [query, category]);
+  }, [query, category, guides]);
 
   return (
     <MobileShell title="Neighbourhood Guides" onBack backFallback="/mobile/explore">

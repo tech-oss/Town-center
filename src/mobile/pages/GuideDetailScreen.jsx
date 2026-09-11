@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
-import { guides, getGuideBySlug } from "../../Data/guides";
+import { getGuides, getGuideBySlug } from "../../api";
+import useFetch from "../../hooks/useFetch";
 import useMobileBack from "../hooks/useMobileBack";
 
 // One "place" section of a guide — hero photo, eyebrow/title/location, full
@@ -47,13 +48,15 @@ function PlaceSection({ s }) {
 
 export default function GuideDetailScreen() {
   const { slug } = useParams();
-  const guide = getGuideBySlug(slug);
+  const { data: guide, loading } = useFetch(() => getGuideBySlug(slug), [slug]);
+  const { data: allGuides } = useFetch(getGuides, []);
   const [toast, setToast] = useState(false);
 
   const goBack = useMobileBack("/mobile/guides");
+  if (loading) return null;
   if (!guide) return <Navigate to="/mobile/guides" replace />;
 
-  const related = guides.filter((g) => g.slug !== guide.slug).slice(0, 3);
+  const related = (allGuides ?? []).filter((g) => g.slug !== guide.slug).slice(0, 3);
 
   async function handleShare() {
     const url = `${window.location.origin}/guides/${guide.slug}`;

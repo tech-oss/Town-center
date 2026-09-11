@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import { liveStory } from "../Data/live";
-import { guides } from "../Data/guides";
-import { getBuildings } from "../api";
+import { getGuides } from "../api";
 import useFetch from "../hooks/useFetch";
+import { getBuildings } from "../api";
 import useTapReveal from "../hooks/useTapReveal";
 import LocationMap from "./LocationMap";
 import ConnectivitySection from "./ConnectivitySection";
@@ -92,8 +92,9 @@ const FEATURED_GUIDE_SLUGS = [
 ];
 
 function FeaturedArticles() {
+  const { data: guides } = useFetch(getGuides, []);
   const featured = FEATURED_GUIDE_SLUGS
-    .map((slug) => guides.find((g) => g.slug === slug))
+    .map((slug) => (guides ?? []).find((g) => g.slug === slug))
     .filter(Boolean);
   if (featured.length === 0) return null;
 

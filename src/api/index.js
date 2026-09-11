@@ -9,5 +9,6 @@ export * from "./attractions";
 export * from "./developments";
 export * from "./stories";
 export * from "./siteContent";
+export * from "./guides";
 export * from "./stay";
 export { request } from "./client";

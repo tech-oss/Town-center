@@ -1,6 +1,8 @@
 import { Link, useParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getGuideBySlug, guides } from "../Data/guides";
+import { getGuideBySlug, getGuides } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
 import { card, pill } from "../utils/design";
 import useTapReveal from "../hooks/useTapReveal";
 
@@ -84,12 +86,14 @@ function PlaceSection({ s, index }) {
 
 export default function GuideDetailPage() {
   const { slug } = useParams();
-  const guide = getGuideBySlug(slug);
+  const { data: guide, loading } = useFetch(() => getGuideBySlug(slug), [slug]);
+  const { data: allGuides } = useFetch(getGuides, []);
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 
+  if (loading) return <Loading minHeight="70vh" />;
   if (!guide) return <Navigate to="/guides" replace />;
 
-  const related = guides.filter((g) => g.slug !== guide.slug).slice(0, 3);
+  const related = (allGuides ?? []).filter((g) => g.slug !== guide.slug).slice(0, 3);
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>

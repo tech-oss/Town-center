@@ -255,6 +255,9 @@ function guideFromRow(r) {
     id: r.id, slug: r.slug, title: r.title, area: r.area, body: r.body,
     thumbnail: r.thumbnail, heroImage: r.hero_image, status: r.status,
     showOnHomepage: r.show_on_homepage, showOnPlatform: r.show_on_platform,
+    sortOrder: r.sort_order,
+    // The nested page document the public guide page renders.
+    content: r.content ?? {},
   };
 }
 
@@ -283,6 +286,7 @@ export async function saveGuide(guide) {
     show_on_homepage: !!guide.showOnHomepage,
     show_on_platform: guide.showOnPlatform !== false,
     sort_order: guide.sortOrder ?? 0,
+    content: guide.content ?? {},
   }, { slugFrom: "title" });
 
   const { data, error } = await supabase.from("neighbourhood_guides").upsert(row).select().single();
