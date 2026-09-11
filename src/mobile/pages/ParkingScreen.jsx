@@ -1,12 +1,17 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
-import { travelSections, carParks, goodToKnow } from "../../Data/gettingHere";
-
-const parking = travelSections.find((s) => s.id === "parking");
-const accessibility = goodToKnow.find((g) => g.id === "accessibility");
+import { getGettingHere } from "../../api";
+import useFetch from "../../hooks/useFetch";
 
 export default function ParkingScreen() {
+  const { data: content } = useFetch(getGettingHere, []);
+  const parking = (content?.sections ?? []).find((s) => s.id === "parking");
+  const carParks = content?.carParks ?? [];
+  const accessibility = (content?.goodToKnow ?? []).find((g) => g.id === "accessibility");
+
+  if (!parking) return null;
+
   return (
     <MobileShell title="Parking" onBack backFallback="/mobile/transport" noPadding>
       <div className="flex flex-col">

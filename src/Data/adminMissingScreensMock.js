@@ -3,6 +3,8 @@
 // successful write and shows a toast. See individual TODO comments for the
 // real backend integration points (Supabase / Resend / Stripe).
 
+import { travelSections, travelStats, goodToKnow, carParks } from "./gettingHere";
+
 const img = (seed, w = 800, h = 500) => `https://picsum.photos/seed/${seed}/${w}/${h}`;
 
 // ─── Support Tickets ───────────────────────────────────────────────────────────
@@ -152,7 +154,24 @@ export const NEIGHBOURHOOD_GUIDES = [
 ];
 
 // ─── Site Content (page hero/header editor) ────────────────────────────────────
+export const GETTING_HERE_DEFAULTS = {
+  key: "getting-here", label: "Getting Here & Good to Know", kind: "getting-here",
+  heroEyebrow: "Plan Your Visit",
+  heroTitle: "Getting Here & Good to Know",
+  heroIntro:
+    "By rail, road, bus or bicycle, getting to and around Maidenhead is easy \u2014 with the Elizabeth Line putting central London just 25 minutes away.",
+  heroImage: "/images/getting-here.jpg",
+  stats: travelStats,
+  sections: travelSections,
+  carParks,
+  goodToKnowEyebrow: "Good to Know",
+  goodToKnowHeading: "Before You Visit",
+  goodToKnowIntro: "A few practical things worth knowing before you head into the town centre.",
+  goodToKnow,
+};
+
 export const SITE_CONTENT_SECTIONS = [
+  GETTING_HERE_DEFAULTS,
   {
     key: "homepage", label: "Homepage", kind: "homepage",
     heroVideoName: "maidenhead-hero-loop.mp4",
@@ -201,13 +220,6 @@ export const SITE_CONTENT_SECTIONS = [
     headline: "WORK",
     subtitle: "A new home for local jobs and business",
     intro: "We're building a home for local jobs, freelance projects and business opportunities in Maidenhead's growing town centre.",
-  },
-  {
-    key: "explore", label: "Explore", kind: "listing",
-    headerImage: img("explore-hero", 1200, 700),
-    headline: "EXPLORE THE FUTURE",
-    subtitle: "The regeneration projects shaping Maidenhead",
-    intro: "Explore the regeneration projects transforming Maidenhead town centre over the next decade.",
   },
   {
     key: "offers", label: "Offers", kind: "listing",

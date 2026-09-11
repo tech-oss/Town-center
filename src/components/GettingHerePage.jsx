@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { travelSections as sections, travelStats as stats, goodToKnow, carParks } from "../Data/gettingHere";
+import { getGettingHere } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
 
 const quickNav = [
   { label: "Public Transport", href: "#transport" },
@@ -12,6 +14,7 @@ const quickNav = [
 
 export default function GettingHerePage() {
   const { hash } = useLocation();
+  const { data: content, loading } = useFetch(getGettingHere, []);
 
   // Smooth-scroll to the anchored section when arriving via /getting-here#parking etc.
   useEffect(() => {
@@ -31,21 +34,27 @@ export default function GettingHerePage() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  if (loading || !content) return <Loading minHeight="70vh" />;
+
+  const sections = content.sections ?? [];
+  const stats = content.stats ?? [];
+  const goodToKnow = content.goodToKnow ?? [];
+  const carParks = content.carParks ?? [];
+
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── Hero — same height/layout/typography treatment as the Explore
           "The Future" page hero (bottom-anchored, centered, hero-title
           typeface). ── */}
       <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
-        <img src="/images/getting-here.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={content.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
-        <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>Plan Your Visit</span>
+        <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{content.heroEyebrow}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
-          Getting Here & Good to Know
+          {content.heroTitle}
         </h1>
         <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium text-white" style={{ letterSpacing: "-0.01em" }}>
-          By rail, road, bus or bicycle, getting to and around Maidenhead is easy — with the Elizabeth
-          Line putting central London just 25 minutes away.
+          {content.heroIntro}
         </p>
       </section>
 
@@ -241,10 +250,10 @@ export default function GettingHerePage() {
       <section id="good-to-know" className="scroll-mt-24 px-6 md:px-12 pt-20 pb-24 mt-20" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto">
           <div className="max-w-2xl mb-10">
-            <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Good to Know</p>
-            <h2 className="section-heading text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>Before You Visit</h2>
+            <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{content.goodToKnowEyebrow}</p>
+            <h2 className="section-heading text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{content.goodToKnowHeading}</h2>
             <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
-              A few practical things worth knowing before you head into the town centre.
+              {content.goodToKnowIntro}
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

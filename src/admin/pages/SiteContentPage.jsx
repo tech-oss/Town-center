@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { SITE_CONTENT_SECTIONS } from "../../Data/adminMissingScreensMock";
 import { ensureSiteSections, saveSiteSection } from "../../api/admin";
+import GettingHereEditor from "./siteContent/GettingHereEditor";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 const INPUT = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
@@ -165,6 +166,8 @@ export default function SiteContentPage() {
         <div className="flex-1 min-w-0 flex flex-col gap-5">
           {active.kind === "homepage" ? (
             <HomepageEditor section={active} onChange={set} />
+          ) : active.kind === "getting-here" ? (
+            <GettingHereEditor section={active} onChange={set} />
           ) : (
             <ListingEditor section={active} onChange={set} />
           )}

@@ -321,12 +321,21 @@ export async function saveSiteSection(section) {
   return sectionFromRow(data);
 }
 
-// Seeds the section rows the admin screen expects the first time it loads, so
-// the editor has something to edit on a fresh database.
+export async function deleteSiteSection(key) {
+  const { error } = await supabase.from("site_content").delete().eq("key", key);
+  if (error) throw error;
+  return { key, deleted: true };
+}
+
+// Seeds the section rows the admin screen expects, so the editor has something
+// to edit on a fresh database. Seeds per key rather than only when the table is
+// empty, so a section added later still appears for existing installs.
 export async function ensureSiteSections(defaults) {
   const existing = await getSiteContent();
-  if (existing.length) return existing;
-  for (const section of defaults) await saveSiteSection(section);
+  const have = new Set(existing.map((s) => s.key));
+  const missing = defaults.filter((s) => !have.has(s.key));
+  if (!missing.length) return existing;
+  for (const section of missing) await saveSiteSection(section);
   return getSiteContent();
 }
 

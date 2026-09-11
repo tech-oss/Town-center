@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
-import { travelSections, travelStats, goodToKnow } from "../../Data/gettingHere";
+import { getGettingHere } from "../../api";
+import useFetch from "../../hooks/useFetch";
 
-// The website's own Getting Here content, laid out natively. Parking has its
+// The website's own Getting Here content, laid out natively and read from the
+// same admin-editable site_content row the desktop page uses. Parking has its
 // own dedicated screen, so it is linked to rather than repeated here.
-const sections = travelSections.filter((s) => s.id !== "parking");
 
 const MAPS = {
   transport: {
@@ -23,6 +24,11 @@ const MAPS = {
 };
 
 export default function TransportScreen() {
+  const { data: content } = useFetch(getGettingHere, []);
+  const sections = (content?.sections ?? []).filter((s) => s.id !== "parking");
+  const travelStats = content?.stats ?? [];
+  const goodToKnow = content?.goodToKnow ?? [];
+
   return (
     <MobileShell title="Getting Here" onBack backFallback="/mobile/explore" noPadding>
       <div className="flex flex-col">
