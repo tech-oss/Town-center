@@ -6,6 +6,7 @@ import { resolveCategory } from "../Data/taxonomy";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 import CategoryFilterBar from "./CategoryFilterBar";
+import { sectionCategories, groupColumnFor, columnCategoryValues, matchesCategory, eventToSeeDoCard } from "../lib/sectionCategories";
 
 // Colour key for the See & Do category dots — one fixed colour per category,
 // reused everywhere a category is shown so it reads as a consistent legend.
@@ -22,36 +23,6 @@ const CATEGORY_COLORS = {
   markets: "#4C9A2A",
 };
 
-// What's On events carry their own category system (Music, Family, Market,
-// Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
-// category so every card, event or otherwise, uses the same consistent set.
-const EVENT_CATEGORY_MAP = {
-  Music: "music-dance",
-  Theatre: "theatre",
-  Family: "family",
-  Market: "markets",
-  Festive: "community",
-  Community: "community",
-  Sport: "sport-wellness",
-};
-
-// The real What's On events surfaced as See & Do cards that link to the shared
-// /event/:slug detail page — keeps one source of truth.
-const toEventCard = (e) => {
-  const category = EVENT_CATEGORY_MAP[e.category] ?? "community";
-  return {
-    slug: e.slug,
-    name: e.title,
-    tag: categoryTitles[category],
-    section: "see-do",
-    category,
-    image: e.image,
-    date: e.date,
-    address: e.location,
-    description: e.excerpt,
-    to: `/event/${e.slug}`,
-  };
-};
 
 export default function CategoryPage() {
   // Two routes render this component: the generic "/:section" listing, and
@@ -82,19 +53,17 @@ export default function CategoryPage() {
   // The column of the group's own filter chips (e.g. just Builders/
   // Electricians/.../Cleaners for Tradespeople), used both to build the
   // chip list below and to restrict the item pool to that group.
-  const groupColumn = groupConfig && sec.columns.find((c) => c.heading === groupConfig.heading);
-  const groupCategoryValues = groupColumn
-    ? new Set(groupColumn.links.filter((l) => l.to.includes("?category=")).map((l) => l.to.split("?category=")[1]))
-    : null;
+  const groupColumn = groupColumnFor(sec, groupConfig);
+  const groupCategoryValues = columnCategoryValues(groupColumn);
 
   const baseItems = groupCategoryValues
     ? (sectionItems ?? []).filter((i) => groupCategoryValues.has(i.category))
     : sectionItems ?? [];
-  const eventCards = (whatsOnEvents ?? []).map(toEventCard);
+  const eventCards = (whatsOnEvents ?? []).map((e) => eventToSeeDoCard(e));
 
   // An item appears under its primary `category` plus any extra `categories`.
   let items = category
-    ? baseItems.filter((i) => i.category === category || i.categories?.includes(category))
+    ? baseItems.filter((i) => matchesCategory(i, category))
     : baseItems;
 
   // See & Do: real What's On events are folded in alongside activities, each
@@ -123,13 +92,7 @@ export default function CategoryPage() {
 
   // Grouped pages (e.g. /services/tradespeople) only offer that group's own
   // chips — not every category across all of Services.
-  const categories = (() => {
-    const seen = new Set();
-    const links = groupColumn ? groupColumn.links : sec.columns.flatMap((c) => c.links);
-    return links
-      .filter((l) => l.to.includes("?category=") && !seen.has(l.to) && seen.add(l.to))
-      .map((l) => ({ value: l.to.split("?category=")[1], label: l.label }));
-  })();
+  const categories = sectionCategories(sec, groupColumn);
 
   // Category chip links need to stay within the grouped URL (e.g.
   // /services/tradespeople?category=builders), not the plain section path.

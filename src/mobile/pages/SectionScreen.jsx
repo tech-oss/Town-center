@@ -1,9 +1,14 @@
-import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import useTapReveal from "../../hooks/useTapReveal";
+import useFetch from "../../hooks/useFetch";
 import MobileShell from "../components/MobileShell";
-import { ListSearch, FilterPills, OffersLink } from "../components/ListSearch";
+import CategorySheet from "../components/CategorySheet";
+import { ListSearch, OffersLink } from "../components/ListSearch";
 import { sections } from "../../Data/pages";
+import { resolveCategory } from "../../Data/taxonomy";
+import { getEvents } from "../../api";
+import { sectionCategories, matchesCategory, eventToSeeDoCard } from "../../lib/sectionCategories";
 
 const SECTION_INTROS = {
   "see-do": "Explore the best attractions, green spaces, and things to do in and around Maidenhead.",
@@ -29,26 +34,49 @@ function CardImage({ src, alt }) {
 
 export default function SectionScreen({ sectionKey }) {
   const section = sections[sectionKey];
-  const [filter, setFilter] = useState("All");
+  const isSeeDo = sectionKey === "see-do";
   const [query, setQuery] = useState("");
 
-  const filters = useMemo(
-    () => ["All", ...Array.from(new Set(section.items.map((i) => i.tag)))],
-    [section]
-  );
+  // The category lives in the URL, as it does on the website, so a shared
+  // link opens the same filter and "back" from a listing returns to it.
+  // Run through the taxonomy's alias map so a pre-rename slug still lands.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawCategory = searchParams.get("category");
+  const category = rawCategory ? resolveCategory(rawCategory) : null;
+  const setCategory = (value) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) next.set("category", value);
+      else next.delete("category");
+      return next;
+    }, { replace: true });
+  };
+
+  // A typed search shouldn't follow the user into a different section.
+  useEffect(() => setQuery(""), [sectionKey]);
+
+  // Same list, same order as the website's filter — the section's nav
+  // columns flattened (see lib/sectionCategories).
+  const categories = useMemo(() => sectionCategories(section), [section]);
+
+  // See & Do folds the What's On events in alongside activities, exactly as
+  // the website does, so categories like Music & Dance or Markets aren't
+  // empty just because no venue is tagged with them.
+  const { data: events } = useFetch(getEvents, []);
 
   const items = useMemo(() => {
+    let list;
+    if (isSeeDo) {
+      const eventCards = (events ?? []).map((e) => eventToSeeDoCard(e, "/mobile/event"));
+      const all = [...eventCards, ...section.items];
+      list = category ? all.filter((i) => i.category === category) : all;
+    } else {
+      list = section.items.filter((i) => matchesCategory(i, category));
+    }
     const q = query.trim().toLowerCase();
-    return section.items.filter((i) => {
-      if (filter !== "All" && i.tag !== filter) return false;
-      if (!q) return true;
-      return (
-        i.name.toLowerCase().includes(q) ||
-        i.tag.toLowerCase().includes(q) ||
-        (i.description ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [section, filter, query]);
+    if (q) list = list.filter((i) => i.name.toLowerCase().includes(q));
+    return list;
+  }, [section, isSeeDo, events, category, query]);
 
   return (
     <MobileShell title={section.label} onBack backFallback="/mobile/explore">
@@ -57,9 +85,7 @@ export default function SectionScreen({ sectionKey }) {
 
         <OffersLink />
 
-        <ListSearch value={query} onChange={setQuery} placeholder={`Search ${section.label}…`} />
-
-        {sectionKey === "see-do" && (
+        {isSeeDo && (
           <Link
             to="/mobile/whats-on"
             className="self-start inline-flex items-center gap-1.5 text-sm font-bold active:opacity-70"
@@ -71,11 +97,18 @@ export default function SectionScreen({ sectionKey }) {
           </Link>
         )}
 
-        <FilterPills options={filters} value={filter} onChange={setFilter} />
+        {/* The website's phone-width filter row: category sheet beside a
+            search-by-name field. */}
+        <div className="flex items-center gap-3">
+          <CategorySheet categories={categories} value={category} onChange={setCategory} />
+          <div className="flex-1 min-w-0">
+            <ListSearch value={query} onChange={setQuery} placeholder="Search by name" />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-3">
           {items.map((it) => (
-            <Link key={it.slug} to={`/mobile/place/${it.slug}`}>
+            <Link key={`${it.isEvent ? "e" : "p"}-${it.slug}`} to={it.to ?? `/mobile/place/${it.slug}`}>
               <div
                 className="flex items-stretch overflow-hidden bg-white active:opacity-90"
                 style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}

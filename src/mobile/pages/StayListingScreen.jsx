@@ -5,6 +5,7 @@ import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import { ListSearch, OffersLink } from "../components/ListSearch";
 import FilterSheet from "../components/FilterSheet";
+import CategorySheet from "../components/CategorySheet";
 import useFetch from "../../hooks/useFetch";
 import { getHotels, getAccommodations } from "../../api";
 import { POSTCODE_COORDS, RADIUS_OPTIONS, milesBetween } from "../../lib/postcodeDistance";
@@ -158,13 +159,13 @@ export default function StayListingScreen() {
   const filterDefs = isHotels
     ? [
         { field: "facilities", label: "Facilities" },
-        { field: "roomFacilities", label: "Room Facilities" },
+        { field: "roomFacilities", label: "Room facilities" },
       ]
     : [
         { field: "facilities", label: "Facilities" },
-        { field: "roomFacilities", label: "Room Facilities" },
+        { field: "roomFacilities", label: "Room facilities" },
         { field: "meals", label: "Meals" },
-        { field: "travelGroup", label: "Travel Group" },
+        { field: "travelGroup", label: "Travel group" },
       ];
   const checkboxFilters = useMemo(() => {
     const out = {};
@@ -173,6 +174,12 @@ export default function StayListingScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, kind]);
   const setCheckboxField = (field) => (next) => patchParams({ [field]: setToParam(next) });
+
+  // "Property rating" — the website's multi-select star filter (hotels only),
+  // separate from the single-select star category below it.
+  const starsFilter = useMemo(() => paramToSet(searchParams.get("stars")), [searchParams]);
+  const setStarsFilter = (next) => patchParams({ stars: setToParam(next) });
+  const STAR_OPTIONS = [5, 4, 3, 2, 1].map((n) => ({ key: String(n), label: "★".repeat(n), color: "#c9962c" }));
 
   const postcode = searchParams.get("postcode");
   const locParam = searchParams.get("loc"); // "lat,lng,radius"
@@ -191,10 +198,10 @@ export default function StayListingScreen() {
     if (!allItems) return [];
     if (isHotels) {
       const stars = [...new Set(allItems.map((h) => h.stars))].sort((a, b) => b - a);
-      return stars.map((s) => ({ key: String(s), label: `${s}-Star` }));
+      return stars.map((s) => ({ value: String(s), label: `${s}-Star` }));
     }
     const types = [...new Set(allItems.map((a) => a.type))];
-    return types.map((t) => ({ key: slugify(t), label: t }));
+    return types.map((t) => ({ value: slugify(t), label: t }));
   }, [allItems, isHotels]);
 
   const filterOptions = useMemo(() => {
@@ -213,6 +220,9 @@ export default function StayListingScreen() {
     if (category) {
       list = isHotels ? list.filter((h) => String(h.stars) === category) : list.filter((a) => slugify(a.type) === category);
     }
+    if (isHotels && starsFilter.size > 0) {
+      list = list.filter((h) => starsFilter.has(String(h.stars)));
+    }
     filterDefs.forEach(({ field }) => {
       const set = checkboxFilters[field];
       if (set && set.size > 0) {
@@ -226,11 +236,21 @@ export default function StayListingScreen() {
     }
     const q = query.trim().toLowerCase();
     if (q) {
-      list = list.filter((i) => i.name.toLowerCase().includes(q) || (i.tagline ?? "").toLowerCase().includes(q));
+      list = list.filter((i) => i.name.toLowerCase().includes(q));
     }
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allItems, category, checkboxFilters, appliedLocation, query, isHotels]);
+  }, [allItems, category, starsFilter, checkboxFilters, appliedLocation, query, isHotels]);
+
+  const activeFilterCount =
+    filterDefs.reduce((n, { field }) => n + (checkboxFilters[field]?.size ?? 0), 0) +
+    (isHotels ? starsFilter.size : 0) +
+    (appliedLocation ? 1 : 0);
+  const clearAllFilters = () => {
+    const patch = { postcode: undefined, loc: undefined, stars: undefined };
+    filterDefs.forEach(({ field }) => { patch[field] = undefined; });
+    patchParams(patch);
+  };
 
   if (!landing) return <Navigate to="/mobile/live" replace />;
 
@@ -259,17 +279,7 @@ export default function StayListingScreen() {
 
         <OffersLink />
 
-        <ListSearch value={query} onChange={setQuery} placeholder={`Search ${landing.title}…`} />
-
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none -mx-5 px-5">
-          <FilterSheet
-            title={isHotels ? "Property Rating" : "Property Type"}
-            triggerLabel={categories.find((c) => c.key === category)?.label ?? (isHotels ? "Property Rating" : "Property Type")}
-            options={categories}
-            value={category}
-            onChange={setCategory}
-            allLabel={isHotels ? "All Ratings" : "All Types"}
-          />
           <PostcodeFilterSheet
             appliedLocation={appliedLocation}
             onApply={applyLocation}
@@ -291,7 +301,33 @@ export default function StayListingScreen() {
               />
             );
           })}
+          {isHotels && (
+            <FilterSheet
+              title="Property rating"
+              triggerLabel={`Property rating${starsFilter.size > 0 ? ` (${starsFilter.size})` : ""}`}
+              options={STAR_OPTIONS}
+              multi
+              value={starsFilter}
+              onChange={setStarsFilter}
+            />
+          )}
+          {activeFilterCount > 0 && (
+            <button type="button" onClick={clearAllFilters} className="shrink-0 text-xs font-semibold underline whitespace-nowrap" style={{ color: "#000000" }}>
+              Clear all filters
+            </button>
+          )}
         </div>
+
+        {/* As on the website, the category row (with its name search) only
+            appears when there is more than one category to choose between. */}
+        {categories.length > 1 && (
+          <div className="flex items-center gap-3">
+            <CategorySheet categories={categories} value={category} onChange={setCategory} />
+            <div className="flex-1 min-w-0">
+              <ListSearch value={query} onChange={setQuery} placeholder="Search by name" />
+            </div>
+          </div>
+        )}
 
         <div className="flex flex-col gap-3">
           {items.map((p) => (
@@ -300,7 +336,7 @@ export default function StayListingScreen() {
                 <img src={p.image} alt="" className="w-28 h-28 object-cover shrink-0" />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                   <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>
-                    {isHotels ? `${"★".repeat(p.stars)} Hotel` : p.type}
+                    {isHotels ? `${p.stars}-Star Hotel` : p.type}
                   </span>
                   <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{p.name}</p>
                   <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{p.tagline}</p>

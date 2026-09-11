@@ -1,24 +1,14 @@
-import { useState, useMemo } from "react";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
-import { ListSearch, FilterPills, OffersLink } from "../components/ListSearch";
+import CategorySheet from "../components/CategorySheet";
+import { ListSearch, OffersLink } from "../components/ListSearch";
 import { sections } from "../../Data/pages";
+import { resolveCategory } from "../../Data/taxonomy";
+import { sectionCategories, groupColumnFor, columnCategoryValues, matchesCategory } from "../../lib/sectionCategories";
 
 const servicesSection = sections.services;
-
-// Same category slug -> group mapping the website derives from Services'
-// three columns (Tradesperson/Professionals/Freelancers) — reused here
-// rather than duplicated, so mobile and web can never drift apart on which
-// category belongs to which group.
-function categoriesForGroup(groupConfig) {
-  if (!groupConfig) return null;
-  const column = servicesSection.columns.find((c) => c.heading === groupConfig.heading);
-  if (!column) return null;
-  return new Set(
-    column.links.filter((l) => l.to.includes("?category=")).map((l) => l.to.split("?category=")[1])
-  );
-}
 
 function CardImage({ src, alt }) {
   const { revealed, onImageClick } = useTapReveal();
@@ -36,32 +26,39 @@ function CardImage({ src, alt }) {
 export default function ServicesGroupScreen() {
   const { group } = useParams();
   const groupConfig = servicesSection.groups.find((g) => g.key === group);
-  const [filter, setFilter] = useState("All");
   const [query, setQuery] = useState("");
 
-  const groupCategories = useMemo(() => categoriesForGroup(groupConfig), [groupConfig]);
-  const groupItems = useMemo(
-    () => (groupCategories ? servicesSection.items.filter((i) => groupCategories.has(i.category)) : []),
-    [groupCategories]
-  );
+  // Category in the URL, alias-resolved — same as the website's
+  // /services/:group?category= pages.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawCategory = searchParams.get("category");
+  const category = rawCategory ? resolveCategory(rawCategory) : null;
+  const setCategory = (value) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) next.set("category", value);
+      else next.delete("category");
+      return next;
+    }, { replace: true });
+  };
 
-  const filters = useMemo(
-    () => ["All", ...Array.from(new Set(groupItems.map((i) => i.tag)))],
-    [groupItems]
-  );
+  useEffect(() => setQuery(""), [group]);
+
+  // Scoped to this group's own column — its full taxonomy list, including
+  // categories no one is listed under yet and the trailing "Other".
+  const column = useMemo(() => groupColumnFor(servicesSection, groupConfig), [groupConfig]);
+  const categories = useMemo(() => (column ? sectionCategories(servicesSection, column) : []), [column]);
+  const groupItems = useMemo(() => {
+    const values = columnCategoryValues(column);
+    return values ? servicesSection.items.filter((i) => values.has(i.category)) : [];
+  }, [column]);
 
   const items = useMemo(() => {
+    let list = groupItems.filter((i) => matchesCategory(i, category));
     const q = query.trim().toLowerCase();
-    return groupItems.filter((i) => {
-      if (filter !== "All" && i.tag !== filter) return false;
-      if (!q) return true;
-      return (
-        i.name.toLowerCase().includes(q) ||
-        i.tag.toLowerCase().includes(q) ||
-        (i.description ?? "").toLowerCase().includes(q)
-      );
-    });
-  }, [groupItems, filter, query]);
+    if (q) list = list.filter((i) => i.name.toLowerCase().includes(q));
+    return list;
+  }, [groupItems, category, query]);
 
   if (!groupConfig) return <Navigate to="/mobile/services" replace />;
 
@@ -72,9 +69,12 @@ export default function ServicesGroupScreen() {
 
         <OffersLink />
 
-        <ListSearch value={query} onChange={setQuery} placeholder={`Search ${groupConfig.label}…`} />
-
-        <FilterPills options={filters} value={filter} onChange={setFilter} />
+        <div className="flex items-center gap-3">
+          <CategorySheet categories={categories} value={category} onChange={setCategory} />
+          <div className="flex-1 min-w-0">
+            <ListSearch value={query} onChange={setQuery} placeholder="Search by name" />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-3">
           {items.map((it) => (
