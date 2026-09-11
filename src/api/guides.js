@@ -15,6 +15,7 @@ function fromRow(r) {
     heroImage: r.hero_image,
     cardImage: r.thumbnail,
     status: r.status,
+    showOnHomepage: !!r.show_on_homepage,
     ...(r.content ?? {}),
   };
 }

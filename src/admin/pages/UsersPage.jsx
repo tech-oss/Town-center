@@ -4,6 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import { getUsers, approveUser, rejectUser, suspendUser, registerUser, deleteUser, getBusinesses } from "../../api/admin";
 import BusinessTypeahead from "../components/BusinessTypeahead";
 import StatusTag from "../components/StatusTag";
+import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
@@ -81,19 +82,55 @@ const EMPTY_REGISTER = {
 function RegisterUserModal({ onClose, onRegistered }) {
   const [form, setForm] = useState(EMPTY_REGISTER);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(null);
   const { data: businesses } = useFetch(getBusinesses, []);
-  function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
-  const isValid = form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.businessId
-    && (form.autoPassword || form.password);
+  function set(k, v) { setForm((f) => ({ ...f, [k]: v })); setError(""); }
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const passwordOk = form.autoPassword || form.password.length >= 8;
+  const isValid = form.firstName.trim() && form.lastName.trim() && emailOk && form.businessId && passwordOk;
 
-  function handleSubmit() {
-    if (!isValid) return;
+  // Every failure is caught and shown. Before, a rejected save left the
+  // button on "Registering…" for good with nothing to say why.
+  async function handleSubmit() {
+    if (!isValid || saving) return;
     setSaving(true);
-    // TODO: create Supabase auth user and send invite email
-    registerUser(form).then(() => {
+    setError("");
+    try {
+      const res = await registerUser(form);
+      setDone({ name: `${form.firstName} ${form.lastName}`, email: form.email.trim(), password: res.password });
+    } catch (e) {
+      const msg = e?.message ?? "Could not register this user.";
+      setError(/already been registered|already exists/i.test(msg)
+        ? "A login with this email already exists. Use a different email, or find the user in the list."
+        : msg);
+    } finally {
       setSaving(false);
-      onRegistered();
-    });
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
+        <div className="bg-white rounded-2xl p-6 max-w-md w-full flex flex-col gap-4 text-center" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+          <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center text-xl" style={{ backgroundColor: "rgba(22,163,74,0.12)", color: "#15803D" }}>✓</div>
+          <div>
+            <p className="text-base font-bold" style={{ color: NAVY }}>{done.name} is registered</p>
+            <p className="text-xs mt-1" style={{ color: MUTED }}>Their login is active and they can sign in to the business portal now.</p>
+          </div>
+          {done.password && (
+            <div className="rounded-xl p-3 text-left text-sm" style={{ backgroundColor: "#f8fafc", border: `1px solid ${BORDER}` }}>
+              <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#9CA3AF" }}>Login details to share</p>
+              <p style={{ color: NAVY }}>Email: <strong>{done.email}</strong></p>
+              <p style={{ color: NAVY }}>Temporary password: <strong className="font-mono">{done.password}</strong></p>
+              <button type="button" onClick={() => navigator.clipboard?.writeText(`Email: ${done.email}\nPassword: ${done.password}`)}
+                className="mt-2 text-xs font-semibold" style={{ color: BLUE }}>Copy details</button>
+            </div>
+          )}
+          <button onClick={onRegistered} className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: BLUE }}>Done</button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -107,7 +144,7 @@ function RegisterUserModal({ onClose, onRegistered }) {
         <div className="grid sm:grid-cols-2 gap-3">
           <Field label="First Name"><input value={form.firstName} onChange={(e) => set("firstName", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
           <Field label="Last Name"><input value={form.lastName} onChange={(e) => set("lastName", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
-          <Field label="Email"><input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
+          <Field label="Email"><input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={form.email && !emailOk ? { ...FIELD_STYLE, borderColor: "#DC2626" } : FIELD_STYLE} /></Field>
           <Field label="Phone"><input value={form.phone} onChange={(e) => set("phone", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} /></Field>
           <Field label="Role">
             <select value={form.role} onChange={(e) => set("role", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE}>
@@ -128,9 +165,9 @@ function RegisterUserModal({ onClose, onRegistered }) {
             <span className="text-sm font-medium" style={{ color: NAVY }}>Auto-generate password</span>
           </label>
           {form.autoPassword ? (
-            <p className="text-xs" style={{ color: MUTED }}>A temporary password will be sent to their email.</p>
+            <p className="text-xs" style={{ color: MUTED }}>A temporary password is generated and shown to you once the user is registered, so you can share it with them.</p>
           ) : (
-            <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password"
+            <input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password (at least 8 characters)"
               className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
           )}
         </div>
@@ -139,6 +176,10 @@ function RegisterUserModal({ onClose, onRegistered }) {
           <input type="checkbox" checked={form.sendInvite} onChange={(e) => set("sendInvite", e.target.checked)} className="w-4 h-4" />
           <span className="text-sm" style={{ color: NAVY }}>Send invitation email</span>
         </label>
+
+        {error && (
+          <div className="px-3.5 py-2.5 rounded-xl text-xs font-medium" style={{ backgroundColor: "rgba(185,28,28,0.08)", color: "#991B1B" }}>{error}</div>
+        )}
 
         <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
           <button onClick={handleSubmit} disabled={!isValid || saving}
@@ -397,7 +438,7 @@ export default function UsersPage() {
                       <td className="px-4 py-3" style={{ color: NAVY }}>{u.business ?? "—"}</td>
                       <td className="px-4 py-3" style={{ color: MUTED }}>{u.role}</td>
                       <td className="px-4 py-3" style={{ color: MUTED }}>{u.tier ?? "—"}</td>
-                      <td className="px-4 py-3" style={{ color: MUTED }}>{u.joined}</td>
+                      <td className="px-4 py-3" style={{ color: MUTED }}>{formatUK(u.joined)}</td>
                       <td className="px-4 py-3"><StatusTag status={u.status} /></td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>

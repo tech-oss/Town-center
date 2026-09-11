@@ -6,6 +6,7 @@ import { resolveCategory } from "../Data/taxonomy";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 import CategoryFilterBar from "./CategoryFilterBar";
+import { toSeeDoSlug, toSeeDoSlugs } from "../lib/eventCategories";
 
 // Colour key for the See & Do category dots — one fixed colour per category,
 // reused everywhere a category is shown so it reads as a consistent legend.
@@ -20,24 +21,12 @@ const CATEGORY_COLORS = {
   "sport-wellness": "#22c55e",
 };
 
-// What's On events carry their own category system (Music, Family, Market,
-// Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
-// category so every card, event or otherwise, uses the same consistent set.
-const EVENT_CATEGORY_MAP = {
-  Music: "art-culture",
-  Theatre: "art-culture",
-  Family: "family",
-  Market: "community",
-  Festive: "community",
-  Community: "community",
-  Sport: "sport-wellness",
-};
-
 // The real What's On events surfaced as See & Do cards that link to the shared
 // /event/:slug detail page — keeps one source of truth.
 const toEventCard = (e) => {
-  const category = EVENT_CATEGORY_MAP[e.category] ?? "community";
+  const category = toSeeDoSlug(e.category);
   return {
+    categories: toSeeDoSlugs(e.categories),
     slug: e.slug,
     name: e.title,
     tag: categoryTitles[category],

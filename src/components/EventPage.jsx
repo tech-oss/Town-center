@@ -2,6 +2,7 @@ import { useParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { categoryColors } from "../Data/events";
 import { categoryTitles } from "../Data/pages";
+import { toSeeDoSlug } from "../lib/eventCategories";
 import { getEventBySlug, getEvents, getBusinessBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
@@ -12,15 +13,6 @@ import PlaceDetailLayout, { CalendarIcon, TicketIcon } from "./PlaceDetailLayout
 // Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
 // category so the breadcrumb links to a real, filterable category, matching
 // the mapping used to tag these events on the See & Do listing page.
-const EVENT_CATEGORY_MAP = {
-  Music: "art-culture",
-  Theatre: "art-culture",
-  Family: "family",
-  Market: "community",
-  Festive: "community",
-  Community: "community",
-  Sport: "sport-wellness",
-};
 
 // Map a What's On event, or a See & Do business (from the businesses resource),
 // onto the shared event shape so every See & Do detail page uses the same layout.
@@ -84,8 +76,8 @@ export default function EventPage() {
   const dot = categoryColors[event.category] || "var(--leaf)";
 
   // Real See & Do category for the breadcrumb: businesses already carry their
-  // own category slug; What's On events map through EVENT_CATEGORY_MAP.
-  const categorySlug = business?.category ?? EVENT_CATEGORY_MAP[rawEvent?.category] ?? "community";
+  // own category slug; What's On events map through toSeeDoSlug.
+  const categorySlug = business?.category ?? toSeeDoSlug(rawEvent?.category);
   const categoryLabel = categoryTitles[categorySlug] ?? event.category;
 
   // Location isn't included here — it already renders in the info card's

@@ -9,6 +9,7 @@ import {
 import SubscriptionTabs from "../components/SubscriptionTabs";
 import DataTable, { TableAction } from "../components/DataTable";
 import StatusTag from "../components/StatusTag";
+import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
@@ -160,7 +161,7 @@ export function SubscriptionDetailPage() {
 
         {isFullAccess && (
           <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "#1D4ED8" }}>
-            ✦ Unlimited access granted by admin{sub.grantedAt ? ` on ${sub.grantedAt}` : ""} — no renewal date, no charge.
+            ✦ Unlimited access granted by admin{sub.grantedAt ? ` on ${formatUK(sub.grantedAt)}` : ""} — no renewal date, no charge.
           </div>
         )}
         {isTrial && (
@@ -243,7 +244,7 @@ export function SubscriptionDetailPage() {
             <tbody>
               {payments.map((p, i) => (
                 <tr key={i} style={{ borderBottom: i < payments.length - 1 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
-                  <td className="px-3 py-2.5" style={{ color: "#1E293B" }}>{p.date}</td>
+                  <td className="px-3 py-2.5" style={{ color: "#1E293B" }}>{formatUK(p.date)}</td>
                   <td className="px-3 py-2.5" style={{ color: "#6B7280" }}>{p.description}</td>
                   <td className="px-3 py-2.5 font-medium" style={{ color: "#1E293B" }}>{p.amount}</td>
                   <td className="px-3 py-2.5"><StatusTag status={p.status} /></td>
@@ -286,7 +287,7 @@ export function SubscriptionDetailPage() {
         <div className="bg-white rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{isTrial ? "Trial Ends" : "Renewal Date"}</p>
-            <p className="text-lg font-bold" style={{ color: "#1E293B" }}>{sub.renewal}</p>
+            <p className="text-lg font-bold" style={{ color: "#1E293B" }}>{formatUK(sub.renewal)}</p>
           </div>
           <button onClick={handleSendReminder} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
             Send Renewal Reminder

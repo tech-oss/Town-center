@@ -11,6 +11,38 @@ import {
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
+import { VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES, SHOP_CATEGORIES, SERVICES_CATEGORIES, HOTEL_KINDS } from "../../Data/taxonomy";
+
+// The eyebrow is the site section a story belongs to (the small label above
+// the heading on the homepage card), and the category narrows it within that
+// section — so both are picked from the site's own lists rather than typed,
+// which is how stray values like "Fitness & Wellbeing " (trailing space) got in.
+const labels = (list) => [...new Set(list.map((c) => c.label).filter((l) => l !== "Other"))];
+const STORY_SECTIONS = {
+  "Eat & Drink": labels([...VENUE_TYPES, ...CUISINE_TYPES]).concat(["Chocolate Café", "Coffee & Culture", "Fine Dining"]),
+  "See & Do": labels(SEE_DO_CATEGORIES).concat(["Fitness & Wellbeing"]),
+  "Shop & Local Services": labels(SHOP_CATEGORIES),
+  "Services": labels(SERVICES_CATEGORIES),
+  "Hotels & Accommodation": labels(HOTEL_KINDS),
+  "Live": ["Homes", "Neighbourhood", "Community"],
+  "Work": ["Workspaces", "Business", "Careers"],
+  "Explore": ["The Future", "History & Heritage", "Neighbourhood Guides"],
+};
+const STORY_EYEBROWS = Object.keys(STORY_SECTIONS);
+
+function StorySelect({ value, onChange, options, placeholder }) {
+  const current = (value ?? "").trim();
+  return (
+    <select value={current} onChange={(e) => onChange(e.target.value)}
+      className="rounded-xl px-3 py-2.5 text-sm outline-none"
+      style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}>
+      <option value="">{placeholder}</option>
+      {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      {current && !options.includes(current) && <option value={current}>{current} (current)</option>}
+    </select>
+  );
+}
+
 // Real editor for public.feature_articles — the homepage "FEATURED STORIES"
 // / "In Focus" section (src/components/FeatureBlocks.jsx) and its detail
 // pages at /story/:slug (src/components/FeatureArticlePage.jsx). Field names
@@ -259,7 +291,10 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
   }
 
   function handleSave() {
-    if (!form.title.trim() || !form.cardHeading.trim()) return;
+    if (!form.title.trim() || !form.cardHeading.trim() || !(form.eyebrow ?? "").trim()) {
+      alert("Eyebrow, card heading and title are required.");
+      return;
+    }
     setSaving(true);
     saveFeatureArticle(form).then(async (saved) => {
       if (swapOutId) await setArticleHomepageFeature(swapOutId, false);
@@ -283,12 +318,15 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
         <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>Homepage card</p>
         <div className="grid sm:grid-cols-3 gap-4">
           <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Eyebrow (small label)</span>
-            <input value={form.eyebrow} onChange={(e) => set("eyebrow", e.target.value)} placeholder="e.g. Eat & Drink" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Eyebrow * (small label above the heading)</span>
+            <StorySelect value={form.eyebrow} placeholder="Select a section…" options={STORY_EYEBROWS}
+              onChange={(v) => setForm((f) => ({ ...f, eyebrow: v, category: (STORY_SECTIONS[v] ?? []).includes((f.category ?? "").trim()) ? f.category : "" }))} />
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Category</span>
-            <input value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="e.g. Fine Dining" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
+            <StorySelect value={form.category} onChange={(v) => set("category", v)}
+              placeholder={form.eyebrow ? "Select a category…" : "Pick an eyebrow first"}
+              options={STORY_SECTIONS[(form.eyebrow ?? "").trim()] ?? []} />
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Date / tag text</span>
@@ -404,7 +442,11 @@ function StoryRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
           <span className="text-sm font-bold truncate" style={{ color: "#1E293B" }}>{item.cardHeading || item.title}</span>
           <HomeBadge active={item.homepage} />
         </div>
-        <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>{item.eyebrow} · {item.category}</p>
+        <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>
+          {item.eyebrow?.trim()
+            ? <><span className="uppercase tracking-wide text-[10px]" style={{ color: "#2F8C8C" }}>{item.eyebrow.trim()}</span>{item.category ? ` · ${item.category}` : ""}</>
+            : <span style={{ color: "#B45309" }}>⚠ No eyebrow set{item.category ? ` · ${item.category}` : ""}</span>}
+        </p>
         <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.cardBody}</p>
         <p className="text-[11px] mt-1 font-mono" style={{ color: "#9CA3AF" }}>/story/{item.slug}</p>
       </div>
@@ -412,7 +454,7 @@ function StoryRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
         {item.homepage ? (
           <div className="flex gap-2">
             <button onClick={() => onToggleFeature(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#B91C1C", border: "1.5px solid rgba(220,38,38,0.3)" }}>
-              Make Offline
+              Remove from Homepage
             </button>
             <button onClick={() => onOpenSwap(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}>
               Swap →
@@ -461,7 +503,7 @@ export default function FeaturedStoriesPage() {
   }
 
   function handleDelete(id) {
-    if (!confirm("Remove this featured story? This also removes its detail page.")) return;
+    if (!confirm("Delete this story permanently? This also removes its /story/ page. To only take it off the homepage, use \"Remove from Homepage\" instead.")) return;
     deleteFeatureArticle(id).then(() => {
       setLocalItems((prev) => (prev ?? items ?? []).filter((n) => n.id !== id));
       showToast("Deleted.");

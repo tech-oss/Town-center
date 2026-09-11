@@ -125,29 +125,44 @@ export function suspendUser(id) {
 }
 
 // Creating a portal login means creating a Supabase Auth account, which needs
-// the service-role key — that must never reach the browser. Admin therefore
-// records the person against the business here, and they set their own password
-// through the portal's normal "Register a User" flow using this email.
+// the service-role key — that must never reach the browser. So this goes
+// through the admin-create-business Edge Function (the same one the Business
+// Registrations form uses), which verifies the caller is an admin, creates the
+// login, and writes the business_users row linked to it.
+//
+// This used to insert the business_users row directly with no auth account
+// behind it. The table requires the link, so the insert failed — and the
+// modal never heard about it, which is why registering looked stuck.
 export async function registerUser(data) {
-  const { data: inserted, error } = await supabase
-    .from("business_users")
-    .insert({
-      business_id: data.businessId ?? data.business ?? null,
-      role: data.role === "Business Owner" ? "Owner" : (data.role ?? "Content Manager"),
-      first_name: data.firstName,
-      last_name: data.lastName,
-      email: data.email,
-      phone: data.phone ?? null,
-      status: "pending",
-      requested_at: new Date().toISOString(),
-    })
-    .select(SELECT)
-    .single();
-  if (error) throw error;
+  const password = data.autoPassword || !data.password
+    ? crypto.randomUUID().replace(/-/g, "").slice(0, 14)
+    : data.password;
 
-  const user = fromRow(inserted);
-  await addLog("Registered by admin", user, data.sendInvite ? "Invitation email to send" : "");
-  return { ok: true, user };
+  const { data: result, error } = await supabase.functions.invoke("admin-create-business", {
+    body: {
+      businessId: data.businessId,
+      email: data.email.trim(),
+      password,
+      firstName: data.firstName.trim(),
+      lastName: data.lastName.trim(),
+      phone: data.phone || null,
+      role: data.role === "Business Owner" ? "Owner" : "Content Manager",
+    },
+  });
+  if (error) {
+    // The function answers 4xx with { error } in the body; surface that
+    // message rather than the generic "non-2xx status code".
+    let message = error.message;
+    try { message = (await error.context?.json())?.error ?? message; } catch { /* keep generic */ }
+    throw new Error(message);
+  }
+  if (result?.error) throw new Error(result.error);
+
+  const { data: row } = await supabase
+    .from("business_users").select(SELECT).eq("auth_user_id", result.userId).maybeSingle();
+  const user = row ? fromRow(row) : { id: result.userId, name: `${data.firstName} ${data.lastName}` };
+  await addLog("Registered by admin", user, data.sendInvite ? "Login details to be shared with the user" : "");
+  return { ok: true, user, password: data.autoPassword ? password : null };
 }
 
 export async function deleteUser(id) {

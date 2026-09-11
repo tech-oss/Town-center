@@ -34,7 +34,7 @@ export default function ParkingScreen() {
               {carParks.map((p) => (
                 <a
                   key={p.label}
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}`}
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.lat && p.lng ? `${p.lat},${p.lng}` : p.query)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-skip-external-confirm

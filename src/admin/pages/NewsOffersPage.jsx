@@ -10,6 +10,8 @@ import {
   getSpotlightBusinesses,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
+import UKDateInput from "../components/UKDateInput";
+import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
@@ -20,9 +22,7 @@ const TYPES = ["news", "offer"];
 // Format a YYYY-MM-DD date string for display in UK locale.
 function formatUkDate(d) {
   if (!d) return null;
-  return new Date(d + "T00:00:00").toLocaleDateString("en-GB", {
-    day: "numeric", month: "short", year: "numeric",
-  });
+  return formatUK(d);
 }
 
 // Returns the live status of a featured window based on UK time.
@@ -62,6 +62,33 @@ function countdownText(target) {
   if (days > 0) return `${days}d ${hours}h`;
   if (hours > 0) return `${hours}h ${mins}m`;
   return `${mins}m`;
+}
+
+// Word limits sized to the main site's layout: the "In the Spotlight" card
+// clamps its summary at three lines (about 25 words at card width), and the
+// article page is written for a short read. Typing stops at the limit rather
+// than letting text through that the card would cut off mid-sentence.
+const SUMMARY_WORD_LIMIT = 25;
+const BODY_WORD_LIMIT = 500;
+
+function countWords(text) {
+  return (String(text ?? "").match(/\S+/g) ?? []).length;
+}
+
+function clampWords(text, limit) {
+  if (countWords(text) <= limit) return text;
+  const m = String(text).match(new RegExp(`^\\s*(?:\\S+\\s+){${limit - 1}}\\S+`));
+  return m ? m[0] : text;
+}
+
+function WordCounter({ text, limit }) {
+  const n = countWords(text);
+  const atLimit = n >= limit;
+  return (
+    <span className="text-[11px] font-semibold" style={{ color: atLimit ? "#B45309" : "#9CA3AF" }}>
+      {n}/{limit} words{atLimit ? " — limit reached" : ""}
+    </span>
+  );
 }
 
 // ─── Live schedule / active-timer badge shown on each post ────────────────────
@@ -304,11 +331,14 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
 
         {/* Excerpt */}
         <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Short summary (shown on cards) *</span>
+          <span className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Short summary (shown on cards) *</span>
+            <WordCounter text={form.excerpt} limit={SUMMARY_WORD_LIMIT} />
+          </span>
           <textarea
             value={form.excerpt}
-            onChange={(e) => set("excerpt", e.target.value)}
-            rows={2}
+            onChange={(e) => set("excerpt", clampWords(e.target.value, SUMMARY_WORD_LIMIT))}
+            rows={3}
             placeholder="One or two sentences that appear on the card and homepage spotlight…"
             className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
             style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
@@ -317,10 +347,13 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
 
         {/* Body */}
         <label className="flex flex-col gap-1 sm:col-span-2">
-          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Full article / offer body</span>
+          <span className="flex items-center justify-between gap-2">
+            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Full article / offer body</span>
+            <WordCounter text={form.body} limit={BODY_WORD_LIMIT} />
+          </span>
           <textarea
             value={form.body}
-            onChange={(e) => set("body", e.target.value)}
+            onChange={(e) => set("body", clampWords(e.target.value, BODY_WORD_LIMIT))}
             rows={5}
             placeholder="Full text shown on the article detail page. Use blank lines to separate paragraphs."
             className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
@@ -431,9 +464,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Start date</span>
-              <input
-                type="date"
-                value={form.startDate}
+              <UKDateInput                 value={form.startDate}
                 onChange={(e) => set("startDate", e.target.value)}
                 className="rounded-xl px-3 py-2.5 text-sm outline-none"
                 style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
@@ -441,9 +472,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>End date</span>
-              <input
-                type="date"
-                value={form.endDate}
+              <UKDateInput                 value={form.endDate}
                 min={form.startDate || undefined}
                 onChange={(e) => set("endDate", e.target.value)}
                 className="rounded-xl px-3 py-2.5 text-sm outline-none"
@@ -497,7 +526,7 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
         </div>
         <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>{item.businessName} · {item.category}</p>
         <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.excerpt}</p>
-        {item.date && <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{item.date}</p>}
+        {item.date && <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{formatUK(item.date)}</p>}
         {item.featuredOnHome && (item.startDate || item.endDate) && (
           <SpotlightSchedule startDate={item.startDate} endDate={item.endDate} />
         )}
@@ -510,7 +539,7 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
               className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
               style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#B91C1C", border: "1.5px solid rgba(220,38,38,0.3)" }}
             >
-              Make Offline
+              Remove from Homepage
             </button>
             <button
               onClick={() => onOpenSwap(item)}

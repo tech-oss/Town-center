@@ -1,12 +1,13 @@
 import { useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import { saveBusinessEvent, getSpotlightBusinesses } from "../../api/admin";
-import { categories as EVENT_CATEGORIES } from "../../Data/events";
+import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs } from "../../lib/eventCategories";
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
   SingleImageUpload, GalleryGrid, SocialFields, LocationFields, CARD,
 } from "./businessContent/shared";
 import { NAVY, MUTED, BORDER } from "../theme";
+import UKDateInput from "../components/UKDateInput";
 
 // Admin-authored event pages. Deliberately the same shape as the See & Do
 // business content editor (TypeAEditor) — profile, find us, gallery, location
@@ -16,8 +17,6 @@ import { NAVY, MUTED, BORDER } from "../theme";
 //
 // A business is optional. With none attached the event is a town event, which
 // still gets its own page and still shows in See & Do.
-
-const CATEGORY_OPTIONS = Object.keys(EVENT_CATEGORIES);
 
 const BLANK = {
   businessId: "",
@@ -44,7 +43,11 @@ const BLANK = {
 };
 
 export default function EventEditor({ initial, onSaved, onCancel }) {
-  const [form, setForm] = useState(initial ? { ...BLANK, ...initial } : BLANK);
+  // Older events carry the original What's On labels (Music, Market…);
+  // they open already mapped onto the See & Do categories, and save that way.
+  const [form, setForm] = useState(initial
+    ? { ...BLANK, ...initial, category: toSeeDoSlugs(initial.category ?? []) }
+    : BLANK);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const { data: businesses } = useFetch(getSpotlightBusinesses, []);
@@ -106,17 +109,18 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
           </Field>
 
           <div className="mt-4">
-            <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Category</p>
+            <p className="text-xs font-semibold mb-1" style={{ color: MUTED }}>Category</p>
+            <p className="text-[11px] mb-2" style={{ color: "#9CA3AF" }}>The same categories as the See &amp; Do page — the event is listed under each one picked. The first is its main category.</p>
             <div className="flex gap-2 flex-wrap">
-              {CATEGORY_OPTIONS.map((c) => {
-                const on = (form.category ?? []).includes(c);
+              {EVENT_CATEGORY_OPTIONS.map((c) => {
+                const on = (form.category ?? []).includes(c.value);
                 return (
-                  <button key={c} type="button" onClick={() => toggleCategory(c)}
+                  <button key={c.value} type="button" onClick={() => toggleCategory(c.value)}
                     className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                     style={on
-                      ? { backgroundColor: EVENT_CATEGORIES[c].color, color: "#fff" }
+                      ? { backgroundColor: "#2F8C8C", color: "#fff", border: "1.5px solid #2F8C8C" }
                       : { backgroundColor: "#fff", color: NAVY, border: `1.5px solid ${BORDER}` }}>
-                    {c}
+                    {on && "✓ "}{c.label}
                   </button>
                 );
               })}
@@ -125,7 +129,7 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
 
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
             <Field label="Date">
-              <Inp type="date" value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} />
+              <UKDateInput value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} />
             </Field>
             <Field label="Date label" hint="Overrides the date above — use for recurring events, e.g. “2nd Sunday of each month”">
               <Inp value={form.dateLabel ?? ""} onChange={(e) => set("dateLabel", e.target.value)} />
@@ -133,7 +137,7 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
             <Field label="Time" hint="Free text, e.g. “12pm – 5pm”">
               <Inp value={form.eventTime ?? ""} onChange={(e) => set("eventTime", e.target.value)} />
             </Field>
-            <Field label="Entry">
+            <Field label="Entry type" hint="Shown on the event page when the ticket details below are left blank">
               <select
                 value={form.entryType ?? "Free"}
                 onChange={(e) => set("entryType", e.target.value)}
@@ -144,7 +148,7 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
                 <option>Paid</option>
               </select>
             </Field>
-            <Field label="Entry line" span2 hint="What the event page prints, e.g. “Free entry”, “Ticketed — see website”">
+            <Field label="Ticket / entry details" span2 hint="Printed on the event page beside the ticket icon, e.g. “Free entry, no booking needed” or “£12 — book online”. Leave blank to show the entry type instead.">
               <Inp value={form.tickets ?? ""} onChange={(e) => set("tickets", e.target.value)} />
             </Field>
           </div>

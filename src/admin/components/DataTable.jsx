@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import EmptyState from "./EmptyState";
+import { formatUK, isISODate } from "../../lib/ukDate";
 
 const PAGE_SIZE = 10;
 
@@ -127,7 +128,7 @@ export default function DataTable({
                 )}
                 {columns.map((c) => (
                   <td key={c.key} className="px-4 py-3" style={{ color: c.muted ? "#6B7280" : "#1E293B", whiteSpace: c.wrap ? "normal" : "nowrap" }}>
-                    {c.render ? c.render(row[c.key], row) : (row[c.key] ?? "—")}
+                    {c.render ? c.render(row[c.key], row) : (isISODate(row[c.key]) ? formatUK(row[c.key]) : (row[c.key] ?? "—"))}
                   </td>
                 ))}
                 {rowActions && (

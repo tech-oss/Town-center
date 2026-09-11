@@ -6,6 +6,7 @@ import EmptyState from "../components/EmptyState";
 import Toast from "../components/Toast";
 import ReviewActions from "../components/ReviewActions";
 import { NAVY, BLUE, MUTED, BORDER, CARD, FIELD_STYLE } from "../theme";
+import { formatUK } from "../../lib/ukDate";
 
 const FILTERS = ["All", "Visible", "Hidden"];
 
@@ -111,14 +112,25 @@ export default function ReviewModerationPage() {
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#991B1B" }}>Hidden</span>
                     )}
                   </div>
-                  <p className="text-xs mt-1" style={{ color: MUTED }}>{r.businessName} · {r.date}</p>
+                  <p className="text-xs mt-1" style={{ color: MUTED }}>{r.businessName} · {formatUK(r.date)}</p>
                   {r.text && <p className="text-xs mt-2" style={{ color: NAVY }}>{r.text}</p>}
-                  {r.verificationLink && (
-                    <a href={r.verificationLink} target="_blank" rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold mt-2 hover:underline" style={{ color: BLUE }}>
-                      ✓ Verification link ↗
-                    </a>
-                  )}
+                  {/* The review's source URL (the Google / Trustpilot page the
+                      business copied it from) is what proves it's genuine, so
+                      it always has a row — shown in full, or flagged as missing. */}
+                  <div className="mt-2.5 rounded-lg px-3 py-2 text-[11px] flex items-center gap-2 min-w-0"
+                    style={r.verificationLink
+                      ? { backgroundColor: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.18)" }
+                      : { backgroundColor: "rgba(217,119,6,0.08)", border: "1px solid rgba(217,119,6,0.25)" }}>
+                    <span className="font-bold shrink-0" style={{ color: r.verificationLink ? NAVY : "#92400E" }}>Review URL:</span>
+                    {r.verificationLink ? (
+                      <a href={/^https?:\/\//i.test(r.verificationLink) ? r.verificationLink : `https://${r.verificationLink}`}
+                        target="_blank" rel="noreferrer" className="font-semibold hover:underline truncate" style={{ color: BLUE }}>
+                        {r.verificationLink} ↗
+                      </a>
+                    ) : (
+                      <span style={{ color: "#92400E" }}>None provided — this review can't be verified against its source.</span>
+                    )}
+                  </div>
                   {r.reply && (
                     <div className="mt-2 pl-3" style={{ borderLeft: `2px solid ${BORDER}` }}>
                       <p className="text-xs" style={{ color: MUTED }}>

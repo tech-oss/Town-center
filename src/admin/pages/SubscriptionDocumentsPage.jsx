@@ -7,6 +7,7 @@ import {
 } from "../../Data/adminSubscriptionMock";
 import SubscriptionTabs from "../components/SubscriptionTabs";
 import StatusTag from "../components/StatusTag";
+import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import { BORDER, MUTED, NAVY } from "../theme";
@@ -28,7 +29,7 @@ function DocsTable({ rows, numberLabel }) {
       <tbody>
         {rows.map((r, i) => (
           <tr key={i} style={{ borderBottom: i < rows.length - 1 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
-            <td className="px-3 py-2.5" style={{ color: NAVY }}>{r.date}</td>
+            <td className="px-3 py-2.5" style={{ color: NAVY }}>{formatUK(r.date)}</td>
             <td className="px-3 py-2.5" style={{ color: MUTED }}>{r.number}</td>
             <td className="px-3 py-2.5 font-medium" style={{ color: NAVY }}>{r.amount}</td>
             <td className="px-3 py-2.5"><StatusTag status={r.status} /></td>

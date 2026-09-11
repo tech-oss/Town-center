@@ -178,7 +178,7 @@ export default function GettingHerePage() {
                       {carParks.map((p) => (
                         <a
                           key={p.label}
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.query)}`}
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(p.lat && p.lng ? `${p.lat},${p.lng}` : p.query)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-colors"

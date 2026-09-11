@@ -93,9 +93,12 @@ const FEATURED_GUIDE_SLUGS = [
 
 function FeaturedArticles() {
   const { data: guides } = useFetch(getGuides, []);
-  const featured = FEATURED_GUIDE_SLUGS
-    .map((slug) => (guides ?? []).find((g) => g.slug === slug))
-    .filter(Boolean);
+  // Admin picks these with "Show on Homepage" (capped at three there too);
+  // the fixed slugs are only a fallback for when none are switched on.
+  const flagged = (guides ?? []).filter((g) => g.showOnHomepage).slice(0, 3);
+  const featured = flagged.length
+    ? flagged
+    : FEATURED_GUIDE_SLUGS.map((slug) => (guides ?? []).find((g) => g.slug === slug)).filter(Boolean);
   if (featured.length === 0) return null;
 
   return (

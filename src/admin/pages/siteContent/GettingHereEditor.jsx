@@ -183,21 +183,55 @@ export default function GettingHereEditor({ section, onChange }) {
 
       <Card
         title="Car park shortcuts"
-        hint="The chips under the parking map. Each opens directions to the search text below."
-        action={<SmallBtn onClick={() => addTo("carParks", { label: "", query: "" })}>+ Add car park</SmallBtn>}
+        hint="The buttons under the parking map. Each one opens Google Maps directions from the visitor's location to the car park's coordinates."
+        action={<SmallBtn onClick={() => addTo("carParks", { label: "", query: "", lat: "", lng: "" })}>+ Add car park</SmallBtn>}
       >
+        <p className="text-[11px] -mt-1" style={{ color: "#9CA3AF" }}>
+          To get coordinates: right-click the car park entrance in Google Maps and click the numbers at the top of the menu to copy them, then paste into Latitude and Longitude (or paste both into Latitude). Without coordinates the button falls back to searching Maps for the address text.
+        </p>
         <div className="flex flex-col gap-3">
-          {(c.carParks ?? []).map((p, i) => (
-            <div key={i} className="grid sm:grid-cols-[1fr_2fr_auto] gap-3 items-end">
-              <Field label="Chip label"><Inp value={p.label ?? ""} onChange={(e) => updateAt("carParks", i, { label: e.target.value })} /></Field>
-              <Field label="Maps search text"><Inp value={p.query ?? ""} onChange={(e) => updateAt("carParks", i, { query: e.target.value })} /></Field>
-              <div className="flex gap-1.5 pb-0.5">
-                <SmallBtn onClick={() => moveAt("carParks", i, -1)}>↑</SmallBtn>
-                <SmallBtn onClick={() => moveAt("carParks", i, 1)}>↓</SmallBtn>
-                <SmallBtn danger onClick={() => removeAt("carParks", i)}>Remove</SmallBtn>
+          {(c.carParks ?? []).map((p, i) => {
+            const hasCoords = p.lat !== "" && p.lng !== "" && p.lat != null && p.lng != null && !Number.isNaN(Number(p.lat)) && !Number.isNaN(Number(p.lng));
+            return (
+              <div key={i} className="rounded-xl p-4 flex flex-col gap-3" style={{ border: `1.5px solid ${BORDER}` }}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Car park {i + 1}</span>
+                  <div className="flex gap-1.5">
+                    <SmallBtn onClick={() => moveAt("carParks", i, -1)}>↑</SmallBtn>
+                    <SmallBtn onClick={() => moveAt("carParks", i, 1)}>↓</SmallBtn>
+                    <SmallBtn danger onClick={() => removeAt("carParks", i)}>Remove</SmallBtn>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Field label="Button label"><Inp value={p.label ?? ""} onChange={(e) => updateAt("carParks", i, { label: e.target.value })} placeholder="e.g. Nicholsons" /></Field>
+                  <Field label="Address (fallback)" hint="Used only if no coordinates are set">
+                    <Inp value={p.query ?? ""} onChange={(e) => updateAt("carParks", i, { query: e.target.value })} placeholder="e.g. Nicholsons Car Park, Maidenhead" />
+                  </Field>
+                  <Field label="Latitude">
+                    <Inp inputMode="decimal" value={p.lat ?? ""} placeholder="e.g. 51.5226"
+                      onChange={(e) => {
+                        // Accept a pasted "lat, lng" pair from Google Maps in one go.
+                        const pair = e.target.value.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+                        updateAt("carParks", i, pair ? { lat: pair[1], lng: pair[2] } : { lat: e.target.value });
+                      }} />
+                  </Field>
+                  <Field label="Longitude">
+                    <Inp inputMode="decimal" value={p.lng ?? ""} placeholder="e.g. -0.7196" onChange={(e) => updateAt("carParks", i, { lng: e.target.value })} />
+                  </Field>
+                </div>
+                <div className="flex items-center gap-3 text-[11px]">
+                  {hasCoords ? (
+                    <>
+                      <span className="font-semibold" style={{ color: "#15803D" }}>✓ Directions go to {Number(p.lat).toFixed(5)}, {Number(p.lng).toFixed(5)}</span>
+                      <a href={`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline" style={{ color: BLUE }}>Check on map ↗</a>
+                    </>
+                  ) : (
+                    <span className="font-semibold" style={{ color: "#B45309" }}>No coordinates — directions use the address search instead.</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
 

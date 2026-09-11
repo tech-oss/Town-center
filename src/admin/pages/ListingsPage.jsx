@@ -11,6 +11,7 @@ import {
   getDevelopments, saveDevelopment, deleteDevelopment, emptyDevelopment,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
+import UKDateInput from "../components/UKDateInput";
 import StatusTag from "../components/StatusTag";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
@@ -228,7 +229,7 @@ function OffersEditor({ bizId, offers, onRefresh }) {
             </select>
           </Field>
           <Field label="Expiry Date" hint="Leave blank for no expiry">
-            <Inp type="date" value={form.expiry ?? ""} onChange={e => setF("expiry", e.target.value)} />
+            <UKDateInput value={form.expiry ?? ""} onChange={e => setF("expiry", e.target.value)} />
           </Field>
           <Field label="Title" required span2>
             <Inp value={form.title} onChange={e => setF("title", e.target.value)} placeholder="e.g. Happy Hour, New Menu Launch…" />
@@ -597,13 +598,13 @@ function StandalonePageEditor({ page, onBack, onSaved }) {
         <EditorSection title="Date & Time">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Start Date">
-              <Inp type="date" value={form.date} onChange={e => set("date", e.target.value)} />
+              <UKDateInput value={form.date} onChange={e => set("date", e.target.value)} />
             </Field>
             <Field label="Start Time">
               <Inp type="time" value={form.time} onChange={e => set("time", e.target.value)} />
             </Field>
             <Field label="End Date">
-              <Inp type="date" value={form.endDate} onChange={e => set("endDate", e.target.value)} />
+              <UKDateInput value={form.endDate} onChange={e => set("endDate", e.target.value)} />
             </Field>
             <Field label="End Time">
               <Inp type="time" value={form.endTime} onChange={e => set("endTime", e.target.value)} />

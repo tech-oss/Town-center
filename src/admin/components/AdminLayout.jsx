@@ -50,7 +50,6 @@ const NAV = [
     children: [
       { to: "/admin/explore/the-future",   label: "The Future",           icon: I.projects },
       { to: "/admin/neighbourhood-guides", label: "Neighbourhood Guides", icon: I.neighbourhood },
-      { to: "/admin/projects",             label: "Projects",             icon: I.listings },
     ],
   },
   { to: "/admin/subscriptions",      label: "Subscriptions",         icon: I.subscriptions },

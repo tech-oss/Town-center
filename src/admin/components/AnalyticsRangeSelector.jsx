@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { NAVY, BORDER, MUTED, BLUE } from "../theme";
+import UKDateInput from "./UKDateInput";
 import { RANGE_PRESETS } from "../../lib/analyticsRanges";
 
 // value: { type: "preset", key } | { type: "custom", from, to }
@@ -46,10 +47,10 @@ export default function RangeSelector({ value, onChange }) {
 
       {customOpen && (
         <div className="flex items-center gap-2 rounded-xl p-2" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
-          <input type="date" value={draftFrom} max={draftTo || undefined} onChange={(e) => setDraftFrom(e.target.value)}
+          <UKDateInput value={draftFrom} max={draftTo || undefined} onChange={(e) => setDraftFrom(e.target.value)}
             className="text-xs rounded-lg px-2 py-1.5 outline-none" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
           <span className="text-xs" style={{ color: MUTED }}>to</span>
-          <input type="date" value={draftTo} min={draftFrom || undefined} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setDraftTo(e.target.value)}
+          <UKDateInput value={draftTo} min={draftFrom || undefined} max={new Date().toISOString().slice(0, 10)} onChange={(e) => setDraftTo(e.target.value)}
             className="text-xs rounded-lg px-2 py-1.5 outline-none" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
           <button type="button" onClick={applyCustom} disabled={!draftFrom || !draftTo}
             className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: "#2563EB" }}>

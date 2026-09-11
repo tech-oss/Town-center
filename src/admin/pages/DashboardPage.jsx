@@ -522,7 +522,6 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             <QuickAction icon="➕" label="Add Listing"  to="/admin/listings" />
             <QuickAction icon="📅" label="Add Event"    to="/admin/events-news" />
-            <QuickAction icon="🗺" label="Add Project"  to="/admin/projects" />
             <QuickAction icon="📊" label="View Reports" to="/admin/reporting" />
           </div>
         </div>

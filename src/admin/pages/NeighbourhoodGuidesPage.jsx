@@ -6,6 +6,9 @@ import StatusTag from "../components/StatusTag";
 import EmptyState from "../components/EmptyState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
+// The homepage guides strip is laid out for three cards.
+const HOMEPAGE_LIMIT = 3;
+
 function Toggle({ checked, onChange, label }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer">
@@ -37,10 +40,18 @@ export default function NeighbourhoodGuidesPage() {
 
   function notify(msg) { setToast(msg); setTimeout(() => setToast(null), 3500); }
 
+  const onHomepage = guides.filter((g) => g.showOnHomepage).length;
+
   function toggle(id, key) {
     const guide = guides.find((g) => g.id === id);
-    if (guide) saveGuide({ ...guide, [key]: !guide[key] }).then(refresh);
-    notify("Visibility updated.");
+    if (!guide) return;
+    if (key === "showOnHomepage" && !guide.showOnHomepage && onHomepage >= HOMEPAGE_LIMIT) {
+      notify(`Only ${HOMEPAGE_LIMIT} guides can be on the homepage. Turn one off first.`);
+      return;
+    }
+    saveGuide({ ...guide, [key]: !guide[key] })
+      .then(() => { refresh(); notify("Visibility updated."); })
+      .catch((e) => notify(`Could not update: ${e.message}`));
   }
   function handleDelete(g) {
     deleteGuide(g.id).then(refresh);
@@ -60,6 +71,26 @@ export default function NeighbourhoodGuidesPage() {
           style={{ backgroundColor: BLUE }}>
           + New Guide
         </button>
+      </div>
+
+      <div className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ backgroundColor: NAVY }}>
+        <div>
+          <p className="text-sm font-bold text-white">On the homepage</p>
+          <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>{Math.min(onHomepage, HOMEPAGE_LIMIT)}/{HOMEPAGE_LIMIT} slots used. Maximum {HOMEPAGE_LIMIT} guides.</p>
+        </div>
+        <div className="flex gap-1.5">
+          {Array.from({ length: HOMEPAGE_LIMIT }).map((_, i) => (
+            <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+              style={i < onHomepage ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
+              {i < onHomepage ? "★" : "○"}
+            </div>
+          ))}
+        </div>
+        {onHomepage > HOMEPAGE_LIMIT && (
+          <p className="w-full text-xs font-semibold" style={{ color: "#FCD34D" }}>
+            {onHomepage} guides are switched on — only the first {HOMEPAGE_LIMIT} are shown. Turn {onHomepage - HOMEPAGE_LIMIT} off so the choice is yours.
+          </p>
+        )}
       </div>
 
       {guides.length === 0 ? (

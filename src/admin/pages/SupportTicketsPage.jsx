@@ -3,6 +3,7 @@ import { TICKET_CATEGORIES } from "../../Data/adminMissingScreensMock";
 import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness } from "../../api/admin";
 import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
+import { formatUK } from "../../lib/ukDate";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
@@ -230,13 +231,13 @@ function InboxTab({ tickets, onView, onResolve }) {
                   <td className="px-4 py-3 font-semibold" style={{ color: NAVY }}>{t.businessName}</td>
                   <td className="px-4 py-3" style={{ color: NAVY }}>{t.subject}</td>
                   <td className="px-4 py-3" style={{ color: MUTED }}>{t.category}</td>
-                  <td className="px-4 py-3" style={{ color: MUTED }}>{t.submitted}</td>
+                  <td className="px-4 py-3" style={{ color: MUTED }}>{formatUK(t.submitted)}</td>
                   <td className="px-4 py-3"><StatusTag status={t.status} /></td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
                       <button onClick={() => onView(t)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>View</button>
                       {t.status !== "Resolved" && (
-                        <button onClick={() => onResolve(t)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(22,163,74,0.3)", color: "#15803D" }}>Resolve</button>
+                        <button onClick={() => onResolve(t)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(22,163,74,0.3)", color: "#15803D" }}>Close Ticket</button>
                       )}
                     </div>
                   </td>
@@ -268,7 +269,7 @@ export default function SupportTicketsPage() {
 
   async function resolveTicket(t) {
     await setTicketStatus(t.id, "Resolved");
-    notify(`"${t.subject}" marked resolved.`);
+    notify(`"${t.subject}" closed and marked Resolved.`);
     refresh();
   }
 

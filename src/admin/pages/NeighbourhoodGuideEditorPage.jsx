@@ -15,6 +15,10 @@ import { Card, Field, ImageField, Inp, Paragraphs, RepeatList, TextArea } from "
 // Everything nested lives in the row's `content` jsonb; slug, title, hero and
 // card images, and status stay real columns since the listing needs them.
 
+// The categories the guides listing shows and the app filters on. A guide
+// saved with anything else would sit in a category of its own.
+const GUIDE_CATEGORIES = ["Food & Drink", "Things to Do", "Family", "History & Heritage", "Shopping", "Outdoors & Nature", "Nightlife"];
+
 const BLANK_CONTENT = {
   icon: "", category: "", summary: "",
   intro: [], sections: [],
@@ -116,7 +120,13 @@ export default function NeighbourhoodGuideEditorPage() {
             <Inp value={form.slug ?? ""} onChange={(e) => set("slug", e.target.value)} placeholder="auto-generated from the title" />
           </Field>
           <Field label="Category" hint="Shown as the eyebrow above the title, and used by the app's filters">
-            <Inp value={c.category ?? ""} onChange={(e) => setContent("category", e.target.value)} />
+            <select value={c.category ?? ""} onChange={(e) => setContent("category", e.target.value)}
+              className="rounded-xl px-3 py-2.5 text-sm outline-none w-full"
+              style={{ border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" }}>
+              <option value="" disabled>Select a category…</option>
+              {GUIDE_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
+              {c.category && !GUIDE_CATEGORIES.includes(c.category) && <option value={c.category}>{c.category} (current)</option>}
+            </select>
           </Field>
           <Field label="Icon" hint="A single emoji used by the app">
             <Inp value={c.icon ?? ""} onChange={(e) => setContent("icon", e.target.value)} />
