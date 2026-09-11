@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { explore } from "../Data/explore";
+import { getTheFuture } from "../api";
+import useFetch from "../hooks/useFetch";
+import Loading from "./ui/Loading";
 import useTapReveal from "../hooks/useTapReveal";
 
 // Feature image — keeps the "In the Spotlight" framed-photo hover: a sharp
@@ -22,7 +24,11 @@ function FeatureImage({ image, alt }) {
 }
 
 export default function ExploreFuturePage() {
+  const { data: explore, loading } = useFetch(getTheFuture, []);
+
   useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  if (loading || !explore) return <Loading minHeight="70vh" />;
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
@@ -56,8 +62,8 @@ export default function ExploreFuturePage() {
       {/* ── Vision ── */}
       <section id="nicholson" className="pt-8 md:pt-10 pb-16 md:pb-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>The Vision</p>
-          <h2 className="hero-title uppercase text-3xl md:text-6xl mb-6" style={{ color: "#000000" }}>A bold vision for the heart of town</h2>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{explore.visionEyebrow}</p>
+          <h2 className="hero-title uppercase text-3xl md:text-6xl mb-6" style={{ color: "#000000" }}>{explore.visionHeading}</h2>
           <div className="flex flex-col gap-5">
             {explore.vision.map((p, i) => (
               <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
@@ -138,7 +144,7 @@ export default function ExploreFuturePage() {
       {/* ── Community ── */}
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Your Town, Your Future</p>
+          <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{explore.communityEyebrow}</p>
           <h2 className="section-heading text-2xl md:text-4xl font-bold mb-6 leading-tight" style={{ color: "#000000" }}>{explore.community.heading}</h2>
           <p className="text-lg md:text-xl leading-relaxed" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>{explore.community.body}</p>
         </div>
@@ -147,7 +153,7 @@ export default function ExploreFuturePage() {
       {/* ── Closing ── */}
       <section className="px-6 md:px-12 pb-24">
         <div className="max-w-6xl mx-auto overflow-hidden relative">
-          <img src="/images/explore/evening.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={explore.closing.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.92), rgba(31,155,181,0.82))" }} />
           <div className="relative z-10 px-8 md:px-14 py-14 md:py-20 max-w-3xl">
             <h2 className="section-heading text-2xl md:text-4xl font-bold text-white mb-5 leading-tight">{explore.closing.heading}</h2>

@@ -18,3 +18,8 @@ export async function getSiteSection(key) {
 export function getGettingHere() {
   return getSiteSection("getting-here");
 }
+
+// Explore → The Future (/explore/the-future) and the mobile Future screen.
+export function getTheFuture() {
+  return getSiteSection("the-future");
+}

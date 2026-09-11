@@ -2,7 +2,8 @@ import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import useTapReveal from "../../hooks/useTapReveal";
 import useMobileBack from "../hooks/useMobileBack";
-import { explore } from "../../Data/explore";
+import { getTheFuture } from "../../api";
+import useFetch from "../../hooks/useFetch";
 
 function FeatureImage({ image, alt }) {
   const { revealed, onImageClick } = useTapReveal();
@@ -15,6 +16,8 @@ function FeatureImage({ image, alt }) {
 }
 
 export default function FutureScreen() {
+  const { data: explore } = useFetch(getTheFuture, []);
+
   const goBack = useMobileBack("/mobile/explore");
   const [toast, setToast] = useState(false);
 
@@ -36,6 +39,8 @@ export default function FutureScreen() {
       /* clipboard unavailable — no-op */
     }
   }
+
+  if (!explore) return <MobileShell noPadding onBack={goBack} />;
 
   return (
     <MobileShell noPadding onBack={goBack}>
