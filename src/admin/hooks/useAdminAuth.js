@@ -45,6 +45,10 @@ async function refreshFromSession(session) {
 supabase.auth.getSession().then(({ data }) => refreshFromSession(data.session));
 supabase.auth.onAuthStateChange((_event, session) => refreshFromSession(session));
 
+// The signed-in admin, readable outside React — the api/ layer needs it to
+// attribute audit log entries without every caller passing it down.
+export function getCurrentAdmin() { return currentAdmin; }
+
 export async function login(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: error.message };

@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { getCurrentAdmin } from "../../admin/hooks/useAdminAuth";
 
 // Portal users are business_users rows — the people who sign in to the business
 // dashboard, either as the account Owner or as a Content Manager they invited.
@@ -36,11 +37,17 @@ const SELECT = "*, businesses(name)";
 // ── Audit log ─────────────────────────────────────────────────────────────────
 
 export async function addLog(action, user, note = "") {
+  // Who performed it, and acting as what role — the log is far less use
+  // without it, and admin_users.role is the answer to "which role did this".
+  const actor = getCurrentAdmin();
   const { error } = await supabase.from("admin_logs").insert({
     action,
     target_id: String(user?.id ?? ""),
     target_name: user?.name ?? "",
     note: note || null,
+    actor_id: actor?.id ?? null,
+    actor_name: actor?.name ?? null,
+    actor_role: actor?.role ?? null,
   });
   // A failed audit write must never take down the action it was recording.
   if (error) console.error("admin_logs insert failed:", error.message);
@@ -60,7 +67,17 @@ export async function getAdminLogs() {
     targetName: r.target_name,
     targetId: r.target_id,
     note: r.note ?? "",
+    // Entries written before actor attribution existed have none.
+    actorName: r.actor_name ?? "—",
+    actorRole: r.actor_role ?? "—",
   }));
+}
+
+export async function deleteAdminLogs(ids) {
+  if (!ids?.length) return { deleted: 0 };
+  const { error } = await supabase.from("admin_logs").delete().in("id", ids);
+  if (error) throw error;
+  return { deleted: ids.length };
 }
 
 // ── Queries ───────────────────────────────────────────────────────────────────

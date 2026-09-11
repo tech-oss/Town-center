@@ -3,7 +3,13 @@ import EmptyState from "./EmptyState";
 
 const PAGE_SIZE = 10;
 
-export default function DataTable({ columns, rows, onRowClick, rowActions, emptyTitle, emptyMessage }) {
+// `selectable` is opt-in: pass it with selectedIds/onSelectionChange to get a
+// checkbox column and a header toolbar. Tables that don't ask for it render
+// exactly as before.
+export default function DataTable({
+  columns, rows, onRowClick, rowActions, emptyTitle, emptyMessage,
+  selectable = false, selectedIds = [], onSelectionChange, toolbar,
+}) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
@@ -37,10 +43,30 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
 
   function handleSearch(e) { setSearch(e.target.value); setPage(1); }
 
+  // "Select all" applies to the rows actually in view (current filter + page),
+  // so it never silently selects something the admin can't see.
+  const pageIds = paginated.map((r) => r.id).filter(Boolean);
+  const allOnPageSelected = pageIds.length > 0 && pageIds.every((id) => selectedIds.includes(id));
+
+  function toggleAllOnPage() {
+    if (!onSelectionChange) return;
+    onSelectionChange(allOnPageSelected
+      ? selectedIds.filter((id) => !pageIds.includes(id))
+      : [...new Set([...selectedIds, ...pageIds])]);
+  }
+
+  function toggleOne(id) {
+    if (!onSelectionChange) return;
+    onSelectionChange(selectedIds.includes(id)
+      ? selectedIds.filter((x) => x !== id)
+      : [...selectedIds, id]);
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Search bar */}
-      <div className="relative max-w-sm">
+      {/* Search bar + optional toolbar */}
+      <div className="flex items-center gap-3 flex-wrap">
+      <div className="relative max-w-sm flex-1 min-w-[200px]">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: "#9CA3AF" }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input
           value={search}
@@ -50,12 +76,19 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
           style={{ border: "1.5px solid rgba(16,24,40,0.18)", backgroundColor: "#fff", color: "#1E293B", focusRingColor: "#1E293B" }}
         />
       </div>
+      {toolbar}
+      </div>
 
       {/* Table */}
       <div className="overflow-x-auto rounded-2xl" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.09)" }}>
         <table className="w-full min-w-[600px] text-sm border-collapse">
           <thead>
             <tr style={{ backgroundColor: "rgba(16,24,40,0.05)", borderBottom: "1px solid rgba(16,24,40,0.1)" }}>
+              {selectable && (
+                <th className="px-4 py-3 w-10">
+                  <input type="checkbox" checked={allOnPageSelected} onChange={toggleAllOnPage} aria-label="Select all rows on this page" />
+                </th>
+              )}
               {columns.map((c) => (
                 <th
                   key={c.key}
@@ -72,7 +105,7 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
           </thead>
           <tbody>
             {paginated.length === 0 && (
-              <tr><td colSpan={columns.length + (rowActions ? 1 : 0)} className="py-0"><EmptyState title={emptyTitle} message={emptyMessage} /></td></tr>
+              <tr><td colSpan={columns.length + (rowActions ? 1 : 0) + (selectable ? 1 : 0)} className="py-0"><EmptyState title={emptyTitle} message={emptyMessage} /></td></tr>
             )}
             {paginated.map((row, i) => (
               <tr
@@ -87,6 +120,11 @@ export default function DataTable({ columns, rows, onRowClick, rowActions, empty
                 onMouseEnter={(e) => { if (onRowClick) e.currentTarget.style.backgroundColor = "rgba(16,24,40,0.03)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "white"; }}
               >
+                {selectable && (
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <input type="checkbox" checked={selectedIds.includes(row.id)} onChange={() => toggleOne(row.id)} aria-label="Select row" />
+                  </td>
+                )}
                 {columns.map((c) => (
                   <td key={c.key} className="px-4 py-3" style={{ color: c.muted ? "#6B7280" : "#1E293B", whiteSpace: c.wrap ? "normal" : "nowrap" }}>
                     {c.render ? c.render(row[c.key], row) : (row[c.key] ?? "—")}
