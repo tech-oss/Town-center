@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { GUIDE_CATEGORIES } from "../../Data/guideCategories";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills } from "../components/ListSearch";
@@ -11,10 +12,12 @@ export default function GuidesScreen() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
 
-  const categories = useMemo(
-    () => ["All", ...Array.from(new Set(guides.map((g) => g.category)))],
-    [guides]
-  );
+  // Canonical order from the shared list rather than whatever order the
+  // guides happen to come back in; categories with no guides are left out.
+  const categories = useMemo(() => {
+    const used = new Set((guides ?? []).map((g) => g.category));
+    return ["All", ...GUIDE_CATEGORIES.filter((c) => used.has(c.label)).map((c) => c.label)];
+  }, [guides]);
 
   const list = useMemo(() => {
     const q = query.trim().toLowerCase();

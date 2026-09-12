@@ -5,6 +5,9 @@ import LoadingState from "../components/LoadingState";
 import Toast from "../components/Toast";
 import { BLUE, BORDER, MUTED, NAVY } from "../theme";
 import { Card, Field, ImageField, Inp, Paragraphs, RepeatList, TextArea } from "./explore/contentKit";
+// The categories the guides listing shows and the app and site filter on. A
+// guide saved with anything else would sit in a category of its own.
+import { GUIDE_CATEGORY_LABELS as GUIDE_CATEGORIES } from "../../Data/guideCategories";
 
 // Content and media editor for one neighbourhood guide — the public
 // /guides/:slug page. Layout is fixed: the hero, the alternating place
@@ -14,10 +17,6 @@ import { Card, Field, ImageField, Inp, Paragraphs, RepeatList, TextArea } from "
 //
 // Everything nested lives in the row's `content` jsonb; slug, title, hero and
 // card images, and status stay real columns since the listing needs them.
-
-// The categories the guides listing shows and the app filters on. A guide
-// saved with anything else would sit in a category of its own.
-const GUIDE_CATEGORIES = ["Food & Drink", "Things to Do", "Family", "History & Heritage", "Shopping", "Outdoors & Nature", "Nightlife"];
 
 const BLANK_CONTENT = {
   icon: "", category: "", summary: "",
