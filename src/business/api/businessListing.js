@@ -136,23 +136,47 @@ export async function getBusinessListing(businessId) {
 // reflect in-progress edits to fields this exact save doesn't touch. That
 // snapshot is what lets the approval queue show a real before/after instead
 // of "—", and what a rejection reverts the live columns back to.
+// Sections that go live the moment they're saved, with no admin review.
+// Opening hours change often and carry no reputational risk — holding them
+// for approval meant a business couldn't correct a bank-holiday closure
+// without waiting a day. Everything else still goes through the queue.
+export const AUTO_PUBLISH_SECTIONS = new Set(["hours"]);
+
+export function isAutoPublished(tabKey) {
+  return AUTO_PUBLISH_SECTIONS.has(tabKey);
+}
+
 export async function saveBusinessListing(businessId, listing, tabKey) {
   const current = await getBusinessListing(businessId);
-  const fields = SECTION_FIELDS[tabKey] ?? [];
-  const snapshot = {};
-  for (const f of fields) snapshot[f] = current[f] ?? null;
+  const autoPublish = isAutoPublished(tabKey);
+
+  // An auto-published section is never reviewed, so it needs no "before"
+  // snapshot (nothing can revert it) and is written already Up to Date,
+  // whatever state the caller passed.
+  const approvalStatus = {
+    ...(listing.approvalStatus ?? {}),
+    ...(autoPublish ? { [tabKey]: "Up to Date" } : {}),
+  };
+
+  const patch = {
+    ...toRow({ ...listing, approvalStatus }),
+    edited_by: { ...(current.editedBy ?? {}), [tabKey]: "business" },
+  };
+
+  if (!autoPublish) {
+    const fields = SECTION_FIELDS[tabKey] ?? [];
+    const snapshot = {};
+    for (const f of fields) snapshot[f] = current[f] ?? null;
+    patch.pending_snapshot = { ...(current.pendingSnapshot ?? {}), [tabKey]: snapshot };
+  }
 
   const { error } = await supabase
     .from("business_listings")
-    .update({
-      ...toRow(listing),
-      pending_snapshot: { ...(current.pendingSnapshot ?? {}), [tabKey]: snapshot },
-      edited_by: { ...(current.editedBy ?? {}), [tabKey]: "business" },
-    })
+    .update(patch)
     .eq("business_id", businessId);
   if (error) throw error;
   await logActivity(businessId, {
-    action: "listing.submitted",
+    action: autoPublish ? "listing.updated" : "listing.submitted",
     entityType: "listing", entityId: businessId,
     title: SECTION_LABELS[tabKey] ?? tabKey,
   });

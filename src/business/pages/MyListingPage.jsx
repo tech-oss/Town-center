@@ -9,7 +9,7 @@ import {
   CARD, BORDER, MUTED, FOREST, SAGE,
 } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
-import { getBusinessListing, saveBusinessListing } from "../api/businessListing";
+import { getBusinessListing, saveBusinessListing, isAutoPublished } from "../api/businessListing";
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 import {
   AMENITY_CATEGORIES, ACCOMMODATION_AMENITY_CATEGORIES, STAR_RATINGS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
@@ -127,11 +127,17 @@ export default function MyListingPage() {
 
   async function handleSave(tabKey) {
     setSaving(true);
-    const next = { ...listing, approvalStatus: { ...listing.approvalStatus, [tabKey]: "Pending Approval" } };
+    // Opening hours publish straight away; every other section waits on admin.
+    const live = isAutoPublished(tabKey);
+    const next = {
+      ...listing,
+      approvalStatus: { ...listing.approvalStatus, [tabKey]: live ? "Up to Date" : "Pending Approval" },
+      rejectionReason: live ? { ...(listing.rejectionReason ?? {}), [tabKey]: null } : listing.rejectionReason,
+    };
     try {
       await saveBusinessListing(user.id, next, tabKey);
       setListing(next);
-      setToast("Changes submitted for admin approval.");
+      setToast(live ? "Saved — these are live on your page now." : "Changes submitted for admin approval.");
     } catch {
       setToast("Something went wrong saving your changes.");
     } finally {
@@ -180,7 +186,7 @@ export default function MyListingPage() {
         </div>
 
         <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: "rgba(37,99,235,0.07)", border: "1.5px solid rgba(37,99,235,0.2)", color: "#2563EB" }}>
-          Changes you save here are submitted to admin for approval before going live on the public site. Approved changes usually appear within 24 hours.
+          Changes you save here are submitted to admin for approval before going live on the public site. Approved changes usually appear within 24 hours. Opening hours are the exception — they go live as soon as you save them.
         </div>
 
         {/* Tabs */}
