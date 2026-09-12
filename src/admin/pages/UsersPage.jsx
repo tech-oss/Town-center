@@ -8,6 +8,15 @@ import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
+// Both kinds of portal login live here. A Content Manager registered by
+// admin is created already approved — only the ones who sign themselves up
+// through the portal wait on their business owner.
+const ROLE_FILTERS = [
+  { key: "All", label: "All roles" },
+  { key: "Business Owner", label: "Business Owners" },
+  { key: "Content Manager", label: "Content Managers" },
+];
+
 const TABS = [
   { key: "Pending",   label: "Pending Approvals" },
   { key: "Approved",  label: "Approved Users" },
@@ -127,7 +136,7 @@ function RegisterUserModal({ onClose, onRegistered }) {
                 className="mt-2 text-xs font-semibold" style={{ color: BLUE }}>Copy details</button>
             </div>
           )}
-          <button onClick={onRegistered} className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: BLUE }}>Done</button>
+          <button onClick={() => onRegistered(form.role)} className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: BLUE }}>Done</button>
         </div>
       </div>
     );
@@ -223,16 +232,23 @@ export default function UsersPage() {
   const [search, setSearch]     = useState("");
   const [sortCol, setSortCol]   = useState(null);   // column key
   const [sortDir, setSortDir]   = useState("asc");  // "asc" | "desc"
+  const [roleFilter, setRoleFilter] = useState("All");
   const [showRegister, setShowRegister] = useState(false);
   const [deletingUser, setDeletingUser] = useState(null);
   const [toast, setToast] = useState(null);
 
   function notify(msg) { setToast(msg); setTimeout(() => setToast(null), 3500); }
 
-  function handleRegistered() {
+  // Admin-registered logins are created already approved, so land on the tab
+  // and role that actually holds the new user rather than leaving the admin
+  // looking at Pending and concluding it didn't work.
+  function handleRegistered(role) {
     setShowRegister(false);
+    setTab("Approved");
+    if (role) setRoleFilter(role);
+    setSearch("");
     setTick((t) => t + 1);
-    notify("User registered successfully.");
+    notify(`${role ?? "User"} registered and approved — shown under Approved Users.`);
   }
 
   async function handleDeleteConfirm() {
@@ -244,11 +260,13 @@ export default function UsersPage() {
     setTick((t) => t + 1);
   }
 
-  // Content Manager approvals belong to the business owner who invited them,
-  // not the super admin — this screen only manages Business Owner accounts,
-  // one per business registration.
-  const fetch = useCallback(() => getUsers({ status: tab, role: "Business Owner" }), [tab, tick]);
-  const { data: rawUsers, loading } = useFetch(fetch, [tab, tick]);
+  // This used to fetch Business Owners only, which hid every Content
+  // Manager — including the ones admin registers here.
+  const fetch = useCallback(
+    () => getUsers({ status: tab, role: roleFilter === "All" ? undefined : roleFilter }),
+    [tab, roleFilter, tick],
+  );
+  const { data: rawUsers, loading } = useFetch(fetch, [tab, roleFilter, tick]);
 
   // Search + sort applied client-side after fetch
   const users = useMemo(() => {
@@ -323,7 +341,7 @@ export default function UsersPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Users</h1>
-          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage business owner accounts — approve, reject or suspend access. Content Managers are approved by their own business owner.</p>
+          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage portal logins — approve, reject or suspend access. Content Managers who sign up through the portal are approved by their own business owner; ones registered here are active straight away.</p>
         </div>
         <div className="flex gap-2 shrink-0">
           <button
@@ -369,8 +387,9 @@ export default function UsersPage() {
         ))}
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
+      {/* Search + role filter */}
+      <div className="flex gap-3 flex-wrap items-center">
+      <div className="relative max-w-sm flex-1 min-w-[220px]">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
@@ -392,13 +411,30 @@ export default function UsersPage() {
           </button>
         )}
       </div>
+        <div className="flex gap-1.5 flex-wrap">
+          {ROLE_FILTERS.map((r) => (
+            <button
+              key={r.key}
+              onClick={() => { setRoleFilter(r.key); setRejectingId(null); }}
+              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={roleFilter === r.key
+                ? { backgroundColor: BLUE, color: "#fff" }
+                : { border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#fff" }}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Table */}
       {loading ? <LoadingState /> : (
         <div className="bg-white rounded-xl" style={CARD}>
           {!users.length ? (
             <p className="text-sm text-center py-12" style={{ color: MUTED }}>
-              {search ? `No results for "${search}"` : `No ${tab.toLowerCase()} users.`}
+              {search
+                ? `No results for "${search}"`
+                : `No ${tab.toLowerCase()} ${roleFilter === "All" ? "users" : `${roleFilter.toLowerCase()}s`}.`}
             </p>
           ) : (
             // Nine columns (including a multi-button Actions column) don't fit
