@@ -326,11 +326,6 @@ export default function SignUpPage() {
                 <SummaryRow label="Address" value={form.businessAddress} />
               </SummarySection>
 
-              <SummarySection title="Subscription">
-                <SummaryRow label="Your listing" value="Free to start" />
-                <SummaryRow label="Paid plans" value="Choose from your dashboard after signing in" />
-              </SummarySection>
-
               <SummarySection title="Terms" onEdit={() => setStep(3)}>
                 <SummaryRow label="Terms of Use" value={form.agreeTerms ? "Agreed" : "Not agreed"} />
                 <SummaryRow label="Privacy Policy" value={form.agreePrivacy ? "Agreed" : "Not agreed"} />

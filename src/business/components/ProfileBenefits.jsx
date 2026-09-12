@@ -38,9 +38,6 @@ export default function ProfileBenefits() {
         ))}
       </ul>
 
-      <p className="text-xs rounded-xl p-3" style={{ backgroundColor: "rgba(37,99,235,0.06)", color: MUTED, border: "1px solid rgba(37,99,235,0.18)" }}>
-        Your listing starts free. Once you're signed in, you can choose a subscription from your dashboard whenever you're ready.
-      </p>
     </div>
   );
 }

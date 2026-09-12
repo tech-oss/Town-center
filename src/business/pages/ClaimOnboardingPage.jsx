@@ -134,11 +134,6 @@ export default function ClaimOnboardingPage() {
                 <SummaryRow label="Business Name" value={user.businessName} />
               </SummarySection>
 
-              <SummarySection title="Subscription">
-                <SummaryRow label="Your listing" value="Free to start" />
-                <SummaryRow label="Paid plans" value="Choose from your dashboard whenever you're ready" />
-              </SummarySection>
-
               <SummarySection title="Terms" onEdit={() => setStep(1)}>
                 <SummaryRow label="Terms of Use" value={agreeTerms ? "Agreed" : "Not agreed"} />
                 <SummaryRow label="Privacy Policy" value={agreePrivacy ? "Agreed" : "Not agreed"} />
