@@ -140,13 +140,14 @@ export async function getBusinessesForContent() {
 }
 
 export async function getBusinessListingContent(businessId) {
-  const { data, error } = await supabase
-    .from("business_listings")
-    .select("*")
-    .eq("business_id", businessId)
-    .maybeSingle();
+  const [{ data, error }, { data: sub }] = await Promise.all([
+    supabase.from("business_listings").select("*").eq("business_id", businessId).maybeSingle(),
+    supabase.from("business_subscriptions").select("plan").eq("business_id", businessId).maybeSingle(),
+  ]);
   if (error) throw error;
-  return fromRow(data) ?? fromRow({});
+  // The plan decides which fields the editors unlock; it isn't part of the
+  // listing, so toRow never writes it back.
+  return { ...(fromRow(data) ?? fromRow({})), plan: sub?.plan ?? "free" };
 }
 
 export async function saveBusinessListingContent(businessId, listing) {

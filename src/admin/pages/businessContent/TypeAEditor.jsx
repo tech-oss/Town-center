@@ -2,7 +2,7 @@
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
-  CARD,
+  CARD, Locked,
 } from "./shared";
 
 export default function TypeAEditor({ form, set, onSave, saving }) {
@@ -14,20 +14,26 @@ export default function TypeAEditor({ form, set, onSave, saving }) {
             <Field label="Business Name" hint={`${(form.name ?? "").length}/60`}>
               <Inp value={form.name ?? ""} maxLength={60} onChange={(e) => set("name", e.target.value)} />
             </Field>
+            <Locked field="tagline">
             <Field label="Tagline" hint={`Shown on listing cards · ${(form.tagline ?? "").length}/80`}>
               <Inp value={form.tagline ?? ""} maxLength={80} onChange={(e) => set("tagline", e.target.value)} />
             </Field>
+            </Locked>
           </div>
+          <Locked field="description">
           <Field label="Description" hint={`The full about section on the business page · ${(form.description ?? "").length}/600`}>
             <TextArea rows={5} value={form.description ?? ""} maxLength={600} onChange={(e) => set("description", e.target.value)} />
           </Field>
+          </Locked>
           <div className="flex flex-wrap gap-8 mt-4">
             <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]" onChange={(v) => set("heroImage", v)} />
           </div>
         </EditorSection>
 
         <EditorSection title="Opening Hours & Find Us">
+          <Locked field="hours">
           <div className="mb-6"><HoursEditor hours={form.hours} onChange={(v) => set("hours", v)} /></div>
+          </Locked>
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
             <Field label="Address" span2>
               <Inp value={form.address ?? ""} onChange={(e) => set("address", e.target.value)} />
@@ -38,23 +44,33 @@ export default function TypeAEditor({ form, set, onSave, saving }) {
             <Field label="Email" hint="Renders as a clickable mailto: link">
               <Inp value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} />
             </Field>
+            <Locked field="website">
             <Field label="Website URL">
               <Inp value={form.website ?? ""} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
             </Field>
+            </Locked>
+            <Locked field="bookingUrl">
             <Field label="Booking URL" hint='Powers the "Book a Reservation" button'>
               <Inp value={form.bookingUrl ?? ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" />
             </Field>
+            </Locked>
           </div>
-          <p className="text-xs font-semibold mb-2 pt-4" style={{ borderTop: "1px solid rgba(16,24,40,0.1)" }}>Social Links</p>
-          <SocialFields links={form.social ?? {}} onChange={(v) => set("social", v)} />
+          <Locked field="social">
+            <p className="text-xs font-semibold mb-2 pt-4" style={{ borderTop: "1px solid rgba(16,24,40,0.1)" }}>Social Links</p>
+            <SocialFields links={form.social ?? {}} onChange={(v) => set("social", v)} />
+          </Locked>
         </EditorSection>
 
         <EditorSection title="Image Gallery" hint="Gallery images (up to 6) — these appear in the photo gallery section on the business page.">
+          <Locked field="gallery">
           <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} />
+          </Locked>
         </EditorSection>
 
         <EditorSection title="Location Pin">
+          <Locked field="lat">
           <LocationFields lat={form.lat} lng={form.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
+          </Locked>
         </EditorSection>
 
         <SaveBar onSave={onSave} saving={saving} />

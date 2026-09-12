@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   getBusinessesForContent, getBusinessListingContent, saveBusinessListingContent,
 } from "../../api/admin/businessListingContent";
@@ -7,6 +7,8 @@ import {
   StatusDot, NAVY, BLUE, MUTED, BORDER, useToast, Toast,
 } from "./businessContent/shared";
 import TypeAEditor from "./businessContent/TypeAEditor";
+import { PlanContext } from "./businessContent/shared";
+import { isPremium } from "../../Data/plans";
 import TypeBEditor from "./businessContent/TypeBEditor";
 import TypeCEditor from "./businessContent/TypeCEditor";
 
@@ -33,6 +35,7 @@ function NoContentBadge() {
 }
 
 export default function BusinessContentPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const [businesses, setBusinesses] = useState(null);
@@ -164,6 +167,16 @@ export default function BusinessContentPage() {
               Address, phone, website and coordinates below are pulled directly from this business's registration — editing them here updates the same record, published immediately (admin edits don't need approval).
             </p>
 
+            {!isPremium(listing.plan) && (
+              <div className="rounded-xl px-4 py-3 mb-5 text-xs flex items-start gap-3 flex-wrap"
+                style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
+                <span className="font-bold">Free plan.</span>
+                <span className="flex-1 min-w-[200px]">Only the business name, address, phone, email and hero image can be edited. Fields marked 🔒 Premium stay locked until the business is moved to Premium.</span>
+                <button type="button" onClick={() => navigate("/admin/businesses")} className="font-semibold underline">Change plan</button>
+              </div>
+            )}
+
+            <PlanContext.Provider value={listing.plan}>
             {(selectedBusiness?.section === "see-do" || selectedBusiness?.section === "eat-drink" || selectedBusiness?.section === "shop") && (
               <TypeAEditor form={listing} set={set} onSave={handleSave} saving={saving} />
             )}
@@ -173,6 +186,7 @@ export default function BusinessContentPage() {
             {selectedBusiness?.section === "hotel" && (
               <TypeCEditor form={listing} set={set} onSave={handleSave} saving={saving} />
             )}
+            </PlanContext.Provider>
             {!["see-do", "eat-drink", "shop", "services", "hotel"].includes(selectedBusiness?.section) && (
               <div className="bg-white rounded-2xl p-6 text-sm" style={{ color: MUTED, border: "1px solid rgba(16,24,40,0.08)" }}>
                 This business has no registered business type yet, so there's no content form to show. Approve its registration first.

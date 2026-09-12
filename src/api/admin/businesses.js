@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity } from "./businessActivity";
+import { planFor } from "../../Data/plans";
 import { addLog } from "./users";
 import {
   BUSINESS_TYPES, VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES,
@@ -270,16 +271,20 @@ export async function registerBusiness(data) {
     }, { onConflict: "business_id" });
     if (listingError) throw listingError;
 
-    if (data.planKey) {
-      const { error: subError } = await supabase.from("business_subscriptions").upsert({
-        business_id: id,
-        plan: data.planKey,
-        // Admin registering on the business's behalf stands in for their
-        // agreeing to the Terms of Use / Privacy Policy at signup.
-        terms_accepted_at: new Date().toISOString(),
-      }, { onConflict: "business_id" });
-      if (subError) throw subError;
-    }
+    // Every business gets a plan — Free unless admin chose Premium.
+    const plan = planFor(data.planKey);
+    const { error: subError } = await supabase.from("business_subscriptions").upsert({
+      business_id: id,
+      plan: plan.key,
+      plan_status: "Active",
+      monthly_fee: plan.price,
+      renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+      upgrade_plan_key: plan.key,
+      // Admin registering on the business's behalf stands in for their
+      // agreeing to the Terms of Use / Privacy Policy at signup.
+      terms_accepted_at: new Date().toISOString(),
+    }, { onConflict: "business_id" });
+    if (subError) throw subError;
 
     // The owner's login is optional — skipping it leaves the business
     // unclaimed, which is a valid end state, not an incomplete one.
@@ -426,4 +431,27 @@ export async function getBusinessStats() {
     paid,
     free: total - paid,
   };
+}
+
+
+// Moves a business between Free and Premium. Admin can do this at any time —
+// a comp upgrade, a lapsed payment, or correcting a registration — and the
+// business's editors and public page follow the new plan immediately.
+export async function setBusinessPlan(id, planKey) {
+  const plan = planFor(planKey);
+  const { error } = await supabase.from("business_subscriptions").upsert({
+    business_id: id,
+    plan: plan.key,
+    plan_status: "Active",
+    monthly_fee: plan.price,
+    upgrade_plan_key: plan.key,
+    renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "business_id" });
+  if (error) throw error;
+
+  const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
+  addLog("Plan Changed", { id, name: biz?.name ?? id }, `Now on ${plan.name}`);
+  await logBusinessActivity(id, { action: "subscription.changed", entityType: "subscription", entityId: id, title: plan.name });
+  return { ok: true, plan: plan.name };
 }

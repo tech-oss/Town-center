@@ -1,10 +1,11 @@
 import { useState, useRef, useMemo } from "react";
+import { PLANS, planFor, isPremium } from "../../Data/plans";
 import { uploadImage } from "../../lib/uploadImage";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness,
-  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT,
+  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import { formatUK } from "../../lib/ukDate";
@@ -12,7 +13,7 @@ import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import {
   BUSINESS_TYPES, FREELANCER_KINDS, FREELANCER_KIND_CATEGORIES, HOTEL_KINDS,
-  CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES, SUBSCRIPTION_PLANS, labelFor, categoryLabel,
+  CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES, labelFor, categoryLabel,
 } from "../../Data/businessRegistrationTaxonomy";
 import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
@@ -146,7 +147,7 @@ const EMPTY_FORM = {
   lat: "", lng: "",
   logo: null, logoName: "",
   // "Plan"
-  planKey: "standard",
+  planKey: "free",
   // Editorial promotion — capped platform-wide, so it isn't part of any one
   // business type's details.
   featured: false,
@@ -405,17 +406,22 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
       </Section>
 
       {/* ── Plan ── */}
-      <Section title="Plan">
-        <div className="grid sm:grid-cols-3 gap-3">
-          {SUBSCRIPTION_PLANS.map((p) => (
-            <button key={p.key} type="button" onClick={() => set("planKey", p.key)}
-              className="text-left rounded-2xl p-4 flex flex-col gap-1 transition-all"
-              style={form.planKey === p.key ? { border: `2px solid ${BLUE}`, backgroundColor: "rgba(37,99,235,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
-              <span className="text-sm font-bold" style={{ color: NAVY }}>{p.name}</span>
-              <span className="text-base font-bold" style={{ color: NAVY }}>{p.price === 0 ? "Free" : `£${p.price}/mo`}</span>
-            </button>
+      <Section title="Subscription Plan" note="Free lists the name, address, phone, email and hero image. Premium unlocks the full profile.">
+        <FormField label="Plan" required>
+          <select value={form.planKey} onChange={(e) => set("planKey", e.target.value)}
+            className="rounded-xl px-3 py-2.5 text-sm outline-none w-full sm:w-72" style={FIELD_STYLE}>
+            {PLANS.map((p) => (
+              <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : `£${p.price}/month`}</option>
+            ))}
+          </select>
+        </FormField>
+        <ul className="mt-2 grid sm:grid-cols-2 gap-x-6 gap-y-1">
+          {planFor(form.planKey).features.map((f) => (
+            <li key={f} className="text-xs flex items-start gap-1.5" style={{ color: MUTED }}>
+              <span style={{ color: BLUE }}>✓</span>{f}
+            </li>
           ))}
-        </div>
+        </ul>
         <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>Registering on the business's behalf counts as accepting the Terms of Use and Privacy Policy for them.</p>
       </Section>
 
@@ -643,9 +649,26 @@ function typeSpecificRows(biz) {
   }
 }
 
-function BusinessDetailModal({ biz, onClose }) {
+function BusinessDetailModal({ biz, onClose, onPlanChanged }) {
   const navigate = useNavigate();
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.name.toLowerCase() === (biz.plan ?? "").toLowerCase());
+  const currentKey = isPremium(biz.plan) ? "premium" : "free";
+  const [planKey, setPlanKey] = useState(currentKey);
+  const [savingPlan, setSavingPlan] = useState(false);
+  const [planMessage, setPlanMessage] = useState("");
+
+  async function savePlan() {
+    setSavingPlan(true);
+    setPlanMessage("");
+    try {
+      const res = await setBusinessPlan(biz.id, planKey);
+      onPlanChanged?.(biz.id, res.plan);
+      setPlanMessage(`Moved to ${res.plan}.`);
+    } catch (e) {
+      setPlanMessage(`Could not change plan: ${e.message}`);
+    } finally {
+      setSavingPlan(false);
+    }
+  }
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
       <div className="bg-white rounded-2xl p-6 max-w-xl w-full max-h-[85vh] overflow-y-auto flex flex-col gap-1" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
@@ -687,8 +710,20 @@ function BusinessDetailModal({ biz, onClose }) {
           <DetailRow label="Coordinates" value={biz.lat && biz.lng ? `${biz.lat}, ${biz.lng}` : null} />
         </DetailSection>
 
-        <DetailSection title="Current Plan">
-          <DetailRow label="Current Plan" value={plan ? `${plan.name} — ${plan.price === 0 ? "Free" : `£${plan.price}/mo`}` : biz.plan} />
+        <DetailSection title="Subscription Plan">
+          <div className="flex items-center gap-2 flex-wrap py-1">
+            <select value={planKey} onChange={(e) => { setPlanKey(e.target.value); setPlanMessage(""); }}
+              className="rounded-xl px-3 py-2 text-sm outline-none" style={FIELD_STYLE}>
+              {PLANS.map((p) => (
+                <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : `£${p.price}/month`}</option>
+              ))}
+            </select>
+            <button type="button" onClick={savePlan} disabled={savingPlan || planKey === currentKey}
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: BLUE }}>
+              {savingPlan ? "Saving…" : "Change plan"}
+            </button>
+          </div>
+          {planMessage && <p className="text-xs mt-1" style={{ color: planMessage.startsWith("Could not") ? "#991B1B" : "#15803D" }}>{planMessage}</p>}
         </DetailSection>
 
         <DetailSection title="Terms">
@@ -780,7 +815,7 @@ function InfoField({ label, value, mono }) {
   );
 }
 
-function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull }) {
+function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull, onPlanChanged }) {
   const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section);
   const chips = categoryChips(biz);
@@ -891,7 +926,7 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           however many actions happen to apply. */}
       <div className="px-5 pb-5 flex flex-wrap gap-2" style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 16 }}>
         <BizBtn color={NAVY} disabled={isBusy} onClick={() => setShowDetail(true)}>View Details</BizBtn>
-        {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} />}
+        {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} onPlanChanged={onPlanChanged} />}
         {needsUserApproval(biz) && (
           <BizBtn color={BLUE} disabled={isBusy} onClick={() => navigate("/admin/users")}>Approve the User</BizBtn>
         )}
@@ -1239,6 +1274,7 @@ export default function BusinessesPage() {
             <BusinessRow
               key={biz.id}
               biz={biz}
+              onPlanChanged={(id, plan) => patch(id, { plan })}
               pendingAction={pendingAction}
               actionNote={actionNote}
               onActionNote={setActionNote}
