@@ -439,6 +439,18 @@ export async function getBusinessStats() {
 // business's editors and public page follow the new plan immediately.
 export async function setBusinessPlan(id, planKey) {
   const plan = planFor(planKey);
+
+  // A business paying through Stripe is on Premium because Stripe says so;
+  // dropping it to Free here would leave Stripe still charging it, and the next
+  // renewal would put it straight back. That has to be cancelled in Stripe.
+  if (plan.key === "free") {
+    const { data: current } = await supabase
+      .from("business_subscriptions").select("stripe_subscription_id, plan").eq("business_id", id).maybeSingle();
+    if (current?.stripe_subscription_id && current.plan === "premium") {
+      throw new Error("This business pays for Premium through Stripe. Cancel the subscription in the Stripe dashboard — the plan will switch to Free automatically.");
+    }
+  }
+
   const { error } = await supabase.from("business_subscriptions").upsert({
     business_id: id,
     plan: plan.key,
