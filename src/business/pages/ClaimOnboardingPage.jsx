@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
-import { SUBSCRIPTION_PLANS, TERMS_TEXT } from "../../Data/businessPortalMock";
+import { TERMS_TEXT } from "../../Data/businessPortalMock";
+import ProfileBenefits from "../components/ProfileBenefits";
 import { completeClaimOnboarding } from "../api/claimOnboarding";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.14)";
@@ -10,8 +11,9 @@ const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)",
 // already gave us their details when they submitted the claim, and the
 // business details were entered by admin when the listing was created — so
 // steps 1 and 2 have nothing left to ask. What a claim never collected is a
-// plan and a terms acceptance, which is exactly what's left here.
-const STEPS = ["Plan", "Terms", "Review"];
+// terms acceptance, which is what's left here alongside the profile
+// introduction. Subscribing happens later, from the dashboard.
+const STEPS = ["Your Profile", "Terms", "Review"];
 
 function StepIndicator({ step }) {
   return (
@@ -29,26 +31,6 @@ function StepIndicator({ step }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function PlanCard({ plan, selected, onClick }) {
-  return (
-    <button type="button" onClick={onClick}
-      className="text-left rounded-2xl p-5 flex flex-col gap-3 transition-all"
-      style={selected ? { border: `2px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
-      <div>
-        <span className="text-base font-bold" style={{ color: FOREST }}>{plan.name}</span>
-        <p className="text-xl font-bold mt-1" style={{ color: FOREST }}>{plan.price === 0 ? "Free" : `£${plan.price}/mo`}</p>
-      </div>
-      <ul className="flex flex-col gap-1.5">
-        {plan.features.map((f) => (
-          <li key={f} className="text-xs flex items-start gap-1.5" style={{ color: MUTED }}>
-            <span style={{ color: SAGE }}>✓</span> {f}
-          </li>
-        ))}
-      </ul>
-    </button>
   );
 }
 
@@ -77,7 +59,8 @@ function SummarySection({ title, onEdit, children }) {
 export default function ClaimOnboardingPage() {
   const { user, refresh } = useBusinessAuth();
   const [step, setStep] = useState(0);
-  const [planKey, setPlanKey] = useState("standard");
+  // Everyone starts on the free listing; plans are chosen from the dashboard.
+  const FREE_PLAN = "free";
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
   const [confirmFinal, setConfirmFinal] = useState(false);
@@ -93,7 +76,7 @@ export default function ClaimOnboardingPage() {
   async function handleSubmit() {
     setError("");
     setSubmitting(true);
-    const res = await completeClaimOnboarding(user.id, planKey);
+    const res = await completeClaimOnboarding(user.id, FREE_PLAN);
     if (!res.ok) {
       setSubmitting(false);
       setError(res.error);
@@ -104,8 +87,6 @@ export default function ClaimOnboardingPage() {
     await refresh();
   }
 
-  const chosenPlan = SUBSCRIPTION_PLANS.find((p) => p.key === planKey);
-
   return (
     <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
       <div className="max-w-2xl w-full">
@@ -113,23 +94,14 @@ export default function ClaimOnboardingPage() {
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
           <h1 className="text-xl font-bold" style={{ color: FOREST }}>Finish setting up {user.businessName}</h1>
           <p className="text-sm" style={{ color: MUTED }}>
-            Your claim has been approved. Choose a plan and accept the terms to finish — this only happens once.
+            Your claim has been approved. Accept the terms to finish — this only happens once.
           </p>
         </div>
 
         <div className="bg-white rounded-2xl p-6 sm:p-8" style={CARD}>
           <StepIndicator step={step} />
 
-          {step === 0 && (
-            <div className="flex flex-col gap-4">
-              <p className="text-base font-bold" style={{ color: FOREST }}>Choose a subscription plan</p>
-              <div className="grid sm:grid-cols-3 gap-3">
-                {SUBSCRIPTION_PLANS.map((p) => (
-                  <PlanCard key={p.key} plan={p} selected={planKey === p.key} onClick={() => setPlanKey(p.key)} />
-                ))}
-              </div>
-            </div>
-          )}
+          {step === 0 && <ProfileBenefits />}
 
           {step === 1 && (
             <div className="flex flex-col gap-4">
@@ -162,9 +134,9 @@ export default function ClaimOnboardingPage() {
                 <SummaryRow label="Business Name" value={user.businessName} />
               </SummarySection>
 
-              <SummarySection title="Plan" onEdit={() => setStep(0)}>
-                <SummaryRow label="Selected Plan" value={chosenPlan?.name} />
-                <SummaryRow label="Price" value={chosenPlan?.price === 0 ? "Free" : `£${chosenPlan?.price}/mo`} />
+              <SummarySection title="Subscription">
+                <SummaryRow label="Your listing" value="Free to start" />
+                <SummaryRow label="Paid plans" value="Choose from your dashboard whenever you're ready" />
               </SummarySection>
 
               <SummarySection title="Terms" onEdit={() => setStep(1)}>

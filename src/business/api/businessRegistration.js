@@ -89,14 +89,16 @@ export async function registerBusiness(form) {
   });
   if (listingError) return { ok: false, error: listingError.message };
 
-  const chosen = SUBSCRIPTION_PLANS.find((p) => p.key === form.planKey) ?? SUBSCRIPTION_PLANS[0];
+  // Registration no longer sells anything: every new business starts on the
+  // free listing and subscribes later from their dashboard.
+  const freePlan = SUBSCRIPTION_PLANS.find((p) => p.price === 0) ?? { key: "free", price: 0 };
   const renewalDate = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const { error: subError } = await supabase.from("business_subscriptions").insert({
     business_id: businessId,
-    plan: chosen.key,
+    plan: freePlan.key,
     plan_status: "Active",
     renewal_date: renewalDate,
-    monthly_fee: chosen.price,
+    monthly_fee: freePlan.price,
     is_multi_site: false,
     site_tier_key: null,
     upgrade_plan_key: "basic",

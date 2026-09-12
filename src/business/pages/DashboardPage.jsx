@@ -52,6 +52,9 @@ export default function DashboardPage() {
       : "Your business profile is now hidden from the public site.");
   }
 
+  // "free" is what registration and claim onboarding now write for everyone.
+  const isFreePlan = !user.plan || user.plan === "free" || Number(user.monthlyFee ?? 0) === 0;
+
   return (
     <BusinessLayout>
       <Toast message={toast} />
@@ -63,12 +66,16 @@ export default function DashboardPage() {
 
         {/* Subscription banner */}
         <div className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #245C63 60%, ${SAGE} 100%)` }}>
-          <p className="text-sm text-white">Your <strong className="capitalize">{user.plan.replace(/-/g, " ")}</strong> plan renews on <strong>{new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</strong>.</p>
+          {isFreePlan ? (
+            <p className="text-sm text-white">You're on the <strong>free listing</strong>. Subscribe whenever you're ready to unlock more photos, news &amp; offers and featured placement.</p>
+          ) : (
+            <p className="text-sm text-white">Your <strong className="capitalize">{String(user.plan ?? "").replace(/-/g, " ")}</strong> plan renews on <strong>{user.renewalDate ? new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}</strong>.</p>
+          )}
           {user.role === "Content Manager" ? (
             <span className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>Managed by the business owner</span>
           ) : (
             <div className="flex gap-2">
-              <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>Upgrade</Link>
+              <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>{isFreePlan ? "Subscribe" : "Upgrade"}</Link>
               <Link to="/business/billing" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>Manage Billing</Link>
             </div>
           )}

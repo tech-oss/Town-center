@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BUSINESS_TYPES, SUBSCRIPTION_PLANS, TERMS_TEXT,
+  BUSINESS_TYPES, TERMS_TEXT,
   FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES,
   FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES, TRADESPERSON_CATEGORIES,
 } from "../../Data/businessPortalMock";
@@ -13,12 +13,13 @@ const FREELANCER_KIND_CATEGORIES = {
 };
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
 import { registerBusiness } from "../api/businessRegistration";
+import ProfileBenefits from "../components/ProfileBenefits";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const MUTED = "#64748B", BORDER = "rgba(16,24,40,0.14)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 
-const STEPS = ["Your Details", "Business Details", "Plan", "Terms", "Review"];
+const STEPS = ["Your Details", "Business Details", "Your Profile", "Terms", "Review"];
 
 const EMPTY = {
   firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "",
@@ -30,7 +31,6 @@ const EMPTY = {
   venueTypes: [],       // multi-select, max 2, for businessType "eat-drink"
   shopCategories: [],   // multi-select, max 2, for businessType "shop"
   seeDoCategories: [],  // multi-select, max 2, for businessType "see-do"
-  planKey: "standard",
   agreeTerms: false, agreePrivacy: false,
   confirmFinal: false,  // "I understand this can't be changed later" — Review step
 };
@@ -54,7 +54,7 @@ function SummarySection({ title, onEdit, children }) {
     <div className="rounded-xl p-4" style={{ border: `1.5px solid ${BORDER}` }}>
       <div className="flex items-center justify-between mb-1">
         <p className="text-sm font-bold" style={{ color: FOREST }}>{title}</p>
-        <button type="button" onClick={onEdit} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Edit</button>
+        {onEdit && <button type="button" onClick={onEdit} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Edit</button>}
       </div>
       <div className="divide-y" style={{ borderColor: BORDER }}>{children}</div>
     </div>
@@ -134,26 +134,6 @@ function CheckGroup({ options, selected, onChange, grouped, max }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function PlanCard({ plan, selected, onClick }) {
-  return (
-    <button type="button" onClick={onClick}
-      className="text-left rounded-2xl p-5 flex flex-col gap-3 transition-all"
-      style={selected ? { border: `2px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.06)" } : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
-      <div>
-        <span className="text-base font-bold" style={{ color: FOREST }}>{plan.name}</span>
-        <p className="text-xl font-bold mt-1" style={{ color: FOREST }}>{plan.price === 0 ? "Free" : `£${plan.price}/mo`}</p>
-      </div>
-      <ul className="flex flex-col gap-1.5">
-        {plan.features.map((f) => (
-          <li key={f} className="text-xs flex items-start gap-1.5" style={{ color: MUTED }}>
-            <span style={{ color: SAGE }}>✓</span> {f}
-          </li>
-        ))}
-      </ul>
-    </button>
   );
 }
 
@@ -300,16 +280,7 @@ export default function SignUpPage() {
             </div>
           )}
 
-          {step === 2 && (
-            <div className="flex flex-col gap-4">
-              <p className="text-base font-bold" style={{ color: FOREST }}>Choose a subscription plan</p>
-              <div className="grid sm:grid-cols-3 gap-3">
-                {SUBSCRIPTION_PLANS.map((p) => (
-                  <PlanCard key={p.key} plan={p} selected={form.planKey === p.key} onClick={() => set("planKey", p.key)} />
-                ))}
-              </div>
-            </div>
-          )}
+          {step === 2 && <ProfileBenefits />}
 
           {step === 3 && (
             <div className="flex flex-col gap-4">
@@ -355,8 +326,9 @@ export default function SignUpPage() {
                 <SummaryRow label="Address" value={form.businessAddress} />
               </SummarySection>
 
-              <SummarySection title="Plan" onEdit={() => setStep(2)}>
-                <SummaryRow label="Selected Plan" value={SUBSCRIPTION_PLANS.find((p) => p.key === form.planKey)?.name} />
+              <SummarySection title="Subscription">
+                <SummaryRow label="Your listing" value="Free to start" />
+                <SummaryRow label="Paid plans" value="Choose from your dashboard after signing in" />
               </SummarySection>
 
               <SummarySection title="Terms" onEdit={() => setStep(3)}>
