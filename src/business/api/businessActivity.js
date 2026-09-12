@@ -61,6 +61,7 @@ const LABELS = {
   "profile.hidden": () => "You hid your profile",
   "profile.details_updated": () => "You updated your personal details",
   "subscription.changed": (t) => `Your plan changed to ${t}`,
+  "subscription.payment_failed": () => "Your Premium payment didn't go through — update your card in Billing",
 };
 
 // Icon per entity, so the feed scans without reading every line.

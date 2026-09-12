@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
-import { Field, Inp, Select, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
+import { FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { PLANS, isPremium } from "../../Data/plans";
-import { updateSubscription, addPayment } from "../api/businessSubscription";
+import { startPremiumCheckout, openBillingPortal, waitForPremium } from "../api/stripeBilling";
 
 const STEPS = ["Choose Plan", "Terms", "Payment", "Success"];
 
@@ -137,74 +137,44 @@ function ScreenTerms({ plan, agreed, setAgreed, onBack, onContinue }) {
 }
 
 // ─── Screen 3 — Secure Payment (mock Stripe checkout) ─────────────────────────
-function ScreenPayment({ plan, user, onBack, onPay, paying }) {
-  const [email, setEmail] = useState(user.email);
-  const [cardName, setCardName] = useState(`${user.firstName} ${user.lastName}`);
-
+function ScreenPayment({ plan, user, onBack, onPay, paying, error }) {
   return (
-    <div className="max-w-4xl bg-white rounded-2xl overflow-hidden grid sm:grid-cols-2" style={CARD}>
+    <div className="max-w-3xl bg-white rounded-2xl overflow-hidden grid sm:grid-cols-2" style={CARD}>
       {/* Left — order summary */}
       <div className="p-8 flex flex-col gap-6" style={{ backgroundColor: "#F5F7FB" }}>
         <button onClick={onBack} className="text-xl w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>‹</button>
-        <div className="flex items-center gap-2">
-          <img src="/logo-mark.svg" alt="" style={{ width: 28, height: 28 }} />
-          <span className="text-sm font-bold" style={{ color: FOREST }}>Business Town</span>
-        </div>
         <div>
           <p className="text-sm" style={{ color: MUTED }}>Subscribe to {plan.name}</p>
           <p className="text-4xl font-bold mt-1" style={{ color: FOREST }}>£{plan.price.toFixed(2)}</p>
           <p className="text-xs" style={{ color: MUTED }}>per month</p>
         </div>
         <div className="flex flex-col gap-2 pt-4" style={{ borderTop: `1px solid ${BORDER}` }}>
-          <div className="flex justify-between text-sm"><span style={{ color: FOREST }}>{plan.name} plan</span><span style={{ color: FOREST }}>£{plan.price.toFixed(2)}</span></div>
-          <div className="flex justify-between text-sm pt-2 mt-2" style={{ borderTop: `1px solid ${BORDER}`, color: MUTED }}><span>Subtotal</span><span>£{plan.price.toFixed(2)}</span></div>
-          <div className="flex justify-between text-sm font-bold pt-2" style={{ color: FOREST }}><span>Total due today</span><span>£{plan.price.toFixed(2)}</span></div>
-        </div>
-        <div className="mt-auto pt-6 text-[11px]" style={{ color: "#9CA3AF" }}>
-          <p className="font-semibold">Powered by <span style={{ color: FOREST }}>stripe</span></p>
-          <p className="mt-1"><span className="underline cursor-pointer">Terms</span> · <span className="underline cursor-pointer">Privacy</span></p>
+          <div className="flex justify-between text-sm"><span style={{ color: FOREST }}>{plan.name} plan · {user.businessName}</span><span style={{ color: FOREST }}>£{plan.price.toFixed(2)}</span></div>
+          <div className="flex justify-between text-sm font-bold pt-2 mt-2" style={{ borderTop: `1px solid ${BORDER}`, color: FOREST }}><span>Total due today</span><span>£{plan.price.toFixed(2)}</span></div>
         </div>
       </div>
 
-      {/* Right — payment form */}
-      {/* TODO: replace with real Stripe Elements on backend integration */}
-      <div className="p-8 flex flex-col gap-4">
-        <p className="text-base font-bold" style={{ color: FOREST }}>Pay with card</p>
+      {/* Right — hand-off to Stripe */}
+      <div className="p-8 flex flex-col gap-4 justify-center">
+        <p className="text-base font-bold" style={{ color: FOREST }}>Secure payment with Stripe</p>
+        <p className="text-sm" style={{ color: MUTED }}>
+          You'll enter your card details on Stripe's secure checkout page. We never see or store your card number.
+        </p>
+        <ul className="flex flex-col gap-1.5 text-xs" style={{ color: MUTED }}>
+          <li>✓ Billed monthly — cancel any time from Billing</li>
+          <li>✓ Premium unlocks as soon as your payment is confirmed</li>
+        </ul>
 
-        <Field label="Email"><Inp type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-
-        <Field label="Card Information">
-          <div className="rounded-xl overflow-hidden" style={{ border: `1.5px solid ${BORDER}` }}>
-            <div className="flex items-center justify-between px-3 py-2.5" style={{ borderBottom: `1px solid ${BORDER}` }}>
-              <input placeholder="1234 1234 1234 1234" className="flex-1 text-sm outline-none" style={{ color: FOREST }} />
-              <span className="text-xs shrink-0 flex gap-1" style={{ color: MUTED }}>💳 Visa · MC · Amex</span>
-            </div>
-            <div className="flex">
-              <input placeholder="MM / YY" className="flex-1 px-3 py-2.5 text-sm outline-none" style={{ color: FOREST, borderRight: `1px solid ${BORDER}` }} />
-              <input placeholder="CVC" className="flex-1 px-3 py-2.5 text-sm outline-none" style={{ color: FOREST }} />
-            </div>
-          </div>
-        </Field>
-
-        <Field label="Cardholder Name"><Inp value={cardName} onChange={(e) => setCardName(e.target.value)} /></Field>
-
-        <Field label="Country or Region">
-          <Select defaultValue="GB">
-            <option value="GB">United Kingdom</option>
-            <option value="IE">Ireland</option>
-            <option value="US">United States</option>
-          </Select>
-        </Field>
+        {error && (
+          <div className="px-3.5 py-2.5 rounded-xl text-xs font-medium" style={{ backgroundColor: "rgba(185,28,28,0.08)", color: "#991B1B" }}>{error}</div>
+        )}
 
         <button onClick={onPay} disabled={paying}
           className="mt-2 px-6 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90"
           style={{ backgroundColor: SAGE }}>
-          {paying ? "Processing…" : `Pay £${plan.price.toFixed(2)}`}
+          {paying ? "Opening secure checkout…" : `Continue to payment — £${plan.price.toFixed(2)}/month`}
         </button>
-
-        <p className="text-[11px] mt-1" style={{ color: "#9CA3AF" }}>
-          By confirming your payment, you allow {user.businessName} to charge your card for this payment and future recurring payments in accordance with their terms.
-        </p>
+        <p className="text-[11px] text-center" style={{ color: "#9CA3AF" }}>Payments processed by Stripe</p>
       </div>
     </div>
   );
@@ -217,7 +187,7 @@ function nextBillingDate() {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-function ScreenSuccess({ plan }) {
+function ScreenSuccess({ plan, renewalDate }) {
   const navigate = useNavigate();
   return (
     <div className="max-w-md mx-auto flex flex-col items-center text-center gap-5 py-10 relative overflow-hidden">
@@ -248,12 +218,9 @@ function ScreenSuccess({ plan }) {
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex justify-between"><span style={{ color: MUTED }}>Plan</span><span style={{ color: FOREST }}>{plan.name} Listing</span></div>
           <div className="flex justify-between"><span style={{ color: MUTED }}>Amount</span><span style={{ color: FOREST }}>£{plan.price.toFixed(2)} per month</span></div>
-          <div className="flex justify-between"><span style={{ color: MUTED }}>Next billing date</span><span style={{ color: FOREST }}>{nextBillingDate()}</span></div>
-          <div className="flex justify-between"><span style={{ color: MUTED }}>Payment method</span><span style={{ color: FOREST }}>Visa •••• 4242</span></div>
+          <div className="flex justify-between"><span style={{ color: MUTED }}>Next billing date</span><span style={{ color: FOREST }}>{renewalDate ? new Date(renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : nextBillingDate()}</span></div>
         </div>
       </div>
-
-      {/* TODO: trigger Supabase subscription record creation and Resend confirmation email */}
 
       <div className="flex flex-col items-center gap-3 relative z-10">
         <button onClick={() => navigate("/business/dashboard")}
@@ -267,54 +234,105 @@ function ScreenSuccess({ plan }) {
 }
 
 // ─── Main flow ──────────────────────────────────────────────────────────────────
+// Shown on return from Stripe Checkout while we wait for Stripe to confirm the
+// payment to our webhook — the plan isn't Premium until that happens.
+function ScreenConfirming({ timedOut, onRetry }) {
+  return (
+    <div className="max-w-md mx-auto flex flex-col items-center text-center gap-4 py-16">
+      {timedOut ? (
+        <>
+          <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(217,119,6,0.12)" }}>⏳</div>
+          <h1 className="text-lg font-bold" style={{ color: FOREST }}>Your payment is still being confirmed</h1>
+          <p className="text-sm" style={{ color: MUTED }}>Stripe hasn't confirmed it to us yet. This usually takes a few seconds — check again in a moment. You won't be charged twice.</p>
+          <button onClick={onRetry} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: SAGE }}>Check again</button>
+        </>
+      ) : (
+        <>
+          <div className="w-12 h-12 rounded-full border-4 animate-spin" style={{ borderColor: "rgba(37,99,235,0.2)", borderTopColor: SAGE }} />
+          <h1 className="text-lg font-bold" style={{ color: FOREST }}>Confirming your payment…</h1>
+          <p className="text-sm" style={{ color: MUTED }}>Please keep this page open.</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function UpgradeFlowPage() {
   const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const { user, switchUser } = useBusinessAuth();
-  const [step, setStep] = useState(1);
-  const [plan, setPlan] = useState(null);
+  const checkout = params.get("checkout");
+  const premiumPlan = PLANS.find((p) => p.key === "premium");
+
+  const [step, setStep] = useState(checkout === "success" ? 4 : 1);
+  const [plan, setPlan] = useState(checkout === "success" ? premiumPlan : null);
   const [agreed, setAgreed] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [error, setError] = useState("");
+  const [confirmed, setConfirmed] = useState(null);
+  const [timedOut, setTimedOut] = useState(false);
+  const [notice, setNotice] = useState(checkout === "cancelled" ? "Checkout was cancelled — you haven't been charged." : "");
+
+  async function confirmPayment() {
+    setTimedOut(false);
+    const sub = await waitForPremium(user.id);
+    if (sub) {
+      setConfirmed(sub);
+      switchUser({ ...user, ...sub });
+    } else {
+      setTimedOut(true);
+    }
+  }
+
+  // Back from Stripe: wait for the webhook to put the business on Premium.
+  useEffect(() => {
+    if (checkout === "success") confirmPayment();
+    if (checkout) setParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function handleChoosePlan(p) {
-    // Moving down to Free costs nothing, so it needs no terms or payment.
+    setNotice("");
     if (p.key === "free") {
-      await updateSubscription(user.id, { plan: "free", monthly_fee: 0, upgrade_plan_key: "free", plan_status: "Active", cancelled: false });
-      switchUser({ ...user, plan: "free", monthlyFee: 0, upgradePlanKey: "free", planStatus: "Active", cancelled: false });
-      navigate("/business/billing");
+      // Leaving Premium means cancelling the Stripe subscription, which is
+      // done in Stripe's portal — the plan follows via the webhook.
+      try { await openBillingPortal(user.id); } catch (e) { setNotice(e.message); }
       return;
     }
     setPlan(p);
     setStep(2);
   }
-  // TODO: real card payment (Stripe). Until then this is a simulated charge,
-  // and the plan is written from the browser — see the note in the migration.
-  function handlePay() {
+
+  async function handlePay() {
     setPaying(true);
-    setTimeout(async () => {
-      await updateSubscription(user.id, {
-        plan: plan.key, monthly_fee: plan.price, upgrade_plan_key: plan.key,
-        plan_status: "Active", cancelled: false,
-        renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-      });
-      await addPayment(user.id, { description: `${plan.name} subscription — monthly`, amount: `£${plan.price.toFixed(2)}` });
-      switchUser({ ...user, plan: plan.key, monthlyFee: plan.price, upgradePlanKey: plan.key, planStatus: "Active", cancelled: false });
+    setError("");
+    try {
+      await startPremiumCheckout(user.id);
+      // The browser is leaving for Stripe; nothing further to do here.
+    } catch (e) {
+      setError(e.message);
       setPaying(false);
-      setStep(4);
-    }, 1200);
+    }
   }
 
   return (
     <BusinessLayout>
       <StepIndicator step={step} />
+      {notice && (
+        <div className="max-w-3xl mb-4 px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
+          {notice}
+        </div>
+      )}
       {step === 1 && <ScreenChoosePlan user={user} onChoose={handleChoosePlan} />}
       {step === 2 && plan && (
         <ScreenTerms plan={plan} agreed={agreed} setAgreed={setAgreed}
           onBack={() => setStep(1)} onContinue={() => setStep(3)} />
       )}
       {step === 3 && plan && (
-        <ScreenPayment plan={plan} user={user} paying={paying} onBack={() => setStep(2)} onPay={handlePay} />
+        <ScreenPayment plan={plan} user={user} paying={paying} error={error} onBack={() => setStep(2)} onPay={handlePay} />
       )}
-      {step === 4 && plan && <ScreenSuccess plan={plan} />}
+      {step === 4 && !confirmed && <ScreenConfirming timedOut={timedOut} onRetry={confirmPayment} />}
+      {step === 4 && confirmed && <ScreenSuccess plan={premiumPlan} renewalDate={confirmed.renewalDate} />}
     </BusinessLayout>
   );
 }
