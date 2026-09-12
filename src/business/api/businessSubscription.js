@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logActivity } from "./businessActivity";
 
 // business_subscriptions / business_payments: plan/billing state. Scoped to
 // persisting subscription state only — no real payment processing (Stripe).
@@ -33,6 +34,12 @@ export async function updateSubscription(businessId, patch) {
     .update({ ...patch, updated_at: new Date().toISOString() })
     .eq("business_id", businessId);
   if (error) throw error;
+  if (patch.plan || patch.upgrade_plan_key) {
+    await logActivity(businessId, {
+      action: "subscription.changed", entityType: "subscription", entityId: businessId,
+      title: patch.plan ?? patch.upgrade_plan_key,
+    });
+  }
 }
 
 export async function listPayments(businessId) {

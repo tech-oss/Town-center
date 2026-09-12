@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logActivity } from "./businessActivity";
 import { expandRecurrence } from "./eventRecurrence";
 
 // business_events: "Request Event" — a business requests a See & Do event,
@@ -65,6 +66,21 @@ function toRow(form) {
   };
 }
 
+// Who owns an event, and the event behind an occurrence — both for the
+// activity log, since these mutations are addressed by id alone.
+async function eventOwner(id) {
+  const { data } = await supabase.from("business_events").select("business_id, title").eq("id", id).maybeSingle();
+  return data ?? null;
+}
+
+async function occurrenceOwner(id) {
+  const { data } = await supabase
+    .from("business_event_occurrences")
+    .select("event_id, business_events(business_id, title)")
+    .eq("id", id).maybeSingle();
+  return data?.business_events ?? null;
+}
+
 export async function listEvents(businessId) {
   const { data, error } = await supabase
     .from("business_events")
@@ -90,6 +106,10 @@ export async function createEvent(businessId, form) {
   if (error) throw error;
   const created = fromRow(data);
   if (created.isRecurring) await generateOccurrences(created);
+  await logActivity(businessId, {
+    action: created.status === "Pending Approval" ? "event.submitted" : "event.created",
+    entityType: "event", entityId: created.id, title: created.title,
+  });
   return created;
 }
 
@@ -100,16 +120,28 @@ export async function updateEvent(id, form) {
     .eq("id", id);
   if (error) throw error;
   if (form.isRecurring) await generateOccurrences({ id, ...form });
+  const owner = await eventOwner(id);
+  await logActivity(owner?.business_id, {
+    action: form.status === "Pending Approval" ? "event.submitted" : "event.updated",
+    entityType: "event", entityId: id, title: form.title ?? owner?.title,
+  });
 }
 
 export async function setEventStatus(id, status) {
+  const owner = await eventOwner(id);
   const { error } = await supabase.from("business_events").update({ status }).eq("id", id);
   if (error) throw error;
+  await logActivity(owner?.business_id, {
+    action: status === "Pending Approval" ? "event.submitted" : "event.updated",
+    entityType: "event", entityId: id, title: owner?.title,
+  });
 }
 
 export async function deleteEvent(id) {
+  const owner = await eventOwner(id);
   const { error } = await supabase.from("business_events").delete().eq("id", id);
   if (error) throw error;
+  await logActivity(owner?.business_id, { action: "event.deleted", entityType: "event", entityId: id, title: owner?.title });
 }
 
 // ─── Recurring occurrences ──────────────────────────────────────────────────
@@ -222,6 +254,8 @@ export async function updateOccurrence(id, overrides) {
     })
     .eq("id", id);
   if (error) throw error;
+  const owner = await occurrenceOwner(id);
+  await logActivity(owner?.business_id, { action: "occurrence.updated", entityType: "occurrence", entityId: id, title: owner?.title });
 }
 
 // Cancelling one date is also a change that needs review — the occurrence
@@ -232,6 +266,8 @@ export async function cancelOccurrence(id) {
     .update({ status: "Cancelled", review_status: "Pending Approval", rejection_reason: null, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw error;
+  const owner = await occurrenceOwner(id);
+  await logActivity(owner?.business_id, { action: "occurrence.cancelled", entityType: "occurrence", entityId: id, title: owner?.title });
 }
 
 export async function restoreOccurrence(id) {
@@ -240,6 +276,8 @@ export async function restoreOccurrence(id) {
     .update({ status: "Scheduled", review_status: "Pending Approval", rejection_reason: null, updated_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw error;
+  const owner = await occurrenceOwner(id);
+  await logActivity(owner?.business_id, { action: "occurrence.restored", entityType: "occurrence", entityId: id, title: owner?.title });
 }
 
 // Clears all overrides, reverting the occurrence back to inheriting the

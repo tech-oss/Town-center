@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logActivity } from "./businessActivity";
 
 // business_listings: My Listing page content (profile, hours, gallery,
 // location, contact, FAQs, services/areas/amenities depending on business
@@ -62,6 +63,19 @@ const SECTION_FIELDS = {
   faqs: ["faqs"],
   portfolio: ["portfolio", "skills"],
   services: ["servicesList", "areasCoveredList", "whyChooseUs", "stats"],
+};
+
+// Reader-friendly names for the section a save belongs to, used in the
+// dashboard's activity feed.
+const SECTION_LABELS = {
+  profile: "Profile",
+  hours: "Opening hours",
+  gallery: "Gallery",
+  location: "Location",
+  contact: "Contact details",
+  faqs: "FAQs",
+  portfolio: "Portfolio",
+  services: "Services",
 };
 
 function toRow(listing) {
@@ -137,4 +151,9 @@ export async function saveBusinessListing(businessId, listing, tabKey) {
     })
     .eq("business_id", businessId);
   if (error) throw error;
+  await logActivity(businessId, {
+    action: "listing.submitted",
+    entityType: "listing", entityId: businessId,
+    title: SECTION_LABELS[tabKey] ?? tabKey,
+  });
 }

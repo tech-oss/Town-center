@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logActivity } from "./businessActivity";
 
 // business_articles: News & Offers. Drafts are unlimited; at most 3 can be
 // LIVE at once. The cap is enforced by a trigger
@@ -30,6 +31,13 @@ function fromRow(row) {
     body: row.body,
     rejectionReason: row.rejection_reason,
   };
+}
+
+// Who owns an article, for the activity log — the mutations below are
+// addressed by id alone.
+async function articleOwner(id) {
+  const { data } = await supabase.from("business_articles").select("business_id, title").eq("id", id).maybeSingle();
+  return data ?? null;
 }
 
 export async function listArticles(businessId) {
@@ -65,6 +73,10 @@ export async function createArticle(businessId, form) {
     .select()
     .single();
   if (error) throw error;
+  await logActivity(businessId, {
+    action: form.status === "Pending Approval" ? "article.submitted" : "article.created",
+    entityType: "article", entityId: data.id, title: form.title,
+  });
   return fromRow(data);
 }
 
@@ -84,14 +96,24 @@ export async function updateArticle(id, form) {
     })
     .eq("id", id);
   if (error) throw error;
+  const owner = await articleOwner(id);
+  await logActivity(owner?.business_id, {
+    action: form.status === "Pending Approval" ? "article.submitted" : "article.updated",
+    entityType: "article", entityId: id, title: form.title,
+  });
 }
 
 export async function setArticleStatus(id, status) {
+  const owner = await articleOwner(id);
   const { error } = await supabase.from("business_articles").update({ status }).eq("id", id);
   if (error) {
     if (isLiveLimitError(error)) throw new Error(LIVE_LIMIT_MESSAGE);
     throw error;
   }
+  // Only the business reaches this — admin's own approve/reject logs its own
+  // entry from the admin panel.
+  const action = status === "Live" ? "article.published" : status === "Hidden" ? "article.hidden" : "article.updated";
+  await logActivity(owner?.business_id, { action, entityType: "article", entityId: id, title: owner?.title });
 }
 
 // Swap: take one article off the site and put another on, in that order, so
@@ -109,6 +131,8 @@ export async function swapLiveArticle(hideId, showId) {
 }
 
 export async function deleteArticle(id) {
+  const owner = await articleOwner(id);
   const { error } = await supabase.from("business_articles").delete().eq("id", id);
   if (error) throw error;
+  await logActivity(owner?.business_id, { action: "article.deleted", entityType: "article", entityId: id, title: owner?.title });
 }

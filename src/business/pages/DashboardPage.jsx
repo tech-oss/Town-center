@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast } from "../components/FormKit";
-import { DASHBOARD_ACTIVITY, PROFILE_COMPLETENESS } from "../../Data/businessPortalMock";
+import { PROFILE_COMPLETENESS } from "../../Data/businessPortalMock";
 import { listArticles } from "../api/businessArticles";
 import { listTickets } from "../api/businessTickets";
+import { listActivity, activityLabel, activityIcon, relativeTime } from "../api/businessActivity";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -24,7 +25,9 @@ export default function DashboardPage() {
   const { user, toggleVisibility } = useBusinessAuth();
   const [toast, setToast] = useToast();
 
-  const activity = DASHBOARD_ACTIVITY[user.id] ?? [];
+  const [activity, setActivity] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(true);
+  const [activityError, setActivityError] = useState("");
   const completeness = PROFILE_COMPLETENESS[user.id] ?? { percent: 100, missing: [] };
   const [openTickets, setOpenTickets] = useState(0);
   const [liveArticles, setLiveArticles] = useState(0);
@@ -37,6 +40,10 @@ export default function DashboardPage() {
     listArticles(user.id).then((articles) => {
       if (!cancelled) setLiveArticles(articles.filter((a) => a.status === "Live").length);
     });
+    listActivity(user.id, 10)
+      .then((rows) => { if (!cancelled) { setActivity(rows); setActivityError(""); } })
+      .catch((e) => { if (!cancelled) setActivityError(`Couldn't load your recent activity: ${e.message}`); })
+      .finally(() => { if (!cancelled) setActivityLoading(false); });
     return () => { cancelled = true; };
   }, [user.id]);
 
@@ -128,17 +135,40 @@ export default function DashboardPage() {
           <Link to="/business/support" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>Contact Support</Link>
         </div>
 
-        {/* Recent activity */}
+        {/* Recent activity — the last 10 changes to this business, whether
+            made here or by admin reviewing something submitted. */}
         <div className="bg-white rounded-2xl p-5" style={CARD}>
-          <p className="text-sm font-bold mb-4" style={{ color: FOREST }}>Recent Activity</p>
-          <div className="flex flex-col gap-3">
-            {activity.slice(0, 5).map((a) => (
-              <div key={a.id} className="flex items-start justify-between gap-4 text-sm" style={{ borderBottom: `1px solid ${BORDER}`, paddingBottom: 10 }}>
-                <span style={{ color: FOREST }}>{a.text}</span>
-                <span className="text-xs shrink-0" style={{ color: "#9CA3AF" }}>{a.date}</span>
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <p className="text-sm font-bold" style={{ color: FOREST }}>Recent Activity</p>
+            {activity.length > 0 && (
+              <span className="text-[11px] font-semibold" style={{ color: "#9CA3AF" }}>Last {activity.length} update{activity.length === 1 ? "" : "s"}</span>
+            )}
+          </div>
+          <div className="flex flex-col">
+            {activityLoading ? (
+              <p className="text-sm" style={{ color: MUTED }}>Loading…</p>
+            ) : activityError ? (
+              <p className="text-sm" style={{ color: "#B91C1C" }}>{activityError}</p>
+            ) : activity.length === 0 ? (
+              <p className="text-sm" style={{ color: MUTED }}>
+                No activity yet. Editing your listing, posting news or submitting an event will show up here.
+              </p>
+            ) : activity.map((a, i) => (
+              <div key={a.id} className="flex items-start gap-3 py-3"
+                style={i < activity.length - 1 ? { borderBottom: `1px solid ${BORDER}` } : undefined}>
+                <span className="text-base leading-none mt-0.5 shrink-0" aria-hidden="true">{activityIcon(a)}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm" style={{ color: FOREST }}>{activityLabel(a)}</p>
+                  {a.detail && <p className="text-xs mt-0.5" style={{ color: MUTED }}>{a.detail}</p>}
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {a.actor === "admin" && (
+                    <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: SAGE }}>Admin</span>
+                  )}
+                  <span className="text-xs" style={{ color: "#9CA3AF" }} title={new Date(a.createdAt).toLocaleString("en-GB")}>{relativeTime(a.createdAt)}</span>
+                </div>
               </div>
             ))}
-            {activity.length === 0 && <p className="text-sm" style={{ color: MUTED }}>No activity yet.</p>}
           </div>
         </div>
       </div>

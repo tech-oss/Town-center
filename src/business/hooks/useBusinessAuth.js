@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { logActivity } from "../api/businessActivity";
 import { supabase } from "../../lib/supabaseClient";
 import { coppaMockUser, hotelMockUser } from "../../Data/businessPortalMock";
 import { businessName } from "./useUserRegistry";
@@ -185,6 +186,7 @@ export async function updatePersonalDetails({ firstName, lastName, phone }) {
   if (error) return { ok: false, error: error.message };
   currentUser = { ...currentUser, firstName, lastName, phone };
   emit();
+  await logActivity(currentUser.id, { action: "profile.details_updated", entityType: "profile", entityId: currentUser.id });
   return { ok: true };
 }
 
@@ -216,6 +218,7 @@ export async function toggleVisibility() {
     emit();
     return { ok: false, error: error.message };
   }
+  await logActivity(currentUser.id, { action: next ? "profile.visible" : "profile.hidden", entityType: "profile", entityId: currentUser.id });
   return { ok: true };
 }
 
