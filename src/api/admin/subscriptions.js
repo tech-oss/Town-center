@@ -5,7 +5,7 @@ import { supabase } from "../../lib/supabaseClient";
 // row actually carries rather than a real ledger — the payment timeline fills in
 // once billing is wired up.
 
-const PLAN_LABELS = { free: "Free", basic: "Basic", standard: "Standard", premium: "Premium", agent: "Agent" };
+const PLAN_LABELS = { free: "Free", basic: "Basic", standard: "Standard", premium: "Visibility Plan", agent: "Agent" };
 
 function label(plan) {
   if (!plan) return "Basic";

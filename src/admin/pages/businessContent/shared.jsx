@@ -53,11 +53,11 @@ export function Locked({ field, span2, children }) {
   const plan = useContext(PlanContext);
   if (canEditField(plan, field)) return children;
   return (
-    <div className={`relative${span2 ? " sm:col-span-2" : ""}`} title="Premium plan only">
+    <div className={`relative${span2 ? " sm:col-span-2" : ""}`} title="Visibility Plan only">
       <fieldset disabled className="opacity-45 pointer-events-none select-none">{children}</fieldset>
       <span className="absolute -top-1 right-0 text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
         style={{ backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }}>
-        🔒 Premium
+        🔒 Visibility Plan
       </span>
     </div>
   );

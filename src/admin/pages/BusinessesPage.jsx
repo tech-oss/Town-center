@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from "react";
-import { PLANS, planFor, isPremium } from "../../Data/plans";
+import { PLANS, planFor, isPremium, PREMIUM_PLAN } from "../../Data/plans";
 import { uploadImage } from "../../lib/uploadImage";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
@@ -406,7 +406,7 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
       </Section>
 
       {/* ── Plan ── */}
-      <Section title="Subscription Plan" note="Free lists the name, address, phone, email and hero image. Premium unlocks the full profile.">
+      <Section title="Subscription Plan" note="Free lists the name, address, phone, email and hero image. The Visibility Plan unlocks the full profile.">
         <FormField label="Plan" required>
           <select value={form.planKey} onChange={(e) => set("planKey", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none w-full sm:w-72" style={FIELD_STYLE}>
@@ -651,7 +651,8 @@ function typeSpecificRows(biz) {
 
 function BusinessDetailModal({ biz, onClose, onPlanChanged }) {
   const navigate = useNavigate();
-  const currentKey = isPremium(biz.plan) ? "premium" : "free";
+  // biz.plan is the display name ("Visibility Plan"), not the stored key.
+  const currentKey = isPremium(biz.plan) || biz.plan === PREMIUM_PLAN.name ? "premium" : "free";
   const [planKey, setPlanKey] = useState(currentKey);
   const [savingPlan, setSavingPlan] = useState(false);
   const [planMessage, setPlanMessage] = useState("");

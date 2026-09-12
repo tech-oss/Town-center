@@ -145,7 +145,7 @@ function fromRow(row) {
 
     // ── "Plan" step ──
     // Plans are stored lowercase ("standard"); the admin UI title-cases them.
-    plan: titleCase(subscription.plan) || "Free",
+    plan: subscription.plan === "premium" ? "Visibility Plan" : (titleCase(subscription.plan) || "Free"),
     // ── "Terms" step ──
     termsAcceptedAt: subscription.terms_accepted_at ?? null,
 
@@ -447,7 +447,7 @@ export async function setBusinessPlan(id, planKey) {
     const { data: current } = await supabase
       .from("business_subscriptions").select("stripe_subscription_id, plan").eq("business_id", id).maybeSingle();
     if (current?.stripe_subscription_id && current.plan === "premium") {
-      throw new Error("This business pays for Premium through Stripe. Cancel the subscription in the Stripe dashboard — the plan will switch to Free automatically.");
+      throw new Error("This business pays for the Visibility Plan through Stripe. Cancel the subscription in the Stripe dashboard — the plan will switch to Free automatically.");
     }
   }
 

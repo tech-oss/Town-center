@@ -171,7 +171,7 @@ export default function BusinessContentPage() {
               <div className="rounded-xl px-4 py-3 mb-5 text-xs flex items-start gap-3 flex-wrap"
                 style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
                 <span className="font-bold">Free plan.</span>
-                <span className="flex-1 min-w-[200px]">Only the business name, address, phone, email and hero image can be edited. Fields marked 🔒 Premium stay locked until the business is moved to Premium.</span>
+                <span className="flex-1 min-w-[200px]">Only the business name, address, phone, email and hero image can be edited. Fields marked 🔒 Visibility Plan stay locked until the business is moved onto the Visibility Plan.</span>
                 <button type="button" onClick={() => navigate("/admin/businesses")} className="font-semibold underline">Change plan</button>
               </div>
             )}
