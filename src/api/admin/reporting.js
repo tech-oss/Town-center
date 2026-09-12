@@ -83,9 +83,14 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
   const listings = listingsRes.data ?? [];
   const users = usersRes.data ?? [];
 
+  // Opening hours publish without review, so they never sit in a queue —
+  // matches AUTO_PUBLISHED_SECTIONS in approvals.js.
+  const reviewable = (l) =>
+    Object.entries(l.approval_status ?? {}).filter(([section]) => section !== "hours");
+
   // A listing counts as active once every section of it is approved.
   const isActive = (l) => {
-    const states = Object.values(l.approval_status ?? {});
+    const states = reviewable(l).map(([, state]) => state);
     return states.length > 0 && states.every((s) => s === "Up to Date");
   };
   const activeListings = listings.filter(isActive).length;
@@ -93,7 +98,7 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
   // Everything still sitting in a queue: listing sections, pending businesses,
   // pending user accounts and unapproved events.
   const pendingSections = listings.reduce(
-    (n, l) => n + Object.values(l.approval_status ?? {}).filter((s) => s === "Pending Approval").length, 0);
+    (n, l) => n + reviewable(l).filter(([, s]) => s === "Pending Approval").length, 0);
   const pendingBusinesses = businesses.filter((b) => b.status === "Pending").length;
   const pendingUsers = users.filter((u) => u.status === "pending").length;
   const pendingEvents = (occRes.data ?? []).filter((e) => e.status === "Pending Approval").length;

@@ -54,6 +54,11 @@ const SECTION_FIELDS = {
   services: [["services_list", "servicesList", "Services"], ["areas_covered_list", "areasCoveredList", "Areas Covered"], ["why_choose_us", "whyChooseUs", "Why Choose Us"], ["stats", "stats", "Stats"]],
 };
 
+// Sections the business publishes without review — they never produce a
+// queue item, even if an older row still carries a pending state for one.
+// Mirrors AUTO_PUBLISH_SECTIONS in business-dashboard's businessListing.js.
+const AUTO_PUBLISHED_SECTIONS = new Set(["hours"]);
+
 const PENDING = "Pending Approval";
 const APPROVED = "Up to Date";
 const REJECTED = "Changes Rejected";
@@ -176,6 +181,7 @@ export async function getApprovals({ status } = {}) {
     // that hasn't been approved yet.
     const named = { ...row, name: row.businesses?.name ?? row.name };
     for (const [section, state] of Object.entries(row.approval_status ?? {})) {
+      if (AUTO_PUBLISHED_SECTIONS.has(section)) continue;
       items.push(toItem(named, section, state, owners[row.business_id]));
     }
   }
@@ -192,7 +198,7 @@ export async function getApprovalById(id) {
   if (error) throw error;
   if (!data) return null;
   const state = data.approval_status?.[section];
-  if (!state) return null;
+  if (!state || AUTO_PUBLISHED_SECTIONS.has(section)) return null;
   const owners = await ownersByBusiness([businessId]);
   const named = { ...data, name: data.businesses?.name ?? data.name };
   return toItem(named, section, state, owners[businessId]);
