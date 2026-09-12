@@ -65,7 +65,7 @@ export default function BusinessLayout({ children }) {
 
         <div className="px-5 py-4" style={{ borderBottom: `1px solid ${DIVIDER}` }}>
           <p className="text-sm font-bold truncate" style={{ color: "#fff" }}>{user.businessName}</p>
-          <p className="text-xs mt-0.5 capitalize" style={{ color: TEXT_DIM }}>{user.plan.replace(/-/g, " ")} plan</p>
+          <p className="text-xs mt-0.5" style={{ color: TEXT_DIM }}>{user.plan === "premium" ? "Visibility Plan" : "Free plan"}</p>
           {user.role === "Content Manager" && (
             <span className="inline-block mt-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>
               Content Manager
@@ -74,6 +74,18 @@ export default function BusinessLayout({ children }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-0.5">
+          {user.plan !== "premium" && user.role !== "Content Manager" && (
+            <NavLink to="/business/subscription" onClick={() => setSidebarOpen(false)}
+              className="mb-2 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all"
+              style={({ isActive }) => ({
+                color: "#fff",
+                background: isActive ? SAGE : "linear-gradient(135deg, rgba(37,99,235,0.55), rgba(59,130,246,0.25))",
+                border: "1px solid rgba(147,197,253,0.35)",
+              })}>
+              <span className="shrink-0 w-4 text-center">⭐</span>
+              <span className="flex-1 leading-snug">Upgrade to Visibility Plan</span>
+            </NavLink>
+          )}
           {NAV.map((item) => {
             const isBillingLocked = item.to === "/business/billing" && user.role === "Content Manager";
             if (isBillingLocked) {

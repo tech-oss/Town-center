@@ -1,13 +1,13 @@
 import { supabase } from "../../lib/supabaseClient";
 import { getSubscription } from "./businessSubscription";
 
-// Stripe billing for the Premium plan. Payment and card details live entirely
+// Stripe billing for the Visibility Plan. Payment and card details live entirely
 // on Stripe's hosted pages; this only asks our Edge Functions for a page to
 // send the owner to. The plan itself changes when Stripe confirms payment to
 // the stripe-webhook function — never from the browser.
 
-async function invoke(name, businessId) {
-  const { data, error } = await supabase.functions.invoke(name, { body: { businessId } });
+async function invoke(name, body) {
+  const { data, error } = await supabase.functions.invoke(name, { body });
   if (error) {
     // Functions answer 4xx with { error } in the body — show that, not the
     // generic "non-2xx status code".
@@ -19,18 +19,19 @@ async function invoke(name, businessId) {
   return data.url;
 }
 
-// Sends the browser to Stripe Checkout to subscribe to Premium.
-export async function startPremiumCheckout(businessId) {
-  window.location.assign(await invoke("stripe-checkout", businessId));
+// Sends the browser to Stripe Checkout for the Visibility Plan, billed
+// "month" or "year".
+export async function startPremiumCheckout(businessId, interval = "year") {
+  window.location.assign(await invoke("stripe-checkout", { businessId, interval }));
 }
 
 // Sends the browser to Stripe's Customer Portal — update card, invoices, cancel.
 export async function openBillingPortal(businessId) {
-  window.location.assign(await invoke("stripe-portal", businessId));
+  window.location.assign(await invoke("stripe-portal", { businessId }));
 }
 
 // After returning from Checkout, the webhook usually lands within a second or
-// two. Polls until the subscription shows Premium, or gives up.
+// two. Polls until the subscription shows the Visibility Plan, or gives up.
 export async function waitForPremium(businessId, { timeoutMs = 30000, intervalMs = 2000 } = {}) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {

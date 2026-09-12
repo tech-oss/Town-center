@@ -19,6 +19,8 @@ function fromRow(row) {
     stripeSubscriptionId: row.stripe_subscription_id,
     currentPeriodEnd: row.current_period_end,
     cancelAtPeriodEnd: !!row.cancel_at_period_end,
+    billingInterval: row.billing_interval,
+    priceAmount: row.price_amount,
   };
 }
 

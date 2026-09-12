@@ -67,6 +67,11 @@ async function applySubscription(sub: Stripe.Subscription) {
 
   const premium = PREMIUM_STATES.has(sub.status);
   const price = sub.items.data[0]?.price;
+  // Annual billing is stored with a monthly-equivalent fee so revenue figures
+  // (MRR) stay comparable across monthly and yearly subscribers.
+  const interval = price?.recurring?.interval === "year" ? "year" : "month";
+  const amount = (price?.unit_amount ?? 0) / 100;
+  const monthlyFee = interval === "year" ? Math.round((amount / 12) * 100) / 100 : amount;
   const periodEnd = sub.current_period_end ? new Date(sub.current_period_end * 1000) : null;
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
 
@@ -79,7 +84,9 @@ async function applySubscription(sub: Stripe.Subscription) {
     business_id: businessId,
     plan: premium ? "premium" : "free",
     upgrade_plan_key: premium ? "premium" : "free",
-    monthly_fee: premium ? (price?.unit_amount ?? 0) / 100 : 0,
+    monthly_fee: premium ? monthlyFee : 0,
+    billing_interval: premium ? interval : null,
+    price_amount: premium ? amount : null,
     plan_status: planStatus,
     cancelled: !premium,
     stripe_customer_id: customer,
@@ -93,7 +100,7 @@ async function applySubscription(sub: Stripe.Subscription) {
 
   const newPlan = premium ? "premium" : "free";
   if (before?.plan !== newPlan) {
-    await logActivity(businessId, "subscription.changed", premium ? "Premium" : "Free");
+    await logActivity(businessId, "subscription.changed", premium ? "Visibility Plan" : "Free");
   }
 }
 
@@ -120,7 +127,7 @@ async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed")
   const { error } = await admin.from("business_payments").upsert({
     business_id: businessId,
     date: new Date(paidAt * 1000).toISOString().slice(0, 10),
-    description: invoice.lines?.data?.[0]?.description ?? "Premium subscription",
+    description: invoice.lines?.data?.[0]?.description ?? "Visibility Plan subscription",
     amount: money(status === "Paid" ? invoice.amount_paid : invoice.amount_due, invoice.currency),
     status,
     stripe_invoice_id: invoice.id,
@@ -133,7 +140,7 @@ async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed")
     await admin.from("business_subscriptions")
       .update({ plan_status: "Payment Failed", updated_at: new Date().toISOString() })
       .eq("business_id", businessId);
-    await logActivity(businessId, "subscription.payment_failed", "Premium", "Your latest Premium payment didn't go through.");
+    await logActivity(businessId, "subscription.payment_failed", "Visibility Plan", "Your latest Visibility Plan payment didn't go through.");
   }
 }
 

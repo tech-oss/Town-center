@@ -541,7 +541,7 @@ function SubscribeBadge({ canSubscribe }) {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap"
       style={{ backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }}>
-      🔒 {canSubscribe ? "Subscribe" : "Premium"}
+      🔒 {canSubscribe ? "Upgrade" : "Visibility Plan"}
     </span>
   );
 }
@@ -551,7 +551,7 @@ export function Locked({ field, span2, children }) {
   const navigate = useNavigate();
   if (canEditField(plan, field)) return children;
   const canSubscribe = role !== "Content Manager";
-  const hint = canSubscribe ? "Subscribe now to unlock this" : "Ask the business owner to subscribe to unlock this";
+  const hint = canSubscribe ? "Upgrade to the Visibility Plan to unlock this" : "Ask the business owner to upgrade to unlock this";
   return (
     <div className={`relative group${span2 ? " sm:col-span-2" : ""}`}>
       <fieldset disabled className="opacity-45 select-none">{children}</fieldset>
@@ -589,10 +589,10 @@ export function PremiumFeatureGate({ title, description }) {
       {canSubscribe ? (
         <button onClick={() => navigate("/business/upgrade")}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-          Subscribe Now
+          See the Visibility Plan
         </button>
       ) : (
-        <p className="text-xs font-semibold" style={{ color: "#92400E" }}>Ask your business owner to subscribe to Premium.</p>
+        <p className="text-xs font-semibold" style={{ color: "#92400E" }}>Ask your business owner to upgrade to the Visibility Plan.</p>
       )}
     </div>
   );
@@ -608,12 +608,12 @@ export function FreePlanNotice() {
       style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
       <span className="font-bold">You're on the Free plan.</span>
       <span className="flex-1 min-w-[220px] text-xs">
-        You can edit your business name, address, telephone, email and hero image. Everything marked 🔒 unlocks with Premium.
+        You can edit your business name, address, telephone, email and hero image. Everything marked 🔒 unlocks with the Visibility Plan.
       </span>
       {canSubscribe && (
         <button onClick={() => navigate("/business/upgrade")}
           className="px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ backgroundColor: SAGE }}>
-          Subscribe Now
+          Upgrade
         </button>
       )}
     </div>

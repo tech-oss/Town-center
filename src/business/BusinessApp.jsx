@@ -44,7 +44,7 @@ function RequireOwner({ children }) {
   return children;
 }
 
-// News & Offers and Events are Premium features. A Free business reaching
+// News & Offers, Events and Analytics are Visibility Plan features. A Free business reaching
 // any of those routes — the list, the editor, or a deep link — sees a
 // Subscribe screen instead of the page.
 function RequirePremium({ title, description, children }) {
@@ -59,8 +59,9 @@ function RequirePremium({ title, description, children }) {
   );
 }
 
-const NEWS_GATE = { title: "News & Offers is a Premium feature", description: "Subscribe to Premium to publish news, updates and special offers on your business page." };
-const EVENTS_GATE = { title: "Events is a Premium feature", description: "Subscribe to Premium to share upcoming events, activities and special occasions." };
+const NEWS_GATE = { title: "News & Offers is part of the Visibility Plan", description: "Upgrade to publish news, updates and special offers on your business page." };
+const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions." };
+const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention." };
 
 // The one route that requires onboarding to still be outstanding — once it's
 // done, landing here again would just show a form with nothing left to save.
@@ -85,9 +86,9 @@ export default function BusinessApp() {
       <Route path="welcome" element={<RequireOnboarding><ClaimOnboardingPage /></RequireOnboarding>} />
 
       <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
-      <Route path="analytics" element={<RequireAuth><AnalyticsPage /></RequireAuth>} />
-      <Route path="analytics/content/:id" element={<RequireAuth><ContentAnalyticsDetailPage /></RequireAuth>} />
-      <Route path="analytics/report" element={<RequireAuth><AnalyticsReportPage /></RequireAuth>} />
+      <Route path="analytics" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><AnalyticsPage /></RequirePremium></RequireAuth>} />
+      <Route path="analytics/content/:id" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><ContentAnalyticsDetailPage /></RequirePremium></RequireAuth>} />
+      <Route path="analytics/report" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><AnalyticsReportPage /></RequirePremium></RequireAuth>} />
       <Route path="listing" element={<RequireAuth><MyListingPage /></RequireAuth>} />
       <Route path="articles" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticlesPage /></RequirePremium></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
@@ -98,6 +99,7 @@ export default function BusinessApp() {
       <Route path="events/:id/dates" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventOccurrencesPage /></RequirePremium></RequireAuth>} />
       <Route path="billing" element={<RequireOwner><BillingPage /></RequireOwner>} />
       <Route path="upgrade" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
+      <Route path="subscription" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
       <Route path="reviews" element={<RequireAuth><ReviewsPage /></RequireAuth>} />
       <Route path="support" element={<RequireAuth><SupportPage /></RequireAuth>} />
       <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />

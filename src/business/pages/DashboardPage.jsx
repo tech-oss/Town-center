@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { isPremium, PREMIUM_PLAN } from "../../Data/plans";
+import { isPremium, BILLING_OPTIONS } from "../../Data/plans";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -75,7 +75,7 @@ export default function DashboardPage() {
         {/* Subscription banner */}
         <div className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #245C63 60%, ${SAGE} 100%)` }}>
           {isFreePlan ? (
-            <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Subscribe to Premium (£{PREMIUM_PLAN.price}/month) to add your description, opening hours, photos, website, social links, news &amp; offers and more.</p>
+            <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Upgrade to the <strong>Visibility Plan</strong> — just {BILLING_OPTIONS.year.perDay} a day — to add your logo, photos, opening hours, description, website, social links, news &amp; offers and analytics.</p>
           ) : (
             <p className="text-sm text-white">Your <strong className="capitalize">{String(user.plan ?? "").replace(/-/g, " ")}</strong> plan renews on <strong>{user.renewalDate ? new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}</strong>.</p>
           )}
@@ -83,7 +83,7 @@ export default function DashboardPage() {
             <span className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>Managed by the business owner</span>
           ) : (
             <div className="flex gap-2">
-              <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>{isFreePlan ? "Subscribe" : "Upgrade"}</Link>
+              <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>{isFreePlan ? "See the Visibility Plan" : "Manage plan"}</Link>
               <Link to="/business/billing" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>Manage Billing</Link>
             </div>
           )}

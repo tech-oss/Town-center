@@ -72,7 +72,7 @@ export default function BillingPage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Current Plan</p>
-              <p className="text-xl font-bold" style={{ color: FOREST }}>{premium ? "Premium" : "Free"}</p>
+              <p className="text-xl font-bold" style={{ color: FOREST }}>{premium ? "Visibility Plan" : "Free"}</p>
             </div>
             <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ backgroundColor: cancelled || /Failed|Past Due/.test(user.planStatus ?? "") ? "rgba(220,38,38,0.1)" : "rgba(37,99,235,0.16)", color: cancelled || /Failed|Past Due/.test(user.planStatus ?? "") ? "#991B1B" : "#2563EB" }}>
               {cancelled ? "Cancelled" : (user.planStatus ?? "Active")}
@@ -80,25 +80,25 @@ export default function BillingPage() {
           </div>
           {premium ? (
             <div className="grid sm:grid-cols-3 gap-4">
-              <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{user.cancelAtPeriodEnd ? "Premium Ends" : "Renewal Date"}</p><p className="text-sm font-medium" style={{ color: FOREST }}>{user.renewalDate ? fmtDate(user.renewalDate) : "—"}</p></div>
-              <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Monthly Fee</p><p className="text-sm font-medium" style={{ color: FOREST }}>£{Number(user.monthlyFee ?? 0).toFixed(2)}/mo</p></div>
+              <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{user.cancelAtPeriodEnd ? "Plan Ends" : "Renewal Date"}</p><p className="text-sm font-medium" style={{ color: FOREST }}>{user.renewalDate ? fmtDate(user.renewalDate) : "—"}</p></div>
+              <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Billing</p><p className="text-sm font-medium" style={{ color: FOREST }}>{user.billingInterval === "year" ? `£${Number(user.priceAmount ?? 329).toFixed(2)} / year` : `£${Number(user.priceAmount ?? user.monthlyFee ?? 0).toFixed(2)} / month`}</p></div>
             </div>
           ) : (
-            <p className="text-sm" style={{ color: MUTED }}>Your listing shows your name, address, telephone, email and hero image. Subscribe to Premium to unlock your full business profile.</p>
+            <p className="text-sm" style={{ color: MUTED }}>Your listing shows your name, address, telephone, email and hero image. Upgrade to the Visibility Plan to unlock your full business profile.</p>
           )}
           {user.cancelAtPeriodEnd && premium && (
             <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(217,119,6,0.08)", color: "#92400E" }}>
-              Your Premium subscription is cancelled and ends on {fmtDate(user.renewalDate)}. You keep Premium until then.
+              Your Visibility Plan is cancelled and ends on {fmtDate(user.renewalDate)}. You keep every feature until then.
             </p>
           )}
           {/Failed|Past Due/.test(user.planStatus ?? "") && (
             <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(185,28,28,0.08)", color: "#991B1B" }}>
-              Your latest payment didn't go through. Update your card in Manage Billing to keep Premium.
+              Your latest payment didn't go through. Update your card in Manage Billing to keep the Visibility Plan.
             </p>
           )}
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
             {!premium && (
-              <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Subscribe to Premium</button>
+              <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Upgrade to Visibility Plan</button>
             )}
             {user.stripeCustomerId && (
               <button onClick={manageBilling} disabled={opening} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>
@@ -117,7 +117,7 @@ export default function BillingPage() {
               return (
                 <div key={p.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={current ? { border: `2px solid ${SAGE}` } : CARD}>
                   <p className="text-base font-bold" style={{ color: FOREST }}>{p.name}</p>
-                  <p className="text-lg font-bold" style={{ color: FOREST }}>{p.price === 0 ? "Free" : `£${p.price}/mo`}</p>
+                  <p className="text-lg font-bold" style={{ color: FOREST }}>{p.price === 0 ? "Free" : `£${p.price}/mo or £${p.yearlyPrice}/yr`}</p>
                   <ul className="flex flex-col gap-1">
                     {p.features.map((f) => <li key={f} className="text-xs" style={{ color: MUTED }}>✓ {f}</li>)}
                   </ul>
@@ -125,7 +125,7 @@ export default function BillingPage() {
                     <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>Current Plan</span>
                   ) : (
                     <button onClick={() => handleUpgrade(p)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={p.key === "premium" ? { backgroundColor: SAGE, color: "#fff" } : { border: `1.5px solid ${BORDER}`, color: FOREST }}>
-                      {p.key === "premium" ? "Subscribe" : "Cancel Premium"}
+                      {p.key === "premium" ? "Upgrade" : "Cancel plan"}
                     </button>
                   )}
                 </div>
@@ -163,7 +163,7 @@ export default function BillingPage() {
             </thead>
             <tbody>
               {payments.length === 0 && (
-                <tr><td colSpan={5} className="px-3 py-6 text-center text-xs" style={{ color: "#9CA3AF" }}>No payments yet. Invoices appear here once you subscribe to Premium.</td></tr>
+                <tr><td colSpan={5} className="px-3 py-6 text-center text-xs" style={{ color: "#9CA3AF" }}>No payments yet. Invoices appear here once you upgrade to the Visibility Plan.</td></tr>
               )}
               {payments.map((p, i) => (
                 <tr key={i} style={{ borderBottom: i < payments.length - 1 ? `1px solid ${BORDER}` : "none" }}>

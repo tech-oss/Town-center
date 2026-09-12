@@ -207,7 +207,7 @@ export default function MyListingPage() {
               className="px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1.5"
               style={{ color: tab === t.key ? "#2563EB" : MUTED, borderBottom: tab === t.key ? `2px solid ${SAGE}` : "2px solid transparent", marginBottom: -1 }}>
               {t.label}
-              {!tabEditable(t.key) && <span aria-label="Premium" title="Subscribe to unlock">🔒</span>}
+              {!tabEditable(t.key) && <span aria-label="Visibility Plan" title="Upgrade to the Visibility Plan to unlock">🔒</span>}
               {listing.approvalStatus?.[t.key] === "Pending Approval" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#D97706" }} />}
               {listing.approvalStatus?.[t.key] === "Changes Rejected" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#DC2626" }} />}
             </button>

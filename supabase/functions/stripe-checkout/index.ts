@@ -6,7 +6,9 @@
 // browser.
 //
 // Deploy:  supabase functions deploy stripe-checkout
-// Secrets: STRIPE_SECRET_KEY, STRIPE_PRICE_PREMIUM, SITE_URL
+// Secrets: STRIPE_SECRET_KEY, SITE_URL,
+//          STRIPE_PRICE_VISIBILITY_MONTHLY (£29.99/month),
+//          STRIPE_PRICE_VISIBILITY_YEARLY (£329/year)
 //          (optional ALLOWED_ORIGIN_REGEX)
 
 import Stripe from "https://esm.sh/stripe@14.25.0?target=deno";
@@ -49,8 +51,18 @@ Deno.serve(async (req) => {
     const { data: { user } } = await caller.auth.getUser();
     if (!user) return json({ error: "Please sign in again." }, 401);
 
-    const { businessId } = await req.json().catch(() => ({}));
+    const { businessId, interval } = await req.json().catch(() => ({}));
     if (!businessId) return json({ error: "Missing business." }, 400);
+
+    // Monthly or annual Visibility Plan. Only these two Stripe prices can be
+    // bought — the price is chosen here, never supplied by the browser.
+    const priceId = interval === "year"
+      ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
+      : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM"));
+    if (!priceId) {
+      console.error("Missing Stripe price secret for interval", interval);
+      return json({ error: "This billing option isn't available yet." }, 503);
+    }
 
     // Only the approved Owner of an approved business can subscribe it.
     const { data: member } = await admin
@@ -70,7 +82,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (sub?.plan === "premium" && sub?.stripe_subscription_id && !sub?.cancel_at_period_end) {
-      return json({ error: "This business is already on Premium." }, 409);
+      return json({ error: "This business is already on the Visibility Plan." }, 409);
     }
 
     // One Stripe customer per business, reused across subscriptions.
@@ -90,7 +102,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
-      line_items: [{ price: Deno.env.get("STRIPE_PRICE_PREMIUM")!, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: businessId,
       metadata: { business_id: businessId },
       subscription_data: { metadata: { business_id: businessId } },
