@@ -69,7 +69,10 @@ select a.business_id,
        case when a.status in ('Live', 'Rejected') then 'admin' else 'business' end,
        coalesce(a.updated_at, a.date::timestamptz, now())
 from public.business_articles a
-where not exists (
+-- Admin can author content with no business attached (a town event, say);
+-- those have nobody to show it to.
+where a.business_id is not null
+  and not exists (
   select 1 from public.business_activity x
   where x.entity_type = 'article' and x.entity_id = a.id::text
 );
@@ -86,7 +89,8 @@ select e.business_id,
        case when e.status in ('Live', 'Rejected') then 'admin' else 'business' end,
        coalesce(e.updated_at, e.created_at, now())
 from public.business_events e
-where not exists (
+where e.business_id is not null
+  and not exists (
   select 1 from public.business_activity x
   where x.entity_type = 'event' and x.entity_id = e.id::text
 );
@@ -95,7 +99,8 @@ insert into public.business_activity (business_id, action, entity_type, entity_i
 select l.business_id, 'listing.updated', 'listing', l.business_id, l.name, 'business',
        coalesce(l.updated_at, now())
 from public.business_listings l
-where not exists (
+where l.business_id is not null
+  and not exists (
   select 1 from public.business_activity x
   where x.entity_type = 'listing' and x.business_id = l.business_id
 );
@@ -104,7 +109,8 @@ insert into public.business_activity (business_id, action, entity_type, entity_i
 select r.business_id, 'review.received', 'review', r.id::text, r.reviewer, 'system',
        coalesce(r.date::timestamptz, now())
 from public.business_reviews r
-where not exists (
+where r.business_id is not null
+  and not exists (
   select 1 from public.business_activity x
   where x.entity_type = 'review' and x.entity_id = r.id::text
 );
