@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { Field, Inp } from "../components/FormKit";
 
@@ -8,7 +8,10 @@ const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)",
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useBusinessAuth();
+  // The page a signed-out visitor was sent here from, if any.
+  const from = location.state?.from;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -21,7 +24,7 @@ export default function LoginPage() {
     const { ok, error: err } = await login(email, password);
     setSubmitting(false);
     if (!ok) { setError(err); return; }
-    navigate("/business/dashboard");
+    navigate(from ? `${from.pathname}${from.search ?? ""}` : "/business/dashboard", { replace: true });
   }
 
   return (

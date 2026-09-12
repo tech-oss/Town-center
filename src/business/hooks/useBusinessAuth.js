@@ -16,9 +16,17 @@ let currentUser = null; // null = signed out
 let restored = false; // true once the initial getSession() resolves
 const listeners = new Set();
 
-function emit() { listeners.forEach((l) => l()); }
+// The snapshot pairs the user with `restored`, and is replaced on every emit.
+// Returning currentUser alone meant a signed-out visitor never re-rendered
+// when the restore finished (null → null looks unchanged to React), so
+// anything waiting on `restored` would wait forever.
+let snapshot = { user: currentUser, restored };
+function emit() {
+  snapshot = { user: currentUser, restored };
+  listeners.forEach((l) => l());
+}
 function subscribe(cb) { listeners.add(cb); return () => listeners.delete(cb); }
-function getSnapshot() { return currentUser; }
+function getSnapshot() { return snapshot; }
 
 // Owners of the two fully seeded demo businesses reuse their rich mock
 // records; any other business (registered only via "Register a User") gets a
@@ -122,14 +130,17 @@ async function refreshFromSession(session) {
   }
   const row = await fetchOwnRow(session.user.id);
 
-  currentUser = isFullyApproved(row) ? buildSessionUser(row) : null;
+  // Build the whole session — listing identity and plan included — before
+  // announcing it. Announcing early let the route guards and plan locks run
+  // against a half-built user: a subscribed owner briefly saw Free-plan locks.
+  let user = isFullyApproved(row) ? buildSessionUser(row) : null;
+  if (user) {
+    user = await applyListingIdentity(user);
+    user = await applySubscription(user);
+  }
+  currentUser = user;
   restored = true;
   emit();
-  if (currentUser) {
-    currentUser = await applyListingIdentity(currentUser);
-    currentUser = await applySubscription(currentUser);
-    emit();
-  }
 }
 
 // Re-reads the signed-in user's row. Used after a write that changes
@@ -223,11 +234,11 @@ export async function toggleVisibility() {
 }
 
 export default function useBusinessAuth() {
-  const user = useSyncExternalStore(subscribe, getSnapshot);
+  const { user, restored: isRestored } = useSyncExternalStore(subscribe, getSnapshot);
   return {
     user,
     isLoggedIn: !!user,
-    restored,
+    restored: isRestored,
     // True only for someone who claimed a business and hasn't yet chosen a
     // plan or accepted the terms — the two things a claim never asked for.
     needsOnboarding: !!user && !user.onboardingCompletedAt,

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import BusinessLayout from "./components/BusinessLayout";
 import { PlanContext, PremiumFeatureGate } from "./components/FormKit";
 import { isPremium } from "../Data/plans";
@@ -24,9 +24,28 @@ import ReviewsPage from "./pages/ReviewsPage";
 import SupportPage from "./pages/SupportPage";
 import SettingsPage from "./pages/SettingsPage";
 
+// Shown while the saved session is being restored on a fresh page load.
+function SessionLoading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F5F7FB" }}>
+      <span className="w-9 h-9 rounded-full border-4 animate-spin" style={{ borderColor: "rgba(37,99,235,0.18)", borderTopColor: "#2563EB" }} aria-label="Loading" />
+    </div>
+  );
+}
+
+// Sends a signed-out visitor to login, carrying the page they asked for so
+// login can return them to it. Before this, every direct page load — including
+// Stripe's return to /business/upgrade?checkout=success — redirected to login
+// before the saved session had been restored, and the destination was lost.
+function ToLogin() {
+  const location = useLocation();
+  return <Navigate to="/business/login" replace state={{ from: location }} />;
+}
+
 function RequireAuth({ children }) {
-  const { isLoggedIn, needsOnboarding } = useBusinessAuth();
-  if (!isLoggedIn) return <Navigate to="/business/login" replace />;
+  const { isLoggedIn, needsOnboarding, restored } = useBusinessAuth();
+  if (!restored) return <SessionLoading />;
+  if (!isLoggedIn) return <ToLogin />;
   // Someone who claimed a business still owes us a plan and a terms
   // acceptance. Everything behind the dashboard assumes both exist, so the
   // guard sends them there rather than the individual pages coping with a
@@ -37,8 +56,9 @@ function RequireAuth({ children }) {
 
 // Content Managers cannot see or manage billing — Owner only.
 function RequireOwner({ children }) {
-  const { isLoggedIn, user, needsOnboarding } = useBusinessAuth();
-  if (!isLoggedIn) return <Navigate to="/business/login" replace />;
+  const { isLoggedIn, user, needsOnboarding, restored } = useBusinessAuth();
+  if (!restored) return <SessionLoading />;
+  if (!isLoggedIn) return <ToLogin />;
   if (needsOnboarding) return <Navigate to="/business/welcome" replace />;
   if (user.role === "Content Manager") return <Navigate to="/business/dashboard" replace />;
   return children;
@@ -66,20 +86,27 @@ const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Pl
 // The one route that requires onboarding to still be outstanding — once it's
 // done, landing here again would just show a form with nothing left to save.
 function RequireOnboarding({ children }) {
-  const { isLoggedIn, needsOnboarding } = useBusinessAuth();
-  if (!isLoggedIn) return <Navigate to="/business/login" replace />;
+  const { isLoggedIn, needsOnboarding, restored } = useBusinessAuth();
+  if (!restored) return <SessionLoading />;
+  if (!isLoggedIn) return <ToLogin />;
   if (!needsOnboarding) return <Navigate to="/business/dashboard" replace />;
   return children;
 }
 
 export default function BusinessApp() {
-  const { isLoggedIn } = useBusinessAuth();
+  const { isLoggedIn, restored } = useBusinessAuth();
+  const location = useLocation();
+  // Where to send someone who is already signed in when they land on login.
+  const from = location.state?.from;
+  const afterLogin = from ? `${from.pathname}${from.search ?? ""}` : "/business/dashboard";
+
+  if (!restored) return <SessionLoading />;
 
   return (
     <Routes>
       <Route path="/" element={<Navigate to={isLoggedIn ? "/business/dashboard" : "/business/login"} replace />} />
       <Route path="signup" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <SignUpPage />} />
-      <Route path="login" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <LoginPage />} />
+      <Route path="login" element={isLoggedIn ? <Navigate to={afterLogin} replace /> : <LoginPage />} />
       <Route path="register-user" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <RegisterUserPage />} />
       <Route path="claim-business" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <ClaimBusinessPage />} />
 
