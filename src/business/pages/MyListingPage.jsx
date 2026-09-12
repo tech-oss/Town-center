@@ -7,7 +7,9 @@ import {
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
   RepeatableList, FaqListEditor, StatsEditor, PortfolioEditor, Toggle, Toast, useToast,
   CARD, BORDER, MUTED, FOREST, SAGE,
+  PlanContext, Locked, FreePlanNotice,
 } from "../components/FormKit";
+import { isPremium } from "../../Data/plans";
 import ReviewsList from "../components/ReviewsList";
 import { getBusinessListing, saveBusinessListing, isAutoPublished } from "../api/businessListing";
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
@@ -100,8 +102,14 @@ function tabsFor(user, listing) {
   return base;
 }
 
+// Tabs that contain at least one field a Free business may edit. Every other
+// tab is shown fully locked, with no Save button.
+const FREE_TABS = new Set(["profile", "location", "contact"]);
+
 export default function MyListingPage() {
   const { user } = useBusinessAuth();
+  const premium = isPremium(user.plan);
+  const tabEditable = (key) => premium || FREE_TABS.has(key);
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
@@ -178,6 +186,7 @@ export default function MyListingPage() {
 
   return (
     <BusinessLayout>
+      <PlanContext.Provider value={{ plan: user.plan, role: user.role }}>
       <Toast message={toast} />
       <div className="flex flex-col gap-6 max-w-4xl">
         <div>
@@ -189,6 +198,8 @@ export default function MyListingPage() {
           Changes you save here are submitted to admin for approval before going live on the public site. Approved changes usually appear within 24 hours. Opening hours are the exception — they go live as soon as you save them.
         </div>
 
+        {!premium && <FreePlanNotice />}
+
         {/* Tabs */}
         <div className="flex gap-1 border-b overflow-x-auto" style={{ borderColor: BORDER }}>
           {tabs.map((t) => (
@@ -196,6 +207,7 @@ export default function MyListingPage() {
               className="px-4 py-2.5 text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1.5"
               style={{ color: tab === t.key ? "#2563EB" : MUTED, borderBottom: tab === t.key ? `2px solid ${SAGE}` : "2px solid transparent", marginBottom: -1 }}>
               {t.label}
+              {!tabEditable(t.key) && <span aria-label="Premium" title="Subscribe to unlock">🔒</span>}
               {listing.approvalStatus?.[t.key] === "Pending Approval" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#D97706" }} />}
               {listing.approvalStatus?.[t.key] === "Changes Rejected" && <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#DC2626" }} />}
             </button>
@@ -219,6 +231,7 @@ export default function MyListingPage() {
                     </Field>
                   )}
                   {subCatConfig && (
+                    <Locked field="businessTypeDetail" span2>
                     <Field label={subCatConfig.label} span2 hint="Select up to 2 — you can update this yourself">
                       <CheckGroup
                         options={subCatConfig.options}
@@ -227,16 +240,23 @@ export default function MyListingPage() {
                         max={subCatConfig.max}
                       />
                     </Field>
+                    </Locked>
                   )}
+                  <Locked field="tagline" span2>
                   <Field label="Short Tagline" span2 hint={`Shown on listing cards · ${(listing.tagline ?? "").length}/80`}>
                     <Inp value={listing.tagline} maxLength={80} onChange={(e) => set("tagline", e.target.value)} />
                   </Field>
+                  </Locked>
+                  <Locked field="description" span2>
                   <Field label="Main Description" span2 hint={`The full about section on your page · ${(listing.description ?? "").length}/600`}>
                     <TextArea rows={5} value={listing.description} maxLength={600} onChange={(e) => set("description", e.target.value)} />
                   </Field>
+                  </Locked>
                 </div>
                 <div className="flex flex-wrap gap-8">
+                  <Locked field="logo">
                   <SingleImageUpload label="Business Logo" src={listing.logo} round pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
+                  </Locked>
                   <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />
                 </div>
                 <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>This image appears at the top of your public business page.</p>
@@ -248,22 +268,26 @@ export default function MyListingPage() {
           {tab === "hours" && (
             <>
               <EditorSection title={user.businessType === "hotel" ? "Availability & Check-in" : "Opening Hours"}>
-                {user.businessType === "hotel" ? (
-                  <TextArea rows={4} value={listing.availabilityInfo ?? ""} onChange={(e) => set("availabilityInfo", e.target.value)} placeholder="e.g. Check-in from 3pm. 24-hour reception." />
-                ) : (
-                  <HoursEditor hours={listing.hours ?? DEFAULT_HOURS()} onChange={(v) => set("hours", v)} />
-                )}
+                <Locked field="hours">
+                  {user.businessType === "hotel" ? (
+                    <TextArea rows={4} value={listing.availabilityInfo ?? ""} onChange={(e) => set("availabilityInfo", e.target.value)} placeholder="e.g. Check-in from 3pm. 24-hour reception." />
+                  ) : (
+                    <HoursEditor hours={listing.hours ?? DEFAULT_HOURS()} onChange={(v) => set("hours", v)} />
+                  )}
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("hours")} saving={saving} status={status} />
+              {tabEditable("hours") && <SaveBar onSave={() => handleSave("hours")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "gallery" && (
             <>
               <EditorSection title={user.businessType === "hotel" ? "Photos" : "Gallery"} hint="These images appear in the gallery on your public page.">
-                <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
+                <Locked field="gallery">
+                  <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("gallery")} saving={saving} status={status} />
+              {tabEditable("gallery") && <SaveBar onSave={() => handleSave("gallery")} saving={saving} status={status} />}
             </>
           )}
 
@@ -277,7 +301,9 @@ export default function MyListingPage() {
                   )}
                 </div>
                 <div className="mt-4">
+                  <Locked field="lat">
                   <LocationFields lat={listing.lat} lng={listing.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
+                  </Locked>
                 </div>
               </EditorSection>
               <SaveBar onSave={() => handleSave("location")} saving={saving} status={status} />
@@ -290,18 +316,26 @@ export default function MyListingPage() {
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
                   <Field label="Phone" hint="Shown as a clickable call link"><Inp value={listing.phone} onChange={(e) => set("phone", e.target.value)} /></Field>
                   <Field label="Email"><Inp value={listing.email} onChange={(e) => set("email", e.target.value)} /></Field>
+                  <Locked field="website">
                   <Field label="Website URL"><Inp value={listing.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
+                  </Locked>
+                  <Locked field="bookingUrl">
                   <Field label="Booking URL" hint="If you have a reservation system, add the URL here — it powers the &ldquo;Book a Reservation&rdquo; button on your page">
                     <Inp value={listing.bookingUrl ?? ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" />
                   </Field>
+                  </Locked>
                   {user.businessType === "services" && (
+                    <Locked field="availabilityTag">
                     <Field label="Booking / Availability Tag" hint="e.g. &ldquo;24 hour booking&rdquo; — shown as a short tag on your listing">
                       <Inp value={listing.availabilityTag ?? ""} onChange={(e) => set("availabilityTag", e.target.value)} placeholder="e.g. 24 hour booking" />
                     </Field>
+                    </Locked>
                   )}
                 </div>
-                <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Social Links</p>
-                <SocialFields links={listing.social} onChange={(v) => set("social", v)} />
+                <Locked field="social">
+                  <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Social Links</p>
+                  <SocialFields links={listing.social} onChange={(v) => set("social", v)} />
+                </Locked>
               </EditorSection>
               <SaveBar onSave={() => handleSave("contact")} saving={saving} status={status} />
             </>
@@ -309,87 +343,108 @@ export default function MyListingPage() {
 
           {tab === "articles" && (
             <EditorSection title="News & Articles">
-              <p className="text-sm mb-4" style={{ color: MUTED }}>Manage up to 3 articles that appear on your business page and in the Offers section of the public site.</p>
-              <Link to="/business/articles" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 w-fit inline-block" style={{ backgroundColor: SAGE }}>
-                Manage Articles →
-              </Link>
+              <Locked field="articles">
+                <p className="text-sm mb-4" style={{ color: MUTED }}>Manage up to 3 articles that appear on your business page and in the Offers section of the public site.</p>
+                <Link to="/business/articles" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 w-fit inline-block" style={{ backgroundColor: SAGE }}>
+                  Manage Articles →
+                </Link>
+              </Locked>
             </EditorSection>
           )}
 
           {tab === "reviews" && (
             <EditorSection title="Reviews">
               <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine.</p>
+              <Locked field="reviews">
               <ReviewsList reviews={reviews} onAdd={handleReviewAdd} onUpdate={handleReviewUpdate} onDelete={handleReviewDelete} />
+              </Locked>
             </EditorSection>
           )}
 
           {tab === "faqs" && (
             <>
               <EditorSection title="FAQs">
+                <Locked field="faqs">
                 <FaqListEditor items={listing.faqs ?? []} onChange={(v) => set("faqs", v)} />
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("faqs")} saving={saving} status={status} />
+              {tabEditable("faqs") && <SaveBar onSave={() => handleSave("faqs")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "services" && (
             <>
               <EditorSection title="Services We Offer">
+                <Locked field="servicesList">
                 <RepeatableList items={listing.servicesList ?? SERVICES_LIST} onChange={(v) => set("servicesList", v)} placeholder="e.g. General Enquiries" />
+                </Locked>
               </EditorSection>
               <EditorSection title="Why Choose Us">
+                <Locked field="whyChooseUs">
                 <RepeatableList items={listing.whyChooseUs ?? []} onChange={(v) => set("whyChooseUs", v)} placeholder="e.g. Fully insured & accredited" />
+                </Locked>
               </EditorSection>
               <EditorSection title="Stats / Highlights" hint="Shown as feature tiles on your public page">
+                <Locked field="stats">
                 <StatsEditor items={listing.stats ?? []} onChange={(v) => set("stats", v)} />
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("services")} saving={saving} status={status} />
+              {tabEditable("services") && <SaveBar onSave={() => handleSave("services")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "areas" && (
             <>
               <EditorSection title="Areas Covered">
+                <Locked field="areasCoveredList">
                 <RepeatableList items={listing.areasCoveredList ?? AREAS_COVERED_LIST} onChange={(v) => set("areasCoveredList", v)} placeholder="e.g. Maidenhead" />
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("areas")} saving={saving} status={status} />
+              {tabEditable("areas") && <SaveBar onSave={() => handleSave("areas")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "workingwithme" && (
             <>
               <EditorSection title="Working With Me">
+                <Locked field="workingWithMe">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <Field label="Availability" hint="e.g. Accepting new projects"><Inp value={listing.workingWithMe?.availability ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, availability: e.target.value })} /></Field>
                   <Field label="Works" hint="e.g. Remote & on-site"><Inp value={listing.workingWithMe?.works ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, works: e.target.value })} /></Field>
                   <Field label="Response Time" hint="e.g. Usually within 24 hours"><Inp value={listing.workingWithMe?.responseTime ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, responseTime: e.target.value })} /></Field>
                   <Field label="Experience" hint="e.g. 10+"><Inp value={listing.workingWithMe?.experience ?? ""} onChange={(e) => set("workingWithMe", { ...listing.workingWithMe, experience: e.target.value })} /></Field>
                 </div>
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("workingwithme")} saving={saving} status={status} />
+              {tabEditable("workingwithme") && <SaveBar onSave={() => handleSave("workingwithme")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "skills" && (
             <>
               <EditorSection title="Skills">
+                <Locked field="skills">
                 <RepeatableList items={listing.skills ?? []} onChange={(v) => set("skills", v)} placeholder="e.g. Logo Design" />
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("skills")} saving={saving} status={status} />
+              {tabEditable("skills") && <SaveBar onSave={() => handleSave("skills")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "portfolio" && (
             <>
               <EditorSection title="Portfolio" hint="Up to 6 items">
+                <Locked field="portfolio">
                 <PortfolioEditor items={listing.portfolio ?? []} onChange={(v) => set("portfolio", v)} pathPrefix={user.id} max={6} />
+                </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("portfolio")} saving={saving} status={status} />
+              {tabEditable("portfolio") && <SaveBar onSave={() => handleSave("portfolio")} saving={saving} status={status} />}
             </>
           )}
 
           {tab === "amenities" && (
             <>
+              <Locked field="amenities">
               <EditorSection title="Star Rating">
                 <div className="flex gap-2">
                   {STAR_RATINGS.map((n) => {
@@ -418,13 +473,15 @@ export default function MyListingPage() {
                   </div>
                 </EditorSection>
               ))}
+              </Locked>
 
-              <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} />
+              {tabEditable("amenities") && <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} />}
             </>
           )}
 
         </div>
       </div>
+      </PlanContext.Provider>
     </BusinessLayout>
   );
 }

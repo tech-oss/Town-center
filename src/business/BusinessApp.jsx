@@ -1,4 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import BusinessLayout from "./components/BusinessLayout";
+import { PlanContext, PremiumFeatureGate } from "./components/FormKit";
+import { isPremium } from "../Data/plans";
 import useBusinessAuth from "./hooks/useBusinessAuth";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
@@ -41,6 +44,24 @@ function RequireOwner({ children }) {
   return children;
 }
 
+// News & Offers and Events are Premium features. A Free business reaching
+// any of those routes — the list, the editor, or a deep link — sees a
+// Subscribe screen instead of the page.
+function RequirePremium({ title, description, children }) {
+  const { user } = useBusinessAuth();
+  if (isPremium(user?.plan)) return children;
+  return (
+    <BusinessLayout>
+      <PlanContext.Provider value={{ plan: user?.plan, role: user?.role }}>
+        <PremiumFeatureGate title={title} description={description} />
+      </PlanContext.Provider>
+    </BusinessLayout>
+  );
+}
+
+const NEWS_GATE = { title: "News & Offers is a Premium feature", description: "Subscribe to Premium to publish news, updates and special offers on your business page." };
+const EVENTS_GATE = { title: "Events is a Premium feature", description: "Subscribe to Premium to share upcoming events, activities and special occasions." };
+
 // The one route that requires onboarding to still be outstanding — once it's
 // done, landing here again would just show a form with nothing left to save.
 function RequireOnboarding({ children }) {
@@ -68,13 +89,13 @@ export default function BusinessApp() {
       <Route path="analytics/content/:id" element={<RequireAuth><ContentAnalyticsDetailPage /></RequireAuth>} />
       <Route path="analytics/report" element={<RequireAuth><AnalyticsReportPage /></RequireAuth>} />
       <Route path="listing" element={<RequireAuth><MyListingPage /></RequireAuth>} />
-      <Route path="articles" element={<RequireAuth><ArticlesPage /></RequireAuth>} />
-      <Route path="articles/new" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
-      <Route path="articles/:id/edit" element={<RequireAuth><ArticleEditorPage /></RequireAuth>} />
-      <Route path="events" element={<RequireAuth><EventsPage /></RequireAuth>} />
-      <Route path="events/new" element={<RequireAuth><EventEditorPage /></RequireAuth>} />
-      <Route path="events/:id/edit" element={<RequireAuth><EventEditorPage /></RequireAuth>} />
-      <Route path="events/:id/dates" element={<RequireAuth><EventOccurrencesPage /></RequireAuth>} />
+      <Route path="articles" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticlesPage /></RequirePremium></RequireAuth>} />
+      <Route path="articles/new" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
+      <Route path="articles/:id/edit" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
+      <Route path="events" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventsPage /></RequirePremium></RequireAuth>} />
+      <Route path="events/new" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventEditorPage /></RequirePremium></RequireAuth>} />
+      <Route path="events/:id/edit" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventEditorPage /></RequirePremium></RequireAuth>} />
+      <Route path="events/:id/dates" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventOccurrencesPage /></RequirePremium></RequireAuth>} />
       <Route path="billing" element={<RequireOwner><BillingPage /></RequireOwner>} />
       <Route path="upgrade" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
       <Route path="reviews" element={<RequireAuth><ReviewsPage /></RequireAuth>} />

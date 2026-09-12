@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { SUBSCRIPTION_PLANS, ADD_ONS } from "../../Data/businessPortalMock";
+import { ADD_ONS } from "../../Data/businessPortalMock";
+import { PLANS, isPremium } from "../../Data/plans";
 import { listPayments, updateSubscription } from "../api/businessSubscription";
 
 function fmtDate(d) {
@@ -29,10 +30,14 @@ export default function BillingPage() {
     return () => { cancelledEffect = true; };
   }, [user.id]);
 
+  // Premium always goes through the subscribe (payment) flow; this page used
+  // to switch plans directly, which let anyone move onto a paid plan without
+  // paying. Only moving down to Free happens here.
   async function handleUpgrade(plan) {
-    await updateSubscription(user.id, { plan: plan.key, monthly_fee: plan.price, plan_status: "Active", cancelled: false });
-    switchUser({ ...user, plan: plan.key, monthlyFee: plan.price, planStatus: "Active", cancelled: false });
-    setToast(`Switched to ${plan.name}.`);
+    if (plan.key !== "free") { navigate("/business/upgrade"); return; }
+    await updateSubscription(user.id, { plan: "free", monthly_fee: 0, upgrade_plan_key: "free", plan_status: "Active", cancelled: false });
+    switchUser({ ...user, plan: "free", monthlyFee: 0, upgradePlanKey: "free", planStatus: "Active", cancelled: false });
+    setToast("Switched to Free.");
   }
   function handlePurchaseAddon(name) {
     // TODO: Stripe one-off payment
@@ -75,7 +80,9 @@ export default function BillingPage() {
             <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Monthly Fee</p><p className="text-sm font-medium" style={{ color: FOREST }}>£{user.monthlyFee}/mo</p></div>
           </div>
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-            <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Upgrade</button>
+            {!isPremium(user.plan) && (
+              <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Subscribe to Premium</button>
+            )}
             <button onClick={() => setConfirmCancel(true)} disabled={cancelled} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40" style={{ backgroundColor: "#DC2626" }}>Cancel Plan</button>
           </div>
         </div>
@@ -83,9 +90,9 @@ export default function BillingPage() {
         {/* Available plans */}
         <div>
           <p className="text-sm font-bold mb-3" style={{ color: FOREST }}>Available Plans</p>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {SUBSCRIPTION_PLANS.map((p) => {
-              const current = p.key === user.plan;
+          <div className="grid sm:grid-cols-2 gap-4 max-w-3xl">
+            {PLANS.map((p) => {
+              const current = p.key === (isPremium(user.plan) ? "premium" : "free");
               return (
                 <div key={p.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={current ? { border: `2px solid ${SAGE}` } : CARD}>
                   <p className="text-base font-bold" style={{ color: FOREST }}>{p.name}</p>
@@ -96,7 +103,9 @@ export default function BillingPage() {
                   {current ? (
                     <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>Current Plan</span>
                   ) : (
-                    <button onClick={() => handleUpgrade(p)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Switch to this plan</button>
+                    <button onClick={() => handleUpgrade(p)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={p.key === "premium" ? { backgroundColor: SAGE, color: "#fff" } : { border: `1.5px solid ${BORDER}`, color: FOREST }}>
+                      {p.key === "premium" ? "Subscribe" : "Switch to Free"}
+                    </button>
                   )}
                 </div>
               );

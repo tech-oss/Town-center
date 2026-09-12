@@ -32,14 +32,14 @@ function buildSessionUser(row) {
       id: row.business_id,
       businessName: businessName(row.business_id),
       businessType: "eat-drink",
-      plan: "standard",
+      plan: "free",
       planStatus: "Active",
       renewalDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-      monthlyFee: 39,
+      monthlyFee: 0,
       isMultiSite: false,
       visible: true,
       termsAcceptedAt: new Date().toISOString(),
-      upgradePlanKey: "basic",
+      upgradePlanKey: "free",
     };
   return {
     ...base,

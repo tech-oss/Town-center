@@ -3,16 +3,12 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, Select, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { UPGRADE_PLANS } from "../../Data/businessPortalMock";
+import { PLANS, isPremium } from "../../Data/plans";
 import { updateSubscription, addPayment } from "../api/businessSubscription";
 
 const STEPS = ["Choose Plan", "Terms", "Payment", "Success"];
 
-const PLAN_ICONS = {
-  "paper-plane": "✈️",
-  star: "⭐",
-  crown: "👑",
-};
+const PLAN_ICONS = { free: "✈️", premium: "👑" };
 
 function StepIndicator({ step }) {
   return (
@@ -38,16 +34,17 @@ function StepIndicator({ step }) {
 
 // ─── Screen 1 — Choose Upgrade Plan ────────────────────────────────────────────
 function PlanCard({ plan, isCurrent, onChoose }) {
+  const popular = plan.key === "premium";
   return (
     <div className="relative rounded-2xl p-6 flex flex-col gap-4 bg-white"
-      style={plan.popular ? { border: `2px solid ${SAGE}`, boxShadow: "0 8px 24px -8px rgba(37,99,235,0.3)" } : CARD}>
-      {plan.popular && (
+      style={popular ? { border: `2px solid ${SAGE}`, boxShadow: "0 8px 24px -8px rgba(37,99,235,0.3)" } : CARD}>
+      {popular && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-wide px-3 py-1 rounded-full text-white whitespace-nowrap"
           style={{ backgroundColor: SAGE }}>
           Most Popular
         </span>
       )}
-      <div className="text-3xl">{PLAN_ICONS[plan.icon]}</div>
+      <div className="text-3xl">{PLAN_ICONS[plan.key]}</div>
       <div>
         <p className="text-lg font-bold" style={{ color: FOREST }}>{plan.name}</p>
         <p className="text-xs mt-0.5" style={{ color: MUTED }}>{plan.tagline}</p>
@@ -75,12 +72,12 @@ function ScreenChoosePlan({ user, onChoose }) {
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Upgrade Your Business Listing</h1>
-        <p className="text-sm mt-1" style={{ color: MUTED }}>Unlock more visibility and grow your business in Maidenhead.</p>
+        <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Subscribe to Premium</h1>
+        <p className="text-sm mt-1" style={{ color: MUTED }}>Unlock your full business profile and stand out in Maidenhead.</p>
       </div>
-      <div className="grid sm:grid-cols-3 gap-5 pt-2">
-        {UPGRADE_PLANS.map((p) => (
-          <PlanCard key={p.key} plan={p} isCurrent={p.key === user.upgradePlanKey} onChoose={onChoose} />
+      <div className="grid sm:grid-cols-2 gap-5 pt-2 max-w-3xl">
+        {PLANS.map((p) => (
+          <PlanCard key={p.key} plan={p} isCurrent={p.key === (isPremium(user.plan) ? "premium" : "free")} onChoose={onChoose} />
         ))}
       </div>
       <p className="text-xs text-center" style={{ color: "#9CA3AF" }}>All plans are billed monthly. You can cancel anytime.</p>
@@ -271,22 +268,36 @@ function ScreenSuccess({ plan }) {
 
 // ─── Main flow ──────────────────────────────────────────────────────────────────
 export default function UpgradeFlowPage() {
+  const navigate = useNavigate();
   const { user, switchUser } = useBusinessAuth();
   const [step, setStep] = useState(1);
   const [plan, setPlan] = useState(null);
   const [agreed, setAgreed] = useState(false);
   const [paying, setPaying] = useState(false);
 
-  function handleChoosePlan(p) {
+  async function handleChoosePlan(p) {
+    // Moving down to Free costs nothing, so it needs no terms or payment.
+    if (p.key === "free") {
+      await updateSubscription(user.id, { plan: "free", monthly_fee: 0, upgrade_plan_key: "free", plan_status: "Active", cancelled: false });
+      switchUser({ ...user, plan: "free", monthlyFee: 0, upgradePlanKey: "free", planStatus: "Active", cancelled: false });
+      navigate("/business/billing");
+      return;
+    }
     setPlan(p);
     setStep(2);
   }
+  // TODO: real card payment (Stripe). Until then this is a simulated charge,
+  // and the plan is written from the browser — see the note in the migration.
   function handlePay() {
     setPaying(true);
     setTimeout(async () => {
-      await updateSubscription(user.id, { upgrade_plan_key: plan.key, plan_status: "Active", cancelled: false });
-      await addPayment(user.id, { description: `${plan.name} listing upgrade — monthly`, amount: `£${plan.price.toFixed(2)}` });
-      switchUser({ ...user, upgradePlanKey: plan.key, planStatus: "Active", cancelled: false });
+      await updateSubscription(user.id, {
+        plan: plan.key, monthly_fee: plan.price, upgrade_plan_key: plan.key,
+        plan_status: "Active", cancelled: false,
+        renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+      });
+      await addPayment(user.id, { description: `${plan.name} subscription — monthly`, amount: `£${plan.price.toFixed(2)}` });
+      switchUser({ ...user, plan: plan.key, monthlyFee: plan.price, upgradePlanKey: plan.key, planStatus: "Active", cancelled: false });
       setPaying(false);
       setStep(4);
     }, 1200);

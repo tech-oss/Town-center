@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { canEditField } from "../../Data/plans";
 import { supabase } from "../../lib/supabaseClient";
 
 async function uploadToStorage(file, pathPrefix) {
@@ -523,5 +525,97 @@ export function Stars({ rating, size = 14 }) {
     <span style={{ fontSize: size, color: "#D97706", letterSpacing: 1 }}>
       {"★".repeat(rating)}<span style={{ color: "#E5E7EB" }}>{"★".repeat(5 - rating)}</span>
     </span>
+  );
+}
+
+
+// ─── Plan locks ───────────────────────────────────────────────────────────────
+// The signed-in business's plan and role, provided by the page. On the Free
+// plan only the business name, address, phone, email and hero image can be
+// edited; every other field is still shown, but disabled, and clicking it
+// takes an Owner to the Subscribe flow. A Content Manager can't subscribe, so
+// they're told to ask the owner instead.
+export const PlanContext = createContext({ plan: "premium", role: "Owner" });
+
+function SubscribeBadge({ canSubscribe }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap"
+      style={{ backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }}>
+      🔒 {canSubscribe ? "Subscribe" : "Premium"}
+    </span>
+  );
+}
+
+export function Locked({ field, span2, children }) {
+  const { plan, role } = useContext(PlanContext);
+  const navigate = useNavigate();
+  if (canEditField(plan, field)) return children;
+  const canSubscribe = role !== "Content Manager";
+  const hint = canSubscribe ? "Subscribe now to unlock this" : "Ask the business owner to subscribe to unlock this";
+  return (
+    <div className={`relative group${span2 ? " sm:col-span-2" : ""}`}>
+      <fieldset disabled className="opacity-45 select-none">{children}</fieldset>
+      {/* Covers the whole field so any click — not just the badge — leads to Subscribe. */}
+      <button
+        type="button"
+        onClick={() => canSubscribe && navigate("/business/upgrade")}
+        className={`absolute inset-0 w-full h-full rounded-xl flex items-start justify-end p-1 ${canSubscribe ? "cursor-pointer" : "cursor-not-allowed"}`}
+        aria-label={hint}
+        title={hint}
+      >
+        <SubscribeBadge canSubscribe={canSubscribe} />
+      </button>
+      <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-7 z-10 hidden group-hover:block text-[11px] font-semibold px-2.5 py-1 rounded-lg text-white whitespace-nowrap"
+        style={{ backgroundColor: FOREST }}>
+        {hint}
+      </span>
+    </div>
+  );
+}
+
+// A whole feature that needs Premium (News & Offers, Events) — shown in place
+// of the page for a Free business.
+export function PremiumFeatureGate({ title, description }) {
+  const { role } = useContext(PlanContext);
+  const navigate = useNavigate();
+  const canSubscribe = role !== "Content Manager";
+  return (
+    <div className="bg-white rounded-2xl p-8 flex flex-col items-center text-center gap-4 max-w-xl mx-auto mt-6" style={CARD}>
+      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style={{ backgroundColor: "rgba(217,119,6,0.12)" }}>🔒</div>
+      <div>
+        <h1 className="text-lg font-bold" style={{ color: FOREST }}>{title}</h1>
+        <p className="text-sm mt-1" style={{ color: MUTED }}>{description}</p>
+      </div>
+      {canSubscribe ? (
+        <button onClick={() => navigate("/business/upgrade")}
+          className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
+          Subscribe Now
+        </button>
+      ) : (
+        <p className="text-xs font-semibold" style={{ color: "#92400E" }}>Ask your business owner to subscribe to Premium.</p>
+      )}
+    </div>
+  );
+}
+
+// Tab-level notice at the top of an editor on the Free plan.
+export function FreePlanNotice() {
+  const { role } = useContext(PlanContext);
+  const navigate = useNavigate();
+  const canSubscribe = role !== "Content Manager";
+  return (
+    <div className="rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap text-sm"
+      style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
+      <span className="font-bold">You're on the Free plan.</span>
+      <span className="flex-1 min-w-[220px] text-xs">
+        You can edit your business name, address, telephone, email and hero image. Everything marked 🔒 unlocks with Premium.
+      </span>
+      {canSubscribe && (
+        <button onClick={() => navigate("/business/upgrade")}
+          className="px-4 py-2 rounded-lg text-xs font-semibold text-white" style={{ backgroundColor: SAGE }}>
+          Subscribe Now
+        </button>
+      )}
+    </div>
   );
 }

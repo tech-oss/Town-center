@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
-import { SUBSCRIPTION_PLANS } from "../../Data/businessPortalMock";
+import { FREE_PLAN } from "../../Data/plans";
 
 function slugify(name) {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -91,7 +91,7 @@ export async function registerBusiness(form) {
 
   // Registration no longer sells anything: every new business starts on the
   // free listing and subscribes later from their dashboard.
-  const freePlan = SUBSCRIPTION_PLANS.find((p) => p.price === 0) ?? { key: "free", price: 0 };
+  const freePlan = FREE_PLAN;
   const renewalDate = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
   const { error: subError } = await supabase.from("business_subscriptions").insert({
     business_id: businessId,

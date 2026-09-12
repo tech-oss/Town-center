@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { isPremium, PREMIUM_PLAN } from "../../Data/plans";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -60,7 +61,7 @@ export default function DashboardPage() {
   }
 
   // "free" is what registration and claim onboarding now write for everyone.
-  const isFreePlan = !user.plan || user.plan === "free" || Number(user.monthlyFee ?? 0) === 0;
+  const isFreePlan = !isPremium(user.plan);
 
   return (
     <BusinessLayout>
@@ -74,7 +75,7 @@ export default function DashboardPage() {
         {/* Subscription banner */}
         <div className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #245C63 60%, ${SAGE} 100%)` }}>
           {isFreePlan ? (
-            <p className="text-sm text-white">You're on the <strong>free listing</strong>. Subscribe whenever you're ready to unlock more photos, news &amp; offers and featured placement.</p>
+            <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Subscribe to Premium (£{PREMIUM_PLAN.price}/month) to add your description, opening hours, photos, website, social links, news &amp; offers and more.</p>
           ) : (
             <p className="text-sm text-white">Your <strong className="capitalize">{String(user.plan ?? "").replace(/-/g, " ")}</strong> plan renews on <strong>{user.renewalDate ? new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}</strong>.</p>
           )}
