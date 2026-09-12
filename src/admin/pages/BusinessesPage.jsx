@@ -501,6 +501,20 @@ function RegistrationSuccess({ biz, onAddContent, onLater }) {
   );
 }
 
+function Section({ title, note, children }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div>
+        <p className="text-sm font-bold" style={{ color: NAVY }}>{title}</p>
+        {note && <p className="text-xs mt-0.5" style={{ color: MUTED }}>{note}</p>}
+      </div>
+      <div style={{ borderLeft: `3px solid rgba(37,99,235,0.2)`, paddingLeft: 16 }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // ─── Business card ────────────────────────────────────────────────────────────
 // ─── Logo upload modal ─────────────────────────────────────────────────────────
 // TODO: upload to Supabase storage
