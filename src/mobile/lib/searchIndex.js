@@ -12,35 +12,43 @@
 //  rest still comes from the Data/*.js the website uses.
 // ════════════════════════════════════════════════════════════════════════════
 
-import { sections, allArticles } from "../../Data/pages";
-import { hotels, accommodations, allStayArticles } from "../../Data/stay";
-import { getEvents, getStories, getGuides, getGettingHere } from "../../api";
+import { sections } from "../../Data/pages";
+import {
+  getEvents, getStories, getGuides, getGettingHere,
+  getBusinesses, getHotels, getAccommodations, getArticles,
+} from "../../api";
 
 export async function buildSearchIndex() {
   const out = [];
 
   // A search box is not worth breaking the screen over: if one source fails,
   // index everything else.
-  const [events, features, guides, gettingHere] = await Promise.all([
+  const [events, features, guides, gettingHere, businesses, hotels, accommodations, articles] = await Promise.all([
     getEvents().catch(() => []),
     getStories().catch(() => []),
     getGuides().catch(() => []),
     getGettingHere().catch(() => null),
+    // Registered businesses plus the demo directory, via the same API the
+    // website uses — so anything admin or a business adds is searchable.
+    getBusinesses().catch(() => []),
+    getHotels().catch(() => []),
+    getAccommodations().catch(() => []),
+    getArticles().catch(() => []),
   ]);
 
   // Businesses / places / services, grouped by their section label.
-  for (const section of Object.values(sections)) {
-    for (const item of section.items) {
-      out.push({
-        id: `place-${item.slug}`,
-        title: item.name,
-        subtitle: `${section.label} · ${item.tag}`,
-        keywords: `${item.description ?? ""} ${item.address ?? ""}`,
-        group: section.label,
-        image: item.image,
-        to: `/mobile/place/${item.slug}`,
-      });
-    }
+  for (const item of businesses) {
+    const section = sections[item.section];
+    if (!section) continue;
+    out.push({
+      id: `place-${item.slug}`,
+      title: item.name,
+      subtitle: [section.label, item.tag].filter(Boolean).join(" · "),
+      keywords: `${item.description ?? ""} ${item.address ?? ""}`,
+      group: section.label,
+      image: item.image,
+      to: `/mobile/place/${item.slug}`,
+    });
   }
 
   for (const e of events) {
@@ -55,7 +63,7 @@ export async function buildSearchIndex() {
     });
   }
 
-  for (const a of [...allArticles, ...allStayArticles]) {
+  for (const a of articles) {
     out.push({
       id: `article-${a.slug}`,
       title: a.title,
@@ -95,7 +103,7 @@ export async function buildSearchIndex() {
     out.push({
       id: `hotel-${h.slug}`,
       title: h.name,
-      subtitle: `Hotel · ${h.address}`,
+      subtitle: ["Hotel", h.address].filter(Boolean).join(" · "),
       keywords: h.tagline ?? "",
       group: "Stay",
       image: h.image,
@@ -107,7 +115,7 @@ export async function buildSearchIndex() {
     out.push({
       id: `stay-${a.slug}`,
       title: a.name,
-      subtitle: `${a.type} · ${a.address}`,
+      subtitle: [a.type, a.address].filter(Boolean).join(" · "),
       keywords: a.tagline ?? "",
       group: "Stay",
       image: a.image,

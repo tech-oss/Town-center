@@ -6,6 +6,8 @@ import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { brandGrid } from "../Data/content";
+import useFetch from "../hooks/useFetch";
+import { getMapBrands } from "../api";
 import { itemBySlug } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 
@@ -567,6 +569,8 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
 
 export default function TradersMap() {
   const navigate = useNavigate();
+  // Demo traders show immediately; registered businesses join once loaded.
+  const { data: brands } = useFetch(getMapBrands, []);
   const [filter, setFilter] = useState("all");
   const [userPos, setUserPos] = useState(null);
   const [activeBrand, setActiveBrand] = useState(null);
@@ -592,12 +596,13 @@ export default function TradersMap() {
   const activeFilter = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
 
   const filtered = useMemo(() => {
+    const all = brands ?? brandGrid.brands;
     const list =
       activeFilter.sections === null
-        ? brandGrid.brands
-        : brandGrid.brands.filter((b) => activeFilter.sections.includes(b.section));
+        ? all
+        : all.filter((b) => activeFilter.sections.includes(b.section));
     return [...list].sort((a, b) => a.name.localeCompare(b.name));
-  }, [activeFilter]);
+  }, [activeFilter, brands]);
 
   // Free-text search runs within the selected tab.
   const q = searchQuery.trim().toLowerCase();

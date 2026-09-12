@@ -16,7 +16,9 @@ export default function NewsDetailScreen() {
 
   const biz = article.business;
   const more = (biz?.news ?? []).filter((a) => a.slug !== article.slug).slice(0, 3);
-  const bizLink = biz?.section && biz?.slug ? `/mobile/place/${biz.slug}` : null;
+  const bizLink = !biz?.slug ? null
+    : biz.section === "stay" ? `/mobile/stay/${biz.stayKind ?? "hotels"}/${biz.slug}`
+    : biz.section ? `/mobile/place/${biz.slug}` : null;
 
   return (
     <MobileShell noPadding onBack={goBack}>

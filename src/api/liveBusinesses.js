@@ -11,6 +11,7 @@
 // the "coming soon" placeholders in those places.
 import { supabase } from "../lib/supabaseClient";
 import { categoryLabel } from "../Data/taxonomy";
+import { brandGrid } from "../Data/content";
 
 // Registration stores a type slug; the site's sections are keyed a little
 // differently for hotels, which live under Live & Stay.
@@ -125,19 +126,35 @@ function toItem(row, articles) {
 }
 
 // One fetch per page load, shared by every caller.
+// Right after a migration adds a view, some of Supabase's API servers can
+// briefly answer "Could not find the table … in the schema cache" (PGRST205)
+// while others already know it. That's transient, so retry a couple of times
+// before treating it as a real failure.
+async function withSchemaRetry(run, attempts = 3) {
+  let res = await run();
+  for (let i = 1; i < attempts && res.error?.code === "PGRST205"; i++) {
+    await new Promise((r) => setTimeout(r, 400 * i));
+    res = await run();
+  }
+  return res;
+}
+
 let cache = null;
 
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
     const [profilesRes, articlesRes] = await Promise.all([
-      supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false }),
-      supabase.from("public_business_articles").select("*").order("date", { ascending: false }),
+      withSchemaRetry(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false })),
+      withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
     ]);
     // A missing view (migration not run yet) or a network failure must not
     // take the whole directory down — the site falls back to its demo data.
     if (profilesRes.error) {
       console.warn("Live businesses unavailable:", profilesRes.error.message);
+      // Don't remember a failure: the next page asks again instead of hiding
+      // every registered business until a full reload.
+      cache = null;
       return [];
     }
     const articles = {};
@@ -149,12 +166,48 @@ export function loadLiveBusinesses() {
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
       .map((row) => toItem(row, articles));
   })();
-  // Let a failed load retry on the next page rather than caching the failure.
-  cache.catch(() => { cache = null; });
-  return cache;
+  // A thrown error (e.g. offline) likewise retries on the next page.
+  const pending = cache;
+  pending.catch(() => { if (cache === pending) cache = null; });
+  return pending;
 }
 
 export async function getLiveBusinessBySlug(slug) {
   const items = await loadLiveBusinesses();
   return items.find((i) => i.slug === slug) ?? null;
+}
+
+
+// The traders map keys pins by its own section names.
+const MAP_SECTION = { "eat-drink": "food-drink", shop: "shopping", services: "services", "see-do": "see-do", stay: "stay" };
+
+// The website path for a listing; the app converts these to its own routes.
+export function webPathFor(item) {
+  return item.section === "stay"
+    ? `/live/stay/${item.stayKind}/${item.slug}`
+    : `/${item.section}/place/${item.slug}`;
+}
+
+// Pins for the website's traders map and the app's Map tab: the demo traders
+// plus every registered business with coordinates. Only Premium listings
+// expose coordinates (a Free listing hides its map), so only they get a pin.
+// A registered business replaces a demo pin of the same name.
+export async function getMapBrands() {
+  const live = await loadLiveBusinesses();
+  const pins = live
+    .filter((i) => i.lat != null && i.lng != null && !Number.isNaN(Number(i.lat)) && !Number.isNaN(Number(i.lng)))
+    .map((i) => ({
+      id: `live-${i.slug}`,
+      name: i.name,
+      category: i.tag || "",
+      section: MAP_SECTION[i.section] ?? i.section,
+      logo: i.logo || i.image,
+      to: webPathFor(i),
+      address: i.address,
+      tagline: i.tagline,
+      lat: Number(i.lat),
+      lng: Number(i.lng),
+    }));
+  const names = new Set(pins.map((p) => p.name.trim().toLowerCase()));
+  return [...pins, ...brandGrid.brands.filter((b) => !names.has(String(b.name).trim().toLowerCase()))];
 }

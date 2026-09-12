@@ -35,3 +35,5 @@ export async function getBusinessBySlug(slug) {
   const live = await loadLiveBusinesses();
   return live.find((i) => i.slug === slug && i.section !== "stay") ?? itemBySlug[slug] ?? null;
 }
+
+export { getMapBrands } from "./liveBusinesses";

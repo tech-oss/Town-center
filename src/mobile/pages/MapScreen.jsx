@@ -5,6 +5,8 @@ import L from "leaflet";
 import MobileShell from "../components/MobileShell";
 import { ListSearch } from "../components/ListSearch";
 import { brandGrid } from "../../Data/content";
+import useFetch from "../../hooks/useFetch";
+import { getMapBrands } from "../../api";
 import { MAP_CENTRE } from "../data/mobileMock";
 import { categoryColor } from "../../lib/categoryColors";
 
@@ -120,9 +122,11 @@ export default function MapScreen() {
   const [flyTarget, setFlyTarget] = useState(null);
   const mapRef = useRef(null);
 
+  // Demo traders show immediately; registered businesses join once loaded.
+  const { data: liveBrands } = useFetch(getMapBrands, []);
   const withCoords = useMemo(
-    () => brandGrid.brands.filter((b) => typeof b.lat === "number" && typeof b.lng === "number"),
-    []
+    () => (liveBrands ?? brandGrid.brands).filter((b) => typeof b.lat === "number" && typeof b.lng === "number"),
+    [liveBrands]
   );
 
   const activeFilter = FILTERS.find((f) => f.key === filter) ?? FILTERS[0];
