@@ -71,7 +71,7 @@ function mapArticle(a, business) {
 
 function toItem(row, articles) {
   const type = row.business_type;
-  const section = SECTION_FOR_TYPE[type] ?? "shop";
+  const section = SECTION_FOR_TYPE[type];
   const categories = categoriesFor(type, row.business_type_detail);
   const category = categories[0] ?? null;
   const premium = row.plan === "premium";
@@ -142,7 +142,12 @@ export function loadLiveBusinesses() {
     }
     const articles = {};
     for (const a of articlesRes.data ?? []) (articles[a.business_id] ??= []).push(a);
-    return (profilesRes.data ?? []).map((row) => toItem(row, articles));
+    // A listing without a business type can't be placed in any section —
+    // defaulting it somewhere would file a restaurant under Shop — so it
+    // stays off the public site until its type is set.
+    return (profilesRes.data ?? [])
+      .filter((row) => SECTION_FOR_TYPE[row.business_type])
+      .map((row) => toItem(row, articles));
   })();
   // Let a failed load retry on the next page rather than caching the failure.
   cache.catch(() => { cache = null; });

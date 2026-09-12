@@ -8,6 +8,8 @@ import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout, { CalendarIcon, TicketIcon } from "./PlaceDetailLayout";
+import NewsOffers from "./NewsOffers";
+import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 
 // What's On events carry their own category system (Music, Family, Market,
 // Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
@@ -72,6 +74,9 @@ export default function EventPage() {
   const event = asEvent(rawEvent, business);
   if (!event) return <Navigate to="/" replace />;
 
+  // See & Do businesses render through this page too; a free one follows the
+  // same free-plan rules as every other business page (see DetailPage).
+  const free = event.isBusiness && isFreeListing(business);
   const gallery = event.gallery?.length ? event.gallery : [event.image];
   const dot = categoryColors[event.category] || "var(--leaf)";
 
@@ -104,18 +109,24 @@ export default function EventPage() {
       categoryColor={dot}
       title={event.title}
       heroImage={gallery[0]}
-      extraImages={gallery.slice(1)}
+      extraImages={free ? [] : gallery.slice(1)}
       metaRows={metaRows}
-      description={description}
-      hours={event.hours}
+      description={free ? null : description}
+      descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
+      hours={free ? null : event.hours}
+      hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
+      galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
       address={event.location}
       phone={event.phone}
       email={event.email}
-      website={event.website}
-      social={buildSocial(event.social)}
-      directionsQuery={event.location}
-      extraButtonLabel="Buy Tickets"
+      website={free ? null : event.website}
+      social={free ? null : buildSocial(event.social)}
+      directionsQuery={free ? null : (event.mapQuery || event.location)}
+      extraButtonLabel={free ? undefined : "Buy Tickets"}
       extraButtonHref={event.website}
+      afterMap={event.isBusiness && (free
+        ? <NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} />
+        : <NewsOffers item={business} />)}
       shareTitle={`${event.title} — Maidenhead`}
       relatedHeading="More See & Do"
       related={allEvents

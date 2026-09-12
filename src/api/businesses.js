@@ -7,11 +7,18 @@
 import { allItems, itemBySlug } from "../Data/pages";
 import { loadLiveBusinesses } from "./liveBusinesses";
 
+// A demo entry is dropped when a real business of the same name exists in the
+// same section — the registered Coppa Club replaces the demo one, rather than
+// the directory listing Coppa Club twice.
+const nameKey = (i) => `${i.section}::${String(i.name ?? "").trim().toLowerCase()}`;
+
 function directoryItems(live) {
-  const liveSlugs = new Set(live.map((i) => i.slug));
+  const liveOnSite = live.filter((i) => i.section !== "stay");
+  const liveSlugs = new Set(liveOnSite.map((i) => i.slug));
+  const liveNames = new Set(liveOnSite.map(nameKey));
   return [
-    ...live.filter((i) => i.section !== "stay"),
-    ...allItems.filter((i) => !liveSlugs.has(i.slug)),
+    ...liveOnSite,
+    ...allItems.filter((i) => !liveSlugs.has(i.slug) && !liveNames.has(nameKey(i))),
   ];
 }
 

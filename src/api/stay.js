@@ -12,9 +12,11 @@ async function liveStay(kind) {
     .map((i) => ({ ...i, type: kind === "hotels" ? "Hotel" : "Accommodation", area: i.address }));
 }
 
+// A live listing replaces a demo one with the same slug or the same name.
 function merge(live, demo) {
   const slugs = new Set(live.map((i) => i.slug));
-  return [...live, ...demo.filter((i) => !slugs.has(i.slug))];
+  const names = new Set(live.map((i) => String(i.name ?? "").trim().toLowerCase()));
+  return [...live, ...demo.filter((i) => !slugs.has(i.slug) && !names.has(String(i.name ?? "").trim().toLowerCase()))];
 }
 
 export async function getHotels() {
