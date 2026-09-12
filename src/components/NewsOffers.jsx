@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 
 // Per-business "News & Offers" — same glassmorphic look as the homepage
 // "In the Spotlight" section. Content comes from the item's `news` array.
-export default function NewsOffers({ item }) {
-  const posts = item.news ?? [];
-  if (posts.length === 0) return null;
+export default function NewsOffers({ item, placeholder }) {
+  const posts = placeholder ? [] : (item.news ?? []);
+  if (posts.length === 0 && !placeholder) return null;
 
   return (
     <section
@@ -23,10 +23,16 @@ export default function NewsOffers({ item }) {
             </p>
             <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">News &amp; Offers</h2>
           </div>
-          <span className="text-sm font-semibold self-start sm:self-auto text-white/70">
-            {posts.length} update{posts.length === 1 ? "" : "s"}
-          </span>
+          {!placeholder && (
+            <span className="text-sm font-semibold self-start sm:self-auto text-white/70">
+              {posts.length} update{posts.length === 1 ? "" : "s"}
+            </span>
+          )}
         </div>
+
+        {placeholder && (
+          <p className="text-base md:text-lg italic text-white/80">{placeholder}</p>
+        )}
 
         {/* Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

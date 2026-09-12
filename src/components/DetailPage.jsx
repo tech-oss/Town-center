@@ -7,6 +7,7 @@ import NewsOffers from "./NewsOffers";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
+import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 
 // Business social profiles → the shared layout's { icon, href, label } shape.
 function buildSocial(item) {
@@ -44,14 +45,20 @@ export default function DetailPage() {
   // Map / directions target — prefer an explicit query, else the business name + town
   const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
 
-  const heroImage = item.logoHeader ? item.logo : item.gallery[0];
-  const extraImages = item.logoHeader ? [] : item.gallery.slice(1);
+  // Free plan: name, hero image, address, phone and email only. Description,
+  // hours and photos show a "coming soon" line; socials, website/booking
+  // buttons and the map are left out; News & Offers keeps its heading.
+  const free = isFreeListing(item);
 
-  const description = item.hideDescription
+  const gallery = item.gallery?.length ? item.gallery : [item.image].filter(Boolean);
+  const heroImage = item.logoHeader ? item.logo : gallery[0];
+  const extraImages = free || item.logoHeader ? [] : gallery.slice(1);
+
+  const description = free || item.hideDescription
     ? null
     : item.paragraphs
     ? item.paragraphs
-    : [item.description, item.description2].filter(Boolean);
+    : [item.tagline, item.description, item.description2].filter(Boolean);
 
   return (
     <PlaceDetailLayout
@@ -65,15 +72,18 @@ export default function DetailPage() {
       heroImage={heroImage}
       extraImages={extraImages}
       description={description}
-      hours={item.hours}
+      descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
+      hours={free ? null : item.hours}
+      hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
+      galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
       address={item.address}
       phone={item.phone}
-      email={!item.freePlan ? item.email : null}
-      website={!item.hideWeb ? item.website : null}
-      social={!item.freePlan ? buildSocial(item) : null}
-      directionsQuery={!item.freePlan ? mapQuery : null}
-      extraButtonLabel={item.section === "eat-drink" ? "Booking" : undefined}
-      extraButtonHref={item.website}
+      email={item.email}
+      website={free || item.hideWeb ? null : item.website}
+      social={free ? null : buildSocial(item)}
+      directionsQuery={free ? null : mapQuery}
+      extraButtonLabel={!free && item.section === "eat-drink" ? "Booking" : undefined}
+      extraButtonHref={item.bookingUrl || item.website}
       shareTitle={`${item.name} — Maidenhead`}
       relatedHeading="You might also like"
       related={related.map((it) => ({
@@ -84,7 +94,9 @@ export default function DetailPage() {
         category: it.tag,
         name: it.name,
       }))}
-      afterMap={!item.freePlan && <NewsOffers item={item} />}
+      afterMap={free
+        ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
+        : <NewsOffers item={item} />}
     />
   );
 }

@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
+import ComingSoonCard from "../components/ComingSoonCard";
 import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -84,13 +86,15 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const [openFaq, setOpenFaq] = useState(0);
   const section = sections[place.section];
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${place.name} reviews`)}`;
-  const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
-  const news = place.news ?? [];
-  const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
-  const portfolio = (place.gallery ?? []).filter((g) => g !== place.image);
-  const skills = place.servicesOffered ?? [];
+  // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
+  const free = isFreeListing(place);
+  const websiteUrl = !free && place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  const news = free ? [] : (place.news ?? []);
+  const social = !free && place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k]) : [];
+  const portfolio = free ? [] : (place.gallery ?? []).filter((g) => g !== place.image);
+  const skills = free ? [] : (place.skills ?? place.servicesOffered ?? []);
   const reviewsList = place.reviewsList ?? [];
-  const faq = place.faq ?? [];
+  const faq = free ? [] : (place.faq ?? []);
   const availability = place.availability || "Accepting new projects";
   const workMode = place.workMode || "Remote & on-site";
   const responseTime = place.responseTime || "Usually within 24 hours";
@@ -140,7 +144,10 @@ export default function FreelancerDetailScreen({ place, goBack }) {
             )}
           </div>
 
-          {place.description && (
+          {free && (
+            <p className="text-sm leading-relaxed italic" style={{ color: "rgba(0,0,0,0.55)" }}>{FREE_PLACEHOLDERS.description}</p>
+          )}
+          {!free && place.description && (
             <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{place.description}</p>
           )}
 
@@ -207,7 +214,9 @@ export default function FreelancerDetailScreen({ place, goBack }) {
             </MobileCard>
           )}
 
-          <PhotoGallery images={portfolio} title={`${place.name} portfolio`} max={9} />
+          {free
+            ? <ComingSoonCard heading="Portfolio" text={FREE_PLACEHOLDERS.gallery} />
+            : <PhotoGallery images={portfolio} title={`${place.name} portfolio`} max={9} />}
 
           {place.aboutText && (
             <MobileCard className="p-4 flex flex-col gap-2">
@@ -246,6 +255,16 @@ export default function FreelancerDetailScreen({ place, goBack }) {
                 <FaqItem key={i} {...f} open={openFaq === i} onToggle={() => setOpenFaq(openFaq === i ? -1 : i)} />
               ))}
             </MobileCard>
+          )}
+
+          {free && (
+            <div
+              className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
+              style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+            >
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
+            </div>
           )}
 
           {news.length > 0 && (

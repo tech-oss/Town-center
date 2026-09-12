@@ -191,6 +191,11 @@ export default function PlaceDetailLayout({
   related = [],
   afterGallery,
   afterMap,
+  // Free-plan listings: short "coming soon" lines shown in place of the
+  // description, the opening hours and the photo grid.
+  descriptionPlaceholder,
+  hoursPlaceholder,
+  galleryPlaceholder,
   extraButtonLabel,
   extraButtonHref,
   // Optional extra pills rendered alongside the category pill — same
@@ -336,6 +341,12 @@ export default function PlaceDetailLayout({
             </div>
           )}
 
+          {descriptionPlaceholder && (
+            <p className="text-base md:text-lg leading-relaxed mb-2 text-center max-w-3xl mx-auto italic" style={{ color: "rgba(0,0,0,0.55)" }}>
+              {descriptionPlaceholder}
+            </p>
+          )}
+
           {remainingDescription?.length > 0 && (
             <div className="flex flex-col gap-5 mb-2 text-center max-w-3xl mx-auto">
               {remainingDescription.map((p, i) => (
@@ -353,7 +364,15 @@ export default function PlaceDetailLayout({
             className="mt-8 overflow-hidden flex flex-col lg:flex-row lg:items-stretch transition-transform duration-300 ease-out hover:scale-[1.015]"
             style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
           >
-              {hours?.length > 0 ? (
+              {hoursPlaceholder ? (
+                <div
+                  className="px-6 py-7 md:px-8 lg:w-[26%] shrink-0 border-b lg:border-b-0 lg:border-r"
+                  style={{ borderColor: "rgba(28,46,56,0.1)" }}
+                >
+                  <h3 className="text-xs font-bold uppercase tracking-[0.02em] mb-3" style={{ color: "var(--leaf)" }}>Opening Hours</h3>
+                  <p className="text-sm font-semibold" style={{ color: "rgba(0,0,0,0.55)" }}>{hoursPlaceholder}</p>
+                </div>
+              ) : hours?.length > 0 ? (
                 <div
                   className="px-6 py-7 md:px-8 lg:w-[26%] shrink-0 border-b lg:border-b-0 lg:border-r"
                   style={{ borderColor: "rgba(28,46,56,0.1)" }}
@@ -502,6 +521,14 @@ export default function PlaceDetailLayout({
       {/* ── 4. Additional photos — up to 6, two per row. 90% width on
           mobile; on desktop matched to the content column above (max-w-4xl)
           then reduced 20% further, square corners. ── */}
+      {galleryPlaceholder && extraImages.length === 0 && (
+        <section className="py-12 md:py-16 px-6 md:px-12">
+          <div className="w-[90%] sm:w-full sm:max-w-4xl mx-auto py-14 text-center" style={{ backgroundColor: "#F5F7F7" }}>
+            <p className="text-base md:text-lg italic" style={{ color: "rgba(0,0,0,0.55)" }}>{galleryPlaceholder}</p>
+          </div>
+        </section>
+      )}
+
       {extraImages.length > 0 && (
         <section className="py-12 md:py-16 px-6 md:px-12">
           <div className="w-[90%] sm:w-full sm:max-w-4xl mx-auto">

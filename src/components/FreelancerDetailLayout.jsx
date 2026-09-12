@@ -99,6 +99,10 @@ export default function FreelancerDetailLayout({
   afterGrid,
   relatedHeading,
   related = [],
+  // Free-plan listings: "coming soon" lines in place of the description and
+  // the portfolio.
+  descriptionPlaceholder,
+  galleryPlaceholder,
 }) {
   const [tab, setTab] = useState("Overview");
   const [galleryIndex, setGalleryIndex] = useState(null);
@@ -248,13 +252,21 @@ export default function FreelancerDetailLayout({
                 {description && (
                   <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{description}</p>
                 )}
+                {descriptionPlaceholder && (
+                  <p className="text-sm leading-relaxed italic" style={{ color: "rgba(0,0,0,0.55)" }}>{descriptionPlaceholder}</p>
+                )}
               </div>
             </div>
 
             {/* ── Portfolio preview — same asymmetric big-image + two-tile
                 layout as the Services/Eat & Drink gallery preview, with a
                 link into the full Portfolio tab for the rest. ── */}
-            {portfolio.length > 0 && (
+            {galleryPlaceholder && (
+              <div className="mb-6 py-12 text-center" style={{ backgroundColor: "#F5F7F7" }}>
+                <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>{galleryPlaceholder}</p>
+              </div>
+            )}
+            {!galleryPlaceholder && portfolio.length > 0 && (
               <div className="mb-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {portfolio.slice(0, 3).map((p, i) => (
@@ -324,7 +336,7 @@ export default function FreelancerDetailLayout({
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm" style={{ color: "#000000" }}>No portfolio examples added yet.</p>
+                    <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>{galleryPlaceholder ?? "No portfolio examples added yet."}</p>
                   )}
                 </Section>
               )}

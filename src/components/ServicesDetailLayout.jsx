@@ -89,6 +89,11 @@ export default function ServicesDetailLayout({
   afterGrid,
   relatedHeading,
   related = [],
+  // Free-plan listings: "coming soon" lines in place of the description, the
+  // opening hours and the photo gallery.
+  descriptionPlaceholder,
+  hoursPlaceholder,
+  galleryPlaceholder,
 }) {
   const [tab, setTab] = useState("Overview");
   const [galleryIndex, setGalleryIndex] = useState(null);
@@ -169,13 +174,21 @@ export default function ServicesDetailLayout({
                 {description && (
                   <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{description}</p>
                 )}
+                {descriptionPlaceholder && (
+                  <p className="text-sm leading-relaxed italic" style={{ color: "rgba(0,0,0,0.55)" }}>{descriptionPlaceholder}</p>
+                )}
               </div>
             </div>
 
             {/* ── 3. Photo gallery — the business's profile picture is the
                 header image above; here just three supporting photos, with
                 a link into the full Photos tab for the rest. ── */}
-            {galleryImages.length > 0 && (
+            {galleryPlaceholder && (
+              <div className="mb-6 py-12 text-center" style={{ backgroundColor: "#F5F7F7" }}>
+                <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>{galleryPlaceholder}</p>
+              </div>
+            )}
+            {!galleryPlaceholder && galleryImages.length > 0 && (
               <div className="mb-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-2 sm:row-span-2 aspect-[16/9] sm:aspect-auto overflow-hidden cursor-pointer">
@@ -409,6 +422,11 @@ export default function ServicesDetailLayout({
               )}
             </div>
 
+            {hoursPlaceholder && (
+              <Section heading="Opening Hours">
+                <p className="text-sm font-semibold" style={{ color: "rgba(0,0,0,0.55)" }}>{hoursPlaceholder}</p>
+              </Section>
+            )}
             {hours?.length > 0 && (
               <Section heading="Opening Hours">
                 <ul className="flex flex-col">

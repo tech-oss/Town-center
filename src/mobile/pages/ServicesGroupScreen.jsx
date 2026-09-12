@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import useSectionItems from "../hooks/useSectionItems";
 import { useParams, Link, Navigate } from "react-router-dom";
 import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
@@ -39,14 +40,15 @@ export default function ServicesGroupScreen() {
   const [filter, setFilter] = useState("All");
   const [query, setQuery] = useState("");
 
+  const serviceItems = useSectionItems("services");
   const groupCategories = useMemo(() => categoriesForGroup(groupConfig), [groupConfig]);
   const groupItems = useMemo(
-    () => (groupCategories ? servicesSection.items.filter((i) => groupCategories.has(i.category)) : []),
-    [groupCategories]
+    () => (groupCategories ? serviceItems.filter((i) => groupCategories.has(i.category)) : []),
+    [groupCategories, serviceItems]
   );
 
   const filters = useMemo(
-    () => ["All", ...Array.from(new Set(groupItems.map((i) => i.tag)))],
+    () => ["All", ...Array.from(new Set(groupItems.map((i) => i.tag).filter(Boolean)))],
     [groupItems]
   );
 

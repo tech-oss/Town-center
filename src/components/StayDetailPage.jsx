@@ -6,6 +6,7 @@ import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
 import NewsOffers from "./NewsOffers";
+import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 import { STAY_DISCOVER } from "../Data/stayDiscover";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
@@ -145,6 +146,7 @@ export default function StayDetailPage({ kind }) {
   if (!item) return <Navigate to={isHotels ? "/live/stay/hotels" : "/live/stay/accommodation"} replace />;
 
   const listPath = isHotels ? "/live/stay/hotels" : "/live/stay/accommodation";
+  const free = isFreeListing(item);
   const gallery = item.gallery?.length ? item.gallery : [item.image];
   const address = item.address ?? item.area;
 
@@ -152,9 +154,9 @@ export default function StayDetailPage({ kind }) {
   // paragraph); guest/host details (accommodation only) and the full
   // description render below it, same as any listing with multiple
   // description paragraphs.
-  const description = [
+  const description = free ? null : [
     item.tagline,
-    ...(!isHotels ? [`${item.guests} guests · ${item.bedrooms} bedroom${item.bedrooms !== 1 ? "s" : ""} · ${item.host}`] : []),
+    ...(!isHotels && item.guests ? [`${item.guests} guests · ${item.bedrooms} bedroom${item.bedrooms !== 1 ? "s" : ""} · ${item.host}`] : []),
     ...(item.description ? item.description.split("\n\n") : []),
   ].filter(Boolean);
 
@@ -170,27 +172,32 @@ export default function StayDetailPage({ kind }) {
       extraBadges={isHotels ? <StarBadge stars={item.stars} /> : null}
       title={item.name}
       heroImage={gallery[0]}
-      extraImages={gallery.slice(1)}
+      extraImages={free ? [] : gallery.slice(1)}
       backLink={backTo ? { to: backTo, label: "Back to results" } : undefined}
       description={description}
+      descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
+      hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
+      galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
       address={address}
       phone={item.phone}
       email={item.email}
-      social={buildSocial(item)}
-      website={item.website}
-      directionsQuery={item.mapQuery}
+      social={free ? null : buildSocial(item)}
+      website={free ? null : item.website}
+      directionsQuery={free ? null : item.mapQuery}
       shareInActions
-      stickyBooking={isHotels && !!item.website}
+      stickyBooking={!free && isHotels && !!item.website}
       relatedHeading="Stay Here & Discover"
       relatedBackground="#ffffff"
       related={STAY_DISCOVER}
-      afterGallery={
+      afterGallery={!free && (
         <AmenitiesSection
           amenities={item.amenities}
           heading={isHotels ? "Amenities" : "What This Place Offers"}
         />
-      }
-      afterMap={<NewsOffers item={item} />}
+      )}
+      afterMap={free
+        ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
+        : <NewsOffers item={item} />}
     />
   );
 }

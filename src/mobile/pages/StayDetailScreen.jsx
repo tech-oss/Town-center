@@ -1,4 +1,6 @@
 import { useParams, useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
+import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
+import ComingSoonCard from "../components/ComingSoonCard";
 import { useState } from "react";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -91,10 +93,12 @@ export default function StayDetailScreen() {
   const mapsUrl = place.mapQuery
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery)}`
     : `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
-  const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
-  const gallery = (place.gallery?.length ? place.gallery : [place.image]).filter((g) => g !== place.image);
-  const social = place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k]) : [];
-  const news = place.news ?? [];
+  // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
+  const free = isFreeListing(place);
+  const websiteUrl = !free && place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  const gallery = free ? [] : (place.gallery?.length ? place.gallery : [place.image]).filter((g) => g !== place.image);
+  const social = !free && place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k]) : [];
+  const news = free ? [] : (place.news ?? []);
 
   async function handleShare() {
     const url = `${window.location.origin}/live/stay/${kind}/${place.slug}`;
@@ -128,7 +132,7 @@ export default function StayDetailScreen() {
               {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
-            {place.tagline && <p className="text-sm mt-1" style={{ color: "#000000" }}>{place.tagline}</p>}
+            {!free && place.tagline && <p className="text-sm mt-1" style={{ color: "#000000" }}>{place.tagline}</p>}
           </div>
 
           {!isHotel && (place.guests || place.bedrooms || place.host) && (
@@ -137,7 +141,10 @@ export default function StayDetailScreen() {
             </p>
           )}
 
-          {place.description && place.description.split("\n\n").map((para, i) => (
+          {free && (
+            <p className="text-sm leading-relaxed italic" style={{ color: "rgba(0,0,0,0.55)" }}>{FREE_PLACEHOLDERS.description}</p>
+          )}
+          {!free && place.description && place.description.split("\n\n").map((para, i) => (
             <p key={i} className="text-sm leading-relaxed" style={{ color: "#000000" }}>{para}</p>
           ))}
 
@@ -160,12 +167,14 @@ export default function StayDetailScreen() {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              <ActionButton
-                href={mapsUrl}
-                label="Get Directions"
-                skipExternalConfirm
-                icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
-              />
+              {!free && (
+                <ActionButton
+                  href={mapsUrl}
+                  label="Get Directions"
+                  skipExternalConfirm
+                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
+                />
+              )}
               <ActionButton
                 onClick={handleShare}
                 label={copied ? "Link Copied" : "Share"}
@@ -199,9 +208,13 @@ export default function StayDetailScreen() {
             )}
           </MobileCard>
 
-          <PhotoGallery images={gallery} title={place.name} />
+          {free && <ComingSoonCard heading="Opening Hours" text={FREE_PLACEHOLDERS.hours} />}
 
-          {place.amenities?.length > 0 && (
+          {free
+            ? <ComingSoonCard heading="Photos" text={FREE_PLACEHOLDERS.gallery} />
+            : <PhotoGallery images={gallery} title={place.name} />}
+
+          {!free && place.amenities?.length > 0 && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>
                 {isHotel ? "Amenities" : "What This Place Offers"}
@@ -226,10 +239,22 @@ export default function StayDetailScreen() {
             </div>
           )}
 
-          <div>
-            <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
-            <MiniMap query={place.mapQuery || place.address || place.area} lat={place.lat} lng={place.lng} />
-          </div>
+          {!free && (
+            <div>
+              <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
+              <MiniMap query={place.mapQuery || place.address || place.area} lat={place.lat} lng={place.lng} />
+            </div>
+          )}
+
+          {free && (
+            <div
+              className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
+              style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+            >
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
+            </div>
+          )}
 
           {news.length > 0 && (
             <div

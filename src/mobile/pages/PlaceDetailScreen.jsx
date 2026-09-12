@@ -1,7 +1,11 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useState } from "react";
+import useFetch from "../../hooks/useFetch";
+import { getBusinessBySlug } from "../../api";
+import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
+import ComingSoonCard from "../components/ComingSoonCard";
 import PhotoGallery from "../components/PhotoGallery";
 import ActionButton from "../components/ActionButton";
 import MiniMap from "../components/MiniMap";
@@ -26,15 +30,18 @@ const SOCIAL_ICONS = {
 // (ServicesDetailLayout/FreelancerDetailLayout) rather than this one.
 function BusinessDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
+  // Free plan: name, hero, address, phone and email; everything else shows a
+  // "coming soon" line or is left out — same rules as the website.
+  const free = isFreeListing(place);
   const section = sections[place.section];
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
-  const websiteUrl = place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
-  const news = place.news ?? [];
-  const social = place.social
-    ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k])
+  const websiteUrl = !free && place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  const news = free ? [] : (place.news ?? []);
+  const social = !free && place.social
+    ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k])
     : [];
   const more = (section?.items ?? []).filter((it) => it.slug !== place.slug).slice(0, 3);
-  const gallery = (place.gallery ?? []).filter((g) => g !== place.image);
+  const gallery = free ? [] : (place.gallery ?? []).filter((g) => g !== place.image);
 
   async function handleShare() {
     const url = `${window.location.origin}/${place.section}/place/${place.slug}`;
@@ -71,7 +78,9 @@ function BusinessDetailScreen({ place, goBack }) {
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
           </div>
 
-          {place.description && (
+          {free ? (
+            <p className="text-sm leading-relaxed italic" style={{ color: "rgba(0,0,0,0.55)" }}>{FREE_PLACEHOLDERS.description}</p>
+          ) : place.description && (
             <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{place.description}</p>
           )}
 
@@ -94,7 +103,9 @@ function BusinessDetailScreen({ place, goBack }) {
             )}
           </MobileCard>
 
-          {place.hours?.length > 0 && (
+          {free && <ComingSoonCard heading="Opening Hours" text={FREE_PLACEHOLDERS.hours} />}
+
+          {!free && place.hours?.length > 0 && (
             <MobileCard className="p-4 flex flex-col gap-2">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Opening Hours</p>
               {place.hours.map((h) => (
@@ -115,12 +126,14 @@ function BusinessDetailScreen({ place, goBack }) {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              <ActionButton
-                href={mapsUrl}
-                label="Get Directions"
-                skipExternalConfirm
-                icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
-              />
+              {!free && (
+                <ActionButton
+                  href={mapsUrl}
+                  label="Get Directions"
+                  skipExternalConfirm
+                  icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>}
+                />
+              )}
               <ActionButton
                 onClick={handleShare}
                 label={copied ? "Link Copied" : "Share"}
@@ -149,19 +162,33 @@ function BusinessDetailScreen({ place, goBack }) {
 
           {/* Extra photos — matches the website's up-to-6, 2-per-row grid
               with a tap-to-enlarge lightbox. */}
-          <PhotoGallery images={gallery} title={place.name} />
+          {free
+            ? <ComingSoonCard heading="Photos" text={FREE_PLACEHOLDERS.gallery} />
+            : <PhotoGallery images={gallery} title={place.name} />}
 
           {/* Location map — the website embeds one on every detail page;
               geocoded from the address since not every listing has stored
-              coordinates. */}
-          <div>
-            <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
-            <MiniMap query={place.mapQuery || place.address} lat={place.lat} lng={place.lng} />
-          </div>
+              coordinates. Hidden on a free listing. */}
+          {!free && (
+            <div>
+              <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
+              <MiniMap query={place.mapQuery || place.address} lat={place.lat} lng={place.lng} />
+            </div>
+          )}
 
           {/* News & Offers — same glassmorphic dark-teal card treatment as
               the website's Eat & Drink business pages, condensed to a
               horizontal scroller for mobile. */}
+          {free && (
+            <div
+              className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
+              style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
+            >
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
+            </div>
+          )}
+
           {news.length > 0 && (
             <div
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-4"
@@ -225,9 +252,16 @@ function BusinessDetailScreen({ place, goBack }) {
 // test the website's ServicesDetailPage.jsx uses.
 export default function PlaceDetailScreen() {
   const { id } = useParams();
-  const place = itemBySlug[id];
+  // Demo listings resolve instantly; a registered business is fetched.
+  const staticPlace = itemBySlug[id];
+  const { data: fetched, loading } = useFetch(
+    () => (staticPlace ? Promise.resolve(null) : getBusinessBySlug(id)),
+    [id],
+  );
+  const place = staticPlace ?? fetched;
   const goBack = useMobileBack(place ? `/mobile/${place.section}` : "/mobile/explore");
 
+  if (!place && loading) return <MobileShell onBack={goBack}><p className="text-sm p-5" style={{ color: "#000000" }}>Loading…</p></MobileShell>;
   if (!place) return <Navigate to="/mobile/explore" replace />;
 
   if (place.section === "services") {

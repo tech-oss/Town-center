@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import useSectionItems from "../hooks/useSectionItems";
 import { Link } from "react-router-dom";
 import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
@@ -29,26 +30,27 @@ function CardImage({ src, alt }) {
 
 export default function SectionScreen({ sectionKey }) {
   const section = sections[sectionKey];
+  const sectionItems = useSectionItems(sectionKey);
   const [filter, setFilter] = useState("All");
   const [query, setQuery] = useState("");
 
   const filters = useMemo(
-    () => ["All", ...Array.from(new Set(section.items.map((i) => i.tag)))],
-    [section]
+    () => ["All", ...Array.from(new Set(sectionItems.map((i) => i.tag).filter(Boolean)))],
+    [sectionItems]
   );
 
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return section.items.filter((i) => {
+    return sectionItems.filter((i) => {
       if (filter !== "All" && i.tag !== filter) return false;
       if (!q) return true;
       return (
         i.name.toLowerCase().includes(q) ||
-        i.tag.toLowerCase().includes(q) ||
+        (i.tag ?? "").toLowerCase().includes(q) ||
         (i.description ?? "").toLowerCase().includes(q)
       );
     });
-  }, [section, filter, query]);
+  }, [sectionItems, filter, query]);
 
   return (
     <MobileShell title={section.label} onBack backFallback="/mobile/explore">
