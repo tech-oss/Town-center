@@ -3,6 +3,29 @@
 // categorised place sections with a photo + write-up each, a quick-answer
 // cheat sheet, themed combinations, and links to related guides).
 
+// The categories a neighbourhood guide can carry. One canonical list, shared
+// by the website's guides listing, the app's Guides screen and the admin
+// editor's picker, so a guide can't be filed under something the filters
+// don't know about. `value` is the ?category= slug; `label` is what shows.
+export const GUIDE_CATEGORIES = [
+  { value: "history-heritage",   label: "History & Heritage" },
+  { value: "food-drink",         label: "Food & Drink" },
+  { value: "things-to-do",       label: "Things to Do" },
+  { value: "hidden-gems",        label: "Hidden Gems & Local Favourites" },
+  { value: "outdoors-walks",     label: "Outdoors & Walks" },
+  { value: "shopping-retail",    label: "Shopping & Retail" },
+  { value: "family-kids",        label: "Family & Kids" },
+  { value: "health-wellbeing",   label: "Health, Fitness & Wellbeing" },
+  { value: "local-life",         label: "Local Life & Community" },
+  { value: "seasonal",           label: "Seasonal & Special Occasions" },
+];
+
+export const guideCategorySlug = (label) =>
+  GUIDE_CATEGORIES.find((c) => c.label === label)?.value ?? null;
+
+export const guideCategoryLabel = (slug) =>
+  GUIDE_CATEGORIES.find((c) => c.value === slug)?.label ?? null;
+
 export const guidesIndex = {
   eyebrow: "Explore Maidenhead",
   title: "Neighbourhood Guides",
@@ -337,7 +360,7 @@ export const guides = [
     slug: "10-things-to-do-with-kids-in-maidenhead",
     title: "10 Things to Do with Kids in Maidenhead",
     icon: "🎡",
-    category: "Family",
+    category: "Family & Kids",
     summary:
       "From go-karting and escape rooms to riverside adventures, parks, nature and culture — here's how to keep the whole family entertained in Maidenhead.",
     heroImage: "/images/attractions/garden-path.jpg",

@@ -1,10 +1,34 @@
-import { Link } from "react-router-dom";
-import { useEffect } from "react";
-import { guidesIndex, guides } from "../Data/guides";
+import { Link, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo } from "react";
+import { guidesIndex, guides, GUIDE_CATEGORIES, guideCategorySlug } from "../Data/guides";
 import { card, pill } from "../utils/design";
 
 export default function GuidesPage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
+
+  // Single-select, held in the URL as ?category= — same as every other
+  // listing on the site, so a filtered view can be linked and shared.
+  const [params, setParams] = useSearchParams();
+  const active = params.get("category");
+
+  // Only categories that actually have a guide are offered; an empty filter
+  // would just be a dead end. Order follows the canonical list, not the data.
+  const available = useMemo(() => {
+    const used = new Set(guides.map((g) => guideCategorySlug(g.category)).filter(Boolean));
+    return GUIDE_CATEGORIES.filter((c) => used.has(c.value));
+  }, []);
+
+  const shown = useMemo(
+    () => (active ? guides.filter((g) => guideCategorySlug(g.category) === active) : guides),
+    [active],
+  );
+
+  function select(value) {
+    const next = new URLSearchParams(params);
+    if (value) next.set("category", value);
+    else next.delete("category");
+    setParams(next, { replace: true });
+  }
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
@@ -32,10 +56,43 @@ export default function GuidesPage() {
         <span>Neighbourhood Guides</span>
       </nav>
 
+      {/* Category filter — one flat row of pills, All first. */}
+      <section className="px-6 md:px-12 pt-6">
+        <div className="max-w-6xl mx-auto flex gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => select(null)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] sm:text-xs font-semibold transition-all"
+            style={!active
+              ? { backgroundColor: "var(--forest)", color: "#ffffff" }
+              : { backgroundColor: "#ffffff", color: "#000000", boxShadow: "0 1px 4px rgba(13,42,51,0.12)" }}
+          >
+            All Guides
+          </button>
+          {available.map((c) => {
+            const on = active === c.value;
+            return (
+              <button
+                key={c.value}
+                type="button"
+                onClick={() => select(c.value)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-[11px] sm:text-xs font-semibold transition-all"
+                style={on
+                  ? { backgroundColor: "var(--forest)", color: "#ffffff" }
+                  : { backgroundColor: "#ffffff", color: "#000000", boxShadow: "0 1px 4px rgba(13,42,51,0.12)" }}
+              >
+                <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: on ? "var(--sage)" : "var(--leaf)" }} />
+                {c.label}
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Guides grid — same card treatment as See & Do / Eat & Drink listings. */}
-      <section className="px-6 md:px-12 pt-8 md:pt-10 pb-20 md:pb-28">
+      <section className="px-6 md:px-12 pt-6 md:pt-8 pb-20 md:pb-28">
         <div className="max-w-6xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-          {guides.map((g) => (
+          {shown.map((g) => (
             <Link
               key={g.slug}
               to={`/guides/${g.slug}`}
@@ -67,6 +124,14 @@ export default function GuidesPage() {
             </Link>
           ))}
         </div>
+        {shown.length === 0 && (
+          <p className="max-w-6xl mx-auto text-sm mt-6" style={{ color: "#000000" }}>
+            No guides in this category yet.{" "}
+            <button type="button" onClick={() => select(null)} className="font-semibold underline" style={{ color: "var(--leaf)" }}>
+              See all guides
+            </button>
+          </p>
+        )}
       </section>
     </div>
   );
