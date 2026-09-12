@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logBusinessActivity, articleContext, reviewContext } from "./businessActivity";
 
 // Moderation of the two remaining things businesses publish to the public
 // site: their News & Offers articles, and the customer reviews shown on their
@@ -44,12 +45,16 @@ export async function getBusinessArticles({ status } = {}) {
 // trigger's error on any business that happens to be full, which reads as
 // admin being unable to approve rather than the business being at capacity.
 export async function approveArticle(id) {
+  const ctx = await articleContext(id);
   const { error } = await supabase
     .from("business_articles")
     .update({ status: "Live", rejection_reason: null })
     .eq("id", id);
 
-  if (!error) return { ok: true, live: true };
+  if (!error) {
+    await logBusinessActivity(ctx?.business_id, { action: "article.approved", entityType: "article", entityId: id, title: ctx?.title });
+    return { ok: true, live: true };
+  }
 
   if (!String(error.message ?? "").includes("Live article limit reached")) throw error;
 
@@ -59,15 +64,21 @@ export async function approveArticle(id) {
     .eq("id", id);
   if (hiddenError) throw hiddenError;
 
+  await logBusinessActivity(ctx?.business_id, {
+    action: "article.approved", entityType: "article", entityId: id, title: ctx?.title,
+    detail: "Held off the site until you swap out one of your 3 live posts.",
+  });
   return { ok: true, live: false };
 }
 
 export async function rejectArticle(id, reason) {
+  const ctx = await articleContext(id);
   const { error } = await supabase
     .from("business_articles")
     .update({ status: "Rejected", rejection_reason: reason || null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "article.rejected", entityType: "article", entityId: id, title: ctx?.title, detail: reason || null });
 }
 
 // ─── Customer reviews ──────────────────────────────────────────────────────
@@ -104,6 +115,8 @@ export async function approveReply(id) {
     .update({ reply: { ...(row?.reply ?? {}), status: "Approved" } })
     .eq("id", id);
   if (error) throw error;
+  const ctx = await reviewContext(id);
+  await logBusinessActivity(ctx?.business_id, { action: "review.reply_approved", entityType: "review", entityId: id, title: ctx?.title });
 }
 
 export async function rejectReply(id, reason) {
@@ -115,6 +128,8 @@ export async function rejectReply(id, reason) {
     .update({ reply: { ...(row?.reply ?? {}), status: "Rejected", rejectionReason: reason || null } })
     .eq("id", id);
   if (error) throw error;
+  const ctx = await reviewContext(id);
+  await logBusinessActivity(ctx?.business_id, { action: "review.reply_rejected", entityType: "review", entityId: id, title: ctx?.title, detail: reason || null });
 }
 
 export async function getReviews({ status } = {}) {
@@ -132,19 +147,23 @@ export async function getReviews({ status } = {}) {
 // listing but keeps it on record, so a decision can be reversed and there's
 // still an audit trail. Deletion is separate and deliberate.
 export async function hideReview(id, note) {
+  const ctx = await reviewContext(id);
   const { error } = await supabase
     .from("business_reviews")
     .update({ status: "Hidden", moderation_note: note || null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "review.hidden", entityType: "review", entityId: id, title: ctx?.title });
 }
 
 export async function restoreReview(id) {
+  const ctx = await reviewContext(id);
   const { error } = await supabase
     .from("business_reviews")
     .update({ status: "Visible", moderation_note: null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "review.restored", entityType: "review", entityId: id, title: ctx?.title });
 }
 
 export async function deleteReview(id) {

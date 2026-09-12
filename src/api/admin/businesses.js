@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logBusinessActivity } from "./businessActivity";
 import { addLog } from "./users";
 import {
   BUSINESS_TYPES, VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES,
@@ -358,6 +359,17 @@ async function setStatus(id, status, note, logLabel) {
   if (error) throw error;
 
   addLog(logLabel, { id, name: biz?.name ?? id }, note ?? "");
+  // Mirrored onto the business's own activity feed so the owner sees the
+  // decision on their dashboard, not only in admin's audit log.
+  const ACTIVITY = {
+    "Business Approved": "business.approved",
+    "Business Rejected": "business.rejected",
+    "Business Suspended": "business.suspended",
+    "Business Reinstated": "business.reinstated",
+  };
+  if (ACTIVITY[logLabel]) {
+    await logBusinessActivity(id, { action: ACTIVITY[logLabel], entityType: "business", entityId: id, title: biz?.name ?? id, detail: note || null });
+  }
   return { ok: true };
 }
 

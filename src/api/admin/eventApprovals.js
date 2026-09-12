@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { logBusinessActivity, eventContext, occurrenceContext } from "./businessActivity";
 
 // Moderation of business-submitted events, and of individual dates within a
 // recurring series.
@@ -83,19 +84,23 @@ export async function getBusinessEvents({ status } = {}) {
 }
 
 export async function approveEvent(id) {
+  const ctx = await eventContext(id);
   const { error } = await supabase
     .from("business_events")
     .update({ status: "Live", rejection_reason: null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "event.approved", entityType: "event", entityId: id, title: ctx?.title });
 }
 
 export async function rejectEvent(id, reason) {
+  const ctx = await eventContext(id);
   const { error } = await supabase
     .from("business_events")
     .update({ status: "Rejected", rejection_reason: reason || null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "event.rejected", entityType: "event", entityId: id, title: ctx?.title, detail: reason || null });
 }
 
 // ── Admin-authored events ──────────────────────────────────────────────────
@@ -214,17 +219,21 @@ export async function getOccurrences(eventId) {
 }
 
 export async function approveOccurrence(id) {
+  const ctx = await occurrenceContext(id);
   const { error } = await supabase
     .from("business_event_occurrences")
     .update({ review_status: "Approved", rejection_reason: null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "occurrence.approved", entityType: "occurrence", entityId: id, title: ctx?.title });
 }
 
 export async function rejectOccurrence(id, reason) {
+  const ctx = await occurrenceContext(id);
   const { error } = await supabase
     .from("business_event_occurrences")
     .update({ review_status: "Rejected", rejection_reason: reason || null })
     .eq("id", id);
   if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "occurrence.rejected", entityType: "occurrence", entityId: id, title: ctx?.title, detail: reason || null });
 }
