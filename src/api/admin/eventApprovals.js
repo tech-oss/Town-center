@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { assertValidCoords } from "../../lib/geo";
 import { logBusinessActivity, eventContext, occurrenceContext } from "./businessActivity";
 
 // Moderation of business-submitted events, and of individual dates within a
@@ -145,6 +146,7 @@ function eventToRow(item) {
 }
 
 export async function saveBusinessEvent(item) {
+  assertValidCoords(item.lat, item.lng);
   const { data, error } = await supabase
     .from("business_events")
     .upsert(eventToRow(item))

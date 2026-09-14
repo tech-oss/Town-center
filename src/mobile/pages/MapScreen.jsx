@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
+import { isValidCoords } from "../../lib/geo";
 import MobileShell from "../components/MobileShell";
 import { ListSearch } from "../components/ListSearch";
 import { brandGrid } from "../../Data/content";
@@ -125,7 +126,7 @@ export default function MapScreen() {
   // Demo traders show immediately; registered businesses join once loaded.
   const { data: liveBrands } = useFetch(getMapBrands, []);
   const withCoords = useMemo(
-    () => (liveBrands ?? brandGrid.brands).filter((b) => typeof b.lat === "number" && typeof b.lng === "number"),
+    () => (liveBrands ?? brandGrid.brands).filter((b) => typeof b.lat === "number" && typeof b.lng === "number" && isValidCoords(b.lat, b.lng)),
     [liveBrands]
   );
 

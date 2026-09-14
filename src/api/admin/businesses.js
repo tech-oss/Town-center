@@ -1,6 +1,7 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity } from "./businessActivity";
 import { planFor } from "../../Data/plans";
+import { assertValidCoords } from "../../lib/geo";
 import { addLog } from "./users";
 import {
   BUSINESS_TYPES, VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES,
@@ -209,6 +210,7 @@ function readableConstraintError(error, name) {
 // registers against it from the business portal. Passing ownerEmail creates
 // the login here and now instead, already approved.
 export async function registerBusiness(data) {
+  assertValidCoords(data.lat, data.lng);
   const name = (data.name ?? "").trim();
   const id = data.id || `biz_${slugify(name)}-${Math.random().toString(36).slice(2, 7)}`;
 

@@ -8,6 +8,7 @@ import {
   suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
+import CoordsNotice from "../components/CoordsNotice";
 import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
@@ -378,6 +379,7 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
               placeholder="-0.7198" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
           </FormField>
         </div>
+        <CoordsNotice lat={form.lat} lng={form.lng} />
       </Section>
 
       {/* ── Logo ── */}

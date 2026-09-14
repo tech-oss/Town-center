@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
+import CoordsNotice from "../components/CoordsNotice";
 import { getBusinesses, SUBCATEGORIES, SERVICES_GROUPS } from "../../api/admin";
 import {
   getBusinessContent, saveBusinessContent,
@@ -1001,6 +1002,7 @@ function DevelopmentEditor({ dev, onBack, onSaved }) {
               <Inp value={form.lng} onChange={e => set("lng", e.target.value)} placeholder="e.g. -0.7234" />
             </Field>
           </div>
+          <CoordsNotice lat={form.lat} lng={form.lng} />
         </EditorSection>
 
         <EditorSection title="Contact">

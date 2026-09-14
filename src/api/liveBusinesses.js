@@ -12,6 +12,7 @@
 import { supabase } from "../lib/supabaseClient";
 import { categoryLabel } from "../Data/taxonomy";
 import { brandGrid } from "../Data/content";
+import { parseCoords } from "../lib/geo";
 
 // Registration stores a type slug; the site's sections are keyed a little
 // differently for hotels, which live under Live & Stay.
@@ -76,6 +77,7 @@ function toItem(row, articles) {
   const categories = categoriesFor(type, row.business_type_detail);
   const category = categories[0] ?? null;
   const premium = row.plan === "premium";
+  const coords = parseCoords(row.lat, row.lng);
   // A free listing may not have uploaded a hero yet; cards and the page
   // header still need an image, so fall back to the site mark.
   const hero = row.hero_image || row.logo || "/logo-mark.svg";
@@ -104,9 +106,10 @@ function toItem(row, articles) {
     website: row.website,
     bookingUrl: row.booking_url,
     social: row.social,
-    lat: row.lat,
-    lng: row.lng,
-    mapQuery: premium && (row.lat != null && row.lng != null) ? `${row.lat},${row.lng}` : (premium ? address : null),
+    // Impossible coordinates are dropped here so no map ever receives them.
+    lat: coords?.lat ?? null,
+    lng: coords?.lng ?? null,
+    mapQuery: premium && coords ? `${coords.lat},${coords.lng}` : (premium ? address : null),
     // Layout props default to [] only when undefined, never when null, so an
     // empty column must arrive as undefined or the page throws on .slice().
     faq: listOrUndefined(row.faqs),
@@ -195,7 +198,7 @@ export function webPathFor(item) {
 export async function getMapBrands() {
   const live = await loadLiveBusinesses();
   const pins = live
-    .filter((i) => i.lat != null && i.lng != null && !Number.isNaN(Number(i.lat)) && !Number.isNaN(Number(i.lng)))
+    .filter((i) => parseCoords(i.lat, i.lng))
     .map((i) => ({
       id: `live-${i.slug}`,
       name: i.name,

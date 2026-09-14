@@ -6,6 +6,7 @@
 // lives in the table (see supabase/seed/seed_events_from_data.js), so the
 // admin Events editor can actually change what the site shows.
 import { supabase } from "../lib/supabaseClient";
+import { parseCoords } from "../lib/geo";
 
 // Formats a date the way the hardcoded content did ("Sunday 14 June 2026"),
 // used when an event has a real date but no explicit label. Recurring events
@@ -45,8 +46,8 @@ function fromRow(r) {
     phone: r.phone,
     email: r.email,
     social: r.social ?? {},
-    lat: r.lat,
-    lng: r.lng,
+    lat: parseCoords(r.lat, r.lng)?.lat ?? null,
+    lng: parseCoords(r.lat, r.lng)?.lng ?? null,
     homepage: r.homepage ?? false,
     businessId: r.business_id,
   };

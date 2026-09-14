@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { assertValidCoords } from "../../lib/geo";
 
 // Real, direct read/write access to business_listings for admin's own
 // "Manage Business Content" editor — replacing what used to be a fully mock
@@ -151,6 +152,7 @@ export async function getBusinessListingContent(businessId) {
 }
 
 export async function saveBusinessListingContent(businessId, listing) {
+  assertValidCoords(listing.lat, listing.lng);
   const editedBy = {};
   const approvalStatus = {};
   for (const section of ALL_SECTIONS) {

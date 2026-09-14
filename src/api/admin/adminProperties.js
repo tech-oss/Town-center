@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { assertValidCoords } from "../../lib/geo";
 
 // Property listings come from two places: agents' XML feeds, whose rows import
 // as 'Auto-published', and manual admin entries, which start 'Pending' and need
@@ -65,6 +66,7 @@ function parsePrice(price) {
 }
 
 export async function saveProperty(property) {
+  assertValidCoords(property.lat, property.lng);
   const { value, period } = parsePrice(property.price);
   const row = {
     id: property.id || undefined,

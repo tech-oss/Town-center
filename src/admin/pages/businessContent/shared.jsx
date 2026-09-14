@@ -1,6 +1,8 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { canEditField } from "../../../Data/plans";
 import { uploadImage } from "../../../lib/uploadImage";
+import { isValidCoords } from "../../../lib/geo";
+import CoordsNotice from "../../components/CoordsNotice";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 // Re-exported so the sub-editors in this folder can keep importing tokens from
@@ -271,7 +273,7 @@ export function SocialFields({ links, onChange }) {
 
 // ─── Latitude / Longitude fields + static OpenStreetMap preview ──────────────
 export function LocationFields({ lat, lng, onChange }) {
-  const hasCoords = lat !== "" && lng !== "" && lat != null && lng != null && !Number.isNaN(Number(lat)) && !Number.isNaN(Number(lng));
+  const hasCoords = isValidCoords(lat, lng);
   const mapSrc = hasCoords
     ? `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=15&size=420x180&markers=${lat},${lng},red-pushpin`
     : null;
@@ -286,6 +288,7 @@ export function LocationFields({ lat, lng, onChange }) {
           <Inp type="number" step="0.000001" value={lng ?? ""} onChange={(e) => onChange({ lat, lng: e.target.value })} placeholder="e.g. -0.7234" />
         </Field>
       </div>
+      <CoordsNotice lat={lat} lng={lng} />
       <p className="text-[11px] mb-3" style={{ color: "#9CA3AF" }}>
         Enter the precise coordinates for this business. You can find these from Google Maps by right-clicking the location.
       </p>
@@ -345,7 +348,7 @@ export function NewBusinessBanner({ name }) {
 }
 
 function hasCoords(lat, lng) {
-  return lat !== "" && lng !== "" && lat != null && lng != null && !Number.isNaN(Number(lat)) && !Number.isNaN(Number(lng));
+  return isValidCoords(lat, lng);
 }
 
 // Derives the 5-step onboarding checklist from the current form values.

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
+import { isValidCoords } from "../lib/geo";
 import "leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -123,6 +124,8 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
     });
 
     brands.forEach((b) => {
+      // One impossible coordinate sends markercluster into an endless loop.
+      if (!isValidCoords(b.lat, b.lng)) return;
       const marker = L.marker([b.lat, b.lng], { icon: makePin(false, b.section) });
       marker.on("click", () => selectRef.current(b));
       cluster.addLayer(marker);
