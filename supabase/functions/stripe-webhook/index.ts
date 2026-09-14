@@ -153,6 +153,16 @@ async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed")
   }
 }
 
+// Records a subscription's latest invoice once it's paid. Called from every
+// subscription event as well as checkout, so billing history fills in even if
+// the endpoint isn't sent invoice.paid or checkout.session.completed.
+async function recordLatestInvoice(sub: Stripe.Subscription) {
+  const invoiceId = typeof sub.latest_invoice === "string" ? sub.latest_invoice : sub.latest_invoice?.id;
+  if (!invoiceId) return;
+  const invoice = await stripe.invoices.retrieve(invoiceId);
+  if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return text("Method not allowed", 405);
 
@@ -179,28 +189,30 @@ Deno.serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode === "subscription" && session.subscription) {
           const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
-          await applySubscription(await stripe.subscriptions.retrieve(subId));
+          const sub = await stripe.subscriptions.retrieve(subId);
+          await applySubscription(sub);
           // Record the first payment here too, so billing history doesn't
           // depend on invoice.paid arriving (or being enabled). Recording is
           // keyed on the invoice id, so a later invoice.paid just updates it.
-          const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
-          if (invoiceId) {
-            const invoice = await stripe.invoices.retrieve(invoiceId);
-            if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
-          }
+          await recordLatestInvoice(sub);
         }
         break;
       }
       case "customer.subscription.created":
       case "customer.subscription.updated":
-      case "customer.subscription.deleted":
-        await applySubscription(event.data.object as Stripe.Subscription);
+      case "customer.subscription.deleted": {
+        // Re-read from the API so the shape matches this code's API version,
+        // whatever version the webhook endpoint sends events in.
+        const sub = await stripe.subscriptions.retrieve((event.data.object as Stripe.Subscription).id);
+        await applySubscription(sub);
+        await recordLatestInvoice(sub);
         break;
+      }
       case "invoice.paid":
-        await recordInvoice(event.data.object as Stripe.Invoice, "Paid");
+        await recordInvoice(await stripe.invoices.retrieve((event.data.object as Stripe.Invoice).id), "Paid");
         break;
       case "invoice.payment_failed":
-        await recordInvoice(event.data.object as Stripe.Invoice, "Failed");
+        await recordInvoice(await stripe.invoices.retrieve((event.data.object as Stripe.Invoice).id), "Failed");
         break;
       default:
         break;
