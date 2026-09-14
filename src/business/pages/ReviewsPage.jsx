@@ -23,12 +23,12 @@ export default function ReviewsPage() {
   async function handleAdd(form) {
     const created = await addReview(user.id, form);
     setReviews((prev) => [created, ...prev]);
-    setToast("Review added.");
+    setToast("Review sent for approval. It goes live once an admin approves it.");
   }
   async function handleUpdate(id, form) {
     await updateReview(id, form);
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form } : r)));
-    setToast("Review updated.");
+    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form, status: "Pending Approval", moderationNote: null } : r)));
+    setToast("Changes sent for approval. The review goes live again once an admin approves it.");
   }
   async function handleDelete(id) {
     await deleteReview(id);
@@ -45,7 +45,7 @@ export default function ReviewsPage() {
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage the reviews listed for your business.</p>
         </div>
 
-        <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine.</p>
+        <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine. Every new or edited review is checked by an admin before it appears on your page.</p>
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading reviews…</p>

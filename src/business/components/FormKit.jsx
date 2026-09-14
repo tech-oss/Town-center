@@ -531,7 +531,7 @@ export function Stars({ rating, size = 14 }) {
 
 // ─── Plan locks ───────────────────────────────────────────────────────────────
 // The signed-in business's plan and role, provided by the page. On the Free
-// plan only the business name, address, phone, email and hero image can be
+// plan only the business name, address, phone, email and map pin can be
 // edited; every other field is still shown, but disabled, and clicking it
 // takes an Owner to the Subscribe flow. A Content Manager can't subscribe, so
 // they're told to ask the owner instead.
@@ -546,12 +546,31 @@ function SubscribeBadge({ canSubscribe }) {
   );
 }
 
-export function Locked({ field, span2, children }) {
+export function Locked({ field, span2, message, children }) {
   const { plan, role } = useContext(PlanContext);
   const navigate = useNavigate();
   if (canEditField(plan, field)) return children;
   const canSubscribe = role !== "Content Manager";
   const hint = canSubscribe ? "Upgrade to the Visibility Plan to unlock this" : "Ask the business owner to upgrade to unlock this";
+  // A field with its own explanation shows it under the field, always visible.
+  if (message) {
+    return (
+      <div className={`flex flex-col gap-2${span2 ? " sm:col-span-2" : ""}`}>
+        <div className="relative">
+          <fieldset disabled className="opacity-45 select-none">{children}</fieldset>
+          <button type="button" onClick={() => canSubscribe && navigate("/business/upgrade")}
+            className={`absolute inset-0 w-full h-full rounded-xl flex items-start justify-end p-1 ${canSubscribe ? "cursor-pointer" : "cursor-not-allowed"}`}
+            aria-label={message} title={message}>
+            <SubscribeBadge canSubscribe={canSubscribe} />
+          </button>
+        </div>
+        <p className="text-xs font-semibold max-w-xs" style={{ color: "#92400E" }}>
+          {message}{" "}
+          {canSubscribe && <button type="button" onClick={() => navigate("/business/upgrade")} className="underline">Upgrade</button>}
+        </p>
+      </div>
+    );
+  }
   return (
     <div className={`relative group${span2 ? " sm:col-span-2" : ""}`}>
       <fieldset disabled className="opacity-45 select-none">{children}</fieldset>
@@ -608,7 +627,7 @@ export function FreePlanNotice() {
       style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
       <span className="font-bold">You're on the Free plan.</span>
       <span className="flex-1 min-w-[220px] text-xs">
-        You can edit your business name, address, telephone, email and hero image. Everything marked 🔒 unlocks with the Visibility Plan.
+        You can edit your business name, address, telephone, email and map pin. Your hero picture and everything marked 🔒 unlock with the Visibility Plan.
       </span>
       {canSubscribe && (
         <button onClick={() => navigate("/business/upgrade")}

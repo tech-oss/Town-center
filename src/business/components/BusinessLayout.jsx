@@ -21,6 +21,9 @@ const NAV = [
   { to: "/business/settings",  label: "Account Settings", icon: "⚙️" },
 ];
 
+// Pages that open a Visibility Plan prompt instead on the Free plan.
+const PAID_ONLY = new Set(["/business/analytics", "/business/articles", "/business/events", "/business/reviews"]);
+
 export default function BusinessLayout({ children }) {
   const { user, logout } = useBusinessAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -108,6 +111,9 @@ export default function BusinessLayout({ children }) {
                 })}>
                 <span className="shrink-0 w-4 text-center">{item.icon}</span>
                 <span className="flex-1 leading-snug">{item.label}</span>
+                {user.plan !== "premium" && PAID_ONLY.has(item.to) && (
+                  <span className="text-[11px] opacity-70" title="Visibility Plan">🔒</span>
+                )}
                 {item.to === "/business/support" && openTickets > 0 && (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>{openTickets}</span>
                 )}

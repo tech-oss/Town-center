@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { ADD_ONS } from "../../Data/businessPortalMock";
-import { PLANS, isPremium } from "../../Data/plans";
+import { isPremium } from "../../Data/plans";
+import { TERMS_TEXT } from "../../Data/businessPortalMock";
+import {
+  PAGE_TYPE_CSS, TermsDialog, useVisibilityCheckout, VisibilityPlanCard, VisibilityFeatures, ClosingBand,
+} from "../components/VisibilityPlan";
 import { listPayments, getSubscription } from "../api/businessSubscription";
 import { openBillingPortal } from "../api/stripeBilling";
 
@@ -16,12 +19,34 @@ function fmtDateTime(iso) {
   return `${d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })} at ${d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+// The Terms of Use the business agreed to at signup, with when they agreed.
+function AcceptedTermsDialog({ acceptedAt, onClose }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(15,23,42,0.55)" }} onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-labelledby="accepted-terms-title"
+        className="bg-white rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col p-6 sm:p-7"
+        onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between gap-4 mb-1">
+          <h2 id="accepted-terms-title" className="text-lg font-bold" style={{ color: FOREST }}>Accepted Terms of Use</h2>
+          <button onClick={onClose} aria-label="Close" className="text-xl leading-none opacity-50 hover:opacity-90" style={{ color: FOREST }}>✕</button>
+        </div>
+        {acceptedAt && <p className="text-xs mb-4" style={{ color: MUTED }}>Accepted on {fmtDateTime(acceptedAt)}</p>}
+        <div className="flex-1 overflow-y-auto rounded-xl p-4 text-sm leading-relaxed whitespace-pre-line" style={{ border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#f8fafc" }}>
+          {TERMS_TEXT}
+        </div>
+        <button onClick={onClose} className="mt-5 w-full py-3 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: SAGE }}>Close</button>
+      </div>
+    </div>
+  );
+}
+
 export default function BillingPage() {
-  const navigate = useNavigate();
   const { user, switchUser } = useBusinessAuth();
   const [toast, setToast] = useToast();
   const [payments, setPayments] = useState([]);
   const [opening, setOpening] = useState(false);
+  const [showAcceptedTerms, setShowAcceptedTerms] = useState(false);
+  const vp = useVisibilityCheckout(user.id);
 
   const premium = isPremium(user.plan);
   const cancelled = !premium && (!!user.cancelled || user.planStatus === "Cancelled");
@@ -48,10 +73,6 @@ export default function BillingPage() {
       setOpening(false);
     }
   }
-  function handleUpgrade(plan) {
-    if (plan.key === "premium") navigate("/business/upgrade");
-    else manageBilling();
-  }
   function handlePurchaseAddon(name) {
     // TODO: Stripe one-off payment
     setToast(`"${name}" purchased.`);
@@ -60,8 +81,11 @@ export default function BillingPage() {
   return (
     <BusinessLayout>
       <Toast message={toast} />
+      <style>{PAGE_TYPE_CSS}</style>
+      {vp.showTerms && <TermsDialog onClose={() => vp.setShowTerms(false)} />}
+      {showAcceptedTerms && <AcceptedTermsDialog acceptedAt={user.termsAcceptedAt} onClose={() => setShowAcceptedTerms(false)} />}
 
-      <div className="flex flex-col gap-6 max-w-4xl">
+      <div className="visibility-plan-page flex flex-col gap-6 max-w-4xl">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Subscriptions & Billing</h1>
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your plan, add-ons and payment history.</p>
@@ -84,7 +108,7 @@ export default function BillingPage() {
               <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Billing</p><p className="text-sm font-medium" style={{ color: FOREST }}>{user.billingInterval === "year" ? `£${Number(user.priceAmount ?? 329).toFixed(2)} / year` : `£${Number(user.priceAmount ?? user.monthlyFee ?? 0).toFixed(2)} / month`}</p></div>
             </div>
           ) : (
-            <p className="text-sm" style={{ color: MUTED }}>Your listing shows your name, address, telephone, email and hero image. Upgrade to the Visibility Plan to unlock your full business profile.</p>
+            <p className="text-sm" style={{ color: MUTED }}>Your listing shows your business name, address, telephone and email, with a pin on the homepage map. Upgrade to the Visibility Plan to unlock your full business profile.</p>
           )}
           {user.cancelAtPeriodEnd && premium && (
             <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(217,119,6,0.08)", color: "#92400E" }}>
@@ -97,9 +121,6 @@ export default function BillingPage() {
             </p>
           )}
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-            {!premium && (
-              <button onClick={() => navigate("/business/upgrade")} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Upgrade to Visibility Plan</button>
-            )}
             {user.stripeCustomerId && (
               <button onClick={manageBilling} disabled={opening} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>
                 {opening ? "Opening…" : premium ? "Manage billing or cancel" : "Billing history & cards"}
@@ -108,31 +129,17 @@ export default function BillingPage() {
           </div>
         </div>
 
-        {/* Available plans */}
-        <div>
-          <p className="text-sm font-bold mb-3" style={{ color: FOREST }}>Available Plans</p>
-          <div className="grid sm:grid-cols-2 gap-4 max-w-3xl">
-            {PLANS.map((p) => {
-              const current = p.key === (isPremium(user.plan) ? "premium" : "free");
-              return (
-                <div key={p.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={current ? { border: `2px solid ${SAGE}` } : CARD}>
-                  <p className="text-base font-bold" style={{ color: FOREST }}>{p.name}</p>
-                  <p className="text-lg font-bold" style={{ color: FOREST }}>{p.price === 0 ? "Free" : `£${p.price}/mo or £${p.yearlyPrice}/yr`}</p>
-                  <ul className="flex flex-col gap-1">
-                    {p.features.map((f) => <li key={f} className="text-xs" style={{ color: MUTED }}>✓ {f}</li>)}
-                  </ul>
-                  {current ? (
-                    <span className="text-xs font-bold px-3 py-1.5 rounded-lg text-center" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>Current Plan</span>
-                  ) : (
-                    <button onClick={() => handleUpgrade(p)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={p.key === "premium" ? { backgroundColor: SAGE, color: "#fff" } : { border: `1.5px solid ${BORDER}`, color: FOREST }}>
-                      {p.key === "premium" ? "Upgrade" : "Cancel plan"}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* The Visibility Plan — same sections as the subscription page, and
+            the upgrade buttons go straight to Stripe Checkout. */}
+        {premium ? (
+          <VisibilityFeatures included />
+        ) : (
+          <>
+            <VisibilityPlanCard checkout={vp} />
+            <VisibilityFeatures />
+            <ClosingBand checkout={vp} />
+          </>
+        )}
 
         {/* Add-ons */}
         <div className="bg-white rounded-2xl p-5" style={CARD}>
@@ -187,7 +194,7 @@ export default function BillingPage() {
         {/* Terms acceptance record */}
         <div className="bg-white rounded-2xl p-5" style={CARD}>
           <p className="text-sm font-bold mb-2" style={{ color: FOREST }}>Terms Acceptance Record</p>
-          <p className="text-sm" style={{ color: MUTED }}>Terms accepted on {fmtDateTime(user.termsAcceptedAt)}. <span className="font-semibold cursor-pointer" style={{ color: "#2563EB" }}>View accepted terms →</span></p>
+          <p className="text-sm" style={{ color: MUTED }}>{user.termsAcceptedAt ? `Terms accepted on ${fmtDateTime(user.termsAcceptedAt)}.` : "Terms accepted when your business was registered."} <button type="button" onClick={() => setShowAcceptedTerms(true)} className="font-semibold hover:underline" style={{ color: "#2563EB" }}>View accepted terms →</button></p>
         </div>
       </div>
     </BusinessLayout>

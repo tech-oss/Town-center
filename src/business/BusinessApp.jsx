@@ -81,6 +81,7 @@ function RequirePremium({ title, description, children }) {
 
 const NEWS_GATE = { title: "News & Offers is part of the Visibility Plan", description: "Upgrade to publish news, updates and special offers on your business page." };
 const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions." };
+const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page." };
 const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention." };
 
 // The one route that requires onboarding to still be outstanding — once it's
@@ -127,7 +128,7 @@ export default function BusinessApp() {
       <Route path="billing" element={<RequireOwner><BillingPage /></RequireOwner>} />
       <Route path="upgrade" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
       <Route path="subscription" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
-      <Route path="reviews" element={<RequireAuth><ReviewsPage /></RequireAuth>} />
+      <Route path="reviews" element={<RequireAuth><RequirePremium {...REVIEWS_GATE}><ReviewsPage /></RequirePremium></RequireAuth>} />
       <Route path="support" element={<RequireAuth><SupportPage /></RequireAuth>} />
       <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
 

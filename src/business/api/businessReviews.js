@@ -12,6 +12,9 @@ function fromRow(row) {
     date: row.date,
     text: row.text,
     verificationLink: row.verification_link,
+    // New and edited reviews wait for admin approval before going live.
+    status: row.status ?? "Pending Approval",
+    moderationNote: row.moderation_note ?? null,
   };
 }
 

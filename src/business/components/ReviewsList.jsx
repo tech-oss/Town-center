@@ -36,6 +36,18 @@ export function ReviewsSummary({ reviews }) {
   );
 }
 
+const STATUS_STYLES = {
+  "Pending Approval": { label: "Awaiting approval", bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
+  Visible: { label: "Live", bg: "rgba(22,163,74,0.14)", fg: "#15803D" },
+  Rejected: { label: "Not approved", bg: "rgba(185,28,28,0.1)", fg: "#991B1B" },
+  Hidden: { label: "Hidden by admin", bg: "rgba(107,114,128,0.13)", fg: "#374151" },
+};
+
+function ReviewStatus({ status }) {
+  const s = STATUS_STYLES[status] ?? STATUS_STYLES["Pending Approval"];
+  return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: s.bg, color: s.fg }}>{s.label}</span>;
+}
+
 const EMPTY_REVIEW = { reviewer: "", rating: 5, date: new Date().toISOString().slice(0, 10), text: "", verificationLink: "" };
 
 // A valid web URL — requires an http(s) scheme so a plain word or
@@ -135,6 +147,7 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold" style={{ color: FOREST }}>{r.reviewer}</span>
               <Stars rating={r.rating} />
+              {r.status && <ReviewStatus status={r.status} />}
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs" style={{ color: "#9CA3AF" }}>{r.date}</span>
@@ -147,6 +160,9 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
             </div>
           </div>
           <p className="text-sm" style={{ color: FOREST }}>{r.text}</p>
+          {r.status === "Rejected" && r.moderationNote && (
+            <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(185,28,28,0.08)", color: "#991B1B" }}>Not approved: {r.moderationNote}. Edit the review to send it again.</p>
+          )}
 
           {r.verificationLink && (
             <a href={r.verificationLink} target="_blank" rel="noreferrer"

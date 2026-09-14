@@ -91,6 +91,9 @@ async function applySubscription(sub: Stripe.Subscription) {
     cancelled: !premium,
     stripe_customer_id: customer,
     stripe_subscription_id: premium ? sub.id : null,
+    // Paid through Stripe now, so no longer an admin-granted (non-paying) plan.
+    granted_by_admin: null,
+    granted_at: null,
     current_period_end: periodEnd?.toISOString() ?? null,
     renewal_date: periodEnd ? periodEnd.toISOString().slice(0, 10) : null,
     cancel_at_period_end: !!sub.cancel_at_period_end,

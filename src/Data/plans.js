@@ -16,7 +16,7 @@ export const FREE_PLAN = {
   name: "Free",
   price: 0,
   tagline: "Get listed",
-  features: ["Business name", "Address", "Telephone & email", "Hero image"],
+  features: ["Business name", "Address", "Telephone & email", "Pin on the homepage map"],
 };
 
 // Monthly and annual billing for the Visibility Plan. `stripePriceSecret`
@@ -78,8 +78,12 @@ export const isPremium = (plan) => String(plan ?? "").toLowerCase() === "premium
 export const formatPrice = (n) => `£${Number.isInteger(n) ? n : n.toFixed(2)}`;
 
 // The listing fields a free business may edit. Everything else is shown but
-// locked. `address` and `postalCode` together make up the address.
-export const FREE_EDITABLE_FIELDS = new Set(["name", "address", "postalCode", "phone", "email", "heroImage"]);
+// locked. `address` and `postalCode` together make up the address; `lat`/`lng`
+// place its pin on the homepage map (its own page still has no map).
+//
+// The hero picture is paid-only: a Free listing shows the stock picture admin
+// uploads, which the business can't change.
+export const FREE_EDITABLE_FIELDS = new Set(["name", "address", "postalCode", "phone", "email", "lat", "lng"]);
 
 export const canEditField = (plan, field) => isPremium(plan) || FREE_EDITABLE_FIELDS.has(field);
 

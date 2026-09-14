@@ -104,8 +104,21 @@ export default function DashboardPage() {
 
         {/* Summary cards */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard label="Profile Views (this month)" value="1,284" sub="+18% vs last month" />
-          <StatCard label="Article / Offer Views" value="392" sub="+6% vs last month" />
+          {/* Analytics are a Visibility Plan feature */}
+          {isFreePlan ? (
+            <Link to="/business/upgrade" className="sm:col-span-2 bg-white rounded-2xl p-5 flex items-center gap-4 transition-shadow hover:shadow-md" style={CARD}>
+              <span className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" style={{ backgroundColor: "rgba(217,119,6,0.12)" }}>🔒</span>
+              <span>
+                <span className="block text-sm font-bold" style={{ color: FOREST }}>Page and article views</span>
+                <span className="block text-xs mt-0.5" style={{ color: MUTED }}>Upgrade to the Visibility Plan to see how many people view your page and articles.</span>
+              </span>
+            </Link>
+          ) : (
+            <>
+              <StatCard label="Profile Views (this month)" value="1,284" sub="+18% vs last month" />
+              <StatCard label="Article / Offer Views" value="392" sub="+6% vs last month" />
+            </>
+          )}
           <StatCard label="Active Articles / Offers" value={liveArticles} />
           <StatCard label="Support Tickets (open)" value={openTickets} />
         </div>

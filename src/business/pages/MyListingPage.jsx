@@ -156,12 +156,12 @@ export default function MyListingPage() {
   async function handleReviewAdd(form) {
     const created = await addReview(user.id, form);
     setReviews((prev) => [created, ...prev]);
-    setToast("Review added.");
+    setToast("Review sent for approval. It goes live once an admin approves it.");
   }
   async function handleReviewUpdate(id, form) {
     await updateReview(id, form);
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form } : r)));
-    setToast("Review updated.");
+    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, ...form, status: "Pending Approval", moderationNote: null } : r)));
+    setToast("Changes sent for approval. The review goes live again once an admin approves it.");
   }
   async function handleReviewDelete(id) {
     await deleteReview(id);
@@ -257,7 +257,9 @@ export default function MyListingPage() {
                   <Locked field="logo">
                   <SingleImageUpload label="Business Logo" src={listing.logo} round pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
                   </Locked>
+                  <Locked field="heroImage" message="Upgrade to Visibility to change the hero picture of your business.">
                   <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />
+                  </Locked>
                 </div>
                 <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>This image appears at the top of your public business page.</p>
               </EditorSection>
