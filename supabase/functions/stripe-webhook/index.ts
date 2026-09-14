@@ -114,7 +114,12 @@ function money(amountMinor: number, currency: string) {
 
 async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed") {
   const subId = typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id;
-  let businessId = invoice.subscription_details?.metadata?.business_id ?? null;
+  // Newer Stripe API versions moved the subscription details under `parent`.
+  // deno-lint-ignore no-explicit-any
+  const parentDetails = (invoice as any).parent?.subscription_details;
+  let businessId = invoice.subscription_details?.metadata?.business_id
+    ?? parentDetails?.metadata?.business_id
+    ?? null;
   if (!businessId && invoice.customer) {
     const customer = typeof invoice.customer === "string" ? invoice.customer : invoice.customer.id;
     const { data } = await admin
@@ -122,8 +127,9 @@ async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed")
     businessId = data?.business_id ?? null;
   }
   if (!businessId) {
-    console.warn("No business for invoice", invoice.id, subId);
-    return;
+    // Throwing makes Stripe retry later, by which time the subscription (and
+    // its customer) is on file — rather than silently losing the payment.
+    throw new Error(`No business found yet for invoice ${invoice.id} (${subId ?? parentDetails?.subscription ?? "no subscription"})`);
   }
 
   const paidAt = invoice.status_transitions?.paid_at ?? invoice.created;
@@ -174,6 +180,14 @@ Deno.serve(async (req) => {
         if (session.mode === "subscription" && session.subscription) {
           const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
           await applySubscription(await stripe.subscriptions.retrieve(subId));
+          // Record the first payment here too, so billing history doesn't
+          // depend on invoice.paid arriving (or being enabled). Recording is
+          // keyed on the invoice id, so a later invoice.paid just updates it.
+          const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
+          if (invoiceId) {
+            const invoice = await stripe.invoices.retrieve(invoiceId);
+            if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
+          }
         }
         break;
       }
