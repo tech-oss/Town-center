@@ -174,7 +174,7 @@ export default function BillingPage() {
               )}
               {payments.map((p, i) => (
                 <tr key={i} style={{ borderBottom: i < payments.length - 1 ? `1px solid ${BORDER}` : "none" }}>
-                  <td className="px-3 py-2.5" style={{ color: FOREST }}>{p.date}</td>
+                  <td className="px-3 py-2.5 whitespace-nowrap" style={{ color: FOREST }}>{p.date ? fmtDate(p.date) : "—"}</td>
                   <td className="px-3 py-2.5" style={{ color: MUTED }}>{p.description}</td>
                   <td className="px-3 py-2.5 font-medium" style={{ color: FOREST }}>{p.amount}</td>
                   <td className="px-3 py-2.5"><span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "Paid" ? "rgba(37,99,235,0.16)" : "rgba(220,38,38,0.1)", color: p.status === "Paid" ? "#2563EB" : "#991B1B" }}>{p.status}</span></td>
