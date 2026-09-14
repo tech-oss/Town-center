@@ -1,7 +1,7 @@
 // Type A — See & Do / Eat & Drink / Shop (shared public page layout).
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
-  SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
+  SingleImageUpload, PlanImageNote, GalleryGrid, HoursEditor, SocialFields, LocationFields,
   CARD, Locked,
 } from "./shared";
 
@@ -27,7 +27,9 @@ export default function TypeAEditor({ form, set, onSave, saving }) {
           </Locked>
           <div className="flex flex-wrap gap-8 mt-4">
             <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]" onChange={(v) => set("heroImage", v)} />
+            <SingleImageUpload label="Logo" src={form.logo} round onChange={(v) => set("logo", v)} />
           </div>
+          <PlanImageNote />
         </EditorSection>
 
         <EditorSection title="Opening Hours & Find Us">

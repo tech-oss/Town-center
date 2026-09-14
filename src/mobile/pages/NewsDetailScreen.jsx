@@ -37,6 +37,11 @@ export default function NewsDetailScreen() {
                 </span>
                 {article.date && <span className="text-xs" style={{ color: "#000000" }}>{article.date}</span>}
               </div>
+              {article.endsOn && (
+                <p className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full mb-2" style={{ backgroundColor: "rgba(220,38,38,0.08)", color: "#991B1B" }}>
+                  {article.category === "Offer" ? "Offer ends" : "Ends"} {article.endsOn}
+                </p>
+              )}
               <h1 className="text-xl font-bold leading-snug" style={{ color: "#000000" }}>{article.title}</h1>
               {biz && (
                 <p className="text-sm mt-1.5" style={{ color: "#000000" }}>

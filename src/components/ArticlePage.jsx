@@ -74,6 +74,11 @@ export default function ArticlePage() {
               {article.category}
             </span>
             <span className="text-sm" style={{ color: "#000000" }}>{article.date}</span>
+            {article.endsOn && (
+              <span className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: "rgba(220,38,38,0.08)", color: "#991B1B" }}>
+                {article.category === "Offer" ? "Offer ends" : "Ends"} {article.endsOn}
+              </span>
+            )}
             <span className="ml-auto">
               <ShareButton path={`/news/${article.slug}`} title={article.title} text={article.body?.[0]} />
             </span>

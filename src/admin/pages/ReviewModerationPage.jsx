@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getReviews, hideReview, restoreReview, deleteReview, approveReply, rejectReply } from "../../api/admin";
+import { getReviews, hideReview, restoreReview, deleteReview, approveReply, rejectReply, approveReview, rejectReview } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import Toast from "../components/Toast";
@@ -8,7 +8,9 @@ import ReviewActions from "../components/ReviewActions";
 import { NAVY, BLUE, MUTED, BORDER, CARD, FIELD_STYLE } from "../theme";
 import { formatUK } from "../../lib/ukDate";
 
-const FILTERS = ["All", "Visible", "Hidden"];
+// "Visible" reviews are the live ones.
+const FILTERS = ["Pending Approval", "Visible", "Rejected", "Hidden", "All"];
+const FILTER_LABELS = { Visible: "Live" };
 
 function Stars({ rating }) {
   const n = Math.round(Number(rating) || 0);
@@ -36,7 +38,7 @@ function HideForm({ onHide, onCancel }) {
 }
 
 export default function ReviewModerationPage() {
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("Pending Approval");
   const [nonce, setNonce] = useState(0);
   const [toast, setToast] = useState("");
   const [hidingId, setHidingId] = useState(null);
@@ -60,6 +62,17 @@ export default function ReviewModerationPage() {
     flash("Review restored.");
     refresh();
   }
+  async function handleApproveReview(r) {
+    await approveReview(r.id);
+    flash(`Review from ${r.reviewer} is now live on ${r.businessName}.`);
+    refresh();
+  }
+  async function handleRejectReview(r, reason) {
+    await rejectReview(r.id, reason);
+    flash("Review rejected.");
+    refresh();
+  }
+
   async function handleApproveReply(r) {
     await approveReply(r.id);
     flash("Reply approved.");
@@ -82,7 +95,7 @@ export default function ReviewModerationPage() {
       <Toast message={toast} />
       <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Review Moderation</h1>
       <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
-        Customer reviews across every business listing. Hiding pulls a review off the public site but keeps it on record; deleting is permanent.
+        Reviews businesses add to their listing. Each new or edited review waits here for approval before it appears on the business's page. Hiding pulls a live review off the site but keeps it on record; deleting is permanent.
       </p>
 
       <div className="flex gap-2 flex-wrap mb-5">
@@ -92,7 +105,7 @@ export default function ReviewModerationPage() {
             style={filter === f
               ? { backgroundColor: BLUE, color: "#fff" }
               : { border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#fff" }}>
-            {f}
+            {FILTER_LABELS[f] ?? f}
           </button>
         ))}
       </div>
@@ -108,8 +121,13 @@ export default function ReviewModerationPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-bold" style={{ color: NAVY }}>{r.reviewer}</p>
                     <Stars rating={r.rating} />
-                    {r.status === "Hidden" && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#991B1B" }}>Hidden</span>
+                    {r.status !== "Visible" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={r.status === "Pending Approval"
+                        ? { backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }
+                        : { backgroundColor: "rgba(220,38,38,0.1)", color: "#991B1B" }}>{r.status}</span>
+                    )}
+                    {r.status === "Visible" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(22,163,74,0.14)", color: "#15803D" }}>Live</span>
                     )}
                   </div>
                   <p className="text-xs mt-1" style={{ color: MUTED }}>{r.businessName} · {formatUK(r.date)}</p>
@@ -152,8 +170,14 @@ export default function ReviewModerationPage() {
                       )}
                     </div>
                   )}
-                  {r.status === "Hidden" && r.moderationNote && (
-                    <p className="text-[11px] mt-2" style={{ color: "#991B1B" }}>Hidden: {r.moderationNote}</p>
+                  {(r.status === "Hidden" || r.status === "Rejected") && r.moderationNote && (
+                    <p className="text-[11px] mt-2" style={{ color: "#991B1B" }}>{r.status}: {r.moderationNote}</p>
+                  )}
+                  {r.status === "Pending Approval" && (
+                    <ReviewActions
+                      approveLabel="Approve & publish" rejectLabel="Reject"
+                      onApprove={() => handleApproveReview(r)}
+                      onReject={(reason) => handleRejectReview(r, reason)} />
                   )}
                 </div>
               </div>
@@ -168,7 +192,9 @@ export default function ReviewModerationPage() {
                 </div>
               ) : (
                 <div className="flex gap-2 mt-3">
-                  {r.status === "Hidden" ? (
+                  {r.status === "Pending Approval" ? null : r.status === "Rejected" ? (
+                    <button onClick={() => handleApproveReview(r)} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: BLUE }}>Approve instead</button>
+                  ) : r.status === "Hidden" ? (
                     <button onClick={() => handleRestore(r)} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: BLUE }}>Restore</button>
                   ) : (
                     <button onClick={() => setHidingId(r.id)} className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Hide</button>

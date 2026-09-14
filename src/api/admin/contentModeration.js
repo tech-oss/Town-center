@@ -101,7 +101,7 @@ function reviewFromRow(row) {
     // so a reply is moderated separately from the review it answers.
     reply: row.reply?.text ?? "",
     replyStatus: row.reply?.status ?? null,
-    status: row.status ?? "Visible",
+    status: row.status ?? "Pending Approval",
     moderationNote: row.moderation_note,
   };
 }
@@ -141,6 +141,28 @@ export async function getReviews({ status } = {}) {
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []).map(reviewFromRow);
+}
+
+// Reviews a business adds (or edits) wait as "Pending Approval" until admin
+// approves them; only then do they appear on the business's public page.
+export async function approveReview(id) {
+  const ctx = await reviewContext(id);
+  const { error } = await supabase
+    .from("business_reviews")
+    .update({ status: "Visible", moderation_note: null })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "review.approved", entityType: "review", entityId: id, title: ctx?.title });
+}
+
+export async function rejectReview(id, reason) {
+  const ctx = await reviewContext(id);
+  const { error } = await supabase
+    .from("business_reviews")
+    .update({ status: "Rejected", moderation_note: reason || null })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, { action: "review.rejected", entityType: "review", entityId: id, title: ctx?.title, detail: reason || null });
 }
 
 // Hiding is the default moderation action — it pulls the review off the public

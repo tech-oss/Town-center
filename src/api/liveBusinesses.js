@@ -56,13 +56,27 @@ function mapHours(hours) {
 
 const listOrUndefined = (v) => (Array.isArray(v) && v.length > 0 ? v : undefined);
 
+const shortDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+// The dates a business set on its post, as one line: "14 Sep – 30 Sep 2026",
+// "Ends 30 Sep 2026" or "From 14 Sep". The end date always shows, so people
+// know when an offer finishes.
+function articleDates(a) {
+  if (a.start_date && a.end_date) return `${shortDate(a.start_date)} – ${longDate(a.end_date)}`;
+  if (a.end_date) return `Ends ${longDate(a.end_date)}`;
+  if (a.start_date) return `From ${shortDate(a.start_date)}`;
+  return a.date ? shortDate(a.date) : "";
+}
+
 function mapArticle(a, business) {
   const slug = `live-${a.id}`;
   return {
     id: slug,
     slug,
     category: a.type ?? "News",
-    date: a.start_date ? new Date(a.start_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
+    date: articleDates(a),
+    endsOn: a.end_date ? longDate(a.end_date) : null,
     title: a.title,
     excerpt: String(a.body ?? "").split(/\n\s*\n/)[0]?.slice(0, 180) ?? "",
     image: a.hero_image || a.thumbnail || business.image,
@@ -71,7 +85,25 @@ function mapArticle(a, business) {
   };
 }
 
-function toItem(row, articles) {
+// An approved review, in both shapes the pages use: `reviews` for the
+// Eat & Drink / Shop / See & Do / Stay pages and `reviewsList` for the
+// Services and Freelancer layouts' ReviewCard.
+function mapReview(r) {
+  const link = r.verification_link
+    ? (/^https?:\/\//i.test(r.verification_link) ? r.verification_link : `https://${r.verification_link}`)
+    : null;
+  return {
+    id: r.id,
+    reviewer: r.reviewer,
+    rating: Number(r.rating ?? 0),
+    date: r.date ? longDate(r.date) : "",
+    text: r.text,
+    reply: r.reply || null,
+    sourceUrl: link,
+  };
+}
+
+function toItem(row, articles, reviews = {}) {
   const type = row.business_type;
   const section = SECTION_FOR_TYPE[type];
   const categories = categoriesFor(type, row.business_type_detail);
@@ -128,6 +160,12 @@ function toItem(row, articles) {
     stayKind: row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
   };
   item.news = (articles[row.business_id] ?? []).map((a) => mapArticle(a, item));
+  // Only approved reviews of Visibility Plan businesses reach the view.
+  const approved = (reviews[row.business_id] ?? []).map(mapReview);
+  if (approved.length) {
+    item.reviews = approved;
+    item.reviewsList = approved.map((rv) => ({ area: rv.reviewer, stars: rv.rating, timeAgo: rv.date, text: rv.text, sourceUrl: rv.sourceUrl }));
+  }
   return item;
 }
 
@@ -150,9 +188,11 @@ let cache = null;
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
-    const [profilesRes, articlesRes] = await Promise.all([
+    const [profilesRes, articlesRes, reviewsRes] = await Promise.all([
       withSchemaRetry(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false })),
       withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
+      // Reviews are optional: if the view isn't there yet, pages just show none.
+      withSchemaRetry(() => supabase.from("public_business_reviews").select("*").order("date", { ascending: false })),
     ]);
     // A missing view (migration not run yet) or a network failure must not
     // take the whole directory down — the site falls back to its demo data.
@@ -165,12 +205,14 @@ export function loadLiveBusinesses() {
     }
     const articles = {};
     for (const a of articlesRes.data ?? []) (articles[a.business_id] ??= []).push(a);
+    const reviews = {};
+    for (const rv of reviewsRes.data ?? []) (reviews[rv.business_id] ??= []).push(rv);
     // A listing without a business type can't be placed in any section —
     // defaulting it somewhere would file a restaurant under Shop — so it
     // stays off the public site until its type is set.
     return (profilesRes.data ?? [])
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
-      .map((row) => toItem(row, articles));
+      .map((row) => toItem(row, articles, reviews));
   })();
   // A thrown error (e.g. offline) likewise retries on the next page.
   const pending = cache;
@@ -195,9 +237,8 @@ export function webPathFor(item) {
 }
 
 // Pins for the website's traders map and the app's Map tab: the demo traders
-// plus every registered business with coordinates. Only Premium listings
-// expose coordinates (a Free listing hides its map), so only they get a pin.
-// A registered business replaces a demo pin of the same name.
+// plus every registered business with coordinates, whatever its plan. A
+// registered business replaces a demo pin of the same name.
 export async function getMapBrands() {
   const live = await loadLiveBusinesses();
   const pins = live
@@ -207,7 +248,10 @@ export async function getMapBrands() {
       name: i.name,
       category: i.tag || "",
       section: MAP_SECTION[i.section] ?? i.section,
-      logo: i.logo || i.image,
+      // Logo only on the Visibility Plan (the public view withholds it for a
+      // Free business); the hero picture is used for the map card's banner.
+      logo: i.logo || null,
+      image: i.image,
       to: webPathFor(i),
       address: i.address,
       tagline: i.tagline,

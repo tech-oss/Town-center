@@ -1,6 +1,7 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity } from "./businessActivity";
 import { planFor } from "../../Data/plans";
+import { isPayingSubscription, isAdminGrantedSubscription } from "../../lib/subscriptionStatus";
 import { assertValidCoords } from "../../lib/geo";
 import { addLog } from "./users";
 import {
@@ -147,6 +148,8 @@ function fromRow(row) {
     // ── "Plan" step ──
     // Plans are stored lowercase ("standard"); the admin UI title-cases them.
     plan: subscription.plan === "premium" ? "Visibility Plan" : (titleCase(subscription.plan) || "Free"),
+    // A Visibility Plan admin gave the business, with nothing billed through Stripe.
+    planNotPaying: isAdminGrantedSubscription(subscription),
     // ── "Terms" step ──
     termsAcceptedAt: subscription.terms_accepted_at ?? null,
 
@@ -279,7 +282,11 @@ export async function registerBusiness(data) {
       business_id: id,
       plan: plan.key,
       plan_status: "Active",
-      monthly_fee: plan.price,
+      // Admin choosing the Visibility Plan gives it away: nothing is billed,
+      // so it's recorded at £0 and flagged, keeping revenue figures honest.
+      monthly_fee: 0,
+      granted_by_admin: plan.key === "premium" ? "full" : null,
+      granted_at: plan.key === "premium" ? new Date().toISOString() : null,
       renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
       upgrade_plan_key: plan.key,
       // Admin registering on the business's behalf stands in for their
@@ -412,7 +419,7 @@ export async function deleteBusiness(id) {
 export async function getBusinessStats() {
   const [bizRes, subsRes, ownersRes] = await Promise.all([
     supabase.from("businesses").select("id"),
-    supabase.from("business_subscriptions").select("business_id, plan, monthly_fee"),
+    supabase.from("business_subscriptions").select("business_id, plan, monthly_fee, stripe_subscription_id, cancelled"),
     supabase.from("business_users").select("business_id").eq("role", "Owner").eq("status", "approved"),
   ]);
   if (bizRes.error) throw bizRes.error;
@@ -420,7 +427,9 @@ export async function getBusinessStats() {
   if (ownersRes.error) throw ownersRes.error;
 
   const claimedIds = new Set((ownersRes.data ?? []).map((r) => r.business_id));
-  const paidByBusiness = new Map((subsRes.data ?? []).map((s) => [s.business_id, Number(s.monthly_fee ?? 0) > 0]));
+  const subs = subsRes.data ?? [];
+  const paidByBusiness = new Map(subs.map((s) => [s.business_id, isPayingSubscription(s)]));
+  const adminGranted = subs.filter(isAdminGrantedSubscription).length;
 
   const total = (bizRes.data ?? []).length;
   const claimed = (bizRes.data ?? []).filter((b) => claimedIds.has(b.id)).length;
@@ -431,10 +440,23 @@ export async function getBusinessStats() {
     claimed,
     unclaimed: total - claimed,
     paid,
-    free: total - paid,
+    adminGranted,
+    free: total - paid - adminGranted,
   };
 }
 
+
+// Saves a business's logo straight onto its listing. The public site only
+// shows it while the business is on the Visibility Plan.
+export async function setBusinessLogo(id, url) {
+  const { error } = await supabase
+    .from("business_listings")
+    .update({ logo: url || null, updated_at: new Date().toISOString() })
+    .eq("business_id", id);
+  if (error) throw error;
+  const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
+  addLog("Logo Updated", { id, name: biz?.name ?? id }, url ? "New logo uploaded" : "Logo removed");
+}
 
 // Moves a business between Free and Premium. Admin can do this at any time —
 // a comp upgrade, a lapsed payment, or correcting a registration — and the
@@ -445,19 +467,24 @@ export async function setBusinessPlan(id, planKey) {
   // A business paying through Stripe is on Premium because Stripe says so;
   // dropping it to Free here would leave Stripe still charging it, and the next
   // renewal would put it straight back. That has to be cancelled in Stripe.
-  if (plan.key === "free") {
-    const { data: current } = await supabase
-      .from("business_subscriptions").select("stripe_subscription_id, plan").eq("business_id", id).maybeSingle();
-    if (current?.stripe_subscription_id && current.plan === "premium") {
+  const { data: current } = await supabase
+    .from("business_subscriptions").select("stripe_subscription_id, plan").eq("business_id", id).maybeSingle();
+  const payingThroughStripe = !!current?.stripe_subscription_id && current.plan === "premium";
+  if (payingThroughStripe) {
+    if (plan.key === "free") {
       throw new Error("This business pays for the Visibility Plan through Stripe. Cancel the subscription in the Stripe dashboard — the plan will switch to Free automatically.");
     }
+    return { ok: true, plan: plan.name }; // already paying for it; nothing to change
   }
 
   const { error } = await supabase.from("business_subscriptions").upsert({
     business_id: id,
     plan: plan.key,
     plan_status: "Active",
-    monthly_fee: plan.price,
+    // Given by admin, not bought: £0 and flagged so reports don't count it as revenue.
+    monthly_fee: 0,
+    granted_by_admin: plan.key === "premium" ? "full" : null,
+    granted_at: plan.key === "premium" ? new Date().toISOString() : null,
     upgrade_plan_key: plan.key,
     renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
     updated_at: new Date().toISOString(),

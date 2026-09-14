@@ -16,6 +16,7 @@ import { typeColor } from "../lib/typeColors";
 import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
 import ServicesBusinessDetailScreen from "./ServicesBusinessDetailScreen";
 import FreelancerDetailScreen from "./FreelancerDetailScreen";
+import MobileReviews from "../components/MobileReviews";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -202,6 +203,8 @@ function BusinessDetailScreen({ place, goBack }) {
             </div>
           )}
 
+          {!free && <MobileReviews reviews={place.reviews} />}
+
           {news.length > 0 && (
             <div
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-4"
@@ -223,6 +226,7 @@ function BusinessDetailScreen({ place, goBack }) {
                         {n.category}
                       </span>
                       <p className="text-xs font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{n.title}</p>
+                      {n.date && <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.6)" }}>{n.date}</p>}
                     </div>
                   </Link>
                 ))}

@@ -1,7 +1,7 @@
 // Type B — Services businesses.
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
-  SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
+  SingleImageUpload, PlanImageNote, GalleryGrid, HoursEditor, SocialFields, LocationFields,
   RepeatableList, StatTilesEditor,
   CARD, BORDER, Locked,
 } from "./shared";
@@ -38,6 +38,7 @@ export default function TypeBEditor({ form, set, onSave, saving }) {
           </Locked>
           <div className="mt-4">
             <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]" onChange={(v) => set("heroImage", v)} />
+            <PlanImageNote />
           </div>
         </EditorSection>
 

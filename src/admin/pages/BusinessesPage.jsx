@@ -4,7 +4,7 @@ import { uploadImage } from "../../lib/uploadImage";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
-  getBusinesses, registerBusiness, approveBusiness, rejectBusiness,
+  getBusinesses, registerBusiness, approveBusiness, rejectBusiness, setBusinessLogo,
   suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
@@ -408,12 +408,12 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
       </Section>
 
       {/* ── Plan ── */}
-      <Section title="Subscription Plan" note="Free lists the name, address, phone, email and hero image. The Visibility Plan unlocks the full profile.">
+      <Section title="Subscription Plan" note="Free lists the name, address, phone and email, with a stock hero picture you upload. Choosing the Visibility Plan here gives it to the business for free: it's recorded as not paying and isn't counted as revenue.">
         <FormField label="Plan" required>
           <select value={form.planKey} onChange={(e) => set("planKey", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none w-full sm:w-72" style={FIELD_STYLE}>
             {PLANS.map((p) => (
-              <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : `£${p.price}/month`}</option>
+              <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : "given by admin, not paying"}</option>
             ))}
           </select>
         </FormField>
@@ -525,7 +525,6 @@ function Section({ title, note, children }) {
 
 // ─── Business card ────────────────────────────────────────────────────────────
 // ─── Logo upload modal ─────────────────────────────────────────────────────────
-// TODO: upload to Supabase storage
 function LogoUploadModal({ biz, onSave, onCancel }) {
   const [preview, setPreview] = useState(biz.logo ?? null);
   const [dragOver, setDragOver] = useState(false);
@@ -718,7 +717,7 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged }) {
             <select value={planKey} onChange={(e) => { setPlanKey(e.target.value); setPlanMessage(""); }}
               className="rounded-xl px-3 py-2 text-sm outline-none" style={FIELD_STYLE}>
               {PLANS.map((p) => (
-                <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : `£${p.price}/month`}</option>
+                <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : "given by admin, not paying"}</option>
               ))}
             </select>
             <button type="button" onClick={savePlan} disabled={savingPlan || planKey === currentKey}
@@ -861,6 +860,10 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
               <StatusTag status={biz.status} />
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
                 style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>{biz.plan}</span>
+              {biz.planNotPaying && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" title="Given by admin — nothing is billed through Stripe"
+                  style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Not paying</span>
+              )}
               {!biz.hasContent && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
@@ -1121,10 +1124,13 @@ export default function BusinessesPage() {
       notify(`"${biz.name}" permanently deleted and recorded in Admin Logs.`);
     });
   }
-  function handleUploadLogo(id, dataUrl) {
-    // TODO: upload to Supabase storage
-    patch(id, { logo: dataUrl });
-    notify("Logo updated.");
+  function handleUploadLogo(id, url) {
+    setBusinessLogo(id, url)
+      .then(() => {
+        patch(id, { logo: url });
+        notify("Logo saved. It shows on the site while the business is on the Visibility Plan.");
+      })
+      .catch((e) => notify(`Could not save the logo: ${e.message}`));
   }
 
   function handleToggleFeatured(biz) {

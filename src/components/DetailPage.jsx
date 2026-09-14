@@ -7,6 +7,7 @@ import NewsOffers from "./NewsOffers";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
+import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 
 // Business social profiles → the shared layout's { icon, href, label } shape.
@@ -101,7 +102,7 @@ export default function DetailPage() {
       }))}
       afterMap={free
         ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
-        : <NewsOffers item={item} />}
+        : <><BusinessReviews reviews={item.reviews} /><NewsOffers item={item} /></>}
     />
   );
 }

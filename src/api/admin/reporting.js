@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { isPayingSubscription, isAdminGrantedSubscription, monthlyRevenue, planBucket } from "../../lib/subscriptionStatus";
 
 // Reporting has no tables of its own — every figure is derived from
 // businesses, business_subscriptions, business_users, business_listings and
@@ -76,8 +77,11 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
   if (bizRes.error) throw bizRes.error;
 
   const scoped = tier === "All" ? subs : subs.filter((s) => label(s.plan) === tier);
-  const mrr = scoped.reduce((sum, s) => sum + Number(s.monthly_fee ?? 0), 0);
-  const paying = scoped.filter((s) => Number(s.monthly_fee ?? 0) > 0).length;
+  // Admin-granted Visibility Plans earn nothing, so only Stripe-backed plans
+  // count towards revenue and paying accounts.
+  const mrr = scoped.reduce((sum, s) => sum + monthlyRevenue(s), 0);
+  const paying = scoped.filter(isPayingSubscription).length;
+  const adminGranted = scoped.filter(isAdminGrantedSubscription).length;
 
   const businesses = bizRes.data ?? [];
   const listings = listingsRes.data ?? [];
@@ -113,7 +117,9 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
     mrr,
     mrrChange: 0,
     arpa: paying > 0 ? Math.round(mrr / paying) : 0,
-    activeSubscriptions: scoped.filter((s) => !s.cancelled).length,
+    activeSubscriptions: paying,
+    payingSubscriptions: paying,
+    adminGrantedSubscriptions: adminGranted,
     subscriptionsChange: 0,
     pendingApprovals: pendingSections + pendingBusinesses + pendingUsers + pendingEvents,
     activeListings,
@@ -137,16 +143,17 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
 // ─── Revenue ───────────────────────────────────────────────────────────────
 
 export async function getRevenueByTier({ tier = "All" } = {}) {
-  const subs = await loadSubscriptions();
+  const all = await loadSubscriptions();
+  const subs = tier === "All" ? all : all.filter((s) => label(s.plan) === tier);
   const byTier = {};
   for (const s of subs) {
-    const t = label(s.plan);
+    const t = planBucket(s);
     byTier[t] ??= { tier: t, revenue: 0, count: 0 };
-    byTier[t].revenue += Number(s.monthly_fee ?? 0);
+    byTier[t].revenue += monthlyRevenue(s);
     byTier[t].count += 1;
   }
   const list = Object.values(byTier).sort((a, b) => b.revenue - a.revenue);
-  return tier === "All" ? list : list.filter((t) => t.tier === tier);
+  return list;
 }
 
 export async function getSubscriptionTrend({ range = "6m", tier = "All" } = {}) {
@@ -299,7 +306,7 @@ export async function getPlanDistribution() {
   const subs = await loadSubscriptions();
   const counts = {};
   for (const s of subs) {
-    const plan = label(s.plan);
+    const plan = planBucket(s);
     counts[plan] = (counts[plan] ?? 0) + 1;
   }
   const rows = Object.entries(counts).map(([plan, count]) => ({ plan, count })).sort((a, b) => b.count - a.count);

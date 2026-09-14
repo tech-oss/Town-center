@@ -14,3 +14,4 @@ export * from "./supportTickets";
 export * from "./siteContent";
 export * from "./subscriptions";
 export * from "./reporting";
+export * from "./pushAttachments";

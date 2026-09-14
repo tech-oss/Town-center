@@ -69,7 +69,7 @@ function makeUserPin() {
 function popupHtml(b) {
   return `
     <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px 2px;min-width:152px;text-align:center;">
-      <img src="${b.logo}" alt="${b.name}" style="width:52px;height:52px;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,0.08);background:#fafafa"/>
+      ${b.logo ? `<img src="${b.logo}" alt="${b.name}" style="width:52px;height:52px;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,0.08);background:#fafafa"/>` : ""}
       <div>
         <div style="font-weight:700;font-size:13px;color:#1a3a42;line-height:1.3">${b.name}</div>
         <div style="font-size:11px;color:#666;margin-top:2px">${b.category}</div>
@@ -439,13 +439,16 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
         {/* Identity — logo tucked over the hero, as in the reference */}
         <div className="px-4 sm:px-5">
           <div className="flex items-start gap-3.5 -mt-7 relative">
-            <div
-              className="shrink-0 w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden"
-              style={{ border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 6px 18px -6px rgba(13,42,51,0.35)" }}
-            >
-              <img src={b.logo} alt="" className="w-10 h-10 object-contain" />
-            </div>
-            <div className="flex-1 min-w-0 pt-8">
+            {/* Logo square over the hero — Visibility Plan businesses only */}
+            {b.logo && (
+              <div
+                className="shrink-0 w-14 h-14 rounded-xl bg-white flex items-center justify-center overflow-hidden"
+                style={{ border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 6px 18px -6px rgba(13,42,51,0.35)" }}
+              >
+                <img src={b.logo} alt="" className="w-10 h-10 object-contain" />
+              </div>
+            )}
+            <div className={`flex-1 min-w-0 ${b.logo ? "pt-8" : "pt-10"}`}>
               <div className="min-w-0">
                 <h3 className="text-xl leading-tight truncate" style={{ fontFamily: "var(--font-heading)", fontWeight: 400, color: "var(--forest)" }}>
                   {b.name}

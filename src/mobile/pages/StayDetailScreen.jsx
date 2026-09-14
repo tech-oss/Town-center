@@ -14,6 +14,7 @@ import { typeColor } from "../lib/typeColors";
 import useMobileBack from "../hooks/useMobileBack";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import { OffersLink } from "../components/ListSearch";
+import MobileReviews from "../components/MobileReviews";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -255,6 +256,8 @@ export default function StayDetailScreen() {
               <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
             </div>
           )}
+
+          {!free && <MobileReviews reviews={place.reviews} />}
 
           {news.length > 0 && (
             <div

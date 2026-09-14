@@ -95,6 +95,7 @@ function BusinessBreakdownCard({ stats }) {
     { label: "Total Business Profiles", value: s.total ?? 0, to: "/admin/businesses" },
     { label: "Free", value: s.free ?? 0 },
     { label: "Paid", value: s.paid ?? 0 },
+    { label: "Visibility Plan, not paying", value: s.adminGranted ?? 0 },
     { label: "Claimed", value: s.claimed ?? 0 },
     { label: "Unclaimed", value: s.unclaimed ?? 0 },
   ];
@@ -104,7 +105,7 @@ function BusinessBreakdownCard({ stats }) {
         <h2 className="font-semibold text-sm" style={{ color: NAVY, fontFamily: CINZEL }}>Business Profiles</h2>
         <InfoTip text="Claimed means the business has an approved owner account signed in against it. Admin-registered listings with nobody signed in yet count as unclaimed." />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-6 gap-3">
         {rows.map((r) => (
           <div key={r.label} className="flex flex-col gap-1">
             <span className="text-2xl font-bold" style={{ color: NAVY }}>{r.value}</span>
@@ -415,7 +416,7 @@ export default function DashboardPage() {
       {/* ── 6 stat cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard icon={Icons.revenue}       label="Total Revenue This Month"   value={`£${(s.mrr ?? 0).toLocaleString()}`}  sub={`+${s.mrrChange}% on this month`}     to="/admin/subscriptions" />
-        <StatCard icon={Icons.subscriptions} label="Active Paid Subscriptions" value={s.activeSubscriptions ?? "—"}          sub={`+${s.subscriptionsChange} this month`} to="/admin/subscriptions" />
+        <StatCard icon={Icons.subscriptions} label="Active Paid Subscriptions" value={s.payingSubscriptions ?? "—"}          sub={`${s.adminGrantedSubscriptions ?? 0} more on admin-granted plans (not paying)`} to="/admin/subscriptions" />
         <StatCard icon={Icons.users}         label="Total Users"          value={s.totalUsers ?? "—"}                   sub={`+${s.newUsersThisMonth} this month`}   to="/admin/users" />
         <StatCard icon={Icons.content}       label="Content Approvals"    value={approvals?.length ?? 0}                pending to="/admin/approvals" />
         <StatCard icon={Icons.business}      label="Business Approvals"   value={pendingBusinesses?.length ?? 0}        pending to="/admin/businesses" />

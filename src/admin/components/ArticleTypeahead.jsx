@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { PUSH_ATTACHABLE_ARTICLES } from "../../Data/adminPushArticlesMock";
+import useFetch from "../../hooks/useFetch";
+import { getAttachableContent } from "../../api/admin";
 import { BLUE, BORDER, MUTED, NAVY } from "../theme";
 
 const CATEGORY_COLOURS = {
@@ -20,8 +21,12 @@ export default function ArticleTypeahead({ selected, onSelect, placeholder = "Se
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
 
-  const matches = query.trim()
-    ? PUSH_ATTACHABLE_ARTICLES.filter((a) => a.title.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
+  // Live content from the site; matches on the title or the business name, so
+  // typing "Solas" finds that business's offers.
+  const { data: attachable, loading } = useFetch(getAttachableContent, []);
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? (attachable ?? []).filter((a) => a.title.toLowerCase().includes(q) || (a.businessName ?? "").toLowerCase().includes(q)).slice(0, 8)
     : [];
 
   useEffect(() => {
@@ -63,14 +68,17 @@ export default function ArticleTypeahead({ selected, onSelect, placeholder = "Se
         <div className="absolute z-20 mt-1 w-full rounded-xl overflow-hidden bg-white max-h-64 overflow-y-auto"
           style={{ border: `1.5px solid ${BORDER}`, boxShadow: "0 8px 24px rgba(16,24,40,0.12)" }}>
           {matches.length === 0 ? (
-            <p className="px-3 py-2.5 text-xs" style={{ color: MUTED }}>No articles found.</p>
+            <p className="px-3 py-2.5 text-xs" style={{ color: MUTED }}>{loading ? "Loading articles…" : "No articles found."}</p>
           ) : (
             matches.map((a) => (
               <button key={a.id} type="button" onClick={() => pick(a)}
                 className="w-full text-left px-3 py-2.5 flex items-center gap-2 hover:bg-gray-50 transition-colors"
                 style={{ borderBottom: `1px solid ${BORDER}` }}>
                 <img src={a.thumbnail} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-                <span className="text-sm font-medium flex-1 min-w-0 truncate" style={{ color: NAVY }}>{a.title}</span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-medium truncate" style={{ color: NAVY }}>{a.title}</span>
+                  {a.businessName && <span className="block text-[11px] truncate" style={{ color: MUTED }}>{a.businessName}</span>}
+                </span>
                 <CategoryBadge category={a.category} />
               </button>
             ))

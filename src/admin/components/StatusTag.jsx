@@ -7,6 +7,8 @@ const COLOURS = {
   Refunded:      { bg: "rgba(217,119,6,0.14)",  text: "#92400E" },
   Pending:       { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Trial:         { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
+  "Not Paying":  { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
+  Free:          { bg: "rgba(107,114,128,0.13)", text: "#374151" },
   Draft:         { bg: "rgba(107,114,128,0.13)", text: "#374151" },
   Hidden:        { bg: "rgba(217,119,6,0.13)",   text: "#92400E" },
   Lapsed:        { bg: "rgba(107,114,128,0.13)", text: "#374151" },

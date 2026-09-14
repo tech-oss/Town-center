@@ -47,13 +47,18 @@ export function Toggle({ checked, onChange, label }) {
 
 // ─── Plan locks ───────────────────────────────────────────────────────────────
 // The business's subscription plan, provided by BusinessContentPage. A Free
-// business can only have its name, address, phone, email and hero image
-// edited; every other field is shown but disabled with a Premium tag.
+// business can only have its name, address, phone, email and map pin edited;
+// every other field is shown but disabled with a Premium tag.
+//
+// Admin can always set the hero picture (a Free business's hero is the stock
+// picture only admin uploads) and the logo (kept ready; it only shows on the
+// site once the business is on the Visibility Plan).
 export const PlanContext = createContext("premium");
+const ADMIN_ALWAYS_EDITABLE = new Set(["heroImage", "logo"]);
 
 export function Locked({ field, span2, children }) {
   const plan = useContext(PlanContext);
-  if (canEditField(plan, field)) return children;
+  if (canEditField(plan, field) || ADMIN_ALWAYS_EDITABLE.has(field)) return children;
   return (
     <div className={`relative${span2 ? " sm:col-span-2" : ""}`} title="Visibility Plan only">
       <fieldset disabled className="opacity-45 pointer-events-none select-none">{children}</fieldset>
@@ -138,6 +143,18 @@ export function SaveBar({ onSave, saving }) {
 
 // ─── Single hero / logo image upload with replace + drag-drop ────────────────
 // TODO: wire to Supabase storage bucket on backend integration
+// Under the hero/logo uploads: what each picture does on each plan.
+export function PlanImageNote() {
+  const plan = useContext(PlanContext);
+  return (
+    <p className="text-[11px] mt-3" style={{ color: "#9CA3AF" }}>
+      {canEditField(plan, "heroImage")
+        ? "The business can change its own hero picture and logo on the Visibility Plan."
+        : "Free plan: the hero picture is the stock picture you upload here, and the business can't change it. The logo is saved now but only shows once the business is on the Visibility Plan."}
+    </p>
+  );
+}
+
 export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video" }) {
   const [dragOver, setDragOver] = useState(false);
 

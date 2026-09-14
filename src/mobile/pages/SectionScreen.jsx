@@ -5,6 +5,7 @@ import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills, OffersLink } from "../components/ListSearch";
 import { sections } from "../../Data/pages";
+import { categoryLabel } from "../../Data/taxonomy";
 
 const SECTION_INTROS = {
   "see-do": "Explore the best attractions, green spaces, and things to do in and around Maidenhead.",
@@ -28,21 +29,36 @@ function CardImage({ src, alt }) {
   );
 }
 
+// Every category a listing is filed under — a registered business can pick
+// more than one (e.g. Restaurants and Private Dining), and should appear under
+// each, the same as on the website. Only the section's own categories count
+// (the ones the website's category bar offers), so cuisines don't become pills.
+function sectionCategorySlugs(section) {
+  const links = (section?.columns ?? []).flatMap((c) => c.links ?? []);
+  return new Set(links.filter((l) => l.to?.includes("?category=")).map((l) => l.to.split("?category=")[1]));
+}
+
+function tagsOf(item, slugs) {
+  const extra = (item.categories ?? []).filter((c) => slugs.has(c)).map(categoryLabel);
+  return [...new Set([item.tag, ...extra].filter(Boolean))];
+}
+
 export default function SectionScreen({ sectionKey }) {
   const section = sections[sectionKey];
   const sectionItems = useSectionItems(sectionKey);
   const [filter, setFilter] = useState("All");
   const [query, setQuery] = useState("");
+  const slugs = useMemo(() => sectionCategorySlugs(section), [section]);
 
   const filters = useMemo(
-    () => ["All", ...Array.from(new Set(sectionItems.map((i) => i.tag).filter(Boolean)))],
-    [sectionItems]
+    () => ["All", ...Array.from(new Set(sectionItems.flatMap((i) => tagsOf(i, slugs))))],
+    [sectionItems, slugs]
   );
 
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
     return sectionItems.filter((i) => {
-      if (filter !== "All" && i.tag !== filter) return false;
+      if (filter !== "All" && !tagsOf(i, slugs).includes(filter)) return false;
       if (!q) return true;
       return (
         i.name.toLowerCase().includes(q) ||
@@ -50,7 +66,7 @@ export default function SectionScreen({ sectionKey }) {
         (i.description ?? "").toLowerCase().includes(q)
       );
     });
-  }, [sectionItems, filter, query]);
+  }, [sectionItems, filter, query, slugs]);
 
   return (
     <MobileShell title={section.label} onBack backFallback="/mobile/explore">

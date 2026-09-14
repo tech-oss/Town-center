@@ -38,6 +38,8 @@ function StatBadge({ label, value, sub, accent = "#1E293B" }) {
 }
 
 const TIER_COLOURS = { Premium: "#2563EB", Standard: "#60A5FA", Agent: "#F59E0B", Basic: "#93C5FD" };
+// Bars in the revenue/tier breakdown are split by whether the plan is paid for.
+const BUCKET_COLOURS = { "Visibility Plan (paying)": "#2563EB", "Visibility Plan (admin, not paying)": "#F59E0B", Free: "#93C5FD" };
 const SECTION_COLOURS = ["#2563EB", "#60A5FA", "#F59E0B"];
 
 const RANGES = [
@@ -228,7 +230,7 @@ export default function ReportingPage() {
                     <span className="text-xs" style={{ color: "#6B7280" }}>{t.count} accounts · £{t.revenue}/mo</span>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(16,24,40,0.1)" }}>
-                    <div className="h-full rounded-full" style={{ width: `${(t.revenue / maxRevenue) * 100}%`, backgroundColor: TIER_COLOURS[t.tier] }} />
+                    <div className="h-full rounded-full" style={{ width: `${(t.revenue / maxRevenue) * 100}%`, backgroundColor: BUCKET_COLOURS[t.tier] ?? TIER_COLOURS[t.tier] }} />
                   </div>
                 </div>
               );

@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { isPayingSubscription, isAdminGrantedSubscription } from "../../lib/subscriptionStatus";
 
 // Subscriptions are business_subscriptions rows, one per business. Payments are
 // not yet taken through Stripe, so `history` is assembled from the few dates the
@@ -35,8 +36,12 @@ function fromRow(row, owner) {
     startDate: (row.terms_accepted_at ?? "").slice(0, 10),
     renewal: row.renewal_date ?? "",
     monthlyFee: row.monthly_fee ?? 0,
-    // No payment provider yet, so nothing can report a real payment state.
-    paymentStatus: row.monthly_fee > 0 ? "Paid" : "Trial",
+    // Paid only when Stripe is actually billing it; a Visibility Plan admin
+    // gave away shows as Not Paying so it's never mistaken for revenue.
+    paymentStatus: isPayingSubscription(row) ? "Paid"
+      : isAdminGrantedSubscription(row) ? "Not Paying"
+      : row.plan_status === "Trial" ? "Trial" : "Free",
+    paying: isPayingSubscription(row),
     isMultiSite: row.is_multi_site,
     upgradePlanKey: row.upgrade_plan_key,
     // 'trial' | 'full' | null — set only by grantTrial/grantFullAccess below,
