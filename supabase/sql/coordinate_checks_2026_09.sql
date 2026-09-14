@@ -12,6 +12,11 @@
 -- the table; fix that row, then run this again.
 -- ═══════════════════════════════════════════════════════════════════════════
 
+-- Existing rows with the same dropped-decimal typo. A constraint can't be
+-- added while any row breaks it, so these are corrected first.
+update public.business_listings set lng = '-0.7157608728476812' where business_id = 'biz_maidenhead-mini-golf-d4ph8' and lng = '-07157608728476812';
+update public.business_listings set lng = '-0.7467960617027777' where business_id = 'biz_norden-farm-siizn'         and lng = '-07467960617027777';
+
 create or replace function public.coord_in_range(value text, lo numeric, hi numeric)
 returns boolean
 language plpgsql immutable
