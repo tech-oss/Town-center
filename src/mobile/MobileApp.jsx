@@ -31,8 +31,11 @@ import WorkWithUsScreen from "./pages/WorkWithUsScreen";
 import TradersScreen from "./pages/TradersScreen";
 import LegalPlaceholderScreen from "./pages/LegalPlaceholderScreen";
 import { markMobileAppMounted } from "./lib/navHistory";
+import { enableLiveUpdates } from "../lib/liveUpdates";
 
 export default function MobileApp() {
+  // Content admin publishes appears in the open app without a restart.
+  useEffect(() => enableLiveUpdates(), []);
   // Service worker scoped to /mobile/ only — never touches the rest of the site.
   useEffect(() => {
     if ("serviceWorker" in navigator) {

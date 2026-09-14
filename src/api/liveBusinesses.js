@@ -185,6 +185,12 @@ async function withSchemaRetry(run, attempts = 3) {
 
 let cache = null;
 
+// Forget the loaded businesses so the next read fetches fresh data — used by
+// live updates when admin changes something.
+export function invalidateLiveBusinesses() {
+  cache = null;
+}
+
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {

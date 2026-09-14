@@ -1,4 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { enableLiveUpdates } from './lib/liveUpdates'
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom'
 import MobileApp from './mobile/MobileApp'
 import AdminApp from './admin/AdminApp'
@@ -59,6 +60,8 @@ function PublicSite() {
   useOrientationRepaint()
   const headerRef = useRef(null)
   const [headerHeight, setHeaderHeight] = useState(0)
+  // Content admin publishes appears on open pages without a reload.
+  useEffect(() => enableLiveUpdates(), [])
   const { pathname } = useLocation()
   // The homepage hero is a fullscreen video that the transparent header floats
   // over, so its <main> must start at y=0 (no header offset). Shop, Eat &
