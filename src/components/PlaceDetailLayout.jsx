@@ -280,14 +280,6 @@ export default function PlaceDetailLayout({
       {/* ── 1. Title & tagline, centered above the hero ── */}
       <section className="pt-10 md:pt-16 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          {logo && (
-            <img
-              src={logo}
-              alt={`${title} logo`}
-              className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-2xl object-contain bg-white p-1.5"
-              style={{ border: "1px solid rgba(0,0,0,0.08)" }}
-            />
-          )}
           <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
             {title}
           </h1>
@@ -321,6 +313,10 @@ export default function PlaceDetailLayout({
       {/* ── 3. Breadcrumb · category · description ── */}
       <section className="pt-10 md:pt-14 px-6 md:px-12">
         <div className="max-w-4xl mx-auto">
+          {/* Breadcrumb and category on the left, the business logo (when
+              there is one) on the right of the same block. */}
+          <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
           {/* Breadcrumb */}
           <nav className="mb-5 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--leaf)" }}>
             {breadcrumbs.map((b, i) => (
@@ -349,6 +345,16 @@ export default function PlaceDetailLayout({
               {extraBadges}
             </div>
           )}
+          </div>
+          {logo && (
+            <img
+              src={logo}
+              alt={`${title} logo`}
+              className="w-16 h-16 md:w-24 md:h-24 shrink-0 rounded-xl object-contain bg-white p-1.5"
+              style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+            />
+          )}
+          </div>
 
           {descriptionPlaceholder && (
             <p className="text-base md:text-lg leading-relaxed mb-2 text-center max-w-3xl mx-auto italic" style={{ color: "rgba(0,0,0,0.55)" }}>
