@@ -20,6 +20,9 @@ function buildSocial(item) {
   ].filter(Boolean);
 }
 
+// Sections whose page shows the business logo beside its name.
+const LOGO_SECTIONS = new Set(["see-do", "eat-drink", "shop"]);
+
 export default function DetailPage() {
   const { slug } = useParams();
   const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
@@ -69,6 +72,7 @@ export default function DetailPage() {
       ]}
       categoryLabel={item.tag}
       title={item.name}
+      logo={LOGO_SECTIONS.has(item.section) && !item.logoHeader ? item.logo : null}
       heroImage={heroImage}
       extraImages={extraImages}
       description={description}
@@ -91,6 +95,7 @@ export default function DetailPage() {
         to: `/${it.section}/place/${it.slug}`,
         image: it.image,
         logo: it.logo,
+        hasHero: it.hasHero,
         category: it.tag,
         name: it.name,
       }))}

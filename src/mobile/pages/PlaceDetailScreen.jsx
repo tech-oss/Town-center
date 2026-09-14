@@ -28,6 +28,9 @@ const SOCIAL_ICONS = {
 // freelancer) uses its own, richer native screens below since the website
 // itself gives Services a completely different, deeper layout
 // (ServicesDetailLayout/FreelancerDetailLayout) rather than this one.
+// Sections whose screen shows the business logo beside its name.
+const LOGO_SECTIONS = new Set(["see-do", "eat-drink", "shop"]);
+
 function BusinessDetailScreen({ place, goBack }) {
   const [copied, setCopied] = useState(false);
   // Free plan: name, hero, address, phone and email; everything else shows a
@@ -70,12 +73,22 @@ function BusinessDetailScreen({ place, goBack }) {
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
-          <div>
+          <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
             <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
               {section?.label} · {place.tag}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
+          </div>
+          {LOGO_SECTIONS.has(place.section) && place.logo && (
+            <img
+              src={place.logo}
+              alt={`${place.name} logo`}
+              className="w-14 h-14 shrink-0 rounded-xl object-contain bg-white p-1"
+              style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+            />
+          )}
           </div>
 
           {free ? (

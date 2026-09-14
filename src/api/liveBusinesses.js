@@ -96,6 +96,9 @@ function toItem(row, articles) {
     tag: category ? categoryLabel(category) : "",
     image: hero,
     logo: row.logo,
+    // The logo stays a logo: cards and page banners use the hero whenever
+    // one exists, and only fall back to the logo when it doesn't.
+    hasHero: !!row.hero_image,
     gallery,
     tagline: row.tagline,
     description: row.description,

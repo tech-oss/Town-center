@@ -40,6 +40,12 @@ const toEventCard = (e) => {
   };
 };
 
+// Demo brands only have a logo, shown contained on a mint tile. A registered
+// business with a hero image shows that photo instead, as its banner.
+function logoTile(it) {
+  return it.logo && !it.hasHero;
+}
+
 export default function CategoryPage() {
   // Two routes render this component: the generic "/:section" listing, and
   // "/services/:group" — a dedicated, category-scoped listing for one of
@@ -245,9 +251,9 @@ export default function CategoryPage() {
                 >
                   <div
                     className="relative aspect-[4/3] sm:aspect-square overflow-hidden"
-                    style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: it.logo ? "var(--mint)" : undefined }}
+                    style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: logoTile(it) ? "var(--mint)" : undefined }}
                   >
-                    {it.logo ? (
+                    {logoTile(it) ? (
                       <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-5 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                       <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />

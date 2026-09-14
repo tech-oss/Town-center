@@ -172,6 +172,7 @@ function normalizeUrl(url) {
 //   6. "related" grid
 export default function PlaceDetailLayout({
   breadcrumbs,
+  logo,
   categoryLabel,
   categoryColor = "var(--leaf)",
   title,
@@ -279,6 +280,14 @@ export default function PlaceDetailLayout({
       {/* ── 1. Title & tagline, centered above the hero ── */}
       <section className="pt-10 md:pt-16 px-6 text-center">
         <div className="max-w-3xl mx-auto">
+          {logo && (
+            <img
+              src={logo}
+              alt={`${title} logo`}
+              className="w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 rounded-2xl object-contain bg-white p-1.5"
+              style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+            />
+          )}
           <h1 className="hero-title uppercase text-3xl md:text-6xl mb-4" style={{ color: "#000000" }}>
             {title}
           </h1>
@@ -587,8 +596,8 @@ export default function PlaceDetailLayout({
                   className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden" style={it.logo ? { backgroundColor: "var(--mint)" } : undefined}>
-                    {it.logo ? (
+                  <div className="relative aspect-[4/3] overflow-hidden" style={it.logo && !it.hasHero ? { backgroundColor: "var(--mint)" } : undefined}>
+                    {it.logo && !it.hasHero ? (
                       <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-3 sm:p-10 transition-transform duration-500 group-hover:scale-105" />
                     ) : (
                       <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
