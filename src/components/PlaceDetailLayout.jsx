@@ -350,7 +350,7 @@ export default function PlaceDetailLayout({
             <img
               src={logo}
               alt={`${title} logo`}
-              className="w-16 h-16 md:w-24 md:h-24 shrink-0 mr-[70px] rounded-xl object-contain bg-white p-1.5"
+              className="w-16 h-16 md:w-24 md:h-24 shrink-0 md:mr-[370px] rounded-xl object-contain bg-white p-1.5"
               style={{ border: "1px solid rgba(0,0,0,0.08)" }}
             />
           )}
