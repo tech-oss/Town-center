@@ -15,7 +15,7 @@
 //   customer.subscription.updated, customer.subscription.deleted,
 //   invoice.paid, invoice.payment_failed
 
-import Stripe from "https://esm.sh/stripe@14.25.0?target=deno";
+import Stripe from "npm:stripe@14.25.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
@@ -23,6 +23,23 @@ const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
   httpClient: Stripe.createFetchHttpClient(),
 });
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
+
+// Reads a Stripe object straight from the REST API. The SDK's own request
+// client crashes this edge runtime ("Deno.core.runMicrotasks() is not
+// supported"), so API reads use fetch; the SDK is only used to verify
+// signatures. Pinned to the API version this code was written against.
+// deno-lint-ignore no-explicit-any
+async function stripeGet(path: string): Promise<any> {
+  const res = await fetch(`https://api.stripe.com/v1/${path}`, {
+    headers: {
+      Authorization: `Bearer ${Deno.env.get("STRIPE_SECRET_KEY")}`,
+      "Stripe-Version": "2024-06-20",
+    },
+  });
+  const body = await res.json();
+  if (!res.ok) throw new Error(`Stripe ${path}: ${body?.error?.message ?? res.status}`);
+  return body;
+}
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const text = (body: string, status = 200) => new Response(body, { status });
@@ -159,7 +176,7 @@ async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed")
 async function recordLatestInvoice(sub: Stripe.Subscription) {
   const invoiceId = typeof sub.latest_invoice === "string" ? sub.latest_invoice : sub.latest_invoice?.id;
   if (!invoiceId) return;
-  const invoice = await stripe.invoices.retrieve(invoiceId);
+  const invoice = await stripeGet(`invoices/${invoiceId}`);
   if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
 }
 
@@ -189,7 +206,7 @@ Deno.serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.mode === "subscription" && session.subscription) {
           const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
-          const sub = await stripe.subscriptions.retrieve(subId);
+          const sub = await stripeGet(`subscriptions/${subId}`);
           await applySubscription(sub);
           // Record the first payment here too, so billing history doesn't
           // depend on invoice.paid arriving (or being enabled). Recording is
@@ -203,16 +220,16 @@ Deno.serve(async (req) => {
       case "customer.subscription.deleted": {
         // Re-read from the API so the shape matches this code's API version,
         // whatever version the webhook endpoint sends events in.
-        const sub = await stripe.subscriptions.retrieve((event.data.object as Stripe.Subscription).id);
+        const sub = await stripeGet(`subscriptions/${(event.data.object as Stripe.Subscription).id}`);
         await applySubscription(sub);
         await recordLatestInvoice(sub);
         break;
       }
       case "invoice.paid":
-        await recordInvoice(await stripe.invoices.retrieve((event.data.object as Stripe.Invoice).id), "Paid");
+        await recordInvoice(await stripeGet(`invoices/${(event.data.object as Stripe.Invoice).id}`), "Paid");
         break;
       case "invoice.payment_failed":
-        await recordInvoice(await stripe.invoices.retrieve((event.data.object as Stripe.Invoice).id), "Failed");
+        await recordInvoice(await stripeGet(`invoices/${(event.data.object as Stripe.Invoice).id}`), "Failed");
         break;
       default:
         break;
