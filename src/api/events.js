@@ -26,7 +26,9 @@ function fromRow(r) {
     // /event/null. getEventBySlug resolves either form.
     slug: r.slug || r.id,
     title: r.title,
-    subtitle: r.subtitle,
+    // Subtitle and the old admin "Tagline" (excerpt) are the same thing.
+    subtitle: r.subtitle || r.excerpt || null,
+    paid: String(r.entry_type ?? "").toLowerCase() === "paid" || !!r.tickets,
     // `category` is an array on the row (a business can tag several); the
     // public cards and category filters are built around a single label.
     category: Array.isArray(r.category) ? r.category[0] : r.category,
@@ -38,7 +40,7 @@ function fromRow(r) {
     tickets: r.tickets || r.entry_type,
     image: r.hero_image || gallery[0],
     gallery,
-    excerpt: r.excerpt,
+    excerpt: r.excerpt || r.subtitle || null,
     standfirst: r.description,
     body: r.body ?? [],
     website: r.website,

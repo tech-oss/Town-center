@@ -15,7 +15,8 @@ import { formatUK } from "../../lib/ukDate";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 
-const CATEGORIES = ["News", "Offer", "What's On"];
+// Same two types businesses can post under.
+const CATEGORIES = ["News", "Offer"];
 const TYPES = ["news", "offer"];
 
 // ─── UK-time schedule helpers ─────────────────────────────────────────────────

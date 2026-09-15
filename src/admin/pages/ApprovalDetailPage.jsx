@@ -55,7 +55,7 @@ function ValueCell({ kind, value, hasBefore, empty }) {
       </div>
     );
   }
-  return <span className="text-xs px-2 py-1 rounded-lg break-words" style={{ backgroundColor: "rgba(16,24,40,0.06)", color: "#1E293B" }}>{value}</span>;
+  return <span className="inline-block text-xs px-2 py-1 rounded-lg break-words whitespace-pre-line leading-relaxed" style={{ backgroundColor: "rgba(16,24,40,0.06)", color: "#1E293B" }}>{value}</span>;
 }
 
 function ChangesTable({ changes }) {

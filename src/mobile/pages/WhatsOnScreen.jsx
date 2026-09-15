@@ -6,7 +6,8 @@ import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
 import FilterSheet from "../components/FilterSheet";
 import { getEvents } from "../../api";
-import { categories, categoryColors } from "../../Data/events";
+import { categoryColors } from "../../Data/events";
+import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs, eventCategoryLabel } from "../../lib/eventCategories";
 
 const RANGE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const formatUkShort = (iso) => {
@@ -14,7 +15,8 @@ const formatUkShort = (iso) => {
   return `${d.getDate()} ${RANGE_MONTHS[d.getMonth()]}`;
 };
 
-const CATEGORY_OPTIONS = Object.entries(categories).map(([key, c]) => ({ key, label: c.label, color: c.color }));
+// The See & Do categories events are actually tagged with.
+const CATEGORY_OPTIONS = EVENT_CATEGORY_OPTIONS.map((c) => ({ key: c.value, label: c.label, color: "var(--leaf)" }));
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const pad = (n) => String(n).padStart(2, "0");
@@ -199,7 +201,7 @@ export default function WhatsOnScreen() {
 
   const dateRange = useMemo(() => resolveDateRange(quickFilter, rangeStart, rangeEnd), [quickFilter, rangeStart, rangeEnd]);
   const categoryFiltered = useMemo(
-    () => (events ?? []).filter((e) => categoryFilter.size === 0 || categoryFilter.has(e.category)),
+    () => (events ?? []).filter((e) => categoryFilter.size === 0 || toSeeDoSlugs(e.categories ?? e.category).some((c) => categoryFilter.has(c))),
     [events, categoryFilter]
   );
   const listed = useMemo(() => generateOccurrences(categoryFiltered, dateRange).slice(0, 40), [categoryFiltered, dateRange]);
@@ -285,8 +287,9 @@ export default function WhatsOnScreen() {
                       <div className="text-xl font-bold leading-none" style={{ color: "#000000" }}>{date.getDate()}</div>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: categoryColors[e.category] ?? "var(--leaf)" }}>{e.category}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: categoryColors[e.category] ?? "var(--leaf)" }}>{eventCategoryLabel(e.category)}</span>
                       <p className="text-sm font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
+                      {e.subtitle && <p className="text-xs truncate" style={{ color: "rgba(0,0,0,0.65)" }}>{e.subtitle}</p>}
                       {e.location && <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{e.location}</p>}
                     </div>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M9 18l6-6-6-6" /></svg>

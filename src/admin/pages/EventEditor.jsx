@@ -99,8 +99,8 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
             <Field label="Event Title" required hint={`${(form.title ?? "").length}/60`}>
               <Inp value={form.title ?? ""} maxLength={60} onChange={(e) => set("title", e.target.value)} />
             </Field>
-            <Field label="Tagline" hint={`Shown on listing and homepage cards · ${(form.excerpt ?? "").length}/160`}>
-              <Inp value={form.excerpt ?? ""} maxLength={160} onChange={(e) => set("excerpt", e.target.value)} />
+            <Field label="Subtitle" hint={`Shown under the title on the event page, calendar and homepage cards · ${(form.subtitle ?? form.excerpt ?? "").length}/160`}>
+              <Inp value={form.subtitle ?? form.excerpt ?? ""} maxLength={160} onChange={(e) => set("subtitle", e.target.value)} />
             </Field>
           </div>
 

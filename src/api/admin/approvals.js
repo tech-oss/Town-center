@@ -31,6 +31,10 @@ const SECTION_LABELS = {
   faqs: "FAQs",
   portfolio: "Portfolio",
   services: "Services",
+  areas: "Areas Covered",
+  skills: "Skills",
+  workingwithme: "Working With Me",
+  amenities: "Amenities",
 };
 
 // [db column, camelCase field (matches pending_snapshot's keys), display
@@ -44,14 +48,19 @@ const SECTION_FIELDS = {
     ["description", "description", "Description"],
     ["logo", "logo", "Logo", "image"],
     ["hero_image", "heroImage", "Header Image", "image"],
+    ["business_type_detail", "businessTypeDetail", "Categories"],
   ],
   hours: [["hours", "hours", "Opening Hours"], ["availability_info", "availabilityInfo", "Availability Info"]],
   gallery: [["gallery", "gallery", "Gallery Images", "gallery"]],
   location: [["address", "address", "Address"], ["postal_code", "postalCode", "Postcode"], ["lat", "lat", "Latitude"], ["lng", "lng", "Longitude"]],
-  contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"]],
+  contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"], ["availability_tag", "availabilityTag", "Availability Tag"]],
   faqs: [["faqs", "faqs", "FAQs"]],
   portfolio: [["portfolio", "portfolio", "Portfolio"], ["skills", "skills", "Skills"]],
   services: [["services_list", "servicesList", "Services"], ["areas_covered_list", "areasCoveredList", "Areas Covered"], ["why_choose_us", "whyChooseUs", "Why Choose Us"], ["stats", "stats", "Stats"]],
+  areas: [["areas_covered_list", "areasCoveredList", "Areas Covered"]],
+  skills: [["skills", "skills", "Skills"]],
+  workingwithme: [["working_with_me", "workingWithMe", "Working With Me"]],
+  amenities: [["amenities", "amenities", "Amenities"], ["other_amenities", "otherAmenities", "Other Amenities"], ["star_rating", "starRating", "Star Rating"]],
 };
 
 // Sections the business publishes without review — they never produce a
@@ -71,10 +80,42 @@ function parseId(id) {
   return { businessId, section };
 }
 
+// Writes a value out in full so admin can read exactly what the business
+// entered — FAQs as Q/A pairs, social links as "Instagram: url", opening hours
+// day by day — rather than a count like "2 fields".
+const LABELS = { instagram: "Instagram", facebook: "Facebook", x: "X / Twitter", twitter: "X / Twitter", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
+
+function describeEntry(item) {
+  if (item == null) return "";
+  if (typeof item !== "object") return String(item);
+  const q = item.question ?? item.q;
+  const a = item.answer ?? item.a;
+  if (q != null || a != null) return `Q: ${q ?? ""}\nA: ${a ?? ""}`;
+  if (item.day) {
+    if (item.open === false) return `${item.day}: Closed`;
+    return `${item.day}: ${[item.from, item.to].filter(Boolean).join(" – ") || item.time || "Open"}`;
+  }
+  if (item.label != null && item.value != null) return `${item.label}: ${item.value}`;
+  return Object.entries(item)
+    .filter(([k, v]) => k !== "id" && v != null && v !== "")
+    .map(([k, v]) => `${LABELS[k] ?? k}: ${typeof v === "object" ? JSON.stringify(v) : v}`)
+    .join(" · ");
+}
+
 function describe(value) {
   if (value == null || value === "") return "—";
-  if (Array.isArray(value)) return `${value.length} item${value.length === 1 ? "" : "s"}`;
-  if (typeof value === "object") return `${Object.keys(value).length} field${Object.keys(value).length === 1 ? "" : "s"}`;
+  if (Array.isArray(value)) {
+    const lines = value.map(describeEntry).filter((l) => l.trim());
+    if (!lines.length) return "—";
+    const faqLike = value.some((v) => v && typeof v === "object" && ("question" in v || "q" in v));
+    return lines.join(faqLike ? "\n\n" : "\n");
+  }
+  if (typeof value === "object") {
+    const lines = Object.entries(value)
+      .filter(([, v]) => v != null && v !== "" && !(Array.isArray(v) && !v.length))
+      .map(([k, v]) => `${LABELS[k] ?? k}: ${Array.isArray(v) ? v.map(describeEntry).join(", ") : typeof v === "object" ? describeEntry(v) : v}`);
+    return lines.length ? lines.join("\n") : "—";
+  }
   return String(value);
 }
 

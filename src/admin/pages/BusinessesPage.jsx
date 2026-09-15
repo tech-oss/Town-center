@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness, setBusinessLogo,
-  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, setBusinessPlan,
+  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import CoordsNotice from "../components/CoordsNotice";
@@ -154,9 +154,12 @@ const EMPTY_FORM = {
   featured: false,
 };
 
-function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }) {
-  const featuredFull = featuredCount >= featuredLimit;
+function RegisterBusinessForm({ onSave, onCancel, featuredCounts, featuredLimit }) {
   const [form, setForm] = useState(EMPTY_FORM);
+  // Slots are counted per business type, so this follows the type picked above.
+  const typeLabel = FEATURED_GROUP_LABELS[featuredGroup(form.section)] ?? "this business type";
+  const featuredCount = form.section ? (featuredCounts?.[featuredGroup(form.section)] ?? 0) : 0;
+  const featuredFull = !!form.section && featuredCount >= featuredLimit;
   const [logoPreview, setLogoPreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -428,7 +431,7 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
       </Section>
 
       {/* ── Featured ── */}
-      <Section title="Featured" note={`Promoted placement across the site — ${featuredCount} of ${featuredLimit} slots in use`}>
+      <Section title="Featured" note={form.section ? `${typeLabel}: ${featuredCount} of ${featuredLimit} featured slots in use` : `Choose a business type first — each type has ${featuredLimit} featured slots`}>
         <label className={`flex items-start gap-3 rounded-xl p-3.5 ${featuredFull && !form.featured ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
           style={{ backgroundColor: form.featured ? "rgba(217,119,6,0.06)" : "#f8fafc", border: `1px solid ${form.featured ? "rgba(217,119,6,0.3)" : "rgba(16,24,40,0.1)"}` }}>
           <input type="checkbox" checked={form.featured} disabled={featuredFull && !form.featured}
@@ -437,8 +440,8 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCount, featuredLimit }
             <span className="text-sm font-semibold" style={{ color: NAVY }}>Feature this business</span>
             <span className="text-xs" style={{ color: MUTED }}>
               {featuredFull && !form.featured
-                ? `All ${featuredLimit} featured slots are taken. Un-feature another business first.`
-                : `Featured businesses get promoted placement. Maximum ${featuredLimit} at any one time.`}
+                ? `All ${featuredLimit} ${typeLabel} featured slots are taken. Un-feature another ${typeLabel} business first.`
+                : `Featured businesses get promoted placement. Maximum ${featuredLimit} per business type.`}
             </span>
           </span>
         </label>
@@ -650,7 +653,7 @@ function typeSpecificRows(biz) {
   }
 }
 
-function BusinessDetailModal({ biz, onClose, onPlanChanged }) {
+function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featuredBusy, onToggleFeatured }) {
   const navigate = useNavigate();
   // biz.plan is the display name ("Visibility Plan"), not the stored key.
   const currentKey = isPremium(biz.plan) || biz.plan === PREMIUM_PLAN.name ? "premium" : "free";
@@ -710,6 +713,25 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged }) {
 
         <DetailSection title="Location (for Map)">
           <DetailRow label="Coordinates" value={biz.lat && biz.lng ? `${biz.lat}, ${biz.lng}` : null} />
+        </DetailSection>
+
+        <DetailSection title="Featured">
+          <div className="flex items-center justify-between gap-3 py-1">
+            <div>
+              <p className="text-sm font-semibold" style={{ color: NAVY }}>{biz.featured ? "★ Featured" : "Not featured"}</p>
+              <p className="text-xs" style={{ color: MUTED }}>
+                {!biz.featured && featuredFull
+                  ? `All ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} slots are taken.`
+                  : `Up to ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} businesses can be featured.`}
+              </p>
+            </div>
+            <button type="button" role="switch" aria-checked={!!biz.featured} aria-label="Featured"
+              onClick={onToggleFeatured} disabled={featuredBusy || (!biz.featured && featuredFull)}
+              className="w-12 h-6 rounded-full flex items-center px-0.5 transition-colors disabled:opacity-40 shrink-0"
+              style={{ backgroundColor: biz.featured ? "#D97706" : "#D1D5DB" }}>
+              <span className="w-5 h-5 rounded-full bg-white shadow transition-transform" style={{ transform: biz.featured ? "translateX(24px)" : "translateX(0)" }} />
+            </button>
+          </div>
         </DetailSection>
 
         <DetailSection title="Subscription Plan">
@@ -860,6 +882,9 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
               <StatusTag status={biz.status} />
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
                 style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>{biz.plan}</span>
+              {biz.featured && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>★ Featured</span>
+              )}
               {biz.planNotPaying && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" title="Given by admin — nothing is billed through Stripe"
                   style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Not paying</span>
@@ -932,7 +957,8 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           however many actions happen to apply. */}
       <div className="px-5 pb-5 flex flex-wrap gap-2" style={{ borderTop: `1px solid ${BORDER}`, paddingTop: 16 }}>
         <BizBtn color={NAVY} disabled={isBusy} onClick={() => setShowDetail(true)}>View Details</BizBtn>
-        {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} onPlanChanged={onPlanChanged} />}
+        {showDetail && <BusinessDetailModal biz={biz} onClose={() => setShowDetail(false)} onPlanChanged={onPlanChanged}
+          featuredFull={featuredFull} featuredBusy={isBusy} onToggleFeatured={() => onToggleFeatured(biz)} />}
         {needsUserApproval(biz) && (
           <BizBtn color={BLUE} disabled={isBusy} onClick={() => navigate("/admin/users")}>Approve the User</BizBtn>
         )}
@@ -940,7 +966,7 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
           color={biz.featured ? "#D97706" : NAVY}
           disabled={isBusy || (!biz.featured && featuredFull)}
           onClick={() => onToggleFeatured(biz)}
-          title={!biz.featured && featuredFull ? `All ${FEATURED_LIMIT} featured slots are in use` : undefined}
+          title={!biz.featured && featuredFull ? `All ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} featured slots are in use` : undefined}
         >
           {biz.featured ? "★ Unfeature" : "☆ Feature"}
         </BizBtn>
@@ -1149,7 +1175,11 @@ export default function BusinessesPage() {
   // count is exact — and it moves the moment a toggle patches local state,
   // rather than waiting on a refetch.
   const featuredCount = list.filter((b) => b.featured).length;
-  const featuredFull  = featuredCount >= FEATURED_LIMIT;
+  const featuredCounts = list.reduce((acc, b) => {
+    if (b.featured) acc[featuredGroup(b.section)] = (acc[featuredGroup(b.section)] ?? 0) + 1;
+    return acc;
+  }, {});
+  const isFeaturedFull = (biz) => (featuredCounts[featuredGroup(biz.section)] ?? 0) >= FEATURED_LIMIT;
 
   const counts = {
     Pending:   list.filter((b) => b.status === "Pending").length,
@@ -1211,7 +1241,7 @@ export default function BusinessesPage() {
           />
         ) : (
           <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)}
-            featuredCount={featuredCount} featuredLimit={FEATURED_LIMIT} />
+            featuredCounts={featuredCounts} featuredLimit={FEATURED_LIMIT} />
         )
       )}
 
@@ -1224,7 +1254,7 @@ export default function BusinessesPage() {
           { label: "Rejected",  value: counts.Rejected,  accent: "#991B1B" },
           // Shown as a fraction because the ceiling is the point — admin needs
           // to know how many slots are left before opening the form.
-          { label: "Featured",  value: `${featuredCount}/${FEATURED_LIMIT}`, accent: "#D97706" },
+          { label: `Featured (max ${FEATURED_LIMIT} per business type)`, value: featuredCount, accent: "#D97706" },
         ].map(({ label, value, accent }) => (
           <div key={label} className="bg-white rounded-2xl p-4 flex flex-col gap-1" style={CARD}>
             <span className="text-2xl font-bold" style={{ color: accent }}>{value}</span>
@@ -1297,7 +1327,7 @@ export default function BusinessesPage() {
               busy={busy}
               onAddContent={handleAddContent}
               onToggleFeatured={handleToggleFeatured}
-              featuredFull={featuredFull}
+              featuredFull={isFeaturedFull(biz)}
             />
           ))}
         </div>

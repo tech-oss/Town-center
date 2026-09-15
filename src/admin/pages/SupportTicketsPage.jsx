@@ -67,7 +67,17 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
               ? { backgroundColor: BLUE, color: "#fff" }
               : { backgroundColor: "#fff", color: NAVY, border: `1px solid ${BORDER}` }}>
             <p className="text-[11px] font-semibold mb-1 opacity-80">{m.author} · {m.date}</p>
-            <p className="text-sm leading-relaxed">{m.body}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line">{m.body}</p>
+            {/* Screenshots the business attached */}
+            {m.attachments?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {m.attachments.map((url) => (
+                  <a key={url} href={url} target="_blank" rel="noopener noreferrer" title="Open full size">
+                    <img src={url} alt="Attachment" className="w-40 max-h-40 rounded-lg object-cover" style={{ border: `1px solid ${BORDER}` }} />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>

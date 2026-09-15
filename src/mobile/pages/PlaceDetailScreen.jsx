@@ -17,6 +17,7 @@ import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
 import ServicesBusinessDetailScreen from "./ServicesBusinessDetailScreen";
 import FreelancerDetailScreen from "./FreelancerDetailScreen";
 import MobileReviews from "../components/MobileReviews";
+import MobileFaqs from "../components/MobileFaqs";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -202,6 +203,8 @@ function BusinessDetailScreen({ place, goBack }) {
               <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
             </div>
           )}
+
+          {!free && <MobileFaqs faq={place.faq} />}
 
           {!free && <MobileReviews reviews={place.reviews} />}
 

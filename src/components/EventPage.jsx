@@ -2,7 +2,7 @@ import { useParams, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { categoryColors } from "../Data/events";
 import { categoryTitles } from "../Data/pages";
-import { toSeeDoSlug } from "../lib/eventCategories";
+import { toSeeDoSlug, eventCategoryLabel } from "../lib/eventCategories";
 import { getEventBySlug, getEvents, getBusinessBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
@@ -105,9 +105,10 @@ export default function EventPage() {
         { label: categoryLabel, to: `/see-do?category=${categorySlug}` },
       ]}
       backLink={{ label: "View full calendar", to: "/whats-on" }}
-      categoryLabel={event.category}
+      categoryLabel={event.isBusiness ? event.category : eventCategoryLabel(event.category)}
       categoryColor={dot}
       title={event.title}
+      subtitle={event.subtitle}
       heroImage={gallery[0]}
       extraImages={free ? [] : gallery.slice(1)}
       metaRows={metaRows}
@@ -122,8 +123,9 @@ export default function EventPage() {
       website={free ? null : event.website}
       social={free ? null : buildSocial(event.social)}
       directionsQuery={free ? null : (event.mapQuery || event.location)}
-      extraButtonLabel={free ? undefined : "Buy Tickets"}
-      extraButtonHref={event.website}
+      // Only paid events get a ticket button, and it goes to the booking link.
+      extraButtonLabel={!free && event.paid && event.bookingUrl ? "Buy Tickets" : undefined}
+      extraButtonHref={event.bookingUrl}
       afterMap={event.isBusiness && (free
         ? <NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} />
         : <NewsOffers item={business} />)}

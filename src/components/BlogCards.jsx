@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import { blogCards } from "../Data/content";
+import useFetch from "../hooks/useFetch";
+import { getSpotlightPosts } from "../api";
 import useTapReveal from "../hooks/useTapReveal";
 
 function CardLink({ href, className, style, onClick, children }) {
@@ -89,7 +91,10 @@ function PortfolioCard({ post, offset }) {
 
 // ── Section ────────────────────────────────────────────────────────────────
 export default function BlogCards() {
-  const posts = blogCards.posts.filter((p) => p.homepage).slice(0, 4);
+  // What admin picked for the homepage; the demo posts only fill in when
+  // nothing has been picked yet.
+  const { data: spotlight } = useFetch(getSpotlightPosts, []);
+  const posts = (spotlight?.length ? spotlight : blogCards.posts.filter((p) => p.homepage)).slice(0, 4);
 
   return (
     <section

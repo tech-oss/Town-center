@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
-import { categories, categoryColors } from "../Data/events";
+import { categoryColors } from "../Data/events";
+import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs, eventCategoryLabel } from "../lib/eventCategories";
+
+// Filter options are the See & Do categories events are actually tagged with.
+const categories = Object.fromEntries(EVENT_CATEGORY_OPTIONS.map((c) => [c.value, { label: c.label, color: "var(--leaf)" }]));
 import { getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 
@@ -129,9 +133,10 @@ function EventCard({ e, date }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-0.5">
             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: categoryColors[e.category] || "var(--leaf)" }} />
-            <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{e.category}</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{eventCategoryLabel(e.category)}</span>
           </div>
           <p className="font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
+          {e.subtitle && <p className="text-sm truncate" style={{ color: "rgba(0,0,0,0.65)" }}>{e.subtitle}</p>}
           {e.location && <p className="text-sm truncate" style={{ color: "#000000" }}>{e.location}</p>}
         </div>
         <span className="hidden sm:block shrink-0 text-xl transition-transform group-hover:translate-x-1" style={{ color: "#000000" }}>→</span>
@@ -156,7 +161,7 @@ export default function EventsCalendar() {
   const dateRange = useMemo(() => resolveDateRange(quickFilter, rangeStart, rangeEnd), [quickFilter, rangeStart, rangeEnd]);
 
   const categoryFilteredEvents = useMemo(
-    () => allEvents.filter((e) => categoryFilter.size === 0 || categoryFilter.has(e.category)),
+    () => allEvents.filter((e) => categoryFilter.size === 0 || toSeeDoSlugs(e.categories ?? e.category).some((c) => categoryFilter.has(c))),
     [allEvents, categoryFilter]
   );
 

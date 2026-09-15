@@ -12,3 +12,4 @@ export * from "./siteContent";
 export * from "./guides";
 export * from "./stay";
 export { request } from "./client";
+export * from "./spotlight";

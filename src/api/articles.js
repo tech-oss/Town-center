@@ -6,6 +6,7 @@
 import { allArticles, articleBySlug } from "../Data/pages";
 import { allStayArticles, stayArticleBySlug } from "../Data/stay";
 import { loadLiveBusinesses } from "./liveBusinesses";
+import { getSpotlightArticleBySlug } from "./spotlight";
 
 const combinedArticles = [...allArticles, ...allStayArticles];
 const combinedArticleBySlug = { ...articleBySlug, ...stayArticleBySlug };
@@ -21,5 +22,6 @@ export async function getArticles() {
 
 export async function getArticleBySlug(slug) {
   if (combinedArticleBySlug[slug]) return combinedArticleBySlug[slug];
-  return (await liveArticles()).find((a) => a.slug === slug) ?? null;
+  return (await liveArticles()).find((a) => a.slug === slug)
+    ?? (await getSpotlightArticleBySlug(slug));
 }

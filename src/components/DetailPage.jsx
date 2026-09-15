@@ -75,6 +75,7 @@ export default function DetailPage() {
       title={item.name}
       logo={LOGO_SECTIONS.has(item.section) && !item.logoHeader ? item.logo : null}
       heroImage={heroImage}
+      faq={free ? null : item.faq}
       extraImages={extraImages}
       description={description}
       descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}

@@ -1,7 +1,10 @@
 // Minimal service worker for the /mobile PWA demo.
 // Scope is set to /mobile/ at registration time (see main.jsx), so this never
 // touches the rest of the site.
-const CACHE = "maidenhead-mobile-v2";
+// Bumped from v2: that version cached every GET, including Supabase data, so
+// the app kept showing its first-ever copy of businesses, hours and content.
+// Activating this version deletes those caches.
+const CACHE = "maidenhead-mobile-v3";
 
 // Web Push delivery. The payload is set by supabase/functions/send-push.
 self.addEventListener("push", (event) => {
@@ -48,10 +51,20 @@ self.addEventListener("activate", (event) => {
 });
 
 // Network-first for navigations (always get fresh content when online),
-// falling back to the cached shell when offline. Cache-first for static assets.
+// falling back to the cached shell when offline. Cache-first only for this
+// site's own fingerprinted build files and images. Everything else — Supabase
+// data, APIs, other hosts — goes straight to the network and is never cached,
+// so admin's changes show as soon as the app asks for them.
+function isCacheableAsset(url) {
+  if (url.origin !== self.location.origin) return false;
+  return url.pathname.startsWith("/assets/")
+    || /\.(png|jpe?g|webp|gif|svg|ico|woff2?)$/i.test(url.pathname);
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
+  const url = new URL(request.url);
 
   if (request.mode === "navigate") {
     event.respondWith(
@@ -65,6 +78,8 @@ self.addEventListener("fetch", (event) => {
     );
     return;
   }
+
+  if (!isCacheableAsset(url)) return; // let the browser fetch it normally
 
   event.respondWith(
     caches.match(request).then(

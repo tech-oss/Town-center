@@ -54,6 +54,15 @@ export const BUSINESS_PLANS = ["Basic", "Standard", "Premium", "Agent"];
 // disable the control before a doomed round trip, not as the rule itself.
 export const FEATURED_LIMIT = 10;
 
+// The featured limit applies per business type. Freelancers share the
+// Services listing pages, so they share its slots.
+export const FEATURED_GROUP_LABELS = {
+  "eat-drink": "Eat & Drink", "see-do": "See & Do", shop: "Shop", services: "Services", hotel: "Hotel & Accommodation",
+};
+export function featuredGroup(section) {
+  return section === "freelancer" ? "services" : (section || "other");
+}
+
 // ─── Supabase-backed queries ──────────────────────────────────────────────────
 // A "business registration" is spread across three tables: `businesses` holds
 // the identity + admin approval state, `business_listings` the public-facing
@@ -201,7 +210,7 @@ function readableConstraintError(error, name) {
     return new Error(`A business called "${name}" is already registered. Business names must be unique.`);
   }
   if (message.includes("Featured limit")) {
-    return new Error(`Only ${FEATURED_LIMIT} businesses can be featured at once. Un-feature one first.`);
+    return new Error(`Only ${FEATURED_LIMIT} businesses of this type can be featured at once. Un-feature one first.`);
   }
   return error;
 }
@@ -232,7 +241,9 @@ export async function registerBusiness(data) {
   const businessRow = {
     id,
     name,
-    featured: !!data.featured,
+    // Featured is set once the listing (and so the business type) exists —
+    // the per-type limit can't be checked before that.
+    featured: data.id ? !!data.featured : false,
     // A business admin registers directly is pre-vetted by admin themselves
     // entering the data — it doesn't need to sit in its own Pending queue the
     // way a self-signup does. The owner login (below) is created already
@@ -275,6 +286,11 @@ export async function registerBusiness(data) {
       logo: data.logo ?? null,
     }, { onConflict: "business_id" });
     if (listingError) throw listingError;
+
+    if (!data.id && data.featured) {
+      const { error: featuredError } = await supabase.from("businesses").update({ featured: true }).eq("id", id);
+      if (featuredError) throw readableConstraintError(featuredError, name);
+    }
 
     // Every business gets a plan — Free unless admin chose Premium.
     const plan = planFor(data.planKey);
@@ -349,7 +365,7 @@ export async function setFeatured(id, featured) {
   addLog(
     featured ? "Business Featured" : "Business Unfeatured",
     { id, name: biz?.name ?? id },
-    featured ? `Promoted to the featured list (max ${FEATURED_LIMIT}).` : "Removed from the featured list.",
+    featured ? `Promoted to the featured list (max ${FEATURED_LIMIT} per business type).` : "Removed from the featured list.",
   );
   return { ok: true };
 }

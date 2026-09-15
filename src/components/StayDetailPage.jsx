@@ -174,6 +174,7 @@ export default function StayDetailPage({ kind }) {
       title={item.name}
       heroImage={gallery[0]}
       extraImages={free ? [] : gallery.slice(1)}
+      faq={free ? null : item.faq}
       backLink={backTo ? { to: backTo, label: "Back to results" } : undefined}
       description={description}
       descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}

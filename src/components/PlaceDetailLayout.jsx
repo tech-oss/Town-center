@@ -173,6 +173,8 @@ function normalizeUrl(url) {
 export default function PlaceDetailLayout({
   breadcrumbs,
   logo,
+  subtitle,
+  faq,
   categoryLabel,
   categoryColor = "var(--leaf)",
   title,
@@ -270,10 +272,14 @@ export default function PlaceDetailLayout({
   // Tagline shown under the title above the hero: the first description
   // paragraph, so nothing needs to be authored twice. The remaining
   // paragraphs (if any) still render in their usual place below the hero.
-  const firstParagraphText = Array.isArray(description)
+  // An explicit subtitle (events) takes that spot instead, and then the whole
+  // description renders below the hero.
+  const firstParagraphText = subtitle || (Array.isArray(description)
     ? (typeof description[0] === "string" ? description[0] : description[0]?.text)
-    : description;
-  const remainingDescription = Array.isArray(description) ? description.slice(1) : null;
+    : description);
+  const remainingDescription = Array.isArray(description)
+    ? (subtitle ? description : description.slice(1))
+    : (subtitle && description ? [description] : null);
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
@@ -570,6 +576,26 @@ export default function PlaceDetailLayout({
       )}
 
       {afterGallery}
+
+      {/* ── FAQs the business added ── */}
+      {faq?.length > 0 && (
+        <section className="pb-12 md:pb-16 px-6 md:px-12">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="hero-title uppercase text-2xl md:text-4xl mb-6" style={{ color: "#000000" }}>Frequently Asked Questions</h2>
+            <div className="flex flex-col" style={{ borderTop: "1px solid rgba(28,46,56,0.12)" }}>
+              {faq.map((f, i) => (
+                <details key={i} className="group py-4" style={{ borderBottom: "1px solid rgba(28,46,56,0.12)" }}>
+                  <summary className="cursor-pointer list-none flex items-center justify-between gap-4 font-semibold text-base" style={{ color: "#000000" }}>
+                    {f.q}
+                    <span className="shrink-0 text-xl transition-transform group-open:rotate-45" aria-hidden="true">+</span>
+                  </summary>
+                  <p className="mt-2 text-sm md:text-base leading-relaxed whitespace-pre-line" style={{ color: "#000000" }}>{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── 5. Location map — 90% width and taller on mobile, 80% width on
           desktop; address shown as an always-open tile above the pin rather

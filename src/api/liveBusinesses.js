@@ -147,7 +147,9 @@ function toItem(row, articles, reviews = {}) {
     mapQuery: premium && coords ? `${coords.lat},${coords.lng}` : (premium ? address : null),
     // Layout props default to [] only when undefined, never when null, so an
     // empty column must arrive as undefined or the page throws on .slice().
-    faq: listOrUndefined(row.faqs),
+    faq: listOrUndefined((row.faqs ?? [])
+      .map((f) => ({ q: f.q ?? f.question ?? "", a: f.a ?? f.answer ?? "" }))
+      .filter((f) => f.q.trim() && f.a.trim())),
     servicesOffered: listOrUndefined(row.services_list),
     areasCovered: listOrUndefined(row.areas_covered_list),
     whyChooseUs: listOrUndefined(row.why_choose_us),

@@ -19,7 +19,8 @@ export default function EventDetailScreen() {
 
   const dot = categoryColors[event.category] ?? "var(--leaf)";
   const gallery = event.gallery?.length ? event.gallery : [event.image];
-  const websiteUrl = event.website ? `https://${event.website.replace(/^https?:\/\//, "")}` : null;
+  // Ticket buttons only for paid events, pointing at the booking link.
+  const websiteUrl = event.paid && event.bookingUrl ? `https://${event.bookingUrl.replace(/^https?:\/\//, "")}` : null;
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location ?? "")}`;
   const more = (events ?? []).filter((e) => e.slug !== event.slug).slice(0, 3);
 
@@ -38,6 +39,7 @@ export default function EventDetailScreen() {
                 {event.category}
               </span>
               <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{event.title}</h1>
+              {event.subtitle && <p className="text-sm mt-1 leading-snug" style={{ color: "rgba(0,0,0,0.7)" }}>{event.subtitle}</p>}
             </div>
             <ShareButton path={`/event/${event.slug}`} title={event.title} text={event.standfirst} className="mt-0.5" />
           </div>
