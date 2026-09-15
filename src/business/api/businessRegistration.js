@@ -64,6 +64,9 @@ export async function registerBusiness(form) {
     last_name: form.lastName,
     email: form.email,
     phone: form.phone,
+    // Terms were accepted in the signup form itself, so no Terms & Review
+    // step after approval (that's only for claims).
+    onboarding_completed_at: new Date().toISOString(),
   });
   if (ownerError) return { ok: false, error: ownerError.message };
 

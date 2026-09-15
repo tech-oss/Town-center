@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
-import { Field, Inp, TextArea, Select, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
+import { Field, Inp, TextArea, Select, Toast, useToast, uploadToStorage, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { TICKET_CATEGORIES } from "../../Data/businessPortalMock";
 import { listTickets, createTicket, addTicketMessage } from "../api/businessTickets";
 
@@ -45,7 +45,14 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
           <div key={i} className={`max-w-[80%] rounded-2xl px-4 py-3 ${m.from === "business" ? "self-end" : "self-start"}`}
             style={m.from === "business" ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "#fff", color: FOREST, border: `1px solid ${BORDER}` }}>
             <p className="text-[11px] font-semibold mb-1 opacity-80">{m.author} · {m.date}</p>
-            <p className="text-sm leading-relaxed">{m.body}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line">{m.body}</p>
+            {m.attachments?.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {m.attachments.map((url) => (
+                  <a key={url} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Attachment" className="w-32 max-h-32 rounded-lg object-cover" /></a>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -63,7 +70,7 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
   );
 }
 
-function NewTicketTab({ notify, onCreated }) {
+function NewTicketTab({ notify, onCreated, businessId }) {
   const [category, setCategory] = useState(TICKET_CATEGORIES[0]);
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -74,9 +81,13 @@ function NewTicketTab({ notify, onCreated }) {
     if (!subject.trim() || !message.trim()) return;
     setSubmitting(true);
     try {
-      await onCreated({ subject: subject.trim(), category, message: message.trim() });
+      // The screenshot is uploaded first so admin receives a real image link.
+      const attachments = attachment ? [await uploadToStorage(attachment, `${businessId}/support`)] : [];
+      await onCreated({ subject: subject.trim(), category, message: message.trim(), attachments });
       notify("Your support request has been submitted. We'll respond within 1-2 business days.");
       setSubject(""); setMessage(""); setAttachment(null); setCategory(TICKET_CATEGORIES[0]);
+    } catch (e) {
+      notify(`Couldn't send your request: ${e.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -96,9 +107,14 @@ function NewTicketTab({ notify, onCreated }) {
           <label className="cursor-pointer px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"
             style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB", border: "1.5px solid rgba(37,99,235,0.3)" }}>
             📎 Attach File
-            <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0]?.name ?? null)} className="hidden" />
+            <input type="file" accept="image/*" onChange={(e) => setAttachment(e.target.files?.[0] ?? null)} className="hidden" />
           </label>
-          {attachment && <span className="text-xs font-medium" style={{ color: "#2563EB" }}>{attachment}</span>}
+          {attachment && (
+            <span className="text-xs font-medium flex items-center gap-2" style={{ color: "#2563EB" }}>
+              {attachment.name}
+              <button type="button" onClick={() => setAttachment(null)} className="font-bold" aria-label="Remove attachment">✕</button>
+            </span>
+          )}
         </div>
       </Field>
       <button onClick={handleSubmit} disabled={!subject.trim() || !message.trim() || submitting}
@@ -183,7 +199,7 @@ export default function SupportPage() {
             </div>
           )
         ) : (
-          <NewTicketTab notify={notify} onCreated={handleCreated} />
+          <NewTicketTab notify={notify} onCreated={handleCreated} businessId={user.id} />
         )}
       </div>
     </BusinessLayout>

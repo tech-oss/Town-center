@@ -24,8 +24,12 @@ export async function listTickets(businessId) {
   return (data ?? []).map(fromRow);
 }
 
-export async function createTicket(businessId, { subject, category, message, author }) {
-  const thread = [{ from: "business", author, date: new Date().toISOString().slice(0, 16).replace("T", " "), body: message }];
+export async function createTicket(businessId, { subject, category, message, author, attachments = [] }) {
+  const thread = [{
+    from: "business", author, date: new Date().toISOString().slice(0, 16).replace("T", " "), body: message,
+    // Public URLs of uploaded screenshots, shown to admin with the message.
+    ...(attachments.length ? { attachments } : {}),
+  }];
   const { data, error } = await supabase
     .from("business_tickets")
     .insert({ business_id: businessId, subject, category, thread })

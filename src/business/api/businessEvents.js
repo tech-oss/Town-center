@@ -28,6 +28,7 @@ function fromRow(row) {
     social: row.social,
     website: row.website,
     bookingUrl: row.booking_url,
+    heroImage: row.hero_image ?? null,
     gallery: row.gallery,
     status: row.status,
     rejectionReason: row.rejection_reason,
@@ -44,6 +45,8 @@ function toRow(form) {
   return {
     title: form.title,
     subtitle: form.subtitle,
+    // Admin's editor calls the same thing "Subtitle"; keep both columns in step.
+    excerpt: form.subtitle || null,
     description: form.description,
     category: form.category ?? [],
     event_date: form.eventDate || null,
@@ -55,6 +58,7 @@ function toRow(form) {
     social: form.social,
     website: form.website,
     booking_url: form.bookingUrl,
+    hero_image: form.heroImage || null,
     gallery: form.gallery,
     status: form.status,
     is_recurring: !!form.isRecurring,

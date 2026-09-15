@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
-  Field, Inp, TextArea, Select, CheckGroup, SocialFields, LocationFields, GalleryGrid,
+  Field, Inp, TextArea, Select, CheckGroup, SocialFields, LocationFields, GalleryGrid, SingleImageUpload,
   EditorSection, Toast, useToast, Toggle, FOREST, SAGE, MUTED, BORDER, CARD,
 } from "../components/FormKit";
 import { getEvent, createEvent, updateEvent } from "../api/businessEvents";
@@ -162,7 +162,7 @@ export default function EventEditorPage() {
           <EditorSection title="Event Details">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Event Title" required span2><Inp value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Event title…" /></Field>
-              <Field label="Event Sub Title" span2><Inp value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} placeholder="Short tagline…" /></Field>
+              <Field label="Subtitle" span2 hint={`Shown under the title on the event page and the calendar · ${(form.subtitle ?? "").length}/160`}><Inp value={form.subtitle ?? ""} maxLength={160} onChange={(e) => set("subtitle", e.target.value)} placeholder="One line about the event…" /></Field>
               <Field label="Event Description" span2><TextArea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the event…" /></Field>
               <Field label={form.isRecurring ? "First Occurrence Date" : "Event Date"}><Inp type="date" value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
               <Field label="Event Time" hint="e.g. 7:00 PM or 10am - 4pm"><Inp value={form.eventTime ?? ""} onChange={(e) => set("eventTime", e.target.value)} /></Field>
@@ -198,6 +198,10 @@ export default function EventEditorPage() {
             </div>
             <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Social Links (optional)</p>
             <SocialFields links={form.social} onChange={(v) => set("social", v)} />
+          </EditorSection>
+
+          <EditorSection title="Hero Image" hint="The main picture at the top of your event page and on its calendar card">
+            <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />
           </EditorSection>
 
           <EditorSection title="Image Gallery" hint="Up to 6 photos">

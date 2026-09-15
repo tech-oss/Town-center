@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { canEditField } from "../../Data/plans";
 import { supabase } from "../../lib/supabaseClient";
 
-async function uploadToStorage(file, pathPrefix) {
+export async function uploadToStorage(file, pathPrefix) {
   const path = `${pathPrefix}/${Date.now()}-${file.name}`;
   const { error } = await supabase.storage.from("business-media").upload(path, file);
   if (error) throw error;

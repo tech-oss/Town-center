@@ -239,10 +239,11 @@ export default function useBusinessAuth() {
     user,
     isLoggedIn: !!user,
     restored: isRestored,
-    // Always false now. Signup and claim both ask for the terms before the
-    // request is sent, so an approved owner goes straight to their dashboard
-    // on first sign-in instead of repeating the terms and review steps.
-    needsOnboarding: false,
+    // Only someone who CLAIMED a business goes through Terms & Review after
+    // approval — a claim inserts onboarding_completed_at as null. Owners who
+    // registered their own business accepted the terms at signup, so their
+    // row is already marked complete and they go straight to the dashboard.
+    needsOnboarding: !!user && !user.onboardingCompletedAt,
     login,
     logout,
     refresh,

@@ -55,14 +55,18 @@ function fromRow(row) {
 // Used to snapshot only the fields a save is about to touch, not the whole
 // row, so two tabs saved back-to-back don't clobber each other's snapshot.
 const SECTION_FIELDS = {
-  profile: ["name", "tagline", "description", "logo", "heroImage"],
+  profile: ["name", "tagline", "description", "logo", "heroImage", "businessTypeDetail"],
   hours: ["hours", "availabilityInfo"],
   gallery: ["gallery"],
   location: ["address", "postalCode", "lat", "lng"],
-  contact: ["phone", "email", "website", "bookingUrl", "social"],
+  contact: ["phone", "email", "website", "bookingUrl", "social", "availabilityTag"],
   faqs: ["faqs"],
   portfolio: ["portfolio", "skills"],
   services: ["servicesList", "areasCoveredList", "whyChooseUs", "stats"],
+  areas: ["areasCoveredList"],
+  skills: ["skills"],
+  workingwithme: ["workingWithMe"],
+  amenities: ["amenities", "otherAmenities", "starRating"],
 };
 
 // Reader-friendly names for the section a save belongs to, used in the
@@ -76,6 +80,10 @@ const SECTION_LABELS = {
   faqs: "FAQs",
   portfolio: "Portfolio",
   services: "Services",
+  areas: "Areas covered",
+  skills: "Skills",
+  workingwithme: "Working with me",
+  amenities: "Amenities",
 };
 
 function toRow(listing) {
