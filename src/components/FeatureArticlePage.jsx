@@ -69,7 +69,9 @@ export default function FeatureArticlePage() {
   if (!story) return <Navigate to="/" replace />;
 
   const more = stories.filter((f) => f.slug !== story.slug);
-  const websiteUrl = `https://${story.website.replace(/^https?:\/\//, "")}`;
+  // Website and location are optional — a story about the town itself has
+  // neither, and assuming a website crashed the whole page.
+  const websiteUrl = story.website ? `https://${story.website.replace(/^https?:\/\//, "")}` : null;
 
   // Story titles are authored as "Business Name: subtitle" — the business
   // name is the actual hero title (matching See & Do's short place names),
@@ -174,12 +176,14 @@ export default function FeatureArticlePage() {
             })}
           </article>
 
-          {/* CTA */}
+          {/* CTA — only when the story points somewhere */}
+          {(websiteUrl || story.location) && (
           <div className="mt-16 overflow-hidden p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
             <div className="flex-1">
               <p className="text-[11px] font-bold uppercase tracking-[0.02em] mb-2" style={{ color: "var(--sage)" }}>{story.eyebrow}</p>
-              <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>{story.location}</p>
+              {story.location && <p className="text-sm leading-relaxed" style={{ color: "var(--mint)" }}>{story.location}</p>}
             </div>
+            {websiteUrl && (
             <a
               href={websiteUrl}
               target="_blank"
@@ -191,7 +195,9 @@ export default function FeatureArticlePage() {
             >
               Visit official website →
             </a>
+            )}
           </div>
+          )}
         </div>
       </section>
 
