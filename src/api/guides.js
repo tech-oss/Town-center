@@ -30,6 +30,17 @@ export async function getGuides() {
   return (data ?? []).map(fromRow);
 }
 
+// The three guides admin ticked "Show on Homepage" for, used by the website's
+// homepage section and the app's home screen so the two always agree. With
+// none ticked it falls back to the first three, rather than showing nothing.
+export const HOMEPAGE_GUIDE_SLOTS = 3;
+
+export async function getHomepageGuides() {
+  const all = await getGuides();
+  const chosen = all.filter((g) => g.showOnHomepage);
+  return (chosen.length ? chosen : all).slice(0, HOMEPAGE_GUIDE_SLOTS);
+}
+
 export async function getGuideBySlug(slug) {
   const { data, error } = await supabase
     .from("neighbourhood_guides")

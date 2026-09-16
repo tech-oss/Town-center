@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
-import { getGuides } from "../api";
+import { getHomepageGuides } from "../api";
 import useTapReveal from "../hooks/useTapReveal";
 
 // Homepage teaser for the neighbourhood guides. Shows the guides admin has
@@ -8,7 +8,6 @@ import useTapReveal from "../hooks/useTapReveal";
 // first; if none are switched on it falls back to the first three published
 // guides so the section is never empty. Same treatment as the app's home
 // screen and the What's On cards above it.
-const SLOTS = 3;
 
 function GuideCard({ guide }) {
   const { revealed, onImageClick } = useTapReveal();
@@ -44,10 +43,8 @@ function GuideCard({ guide }) {
 }
 
 export default function GuidesGrid() {
-  const { data: guides } = useFetch(getGuides, []);
-  const all = guides ?? [];
-  const chosen = all.filter((g) => g.showOnHomepage);
-  const featured = (chosen.length ? chosen : all).slice(0, SLOTS);
+  const { data: guides } = useFetch(getHomepageGuides, []);
+  const featured = guides ?? [];
 
   if (!featured.length) return null;
 
