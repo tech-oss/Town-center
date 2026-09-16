@@ -5,7 +5,6 @@ import NotificationTray, { NOTIFICATIONS } from "../components/NotificationTray"
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getEvents, getStories, getSpotlightPosts } from "../../api";
-import { blogCards } from "../../Data/content";
 import { categoryColors } from "../../Data/events";
 import { getGuides } from "../../api";
 import { homeCategories } from "../data/mobileMock";
@@ -54,9 +53,9 @@ export default function HomeScreen() {
   const videoRef = useRef(null);
   const { data: events } = useFetch(getEvents, []);
   const { data: stories } = useFetch(getStories, []);
-  // Admin's homepage picks; demo posts only when nothing is picked.
+  // Exactly what admin picked in Business News & Offers — nothing else.
   const { data: spotlight } = useFetch(getSpotlightPosts, []);
-  const appOffers = (spotlight?.length ? spotlight : blogCards.posts.filter((p) => p.homepage)).slice(0, 4);
+  const appOffers = (spotlight ?? []).slice(0, 4);
   const upcomingEvents = (events ?? []).slice(0, 3);
   const featuredGuides = (guideList ?? []).slice(0, 3);
   const featuredStories = (stories ?? []).filter((s) => s.homepage);

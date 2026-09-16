@@ -15,11 +15,10 @@
 //   /:section/place/:slug         → item detail page
 // ════════════════════════════════════════════════════════════════════════════
 
-import { featuredEvents } from "./events";
 import {
   CATEGORY_TITLES, VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES,
   TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES, FREELANCER_CATEGORIES,
-  categoryLinks, shopGroup, categoryLabel,
+  categoryLinks, shopGroup,
 } from "./taxonomy";
 
 // Stable dummy image per slug (replace with real assets later)
@@ -27,20 +26,8 @@ const img = (seed) => `https://picsum.photos/seed/${seed}/900/650`;
 
 // Pads a gallery out to 7 images (1 hero + 6 extra, filling the detail page's
 // photo grid) with placeholder shots when a real gallery is shorter.
-const padGallery = (slug, images) => {
-  const padded = [...images];
-  for (let n = images.length + 1; padded.length < 7; n++) {
-    padded.push(img(`${slug}-${n}`));
-  }
-  return padded;
-};
 
 // Shared dummy detail content so every sub-page is fully populated
-const HOURS = [
-  { day: "Monday – Friday", time: "9am – 8pm" },
-  { day: "Saturday", time: "9am – 7pm" },
-  { day: "Sunday", time: "11am – 5pm" },
-];
 
 // Per-business News & Offers (unique to each item, styled like "In the Spotlight").
 // Every article has its own sub-page at /news/:slug.
@@ -89,568 +76,25 @@ export function newsFor(slug, name) {
 }
 
 // Real News & Offers for Coppa Club, Maidenhead (sub-pages at /news/:slug)
-const coppaNews = [
-  {
-    id: "coppa-cocktail-masterclass",
-    slug: "coppa-cocktail-masterclass",
-    category: "What's On",
-    date: "Monthly · 7pm",
-    title: "Shake, Stir & Sip: Cocktail Masterclass",
-    excerpt:
-      "A hands-on cocktail masterclass led by our in-house bartenders — learn to shake, stir and sip your way through Coppa Club's signature serves.",
-    image: "/images/coppa/cocktail.jpg",
-    body: [
-      "Ever wanted to mix like a pro? Join our in-house bartenders for Shake, Stir & Sip — a hands-on cocktail masterclass at Coppa Club Maidenhead. Over the course of the evening you'll learn the techniques behind some of our most-loved serves, from balancing flavours to the all-important garnish.",
-      "You'll get to shake, stir and, of course, sip your way through a selection of cocktails, with expert tips and plenty of good company along the way. It's the perfect night out with friends, a relaxed date, or a different kind of celebration.",
-      "Places are limited and booking is recommended. Get in touch with the team to reserve your spot.",
-    ],
-  },
-  {
-    id: "coppa-champagne-tasting",
-    slug: "coppa-champagne-tasting",
-    category: "Offer",
-    date: "Monthly · 6:30pm",
-    title: "Champagne & Sparkling Tasting Evening",
-    excerpt:
-      "An evening led by our in-house expert, exploring Champagne alongside a curated selection of sparkling wines.",
-    image: "/images/coppa/champagne.jpg",
-    body: [
-      "Raise a glass at Coppa Club Maidenhead with our Champagne & Sparkling Tasting Evening. Led by our in-house expert, you'll explore the world of Champagne alongside a curated selection of sparkling wines from around the world.",
-      "Along the way you'll discover what gives each its character, how they're made, and which food pairings bring out the best in every glass — all served with a few light bites to keep you going.",
-      "Whether you're a seasoned sipper or simply Champagne-curious, it's a relaxed and refined way to spend an evening. Booking is recommended as places fill quickly.",
-    ],
-  },
-  {
-    id: "coppa-wreath-making",
-    slug: "coppa-wreath-making",
-    category: "What's On",
-    date: "Seasonal · Autumn & Winter",
-    title: "Wreath-Making Workshop",
-    excerpt:
-      "A relaxed wreath-making session, complete with all materials provided and a complimentary drink to sip while you create.",
-    image: "/images/coppa/wreath.jpg",
-    body: [
-      "Get creative this season at Coppa Club Maidenhead with our Wreath-Making Workshop. In a relaxed, friendly setting, you'll craft your own seasonal wreath to take home — and a complimentary drink is included to sip while you create.",
-      "All materials are provided, along with plenty of foliage, ribbons and finishing touches, so there's nothing to bring but yourself. Our host will guide you through each step, whether it's your first wreath or your fifth.",
-      "It makes a lovely afternoon out with friends or a thoughtful gift experience. Spaces are limited, so please book ahead.",
-    ],
-  },
-];
 
 // Real News & Offers for COCOBA Chocolate Café, Maidenhead (sub-pages at /news/:slug)
-const cocobaNews = [
-  {
-    id: "cocoba-end-of-season-sale",
-    slug: "cocoba-end-of-season-sale",
-    category: "Offer",
-    date: "While stocks last",
-    title: "End of Season Sale — While Stocks Last",
-    excerpt: "Stock up on handcrafted COCOBA chocolates at reduced prices — a perfect chance to discover new favourites or pick up a gift.",
-    image: "/images/cocoba/truffles.jpg",
-    body: [
-      "There's never been a better time to treat yourself (or someone else) at COCOBA Maidenhead. Our End of Season Sale is now on in store, with a selection of handcrafted chocolates, gift boxes and seasonal treats available at reduced prices.",
-      "Every piece is made with premium chocolate crafted at COCOBA's dedicated Kent chocolate factory, so it's a genuine chance to enjoy artisan quality for less.",
-      "Stock is limited and selling fast — pop in to the café on the High Street while it lasts.",
-    ],
-  },
-  {
-    id: "cocoba-hot-chocolate-bombes",
-    slug: "cocoba-hot-chocolate-bombes",
-    category: "Featured",
-    date: "All year round",
-    title: "Meet the Hot Chocolate Bombes",
-    excerpt: "Drop one into warm milk and watch it melt into a rich, real-chocolate hot drink — one of COCOBA's signature treats.",
-    image: "/images/cocoba/bombes.jpg",
-    body: [
-      "If you haven't tried a COCOBA Hot Chocolate Bombe yet, you're in for something special. Drop one into a mug of warm milk and watch it melt away to reveal a rich, indulgent, real-chocolate hot drink.",
-      "Available in a range of flavours and made with the same premium chocolate as everything else on our menu, they're a firm favourite with guests — and they make a lovely gift to take home, too.",
-      "Ask the team in store to point you to the current flavours and bestsellers.",
-    ],
-  },
-  {
-    id: "cocoba-cafe-experience",
-    slug: "cocoba-cafe-experience",
-    category: "News",
-    date: "Now open",
-    title: "A Chocolate Café in the Heart of Maidenhead",
-    excerpt: "From barista coffee and luxurious real-chocolate hot drinks to waffles, cakes and brunch — discover the full COCOBA café experience.",
-    image: "/images/cocoba/storefront.jpg",
-    body: [
-      "Since opening in October 2024, COCOBA Maidenhead has become a much-loved spot for coffee and chocolate lovers alike. Owners Viv and Shashank have created a warm, welcoming café in the heart of the High Street.",
-      "Alongside expertly prepared barista coffee and luxurious real-chocolate hot drinks, you'll find freshly made cakes, waffles, desserts, light lunches and brunch favourites — all served in a stylish, comfortable setting.",
-      "Whether you're meeting friends, working, enjoying family time or simply treating yourself, there's always a reason to drop by.",
-    ],
-  },
-];
 
-function item(slug, name, section, category, tag, blurb) {
-  return {
-    slug,
-    name,
-    section,
-    category,
-    // The card's label follows the category rather than being passed
-    // alongside it — the two used to be separate arguments and drifted apart
-    // whenever a category was relabelled, so a card could show the old name
-    // while its filter chip showed the new one. An explicit `tag` still wins
-    // for the few items that want wording of their own.
-    tag: tag ?? categoryLabel(category),
-    image: img(slug),
-    gallery: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => img(n === 1 ? slug : `${slug}-${n}`)),
-    description:
-      blurb ||
-      `${name} is one of the many places that make Maidenhead town centre special. Drop in to discover what's on offer, from everyday essentials to something a little different — all just a short walk from the station and the riverside.`,
-    hours: HOURS,
-    address: "The Colonnade, High Street, Maidenhead SL6 1QJ",
-    phone: "01628 000 000",
-    email: `hello@${slug}.example`,
-    website: "www.maidenhead.example",
-    social: {
-      facebook: `https://www.facebook.com/${slug}`,
-      instagram: `https://www.instagram.com/${slug}`,
-      x: `https://x.com/${slug}`,
-    },
-    news: newsFor(slug, name),
-
-    // ── Extended fields for the Services business-profile page ──
-    rating: 4.8,
-    reviewCount: 46,
-    verified: true,
-    badges: ["24 hour booking"],
-    aboutHeading: `About ${name}`,
-    aboutText: `${name} is a friendly, reliable local business serving Maidenhead and the surrounding area. With years of experience, they take pride in quality work and looking after every customer, no job too big or too small.`,
-    stats: [
-      { value: "10+", label: "Years in Business" },
-      { value: "Fully", label: "Insured" },
-      { value: "Free", label: "No Obligation Quotes" },
-      { value: "5★", label: "Rated by Customers" },
-    ],
-    servicesOffered: ["General Enquiries", "Free Quotations", "Friendly Advice", "Local Call-Outs"],
-    whyChooseUs: ["Locally Owned & Run", "Reliable & Punctual", "Fully Insured", "Great Value", "Friendly Team", "5-Star Rated"],
-    areasCovered: ["Maidenhead", "Cookham", "Bray", "Windsor", "Marlow", "Bourne End"],
-    reviewsBreakdown: [
-      { stars: 5, count: 36 },
-      { stars: 4, count: 8 },
-      { stars: 3, count: 1 },
-      { stars: 2, count: 0 },
-      { stars: 1, count: 1 },
-    ],
-    reviewsList: [
-      {
-        name: "Sarah W.",
-        area: "Maidenhead",
-        stars: 5,
-        timeAgo: "2 weeks ago",
-        text: `Excellent service from start to finish. Turned up on time, very professional and tidy work. Would highly recommend ${name}.`,
-      },
-    ],
-    businessInfo: {
-      type: "Local Business",
-      vatRegistered: "No",
-      insurance: "Up to £1,000,000",
-      paymentMethods: ["Cash", "Card"],
-      languages: "English",
-      memberships: [],
-    },
-    accreditations: [],
-    faq: [
-      { q: `Does ${name} offer free quotes?`, a: "Yes — get in touch and the team will be happy to provide a free, no-obligation quote." },
-      { q: "What areas do you cover?", a: "Maidenhead and the surrounding towns and villages — see the Areas Covered tab for the full list." },
-      { q: "Are you fully insured?", a: `Yes — ${name} carries full public liability insurance, so you're covered for every job.` },
-      { q: "How quickly can you start?", a: "In most cases within a few days — get in touch for the team's current availability." },
-      { q: "Do you work evenings or weekends?", a: "Where possible, yes — just ask about availability outside normal working hours." },
-      { q: "What payment methods do you accept?", a: "Cash and card, with details agreed upfront before any work begins." },
-      { q: "Do you offer any guarantees on your work?", a: "Yes — all work is carried out to a high standard and backed by a workmanship guarantee." },
-      { q: "How do I get in touch?", a: "Call, email or send a message using the contact details on this page — the team usually responds the same day." },
-    ],
-  };
-}
 
 // ─── SHOP ──────────────────────────────────────────────────────────────────
-const shopItems = [
-  item("pandora", "Pandora", "shop", "jewellery-watches", "Jewellery & Watches"),
-  item("watches-of-maidenhead", "Watches of Maidenhead", "shop", "jewellery-watches", "Jewellery & Watches"),
-  item("zara", "Zara", "shop", "fashion-clothing", "Fashion & Clothing"),
-  item("m-s", "M&S", "shop", "fashion-clothing", "Fashion & Clothing"),
-  item("the-riverside-tailor", "The Riverside Tailor", "shop", "fashion-clothing", "Fashion & Clothing"),
-  item("currys", "Currys", "shop", "electronics-phones", "Electronics & Phones"),
-  item("ee-store", "EE Store", "shop", "electronics-phones", "Electronics & Phones"),
-  item("waitrose", "Waitrose", "shop", "food-groceries", "Food & Groceries"),
-  item("boots", "Boots", "shop", "health-beauty", "Health & Beauty"),
-  item("the-body-co", "The Body Co.", "shop", "health-beauty", "Health & Beauty"),
-  item("home-thames", "Home on the Thames", "shop", "home-garden", "Home & Garden"),
-  item("sole-mate", "Sole Mate", "shop", "footwear", "Footwear"),
-  item("riverside-runners", "Riverside Runners", "shop", "sports-fitness", "Sports & Fitness"),
-  // Services
-  item("barclays", "Barclays", "shop", "banks", "Banks & Foreign Exchange"),
-  item("little-acorns", "Little Acorns Childcare", "shop", "childcare", "Childcare"),
-  item("quick-clean", "Quick Clean & Repair", "shop", "dry-cleaning", "Dry Cleaning & Laundry"),
-  item("the-cut-co", "The Cut Co.", "shop", "hairdressing", "Hair & Beauty"),
-  item("bupa", "Bupa Health Clinic", "shop", "health-beauty", "Health & Beauty"),
-  item("specsavers", "Specsavers", "shop", "health-beauty", "Health & Beauty"),
-  item("serenity-spa", "Serenity Spa", "shop", "spa", "Spa & Wellness"),
-  item("thames-travel", "Thames Travel", "shop", "travel-agents", "Travel Agents"),
-];
+// Demo shop listings removed: this section shows registered businesses only.
+const shopItems = [];
 
 // ─── SERVICES ────────────────────────────────────────────────────────────────
-const servicesItems = [
-  // Tradesperson
-  item("thames-valley-builders", "Thames Valley Builders", "services", "builders", "Builders & General Building"),
-  item("brightspark-electrical", "BrightSpark Electrical", "services", "electricians", "Electricians"),
-  {
-    // ── Real content: Elgan Davies Ltd, Maidenhead (plumbing & heating) ──
-    ...item("elgan-davies-plumbing-heating", "Elgan Davies Ltd", "services", "plumbers", "Plumbers"),
-    description:
-      "Family-run plumbing and heating engineers based in Fifield, Maidenhead, serving Berkshire for over 20 years. From emergency repairs to full boiler installations and luxury bathroom design, every job is treated with the care of a family business.",
-    hours: [
-      { day: "Monday – Friday", time: "8am – 5pm" },
-      { day: "Saturday", time: "Closed" },
-      { day: "Sunday", time: "Closed" },
-    ],
-    address: "Coningsby Farm, Coningsby Lane, Fifield, Maidenhead SL6 2PF",
-    mapQuery: "Coningsby Farm, Coningsby Lane, Fifield, Maidenhead SL6 2PF",
-    phone: "0800 193 1434",
-    email: "info@elgandaviesheating.co.uk",
-    website: "www.elgandaviesheating.co.uk",
-    social: {
-      facebook: "https://www.facebook.com/elgandaviesltd/",
-    },
-    rating: 5.0,
-    reviewCount: 76,
-    verified: true,
-    badges: ["24 hour booking", "Family Run", "Gas Safe Registered"],
-    aboutHeading: "About Elgan Davies",
-    aboutText:
-      "Elgan Davies is a small, highly experienced and professional team of plumbing and heating engineers based in Fifield, Maidenhead. Established over 20 years ago, the family-run business has built an enviable reputation for the finest quality of technical work — treating every project, from a single tap to a full renovation, with uncompromising care.",
-    stats: [
-      { value: "20+", label: "Years in Business" },
-      { value: "Gas Safe", label: "Registered" },
-      { value: "Fully", label: "Insured" },
-      { value: "10.0", label: "Rated by Customers" },
-    ],
-    servicesOffered: [
-      "Emergency Plumbing & Repairs",
-      "Burst Pipes & Leak Detection",
-      "Blocked Drains",
-      "Shower & Tap Installation",
-      "Boiler Installation & Replacement",
-      "Gas, Oil & LPG Heating Systems",
-      "Radiator Installation",
-      "Underfloor Heating",
-      "Smart Thermostats (Hive, Nest)",
-      "Luxury Bathroom Design & Fitting",
-      "Full Property Refurbishments",
-      "Gas Safety Checks & Boiler Servicing",
-    ],
-    whyChooseUs: [
-      "Gas Safe Registered",
-      "OFTEC Certified",
-      "20+ Years Experience",
-      "Family Run Business",
-      "Fully Insured",
-      "Free Quotations",
-    ],
-    areasCovered: ["Maidenhead", "Fifield", "Windsor", "Cookham", "Bray", "Marlow", "Slough", "London"],
-    reviewsBreakdown: [
-      { stars: 5, count: 71 },
-      { stars: 4, count: 4 },
-      { stars: 3, count: 1 },
-      { stars: 2, count: 0 },
-      { stars: 1, count: 0 },
-    ],
-    reviewsList: [
-      {
-        name: "Chris Way",
-        area: "Maidenhead",
-        stars: 5,
-        timeAgo: "1 month ago",
-        text: "Prompt service, tidy work and very pleased with the end result.",
-      },
-      {
-        name: "David Parslow",
-        area: "Fifield",
-        stars: 5,
-        timeAgo: "2 months ago",
-        text: "Reliable, professional and flexible — upgraded our kitchen electrical and plumbing supply with no fuss.",
-      },
-      {
-        name: "David Colborn",
-        area: "Windsor",
-        stars: 5,
-        timeAgo: "3 months ago",
-        text: "From start to finish, professional, punctual, and incredibly easy to work with.",
-      },
-      {
-        name: "R. Bennett",
-        area: "Maidenhead",
-        stars: 5,
-        timeAgo: "4 months ago",
-        text: "Everyone on the team is highly professional, takes pride in the work, and is punctual, helpful and tidy.",
-      },
-    ],
-    businessInfo: {
-      type: "Limited Company",
-      vatRegistered: "Yes",
-      insurance: "Up to £2,000,000",
-      paymentMethods: ["Cash", "Card", "Bank Transfer"],
-      languages: "English",
-      memberships: ["Gas Safe Register", "OFTEC", "Checkatrade"],
-    },
-    accreditations: ["Gas Safe Registered", "OFTEC Certified", "Checkatrade Verified", "Houzz Professional"],
-    faq: [
-      { q: "Are you Gas Safe registered?", a: "Yes — Elgan Davies is fully Gas Safe registered (No. 201138) and OFTEC certified for oil and solid fuel systems." },
-      { q: "Do you offer emergency call-outs?", a: "Yes, the team responds to emergency plumbing and heating issues including burst pipes and boiler breakdowns." },
-      { q: "What areas do you cover?", a: "Maidenhead, Fifield, Windsor, Cookham, Bray, Marlow, Slough and London — see the Areas Covered tab for the full list." },
-      { q: "Do you provide free quotes?", a: "Yes — every job starts with a free, no-obligation quote before any work is booked in." },
-      { q: "Are you insured?", a: "Yes — Elgan Davies is fully insured up to £2,000,000, so every job is covered." },
-      { q: "Do you install boilers as well as repair them?", a: "Yes — the team handles full boiler installation and replacement across gas, oil and LPG systems, alongside repairs and servicing." },
-      { q: "Can you fit smart thermostats?", a: "Yes — the team fits and configures smart thermostats including Hive and Nest as part of a heating upgrade or on their own." },
-      { q: "How do I book an appointment?", a: "Call 0800 193 1434 or email info@elgandaviesheating.co.uk and the team will arrange a convenient time." },
-    ],
-  },
-  item("maidenhead-decorators", "Maidenhead Decorators", "services", "decorators-painters", "Painters & Decorators"),
-  item("towncentre-locksmiths", "Town Centre Locksmiths", "services", "locksmiths", "Locksmith"),
-  item("sparkle-clean-co", "Sparkle Clean Co.", "services", "cleaners", "Cleaning"),
-  // Professionals
-  item("thames-accountancy", "Thames Accountancy", "services", "accountants", "Accountants & Finance"),
-  item("maidenhead-legal-partners", "Maidenhead Legal Partners", "services", "solicitors", "Legal Services"),
-  item("bridgeview-financial", "Bridgeview Financial", "services", "financial-advisers", "Financial & Mortgage Advice"),
-  item("riverside-estates", "Riverside Estates", "services", "estate-agents", "Property & Estate Agents"),
-  item("towncentre-recruitment", "Town Centre Recruitment", "services", "recruitment", "Recruitment & HR"),
-  item("shield-insurance-brokers", "Shield Insurance Brokers", "services", "insurance-brokers", "Insurance"),
-  // Freelancers — each profile lists 10 skills.
-  {
-    ...item("riverside-graphic-design", "Riverside Graphic Design", "services", "design-creative", "Design & Creative"),
-    servicesOffered: [
-      "Logo Design", "Brand Identity", "Print Design", "Packaging Design", "Illustration",
-      "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Social Media Graphics", "Typography",
-    ],
-  },
-  {
-    // Portfolio mixes photos with links out to live project sites — a
-    // freelancer's work isn't always a picture (see FreelancerDetailLayout).
-    ...item("thames-web-studio", "Thames Web Studio", "services", "web-digital", "Web & Digital"),
-    servicesOffered: [
-      "Website Design", "Front-End Development", "WordPress", "Shopify", "E-Commerce Builds",
-      "Responsive Design", "SEO Basics", "JavaScript", "HTML & CSS", "Website Maintenance",
-    ],
-    portfolio: [
-      { image: img("thames-web-studio-1") },
-      { link: "https://www.coppaclub.co.uk/maidenhead", title: "Coppa Club Maidenhead — restaurant website" },
-      { image: img("thames-web-studio-2") },
-      { link: "https://www.maidenheadfarmersmarket.org.uk/", title: "Maidenhead Farmers' Market — event site" },
-      { image: img("thames-web-studio-3") },
-    ],
-  },
-  {
-    ...item("maidenhead-photo-co", "Maidenhead Photo Co.", "services", "photography-video", "Photography & Video"),
-    servicesOffered: [
-      "Portrait Photography", "Event Photography", "Product Photography", "Wedding Photography", "Photo Editing",
-      "Lightroom", "Photoshop", "Studio Lighting", "Drone Photography", "Headshots",
-    ],
-  },
-  {
-    ...item("wordsmith-copywriting", "Wordsmith Copywriting", "services", "writing-content", "Writing & Content"),
-    servicesOffered: [
-      "Website Copy", "Blog Writing", "SEO Copywriting", "Email Marketing", "Product Descriptions",
-      "Brand Voice & Tone", "Proofreading & Editing", "Social Media Copy", "Press Releases", "Content Strategy",
-    ],
-  },
-  {
-    ...item("bridgeview-marketing", "Bridgeview Marketing", "services", "marketing-social-media", "Marketing & Social Media"),
-    servicesOffered: [
-      "Digital Marketing Strategy", "Social Media Marketing", "SEO", "PPC & Google Ads", "Email Marketing",
-      "Brand Strategy", "Market Research", "Content Marketing", "Marketing Analytics", "Campaign Management",
-    ],
-  },
-  {
-    ...item("towncentre-pt", "Town Centre PT", "services", "tutoring-training", "Tutoring & Training"),
-    servicesOffered: [
-      "Strength Training", "Weight Loss Coaching", "Nutrition Advice", "HIIT Training", "Mobility & Flexibility",
-      "Group Sessions", "One-to-One Coaching", "Sports Conditioning", "Injury Rehabilitation Support", "Online Coaching Plans",
-    ],
-  },
-  {
-    ...item("riverside-tutoring", "Riverside Tutoring", "services", "tutoring-training", "Tutoring & Training"),
-    servicesOffered: [
-      "Maths Tutoring", "English Tutoring", "Science Tutoring", "GCSE Preparation", "A-Level Preparation",
-      "11+ Preparation", "Exam Technique", "Homework Support", "Online Tutoring", "Study Skills Coaching",
-    ],
-  },
-  {
-    ...item("maidenhead-va-services", "Maidenhead VA Services", "services", "admin-virtual-assistance", "Admin & Virtual Assistance"),
-    servicesOffered: [
-      "Diary Management", "Email Management", "Data Entry", "Customer Support", "Social Media Scheduling",
-      "Invoicing & Bookkeeping Support", "Travel Booking", "Document Preparation", "CRM Management", "Research & Reporting",
-    ],
-  },
-];
+// Demo services listings removed: this section shows registered businesses only.
+const servicesItems = [];
 
 // ─── EAT & DRINK ─────────────────────────────────────────────────────────────
-const eatItems = [
-  {
-    // ── Real content: Coppa Club, Maidenhead ──
-    ...item("coppa-club", "Coppa Club", "eat-drink", "restaurants", "Restaurants"),
-    image: "/images/coppa/hero.jpg",
-    gallery: padGallery("coppa", [
-      "/images/coppa/hero.jpg",
-      "/images/coppa/terrace.jpg",
-      "/images/coppa/garden.jpg",
-      "/images/coppa/bar.jpg",
-      "/images/coppa/dining.jpg",
-    ]),
-    description:
-      "Located in the centre of Maidenhead overlooking the waterway, Coppa Club provides a welcoming space to relax and dine. Whether you're enjoying the garden room or meeting friends for drinks at the bar, you're welcome any time.",
-    hours: [
-      { day: "Monday – Thursday", time: "9am – 11pm" },
-      { day: "Friday – Saturday", time: "9am – 11:30pm" },
-      { day: "Sunday", time: "9am – 10pm" },
-    ],
-    address: "The Arches, 2 Bridge Avenue, Maidenhead SL6 1RR",
-    mapQuery: "Coppa Club, Maidenhead SL6 1RR",
-    phone: "01628 951108",
-    email: "maidenhead@coppaclub.co.uk",
-    social: {
-      instagram: "https://www.instagram.com/coppaclub",
-      facebook: "https://www.facebook.com/share/1BYPndXk8G/?mibextid=wwXIfr",
-      // X / Twitter not available for Coppa Club
-      whatsappPhone: "441628951108",
-    },
-    website: "www.coppaclub.co.uk/maidenhead",
-    news: coppaNews,
-  },
-  item("el-cerdo", "El Cerdo Tapas & Bar", "eat-drink", "restaurants", "Restaurants"),
-  item("bombay-story", "Bombay Story", "eat-drink", "indian", "Indian"),
-  item("the-lock-bar", "The Lock Bar", "eat-drink", "bars", "Bars"),
-  item("riverside-tap", "Riverside Tap", "eat-drink", "bars", "Bars"),
-  {
-    // ── Real content: COCOBA Chocolate Café, Maidenhead ──
-    ...item("cocoba", "COCOBA Chocolate Café", "eat-drink", "cafes", "Cafes"),
-    image: "/images/cocoba/storefront.jpg",
-    gallery: padGallery("cocoba", [
-      "/images/cocoba/storefront.jpg",
-      "/images/cocoba/dessert.jpg",
-      "/images/cocoba/interior.jpg",
-      "/images/cocoba/cocoba4.png",
-      "/images/cocoba/cocoba5.png",
-      "/images/cocoba/cocoba6.png",
-    ]),
-    paragraphs: [
-      "Nestled in the heart of Maidenhead, COCOBA Chocolate Café is more than just a coffee shop—it's a destination for chocolate lovers, coffee enthusiasts, and anyone looking to relax and indulge.",
-      "Opened in October 2024, COCOBA Maidenhead combines the warmth of a welcoming neighbourhood café with the craftsmanship of an artisan chocolate maker. Every hot chocolate, dessert, and chocolate treat is created using premium chocolate crafted at COCOBA's dedicated Kent chocolate factory, delivering a truly authentic chocolate experience.",
-      "Guests can enjoy expertly prepared barista coffee, luxurious real-chocolate hot drinks, freshly made cakes, waffles, desserts, light lunches, and brunch favourites in a stylish and comfortable setting. Whether you're catching up with friends, holding an informal meeting, enjoying family time, or simply treating yourself, COCOBA provides the perfect atmosphere to unwind.",
-      "Beyond the café experience, visitors can browse an extensive selection of handcrafted chocolates, gift boxes, hampers, and seasonal treats, making every visit an opportunity to take a little chocolate magic home.",
-      "With its friendly service, premium products, and inviting atmosphere, COCOBA Chocolate Café Maidenhead has quickly become one of the town's most enjoyable destinations for coffee, chocolate, and memorable moments.",
-    ],
-    hours: [
-      { day: "Monday – Tuesday", time: "7:30am – 6pm" },
-      { day: "Wednesday – Saturday", time: "7:30am – 9:30pm" },
-      { day: "Sunday", time: "9am – 5pm" },
-    ],
-    address: "2B High Street, Maidenhead SL6 1QJ",
-    mapQuery: "2B High Street, Maidenhead SL6 1QJ",
-    phone: "—",
-    email: "maidenhead@cocobachocolate.com",
-    social: {
-      instagram: "https://www.instagram.com/cocobachocolatecafe_maidenhead",
-      facebook: "https://www.facebook.com/CocobaChocolate/",
-      x: "https://x.com/cocobachocolate",
-      // no public WhatsApp number — falls back to a "share via WhatsApp" link
-    },
-    website: "www.cocobachocolate.com/pages/cocoba-chocolate-cafe-maidenhead",
-    news: cocobaNews,
-  },
-  {
-    // ── Esquires Coffee — "free plan +" listing (2-image header, description, website) ──
-    ...item("esquires-coffee", "Esquires Coffee", "eat-drink", "cafes", "Cafes"),
-    freePlan: true,
-    image: "/images/esquires/hero-1.png",
-    gallery: ["/images/esquires/hero-2.png", "/images/esquires/hero-1.png"],
-    description:
-      "Esquires Coffee is an ethical coffeehouse brand known for serving organic, Fairtrade coffee in welcoming, community-focused cafés.",
-    hours: [
-      { day: "Monday – Friday", time: "7:30am – 5:30pm" },
-      { day: "Saturday", time: "8am – 5:30pm" },
-      { day: "Sunday", time: "9am – 4pm" },
-    ],
-    address: "70 High St, Maidenhead SL6, 1PY",
-    mapQuery: "70 High Street, Maidenhead SL6 1PY",
-    phone: "01628 000 000",
-    website: "www.esquirescoffee.co.uk",
-  },
-  item("pret-a-manger", "Pret A Manger", "eat-drink", "grab-go", "Grab & Go"),
-  {
-    // ── Real content: Bakedd, Maidenhead — "free plan" listing (logo-only header) ──
-    ...item("bakedd", "Bakedd", "eat-drink", "bakery", "Bakery"),
-    // Listed under both Bakery and Cafés in the Eat & Drink menu
-    categories: ["bakery", "cafes"],
-    freePlan: true,
-    logoHeader: true,
-    hideDescription: true,
-    hideWeb: true,
-    logo: "/images/logos/bakedd.png",
-    paragraphs: [
-      "Bakedd is an artisan bakery where every visit feels like coming home. Everything is freshly handcrafted on-site each day, using honest ingredients and time-honoured traditions with an innovative twist.",
-      "From freshly baked breads and pastries to cakes, coffee and light bites, Bakedd brings a warm, welcoming corner of craft baking to the heart of Maidenhead's High Street — the perfect spot to pause, treat yourself or pick something up to take home.",
-    ],
-    hours: [
-      { day: "Monday – Saturday", time: "7:30am – 5pm" },
-      { day: "Sunday", time: "Closed" },
-    ],
-    address: "1A High Street, Maidenhead SL6 1NJ",
-    mapQuery: "Bakedd, 1A High Street, Maidenhead SL6 1NJ",
-    phone: "01628 299 303",
-    email: "hello@bakedd.co.uk",
-    website: "www.bakedd.co.uk",
-  },
-  item("thai-river", "Thai River", "eat-drink", "thai", "Thai"),
-  item("sakura", "Sakura", "eat-drink", "japanese", "Japanese"),
-  item("la-cucina", "La Cucina", "eat-drink", "italian", "Italian"),
-  item("the-bridge-house", "The Bridge House", "eat-drink", "british", "British"),
-  item("golden-lotus", "Golden Lotus", "eat-drink", "chinese", "Chinese"),
-  item("maison-thames", "Maison Thames", "eat-drink", "french", "French"),
-  item("hall-woodhouse", "Hall & Woodhouse", "eat-drink", "private-dining", "Private Dining"),
-];
+// Demo eat listings removed: this section shows registered businesses only.
+const eatItems = [];
 
 // ─── SEE & DO ────────────────────────────────────────────────────────────────
-const seeItems = [
-  item("winter-makers-market", "Winter Makers Market", "see-do", "community", "Community"),
-  item("riverside-jazz-festival", "Riverside Jazz Festival", "see-do", "art-culture", "Art & Culture"),
-  item("maidenhead-heritage-walk", "Maidenhead Heritage Walk", "see-do", "art-culture", "Art & Culture"),
-  item("community-garden-day", "Community Garden Day", "see-do", "community", "Community"),
-  item("kids-craft-club", "Kids' Craft Club", "see-do", "family", "Family"),
-  item("style-edit-evening", "Style Edit Evening", "see-do", "other-see-do", "Other"),
-  item("riverside-film-nights", "Riverside Film Nights", "see-do", "film", "Film"),
-  {
-    ...item("odeon-luxe-maidenhead", "ODEON Luxe Maidenhead", "see-do", "film", "Film"),
-    image: "/images/cinema.png",
-    gallery: padGallery("odeon", [
-      "/images/cinema.png",
-      "/images/cinema.png",
-      "/images/cinema.png",
-    ]),
-    paragraphs: [
-      "Located in the heart of Maidenhead town centre, ODEON Luxe Maidenhead is a popular entertainment venue that serves both the local community and visitors to the area. Offering the latest blockbuster films, family favourites, live screenings, and special cinematic events, it provides a modern and welcoming destination for people of all ages.",
-      "Following a major refurbishment, the cinema now features luxury reclining seats, state-of-the-art screens, and immersive sound technology, ensuring a comfortable and enjoyable viewing experience. Its central location on King Street makes it a convenient stop for visitors exploring the town's shops, restaurants, and attractions, while also serving as a valued social and leisure hub for local residents.",
-      "Whether you're enjoying a family day out, meeting friends for an evening film, or visiting Maidenhead as part of a wider trip to the Thames Valley, ODEON Luxe offers a relaxing and memorable cinema experience. With a variety of dining options nearby and excellent transport links, including easy access from Maidenhead railway station, it remains one of the town's most popular destinations for entertainment and community gatherings.",
-      "As a key part of Maidenhead's leisure offering, ODEON Luxe continues to bring people together through the shared experience of cinema, contributing to the town's vibrant cultural and social life.",
-    ],
-    hours: [
-      { day: "Monday – Thursday", time: "10am – 11pm" },
-      { day: "Friday – Saturday", time: "10am – 11:30pm" },
-      { day: "Sunday", time: "10am – 10:30pm" },
-    ],
-    address: "King Street, Maidenhead SL6 1DT",
-    mapQuery: "ODEON Maidenhead, King Street, Maidenhead SL6 1DT",
-    lat: 51.5232, lng: -0.7199,
-    phone: "0333 006 7777",
-    website: "www.odeon.co.uk/cinemas/maidenhead/",
-    tag: "Film",
-  },
-  item("retro-arcade-takeover", "Retro Arcade Takeover", "see-do", "gaming", "Gaming"),
-  item("thames-life-drawing", "Thames Life Drawing", "see-do", "learning", "Learning"),
-  item("parkrun-maidenhead", "Maidenhead parkrun", "see-do", "sport-wellness", "Sport & Wellness"),
-];
+// Demo see listings removed: this section shows registered businesses only.
+const seeItems = [];
 
 // ─── Section definitions (drives nav dropdowns + landing pages) ──────────────
 export const sections = {
@@ -673,17 +117,6 @@ export const sections = {
       {
         heading: "Local Services",
         links: categoryLinks("/shop", shopGroup("Local Services")),
-      },
-      {
-        heading: "Featured",
-        links: [
-          { label: "Zara", to: "/shop/place/zara" },
-          { label: "M&S", to: "/shop/place/m-s" },
-          { label: "Boots", to: "/shop/place/boots" },
-          { label: "Barclays", to: "/shop/place/barclays" },
-          { label: "Bupa", to: "/shop/place/bupa" },
-          { label: "Currys", to: "/shop/place/currys" },
-        ],
       },
     ],
     items: shopItems,
@@ -760,17 +193,6 @@ export const sections = {
         heading: "Cuisine Type",
         links: categoryLinks("/eat-drink", CUISINE_TYPES),
       },
-      {
-        heading: "Featured",
-        links: [
-          { label: "Coppa Club", to: "/eat-drink/place/coppa-club" },
-          { label: "Bakedd", to: "/eat-drink/place/bakedd" },
-          { label: "Esquires Coffee", to: "/eat-drink/place/esquires-coffee" },
-          { label: "El Cerdo Tapas & Bar", to: "/eat-drink/place/el-cerdo" },
-          { label: "Bombay Story", to: "/eat-drink/place/bombay-story" },
-          { label: "La Cucina", to: "/eat-drink/place/la-cucina" },
-        ],
-      },
     ],
     items: eatItems,
   },
@@ -792,12 +214,6 @@ export const sections = {
       {
         heading: "Browse By Interest",
         links: categoryLinks("/see-do", SEE_DO_CATEGORIES, { seeAll: "See All Activities" }),
-      },
-      {
-        heading: "Featured",
-        // The same events currently shown on the homepage's What's On grid —
-        // sourced from the one shared list so the two never drift apart.
-        links: featuredEvents.map((e) => ({ label: e.title, to: `/event/${e.slug}` })),
       },
     ],
     items: seeItems,

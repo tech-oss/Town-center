@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getStories, getArticles } from "../api";
-import { blogCards } from "../Data/content";
 import { sections } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 import { TYPE_COLORS } from "../lib/typeColors";
@@ -19,9 +18,9 @@ const BUSINESS_TYPES = [
 
 // Slugs currently live on the homepage's "In the Spotlight" cards, so the
 // same "On Homepage" badge used for Featured Stories can be applied here too.
-const homepageSpotlightSlugs = new Set(
-  blogCards.posts.filter((p) => p.homepage).map((p) => p.href.split("/").pop())
-);
+// Homepage picks are flagged by admin in Business News & Offers; the badge
+// below is resolved from the live spotlight list instead of demo data.
+const homepageSpotlightSlugs = new Set();
 
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 

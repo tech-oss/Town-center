@@ -4,7 +4,6 @@ import MobileShell from "../components/MobileShell";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
 import { getStories, getArticles } from "../../api";
-import { blogCards } from "../../Data/content";
 import { sections } from "../../Data/pages";
 import { TYPE_COLORS, typeColor } from "../lib/typeColors";
 import { categoryColor } from "../../lib/categoryColors";
@@ -14,9 +13,9 @@ const BUSINESS_TYPES = [
   { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
 
-const homepageSpotlightSlugs = new Set(
-  blogCards.posts.filter((p) => p.homepage).map((p) => p.href.split("/").pop())
-);
+// Homepage picks are flagged by admin in Business News & Offers; the badge
+// below is resolved from the live spotlight list instead of demo data.
+const homepageSpotlightSlugs = new Set();
 
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 

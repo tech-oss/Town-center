@@ -1,4 +1,3 @@
-import { hotels, accommodations } from "./stay";
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 export const header = {
@@ -137,211 +136,16 @@ export const blogCards = {
   eyebrow: "From the Journal",
   heading: "IN THE SPOTLIGHT",
   cta: { label: "See All Stories", href: "/offers" },
-  posts: [
-    {
-      id: 1,
-      homepage: true,
-      category: "COCOBA · Offer",
-      title: "End of Season Sale — While Stocks Last",
-      excerpt:
-        "Stock up on handcrafted COCOBA chocolates at reduced prices — a perfect chance to discover new favourites or pick up a gift.",
-      imageSrc: "/images/cocoba/truffles.jpg",
-      imageAlt: "COCOBA handcrafted chocolates",
-      href: "/news/cocoba-end-of-season-sale",
-      date: "While stocks last",
-    },
-    {
-      id: 2,
-      homepage: true,
-      category: "Coppa Club · Offer",
-      title: "Champagne & Sparkling Tasting Evening",
-      excerpt:
-        "An evening led by Coppa Club's in-house expert, exploring Champagne alongside a curated selection of sparkling wines.",
-      imageSrc: "/images/coppa/champagne.jpg",
-      imageAlt: "Champagne tasting at Coppa Club",
-      href: "/news/coppa-champagne-tasting",
-      date: "Monthly · 6:30pm",
-    },
-    {
-      id: 3,
-      homepage: true,
-      category: "COCOBA · Featured",
-      title: "Meet the Hot Chocolate Bombes",
-      excerpt:
-        "Drop one into warm milk and watch it melt into a rich, real-chocolate hot drink — one of COCOBA's signature treats.",
-      imageSrc: "/images/cocoba/bombes.jpg",
-      imageAlt: "COCOBA hot chocolate bombes",
-      href: "/news/cocoba-hot-chocolate-bombes",
-      date: "All year round",
-    },
-    {
-      id: 4,
-      homepage: true,
-      category: "Coppa Club · What's On",
-      title: "Shake, Stir & Sip: Cocktail Masterclass",
-      excerpt:
-        "A hands-on cocktail masterclass led by Coppa Club's in-house bartenders — learn to shake, stir and sip your way through their signature serves.",
-      imageSrc: "/images/coppa/cocktail.jpg",
-      imageAlt: "Cocktail masterclass at Coppa Club",
-      href: "/news/coppa-cocktail-masterclass",
-      date: "Monthly · 7pm",
-    },
-  ],
+  // Demo spotlight posts removed: the homepage shows admin's own picks.
+  posts: [],
 };
 
-// ─── Extra traders (TEMP load-test set) ───────────────────────────────────────
 // ~40 real Maidenhead town-centre businesses added purely to preview how the
 // homepage map + directory behave with ~50 pins (clustering, density, list).
 // One placeholder picture each (picsum), no detail pages. Remove when done.
 // Tuple: [name, category, section, lat, lng]
-const extraTraders = [
-  ["Costa Coffee", "Coffee Shop", "food-drink", 51.52210, -0.71880],
-  ["Caffè Nero", "Coffee Shop", "food-drink", 51.52185, -0.71930],
-  ["Starbucks", "Coffee Shop", "food-drink", 51.52240, -0.71990],
-  ["Greggs", "Bakery", "food-drink", 51.52160, -0.71960],
-  ["McDonald's", "Fast Food", "food-drink", 51.52090, -0.72050],
-  ["Burger King", "Fast Food", "food-drink", 51.52050, -0.72110],
-  ["KFC", "Fast Food", "food-drink", 51.52030, -0.72180],
-  ["Subway", "Sandwiches", "food-drink", 51.52120, -0.72020],
-  ["Pizza Express", "Italian", "food-drink", 51.52260, -0.71850],
-  ["Prezzo", "Italian", "food-drink", 51.52280, -0.71910],
-  ["Wagamama", "Asian", "food-drink", 51.52015, -0.72240],
-  ["Bill's", "Restaurant", "food-drink", 51.52310, -0.71880],
-  ["The Bear", "Pub", "food-drink", 51.52175, -0.71845],
-  ["The Greyhound", "Pub", "food-drink", 51.52330, -0.71800],
-  ["Boots", "Pharmacy", "health-beauty", 51.52195, -0.71905],
-  ["Superdrug", "Health & Beauty", "health-beauty", 51.52150, -0.71930],
-  ["Holland & Barrett", "Health Foods", "health-beauty", 51.52175, -0.71975],
-  ["Specsavers", "Opticians", "health-beauty", 51.52205, -0.71955],
-  ["Vision Express", "Opticians", "health-beauty", 51.52225, -0.71925],
-  ["Toni & Guy", "Hair Salon", "health-beauty", 51.52145, -0.71990],
-  ["Pure Gym", "Gym", "health-beauty", 51.52000, -0.72190],
-  ["Nuffield Health", "Gym & Spa", "health-beauty", 51.51975, -0.72090],
-  ["The Beauty Rooms", "Beauty Salon", "health-beauty", 51.52120, -0.72085],
-  ["Marks & Spencer", "Department Store", "shopping", 51.52210, -0.71990],
-  ["WHSmith", "Books & Stationery", "shopping", 51.52185, -0.72010],
-  ["Waterstones", "Bookshop", "shopping", 51.52230, -0.71965],
-  ["TK Maxx", "Fashion", "shopping", 51.52165, -0.72060],
-  ["Card Factory", "Cards & Gifts", "shopping", 51.52150, -0.71910],
-  ["The Body Shop", "Cosmetics", "shopping", 51.52200, -0.71945],
-  ["Clarks", "Footwear", "shopping", 51.52175, -0.72035],
-  ["Pandora", "Jewellery", "shopping", 51.52195, -0.71980],
-  ["H Samuel", "Jewellery", "shopping", 51.52160, -0.71995],
-  ["Mountain Warehouse", "Outdoor", "shopping", 51.52135, -0.72050],
-  ["Sports Direct", "Sportswear", "shopping", 51.52110, -0.72095],
-  ["Poundland", "Discount Store", "shopping", 51.52100, -0.72020],
-  ["Trespass", "Outdoor", "shopping", 51.52125, -0.71930],
-  ["Barclays", "Bank", "services", 51.52215, -0.71870],
-  ["NatWest", "Bank", "services", 51.52190, -0.71855],
-  ["Lloyds Bank", "Bank", "services", 51.52165, -0.71865],
-  ["HSBC", "Bank", "services", 51.52235, -0.71840],
-  ["Santander", "Bank", "services", 51.52145, -0.71880],
-  ["Post Office", "Postal Services", "services", 51.52125, -0.71840],
-  ["Timpson", "Key Cutting & Repairs", "services", 51.52105, -0.71905],
-  ["Maidenhead Library", "Library", "services", 51.52055, -0.71810],
-  // Batch 2 — added for 100-pin density test
-  ["Flavio's", "Café & Restaurant", "food-drink", 51.52260, -0.71950],
-  ["The Maiden's Head", "Pub", "food-drink", 51.52295, -0.71830],
-  ["Knead Pizza", "Pizza", "food-drink", 51.52320, -0.71865],
-  ["A Hoppy Place", "Craft Beer Bar", "food-drink", 51.52345, -0.71900],
-  ["Sushi Point", "Sushi", "food-drink", 51.52370, -0.71870],
-  ["IRO Sushi", "Sushi", "food-drink", 51.52135, -0.71960],
-  ["German Doner Kebab", "Fast Food", "food-drink", 51.52080, -0.72000],
-  ["Sauce and Flour", "Pasta", "food-drink", 51.52290, -0.71980],
-  ["Kokoro", "Asian Kitchen", "food-drink", 51.52060, -0.72130],
-  ["Noodle Nation", "Noodles", "food-drink", 51.52040, -0.72070],
-  ["Presto Pizza", "Pizza", "food-drink", 51.52355, -0.71940],
-  ["Yao Thai Supermarket", "Asian Grocery", "shopping", 51.52380, -0.71960],
-  ["Grape Tree", "Health Foods", "shopping", 51.52100, -0.71940],
-  ["Ginco Foods", "Specialty Grocery", "shopping", 51.52070, -0.71970],
-  ["Next", "Fashion", "shopping", 51.52240, -0.72050],
-  ["New Look", "Fashion", "shopping", 51.52255, -0.72030],
-  ["River Island", "Fashion", "shopping", 51.52270, -0.72010],
-  ["JD Sports", "Sportswear", "shopping", 51.52250, -0.72080],
-  ["Primark", "Fashion", "shopping", 51.52230, -0.72100],
-  ["Argos", "General Retail", "shopping", 51.52215, -0.72070],
-  ["Robert Dyas", "Hardware & Home", "shopping", 51.52200, -0.72055],
-  ["Currys", "Electronics", "shopping", 51.52185, -0.72090],
-  ["Phones 4u", "Mobile Phones", "shopping", 51.52170, -0.72110],
-  ["Three Mobile", "Telecoms", "shopping", 51.52155, -0.72130],
-  ["EE", "Telecoms", "shopping", 51.52140, -0.72150],
-  ["Vodafone", "Telecoms", "shopping", 51.52125, -0.72170],
-  ["O2", "Telecoms", "shopping", 51.52110, -0.72140],
-  ["Craft Coop", "Arts & Crafts", "shopping", 51.52325, -0.71935],
-  ["Kingdom of Sweets", "Confectionery", "shopping", 51.52308, -0.71915],
-  ["WHSmith", "Books & News", "shopping", 51.52340, -0.71955],
-  ["Snappy Snaps", "Photography", "services", 51.52090, -0.71980],
-  ["Halifax", "Bank", "services", 51.52245, -0.71835],
-  ["TSB", "Bank", "services", 51.52260, -0.71815],
-  ["Metro Bank", "Bank", "services", 51.52275, -0.71800],
-  ["Co-op", "Convenience Store", "shopping", 51.52365, -0.72005],
-  ["Tesco Express", "Supermarket", "shopping", 51.52060, -0.72150],
-  ["Lidl", "Supermarket", "shopping", 51.51990, -0.72300],
-  ["Aldi", "Supermarket", "shopping", 51.51975, -0.72270],
-  ["Waitrose", "Supermarket", "shopping", 51.52010, -0.72230],
-  ["Anytime Fitness", "Gym", "health-beauty", 51.52380, -0.72020],
-  ["Salon 54", "Hair Salon", "health-beauty", 51.52350, -0.71980],
-  ["Regis", "Hair Salon", "health-beauty", 51.52135, -0.72010],
-  ["Nail & Co", "Nail Salon", "health-beauty", 51.52115, -0.71955],
-  ["Zara", "Fashion", "shopping", 51.52265, -0.71975],
-  ["Peacocks", "Fashion", "shopping", 51.52280, -0.72000],
-  ["Deichmann", "Footwear", "shopping", 51.52180, -0.71960],
-  ["Cancer Research UK", "Charity Shop", "shopping", 51.52075, -0.71940],
-  ["Oxfam", "Charity Shop", "shopping", 51.52095, -0.71960],
-  // ── See & Do — attractions, culture, leisure and green spaces ──────────────
-  // NOTE: coordinates below are approximate placeholders, in line with the rest
-  // of this demo dataset. Geocode against real postcodes before launch.
-  ["Odeon Maidenhead", "Cinema", "see-do", 51.52045, -0.72165],
-  ["Norden Farm Centre for the Arts", "Arts Centre", "see-do", 51.51690, -0.72610],
-  ["Maidenhead Heritage Centre", "Museum", "see-do", 51.52080, -0.71760],
-  ["Braywick Leisure Centre", "Leisure Centre", "see-do", 51.51380, -0.71880],
-  ["Boulter's Lock", "On the River", "see-do", 51.53420, -0.69760],
-  ["Ray Mill Island", "Park & Gardens", "see-do", 51.53480, -0.69820],
-  ["Kidwells Park", "Park", "see-do", 51.52560, -0.72080],
-  ["Guards Club Park", "Riverside Park", "see-do", 51.52520, -0.70640],
-  ["Maidenhead Golf Club", "Golf", "see-do", 51.51150, -0.73400],
-  ["Thames Path — Maidenhead Bridge", "Walking Route", "see-do", 51.52390, -0.70930],
-];
 
-const extraBrands = extraTraders.map(([name, category, section, lat, lng], i) => ({
-  id: 100 + i,
-  name,
-  category,
-  section,
-  logo: `https://picsum.photos/seed/mh${100 + i}/240/240`,
-  lat,
-  lng,
-}));
 
-// "Stay on the map" tab — hotels & accommodation, reusing the /live/stay data.
-const stayBrands = [
-  ...hotels.map((h, i) => ({
-    id: 500 + i,
-    name: h.name,
-    category: "Hotel",
-    section: "stay",
-    logo: h.image,
-    image: h.image,
-    to: `/live/stay/hotels/${h.slug}`,
-    address: h.address,
-    tagline: h.tagline,
-    lat: h.lat,
-    lng: h.lng,
-  })),
-  ...accommodations.map((a, i) => ({
-    id: 520 + i,
-    name: a.name,
-    category: a.type,
-    section: "stay",
-    logo: a.image,
-    image: a.image,
-    to: `/live/stay/accommodation/${a.slug}`,
-    address: a.area,
-    tagline: a.tagline,
-    lat: a.lat,
-    lng: a.lng,
-  })),
-];
 
 // ─── BrandGrid ────────────────────────────────────────────────────────────────
 export const brandGrid = {
@@ -353,19 +157,8 @@ export const brandGrid = {
     { label: "Browse Eat & Drink", href: "/eat-drink" },
     { label: "Browse Shops", href: "/shop" },
   ],
-  brands: [
-    // Coordinates verified from live postcodes via postcodes.io (June 2026)
-    { id: 1, name: "bakedd", category: "Bakery", section: "food-drink", logo: "/images/logos/bakedd.png", to: "/eat-drink/place/bakedd", address: "1a High Street, Maidenhead SL6 1JN", tagline: "Fresh bakes made daily", lat: 51.522851, lng: -0.71774 },
-    { id: 2, name: "Bombay Story", category: "Indian Kitchen", section: "food-drink", logo: "/images/logos/bombay.png", to: "/eat-drink/place/bombay-story", address: "The Colonnade, Waterside Quarter, Maidenhead SL6 1QG", tagline: "Authentic Indian cuisine", lat: 51.523680, lng: -0.717180 },
-    { id: 3, name: "Cocoba", category: "Chocolate Café", section: "food-drink", logo: "/images/logos/cocoba.jpg", to: "/eat-drink/place/cocoba", address: "2B High Street, Waterside Quarter, Maidenhead SL6 1QJ", image: "/images/cocoba/cafe.jpg", tagline: "Artisan chocolates & coffee", lat: 51.523201, lng: -0.7176 },
-    { id: 4, name: "Coppa Club", category: "Restaurant & Bar", section: "food-drink", logo: "/images/logos/coppa-club.png", to: "/eat-drink/place/coppa-club", address: "The Arches, Bridge Avenue, Maidenhead SL6 1RR", image: "/images/coppa/bar.jpg", tagline: "Riverside views • Modern British", lat: 51.521889, lng: -0.716051 },
-    { id: 5, name: "El Cerdo", category: "Tapas Bar", section: "food-drink", logo: "/images/logos/el-cerdo.png", to: "/eat-drink/place/el-cerdo", address: "The Colonnade, Waterside Quarter, Maidenhead SL6 1QG", tagline: "Spanish tapas & small plates", lat: 51.523480, lng: -0.717620 },
-    { id: 6, name: "Nando's", category: "Flame-Grilled", section: "food-drink", logo: "/images/logos/nandos.png", to: "/eat-drink?category=restaurants", address: "57 King Street, Maidenhead SL6 1JR", tagline: "Flame-grilled peri-peri", lat: 51.520859, lng: -0.722249 },
-    { id: 7, name: "Pret A Manger", category: "Coffee & Food", section: "food-drink", logo: "/images/logos/pret.png", to: "/eat-drink/place/pret-a-manger", address: "Unit D, 7 Garden Boulevard, Maidenhead SL6 1QQ", tagline: "Coffee, sandwiches & salads", lat: 51.520813, lng: -0.721299 },
-    { id: 8, name: "Hall & Woodhouse", category: "Pub & Kitchen", section: "food-drink", logo: "/images/logos/hall-woodhouse.jpg", to: "/eat-drink/place/hall-woodhouse", address: "Mill Lane, Taplow, Maidenhead SL6 0AA", tagline: "Pub classics by the water", lat: 51.526859, lng: -0.700343 },
-    ...extraBrands,
-    ...stayBrands,
-  ],
+  // Demo traders removed: the map shows registered businesses with a location.
+  brands: [],
 };
 
 // ─── Newsletter ───────────────────────────────────────────────────────────────

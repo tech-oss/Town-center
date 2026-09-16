@@ -91,10 +91,10 @@ function PortfolioCard({ post, offset }) {
 
 // ── Section ────────────────────────────────────────────────────────────────
 export default function BlogCards() {
-  // What admin picked for the homepage; the demo posts only fill in when
-  // nothing has been picked yet.
+  // Exactly what admin picked in Business News & Offers — nothing else.
   const { data: spotlight } = useFetch(getSpotlightPosts, []);
-  const posts = (spotlight?.length ? spotlight : blogCards.posts.filter((p) => p.homepage)).slice(0, 4);
+  const posts = (spotlight ?? []).slice(0, 4);
+  if (!posts.length) return null;
 
   return (
     <section
