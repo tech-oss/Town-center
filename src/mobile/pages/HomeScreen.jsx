@@ -4,7 +4,7 @@ import MobileShell from "../components/MobileShell";
 import NotificationTray, { NOTIFICATIONS } from "../components/NotificationTray";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
-import { getEvents, getStories, getSpotlightPosts } from "../../api";
+import { getHomepageEvents, getStories, getSpotlightPosts } from "../../api";
 import { categoryColors } from "../../Data/events";
 import { getGuides } from "../../api";
 import { homeCategories } from "../data/mobileMock";
@@ -51,11 +51,12 @@ function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
 export default function HomeScreen() {
   const { data: guideList } = useFetch(getGuides, []);
   const videoRef = useRef(null);
-  const { data: events } = useFetch(getEvents, []);
+  const { data: events } = useFetch(getHomepageEvents, []);
   const { data: stories } = useFetch(getStories, []);
   // Exactly what admin picked in Business News & Offers — nothing else.
   const { data: spotlight } = useFetch(getSpotlightPosts, []);
   const appOffers = (spotlight ?? []).slice(0, 4);
+  // The same three homepage slots admin fills on the website, so both agree.
   const upcomingEvents = (events ?? []).slice(0, 3);
   const featuredGuides = (guideList ?? []).slice(0, 3);
   const featuredStories = (stories ?? []).filter((s) => s.homepage);
