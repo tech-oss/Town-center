@@ -4,6 +4,7 @@ import BlogCards from "./BlogCards";
 import TradersMap from "./TradersMap";
 import FeatureBlocks from "./FeatureBlocks";
 import EventsGrid from "./EventsGrid";
+import GuidesGrid from "./GuidesGrid";
 import PlanVisit from "./PlanVisit";
 import AppCta from "./AppCta";
 import Newsletter from "./Newsletter";
@@ -18,6 +19,7 @@ export default function HomePage() {
       <BlogCards />
       <TradersMap />
       <EventsGrid />
+      <GuidesGrid />
       <PlanVisit />
       <AppCta />
       <Newsletter />
