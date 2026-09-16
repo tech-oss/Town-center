@@ -6,7 +6,7 @@ import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getHomepageEvents, getStories, getSpotlightPosts } from "../../api";
 import { categoryColors } from "../../Data/events";
-import { getGuides } from "../../api";
+import { getHomepageGuides } from "../../api";
 import { homeCategories } from "../data/mobileMock";
 
 // Same framed-photo tap-reveal used throughout the desktop site.
@@ -49,7 +49,7 @@ function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
 }
 
 export default function HomeScreen() {
-  const { data: guideList } = useFetch(getGuides, []);
+  const { data: guideList } = useFetch(getHomepageGuides, []);
   const videoRef = useRef(null);
   const { data: events } = useFetch(getHomepageEvents, []);
   const { data: stories } = useFetch(getStories, []);
@@ -58,7 +58,8 @@ export default function HomeScreen() {
   const appOffers = (spotlight ?? []).slice(0, 4);
   // The same three homepage slots admin fills on the website, so both agree.
   const upcomingEvents = (events ?? []).slice(0, 3);
-  const featuredGuides = (guideList ?? []).slice(0, 3);
+  // The same guides admin ticked for the website's homepage.
+  const featuredGuides = guideList ?? [];
   const featuredStories = (stories ?? []).filter((s) => s.homepage);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
