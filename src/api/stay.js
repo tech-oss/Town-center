@@ -16,7 +16,9 @@ async function liveStay(kind) {
 function merge(live, demo) {
   const slugs = new Set(live.map((i) => i.slug));
   const names = new Set(live.map((i) => String(i.name ?? "").trim().toLowerCase()));
-  return [...live, ...demo.filter((i) => !slugs.has(i.slug) && !names.has(String(i.name ?? "").trim().toLowerCase()))];
+  // Live Featured Business bookings come first.
+  const sorted = [...live].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+  return [...sorted, ...demo.filter((i) => !slugs.has(i.slug) && !names.has(String(i.name ?? "").trim().toLowerCase()))];
 }
 
 export async function getHotels() {

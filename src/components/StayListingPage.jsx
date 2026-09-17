@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import FeaturedTag from "./FeaturedTag";
 import { Link, useSearchParams } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { getHotels, getAccommodations } from "../api";
@@ -563,6 +564,7 @@ export default function StayListingPage({ kind }) {
                     style={{ borderRadius: "0px", boxShadow: card.shadow }}
                   >
                     <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
+                      {it.featured && <FeaturedTag overlay />}
                       <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     </div>
                     <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">

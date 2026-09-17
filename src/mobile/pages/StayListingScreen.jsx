@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import FeaturedTag from "../../components/FeaturedTag";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import MobileShell from "../components/MobileShell";
@@ -299,6 +300,7 @@ export default function StayListingScreen() {
               <MobileCard className="flex items-stretch overflow-hidden active:opacity-90">
                 <img src={p.image} alt="" className="w-28 h-28 object-cover shrink-0" />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
+                  {p.featured && <FeaturedTag className="self-start mb-1" />}
                   <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>
                     {isHotels ? `${"★".repeat(p.stars)} Hotel` : p.type}
                   </span>

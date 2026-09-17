@@ -579,10 +579,12 @@ export const liveMenu = {
         { label: "Accommodation", to: "/live/stay/accommodation" },
       ],
     },
-    {
-      heading: "Developments",
-      links: buildings.map((b) => ({ label: b.name, to: `/live/building/${b.slug}` })),
-    },
+    // Developments are hidden from the menu for now. Put this column back
+    // to show them again:
+    // {
+    //   heading: "Developments",
+    //   links: buildings.map((b) => ({ label: b.name, to: `/live/building/${b.slug}` })),
+    // },
     // For Sale & Rent — the property search platform is paused for now
     // (see the commented-out routes in src/App.jsx). Re-add this column
     // when it comes back.

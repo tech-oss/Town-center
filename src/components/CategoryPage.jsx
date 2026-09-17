@@ -3,6 +3,7 @@ import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
 import { listingCategory, placeLink } from "../lib/viewedCategory";
+import FeaturedTag from "./FeaturedTag";
 import { resolveCategory } from "../Data/taxonomy";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -101,7 +102,12 @@ export default function CategoryPage() {
   // detail page so every listing uses the same layout.
   if (section === "see-do") {
     const activities = baseItems.map((i) => ({ ...i, to: `/event/${i.slug}` }));
-    const allSeeDo = [...eventCards, ...activities];
+    // Featured businesses lead, then events, then the rest.
+    const allSeeDo = [
+      ...activities.filter((i) => i.featured),
+      ...eventCards,
+      ...activities.filter((i) => !i.featured),
+    ];
     items = category ? allSeeDo.filter((i) => i.category === category) : allSeeDo;
   }
 
@@ -258,6 +264,7 @@ export default function CategoryPage() {
                     className="relative aspect-[4/3] sm:aspect-square overflow-hidden"
                     style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: logoTile(it) ? "var(--mint)" : undefined }}
                   >
+                    {it.featured && <FeaturedTag overlay />}
                     {logoTile(it) ? (
                       <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-5 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
                     ) : (

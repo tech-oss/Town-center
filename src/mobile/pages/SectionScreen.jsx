@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import FeaturedTag from "../../components/FeaturedTag";
 import useSectionItems from "../hooks/useSectionItems";
 import { Link } from "react-router-dom";
 import useTapReveal from "../../hooks/useTapReveal";
@@ -100,6 +101,7 @@ export default function SectionScreen({ sectionKey }) {
               >
                 <CardImage src={it.image} alt={it.name} />
                 <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
+                  {it.featured && <FeaturedTag className="self-start mb-1" />}
                   <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{it.name}</p>
                   <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{it.description}</p>
                   <div className="flex items-center justify-between mt-1.5">

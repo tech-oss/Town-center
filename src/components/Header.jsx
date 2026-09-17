@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, forwardRef } from "react";
+import { useState, useEffect, useRef, useMemo, forwardRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { header } from "../Data/content";
 import { menus } from "../Data/pages";
@@ -10,14 +10,37 @@ import BrandMark from "./BrandMark/BrandMark";
 import useHeaderScroll from "../hooks/useHeaderScroll";
 import useLogoReveal from "../hooks/useLogoReveal";
 import useOverImmersive from "../hooks/useOverImmersive";
+import useFetch from "../hooks/useFetch";
+import { loadLiveBusinesses, webPathFor } from "../api/liveBusinesses";
 
-const menusByLabel = Object.fromEntries([...menus, liveMenu, exploreMenu, workMenu].map((m) => [m.label, m]));
+const baseMenus = [...menus, liveMenu, exploreMenu, workMenu];
+
+// Each business-type menu gets a "Featured" column: up to 10 businesses with a
+// live Featured Business booking in that type (Live & Stay = hotels and
+// accommodation).
+const FEATURED_IN_MENU = 10;
+const MENU_SECTION = { "see-do": "see-do", "eat-drink": "eat-drink", shop: "shop", services: "services", live: "stay" };
+
+function withFeatured(businesses) {
+  return Object.fromEntries(baseMenus.map((m) => {
+    const section = MENU_SECTION[m.key];
+    const featured = section
+      ? (businesses ?? []).filter((b) => b.featured && b.section === section).slice(0, FEATURED_IN_MENU)
+      : [];
+    const menu = featured.length
+      ? { ...m, columns: [...m.columns, { heading: "Featured", links: featured.map((b) => ({ label: b.name, to: webPathFor(b) })) }] }
+      : m;
+    return [m.label, menu];
+  }));
+}
 
 // Routes whose hero banner the header floats transparently over.
 const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/guides", "/getting-here", "/live", "/live/stay/hotels", "/live/stay/accommodation", "/work"];
 const TRANSPARENT_HERO_PREFIXES = ["/guides/", "/work/developments/", "/live/building/"];
 
 const Header = forwardRef(function Header(_, ref) {
+  const { data: liveBusinesses } = useFetch(loadLiveBusinesses, []);
+  const menusByLabel = useMemo(() => withFeatured(liveBusinesses), [liveBusinesses]);
   const [menuOpen, setMenuOpen] = useState(false); // mobile drawer
   const [openDropdown, setOpenDropdown] = useState(null); // desktop hover
   const [mobileExpanded, setMobileExpanded] = useState(null); // mobile accordion
