@@ -62,7 +62,7 @@ function SlotCard({ slot, hasContent, premium, busy, onBook }) {
   if (!slot.bookable) blocker = "Not available to book right now.";
   else if (!slot.nextStart) blocker = "Fully booked — check back soon.";
   else if (needsContent && !premium) blocker = `Needs the Visibility Plan: this slot shows one of your ${needs.noun}s.`;
-  else if (needsContent) blocker = `Publish a ${needs.noun} first — that's what this slot shows.`;
+  else if (needsContent) blocker = `Publish ${/^[aeiou]/.test(needs.noun) ? "an" : "a"} ${needs.noun} first — that's what this slot shows.`;
 
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>

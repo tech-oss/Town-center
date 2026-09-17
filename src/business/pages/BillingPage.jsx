@@ -107,7 +107,7 @@ export default function BillingPage() {
           )}
           {user.cancelAtPeriodEnd && premium && (
             <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(217,119,6,0.08)", color: "#92400E" }}>
-              Your Visibility Plan is cancelled and ends on {fmtDate(user.renewalDate)}. You keep every feature until then.
+              Your Visibility Plan is cancelled and ends {user.renewalDate ? `on ${fmtDate(user.renewalDate)}` : "at the end of your current billing period"}. You keep every feature until then.
             </p>
           )}
           {/Failed|Past Due/.test(user.planStatus ?? "") && (
