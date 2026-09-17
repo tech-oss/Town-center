@@ -9,6 +9,7 @@ import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
 import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
+import useViewedCategory from "../lib/viewedCategory";
 
 // Business social profiles → the shared layout's { icon, href, label } shape.
 function buildSocial(item) {
@@ -28,6 +29,7 @@ export default function DetailPage() {
   const { slug } = useParams();
   const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
   const { data: allBusinesses, loading: loadingList } = useFetch(getBusinesses, []);
+  const viewed = useViewedCategory(item);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -69,9 +71,9 @@ export default function DetailPage() {
       breadcrumbs={[
         { label: "Home", to: "/" },
         { label: sec.label, to: sec.path },
-        { label: item.tag, to: `/${item.section}?category=${item.category}` },
+        { label: viewed.label, to: `/${item.section}?category=${viewed.value}` },
       ]}
-      categoryLabel={item.tag}
+      categoryLabel={viewed.label}
       title={item.name}
       logo={LOGO_SECTIONS.has(item.section) && !item.logoHeader ? item.logo : null}
       heroImage={heroImage}

@@ -9,6 +9,7 @@ import ServicesDetailLayout from "./ServicesDetailLayout";
 import FreelancerDetailLayout from "./FreelancerDetailLayout";
 import NewsOffers from "./NewsOffers";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
+import useViewedCategory from "../lib/viewedCategory";
 
 // Categories under the Services "Freelancers" menu column — these get the
 // lighter, portfolio-first profile layout instead of the local-directory
@@ -41,6 +42,7 @@ export default function ServicesDetailPage() {
   const { slug } = useParams();
   const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
   const { data: allBusinesses, loading: loadingList } = useFetch(getBusinesses, []);
+  const viewed = useViewedCategory(item);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -75,9 +77,9 @@ export default function ServicesDetailPage() {
         breadcrumbs={[
           { label: "Home", to: "/" },
           { label: sec.label, to: sec.path },
-          { label: item.tag, to: `/${item.section}?category=${item.category}` },
+          { label: viewed.label, to: `/${item.section}?category=${viewed.value}` },
         ]}
-        categoryLabel={item.tag}
+        categoryLabel={viewed.label}
         title={item.name}
         heroImage={item.image}
         description={free ? null : item.description}
@@ -123,9 +125,9 @@ export default function ServicesDetailPage() {
       breadcrumbs={[
         { label: "Home", to: "/" },
         { label: sec.label, to: sec.path },
-        { label: item.tag, to: `/${item.section}?category=${item.category}` },
+        { label: viewed.label, to: `/${item.section}?category=${viewed.value}` },
       ]}
-      categoryLabel={item.tag}
+      categoryLabel={viewed.label}
       title={item.name}
       heroImage={heroImage}
       extraImages={free ? [] : extraImages}

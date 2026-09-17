@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card, pill } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
+import { listingCategory, placeLink } from "../lib/viewedCategory";
 import { resolveCategory } from "../Data/taxonomy";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -86,8 +87,12 @@ export default function CategoryPage() {
   const eventCards = (whatsOnEvents ?? []).map(toEventCard);
 
   // An item appears under its primary `category` plus any extra `categories`.
+  // Under a filter, each card is labelled and linked with the category being
+  // browsed, so the detail page's breadcrumb matches where the visitor came from.
   let items = category
-    ? baseItems.filter((i) => i.category === category || i.categories?.includes(category))
+    ? baseItems
+        .filter((i) => i.category === category || i.categories?.includes(category))
+        .map((i) => ({ ...i, tag: listingCategory(i, category).label, to: placeLink(i, category) }))
     : baseItems;
 
   // See & Do: real What's On events are folded in alongside activities, each
