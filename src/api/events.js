@@ -41,7 +41,10 @@ function fromRow(r) {
     location: r.location,
     tickets: r.tickets || r.entry_type,
     image: r.hero_image || gallery[0],
-    gallery,
+    heroImage: r.hero_image || null,
+    // The hero is stored apart from the gallery. Pages use gallery[0] as the
+    // banner and the rest as photos, so the hero leads the list here.
+    gallery: [r.hero_image, ...gallery.filter((g) => g !== r.hero_image)].filter(Boolean),
     excerpt: r.excerpt || r.subtitle || null,
     standfirst: r.description,
     body: r.body ?? [],
