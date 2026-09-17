@@ -259,7 +259,7 @@ as $$
   end
 $$;
 
-create or replace function public.is_business_owner(p_business_id text)
+create or replace function public.homepage_is_owner(p_business_id text)
 returns boolean
 language sql stable security definer set search_path = public
 as $$
@@ -356,7 +356,7 @@ declare
   v_lane int;
   v_row homepage_placements;
 begin
-  if not public.is_business_owner(p_business_id) then
+  if not public.homepage_is_owner(p_business_id) then
     raise exception 'Only the approved owner of this business can book a homepage slot.' using errcode = '42501';
   end if;
 
@@ -416,7 +416,7 @@ declare v_business text;
 begin
   select business_id into v_business from homepage_placements where id = p_placement_id and status = 'held';
   if v_business is null then return; end if;
-  if not public.is_business_owner(v_business) then
+  if not public.homepage_is_owner(v_business) then
     raise exception 'Not your booking.' using errcode = '42501';
   end if;
   delete from homepage_placements where id = p_placement_id and status = 'held';
@@ -510,7 +510,7 @@ declare
   v_ok boolean;
 begin
   select * into v_row from homepage_placements where id = p_placement_id;
-  if not found or not public.is_business_owner(v_row.business_id) then
+  if not found or not public.homepage_is_owner(v_row.business_id) then
     raise exception 'Not your booking.' using errcode = '42501';
   end if;
   if v_row.status not in ('awaiting_content', 'pending_approval', 'rejected', 'approved') then
