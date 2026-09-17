@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { getStories } from "../api";
+import { getHomepageStories } from "../api";
 import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
 
@@ -12,7 +12,7 @@ import useTapReveal from "../hooks/useTapReveal";
 function FeatureCard({ story, align }) {
   const reversed = align === "right";
   const { revealed, onImageClick } = useTapReveal();
-  const to = `/story/${story.slug}`;
+  const to = story.to ?? `/story/${story.slug}`;
   return (
     <div className={`flex flex-col ${reversed ? "md:flex-row-reverse" : "md:flex-row"} md:items-center gap-6 md:gap-12 w-full`}>
       <Link
@@ -70,8 +70,8 @@ function FeatureCard({ story, align }) {
 }
 
 export default function FeatureBlocks() {
-  const { data: allFeatures } = useFetch(getStories, []);
-  const features = (allFeatures ?? []).filter((f) => f.homepage);
+  // Stories booked into the homepage Featured Article slots right now.
+  const { data: features } = useFetch(getHomepageStories, []);
 
   return (
     <section className="py-14 md:py-16 px-6 md:px-12 bg-white">

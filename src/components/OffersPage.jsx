@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getStories, getArticles } from "../api";
+import { getOffersFeed } from "../api";
 import { sections } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 import { TYPE_COLORS } from "../lib/typeColors";
@@ -16,11 +16,6 @@ const BUSINESS_TYPES = [
   { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
 
-// Slugs currently live on the homepage's "In the Spotlight" cards, so the
-// same "On Homepage" badge used for Featured Stories can be applied here too.
-// Homepage picks are flagged by admin in Business News & Offers; the badge
-// below is resolved from the live spotlight list instead of demo data.
-const homepageSpotlightSlugs = new Set();
 
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 
@@ -288,53 +283,18 @@ function BusinessTypeFilter({ active, onChange }) {
 }
 
 export default function OffersPage() {
-  const { data: allFeatures } = useFetch(getStories, []);
-  const { data: allArticles } = useFetch(getArticles, []);
+  // Stories, every live news post and offer, and What's On events that have
+  // been promoted — the same list the app shows (api/offers.js).
+  const { data: feed } = useFetch(getOffersFeed, []);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState(null);
   const [activeBusinessType, setActiveBusinessType] = useState(null);
-
-  // Unlike /news (which only shows the hand-written spotlight stories), this
-  // page is the home hub for every business's News & Offers — so it pulls
-  // every article from every section (Shop, Eat & Drink, See & Do and
-  // Services, including tradespeople, professionals and freelancers), not
-  // just the hand-picked ones.
-  const allNewsAndOffers = allArticles ?? [];
-  const featuredStories = allFeatures ?? [];
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // One unified list — Featured Stories and In the Spotlight articles
-  // normalised to the same shape, so they can share a single search+filter
-  // and one directory-style card grid instead of two separate sections.
-  const items = useMemo(() => [
-    ...featuredStories.map((s) => ({
-      slug: s.slug,
-      to: `/story/${s.slug}`,
-      image: s.cardImage,
-      title: s.cardHeading,
-      excerpt: s.cardBody,
-      date: s.date,
-      type: "Featured",
-      businessName: null,
-      businessSection: null,
-      homepage: !!s.homepage,
-    })),
-    ...allNewsAndOffers.map((s) => ({
-      slug: s.slug,
-      to: `/news/${s.slug}`,
-      image: s.image,
-      title: s.title,
-      excerpt: s.excerpt,
-      date: s.date,
-      type: s.category,
-      businessName: s.business?.name ?? null,
-      businessSection: s.business?.section ?? null,
-      homepage: homepageSpotlightSlugs.has(s.slug),
-    })),
-  ], [featuredStories, allNewsAndOffers]);
+  const items = useMemo(() => feed ?? [], [feed]);
 
   const types = useMemo(
     () => TYPE_ORDER.filter((t) => items.some((it) => it.type === t)),
@@ -420,7 +380,7 @@ export default function OffersPage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
               {filtered.map((it) => (
                 <Link
-                  key={it.slug}
+                  key={it.key}
                   to={it.to}
                   className="group relative bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
                   style={{ boxShadow: card.shadow }}

@@ -28,7 +28,9 @@ export async function getBusinesses({ section, category } = {}) {
   let list = directoryItems(live);
   if (section) list = list.filter((i) => i.section === section);
   if (category) list = list.filter((i) => i.category === category || i.categories?.includes(category));
-  return list;
+  // Businesses with a live Featured Business booking come first (the sort is
+  // stable, so the rest keep their order).
+  return [...list].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
 }
 
 export async function getBusinessBySlug(slug) {

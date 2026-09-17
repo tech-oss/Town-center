@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity } from "./businessActivity";
+import { getLivePlacementMap, featureNow, unfeature } from "./homepageSlots";
 import { planFor } from "../../Data/plans";
 import { isPayingSubscription, isAdminGrantedSubscription } from "../../lib/subscriptionStatus";
 import { assertValidCoords } from "../../lib/geo";
@@ -175,18 +176,27 @@ const SELECT = `
   business_subscriptions(plan, terms_accepted_at)
 `;
 
+// `featured` means a live Featured Business booking (see ./homepageSlots).
+function withFeatured(biz, live) {
+  const slot = live.get(biz.id);
+  return { ...biz, featured: !!slot, featuredStartsAt: slot?.startsAt ?? null, featuredEndsAt: slot?.endsAt ?? null };
+}
+
 export async function getBusinesses({ status } = {}) {
   let q = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
-  const { data, error } = await q;
+  const [{ data, error }, live] = await Promise.all([q, getLivePlacementMap("featured_business")]);
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  return (data ?? []).map((row) => withFeatured(fromRow(row), live));
 }
 
 export async function getBusinessById(id) {
-  const { data, error } = await supabase.from("businesses").select(SELECT).eq("id", id).maybeSingle();
+  const [{ data, error }, live] = await Promise.all([
+    supabase.from("businesses").select(SELECT).eq("id", id).maybeSingle(),
+    getLivePlacementMap("featured_business"),
+  ]);
   if (error) throw error;
-  return data ? fromRow(data) : null;
+  return data ? withFeatured(fromRow(data), live) : null;
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────
@@ -241,9 +251,6 @@ export async function registerBusiness(data) {
   const businessRow = {
     id,
     name,
-    // Featured is set once the listing (and so the business type) exists —
-    // the per-type limit can't be checked before that.
-    featured: data.id ? !!data.featured : false,
     // A business admin registers directly is pre-vetted by admin themselves
     // entering the data — it doesn't need to sit in its own Pending queue the
     // way a self-signup does. The owner login (below) is created already
@@ -287,10 +294,10 @@ export async function registerBusiness(data) {
     }, { onConflict: "business_id" });
     if (listingError) throw listingError;
 
-    if (!data.id && data.featured) {
-      const { error: featuredError } = await supabase.from("businesses").update({ featured: true }).eq("id", id);
-      if (featuredError) throw readableConstraintError(featuredError, name);
-    }
+    // Featured is a Featured Business booking, made once the listing (and so
+    // the business type its slots are counted by) exists.
+    const featuredNow = (await getLivePlacementMap("featured_business")).has(id);
+    if (!!data.featured !== featuredNow) await setFeatured(id, !!data.featured);
 
     // Every business gets a plan — Free unless admin chose Premium.
     const plan = planFor(data.planKey);
@@ -359,8 +366,14 @@ export async function registerBusiness(data) {
 export async function setFeatured(id, featured) {
   const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
 
-  const { error } = await supabase.from("businesses").update({ featured }).eq("id", id);
-  if (error) throw readableConstraintError(error, biz?.name ?? id);
+  // A Featured Business booking from now for the slot's normal length; its
+  // dates can be changed in Homepage Slots.
+  if (featured) {
+    const res = await featureNow("featured_business", "business", id);
+    if (res.full) throw new Error(`Only ${FEATURED_LIMIT} businesses of this type can be featured at once. Un-feature one first, or book a later start in Homepage Slots.`);
+  } else {
+    await unfeature("featured_business", id);
+  }
 
   addLog(
     featured ? "Business Featured" : "Business Unfeatured",

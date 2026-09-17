@@ -7,6 +7,7 @@
 // admin Events editor can actually change what the site shows.
 import { supabase } from "../lib/supabaseClient";
 import { parseCoords } from "../lib/geo";
+import { getLivePlacements, getPromotedEventIds } from "./homepageSlots";
 
 // Formats a date the way the hardcoded content did ("Sunday 14 June 2026"),
 // used when an event has a real date but no explicit label. Recurring events
@@ -21,6 +22,7 @@ function formatEventDate(iso) {
 function fromRow(r) {
   const gallery = r.gallery ?? [];
   return {
+    id: r.id,
     // Events submitted through the business portal predate the slug column and
     // have none, so fall back to the id — otherwise their cards link to
     // /event/null. getEventBySlug resolves either form.
@@ -87,14 +89,25 @@ export async function getEventBySlug(slug) {
   return byId ? fromRow(byId) : null;
 }
 
-// The three events admin has chosen for the homepage "WHAT'S ON" grid.
+// The events booked into the homepage "WHAT'S ON" slots right now, in slot order.
 export async function getHomepageEvents() {
+  const { whats_on: slots } = await getLivePlacements();
+  const ids = slots.filter((p) => p.content_kind === "business_event").map((p) => p.content_id);
+  if (!ids.length) return [];
   const { data, error } = await supabase
     .from("business_events")
     .select("*")
     .eq("status", "Live")
-    .eq("homepage", true)
-    .order("event_date", { ascending: true });
+    .in("id", ids);
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  const byId = new Map((data ?? []).map((r) => [String(r.id), r]));
+  return ids.map((id) => byId.get(id)).filter(Boolean).map((r) => ({ ...fromRow(r), homepage: true }));
+}
+
+// Events that have been on the homepage (booked into What's On). They stay on
+// the Offers page after their homepage time is over.
+export async function getPromotedEvents() {
+  const ids = await getPromotedEventIds();
+  if (!ids.size) return [];
+  return (await getEvents()).filter((e) => ids.has(String(e.id)));
 }

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
-import { getStories, getArticles } from "../../api";
+import { getOffersFeed } from "../../api";
 import { sections } from "../../Data/pages";
 import { TYPE_COLORS, typeColor } from "../lib/typeColors";
 import { categoryColor } from "../../lib/categoryColors";
@@ -12,10 +12,6 @@ const BUSINESS_TYPES = [
   ...Object.values(sections).map((s) => ({ key: s.key, label: s.label, color: categoryColor(s.key) })),
   { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
-
-// Homepage picks are flagged by admin in Business News & Offers; the badge
-// below is resolved from the live spotlight list instead of demo data.
-const homepageSpotlightSlugs = new Set();
 
 const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
 
@@ -67,39 +63,14 @@ function SearchInput({ value, onChange }) {
 }
 
 export default function OffersScreen() {
-  const { data: allFeatures } = useFetch(getStories, []);
-  const { data: allArticles } = useFetch(getArticles, []);
+  // Stories, every live news post and offer, and What's On events that have
+  // been promoted — the same list the website shows (api/offers.js).
+  const { data: feed } = useFetch(getOffersFeed, []);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState(null);
   const [activeBusinessType, setActiveBusinessType] = useState(null);
 
-  const featuredStories = allFeatures ?? [];
-  const allNewsAndOffers = allArticles ?? [];
-
-  const items = useMemo(() => [
-    ...featuredStories.map((s) => ({
-      slug: s.slug,
-      to: `/mobile/story/${s.slug}`,
-      image: s.cardImage,
-      title: s.cardHeading,
-      date: s.date,
-      type: "Featured",
-      businessName: null,
-      businessSection: null,
-      homepage: !!s.homepage,
-    })),
-    ...allNewsAndOffers.map((s) => ({
-      slug: s.slug,
-      to: `/mobile/news/${s.slug}`,
-      image: s.image,
-      title: s.title,
-      date: s.date,
-      type: s.category,
-      businessName: s.business?.name ?? null,
-      businessSection: s.business?.section ?? null,
-      homepage: homepageSpotlightSlugs.has(s.slug),
-    })),
-  ], [featuredStories, allNewsAndOffers]);
+  const items = useMemo(() => (feed ?? []).map((it) => ({ ...it, to: `/mobile${it.to}` })), [feed]);
 
   const types = useMemo(() => TYPE_ORDER.filter((t) => items.some((it) => it.type === t)), [items]);
 
@@ -150,7 +121,7 @@ export default function OffersScreen() {
           <div className="grid grid-cols-2 gap-3">
             {filtered.map((it) => (
               <Link
-                key={it.slug}
+                key={it.key}
                 to={it.to}
                 className="group relative bg-white overflow-hidden flex flex-col active:opacity-90"
                 style={{ borderRadius: 14, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}

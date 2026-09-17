@@ -36,6 +36,7 @@ const NAV = [
   {
     label: "Home Page Featured", icon: I.featured, group: true,
     children: [
+      { to: "/admin/homepage-slots",   label: "Homepage Slots",   icon: I.featured },
       { to: "/admin/news-offers",      label: "In the Spotlight", icon: I.spotlight },
       { to: "/admin/featured-stories", label: "Featured Stories", icon: I.stories },
       { to: "/admin/featured-see-do",  label: "See & Do",         icon: I.events },

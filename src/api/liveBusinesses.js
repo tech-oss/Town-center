@@ -11,6 +11,7 @@
 // the "coming soon" placeholders in those places.
 import { supabase } from "../lib/supabaseClient";
 import { categoryLabel } from "../Data/taxonomy";
+import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
 import { parseCoords } from "../lib/geo";
 
@@ -85,6 +86,28 @@ function mapArticle(a, business) {
   };
 }
 
+// A post admin wrote about a business (Business News & Offers). It shows on
+// that business's page and the Offers page alongside the business's own posts.
+function mapNewsOffer(n, business) {
+  const offer = n.category === "Offer" || n.type === "offer";
+  const date = n.end_date ? `Ends ${longDate(n.end_date)}` : (n.date_label || (n.start_date ? shortDate(n.start_date) : ""));
+  return {
+    id: `news-offer-${n.id}`,
+    newsOfferId: n.id,
+    slug: n.slug,
+    category: offer ? "Offer" : "News",
+    date,
+    endsOn: n.end_date ? longDate(n.end_date) : null,
+    title: n.title,
+    excerpt: n.excerpt ?? "",
+    image: n.image || business.image,
+    body: String(n.body ?? n.excerpt ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
+    business,
+  };
+}
+
+const notEnded = (n) => !n.end_date || n.end_date >= new Date().toISOString().slice(0, 10);
+
 // An approved review, in both shapes the pages use: `reviews` for the
 // Eat & Drink / Shop / See & Do / Stay pages and `reviewsList` for the
 // Services and Freelancer layouts' ReviewCard.
@@ -103,7 +126,7 @@ function mapReview(r) {
   };
 }
 
-function toItem(row, articles, reviews = {}) {
+function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set()) {
   const type = row.business_type;
   const section = SECTION_FOR_TYPE[type];
   const categories = categoriesFor(type, row.business_type_detail);
@@ -121,6 +144,8 @@ function toItem(row, articles, reviews = {}) {
     businessId: row.business_id,
     live: true,
     plan: premium ? "premium" : "free",
+    // A live Featured Business booking: listed first in its categories.
+    featured: featuredIds.has(row.business_id),
     name: row.name,
     section,
     category,
@@ -161,7 +186,10 @@ function toItem(row, articles, reviews = {}) {
     // Hotels vs accommodation, for the Live & Stay section.
     stayKind: row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
   };
-  item.news = (articles[row.business_id] ?? []).map((a) => mapArticle(a, item));
+  item.news = [
+    ...(articles[row.business_id] ?? []).map((a) => mapArticle(a, item)),
+    ...(newsOffers[row.business_id] ?? []).map((n) => mapNewsOffer(n, item)),
+  ];
   // Only approved reviews of Visibility Plan businesses reach the view.
   const approved = (reviews[row.business_id] ?? []).map(mapReview);
   if (approved.length) {
@@ -196,11 +224,13 @@ export function invalidateLiveBusinesses() {
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
-    const [profilesRes, articlesRes, reviewsRes] = await Promise.all([
+    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, placements] = await Promise.all([
       withSchemaRetry(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false })),
       withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
       // Reviews are optional: if the view isn't there yet, pages just show none.
       withSchemaRetry(() => supabase.from("public_business_reviews").select("*").order("date", { ascending: false })),
+      supabase.from("news_offers").select("*").eq("status", "Published").order("created_at", { ascending: false }),
+      getLivePlacements(),
     ]);
     // A missing view (migration not run yet) or a network failure must not
     // take the whole directory down — the site falls back to its demo data.
@@ -213,6 +243,11 @@ export function loadLiveBusinesses() {
     }
     const articles = {};
     for (const a of articlesRes.data ?? []) (articles[a.business_id] ??= []).push(a);
+    const newsOffers = {};
+    for (const n of (newsOffersRes.data ?? []).filter(notEnded)) {
+      if (n.business_id) (newsOffers[n.business_id] ??= []).push(n);
+    }
+    const featuredIds = new Set(placements.featured_business.map((p) => p.business_id ?? p.content_id));
     const reviews = {};
     for (const rv of reviewsRes.data ?? []) (reviews[rv.business_id] ??= []).push(rv);
     // A listing without a business type can't be placed in any section —
@@ -220,7 +255,7 @@ export function loadLiveBusinesses() {
     // stays off the public site until its type is set.
     return (profilesRes.data ?? [])
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
-      .map((row) => toItem(row, articles, reviews));
+      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds));
   })();
   // A thrown error (e.g. offline) likewise retries on the next page.
   const pending = cache;

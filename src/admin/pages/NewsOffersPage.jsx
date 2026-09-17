@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import PlacementTimer from "../components/PlacementTimer";
 import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import {
@@ -257,10 +259,16 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
   function handleSave() {
     if (!form.title.trim() || !form.excerpt.trim()) return;
     setSaving(true);
-    saveNewsOffer(form).then(async (saved) => {
+    // Free the swapped-out slot first, so the save can take it.
+    (async () => {
       if (swapOutId) await setHomepageFeature(swapOutId, false);
+      return saveNewsOffer(form);
+    })().then((saved) => {
       setSaving(false);
       onSave(saved, swapOutId);
+    }).catch((e) => {
+      setSaving(false);
+      alert(e.message);
     });
   }
 
@@ -528,9 +536,12 @@ function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
         <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>{item.businessName} · {item.category}</p>
         <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.excerpt}</p>
         {item.date && <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{formatUK(item.date)}</p>}
-        {item.featuredOnHome && (item.startDate || item.endDate) && (
-          <SpotlightSchedule startDate={item.startDate} endDate={item.endDate} />
-        )}
+          {item.featuredOnHome && (
+            <>
+              <PlacementTimer startsAt={item.homeStartsAt} endsAt={item.homeEndsAt} compact />
+              <Link to="/admin/homepage-slots" className="text-[11px] font-semibold" style={{ color: "#2563EB" }}>Change times in Homepage Slots →</Link>
+            </>
+          )}
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
         {item.featuredOnHome ? (

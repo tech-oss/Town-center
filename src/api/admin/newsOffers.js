@@ -1,4 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
+import { getLivePlacementMap, featureNow, unfeature, swapFeatured, schedulePlacement } from "./homepageSlots";
+import { fromLondonInput } from "../../lib/ukDateTime";
 
 // ─── Eat & Drink businesses available for news/offers ─────────────────────────
 // Businesses eligible for a homepage spotlight. Was a hardcoded list of six;
@@ -15,7 +17,7 @@ export async function getSpotlightBusinesses() {
 // business_articles, which is what a business writes and admin approves — this
 // is admin's own copy, schedule and paid/complimentary record.
 
-function fromRow(r) {
+function fromRow(r, slot) {
   return {
     id: r.id,
     slug: r.slug,
@@ -31,7 +33,11 @@ function fromRow(r) {
     startDate: r.start_date,
     endDate: r.end_date,
     status: r.status,
-    featuredOnHome: r.featured_on_home,
+    // On the homepage now: a live In the Spotlight booking.
+    featuredOnHome: !!slot,
+    homeStartsAt: slot?.startsAt ?? null,
+    homeEndsAt: slot?.endsAt ?? null,
+    placementId: slot?.id ?? null,
     payType: r.pay_type,
     createdAt: (r.created_at ?? "").slice(0, 10),
   };
@@ -41,42 +47,22 @@ function slugify(text) {
   return String(text ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-// The homepage carousel — published items admin has chosen to feature, in the
-// shape BlogCards expects.
-export async function getSpotlightPosts() {
-  const { data, error } = await supabase
-    .from("news_offers")
-    .select("*")
-    .eq("featured_on_home", true)
-    .eq("status", "Published")
-    .order("sort_order");
-  if (error) throw error;
-  return (data ?? []).map((n) => ({
-    id: n.id,
-    slug: n.slug,
-    category: `${n.business_name} · ${n.category}`,
-    title: n.title,
-    excerpt: n.excerpt,
-    imageSrc: n.image,
-    imageAlt: n.title,
-    href: `/news/${n.slug}`,
-    date: n.date_label,
-  }));
-}
-
 export async function getNewsOffers({ businessId, status } = {}) {
   let q = supabase.from("news_offers").select("*").order("created_at", { ascending: false });
   if (businessId) q = q.eq("business_id", businessId);
   if (status) q = q.eq("status", status);
-  const { data, error } = await q;
+  const [{ data, error }, live] = await Promise.all([q, getLivePlacementMap("spotlight")]);
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  return (data ?? []).map((r) => fromRow(r, live.get(String(r.id))));
 }
 
 export async function getNewsOfferById(id) {
-  const { data, error } = await supabase.from("news_offers").select("*").eq("id", id).maybeSingle();
+  const [{ data, error }, live] = await Promise.all([
+    supabase.from("news_offers").select("*").eq("id", id).maybeSingle(),
+    getLivePlacementMap("spotlight"),
+  ]);
   if (error) throw error;
-  return data ? fromRow(data) : null;
+  return data ? fromRow(data, live.get(String(data.id))) : null;
 }
 
 export async function saveNewsOffer(item) {
@@ -95,13 +81,33 @@ export async function saveNewsOffer(item) {
     start_date: item.startDate || null,
     end_date: item.endDate || null,
     status: item.status ?? "Draft",
-    featured_on_home: !!item.featuredOnHome,
     pay_type: item.payType ?? null,
     updated_at: new Date().toISOString(),
   };
   const { data, error } = await supabase.from("news_offers").upsert(row).select().single();
   if (error) throw error;
-  return fromRow(data);
+
+  // The homepage spotlight is a booking. The post's start/end dates set its
+  // homepage time (from 00:00 on the start date to 23:59 on the end date);
+  // exact times can be changed in Homepage Slots.
+  const live = await getLivePlacementMap("spotlight");
+  const slot = live.get(String(data.id));
+  if (item.featuredOnHome && data.status === "Published") {
+    const startsAt = item.startDate ? fromLondonInput(`${item.startDate}T00:00`) : null;
+    const endsAt = item.endDate ? fromLondonInput(`${item.endDate}T23:59`) : null;
+    if (!slot) {
+      const res = await featureNow("spotlight", "news_offer", String(data.id), { startsAt, endsAt });
+      if (res.full) throw new Error("All In the Spotlight slots are taken for those dates. Swap one out or change the dates.");
+    } else if (startsAt || endsAt) {
+      await schedulePlacement({
+        id: slot.id, slotType: "spotlight", contentKind: "news_offer", contentId: String(data.id),
+        startsAt: startsAt ?? slot.startsAt, endsAt: endsAt ?? slot.endsAt,
+      });
+    }
+  } else if (slot) {
+    await unfeature("spotlight", data.id);
+  }
+  return getNewsOfferById(data.id);
 }
 
 export async function deleteNewsOffer(id) {
@@ -110,35 +116,21 @@ export async function deleteNewsOffer(id) {
   return { id, deleted: true };
 }
 
-// The homepage shows four spotlight slots. Turning a slot off always
-// succeeds; turning one on when all four are taken returns { full: true }
-// instead of erroring, so the UI can offer a swap rather than a dead end.
+// Turning a spotlight on books it from now for the slot's normal length;
+// when every slot is taken it returns { full: true } so the page can offer a
+// swap. Turning it off ends the booking now.
 export async function setHomepageFeature(id, featured) {
   if (!featured) {
-    const { error } = await supabase.from("news_offers").update({ featured_on_home: false }).eq("id", id);
-    if (error) throw error;
+    await unfeature("spotlight", id);
     return { id, featuredOnHome: false };
   }
-
-  const { count, error: countError } = await supabase
-    .from("news_offers")
-    .select("id", { count: "exact", head: true })
-    .eq("featured_on_home", true)
-    .neq("id", id);
-  if (countError) throw countError;
-  if ((count ?? 0) >= 4) return { full: true };
-
-  const { error } = await supabase.from("news_offers").update({ featured_on_home: true }).eq("id", id);
-  if (error) throw error;
+  const res = await featureNow("spotlight", "news_offer", String(id));
+  if (res.full) return { full: true };
   return { id, featuredOnHome: true };
 }
 
-// Swaps one homepage slot: takes `removeId` offline and puts `addId` live in
-// its place. Used both when a 4th item is featured and swap.
+// Puts `addId` into the spotlight slot `removeId` is using, keeping its dates.
 export async function swapHomepageFeature(addId, removeId) {
-  const { error: offErr } = await supabase.from("news_offers").update({ featured_on_home: false }).eq("id", removeId);
-  if (offErr) throw offErr;
-  const { error: onErr } = await supabase.from("news_offers").update({ featured_on_home: true }).eq("id", addId);
-  if (onErr) throw onErr;
+  await swapFeatured("spotlight", "news_offer", String(addId), String(removeId));
   return { addId, removeId };
 }

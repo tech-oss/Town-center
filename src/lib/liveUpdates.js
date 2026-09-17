@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { supabase } from "./supabaseClient";
 import { invalidateLiveBusinesses } from "../api/liveBusinesses";
+import { setHomepageClockHandler } from "./homepageClock";
 
 // Live updates for the public website and app.
 //
@@ -61,7 +62,10 @@ function stop() {
 // business dashboard don't turn this on, so a form being edited there is
 // never refreshed out from under someone.
 export function enableLiveUpdates() {
-  if (users++ === 0) start();
+  if (users++ === 0) {
+    setHomepageClockHandler(bump);
+    start();
+  }
   return () => {
     if (--users === 0) stop();
   };

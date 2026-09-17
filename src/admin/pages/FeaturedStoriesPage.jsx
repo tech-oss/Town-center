@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import PlacementTimer from "../components/PlacementTimer";
 import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import {
@@ -296,10 +298,16 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
       return;
     }
     setSaving(true);
-    saveFeatureArticle(form).then(async (saved) => {
+    // Free the swapped-out slot first, so the save can take it.
+    (async () => {
       if (swapOutId) await setArticleHomepageFeature(swapOutId, false);
+      return saveFeatureArticle(form);
+    })().then((saved) => {
       setSaving(false);
       onSave(saved, swapOutId);
+    }).catch((e) => {
+      setSaving(false);
+      alert(e.message);
     });
   }
 
@@ -449,6 +457,12 @@ function StoryRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
         </p>
         <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.cardBody}</p>
         <p className="text-[11px] mt-1 font-mono" style={{ color: "#9CA3AF" }}>/story/{item.slug}</p>
+          {item.homepage && (
+            <>
+              <PlacementTimer startsAt={item.homeStartsAt} endsAt={item.homeEndsAt} compact />
+              <Link to="/admin/homepage-slots" className="text-[11px] font-semibold" style={{ color: "#2563EB" }}>Change times in Homepage Slots →</Link>
+            </>
+          )}
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
         {item.homepage ? (

@@ -1,9 +1,10 @@
-// "In the Spotlight" — the homepage news & offers admin picks in
-// Admin → Business News & Offers (public.news_offers with featured_on_home).
+// "In the Spotlight" — the homepage news & offers booked into a spotlight slot
+// (admin → Homepage Slots, or bought by a business).
 // The homepage (web) and the app's home screen read these, and their cards
 // open a normal article page.
 import { supabase } from "../lib/supabaseClient";
 import { loadLiveBusinesses } from "./liveBusinesses";
+import { getLivePlacements } from "./homepageSlots";
 
 const HOMEPAGE_SLOTS = 4;
 
@@ -21,26 +22,78 @@ function dateLine(n) {
 
 const notExpired = (n) => !n.end_date || n.end_date >= today();
 
+// The In the Spotlight cards: whatever is booked into a spotlight slot now —
+// an admin post (news_offers) or one of a business's own posts.
 export async function getSpotlightPosts() {
-  const { data, error } = await supabase
-    .from("news_offers")
-    .select("*")
-    .eq("featured_on_home", true)
-    .eq("status", "Published")
-    .order("sort_order", { ascending: true });
-  if (error) throw error;
-  return (data ?? []).filter(notExpired).slice(0, HOMEPAGE_SLOTS).map((n) => ({
-    id: n.id,
-    slug: n.slug,
-    homepage: true,
-    category: [n.business_name, typeOf(n)].filter(Boolean).join(" · "),
-    title: n.title,
-    excerpt: n.excerpt,
-    imageSrc: n.image || "/logo-mark.svg",
-    imageAlt: n.title,
-    href: `/news/${n.slug}`,
-    date: dateLine(n),
-  }));
+  const { spotlight } = await getLivePlacements();
+  if (!spotlight.length) return [];
+
+  const offerIds = spotlight.filter((p) => p.content_kind === "news_offer").map((p) => p.content_id);
+  const [offersRes, live] = await Promise.all([
+    offerIds.length
+      ? supabase.from("news_offers").select("*").in("id", offerIds).eq("status", "Published")
+      : Promise.resolve({ data: [] }),
+    loadLiveBusinesses().catch(() => []),
+  ]);
+  const offers = new Map((offersRes.data ?? []).filter(notExpired).map((n) => [String(n.id), n]));
+  const articles = new Map(live.flatMap((b) => b.news ?? []).filter((a) => a.id?.startsWith("live-")).map((a) => [a.id.slice(5), a]));
+
+  return spotlight.slice(0, HOMEPAGE_SLOTS).map((p) => {
+    if (p.content_kind === "news_offer") {
+      const n = offers.get(p.content_id);
+      if (!n) return null;
+      return {
+        id: n.id,
+        slug: n.slug,
+        homepage: true,
+        category: [n.business_name, typeOf(n)].filter(Boolean).join(" · "),
+        title: n.title,
+        excerpt: n.excerpt,
+        imageSrc: n.image || "/logo-mark.svg",
+        imageAlt: n.title,
+        href: `/news/${n.slug}`,
+        date: dateLine(n),
+      };
+    }
+    const a = articles.get(p.content_id);
+    if (!a) return null;
+    return {
+      id: a.id,
+      slug: a.slug,
+      homepage: true,
+      category: [a.business?.name, a.category].filter(Boolean).join(" · "),
+      title: a.title,
+      excerpt: a.excerpt,
+      imageSrc: a.image || "/logo-mark.svg",
+      imageAlt: a.title,
+      href: `/news/${a.slug}`,
+      date: a.date,
+    };
+  }).filter(Boolean);
+}
+
+// Published admin posts that aren't tied to a listed business, for the Offers
+// page (posts about a listed business arrive through that business's news).
+export async function getStandaloneNewsOffers() {
+  const [{ data, error }, live] = await Promise.all([
+    supabase.from("news_offers").select("*").eq("status", "Published").order("created_at", { ascending: false }),
+    loadLiveBusinesses().catch(() => []),
+  ]);
+  if (error) return [];
+  const listed = new Set(live.map((b) => b.businessId));
+  return (data ?? [])
+    .filter((n) => notExpired(n) && !(n.business_id && listed.has(n.business_id)))
+    .map((n) => ({
+      id: `news-offer-${n.id}`,
+      newsOfferId: n.id,
+      slug: n.slug,
+      category: typeOf(n),
+      date: dateLine(n),
+      title: n.title,
+      excerpt: n.excerpt ?? "",
+      image: n.image || "/logo-mark.svg",
+      business: n.business_name ? { name: n.business_name, section: null } : null,
+    }));
 }
 
 // A spotlight post as an article page, in the same shape as business articles.

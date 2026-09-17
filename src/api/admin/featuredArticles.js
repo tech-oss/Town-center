@@ -1,15 +1,19 @@
 import { supabase } from "../../lib/supabaseClient";
+import { getLivePlacementMap, featureNow, unfeature, swapFeatured } from "./homepageSlots";
 
 // Admin CRUD for public.feature_articles — the real content behind the
 // homepage "FEATURED STORIES" section and /story/:slug detail pages (see
 // src/api/stories.js for the public-facing read side, which shares the same
 // row shape). Replaces the old hardcoded src/Data/features.js.
 
-function fromRow(r) {
+function fromRow(r, slot) {
   return {
     id: r.id,
     slug: r.slug,
-    homepage: r.homepage,
+    // On the homepage now: a live Featured Article booking.
+    homepage: !!slot,
+    homeStartsAt: slot?.startsAt ?? null,
+    homeEndsAt: slot?.endsAt ?? null,
     eyebrow: r.eyebrow ?? "",
     category: r.category ?? "",
     date: r.date_label ?? "",
@@ -34,7 +38,6 @@ function toRow(item) {
   return {
     id: item.id || undefined,
     slug: item.slug || slugify(item.title),
-    homepage: !!item.homepage,
     eyebrow: item.eyebrow || null,
     category: item.category || null,
     date_label: item.date || null,
@@ -53,21 +56,36 @@ function toRow(item) {
 }
 
 export async function getFeatureArticles() {
-  const { data, error } = await supabase.from("feature_articles").select("*").order("sort_order");
+  const [{ data, error }, live] = await Promise.all([
+    supabase.from("feature_articles").select("*").order("sort_order"),
+    getLivePlacementMap("featured_article"),
+  ]);
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  return (data ?? []).map((r) => fromRow(r, live.get(String(r.id))));
 }
 
 export async function getFeatureArticleById(id) {
-  const { data, error } = await supabase.from("feature_articles").select("*").eq("id", id).maybeSingle();
+  const [{ data, error }, live] = await Promise.all([
+    supabase.from("feature_articles").select("*").eq("id", id).maybeSingle(),
+    getLivePlacementMap("featured_article"),
+  ]);
   if (error) throw error;
-  return data ? fromRow(data) : null;
+  return data ? fromRow(data, live.get(String(data.id))) : null;
 }
 
 export async function saveFeatureArticle(item) {
   const { data, error } = await supabase.from("feature_articles").upsert(toRow(item)).select().single();
   if (error) throw error;
-  return fromRow(data);
+  // The homepage toggle books (or ends) a Featured Article slot.
+  const live = await getLivePlacementMap("featured_article");
+  const onHome = live.has(String(data.id));
+  if (item.homepage && !onHome) {
+    const res = await featureNow("featured_article", "feature_article", String(data.id));
+    if (res.full) throw new Error("Both Featured Article slots are taken. Swap one out first.");
+  } else if (!item.homepage && onHome) {
+    await unfeature("featured_article", data.id);
+  }
+  return getFeatureArticleById(data.id);
 }
 
 export async function deleteFeatureArticle(id) {
@@ -76,33 +94,19 @@ export async function deleteFeatureArticle(id) {
   return { id, deleted: true };
 }
 
-// The homepage shows two story slots. Turning one off always succeeds;
-// turning one on when both are taken returns { full: true } so the UI can
-// offer a swap instead of a dead end (same pattern as news_offers).
+// Turning a story on books a Featured Article slot from now; { full: true }
+// when both are taken, so the page can offer a swap.
 export async function setArticleHomepageFeature(id, featured) {
   if (!featured) {
-    const { error } = await supabase.from("feature_articles").update({ homepage: false }).eq("id", id);
-    if (error) throw error;
+    await unfeature("featured_article", id);
     return { id, homepage: false };
   }
-
-  const { count, error: countError } = await supabase
-    .from("feature_articles")
-    .select("id", { count: "exact", head: true })
-    .eq("homepage", true)
-    .neq("id", id);
-  if (countError) throw countError;
-  if ((count ?? 0) >= 2) return { full: true };
-
-  const { error } = await supabase.from("feature_articles").update({ homepage: true }).eq("id", id);
-  if (error) throw error;
+  const res = await featureNow("featured_article", "feature_article", String(id));
+  if (res.full) return { full: true };
   return { id, homepage: true };
 }
 
 export async function swapArticleHomepageFeature(addId, removeId) {
-  const { error: offErr } = await supabase.from("feature_articles").update({ homepage: false }).eq("id", removeId);
-  if (offErr) throw offErr;
-  const { error: onErr } = await supabase.from("feature_articles").update({ homepage: true }).eq("id", addId);
-  if (onErr) throw onErr;
+  await swapFeatured("featured_article", "feature_article", String(addId), String(removeId));
   return { addId, removeId };
 }

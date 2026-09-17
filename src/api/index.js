@@ -13,3 +13,5 @@ export * from "./guides";
 export * from "./stay";
 export { request } from "./client";
 export * from "./spotlight";
+export * from "./offers";
+export * from "./homepageSlots";

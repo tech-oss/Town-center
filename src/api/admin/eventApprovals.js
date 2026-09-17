@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { getLivePlacementMap, featureNow, unfeature, swapFeatured } from "./homepageSlots";
 import { assertValidCoords } from "../../lib/geo";
 import { logBusinessActivity, eventContext, occurrenceContext } from "./businessActivity";
 
@@ -41,7 +42,7 @@ function eventFromRow(row) {
     heroImage: row.hero_image,
     gallery: row.gallery ?? [],
     social: row.social ?? {},
-    homepage: row.homepage ?? false,
+    homepage: false,  // set from bookings by getBusinessEvents
     status: row.status,
     rejectionReason: row.rejection_reason,
     isRecurring: row.is_recurring,
@@ -79,9 +80,13 @@ export async function getBusinessEvents({ status } = {}) {
     .select("*, businesses(name)")
     .order("created_at", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
-  const { data, error } = await q;
+  const [{ data, error }, live] = await Promise.all([q, getLivePlacementMap("whats_on")]);
   if (error) throw error;
-  return (data ?? []).map(eventFromRow);
+  return (data ?? []).map((r) => {
+    const slot = live.get(String(r.id));
+    // On the homepage now: a live What's On booking.
+    return { ...eventFromRow(r), homepage: !!slot, homeStartsAt: slot?.startsAt ?? null, homeEndsAt: slot?.endsAt ?? null };
+  });
 }
 
 export async function approveEvent(id) {
@@ -163,35 +168,21 @@ export async function deleteBusinessEvent(id) {
 }
 
 // ── Homepage "What's On" selection ─────────────────────────────────────────
-// Three slots on the homepage grid. Turning one off always succeeds; turning
-// one on when all three are taken returns { full: true } so the UI can offer
-// a swap rather than a dead end (same pattern as news_offers/feature_articles).
+// Each pick is a What's On booking (see ./homepageSlots). Turning one on when
+// every slot is taken returns { full: true } so the UI can offer a swap.
 
 export async function setEventHomepageFeature(id, featured) {
   if (!featured) {
-    const { error } = await supabase.from("business_events").update({ homepage: false }).eq("id", id);
-    if (error) throw error;
+    await unfeature("whats_on", id);
     return { id, homepage: false };
   }
-
-  const { count, error: countError } = await supabase
-    .from("business_events")
-    .select("id", { count: "exact", head: true })
-    .eq("homepage", true)
-    .neq("id", id);
-  if (countError) throw countError;
-  if ((count ?? 0) >= 3) return { full: true };
-
-  const { error } = await supabase.from("business_events").update({ homepage: true }).eq("id", id);
-  if (error) throw error;
+  const res = await featureNow("whats_on", "business_event", String(id));
+  if (res.full) return { full: true };
   return { id, homepage: true };
 }
 
 export async function swapEventHomepageFeature(addId, removeId) {
-  const { error: offErr } = await supabase.from("business_events").update({ homepage: false }).eq("id", removeId);
-  if (offErr) throw offErr;
-  const { error: onErr } = await supabase.from("business_events").update({ homepage: true }).eq("id", addId);
-  if (onErr) throw onErr;
+  await swapFeatured("whats_on", "business_event", String(addId), String(removeId));
   return { addId, removeId };
 }
 

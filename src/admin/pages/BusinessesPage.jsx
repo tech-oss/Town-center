@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from "react";
+import PlacementTimer from "../components/PlacementTimer";
 import { PLANS, planFor, isPremium, PREMIUM_PLAN } from "../../Data/plans";
 import { uploadImage } from "../../lib/uploadImage";
 import { useNavigate } from "react-router-dom";
@@ -724,6 +725,7 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
                   ? `All ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} slots are taken.`
                   : `Up to ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} businesses can be featured.`}
               </p>
+              {biz.featured && <PlacementTimer startsAt={biz.featuredStartsAt} endsAt={biz.featuredEndsAt} compact />}
             </div>
             <button type="button" role="switch" aria-checked={!!biz.featured} aria-label="Featured"
               onClick={onToggleFeatured} disabled={featuredBusy || (!biz.featured && featuredFull)}

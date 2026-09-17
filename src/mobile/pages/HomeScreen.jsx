@@ -4,7 +4,7 @@ import MobileShell from "../components/MobileShell";
 import NotificationTray, { NOTIFICATIONS } from "../components/NotificationTray";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
-import { getHomepageEvents, getStories, getSpotlightPosts } from "../../api";
+import { getHomepageEvents, getHomepageStories, getSpotlightPosts } from "../../api";
 import { categoryColors } from "../../Data/events";
 import { getHomepageGuides } from "../../api";
 import { homeCategories } from "../data/mobileMock";
@@ -52,7 +52,7 @@ export default function HomeScreen() {
   const { data: guideList } = useFetch(getHomepageGuides, []);
   const videoRef = useRef(null);
   const { data: events } = useFetch(getHomepageEvents, []);
-  const { data: stories } = useFetch(getStories, []);
+  const { data: stories } = useFetch(getHomepageStories, []);
   // Exactly what admin picked in Business News & Offers — nothing else.
   const { data: spotlight } = useFetch(getSpotlightPosts, []);
   const appOffers = (spotlight ?? []).slice(0, 4);
@@ -60,7 +60,7 @@ export default function HomeScreen() {
   const upcomingEvents = (events ?? []).slice(0, 3);
   // The same guides admin ticked for the website's homepage.
   const featuredGuides = guideList ?? [];
-  const featuredStories = (stories ?? []).filter((s) => s.homepage);
+  const featuredStories = stories ?? [];
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
   const [videoPlaying, setVideoPlaying] = useState(true);
@@ -336,7 +336,7 @@ export default function HomeScreen() {
                       <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{s.eyebrow}</span>
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{s.cardHeading}</p>
                       <p className="text-xs leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{s.cardBody}</p>
-                      <Link to={`/mobile/story/${s.slug}`} className="inline-flex items-center gap-1.5 text-xs font-bold mt-1" style={{ color: "var(--teal-deep)" }}>
+                      <Link to={`/mobile${s.to ?? `/story/${s.slug}`}`} className="inline-flex items-center gap-1.5 text-xs font-bold mt-1" style={{ color: "var(--teal-deep)" }}>
                         Read more
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                       </Link>

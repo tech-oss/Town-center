@@ -8,6 +8,7 @@ import {
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
+import PlacementTimer from "../components/PlacementTimer";
 
 // Picks which three events fill the homepage "WHAT'S ON" grid. The events
 // themselves are created and edited under Events — this screen only chooses
@@ -106,6 +107,12 @@ function EventRow({ item, onToggleFeature, onOpenSwap }) {
         <p className="text-[11px] mt-1" style={{ color: "#9CA3AF" }}>
           {item.businessName ? `${item.businessName} · ` : "Town event · "}{item.location}
         </p>
+          {item.homepage && (
+            <>
+              <PlacementTimer startsAt={item.homeStartsAt} endsAt={item.homeEndsAt} compact />
+              <Link to="/admin/homepage-slots" className="text-[11px] font-semibold" style={{ color: "#2563EB" }}>Change times in Homepage Slots →</Link>
+            </>
+          )}
       </div>
       <div className="flex flex-col items-end gap-2 shrink-0">
         {item.homepage ? (
