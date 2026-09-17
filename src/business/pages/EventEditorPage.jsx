@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import UKDateInput from "../components/UKDateInput";
 import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -88,7 +89,7 @@ function RecurrenceFields({ form, set }) {
       </div>
 
       <Field label="Ends" hint="Leave blank for no end date">
-        <Inp type="date" value={form.recurrenceEndDate ?? ""} onChange={(e) => set("recurrenceEndDate", e.target.value)} />
+        <UKDateInput value={form.recurrenceEndDate ?? ""} min={form.eventDate || undefined} onChange={(e) => set("recurrenceEndDate", e.target.value)} />
       </Field>
 
       {preview && (form.recurrenceDays ?? []).length > 0 && (
@@ -164,7 +165,7 @@ export default function EventEditorPage() {
               <Field label="Event Title" required span2><Inp value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Event title…" /></Field>
               <Field label="Subtitle" span2 hint={`Shown under the title on the event page and the calendar · ${(form.subtitle ?? "").length}/160`}><Inp value={form.subtitle ?? ""} maxLength={160} onChange={(e) => set("subtitle", e.target.value)} placeholder="One line about the event…" /></Field>
               <Field label="Event Description" span2><TextArea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the event…" /></Field>
-              <Field label={form.isRecurring ? "First Occurrence Date" : "Event Date"}><Inp type="date" value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
+              <Field label={form.isRecurring ? "First Occurrence Date" : "Event Date"}><UKDateInput value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
               <Field label="Event Time" hint="e.g. 7:00 PM or 10am - 4pm"><Inp value={form.eventTime ?? ""} onChange={(e) => set("eventTime", e.target.value)} /></Field>
               <Field label="Entry">
                 <Select value={form.entryType} onChange={(e) => set("entryType", e.target.value)}>

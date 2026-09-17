@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import UKDateInput from "../components/UKDateInput";
 import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -75,8 +76,8 @@ export default function ArticleEditorPage() {
                   <option>News</option><option>Offer</option>
                 </Select>
               </Field>
-              <Field label="Start Date" hint="Optional"><Inp type="date" value={form.startDate ?? ""} onChange={(e) => set("startDate", e.target.value)} /></Field>
-              <Field label="End Date" hint="Leave blank for no expiry"><Inp type="date" value={form.endDate ?? ""} onChange={(e) => set("endDate", e.target.value)} /></Field>
+              <Field label="Start Date" hint="Optional"><UKDateInput value={form.startDate ?? ""} onChange={(e) => set("startDate", e.target.value)} /></Field>
+              <Field label="End Date" hint="Leave blank for no expiry"><UKDateInput value={form.endDate ?? ""} min={form.startDate || undefined} onChange={(e) => set("endDate", e.target.value)} /></Field>
             </div>
           </EditorSection>
 

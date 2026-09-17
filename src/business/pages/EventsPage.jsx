@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatUK } from "../../lib/ukDate";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -89,7 +90,7 @@ export default function EventsPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {events.map((e) => (
               <div key={e.id} className="bg-white rounded-2xl overflow-hidden flex flex-col" style={CARD}>
-                {e.gallery?.[0] && <img src={e.gallery[0]} alt="" className="w-full h-32 object-cover" />}
+                {(e.heroImage || e.gallery?.[0]) && <img src={e.heroImage || e.gallery[0]} alt="" className="w-full h-32 object-cover" />}
                 <div className="p-4 flex flex-col gap-2 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{e.entryType}</span>
@@ -106,7 +107,7 @@ export default function EventsPage() {
                       {e.eventTime ? ` · ${e.eventTime}` : ""}
                     </p>
                   ) : (
-                    <p className="text-xs" style={{ color: "#9CA3AF" }}>{e.eventDate}{e.eventTime ? ` · ${e.eventTime}` : ""}</p>
+                    <p className="text-xs" style={{ color: "#9CA3AF" }}>{formatUK(e.eventDate)}{e.eventTime ? ` · ${e.eventTime}` : ""}</p>
                   )}
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/events/${e.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>

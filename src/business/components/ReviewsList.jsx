@@ -1,4 +1,5 @@
 import { useState } from "react";
+import UKDateInput from "./UKDateInput";
 import { Stars, Field, Inp, TextArea, Select, ConfirmModal, MUTED, BORDER, FOREST, SAGE } from "./FormKit";
 
 // ─── Rating breakdown bar chart ────────────────────────────────────────────────
@@ -88,7 +89,7 @@ function ReviewForm({ initial, onSave, onCancel }) {
             {[5, 4, 3, 2, 1].map((n) => <option key={n} value={n}>{n} star{n === 1 ? "" : "s"}</option>)}
           </Select>
         </Field>
-        <Field label="Date"><Inp type="date" value={form.date} onChange={(e) => set("date", e.target.value)} /></Field>
+        <Field label="Date"><UKDateInput value={form.date} onChange={(e) => set("date", e.target.value)} /></Field>
       </div>
       <Field label="Review Text"><TextArea rows={3} value={form.text} onChange={(e) => set("text", e.target.value)} placeholder="What did the customer say?" /></Field>
       <Field label="Verification Link" required hint="A link proving this review is genuine (e.g. Google/Trustpilot review URL)">
