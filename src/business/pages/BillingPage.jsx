@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { ADD_ONS } from "../../Data/businessPortalMock";
 import { isPremium } from "../../Data/plans";
 import { TERMS_TEXT } from "../../Data/businessPortalMock";
 import {
@@ -10,6 +9,7 @@ import {
 } from "../components/VisibilityPlan";
 import { listPayments, getSubscription } from "../api/businessSubscription";
 import { openBillingPortal } from "../api/stripeBilling";
+import HomepagePromotions from "../components/HomepagePromotions";
 
 function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -73,11 +73,6 @@ export default function BillingPage() {
       setOpening(false);
     }
   }
-  function handlePurchaseAddon(name) {
-    // TODO: Stripe one-off payment
-    setToast(`"${name}" purchased.`);
-  }
-
   return (
     <BusinessLayout>
       <Toast message={toast} />
@@ -88,7 +83,7 @@ export default function BillingPage() {
       <div className="visibility-plan-page flex flex-col gap-6 max-w-4xl">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Subscriptions & Billing</h1>
-          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your plan, add-ons and payment history.</p>
+          <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your plan, homepage promotions and payment history.</p>
         </div>
 
         {/* Current plan summary */}
@@ -141,21 +136,13 @@ export default function BillingPage() {
           </>
         )}
 
-        {/* Add-ons */}
-        <div className="bg-white rounded-2xl p-5" style={CARD}>
-          <p className="text-sm font-bold mb-3" style={{ color: FOREST }}>Ad-hoc Add-on Services</p>
-          <div className="flex flex-col gap-3">
-            {ADD_ONS.map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-4 flex-wrap rounded-xl p-3" style={{ border: `1px solid ${BORDER}` }}>
-                <div>
-                  <p className="text-sm font-semibold" style={{ color: FOREST }}>{a.name}</p>
-                  <p className="text-xs" style={{ color: MUTED }}>{a.description} · {a.price}</p>
-                </div>
-                <button onClick={() => handlePurchaseAddon(a.name)} className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>Purchase</button>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Paid homepage slots (the ad-hoc add-ons) */}
+        <HomepagePromotions
+          businessId={user.id}
+          premium={premium}
+          onToast={setToast}
+          onBooked={() => listPayments(user.id).then(setPayments)}
+        />
 
         {/* Payment history */}
         <div className="bg-white rounded-2xl p-5" style={CARD}>

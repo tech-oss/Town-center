@@ -11,7 +11,8 @@
 //
 // Stripe → Developers → Webhooks → endpoint URL:
 //   https://<project-ref>.supabase.co/functions/v1/stripe-webhook
-// Events: checkout.session.completed, customer.subscription.created,
+// Events: checkout.session.completed, checkout.session.expired,
+//   customer.subscription.created,
 //   customer.subscription.updated, customer.subscription.deleted,
 //   invoice.paid, invoice.payment_failed
 
@@ -180,6 +181,51 @@ async function recordLatestInvoice(sub: Stripe.Subscription) {
   if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
 }
 
+// A paid homepage slot booking: confirm the reserved slot (or the next free
+// one if the hold lapsed) and record the payment in billing history.
+// deno-lint-ignore no-explicit-any
+async function settlePlacement(session: any) {
+  const meta = session.metadata ?? {};
+  const { data: placement, error } = await admin.rpc("settle_homepage_payment", {
+    p_placement_id: meta.placement_id,
+    p_business_id: meta.business_id,
+    p_slot_type: meta.slot_type,
+    p_session_id: session.id,
+    p_payment_intent: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
+    p_amount_pence: session.amount_total ?? 0,
+  });
+  if (error) throw error;
+
+  const { data: type } = await admin.from("homepage_slot_types").select("label").eq("key", meta.slot_type).maybeSingle();
+  const label = type?.label ?? "Homepage slot";
+  const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
+  if (invoiceId) {
+    await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid");
+  } else {
+    const { error: payError } = await admin.from("business_payments").upsert({
+      business_id: meta.business_id,
+      date: new Date().toISOString().slice(0, 10),
+      description: `Homepage ${label}`,
+      amount: money(session.amount_total ?? 0, session.currency ?? "gbp"),
+      status: "Paid",
+      stripe_invoice_id: session.id,
+    }, { onConflict: "stripe_invoice_id" });
+    if (payError) throw payError;
+  }
+
+  const when = new Date(placement.starts_at).toLocaleString("en-GB", {
+    timeZone: "Europe/London", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+  await admin.from("business_activity").insert({
+    business_id: meta.business_id, action: "placement.booked", entity_type: "placement", entity_id: placement.id,
+    title: `Homepage ${label}`,
+    detail: meta.slot_type === "featured_business"
+      ? `Booked from ${when}. Waiting for admin approval.`
+      : `Booked from ${when}. Choose what to show in Subscriptions & Billing.`,
+    actor: "system",
+  });
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return text("Method not allowed", 405);
 
@@ -204,6 +250,10 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.kind === "placement") {
+          if (session.payment_status === "paid") await settlePlacement(session);
+          break;
+        }
         if (session.mode === "subscription" && session.subscription) {
           const subId = typeof session.subscription === "string" ? session.subscription : session.subscription.id;
           const sub = await stripeGet(`subscriptions/${subId}`);
@@ -212,6 +262,15 @@ Deno.serve(async (req) => {
           // depend on invoice.paid arriving (or being enabled). Recording is
           // keyed on the invoice id, so a later invoice.paid just updates it.
           await recordLatestInvoice(sub);
+        }
+        break;
+      }
+      case "checkout.session.expired": {
+        // Checkout closed without paying: give the reserved slot back.
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.kind === "placement" && session.metadata.placement_id) {
+          await admin.from("homepage_placements").delete()
+            .eq("id", session.metadata.placement_id).eq("status", "held");
         }
         break;
       }
