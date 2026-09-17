@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import FeaturedTag from "./FeaturedTag";
+import ListingCard from "./ListingCard";
 import { Link, useSearchParams } from "react-router-dom";
-import { card, pill } from "../utils/design";
 import { getHotels, getAccommodations } from "../api";
 import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
@@ -552,51 +551,17 @@ export default function StayListingPage({ kind }) {
             <Loading minHeight="30vh" />
           ) : items.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-              {items.map((it) => {
-                const tag = isHotels ? `${it.stars}-Star Hotel` : it.type;
-                const tagColor = isHotels ? STAR_COLORS[it.stars] : (TYPE_COLORS[slugify(it.type)] ?? "var(--leaf)");
-                const address = isHotels ? it.address : it.area;
-                return (
-                  <Link
-                    key={it.slug}
-                    to={`${basePath}/${it.slug}${backParam}`}
-                    className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
-                    style={{ borderRadius: "0px", boxShadow: card.shadow }}
-                  >
-                    <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
-                      {it.featured && <FeaturedTag overlay />}
-                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    </div>
-                    <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
-                      <span
-                        className={`${pill.className} !text-[9px] sm:!text-[9px] !px-2 sm:!px-2 !py-0.5 sm:!py-0.5`}
-                        style={{ color: "#000000", backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(13,42,51,0.12)", alignSelf: "flex-start" }}
-                      >
-                        <span className="inline-block w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: tagColor }} />
-                        {tag}
-                      </span>
-                      <h3 className="listing-card-title text-xs sm:text-sm leading-snug sm:leading-tight line-clamp-2 sm:line-clamp-1" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
-                        {it.name}
-                      </h3>
-                      {address && (
-                        <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px]" style={{ color: "#000000" }}>
-                          <PinIcon size={11} />
-                          <span className="line-clamp-1">{address}</span>
-                        </span>
-                      )}
-                      <div className="hidden sm:block">
-                        <p className="text-[11px] leading-snug line-clamp-1" style={{ color: "#000000" }}>
-                          {it.tagline}
-                        </p>
-                      </div>
-                      <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px] font-semibold mt-0.5 sm:mt-0.5" style={{ color: "#000000" }}>
-                        Read more
-                        <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
+              {items.map((it) => (
+                <ListingCard
+                  key={it.slug}
+                  item={it}
+                  to={`${basePath}/${it.slug}${backParam}`}
+                  tag={isHotels ? `${it.stars}-Star Hotel` : it.type}
+                  tagColor={isHotels ? STAR_COLORS[it.stars] : (TYPE_COLORS[slugify(it.type)] ?? "var(--leaf)")}
+                  address={isHotels ? it.address : it.area}
+                  description={it.tagline}
+                />
+              ))}
             </div>
           ) : (
             <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>

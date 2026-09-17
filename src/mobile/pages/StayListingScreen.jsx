@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import FeaturedTag from "../../components/FeaturedTag";
-import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
+import ListingCard from "../../components/ListingCard";
+import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import MobileShell from "../components/MobileShell";
-import MobileCard from "../components/MobileCard";
 import { ListSearch, OffersLink } from "../components/ListSearch";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
@@ -294,31 +293,23 @@ export default function StayListingScreen() {
           })}
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {items.map((p) => (
-            <Link key={p.slug} to={`/mobile/stay/${kind}/${p.slug}${backParam}`}>
-              <MobileCard className="flex items-stretch overflow-hidden active:opacity-90">
-                <img src={p.image} alt="" className="w-28 h-28 object-cover shrink-0" />
-                <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                  {p.featured && <FeaturedTag className="self-start mb-1" />}
-                  <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>
-                    {isHotels ? `${"★".repeat(p.stars)} Hotel` : p.type}
-                  </span>
-                  <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{p.name}</p>
-                  <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{p.tagline}</p>
-                  <span className="inline-flex items-center gap-0.5 self-start text-[10px] font-bold mt-1.5" style={{ color: "var(--leaf)" }}>
-                    Read more
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                  </span>
-                </div>
-              </MobileCard>
-            </Link>
+            <ListingCard
+              key={p.slug}
+              item={p}
+              to={`/mobile/stay/${kind}/${p.slug}${backParam}`}
+              tag={isHotels ? `${p.stars}-Star Hotel` : p.type}
+              tagColor={isHotels && p.stars >= 4 ? "#c9962c" : "var(--leaf)"}
+              address={isHotels ? p.address : (p.area ?? p.address)}
+              description={p.tagline}
+            />
           ))}
           {allItems == null && (
-            <p className="text-sm text-center py-8 font-medium" style={{ color: "#000000" }}>Loading places to stay…</p>
+            <p className="col-span-2 text-sm text-center py-8 font-medium" style={{ color: "#000000" }}>Loading places to stay…</p>
           )}
           {allItems != null && items.length === 0 && (
-            <p className="text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>
+            <p className="col-span-2 text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>
               No results{query ? ` for “${query}”` : ""}.
             </p>
           )}

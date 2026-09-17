@@ -1,27 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
-import { card, pill } from "../utils/design";
+import { card } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
 import { listingCategory, placeLink } from "../lib/viewedCategory";
-import FeaturedTag from "./FeaturedTag";
+import ListingCard from "./ListingCard";
 import { resolveCategory } from "../Data/taxonomy";
 import { getBusinesses, getEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 import CategoryFilterBar from "./CategoryFilterBar";
 import { toSeeDoSlug, toSeeDoSlugs } from "../lib/eventCategories";
 
-// Colour key for the See & Do category dots — one fixed colour per category,
-// reused everywhere a category is shown so it reads as a consistent legend.
-const CATEGORY_COLORS = {
-  "art-culture": "#8b5cf6",
-  community: "#f59e0b",
-  family: "#ec4899",
-  "fashion-beauty": "#e11d48",
-  film: "#1c2e38",
-  gaming: "#6366f1",
-  learning: "#2563eb",
-  "sport-wellness": "#22c55e",
-};
 
 // The real What's On events surfaced as See & Do cards that link to the shared
 // /event/:slug detail page — keeps one source of truth.
@@ -42,11 +30,6 @@ const toEventCard = (e) => {
   };
 };
 
-// Demo brands only have a logo, shown contained on a mint tile. A registered
-// business with a hero image shows that photo instead, as its banner.
-function logoTile(it) {
-  return it.logo && !it.hasHero;
-}
 
 export default function CategoryPage() {
   // Two routes render this component: the generic "/:section" listing, and
@@ -251,73 +234,14 @@ export default function CategoryPage() {
           {/* Card grid */}
           {items.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-              {items.map((it) => {
-                const radius = ["see-do", "eat-drink", "shop", "services"].includes(section) ? "0px" : card.radius;
-                return (
-                <Link
+              {items.map((it) => (
+                <ListingCard
                   key={it.slug}
+                  item={it}
                   to={it.to ?? `/${it.section}/place/${it.slug}`}
-                  className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1"
-                  style={{ borderRadius: radius, boxShadow: card.shadow }}
-                >
-                  <div
-                    className="relative aspect-[4/3] sm:aspect-square overflow-hidden"
-                    style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: logoTile(it) ? "var(--mint)" : undefined }}
-                  >
-                    {it.featured && <FeaturedTag overlay />}
-                    {logoTile(it) ? (
-                      <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-5 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
-                    ) : (
-                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    )}
-                  </div>
-                  <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
-                    {it.tag && (
-                      <span
-                        className={`${pill.className} !text-[9px] sm:!text-[9px] !px-2 sm:!px-2 !py-0.5 sm:!py-0.5`}
-                        style={{ color: "#000000", backgroundColor: "#ffffff", boxShadow: "0 1px 4px rgba(13,42,51,0.12)", alignSelf: "flex-start" }}
-                      >
-                        <span
-                          className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ backgroundColor: CATEGORY_COLORS[it.category] ?? "var(--leaf)" }}
-                        />
-                        {it.tag}
-                      </span>
-                    )}
-                    <h3 className="listing-card-title text-xs sm:text-sm leading-snug sm:leading-tight line-clamp-2 sm:line-clamp-1" style={{ color: "#000000", fontFamily: "var(--font-heading)" }}>
-                      {it.name}
-                    </h3>
-                    {it.date && (
-                      <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px]" style={{ color: "#000000" }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                          <rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" />
-                        </svg>
-                        <span className="line-clamp-1">{it.date}</span>
-                      </span>
-                    )}
-                    {it.address && (
-                      <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px]" style={{ color: "#000000" }}>
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" />
-                        </svg>
-                        <span className="line-clamp-1">{it.address}</span>
-                      </span>
-                    )}
-                    {!it.hideDescription && (it.paragraphs?.[0] || it.description) && (
-                      <div className="hidden sm:block">
-                        <p className="text-[11px] leading-snug line-clamp-1" style={{ color: "#000000" }}>
-                          {it.paragraphs?.[0] || it.description}
-                        </p>
-                      </div>
-                    )}
-                    <span className="inline-flex items-center gap-1 sm:gap-1 text-[10px] sm:text-[11px] font-semibold mt-0.5 sm:mt-0.5" style={{ color: "#000000" }}>
-                      Read more
-                      <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
-                    </span>
-                  </div>
-                </Link>
-                );
-              })}
+                  radius={["see-do", "eat-drink", "shop", "services"].includes(section) ? "0px" : card.radius}
+                />
+              ))}
             </div>
           ) : (
             <p className="text-center py-12 text-sm" style={{ color: "#000000" }}>

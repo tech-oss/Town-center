@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
-import FeaturedTag from "../../components/FeaturedTag";
+import ListingCard from "../../components/ListingCard";
 import useSectionItems from "../hooks/useSectionItems";
 import { Link } from "react-router-dom";
-import useTapReveal from "../../hooks/useTapReveal";
 import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills, OffersLink } from "../components/ListSearch";
 import { sections } from "../../Data/pages";
@@ -14,21 +13,6 @@ const SECTION_INTROS = {
   shop: "From high-street favourites to independent boutiques, discover Maidenhead's shops.",
   services: "Trades, professionals and local businesses serving Maidenhead.",
 };
-
-// Framed-photo hover — same "spotlight" treatment used across the website's
-// cards, adapted for a touch tap-reveal on mobile.
-function CardImage({ src, alt }) {
-  const { revealed, onImageClick } = useTapReveal();
-  return (
-    <div
-      onClick={onImageClick}
-      className={`spotlight-card relative w-28 h-28 shrink-0 overflow-hidden ${revealed ? "is-revealed" : ""}`}
-    >
-      <img src={src} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
-      <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
-    </div>
-  );
-}
 
 // Every category a listing is filed under — a registered business can pick
 // more than one (e.g. Restaurants and Private Dining), and should appear under
@@ -92,31 +76,12 @@ export default function SectionScreen({ sectionKey }) {
 
         <FilterPills options={filters} value={filter} onChange={setFilter} />
 
-        <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {items.map((it) => (
-            <Link key={it.slug} to={`/mobile/place/${it.slug}`}>
-              <div
-                className="flex items-stretch overflow-hidden bg-white active:opacity-90"
-                style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}
-              >
-                <CardImage src={it.image} alt={it.name} />
-                <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
-                  {it.featured && <FeaturedTag className="self-start mb-1" />}
-                  <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{it.name}</p>
-                  <p className="text-xs mt-1 leading-snug line-clamp-2 font-medium" style={{ color: "#000000" }}>{it.description}</p>
-                  <div className="flex items-center justify-between mt-1.5">
-                    <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--teal-deep)" }}>{it.tag}</span>
-                    <span className="inline-flex items-center gap-0.5 text-[10px] font-bold" style={{ color: "var(--leaf)" }}>
-                      Read more
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            <ListingCard key={it.slug} item={it} to={`/mobile/place/${it.slug}`} />
           ))}
           {items.length === 0 && (
-            <p className="text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>
+            <p className="col-span-2 text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>
               No results{query ? ` for “${query}”` : ""}.
             </p>
           )}
