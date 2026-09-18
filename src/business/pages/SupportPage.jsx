@@ -4,6 +4,14 @@ import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, TextArea, Select, Toast, useToast, uploadToStorage, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { TICKET_CATEGORIES } from "../../Data/businessPortalMock";
 import { listTickets, createTicket, addTicketMessage } from "../api/businessTickets";
+import { formatUK } from "../../lib/ukDate";
+import { formatUKDateTime } from "../../lib/ukDateTime";
+
+// Messages carry "YYYY-MM-DD HH:mm" in UTC; show them as UK date and time.
+function messageTime(value) {
+  const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/.exec(value ?? "");
+  return m ? formatUKDateTime(`${m[1]}T${m[2]}:00Z`) : formatUK(value);
+}
 
 function StatusBadge({ status }) {
   const map = {
@@ -37,14 +45,14 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
           <h1 className="text-lg font-bold" style={{ color: FOREST }}>{ticket.subject}</h1>
           <StatusBadge status={ticket.status} />
         </div>
-        <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{ticket.category} · Submitted {ticket.submitted}</p>
+        <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{ticket.category} · Submitted {formatUK(ticket.submitted)}</p>
       </div>
 
       <div className="flex flex-col gap-3">
         {ticket.thread.map((m, i) => (
           <div key={i} className={`max-w-[80%] rounded-2xl px-4 py-3 ${m.from === "business" ? "self-end" : "self-start"}`}
             style={m.from === "business" ? { backgroundColor: SAGE, color: "#fff" } : { backgroundColor: "#fff", color: FOREST, border: `1px solid ${BORDER}` }}>
-            <p className="text-[11px] font-semibold mb-1 opacity-80">{m.author} · {m.date}</p>
+            <p className="text-[11px] font-semibold mb-1 opacity-80">{m.author} · {messageTime(m.date)}</p>
             <p className="text-sm leading-relaxed whitespace-pre-line">{m.body}</p>
             {m.attachments?.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
@@ -191,7 +199,7 @@ export default function SupportPage() {
                 <button key={t.id} onClick={() => setViewing(t)} className="bg-white rounded-2xl p-4 flex items-center justify-between gap-4 text-left transition-shadow hover:shadow-md" style={CARD}>
                   <div>
                     <p className="text-sm font-semibold" style={{ color: FOREST }}>{t.subject}</p>
-                    <p className="text-xs mt-0.5" style={{ color: MUTED }}>{t.category} · Submitted {t.submitted}</p>
+                    <p className="text-xs mt-0.5" style={{ color: MUTED }}>{t.category} · Submitted {formatUK(t.submitted)}</p>
                   </div>
                   <StatusBadge status={t.status} />
                 </button>
