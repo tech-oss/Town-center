@@ -91,7 +91,17 @@ export default function CategoryPage() {
       ...eventCards,
       ...activities.filter((i) => !i.featured),
     ];
-    items = category ? allSeeDo.filter((i) => i.category === category) : allSeeDo;
+    // An event or business shows under each of its categories; under a
+    // filter its card and link carry the category being browsed.
+    items = category
+      ? allSeeDo
+          .filter((i) => i.category === category || i.categories?.includes(category))
+          .map((i) => ({
+            ...i,
+            tag: categoryTitles[category] ?? i.tag,
+            to: `${i.to ?? `/event/${i.slug}`}?category=${encodeURIComponent(category)}`,
+          }))
+      : allSeeDo;
   }
 
   // Search-by-name, applied on top of whichever category is active.

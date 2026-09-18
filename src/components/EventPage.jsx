@@ -1,9 +1,9 @@
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { useTrackView, businessView, eventView } from "../lib/trackView";
 import { useEffect, useState } from "react";
 import { categoryColors } from "../Data/events";
 import { categoryTitles } from "../Data/pages";
-import { toSeeDoSlug, eventCategoryLabel } from "../lib/eventCategories";
+import { toSeeDoSlugs } from "../lib/eventCategories";
 import { getEventBySlug, getEvents, getBusinessBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
@@ -60,6 +60,7 @@ function buildSocial(social) {
 
 export default function EventPage() {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
   // The slug can be either a What's On event or a See & Do business; fetch both
   // and let asEvent() pick the right one.
   const { data: rawEvent, loading: loadingEvent, error } = useFetch(() => getEventBySlug(slug), [slug]);
@@ -85,8 +86,15 @@ export default function EventPage() {
 
   // Real See & Do category for the breadcrumb: businesses already carry their
   // own category slug; What's On events map through toSeeDoSlug.
-  const categorySlug = business?.category ?? toSeeDoSlug(rawEvent?.category);
+  // An event (or business) in two categories: the breadcrumb follows the
+  // one the visitor browsed from (?category=), otherwise the first.
+  const allSlugs = business && !rawEvent
+    ? (business.categories?.length ? business.categories : [business.category]).filter(Boolean)
+    : toSeeDoSlugs(rawEvent?.categories ?? rawEvent?.category);
+  const requested = searchParams.get("category");
+  const categorySlug = allSlugs.includes(requested) ? requested : allSlugs[0];
   const categoryLabel = categoryTitles[categorySlug] ?? event.category;
+  const otherSlugs = allSlugs.filter((s) => s !== categorySlug);
 
   // Location isn't included here — it already renders in the info card's
   // Find Us column via the `address` prop below, so repeating it as a Pin
@@ -108,7 +116,15 @@ export default function EventPage() {
         { label: categoryLabel, to: `/see-do?category=${categorySlug}` },
       ]}
       backLink={{ label: "View full calendar", to: "/whats-on" }}
-      categoryLabel={event.isBusiness ? event.category : eventCategoryLabel(event.category)}
+      categoryLabel={categoryLabel}
+      extraBadges={otherSlugs.length ? otherSlugs.map((s) => (
+        <Link key={s} to={`/see-do?category=${s}`}
+          className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full"
+          style={{ backgroundColor: "#fff", color: "#000000", boxShadow: "0 4px 16px -8px rgba(28,46,56,0.3)" }}>
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: categoryColors[s] || "var(--leaf)" }} />
+          {categoryTitles[s] ?? s}
+        </Link>
+      )) : undefined}
       categoryColor={dot}
       title={event.title}
       subtitle={event.subtitle}

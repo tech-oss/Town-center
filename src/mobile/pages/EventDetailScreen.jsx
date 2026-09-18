@@ -1,4 +1,6 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import { externalUrl } from "../../lib/externalUrl";
+import { toSeeDoSlugs, eventCategoryLabel } from "../../lib/eventCategories";
 import { useTrackView, eventView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -22,30 +24,37 @@ export default function EventDetailScreen() {
   const dot = categoryColors[event.category] ?? "var(--leaf)";
   const gallery = event.gallery?.length ? event.gallery : [event.image];
   // Ticket buttons only for paid events, pointing at the booking link.
-  const websiteUrl = event.paid && event.bookingUrl ? `https://${event.bookingUrl.replace(/^https?:\/\//, "")}` : null;
+  const websiteUrl = event.paid ? externalUrl(event.bookingUrl) : null;
+  // Every category the event is filed under.
+  const categoryNames = toSeeDoSlugs(event.categories ?? event.category).map((c) => eventCategoryLabel(c));
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location ?? "")}`;
   const more = (events ?? []).filter((e) => e.slug !== event.slug).slice(0, 3);
 
   return (
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
-        <div className="relative">
-          <img src={gallery[0]} alt={event.title} className="w-full h-56 object-cover" />
+        {/* Title, then subtitle, then the hero picture, then the details. */}
+        <div className="px-5 pt-5 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
+              {categoryNames.map((name) => (
+                <span key={name} className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: dot }}>
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dot }} />
+                  {name}
+                </span>
+              ))}
+            </div>
+            <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{event.title}</h1>
+            {event.subtitle && <p className="text-sm mt-1 leading-snug" style={{ color: "rgba(0,0,0,0.7)" }}>{event.subtitle}</p>}
+          </div>
+          <ShareButton path={`/event/${event.slug}`} title={event.title} text={event.standfirst} className="mt-0.5" />
+        </div>
+
+        <div className="px-5 pt-4">
+          <img src={gallery[0]} alt={event.title} className="w-full h-56 object-cover rounded-2xl" />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: dot }}>
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: dot }} />
-                {event.category}
-              </span>
-              <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{event.title}</h1>
-              {event.subtitle && <p className="text-sm mt-1 leading-snug" style={{ color: "rgba(0,0,0,0.7)" }}>{event.subtitle}</p>}
-            </div>
-            <ShareButton path={`/event/${event.slug}`} title={event.title} text={event.standfirst} className="mt-0.5" />
-          </div>
-
           <MobileCard className="p-4 flex flex-col gap-3">
             <div className="flex items-start gap-3">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>

@@ -30,7 +30,11 @@ function fromRow(r) {
     title: r.title,
     // Subtitle and the old admin "Tagline" (excerpt) are the same thing.
     subtitle: r.subtitle || r.excerpt || null,
-    paid: String(r.entry_type ?? "").toLowerCase() === "paid" || !!r.tickets,
+    // A ticket button only for paid events. The entry type decides; older
+    // rows without one count as paid only if their ticket text isn't "free".
+    paid: r.entry_type
+      ? String(r.entry_type).toLowerCase() === "paid"
+      : !!r.tickets && !/free/i.test(r.tickets),
     // `category` is an array on the row (a business can tag several); the
     // public cards and category filters are built around a single label.
     category: Array.isArray(r.category) ? r.category[0] : r.category,
