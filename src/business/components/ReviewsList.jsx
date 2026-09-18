@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatUK } from "../../lib/ukDate";
 import UKDateInput from "./UKDateInput";
 import { Stars, Field, Inp, TextArea, Select, ConfirmModal, MUTED, BORDER, FOREST, SAGE } from "./FormKit";
 
@@ -151,7 +152,7 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
               {r.status && <ReviewStatus status={r.status} />}
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs" style={{ color: "#9CA3AF" }}>{r.date}</span>
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>{formatUK(r.date)}</span>
               {canManage && (
                 <>
                   <button onClick={() => setEditingId(r.id)} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Edit</button>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatUK } from "../../lib/ukDate";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -44,7 +45,7 @@ function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy }) {
             <div key={a.id} className="flex items-center justify-between gap-3 rounded-xl px-3.5 py-3" style={{ border: `1.5px solid ${BORDER}` }}>
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate" style={{ color: FOREST }}>{a.title}</p>
-                <p className="text-[11px]" style={{ color: "#9CA3AF" }}>{a.type} · {a.date}</p>
+                <p className="text-[11px]" style={{ color: "#9CA3AF" }}>{a.type} · {formatUK(a.date)}</p>
               </div>
               <button onClick={() => onSwap(a)} disabled={busy}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0 disabled:opacity-40"
@@ -195,7 +196,7 @@ export default function ArticlesPage() {
                     <StatusBadge status={a.status} />
                   </div>
                   <p className="text-sm font-bold" style={{ color: FOREST }}>{a.title}</p>
-                  <p className="text-xs" style={{ color: "#9CA3AF" }}>{a.date}</p>
+                  <p className="text-xs" style={{ color: "#9CA3AF" }}>Submitted {formatUK(a.date)}</p>
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/articles/${a.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>
                     {a.status === "Live" ? (
