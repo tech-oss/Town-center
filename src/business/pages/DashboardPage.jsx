@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast } from "../components/FormKit";
-import { PROFILE_COMPLETENESS } from "../../Data/businessPortalMock";
+import { getBusinessListing } from "../api/businessListing";
+import { profileCompleteness } from "../api/profileCompleteness";
+import { getMonthComparison, PROFILE_TYPES, CONTENT_VIEW_TYPES } from "../api/businessAnalytics";
 import { listArticles } from "../api/businessArticles";
 import { listTickets } from "../api/businessTickets";
 import { listActivity, activityLabel, activityIcon, relativeTime } from "../api/businessActivity";
@@ -22,6 +24,18 @@ function StatCard({ label, value, sub }) {
   );
 }
 
+// This month's views for a dashboard card, and how it compares with last month.
+function viewValue(m) {
+  if (m === null) return "…";
+  if (m === false) return "—";
+  return m.thisMonth.toLocaleString("en-GB");
+}
+function viewChange(m) {
+  if (!m) return null;
+  if (m.change === null) return m.lastMonth === 0 && m.thisMonth > 0 ? "First views this month" : null;
+  return `${m.change >= 0 ? "+" : ""}${m.change}% vs last month`;
+}
+
 export default function DashboardPage() {
   const { user, toggleVisibility } = useBusinessAuth();
   const [toast, setToast] = useToast();
@@ -29,7 +43,8 @@ export default function DashboardPage() {
   const [activity, setActivity] = useState([]);
   const [activityLoading, setActivityLoading] = useState(true);
   const [activityError, setActivityError] = useState("");
-  const completeness = PROFILE_COMPLETENESS[user.id] ?? { percent: 100, missing: [] };
+  const [completeness, setCompleteness] = useState(null);
+  const [views, setViews] = useState({ profile: null, content: null });
   const [openTickets, setOpenTickets] = useState(0);
   const [liveArticles, setLiveArticles] = useState(0);
 
@@ -41,12 +56,20 @@ export default function DashboardPage() {
     listArticles(user.id).then((articles) => {
       if (!cancelled) setLiveArticles(articles.filter((a) => a.status === "Live").length);
     });
+    getBusinessListing(user.id)
+      .then((listing) => { if (!cancelled) setCompleteness(profileCompleteness(listing, isPremium(user.plan))); })
+      .catch(() => {});
+    if (isPremium(user.plan)) {
+      Promise.all([getMonthComparison(user.id, PROFILE_TYPES), getMonthComparison(user.id, CONTENT_VIEW_TYPES)])
+        .then(([profile, content]) => { if (!cancelled) setViews({ profile, content }); })
+        .catch(() => { if (!cancelled) setViews({ profile: false, content: false }); });
+    }
     listActivity(user.id, 10)
       .then((rows) => { if (!cancelled) { setActivity(rows); setActivityError(""); } })
       .catch((e) => { if (!cancelled) setActivityError(`Couldn't load your recent activity: ${e.message}`); })
       .finally(() => { if (!cancelled) setActivityLoading(false); });
     return () => { cancelled = true; };
-  }, [user.id]);
+  }, [user.id, user.plan]);
 
   async function handleToggle() {
     const goingLive = !user.visible;
@@ -115,15 +138,16 @@ export default function DashboardPage() {
             </Link>
           ) : (
             <>
-              <StatCard label="Profile Views (this month)" value="1,284" sub="+18% vs last month" />
-              <StatCard label="Article / Offer Views" value="392" sub="+6% vs last month" />
+              <StatCard label="Profile Views (this month)" value={viewValue(views.profile)} sub={viewChange(views.profile)} />
+              <StatCard label="Post & Event Views (this month)" value={viewValue(views.content)} sub={viewChange(views.content)} />
             </>
           )}
           <StatCard label="Active Articles / Offers" value={liveArticles} />
           <StatCard label="Support Tickets (open)" value={openTickets} />
         </div>
 
-        {/* Profile completeness */}
+        {/* Profile completeness — worked out from the real listing */}
+        {completeness && (
         <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold" style={{ color: FOREST }}>Profile Completeness</p>
@@ -140,6 +164,7 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+        )}
 
         {/* Quick actions */}
         <div className="flex gap-3 flex-wrap">

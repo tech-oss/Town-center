@@ -6,8 +6,7 @@ import AnalyticsChart from "../components/AnalyticsChart";
 import RangeSelector from "../components/RangeSelector";
 import { EditorSection, CARD, FOREST, MUTED } from "../components/FormKit";
 import { DEFAULT_RANGE, resolveRange } from "../api/analyticsRanges";
-// Dummy data for now — see AnalyticsPage.jsx for the swap-to-live note.
-import { getContentSeries } from "../api/businessAnalyticsMock";
+import { getContentSeries } from "../api/businessAnalytics";
 
 export default function ContentAnalyticsDetailPage() {
   const { user } = useBusinessAuth();
@@ -22,6 +21,8 @@ export default function ContentAnalyticsDetailPage() {
     setLoading(true);
     getContentSeries(user.id, id, range).then((res) => {
       if (!cancelled) { setData(res); setLoading(false); }
+    }).catch(() => {
+      if (!cancelled) { setData({ total: 0, series: [], item: null }); setLoading(false); }
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

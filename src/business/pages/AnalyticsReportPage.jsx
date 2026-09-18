@@ -4,10 +4,9 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import AnalyticsChart from "../components/AnalyticsChart";
 import { FOREST, SAGE, MUTED, BORDER } from "../components/FormKit";
 import { resolveRange } from "../api/analyticsRanges";
-// Dummy data for now — see AnalyticsPage.jsx for the swap-to-live note.
 // getAllContentSeries pulls every content item's own chart, so the export
 // includes each news/offer/article's graph, not just the two overall ones.
-import { getProfileViewsSeries, getContentViewsSeries, getContentBreakdown, getAllContentSeries } from "../api/businessAnalyticsMock";
+import { getProfileViewsSeries, getContentViewsSeries, getContentBreakdown, getAllContentSeries } from "../api/businessAnalytics";
 
 // Reads the range straight out of the URL so this page can be opened
 // directly (a new tab, or the browser's print dialog) with the exact range
@@ -60,6 +59,8 @@ export default function AnalyticsReportPage() {
       setBreakdown(b);
       setContentSeries(cs);
       setLoading(false);
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

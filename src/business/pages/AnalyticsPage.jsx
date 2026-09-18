@@ -6,16 +6,19 @@ import AnalyticsChart from "../components/AnalyticsChart";
 import RangeSelector from "../components/RangeSelector";
 import { EditorSection, CARD, FOREST, MUTED, BORDER, SAGE } from "../components/FormKit";
 import { DEFAULT_RANGE, resolveRange } from "../api/analyticsRanges";
-// Dummy data for now — swap this single import for "../api/businessAnalytics"
-// once trackView() is wired up on the public site/app and real events exist.
-// Every function name and return shape below is identical between the two.
-import { getProfileViewsSeries, getContentViewsSeries, getContentBreakdown } from "../api/businessAnalyticsMock";
+// Real views recorded by the website and app (see api/businessAnalytics.js).
+import { getProfileViewsSeries, getContentViewsSeries, getContentBreakdown } from "../api/businessAnalytics";
 
-function StatHeader({ total, rangeLabel }) {
+function StatHeader({ total, web = 0, app = 0, rangeLabel }) {
   return (
-    <div className="flex items-baseline gap-2 mb-4">
+    <div className="flex items-baseline gap-2 mb-4 flex-wrap">
       <span className="text-3xl font-bold" style={{ color: FOREST }}>{total.toLocaleString()}</span>
       <span className="text-sm" style={{ color: MUTED }}>views · {rangeLabel}</span>
+      {total > 0 && (
+        <span className="text-xs ml-auto" style={{ color: MUTED }}>
+          Website {web.toLocaleString()} · App {app.toLocaleString()}
+        </span>
+      )}
     </div>
   );
 }
@@ -28,6 +31,7 @@ export default function AnalyticsPage() {
   const [profile, setProfile] = useState({ total: 0, series: [] });
   const [content, setContent] = useState({ total: 0, series: [] });
   const [breakdown, setBreakdown] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -41,6 +45,11 @@ export default function AnalyticsPage() {
       setProfile(p);
       setContent(c);
       setBreakdown(b);
+      setError("");
+      setLoading(false);
+    }).catch((e) => {
+      if (cancelled) return;
+      setError(e.message ?? "Analytics couldn't be loaded.");
       setLoading(false);
     });
     return () => { cancelled = true; };
@@ -81,18 +90,20 @@ export default function AnalyticsPage() {
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading analytics…</p>
+        ) : error ? (
+          <p role="alert" className="text-sm px-4 py-3 rounded-xl" style={{ backgroundColor: "#FEF2F2", color: "#991B1B" }}>{error}</p>
         ) : (
           <>
             <div className="bg-white rounded-2xl p-6" style={CARD}>
               <EditorSection title="Profile views">
-                <StatHeader total={profile.total} rangeLabel={rangeLabel} />
+                <StatHeader total={profile.total} web={profile.web} app={profile.app} rangeLabel={rangeLabel} />
                 <AnalyticsChart series={profile.series} />
               </EditorSection>
             </div>
 
             <div className="bg-white rounded-2xl p-6" style={CARD}>
-              <EditorSection title="Articles, News & Offers" hint="Combined views across everything in your News & Articles tab.">
-                <StatHeader total={content.total} rangeLabel={rangeLabel} />
+              <EditorSection title="News, Offers & Events" hint="Combined views of your news and offer posts and your events.">
+                <StatHeader total={content.total} web={content.web} app={content.app} rangeLabel={rangeLabel} />
                 <AnalyticsChart series={content.series} />
               </EditorSection>
             </div>
@@ -100,7 +111,7 @@ export default function AnalyticsPage() {
             <div className="bg-white rounded-2xl p-6" style={CARD}>
               <EditorSection title="Your content" hint="Click an item to see its own views over time.">
                 {breakdown.length === 0 ? (
-                  <p className="text-sm" style={{ color: MUTED }}>No content views yet for this period.</p>
+                  <p className="text-sm" style={{ color: MUTED }}>No views of your posts or events in this period yet.</p>
                 ) : (
                   <div className="flex flex-col">
                     <div className="grid grid-cols-[1fr_auto_auto] gap-4 pb-2 text-[11px] font-bold uppercase tracking-wide" style={{ color: MUTED, borderBottom: `1px solid ${BORDER}` }}>
