@@ -320,7 +320,47 @@ export function deleteItem(id) {
   return approveItem(id);
 }
 
+// Deleting removes a decided item (approved, rejected or admin's own edit)
+// from the queue — it never approves or changes the listing itself. Items
+// still waiting for a decision are skipped: approve or reject those first,
+// otherwise a business's unreviewed change would just silently stay live.
+// Returns { deleted: [ids], skipped: [ids] }.
 export async function deleteItems(ids) {
-  for (const id of ids) await approveItem(id);
-  return { ok: true };
+  const bySection = new Map();
+  for (const id of ids) {
+    const { businessId, section } = parseId(id);
+    if (!businessId || !section) continue;
+    if (!bySection.has(businessId)) bySection.set(businessId, []);
+    bySection.get(businessId).push({ id, section });
+  }
+
+  const deleted = [];
+  const skipped = [];
+  for (const [businessId, entries] of bySection) {
+    const { data, error: readError } = await supabase
+      .from("business_listings")
+      .select("approval_status, rejection_reason, pending_snapshot")
+      .eq("business_id", businessId)
+      .maybeSingle();
+    if (readError) throw readError;
+    const approval = { ...(data?.approval_status ?? {}) };
+    const reasons = { ...(data?.rejection_reason ?? {}) };
+    const snapshots = { ...(data?.pending_snapshot ?? {}) };
+    let changed = false;
+    for (const { id, section } of entries) {
+      if (approval[section] === PENDING) { skipped.push(id); continue; }
+      delete approval[section];
+      delete reasons[section];
+      delete snapshots[section];
+      deleted.push(id);
+      changed = true;
+    }
+    if (!changed) continue;
+    const { error } = await supabase
+      .from("business_listings")
+      .update({ approval_status: approval, rejection_reason: reasons, pending_snapshot: snapshots })
+      .eq("business_id", businessId);
+    if (error) throw error;
+  }
+  return { deleted, skipped };
 }

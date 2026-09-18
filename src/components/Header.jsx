@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, forwardRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { header } from "../Data/content";
 import { menus } from "../Data/pages";
 import { liveMenu } from "../Data/live";
@@ -46,6 +46,16 @@ const Header = forwardRef(function Header(_, ref) {
   const [openDropdown, setOpenDropdown] = useState(null); // desktop hover
   const [mobileExpanded, setMobileExpanded] = useState(null); // mobile accordion
   const [search, setSearch] = useState("");
+  const navigate = useNavigate();
+  // The header search opens the site's Search page with the words typed.
+  function submitSearch(e) {
+    e.preventDefault();
+    const q = search.trim();
+    if (!q) return;
+    setSearch("");
+    closeAll?.();
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+  }
   const { pathname } = useLocation();
   const closeTimer = useRef(null);
 
@@ -135,7 +145,7 @@ const Header = forwardRef(function Header(_, ref) {
         </div>
 
         <form
-          onSubmit={(e) => e.preventDefault()}
+          onSubmit={submitSearch}
           className="flex items-center gap-2 rounded-full px-3.5 py-1.5 w-56 lg:w-64"
           style={{ backgroundColor: "rgba(255,255,255,0.12)" }}
         >
@@ -297,7 +307,7 @@ const Header = forwardRef(function Header(_, ref) {
         >
           {/* Search */}
           <form
-            onSubmit={(e) => e.preventDefault()}
+            onSubmit={submitSearch}
             className="flex items-center gap-2.5 rounded-full px-4 py-2.5 mt-4 mb-3"
             style={{ backgroundColor: "rgba(255,255,255,0.12)" }}
           >

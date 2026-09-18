@@ -8,6 +8,7 @@ import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
 import CategoryPage from './components/CategoryPage'
 import DetailPage from './components/DetailPage'
+import SearchPage from './components/SearchPage'
 import ServicesDetailPage from './components/ServicesDetailPage'
 import ArticlePage from './components/ArticlePage'
 import LivePage from './components/LivePage'
@@ -98,6 +99,7 @@ function PublicSite() {
           <Route path="/" element={<HomePage />} />
           {/* Plan your visit / info pages */}
           <Route path="/getting-here" element={<GettingHerePage />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/traders" element={<TradersPage />} />
           <Route path="/get-the-app" element={<GetAppPage />} />
           <Route path="/work-with-us" element={<PressPage />} />

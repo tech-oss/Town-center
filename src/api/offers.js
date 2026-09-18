@@ -10,6 +10,7 @@ import { getStories } from "./stories";
 import { getArticles } from "./articles";
 import { getPromotedEvents } from "./events";
 import { getStandaloneNewsOffers } from "./spotlight";
+import { getPromotedPosts } from "./promotedPosts";
 import { getLiveHomepageKeys } from "./homepageSlots";
 
 // A Featured Story's business type comes from its eyebrow (the section it's
@@ -33,10 +34,11 @@ function articleKey(a) {
 }
 
 export async function getOffersFeed() {
-  const [stories, articles, standalone, events, onHome] = await Promise.all([
+  const [stories, articles, standalone, promoted, events, onHome] = await Promise.all([
     getStories(),
     getArticles(),
     getStandaloneNewsOffers(),
+    getPromotedPosts().catch(() => []),
     getPromotedEvents().catch(() => []),
     getLiveHomepageKeys(),
   ]);
@@ -60,7 +62,7 @@ export async function getOffersFeed() {
       category: [s.eyebrow, s.category].filter(Boolean).join(" "),
       homepage: !!s.homepage,
     })),
-    ...[...articles, ...standalone].map((a) => ({
+    ...[...articles, ...standalone, ...promoted].map((a) => ({
       key: `news:${a.slug}`,
       slug: a.slug,
       to: `/news/${a.slug}`,

@@ -57,6 +57,7 @@ export default function ApprovalQueuePage() {
   const [deletedIds, setDeletedIds] = useState([]);
   const [selected, setSelected] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null); // null | "selected" | id
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(null);
   const [tick, setTick] = useState(0);
   const refetch = () => setTick((t) => t + 1);
@@ -95,10 +96,16 @@ export default function ApprovalQueuePage() {
 
   function confirmDeletion() {
     const ids = confirmDelete === "selected" ? selected : [confirmDelete];
-    deleteItems(ids).then(() => {
-      setDeletedIds((d) => [...d, ...ids]);
-      setSelected((s) => s.filter((x) => !ids.includes(x)));
+    deleteItems(ids).then(({ deleted, skipped }) => {
+      setDeletedIds((d) => [...d, ...deleted]);
+      setSelected((s) => s.filter((x) => !deleted.includes(x)));
       setConfirmDelete(null);
+      setNotice(skipped.length
+        ? `${deleted.length} deleted. ${skipped.length} still waiting for approval ${skipped.length === 1 ? "was" : "were"} kept — approve or reject ${skipped.length === 1 ? "it" : "them"} first.`
+        : `${deleted.length} item${deleted.length === 1 ? "" : "s"} deleted.`);
+    }).catch((e) => {
+      setConfirmDelete(null);
+      setNotice(`Couldn't delete: ${e.message}`);
     });
   }
 
@@ -202,6 +209,13 @@ export default function ApprovalQueuePage() {
           </button>
         ))}
       </div>
+
+      {notice && (
+        <div role="status" className="flex items-start gap-3 px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "#EFF6FF", color: "#1E3A8A" }}>
+          <span className="flex-1">{notice}</span>
+          <button onClick={() => setNotice("")} aria-label="Dismiss" className="opacity-60 hover:opacity-100">✕</button>
+        </div>
+      )}
 
       {/* Bulk action bar */}
       {items.length > 0 && (
