@@ -36,7 +36,7 @@ const NAV = [
   {
     label: "Home Page Featured", icon: I.featured, group: true,
     children: [
-      { to: "/admin/homepage-slots",   label: "Homepage Slots",   icon: I.featured },
+      { to: "/admin/homepage-slots",   label: "Homepage Slots",   icon: I.featured, badge: "slots" },
       { to: "/admin/news-offers",      label: "In the Spotlight", icon: I.spotlight },
       { to: "/admin/featured-stories", label: "Featured Stories", icon: I.stories },
       { to: "/admin/featured-see-do",  label: "See & Do",         icon: I.events },
@@ -74,10 +74,18 @@ const DIVIDER   = "rgba(255,255,255,0.10)";
 const CINZEL    = "'Inter', system-ui, -apple-system, sans-serif";
 
 // ─── NavGroup ─────────────────────────────────────────────────────────────────
-function NavGroup({ item, closeSidebar }) {
+function CountBadge({ n }) {
+  if (!n) return null;
+  return (
+    <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 20, backgroundColor: "#DC2626", color: "#fff" }}>{n}</span>
+  );
+}
+
+function NavGroup({ item, closeSidebar, counts = {} }) {
   const location = useLocation();
   const anyActive = item.children.some((c) => location.pathname.startsWith(c.to));
-  const [open, setOpen] = useState(anyActive);
+  const waiting = item.children.reduce((n, c) => n + (counts[c.badge] ?? 0), 0);
+  const [open, setOpen] = useState(anyActive || waiting > 0);
 
   return (
     <div>
@@ -90,12 +98,13 @@ function NavGroup({ item, closeSidebar }) {
       >
         <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: "inherit" }}>{item.icon}</span>
         <span className="flex-1 text-left leading-snug">{item.label}</span>
+        {!open && <CountBadge n={waiting} />}
         <span className="text-xs transition-transform duration-200" style={{ transform: open ? "rotate(90deg)" : "none", color: TEXT_DIM }}>›</span>
       </button>
 
       {open && (
         <div className="mt-0.5 ml-4 pl-3 flex flex-col gap-0.5" style={{ borderLeft: `1px solid ${DIVIDER}` }}>
-          {item.children.map(({ to, label, icon }) => (
+          {item.children.map(({ to, label, icon, badge }) => (
             <NavLink
               key={to} to={to} onClick={closeSidebar}
               className={({ isActive }) => `flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${isActive ? "font-medium" : ""}`}
@@ -103,6 +112,7 @@ function NavGroup({ item, closeSidebar }) {
             >
               <span className="shrink-0" style={{ color: "inherit" }}>{icon}</span>
               <span className="flex-1 leading-snug">{label}</span>
+              <CountBadge n={counts[badge]} />
             </NavLink>
           ))}
         </div>
@@ -112,7 +122,7 @@ function NavGroup({ item, closeSidebar }) {
 }
 
 // ─── AdminLayout ──────────────────────────────────────────────────────────────
-export default function AdminLayout({ pendingCount = 0 }) {
+export default function AdminLayout({ pendingCount = 0, slotsPending = 0 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { admin, logout } = useAdminAuth();
 
@@ -151,7 +161,7 @@ export default function AdminLayout({ pendingCount = 0 }) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-0.5">
           {NAV.map((item) => {
-            if (item.group) return <NavGroup key={item.label} item={item} closeSidebar={() => setSidebarOpen(false)} />;
+            if (item.group) return <NavGroup key={item.label} item={item} counts={{ slots: slotsPending }} closeSidebar={() => setSidebarOpen(false)} />;
             const { to, label, icon, end, badge } = item;
             return (
               <NavLink

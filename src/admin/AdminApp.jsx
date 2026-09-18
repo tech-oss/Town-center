@@ -31,12 +31,16 @@ import NeighbourhoodGuidesPage from "./pages/NeighbourhoodGuidesPage";
 import NeighbourhoodGuideEditorPage from "./pages/NeighbourhoodGuideEditorPage";
 import SiteContentPage from "./pages/SiteContentPage";
 import useFetch from "../hooks/useFetch";
-import { getApprovals } from "../api/admin";
+import { getApprovals, countPlacementsNeedingApproval } from "../api/admin";
+import { useLocation } from "react-router-dom";
 
 export default function AdminApp() {
   const { isLoggedIn, restored } = useAdminAuth();
-  const { data: pending } = useFetch(() => getApprovals({ status: "Pending" }), []);
+  // Re-counted on every page change, so badges clear once items are handled.
+  const { pathname } = useLocation();
+  const { data: pending } = useFetch(() => getApprovals({ status: "Pending" }), [pathname]);
   const pendingCount = pending?.length ?? 0;
+  const { data: slotsPending } = useFetch(countPlacementsNeedingApproval, [pathname]);
 
   // Hold rendering until the initial Supabase getSession() resolves, otherwise
   // a signed-in admin flashes the login screen on every page load.
@@ -45,7 +49,7 @@ export default function AdminApp() {
 
   return (
     <Routes>
-      <Route element={<AdminLayout pendingCount={pendingCount} />}>
+      <Route element={<AdminLayout pendingCount={pendingCount} slotsPending={slotsPending ?? 0} />}>
         <Route index element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:id" element={<UserDetailPage />} />

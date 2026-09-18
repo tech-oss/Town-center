@@ -279,6 +279,18 @@ export async function rejectPlacement(placement, reason) {
   });
 }
 
+// Bookings waiting for admin (paid, content chosen) that haven't ended —
+// for the sidebar badge and the Approval Queue notice.
+export async function countPlacementsNeedingApproval() {
+  const { count, error } = await supabase
+    .from("homepage_placements")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "pending_approval")
+    .gt("ends_at", new Date().toISOString());
+  if (error) return 0;
+  return count ?? 0;
+}
+
 // ── Quick feature / unfeature (the existing section pages) ────────────────
 
 // Live placements of one slot type, keyed by content id.

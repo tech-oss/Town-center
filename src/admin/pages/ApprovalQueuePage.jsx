@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getApprovals, approveItem, rejectItem, deleteItems } from "../../api/admin";
+import { getApprovals, approveItem, rejectItem, deleteItems, countPlacementsNeedingApproval } from "../../api/admin";
 import ApprovalActionBar from "../components/ApprovalActionBar";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
@@ -58,6 +58,7 @@ export default function ApprovalQueuePage() {
   const [selected, setSelected] = useState([]);
   const [confirmDelete, setConfirmDelete] = useState(null); // null | "selected" | id
   const [notice, setNotice] = useState("");
+  const { data: slotsWaiting } = useFetch(countPlacementsNeedingApproval, []);
   const [busy, setBusy] = useState(null);
   const [tick, setTick] = useState(0);
   const refetch = () => setTick((t) => t + 1);
@@ -209,6 +210,16 @@ export default function ApprovalQueuePage() {
           </button>
         ))}
       </div>
+
+      {slotsWaiting > 0 && (
+        <Link to="/admin/homepage-slots" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "#FEF2F2", color: "#991B1B", border: "1px solid rgba(220,38,38,0.25)" }}>
+          <span className="flex-1">
+            {slotsWaiting} paid homepage booking{slotsWaiting === 1 ? " is" : "s are"} waiting for approval (Featured Business, Spotlight, Featured Article or What's On).
+          </span>
+          <span>Review in Homepage Slots →</span>
+        </Link>
+      )}
 
       {notice && (
         <div role="status" className="flex items-start gap-3 px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "#EFF6FF", color: "#1E3A8A" }}>
