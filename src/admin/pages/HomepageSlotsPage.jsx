@@ -298,6 +298,20 @@ function PlacementRow({ placement: p, onEdit, onEnd, onCancel, onApprove, onReje
           {" · "}
           {p.source === "purchase" ? `Paid${p.amount != null ? ` £${p.amount.toFixed(2)}` : ""}` : "Added by admin"}
         </p>
+        {p.contentPreview && (
+          <details className="mt-1.5 text-xs" style={{ color: NAVY }}>
+            <summary className="cursor-pointer font-semibold" style={{ color: BLUE }}>
+              View post · {p.contentPreview.type} · {p.contentPreview.status}
+            </summary>
+            <div className="mt-2 rounded-lg p-3 flex flex-col gap-1.5" style={{ backgroundColor: "#F8FAFC", border: `1px solid ${BORDER}` }}>
+              {p.contentPreview.excerpt && <p className="font-semibold">{p.contentPreview.excerpt}</p>}
+              {p.contentPreview.body && <p className="whitespace-pre-line" style={{ color: MUTED }}>{p.contentPreview.body}</p>}
+              {p.status === "pending_approval" && p.contentPreview.status !== "Live" && (
+                <p className="text-[11px]" style={{ color: "#92400E" }}>Approving the booking also publishes this post.</p>
+              )}
+            </div>
+          </details>
+        )}
         {p.rejectionReason && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>Rejected: {p.rejectionReason}</p>}
         <PlacementTimer startsAt={p.startsAt} endsAt={p.endsAt} compact />
       </div>

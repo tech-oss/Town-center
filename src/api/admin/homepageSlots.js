@@ -9,7 +9,7 @@ import { logBusinessActivity } from "./businessActivity";
 
 export const SLOT_KINDS = {
   spotlight: ["news_offer", "business_article"],
-  featured_article: ["feature_article", "business_article"],
+  featured_article: ["feature_article", "business_article", "news_offer"],
   whats_on: ["business_event"],
   featured_business: ["business"],
 };
@@ -116,8 +116,14 @@ async function contentTitles(rows) {
     for (const r of data ?? []) titles.set(`${kind}:${r.id}`, pick(r));
   };
   await Promise.all([
-    load("news_offer", "news_offers", "id, title, image", (r) => ({ title: r.title, image: r.image })),
-    load("business_article", "business_articles", "id, title, hero_image, thumbnail", (r) => ({ title: r.title, image: r.hero_image || r.thumbnail })),
+    load("news_offer", "news_offers", "id, title, image, excerpt, body, type, status", (r) => ({
+      title: r.title, image: r.image, excerpt: r.excerpt, body: r.body,
+      postType: r.type === "offer" ? "Offer" : "News", postStatus: r.status === "Published" ? "Live" : "Not published yet",
+    })),
+    load("business_article", "business_articles", "id, title, hero_image, thumbnail, body, type, status", (r) => ({
+      title: r.title, image: r.hero_image || r.thumbnail, body: r.body,
+      postType: r.type ?? "News", postStatus: r.status,
+    })),
     load("feature_article", "feature_articles", "id, title, card_heading, card_image", (r) => ({ title: r.card_heading || r.title, image: r.card_image })),
     load("business_event", "business_events", "id, title, hero_image", (r) => ({ title: r.title, image: r.hero_image })),
     load("business", "businesses", "id, name", (r) => ({ title: r.name, image: null })),
@@ -146,6 +152,10 @@ function placementFromRow(r, titles, businesses) {
     contentId: r.content_id,
     contentTitle: content?.title ?? null,
     contentImage: content?.image ?? null,
+    // For posts: what admin approves along with the booking.
+    contentPreview: content?.body || content?.excerpt
+      ? { excerpt: content.excerpt ?? null, body: content.body ?? null, type: content.postType, status: content.postStatus }
+      : null,
     startsAt: r.starts_at,
     endsAt: r.ends_at,
     status: r.status,
@@ -231,7 +241,21 @@ export async function cancelPlacement(id) {
   if (error) throw error;
 }
 
+// Approving a booking also publishes the post it shows, when that post is
+// still waiting: a post written for the slot, or a business post pending review.
 export async function approvePlacement(placement) {
+  if (placement.contentKind === "news_offer") {
+    const { error } = await supabase.from("news_offers")
+      .update({ status: "Published", updated_at: new Date().toISOString() })
+      .eq("id", placement.contentId).eq("status", "Draft");
+    if (error) throw error;
+  }
+  if (placement.contentKind === "business_article") {
+    const { error } = await supabase.from("business_articles")
+      .update({ status: "Live", rejection_reason: null })
+      .eq("id", placement.contentId).eq("status", "Pending Approval");
+    if (error) throw error;
+  }
   const { error } = await supabase.from("homepage_placements")
     .update({ status: "approved", rejection_reason: null })
     .eq("id", placement.id);

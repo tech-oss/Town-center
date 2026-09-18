@@ -47,10 +47,13 @@ export async function getHomepageStories() {
   const { featured_article: slots } = await getLivePlacements();
   if (!slots.length) return [];
   const storyIds = slots.filter((p) => p.content_kind === "feature_article").map((p) => p.content_id);
-  const [storiesRes, live] = await Promise.all([
+  const postIds = slots.filter((p) => p.content_kind === "news_offer").map((p) => p.content_id);
+  const [storiesRes, live, postsRes] = await Promise.all([
     storyIds.length ? supabase.from("feature_articles").select("*").in("id", storyIds) : Promise.resolve({ data: [] }),
     slots.some((p) => p.content_kind === "business_article") ? loadLiveBusinesses().catch(() => []) : [],
+    postIds.length ? supabase.from("news_offers").select("*").in("id", postIds).eq("status", "Published") : Promise.resolve({ data: [] }),
   ]);
+  const posts = new Map((postsRes.data ?? []).map((n) => [String(n.id), n]));
   const stories = new Map((storiesRes.data ?? []).map((r) => [String(r.id), r]));
   const articles = new Map(live.flatMap((b) => b.news ?? []).filter((a) => a.id?.startsWith("live-")).map((a) => [a.id.slice(5), a]));
 
@@ -58,6 +61,19 @@ export async function getHomepageStories() {
     if (p.content_kind === "feature_article") {
       const r = stories.get(p.content_id);
       return r ? { ...fromRow(r), homepage: true, to: `/story/${r.slug}` } : null;
+    }
+    if (p.content_kind === "news_offer") {
+      const n = posts.get(p.content_id);
+      if (!n) return null;
+      return {
+        slug: n.slug,
+        homepage: true,
+        to: `/news/${n.slug}`,
+        eyebrow: n.business_name ?? (n.type === "offer" ? "Offer" : "News"),
+        cardHeading: n.title,
+        cardBody: n.excerpt,
+        cardImage: n.image || "/logo-mark.svg",
+      };
     }
     const a = articles.get(p.content_id);
     if (!a) return null;
