@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { storySectionImages } from "../lib/storyImages";
 import { useEffect } from "react";
 import { getStoryBySlug, getStories } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -81,22 +82,8 @@ export default function FeatureArticlePage() {
   const heroTitle = titleSplit[0];
   const heroSubtitle = titleSplit.length > 1 ? titleSplit.slice(1).join(": ") : null;
 
-  // Weave gallery images through the body: pair each image with a substantial
-  // section (skip the short intro block), alternating image left/right.
-  const imageForBlock = {};
-  const gallery = story.gallery ?? [];
-  const startIdx = story.body[0]?.heading ? 0 : 1; // skip headless intro block
-  const candidates = story.body
-    .map((b, i) => i)
-    .filter((i) => i >= startIdx);
-  if (candidates.length > 0) {
-    gallery.forEach((src, gi) => {
-      // spread images evenly across the eligible blocks
-      const pos = Math.floor(((gi + 0.5) / gallery.length) * candidates.length);
-      const blockIdx = candidates[Math.min(pos, candidates.length - 1)];
-      imageForBlock[blockIdx] = { src, side: gi % 2 === 0 ? "right" : "left" };
-    });
-  }
+  // Each section's picture, alternating sides (see lib/storyImages).
+  const imageForBlock = storySectionImages(story);
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>

@@ -254,7 +254,7 @@ export default function PlaceDetailLayout({
     },
     !shareInActions && extraButtonLabel && {
       label: extraButtonLabel,
-      href: extraButtonHref || websiteHref || "#",
+      href: normalizeUrl(extraButtonHref) || websiteHref || "#",
       icon: <TicketIcon size={22} />,
     },
     directionsQuery && {

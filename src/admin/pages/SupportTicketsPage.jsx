@@ -4,6 +4,14 @@ import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicket
 import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
 import { formatUK } from "../../lib/ukDate";
+import { formatUKDateTime } from "../../lib/ukDateTime";
+
+// Thread messages carry "YYYY-MM-DD HH:mm" in UTC (see api/admin/supportTickets.js);
+// show them as UK date and time.
+function messageTime(value) {
+  const m = /^(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/.exec(value ?? "");
+  return m ? formatUKDateTime(`${m[1]}T${m[2]}:00Z`) : formatUK(value);
+}
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
@@ -56,7 +64,7 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
           </div>
           <StatusTag status={ticket.status} />
         </div>
-        <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{ticket.category} · Submitted {ticket.submitted}</p>
+        <p className="text-xs mt-1" style={{ color: "#9CA3AF" }}>{ticket.category} · Submitted {formatUK(ticket.submitted)}</p>
       </div>
 
       {/* Thread */}
@@ -66,7 +74,7 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
             style={m.from === "admin"
               ? { backgroundColor: BLUE, color: "#fff" }
               : { backgroundColor: "#fff", color: NAVY, border: `1px solid ${BORDER}` }}>
-            <p className="text-[11px] font-semibold mb-1 opacity-80">{m.author} · {m.date}</p>
+            <p className="text-[11px] font-semibold mb-1 opacity-80">{m.author} · {messageTime(m.date)}</p>
             <p className="text-sm leading-relaxed whitespace-pre-line">{m.body}</p>
             {/* Screenshots the business attached */}
             {m.attachments?.length > 0 && (

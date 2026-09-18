@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import PlacementTimer from "../components/PlacementTimer";
+import { Card, Field, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "./explore/contentKit";
+import { withSectionImages } from "../../lib/storyImages";
 import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import {
@@ -26,9 +28,6 @@ const STORY_SECTIONS = {
   "Shop & Local Services": labels(SHOP_CATEGORIES),
   "Services": labels(SERVICES_CATEGORIES),
   "Hotels & Accommodation": labels(HOTEL_KINDS),
-  "Live": ["Homes", "Neighbourhood", "Community"],
-  "Work": ["Workspaces", "Business", "Careers"],
-  "Explore": ["The Future", "History & Heritage", "Neighbourhood Guides"],
 };
 const STORY_EYEBROWS = Object.keys(STORY_SECTIONS);
 
@@ -49,14 +48,6 @@ function StorySelect({ value, onChange, options, placeholder }) {
 // / "In Focus" section (src/components/FeatureBlocks.jsx) and its detail
 // pages at /story/:slug (src/components/FeatureArticlePage.jsx). Field names
 // mirror that component's expectations exactly (see src/api/stories.js).
-
-function slugify(text) {
-  return String(text ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-}
-
-function linesToArray(text) {
-  return String(text ?? "").split("\n").map((s) => s.trim()).filter(Boolean);
-}
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function Toast({ message, error, onDismiss }) {
@@ -148,110 +139,46 @@ function ImageField({ label, value, onChange }) {
   );
 }
 
-// ─── Body block editor ───────────────────────────────────────────────────────────
-function BodyBlockEditor({ blocks, onChange }) {
-  function updateBlock(i, patch) {
-    onChange(blocks.map((b, bi) => (bi === i ? { ...b, ...patch } : b)));
-  }
-  function addBlock() {
-    onChange([...blocks, { heading: "", paras: [] }]);
-  }
-  function removeBlock(i) {
-    onChange(blocks.filter((_, bi) => bi !== i));
-  }
-  function moveBlock(i, dir) {
-    const j = i + dir;
-    if (j < 0 || j >= blocks.length) return;
-    const next = [...blocks];
-    [next[i], next[j]] = [next[j], next[i]];
-    onChange(next);
-  }
-
+// Lines typed into a textarea, kept as typed (blank lines too) while editing
+// so Enter starts a new paragraph; tidied on save.
+function Lines({ label, hint, value, onChange, rows = 4 }) {
   return (
-    <div className="flex flex-col gap-4">
-      {blocks.map((block, i) => (
-        <div key={i} className="rounded-xl p-4 flex flex-col gap-3" style={{ border: "1.5px solid rgba(16,24,40,0.15)" }}>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-bold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Section {i + 1}</span>
-            <div className="flex gap-1.5">
-              <button type="button" onClick={() => moveBlock(i, -1)} disabled={i === 0} className="w-7 h-7 rounded-lg text-xs disabled:opacity-25" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>↑</button>
-              <button type="button" onClick={() => moveBlock(i, 1)} disabled={i === blocks.length - 1} className="w-7 h-7 rounded-lg text-xs disabled:opacity-25" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>↓</button>
-              <button type="button" onClick={() => removeBlock(i)} className="px-2.5 h-7 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Remove</button>
-            </div>
-          </div>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Section heading (optional — first section is often headless)</span>
-            <input
-              value={block.heading ?? ""}
-              onChange={(e) => updateBlock(i, { heading: e.target.value })}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none"
-              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Paragraphs (one per line)</span>
-            <textarea
-              value={(block.paras ?? []).join("\n")}
-              onChange={(e) => updateBlock(i, { paras: linesToArray(e.target.value) })}
-              rows={4}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
-              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Bullet points (optional, one per line)</span>
-            <textarea
-              value={(block.bullets ?? []).join("\n")}
-              onChange={(e) => updateBlock(i, { bullets: linesToArray(e.target.value) })}
-              rows={2}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
-              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Paragraphs after bullets (optional, one per line)</span>
-            <textarea
-              value={(block.parasAfter ?? []).join("\n")}
-              onChange={(e) => updateBlock(i, { parasAfter: linesToArray(e.target.value) })}
-              rows={2}
-              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
-              style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
-            />
-          </label>
-        </div>
-      ))}
-      <button type="button" onClick={addBlock} className="self-start px-4 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB" }}>
-        + Add Section
-      </button>
-    </div>
+    <Field label={label} hint={hint}>
+      <TextArea rows={rows} value={(value ?? []).join("\n")} onChange={(e) => onChange(e.target.value.split("\n"))} />
+    </Field>
   );
 }
 
-// ─── Gallery editor ───────────────────────────────────────────────────────────────
-function GalleryEditor({ images, onChange }) {
-  function handleAdd(file) {
-    if (!file) return;
-    uploadImage(file, "stories").then((url) => onChange([...images, url])).catch((e) => alert(e.message));
-  }
-  function remove(i) {
-    onChange(images.filter((_, gi) => gi !== i));
-  }
+const cleanLines = (list) => (list ?? []).map((l) => l.trim()).filter(Boolean);
+
+// Sections in the same shape as the Neighbourhood Guide editor's places: each
+// has its own picture, shown beside it on the website (sides alternate) and
+// above it in the app.
+function SectionsEditor({ blocks, onChange }) {
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Gallery images (woven into the article body)</span>
-      <div className="flex items-center gap-3 flex-wrap">
-        {images.map((src, i) => (
-          <div key={i} className="relative">
-            <img src={src} alt="" className="w-20 h-16 object-cover rounded-lg" style={{ border: "1px solid rgba(16,24,40,0.1)" }} />
-            <button type="button" onClick={() => remove(i)} className="absolute -top-2 -right-2 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center" style={{ backgroundColor: "#991B1B" }}>✕</button>
-          </div>
-        ))}
-        <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
-          <span>⬆</span> Add Image
-          <input type="file" accept="image/*" onChange={(e) => handleAdd(e.target.files?.[0])} className="hidden" />
-        </label>
-      </div>
-    </div>
+    <Card
+      title="Sections"
+      hint="The article runs in this order. A section's picture sits beside it on the website — alternating right, then left — and above it in the app. The first section can be a short intro with no heading or picture."
+    >
+      <RepeatList
+        items={blocks}
+        onChange={onChange}
+        blank={() => ({ heading: "", paras: [], bullets: [], parasAfter: [], image: "" })}
+        addLabel="+ Add section"
+        itemLabel="Section"
+        renderItem={(b, update) => (
+          <>
+            <Field label="Heading" hint="Optional — leave blank for an intro section">
+              <Inp value={b.heading ?? ""} onChange={(e) => update({ heading: e.target.value })} />
+            </Field>
+            <Lines label="Paragraphs" hint="One paragraph per line" value={b.paras} onChange={(v) => update({ paras: v })} rows={5} />
+            <Lines label="Bullet points" hint="Optional — one per line" value={b.bullets} onChange={(v) => update({ bullets: v })} rows={3} />
+            <Lines label="Paragraphs after the bullets" hint="Optional — one per line" value={b.parasAfter} onChange={(v) => update({ parasAfter: v })} rows={2} />
+            <SectionImageField label="Picture for this section" hint="Optional — shown beside this section" value={b.image ?? ""} onChange={(v) => update({ image: v ?? "" })} folder="stories" />
+          </>
+        )}
+      />
+    </Card>
   );
 }
 
@@ -263,7 +190,9 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
     title: "", heroImage: "", standfirst: "", location: "", website: "",
     body: [], gallery: [], homepage: false,
   };
-  const [form, setForm] = useState(initial ?? blank);
+  // An older story's gallery pictures open on the sections they already sit
+  // beside, so the editor shows exactly where each picture goes.
+  const [form, setForm] = useState(() => (initial ? { ...initial, body: withSectionImages(initial) } : blank));
   const [saving, setSaving] = useState(false);
   const [swapOutId, setSwapOutId] = useState(null);
   const [showSwapPicker, setShowSwapPicker] = useState(false);
@@ -299,9 +228,17 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
     }
     setSaving(true);
     // Free the swapped-out slot first, so the save can take it.
+    // Pictures now live on the sections; tidy the typed lines.
+    const body = (form.body ?? []).map((b) => ({
+      ...(b.heading?.trim() ? { heading: b.heading.trim() } : {}),
+      paras: cleanLines(b.paras),
+      ...(cleanLines(b.bullets).length ? { bullets: cleanLines(b.bullets) } : {}),
+      ...(cleanLines(b.parasAfter).length ? { parasAfter: cleanLines(b.parasAfter) } : {}),
+      ...(b.image ? { image: b.image } : {}),
+    }));
     (async () => {
       if (swapOutId) await setArticleHomepageFeature(swapOutId, false);
-      return saveFeatureArticle(form);
+      return saveFeatureArticle({ ...form, body, gallery: [] });
     })().then((saved) => {
       setSaving(false);
       onSave(saved, swapOutId);
@@ -379,15 +316,9 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
         </div>
       </div>
 
-      {/* ── Body ── */}
-      <div className="flex flex-col gap-4 pt-4 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>Article body</p>
-        <BodyBlockEditor blocks={form.body ?? []} onChange={(v) => set("body", v)} />
-      </div>
-
-      {/* ── Gallery ── */}
+      {/* ── Body: sections, each with its picture ── */}
       <div className="pt-4 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
-        <GalleryEditor images={form.gallery ?? []} onChange={(v) => set("gallery", v)} />
+        <SectionsEditor blocks={form.body ?? []} onChange={(v) => set("body", v)} />
       </div>
 
       {/* ── Homepage feature ── */}

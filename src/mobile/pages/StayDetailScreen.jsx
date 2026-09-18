@@ -1,4 +1,5 @@
 import { useParams, useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
+import { externalUrl } from "../../lib/externalUrl";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
 import ComingSoonCard from "../components/ComingSoonCard";
 import { useState } from "react";
@@ -97,7 +98,10 @@ export default function StayDetailScreen() {
     : `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
   // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
   const free = isFreeListing(place);
-  const websiteUrl = !free && place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  const websiteUrl = !free ? externalUrl(place.website) : null;
+  // The booking button opens the business's booking link, falling back to its
+  // website — the same rule as the website's page.
+  const bookingUrl = !free ? (externalUrl(place.bookingUrl) ?? websiteUrl) : null;
   const gallery = free ? [] : (place.gallery?.length ? place.gallery : [place.image]).filter((g) => g !== place.image);
   const social = !free && place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k]) : [];
   const news = free ? [] : (place.news ?? []);
@@ -310,7 +314,7 @@ export default function StayDetailScreen() {
         </div>
       </div>
 
-      {websiteUrl && <StickyCta label="Make a Booking" href={websiteUrl} icon={<TicketIcon />} />}
+      {bookingUrl && <StickyCta label="Make a Booking" href={bookingUrl} icon={<TicketIcon />} />}
     </MobileShell>
   );
 }

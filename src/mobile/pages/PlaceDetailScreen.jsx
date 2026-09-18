@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { externalUrl } from "../../lib/externalUrl";
 import { useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import { getBusinessBySlug } from "../../api";
@@ -40,7 +41,10 @@ function BusinessDetailScreen({ place, goBack }) {
   const free = isFreeListing(place);
   const section = sections[place.section];
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
-  const websiteUrl = !free && place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
+  const websiteUrl = !free ? externalUrl(place.website) : null;
+  // The booking button opens the business's booking link, falling back to its
+  // website — the same rule as the website's page.
+  const bookingUrl = !free ? (externalUrl(place.bookingUrl) ?? websiteUrl) : null;
   const news = free ? [] : (place.news ?? []);
   const social = !free && place.social
     ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k])
@@ -258,8 +262,8 @@ function BusinessDetailScreen({ place, goBack }) {
 
       {/* Sticky booking CTA — shown only for listings whose subscription
           enables it, matching the website's gate (DetailPage.jsx). */}
-      {place.section === "eat-drink" && websiteUrl && (
-        <StickyCta label="Make a Booking" href={websiteUrl} icon={<TicketIcon />} />
+      {place.section === "eat-drink" && bookingUrl && (
+        <StickyCta label="Make a Booking" href={bookingUrl} icon={<TicketIcon />} />
       )}
     </MobileShell>
   );

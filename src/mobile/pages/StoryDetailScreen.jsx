@@ -5,6 +5,7 @@ import { getStoryBySlug, getStories } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
 import ShareButton from "../components/ShareButton";
 import { typeColor } from "../lib/typeColors";
+import { storySectionImages } from "../../lib/storyImages";
 
 function BlockText({ block }) {
   return (
@@ -41,6 +42,7 @@ export default function StoryDetailScreen() {
   if (!loading && !story) return <Navigate to="/mobile/home" replace />;
   if (loading || !story) return null;
 
+  const sectionImages = storySectionImages(story);
   const more = (stories ?? []).filter((f) => f.slug !== story.slug).slice(0, 3);
   const websiteUrl = story.website ? `https://${story.website.replace(/^https?:\/\//, "")}` : null;
   const titleSplit = story.title.split(/:\s+/);
@@ -69,17 +71,17 @@ export default function StoryDetailScreen() {
               <p className="text-base font-medium leading-relaxed" style={{ color: "#000000" }}>{story.standfirst}</p>
             )}
 
+            {/* Each section with its own picture, as on the guide screens. */}
             <div className="flex flex-col gap-6">
-              {story.body?.map((block, i) => <BlockText key={i} block={block} />)}
+              {story.body?.map((block, i) => (
+                <div key={i} className="flex flex-col gap-3">
+                  {sectionImages[i] && (
+                    <img src={sectionImages[i].src} alt={block.heading || story.title} loading="lazy" className="w-full h-48 object-cover rounded-2xl" />
+                  )}
+                  <BlockText block={block} />
+                </div>
+              ))}
             </div>
-
-            {story.gallery?.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {story.gallery.slice(0, 4).map((src, i) => (
-                  <img key={i} src={src} alt="" className="w-full aspect-square object-cover rounded-xl" />
-                ))}
-              </div>
-            )}
 
             {websiteUrl && (
               <div className="rounded-2xl p-5 flex flex-col gap-3" style={{ backgroundColor: "var(--forest)" }}>
