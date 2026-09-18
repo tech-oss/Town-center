@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import { useTrackView, eventView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
@@ -11,6 +12,7 @@ import ShareButton from "../components/ShareButton";
 export default function EventDetailScreen() {
   const { slug } = useParams();
   const { data: event, loading } = useFetch(() => getEventBySlug(slug), [slug]);
+  useTrackView(eventView(event));
   const { data: events } = useFetch(getEvents, []);
 
   const goBack = useMobileBack("/mobile/whats-on");

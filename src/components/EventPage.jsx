@@ -1,4 +1,5 @@
 import { useParams, Navigate } from "react-router-dom";
+import { useTrackView, businessView, eventView } from "../lib/trackView";
 import { useEffect, useState } from "react";
 import { categoryColors } from "../Data/events";
 import { categoryTitles } from "../Data/pages";
@@ -64,6 +65,8 @@ export default function EventPage() {
   const { data: rawEvent, loading: loadingEvent, error } = useFetch(() => getEventBySlug(slug), [slug]);
   const { data: business, loading: loadingBusiness } = useFetch(() => getBusinessBySlug(slug), [slug]);
   const { data: allEvents, loading: loadingList } = useFetch(getEvents, []);
+  // A What's On event counts as the event; a See & Do business as its page.
+  useTrackView(rawEvent ? eventView(rawEvent) : businessView(business));
 
   useEffect(() => {
     window.scrollTo(0, 0);

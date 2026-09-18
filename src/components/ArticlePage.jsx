@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { useTrackView, articleView } from "../lib/trackView";
 import { useEffect } from "react";
 import { sections } from "../Data/pages";
 import { getArticleBySlug } from "../api";
@@ -11,6 +12,7 @@ import { typeColor } from "../lib/typeColors";
 export default function ArticlePage() {
   const { articleSlug } = useParams();
   const { data: article, loading, error } = useFetch(() => getArticleBySlug(articleSlug), [articleSlug]);
+  useTrackView(articleView(article));
 
   useEffect(() => {
     window.scrollTo(0, 0);

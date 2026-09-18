@@ -1,4 +1,5 @@
 import { useParams, useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
+import { useTrackView, businessView } from "../../lib/trackView";
 import { externalUrl } from "../../lib/externalUrl";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
 import ComingSoonCard from "../components/ComingSoonCard";
@@ -81,6 +82,7 @@ export default function StayDetailScreen() {
     () => (isHotel ? getHotelBySlug(slug) : getAccommodationBySlug(slug)),
     [kind, slug]
   );
+  useTrackView(businessView(place));
 
   const [searchParams] = useSearchParams();
   const backTo = searchParams.get("back");

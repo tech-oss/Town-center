@@ -1,71 +1,106 @@
 import { supabase } from "../../lib/supabaseClient";
-import { resolveRange } from "../../lib/analyticsRanges";
+import { resolveRange, eachDay } from "../../lib/analyticsRanges";
 
-// Admin's read side of a business's own analytics — same RPC contract as the
-// business portal's businessAnalytics.js (supabase/sql/analytics_events.sql),
-// just called with an admin session rather than the business owner's. The
-// RPCs authorize either party, so this is the same data the business itself
-// would see, not a separate admin-only view.
+// A business's analytics, read through the database functions in
+// supabase/sql/analytics_live_2026_09.sql. Views are recorded by the website
+// and app (lib/trackView.js): one per visitor per item per UK day.
 //
-// Returns real zeros, not an error, until the write side (track-view Edge
-// Function) exists and the public site/app actually calls it — there is
-// currently nothing inserting into analytics_events at all.
+// Every series covers every day in the range (days with no views are 0), so
+// charts and totals line up with the range picked.
 
-// resolveRange gives back local-midnight Date objects for the calendar days
-// picked — `from`/`to`'s own y/m/d are what matters, not the instant they
-// represent. Going through .toISOString() converts via the *local* UTC
-// offset, which silently shifts "today" a day backwards whenever the viewer
-// is west of UTC — the RPC's p_until then excludes events that already
-// happened today in UTC. Building the UTC-midnight string by hand from the
-// date's own components sidesteps that conversion entirely.
-function utcMidnightIso(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}T00:00:00.000Z`;
+const CONTENT_TYPES = ["news", "offer", "article", "event"];
+
+// "YYYY-MM-DD" from a local-midnight Date's own calendar components — never
+// toISOString, which shifts the day for anyone away from UTC.
+function ymd(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 function bounds(range) {
   const { from, to } = resolveRange(range);
-  return { since: utcMidnightIso(from), until: utcMidnightIso(to) };
+  return { from, to, p_from: ymd(from), p_to: ymd(to) };
 }
 
-function toSeries(rows) {
-  const series = (rows ?? []).map((r) => ({ date: r.day, views: Number(r.view_count) }));
-  const total = series.reduce((s, p) => s + p.views, 0);
-  return { total, series };
-}
-
-export async function getProfileViewsSeries(businessId, range) {
-  const { since, until } = bounds(range);
-  const { data, error } = await supabase.rpc("get_daily_view_counts", {
+async function dailyViews(businessId, range, contentTypes, contentId = null) {
+  const { from, to, p_from, p_to } = bounds(range);
+  const { data, error } = await supabase.rpc("analytics_daily_views", {
     p_business_id: businessId,
-    p_content_types: ["profile"],
-    p_content_id: null,
-    p_since: since,
-    p_until: until,
+    p_content_types: contentTypes,
+    p_content_id: contentId,
+    p_from,
+    p_to,
   });
   if (error) throw error;
-  return toSeries(data);
-}
-
-export async function getContentViewsSeries(businessId, range) {
-  const { since, until } = bounds(range);
-  const { data, error } = await supabase.rpc("get_daily_view_counts", {
-    p_business_id: businessId,
-    p_content_types: ["article", "news", "offer"],
-    p_content_id: null,
-    p_since: since,
-    p_until: until,
+  const byDay = new Map((data ?? []).map((r) => [r.day, r]));
+  const series = eachDay(from, to).map((date) => {
+    const r = byDay.get(date);
+    return { date, views: Number(r?.view_count ?? 0), web: Number(r?.web_count ?? 0), app: Number(r?.app_count ?? 0) };
   });
-  if (error) throw error;
-  return toSeries(data);
+  return {
+    total: series.reduce((s, p) => s + p.views, 0),
+    web: series.reduce((s, p) => s + p.web, 0),
+    app: series.reduce((s, p) => s + p.app, 0),
+    series,
+  };
 }
 
+// Views of the business's own page.
+export function getProfileViewsSeries(businessId, range) {
+  return dailyViews(businessId, range, ["profile"]);
+}
+
+// Views of its posts (news and offers) and events, combined.
+export function getContentViewsSeries(businessId, range) {
+  return dailyViews(businessId, range, CONTENT_TYPES);
+}
+
+// One post's or event's own views.
+export function getContentSeries(businessId, contentId, range) {
+  return dailyViews(businessId, range, CONTENT_TYPES, contentId);
+}
+
+const TYPE_LABELS = { news: "News", offer: "Offer", article: "Article", event: "Event" };
+
+// Views per post / event in the range, most viewed first.
 export async function getContentBreakdown(businessId, range) {
-  const { since, until } = bounds(range);
-  const { data, error } = await supabase.rpc("get_content_breakdown", {
+  const { p_from, p_to } = bounds(range);
+  const { data, error } = await supabase.rpc("analytics_content_breakdown", {
     p_business_id: businessId,
-    p_since: since,
-    p_until: until,
+    p_from,
+    p_to,
   });
   if (error) throw error;
-  return (data ?? []).map((r) => ({ id: r.content_id, title: r.title, type: r.type, views: Number(r.view_count) }));
+  return (data ?? []).map((r) => ({
+    id: r.content_id,
+    title: r.title,
+    type: TYPE_LABELS[r.content_type] ?? r.content_type,
+    views: Number(r.view_count),
+  }));
 }
+
+// For the PDF report: every item's own series alongside the overall charts.
+export async function getAllContentSeries(businessId, range) {
+  const breakdown = await getContentBreakdown(businessId, range);
+  return Promise.all(breakdown.map(async (c) => {
+    const { total, series } = await getContentSeries(businessId, c.id, range);
+    return { id: c.id, title: c.title, type: c.type, total, series };
+  }));
+}
+
+// This calendar month so far vs the whole of last month, for dashboard cards.
+export async function getMonthComparison(businessId, contentTypes) {
+  const now = new Date();
+  const thisFrom = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastFrom = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const lastTo = new Date(now.getFullYear(), now.getMonth(), 0);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const [cur, prev] = await Promise.all([
+    dailyViews(businessId, { type: "custom", from: ymd(thisFrom), to: ymd(today) }, contentTypes),
+    dailyViews(businessId, { type: "custom", from: ymd(lastFrom), to: ymd(lastTo) }, contentTypes),
+  ]);
+  const change = prev.total > 0 ? Math.round(((cur.total - prev.total) / prev.total) * 100) : null;
+  return { thisMonth: cur.total, lastMonth: prev.total, change };
+}
+
+export const PROFILE_TYPES = ["profile"];
+export const CONTENT_VIEW_TYPES = CONTENT_TYPES;

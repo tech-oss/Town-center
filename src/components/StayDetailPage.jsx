@@ -1,4 +1,5 @@
 import { useParams, useSearchParams, Navigate } from "react-router-dom";
+import { useTrackView, businessView } from "../lib/trackView";
 import { useEffect } from "react";
 import { getHotelBySlug, getAccommodationBySlug } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -139,6 +140,7 @@ export default function StayDetailPage({ kind }) {
   const backTo = searchParams.get("back");
   const fetcher = isHotels ? () => getHotelBySlug(slug) : () => getAccommodationBySlug(slug);
   const { data: item, loading, error } = useFetch(fetcher, [slug, kind]);
+  useTrackView(businessView(item));
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
 

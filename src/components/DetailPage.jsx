@@ -1,4 +1,5 @@
 import { useParams, Navigate } from "react-router-dom";
+import { useTrackView, businessView } from "../lib/trackView";
 import { useEffect } from "react";
 import { sections } from "../Data/pages";
 import { getBusinessBySlug, getBusinesses } from "../api";
@@ -29,6 +30,7 @@ export default function DetailPage() {
   const { slug } = useParams();
   const { data: item, loading, error } = useFetch(() => getBusinessBySlug(slug), [slug]);
   const { data: allBusinesses, loading: loadingList } = useFetch(getBusinesses, []);
+  useTrackView(businessView(item));
   const viewed = useViewedCategory(item);
 
   useEffect(() => {

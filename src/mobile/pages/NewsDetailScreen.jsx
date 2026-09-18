@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import { useTrackView, articleView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
 import useFetch from "../../hooks/useFetch";
 import { getArticleBySlug } from "../../api";
@@ -9,6 +10,7 @@ import ShareButton from "../components/ShareButton";
 export default function NewsDetailScreen() {
   const { slug } = useParams();
   const { data: article, loading } = useFetch(() => getArticleBySlug(slug), [slug]);
+  useTrackView(articleView(article));
 
   const goBack = useMobileBack("/mobile/offers");
   if (!loading && !article) return <Navigate to="/mobile/offers" replace />;

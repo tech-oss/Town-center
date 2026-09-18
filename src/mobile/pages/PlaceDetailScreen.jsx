@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { useTrackView, businessView } from "../../lib/trackView";
 import { externalUrl } from "../../lib/externalUrl";
 import { useState } from "react";
 import useFetch from "../../hooks/useFetch";
@@ -283,6 +284,7 @@ export default function PlaceDetailScreen() {
     [id],
   );
   const place = staticPlace ?? fetched;
+  useTrackView(businessView(place));
   const goBack = useMobileBack(place ? `/mobile/${place.section}` : "/mobile/explore");
 
   if (!place && loading) return <MobileShell onBack={goBack}><p className="text-sm p-5" style={{ color: "#000000" }}>Loading…</p></MobileShell>;
