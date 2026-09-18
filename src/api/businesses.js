@@ -5,6 +5,7 @@
 // business always wins a slug clash, so a registered business can replace a
 // demo entry of the same name.
 import { allItems, itemBySlug } from "../Data/pages";
+import { listingOrder } from "../lib/listingOrder";
 import { loadLiveBusinesses } from "./liveBusinesses";
 
 // A demo entry is dropped when a real business of the same name exists in the
@@ -28,9 +29,8 @@ export async function getBusinesses({ section, category } = {}) {
   let list = directoryItems(live);
   if (section) list = list.filter((i) => i.section === section);
   if (category) list = list.filter((i) => i.category === category || i.categories?.includes(category));
-  // Businesses with a live Featured Business booking come first (the sort is
-  // stable, so the rest keep their order).
-  return [...list].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
+  // Featured first, then A to Z (lib/listingOrder).
+  return listingOrder(list);
 }
 
 export async function getBusinessBySlug(slug) {

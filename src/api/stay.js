@@ -3,6 +3,7 @@
 // Registered hotels and accommodation (Supabase) come first, followed by the
 // static demo listings. A live listing wins a slug clash.
 import { hotels, hotelBySlug, accommodations, accommodationBySlug } from "../Data/stay";
+import { listingOrder } from "../lib/listingOrder";
 import { loadLiveBusinesses } from "./liveBusinesses";
 
 async function liveStay(kind) {
@@ -16,9 +17,8 @@ async function liveStay(kind) {
 function merge(live, demo) {
   const slugs = new Set(live.map((i) => i.slug));
   const names = new Set(live.map((i) => String(i.name ?? "").trim().toLowerCase()));
-  // Live Featured Business bookings come first.
-  const sorted = [...live].sort((a, b) => Number(!!b.featured) - Number(!!a.featured));
-  return [...sorted, ...demo.filter((i) => !slugs.has(i.slug) && !names.has(String(i.name ?? "").trim().toLowerCase()))];
+  // Featured first, then A to Z (lib/listingOrder).
+  return listingOrder([...live, ...demo.filter((i) => !slugs.has(i.slug) && !names.has(String(i.name ?? "").trim().toLowerCase()))]);
 }
 
 export async function getHotels() {

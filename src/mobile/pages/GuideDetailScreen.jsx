@@ -152,7 +152,7 @@ export default function GuideDetailScreen() {
           {guide.combinations && (
             <div className="flex flex-col gap-3">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Make a Morning of It</p>
+                <p className="text-[11px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>{guide.combinations.eyebrow ?? "Make a Morning of It"}</p>
                 <h2 className="text-lg font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>{guide.combinations.heading}</h2>
                 <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{guide.combinations.intro}</p>
               </div>

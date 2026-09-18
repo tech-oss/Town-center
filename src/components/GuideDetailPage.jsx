@@ -188,7 +188,7 @@ export default function GuideDetailPage() {
         <section className="py-16 md:py-24 px-6 md:px-12">
           <div className="max-w-6xl mx-auto">
             <div className="max-w-2xl mb-8">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Make a Morning of It</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{guide.combinations.eyebrow ?? "Make a Morning of It"}</p>
               <h2 className="section-heading text-2xl md:text-4xl font-bold mb-4 leading-tight" style={{ color: "#000000" }}>{guide.combinations.heading}</h2>
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{guide.combinations.intro}</p>
             </div>

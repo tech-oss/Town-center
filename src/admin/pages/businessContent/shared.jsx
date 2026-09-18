@@ -291,8 +291,13 @@ export function SocialFields({ links, onChange }) {
 // ─── Latitude / Longitude fields + static OpenStreetMap preview ──────────────
 export function LocationFields({ lat, lng, onChange }) {
   const hasCoords = isValidCoords(lat, lng);
+  // OpenStreetMap's own embed: a live map with a pin, no API key needed.
+  // (The static-image service used before has been switched off.)
   const mapSrc = hasCoords
-    ? `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lng}&zoom=15&size=420x180&markers=${lat},${lng},red-pushpin`
+    ? (() => {
+        const la = Number(lat), lo = Number(lng), d = 0.004;
+        return `https://www.openstreetmap.org/export/embed.html?bbox=${lo - d}%2C${la - d * 0.6}%2C${lo + d}%2C${la + d * 0.6}&layer=mapnik&marker=${la}%2C${lo}`;
+      })()
     : null;
 
   return (
@@ -311,7 +316,7 @@ export function LocationFields({ lat, lng, onChange }) {
       </p>
       <div className="rounded-xl overflow-hidden max-w-md" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc", minHeight: 120 }}>
         {mapSrc ? (
-          <img src={mapSrc} alt="Map preview" className="w-full h-auto block" />
+          <iframe src={mapSrc} title="Map preview" loading="lazy" className="w-full block" style={{ height: 200, border: 0 }} />
         ) : (
           <div className="h-[120px] flex items-center justify-center text-xs" style={{ color: "#9CA3AF" }}>
             Enter coordinates to preview the map pin

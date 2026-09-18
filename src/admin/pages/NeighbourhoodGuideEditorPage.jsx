@@ -243,13 +243,16 @@ export default function NeighbourhoodGuideEditorPage() {
 
       <OptionalPanel
         title="Combinations"
-        hint='The "Make a Morning of It" suggestions.'
+        hint="The suggestions section, e.g. “Make a Morning of It”."
         value={c.combinations}
         onChange={(v) => setContent("combinations", v)}
-        blank={() => ({ heading: "", intro: "", items: [] })}
+        blank={() => ({ eyebrow: "Make a Morning of It", heading: "", intro: "", items: [] })}
       >
         {c.combinations && (
           <>
+            <Field label="Section label" hint="The small label above the heading">
+              <Inp value={c.combinations.eyebrow ?? "Make a Morning of It"} onChange={(e) => setIn("combinations", { eyebrow: e.target.value })} />
+            </Field>
             <Field label="Heading"><Inp value={c.combinations.heading ?? ""} onChange={(e) => setIn("combinations", { heading: e.target.value })} /></Field>
             <Field label="Intro"><TextArea rows={2} value={c.combinations.intro ?? ""} onChange={(e) => setIn("combinations", { intro: e.target.value })} /></Field>
             <RepeatList

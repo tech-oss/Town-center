@@ -309,7 +309,8 @@ export default function OffersPage() {
     return (
       it.title?.toLowerCase().includes(trimmedSearch) ||
       it.businessName?.toLowerCase().includes(trimmedSearch) ||
-      it.type?.toLowerCase().includes(trimmedSearch)
+      it.type?.toLowerCase().includes(trimmedSearch) ||
+      it.category?.toLowerCase().includes(trimmedSearch)
     );
   });
 

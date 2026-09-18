@@ -11,6 +11,7 @@ import useHeaderScroll from "../hooks/useHeaderScroll";
 import useLogoReveal from "../hooks/useLogoReveal";
 import useOverImmersive from "../hooks/useOverImmersive";
 import useFetch from "../hooks/useFetch";
+import { listingOrder } from "../lib/listingOrder";
 import { loadLiveBusinesses, webPathFor } from "../api/liveBusinesses";
 
 const baseMenus = [...menus, liveMenu, exploreMenu, workMenu];
@@ -25,7 +26,7 @@ function withFeatured(businesses) {
   return Object.fromEntries(baseMenus.map((m) => {
     const section = MENU_SECTION[m.key];
     const featured = section
-      ? (businesses ?? []).filter((b) => b.featured && b.section === section).slice(0, FEATURED_IN_MENU)
+      ? listingOrder((businesses ?? []).filter((b) => b.featured && b.section === section)).slice(0, FEATURED_IN_MENU)
       : [];
     const menu = featured.length
       ? { ...m, columns: [...m.columns, { heading: "Featured", links: featured.map((b) => ({ label: b.name, to: webPathFor(b) })) }] }

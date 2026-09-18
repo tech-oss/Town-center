@@ -12,6 +12,19 @@ import { getPromotedEvents } from "./events";
 import { getStandaloneNewsOffers } from "./spotlight";
 import { getLiveHomepageKeys } from "./homepageSlots";
 
+// A Featured Story's business type comes from its eyebrow (the section it's
+// filed under in the admin editor), so the Offers page's Business Type
+// filter finds it.
+const STORY_SECTION = {
+  "eat & drink": "eat-drink",
+  "see & do": "see-do",
+  "shop & local services": "shop",
+  shop: "shop",
+  services: "services",
+  "hotels & accommodation": "stay",
+};
+const storySection = (s) => STORY_SECTION[String(s.eyebrow ?? "").trim().toLowerCase()] ?? null;
+
 // Which homepage key an article has: an admin post or a business's own post.
 function articleKey(a) {
   if (a.newsOfferId) return `news_offer:${a.newsOfferId}`;
@@ -42,7 +55,9 @@ export async function getOffersFeed() {
       date: s.date,
       type: "Featured",
       businessName: null,
-      businessSection: null,
+      businessSection: storySection(s),
+      // Searchable: the section and category it's filed under.
+      category: [s.eyebrow, s.category].filter(Boolean).join(" "),
       homepage: !!s.homepage,
     })),
     ...[...articles, ...standalone].map((a) => ({
