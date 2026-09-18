@@ -171,7 +171,10 @@ function toItem(row, section, state, owner = {}) {
     source: isAdminEdit ? "admin" : "business portal",
     summary: isAdminEdit
       ? `${SECTION_LABELS[section] ?? section} published directly by admin.`
-      : `${SECTION_LABELS[section] ?? section} updated by the business.`,
+      : `${SECTION_LABELS[section] ?? section} updated by the business${
+          changes.some((c) => c.changed && c.hasBefore)
+            ? `: ${changes.filter((c) => c.changed).map((c) => c.field).join(", ")}.`
+            : "."}`,
     rejectionReason: row.rejection_reason?.[section] ?? "",
     detail: {
       section: SECTION_LABELS[section] ?? section,
@@ -206,6 +209,20 @@ async function ownersByBusiness(ids) {
   return map;
 }
 
+// Only sections someone actually saved belong in the queue. A new business
+// used to start with every section marked "Pending Approval" at signup, and
+// those showed up as edits the business never made. So a section counts only
+// if it was saved by the business or by admin (edited_by), and a pending one
+// only if a field really changed from its snapshot.
+function isRealSubmission(row, section, state) {
+  const editor = row.edited_by?.[section];
+  if (!editor) return false;
+  if (state !== PENDING) return true;
+  const snapshot = row.pending_snapshot?.[section];
+  if (!snapshot) return editor === "admin";
+  return (SECTION_FIELDS[section] ?? []).some(([col, camelKey]) => !sameValue(snapshot[camelKey] ?? null, row[col]));
+}
+
 export async function getApprovals({ status } = {}) {
   const { data, error } = await supabase
     .from("business_listings")
@@ -223,6 +240,7 @@ export async function getApprovals({ status } = {}) {
     const named = { ...row, name: row.businesses?.name ?? row.name };
     for (const [section, state] of Object.entries(row.approval_status ?? {})) {
       if (AUTO_PUBLISHED_SECTIONS.has(section)) continue;
+      if (!isRealSubmission(row, section, state)) continue;
       items.push(toItem(named, section, state, owners[row.business_id]));
     }
   }
