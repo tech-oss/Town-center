@@ -8,11 +8,12 @@ import AnalyticsRangeSelector from "../components/AnalyticsRangeSelector";
 import LoadingState from "../components/LoadingState";
 import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
-function StatHeader({ total, rangeLabel }) {
+function StatHeader({ total, web = 0, app = 0, rangeLabel }) {
   return (
-    <div className="flex items-baseline gap-2 mb-4">
+    <div className="flex items-baseline gap-2 mb-4 flex-wrap">
       <span className="text-3xl font-bold" style={{ color: NAVY }}>{total.toLocaleString()}</span>
       <span className="text-sm" style={{ color: MUTED }}>views · {rangeLabel}</span>
+      {total > 0 && <span className="text-xs ml-auto" style={{ color: MUTED }}>Website {web.toLocaleString()} · App {app.toLocaleString()}</span>}
     </div>
   );
 }
@@ -117,14 +118,14 @@ export default function BusinessAnalyticsPage() {
         <>
           <div className="bg-white rounded-2xl p-6" style={CARD}>
             <h2 className="font-bold text-sm mb-1" style={{ color: NAVY }}>Profile views</h2>
-            <StatHeader total={profile.total} rangeLabel={rangeLabel} />
+            <StatHeader total={profile.total} web={profile.web} app={profile.app} rangeLabel={rangeLabel} />
             <AnalyticsChart series={profile.series} />
           </div>
 
           <div className="bg-white rounded-2xl p-6" style={CARD}>
-            <h2 className="font-bold text-sm mb-1" style={{ color: NAVY }}>Articles, News & Offers</h2>
-            <p className="text-xs mb-1" style={{ color: MUTED }}>Combined views across everything in their News & Articles tab.</p>
-            <StatHeader total={content.total} rangeLabel={rangeLabel} />
+            <h2 className="font-bold text-sm mb-1" style={{ color: NAVY }}>News, Offers & Events</h2>
+            <p className="text-xs mb-1" style={{ color: MUTED }}>Combined views of their news and offer posts and their events.</p>
+            <StatHeader total={content.total} web={content.web} app={content.app} rangeLabel={rangeLabel} />
             <AnalyticsChart series={content.series} />
           </div>
 
