@@ -12,7 +12,7 @@ export const heroImage = "/images/card-bridge.jpg";
 export const homeCategories = [
   { id: "see-do", label: "See & Do", image: "/images/quick-links/see-do.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", label: "Eat & Drink", image: "/images/quick-links/eat-drink.jpg", to: "/mobile/eat-drink" },
-  { id: "shop", label: "Shop", image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
+  { id: "shop", label: "Shop & Services", image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
   { id: "services", label: "Services", image: "/images/quick-links/services.jpg", to: "/mobile/services" },
 ];
 
@@ -22,7 +22,7 @@ export const exploreSections = [
   { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/accommodation-hero.jpg", to: "/mobile/live" },
   { id: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/eat-drink/hero.jpg", to: "/mobile/eat-drink" },
-  { id: "shop", title: "Shop", blurb: "High street & independents.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
+  { id: "shop", title: "Shop & Services", blurb: "High street, independents & local services.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
   { id: "services", title: "Services", blurb: "Trades, health & professionals.", image: "/images/services/hero-desktop.jpg", to: "/mobile/services" },
   { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
@@ -61,16 +61,16 @@ export const mapPins = [
   { id: 6, name: "Norden Farm Centre", category: "See & Do", type: "see-do", lat: 51.5189, lng: -0.7242 },
   { id: 7, name: "Kidwells Park", category: "See & Do", type: "see-do", lat: 51.5224, lng: -0.7268 },
   { id: 8, name: "Maidenhead Heritage Centre", category: "See & Do", type: "see-do", lat: 51.5212, lng: -0.7198 },
-  { id: 9, name: "Nicholsons Centre", category: "Shop", type: "shop", lat: 51.5225, lng: -0.7208 },
-  { id: 10, name: "Zara", category: "Shop", type: "shop", lat: 51.52265, lng: -0.71975, to: "/mobile/place/zara" },
-  { id: 11, name: "Waitrose", category: "Shop", type: "shop", lat: 51.52010, lng: -0.72230, to: "/mobile/place/waitrose" },
+  { id: 9, name: "Nicholsons Centre", category: "Shop & Services", type: "shop", lat: 51.5225, lng: -0.7208 },
+  { id: 10, name: "Zara", category: "Shop & Services", type: "shop", lat: 51.52265, lng: -0.71975, to: "/mobile/place/zara" },
+  { id: 11, name: "Waitrose", category: "Shop & Services", type: "shop", lat: 51.52010, lng: -0.72230, to: "/mobile/place/waitrose" },
 ];
 
 export const mapFilters = [
   { key: "all", label: "All" },
   { key: "eat-drink", label: "Eat & Drink" },
   { key: "see-do", label: "See & Do" },
-  { key: "shop", label: "Shop" },
+  { key: "shop", label: "Shop & Services" },
 ];
 
 export const PIN_COLORS = {

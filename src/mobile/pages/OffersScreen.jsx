@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { appSectionLabel } from "../lib/sectionLabels";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import FilterSheet from "../components/FilterSheet";
@@ -9,7 +10,7 @@ import { TYPE_COLORS, typeColor } from "../lib/typeColors";
 import { categoryColor } from "../../lib/categoryColors";
 
 const BUSINESS_TYPES = [
-  ...Object.values(sections).map((s) => ({ key: s.key, label: s.label, color: categoryColor(s.key) })),
+  ...Object.values(sections).map((s) => ({ key: s.key, label: appSectionLabel(s.key, s.label), color: categoryColor(s.key) })),
   { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
 

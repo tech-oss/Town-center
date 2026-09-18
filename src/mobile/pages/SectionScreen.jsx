@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { appSectionLabel } from "../lib/sectionLabels";
 import ListingCard from "../../components/ListingCard";
 import useSectionItems from "../hooks/useSectionItems";
 import { Link } from "react-router-dom";
@@ -54,13 +55,13 @@ export default function SectionScreen({ sectionKey }) {
   }, [sectionItems, filter, query, slugs]);
 
   return (
-    <MobileShell title={section.label} onBack backFallback="/mobile/explore">
+    <MobileShell title={appSectionLabel(sectionKey, section.label)} onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{SECTION_INTROS[sectionKey] ?? section.landing?.intro}</p>
 
         <OffersLink />
 
-        <ListSearch value={query} onChange={setQuery} placeholder={`Search ${section.label}…`} />
+        <ListSearch value={query} onChange={setQuery} placeholder={`Search ${appSectionLabel(sectionKey, section.label)}…`} />
 
         {sectionKey === "see-do" && (
           <Link

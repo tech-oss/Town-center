@@ -13,6 +13,7 @@
 // ════════════════════════════════════════════════════════════════════════════
 
 import { sections } from "../../Data/pages";
+import { appSectionLabel } from "./sectionLabels";
 import {
   getEvents, getStories, getGuides, getGettingHere,
   getBusinesses, getHotels, getAccommodations, getArticles,
@@ -43,9 +44,9 @@ export async function buildSearchIndex() {
     out.push({
       id: `place-${item.slug}`,
       title: item.name,
-      subtitle: [section.label, item.tag].filter(Boolean).join(" · "),
+      subtitle: [appSectionLabel(section.key, section.label), item.tag].filter(Boolean).join(" · "),
       keywords: `${item.description ?? ""} ${item.address ?? ""}`,
-      group: section.label,
+      group: appSectionLabel(section.key, section.label),
       image: item.image,
       to: `/mobile/place/${item.slug}`,
     });

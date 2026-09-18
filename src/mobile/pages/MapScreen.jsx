@@ -18,7 +18,7 @@ const CARTO_VOYAGER = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}
 const FILTERS = [
   { key: "all", label: "All", sections: null },
   { key: "eat-drink", label: "Eat & Drink", sections: ["food-drink"] },
-  { key: "shop", label: "Shop", sections: ["shopping"] },
+  { key: "shop", label: "Shop & Services", sections: ["shopping"] },
   { key: "services", label: "Services", sections: ["services", "health-beauty"] },
   { key: "see-do", label: "See & Do", sections: ["see-do"] },
   { key: "stay", label: "Stay", sections: ["stay"] },
