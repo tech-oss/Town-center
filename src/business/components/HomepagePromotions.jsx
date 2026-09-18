@@ -52,7 +52,7 @@ function BookingTimer({ startsAt, endsAt }) {
 }
 
 // ─── One slot type ─────────────────────────────────────────────────────────
-function SlotCard({ slot, hasContent, premium, busy, onBook }) {
+function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
   const now = useNow(15_000);
   const needs = SLOT_CONTENT[slot.slotType];
   const startsNow = slot.nextStart && new Date(slot.nextStart).getTime() <= now + 60_000;
@@ -61,7 +61,9 @@ function SlotCard({ slot, hasContent, premium, busy, onBook }) {
   const needsContent = needs.kind === "business_event" && !hasContent;
 
   let blocker = null;
-  if (!slot.bookable) blocker = "Not available to book right now.";
+  // One Featured Business booking at a time.
+  if (activeBooking) blocker = `Your business is already featured until ${formatUKDateTime(activeBooking.endsAt)}. You can book again after that.`;
+  else if (!slot.bookable) blocker = "Not available to book right now.";
   else if (!slot.nextStart) blocker = "Fully booked — check back soon.";
   else if (needsContent && !premium) blocker = `Needs the Visibility Plan: this slot shows one of your ${needs.noun}s.`;
   else if (needsContent) blocker = `Publish ${/^[aeiou]/.test(needs.noun) ? "an" : "a"} ${needs.noun} first — that's what this slot shows.`;
@@ -95,7 +97,7 @@ function SlotCard({ slot, hasContent, premium, busy, onBook }) {
         )}
       </div>
 
-      {slot.nextStart && (
+      {slot.nextStart && !activeBooking && (
         <div className="rounded-xl p-3" style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}>
           <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "#1D4ED8" }}>Your slot if you book now</p>
           <p className="text-sm font-semibold mt-1 tabular-nums" style={{ color: FOREST }}>
@@ -425,7 +427,10 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
           {slots.map((slot) => (
             <SlotCard key={slot.slotType} slot={slot} premium={premium}
               hasContent={contentFor(slot.slotType).length > 0}
-              busy={busy === slot.slotType} onBook={book} />
+              busy={busy === slot.slotType} onBook={book}
+              activeBooking={slot.slotType === "featured_business"
+                ? bookings.find((b) => b.slotType === "featured_business" && b.status !== "cancelled" && new Date(b.endsAt) > new Date())
+                : null} />
           ))}
         </div>
       )}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import ActivePromotions from "../components/ActivePromotions";
 import { isPremium, BILLING_OPTIONS } from "../../Data/plans";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
@@ -145,6 +146,9 @@ export default function DashboardPage() {
           <StatCard label="Active Articles / Offers" value={liveArticles} />
           <StatCard label="Support Tickets (open)" value={openTickets} />
         </div>
+
+        {/* Paid homepage promotions (ad-hoc services) running or booked */}
+        {user.role === "Owner" && <ActivePromotions businessId={user.id} />}
 
         {/* Profile completeness — worked out from the real listing */}
         {completeness && (
