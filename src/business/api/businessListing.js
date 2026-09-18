@@ -154,9 +154,18 @@ export function isAutoPublished(tabKey) {
   return AUTO_PUBLISH_SECTIONS.has(tabKey);
 }
 
+const sameValue = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+
+// Returns { unchanged: true } without saving (or sending anything for
+// approval) when none of the tab's own fields differ from what's live.
 export async function saveBusinessListing(businessId, listing, tabKey) {
   const current = await getBusinessListing(businessId);
   const autoPublish = isAutoPublished(tabKey);
+
+  const tabFields = SECTION_FIELDS[tabKey] ?? [];
+  if (tabFields.length && tabFields.every((f) => sameValue(current[f], listing[f]))) {
+    return { unchanged: true };
+  }
 
   // An auto-published section is never reviewed, so it needs no "before"
   // snapshot (nothing can revert it) and is written already Up to Date,
@@ -187,5 +196,5 @@ export async function saveBusinessListing(businessId, listing, tabKey) {
     action: autoPublish ? "listing.updated" : "listing.submitted",
     entityType: "listing", entityId: businessId,
     title: SECTION_LABELS[tabKey] ?? tabKey,
-  });
+  });  return { unchanged: false };
 }

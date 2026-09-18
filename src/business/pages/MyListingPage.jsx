@@ -143,7 +143,11 @@ export default function MyListingPage() {
       rejectionReason: live ? { ...(listing.rejectionReason ?? {}), [tabKey]: null } : listing.rejectionReason,
     };
     try {
-      await saveBusinessListing(user.id, next, tabKey);
+      const { unchanged } = await saveBusinessListing(user.id, next, tabKey);
+      if (unchanged) {
+        setToast("Nothing has changed in this section, so there's nothing to send.");
+        return;
+      }
       setListing(next);
       setToast(live ? "Saved — these are live on your page now." : "Changes submitted for admin approval.");
     } catch {

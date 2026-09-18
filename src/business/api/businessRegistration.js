@@ -70,7 +70,10 @@ export async function registerBusiness(form) {
   });
   if (ownerError) return { ok: false, error: ownerError.message };
 
-  const approvalStatus = Object.fromEntries(ALL_TABS.map((t) => [t, "Pending Approval"]));
+  // A new business is reviewed as a whole in Business Registrations, so its
+  // sections start Up to Date; the approval queue only shows sections the
+  // business later edits.
+  const approvalStatus = Object.fromEntries(ALL_TABS.map((t) => [t, "Up to Date"]));
   const { error: listingError } = await supabase.from("business_listings").insert({
     business_id: businessId,
     name: form.businessName,
