@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FOREST, SAGE, MUTED, BORDER, CARD } from "./FormKit";
+import { FOREST, SAGE, MUTED, BORDER, CARD, Field, Inp, TextArea, SingleImageUpload } from "./FormKit";
+import UKDateInput from "./UKDateInput";
 import useNow from "../../hooks/useNow";
 import { formatUKDateTime, formatCountdown } from "../../lib/ukDateTime";
 import {
   SLOT_CONTENT, BOOKING_STATUS,
   getSlotAvailability, getMyBookings, getMyContentOptions,
-  chooseBookingContent, startSlotCheckout, releaseHold, waitForBookingPaid,
+  chooseBookingContent, saveBookingPost, startSlotCheckout, releaseHold, waitForBookingPaid,
 } from "../api/homepageSlots";
 
 // Homepage Promotions — the paid homepage slots (In the Spotlight, Featured
@@ -56,7 +57,8 @@ function SlotCard({ slot, hasContent, premium, busy, onBook }) {
   const needs = SLOT_CONTENT[slot.slotType];
   const startsNow = slot.nextStart && new Date(slot.nextStart).getTime() <= now + 60_000;
   const full = slot.liveCount >= slot.capacity;
-  const needsContent = needs.kind !== "business" && !hasContent;
+  // Posts can be chosen or written after paying; only an event must exist first.
+  const needsContent = needs.kind === "business_event" && !hasContent;
 
   let blocker = null;
   if (!slot.bookable) blocker = "Not available to book right now.";
@@ -126,14 +128,80 @@ function SlotCard({ slot, hasContent, premium, busy, onBook }) {
   );
 }
 
-// ─── One of this business's bookings ───────────────────────────────────────
-function BookingRow({ booking: b, label, options, onChoose }) {
-  const [choice, setChoice] = useState(b.contentId ?? "");
+// ─── Writing a post for a booking (any plan) ───────────────────────────────
+const BLANK_POST = { type: "news", title: "", excerpt: "", body: "", image: "", startDate: "", endDate: "" };
+
+function PostForm({ booking, businessId, onSave }) {
+  const [post, setPost] = useState(() => ({ ...BLANK_POST, ...(booking.post ?? {}) }));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const set = (k, v) => setPost((p) => ({ ...p, [k]: v }));
+
+  async function submit() {
+    if (!post.title.trim() || !post.excerpt.trim()) { setError("Add a title and a short summary."); return; }
+    setSaving(true);
+    setError("");
+    try {
+      await onSave(booking, post);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl p-4" style={{ backgroundColor: "#F8FAFC", border: `1px solid ${BORDER}` }}>
+      <div className="flex gap-2" role="radiogroup" aria-label="Post type">
+        {["news", "offer"].map((t) => (
+          <button key={t} type="button" role="radio" aria-checked={post.type === t} onClick={() => set("type", t)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+            style={post.type === t ? { backgroundColor: SAGE, color: "#fff" } : { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+            {t === "news" ? "News" : "Offer"}
+          </button>
+        ))}
+      </div>
+      <Field label="Title" required>
+        <Inp value={post.title} maxLength={120} onChange={(e) => set("title", e.target.value)} placeholder="e.g. 20% off Sunday lunch this month" />
+      </Field>
+      <Field label="Short summary" required hint="Shown on the homepage card (up to 300 characters)">
+        <TextArea rows={2} value={post.excerpt} maxLength={300} onChange={(e) => set("excerpt", e.target.value)} />
+      </Field>
+      <Field label="Full details" hint="Shown when people open the post">
+        <TextArea rows={5} value={post.body} maxLength={5000} onChange={(e) => set("body", e.target.value)} />
+      </Field>
+      <SingleImageUpload label="Picture" src={post.image} aspect="aspect-[16/9]" pathPrefix={businessId} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("image", v ?? "")} />
+      {post.type === "offer" && (
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Field label="Offer starts" hint="Optional"><UKDateInput value={post.startDate} onChange={(e) => set("startDate", e.target.value)} /></Field>
+          <Field label="Offer ends" hint="Optional"><UKDateInput value={post.endDate} min={post.startDate || undefined} onChange={(e) => set("endDate", e.target.value)} /></Field>
+        </div>
+      )}
+      {booking.post?.published && (
+        <p className="text-[11px]" style={{ color: "#92400E" }}>This post is live. Saving changes sends a new version for approval.</p>
+      )}
+      {error && <p role="alert" className="text-xs" style={{ color: "#991B1B" }}>{error}</p>}
+      <div>
+        <button onClick={submit} disabled={saving} className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50" style={{ backgroundColor: SAGE }}>
+          {saving ? "Sending…" : "Send for approval"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── One of this business's bookings ───────────────────────────────────────
+function BookingRow({ booking: b, label, options, premium, businessId, onChoose, onSavePost }) {
   const needs = SLOT_CONTENT[b.slotType];
+  const isPostSlot = needs.kind === "business_article";
+  // Visibility Plan businesses can pick one of their posts; anyone can write one.
+  const canPick = !isPostSlot || (premium && options.length > 0);
+  const [mode, setMode] = useState(() => (isPostSlot && (b.contentKind === "news_offer" || !canPick) ? "write" : "choose"));
+  const [choice, setChoice] = useState(b.contentKind === needs.kind ? (b.contentId ?? "") : "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
   const finished = new Date(b.endsAt) <= new Date();
-  const canChoose = !finished && needs.kind !== "business" && ["awaiting_content", "pending_approval", "rejected", "approved"].includes(b.status);
+  const editable = !finished && needs.kind !== "business" && ["awaiting_content", "pending_approval", "rejected", "approved"].includes(b.status);
   const [bg, fg] = STATUS_TONE[b.status] ?? ["#F1F5F9", "#475569"];
 
   async function save() {
@@ -162,27 +230,56 @@ function BookingRow({ booking: b, label, options, onChoose }) {
       <BookingTimer startsAt={b.startsAt} endsAt={b.endsAt} />
       {b.status === "rejected" && (
         <p className="text-xs" style={{ color: "#991B1B" }}>
-          Not approved{b.rejectionReason ? `: ${b.rejectionReason}` : ""}. Choose something else below.
+          Not approved{b.rejectionReason ? `: ${b.rejectionReason}` : ""}. Change it below and send it again.
         </p>
       )}
       {b.status === "awaiting_content" && !finished && (
         <p className="text-xs" style={{ color: "#92400E" }}>
-          Your slot is reserved. Choose which {needs.noun} to show — admin approves it before it goes on the homepage. The slot runs on its dates either way.
+          Your slot is reserved. {isPostSlot
+            ? (premium ? "Choose one of your News & Offers posts or write a new one" : "Write the post you'd like to show")
+            : `Choose which ${needs.noun} to show`} — admin approves it before it goes on the homepage. The slot runs on its dates either way.
         </p>
       )}
-      {canChoose && (
+
+      {editable && isPostSlot && (
+        <div className="flex gap-2 mt-1" role="tablist">
+          {canPick && (
+            <button type="button" role="tab" aria-selected={mode === "choose"} onClick={() => setMode("choose")}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={mode === "choose" ? { backgroundColor: FOREST, color: "#fff" } : { border: `1.5px solid ${BORDER}`, color: FOREST }}>
+              Choose one of my posts
+            </button>
+          )}
+          <button type="button" role="tab" aria-selected={mode === "write"} onClick={() => setMode("write")}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+            style={mode === "write" ? { backgroundColor: FOREST, color: "#fff" } : { border: `1.5px solid ${BORDER}`, color: FOREST }}>
+            {b.contentKind === "news_offer" ? "Edit my post" : "Write a new post"}
+          </button>
+        </div>
+      )}
+
+      {editable && mode === "write" && isPostSlot && (
+        <PostForm booking={b} businessId={businessId} onSave={onSavePost} />
+      )}
+
+      {editable && mode === "choose" && canPick && (
         <div className="flex gap-2 flex-wrap items-center">
           <select value={choice} onChange={(e) => setChoice(e.target.value)} aria-label={`Choose a ${needs.noun}`}
             className="flex-1 min-w-[200px] rounded-lg px-3 py-2 text-sm" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>
             <option value="">Choose a {needs.noun}…</option>
             {options.map((o) => <option key={o.id} value={o.id}>{o.title}{o.detail ? ` · ${o.detail}` : ""}</option>)}
           </select>
-          <button onClick={save} disabled={saving || !choice || choice === b.contentId}
+          <button onClick={save} disabled={saving || !choice || (b.contentKind === needs.kind && choice === b.contentId)}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50" style={{ backgroundColor: SAGE }}>
             {saving ? "Sending…" : b.contentId ? "Change" : "Send for approval"}
           </button>
-          {b.status === "approved" && choice !== b.contentId && choice && (
+          {b.status === "approved" && choice && choice !== b.contentId && (
             <p className="w-full text-[11px]" style={{ color: "#92400E" }}>Changing it sends your slot back for approval.</p>
+          )}
+          {isPostSlot && (
+            <p className="w-full text-[11px]" style={{ color: MUTED }}>
+              A post that's still waiting for approval is approved together with your slot.
+            </p>
           )}
         </div>
       )}
@@ -267,6 +364,12 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
     }
   }
 
+  async function savePost(booking, post) {
+    await saveBookingPost(booking.id, post);
+    onToast("Post sent for approval. It goes on the homepage once admin approves it.");
+    refresh();
+  }
+
   async function choose(booking, kind, contentId) {
     await chooseBookingContent(booking.id, kind, contentId);
     onToast("Sent for approval. We'll let you know when it's approved.");
@@ -310,7 +413,7 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
         <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
           <p className="text-sm font-bold" style={{ color: FOREST }}>Your bookings</p>
           {active.map((b) => (
-            <BookingRow key={b.id} booking={b} label={labelFor(b.slotType)} options={contentFor(b.slotType)} onChoose={choose} />
+            <BookingRow key={b.id} booking={b} label={labelFor(b.slotType)} options={contentFor(b.slotType)} premium={premium} businessId={businessId} onChoose={choose} onSavePost={savePost} />
           ))}
         </div>
       )}
@@ -332,7 +435,7 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
           <summary className="text-sm font-bold cursor-pointer" style={{ color: FOREST }}>Past bookings ({past.length})</summary>
           <div className="flex flex-col gap-3 mt-3">
             {past.map((b) => (
-              <BookingRow key={b.id} booking={b} label={labelFor(b.slotType)} options={[]} onChoose={choose} />
+              <BookingRow key={b.id} booking={b} label={labelFor(b.slotType)} options={[]} premium={premium} businessId={businessId} onChoose={choose} onSavePost={savePost} />
             ))}
           </div>
         </details>

@@ -53,6 +53,8 @@ function bookingFromRow(r, titles) {
     contentKind: r.content_kind,
     contentId: r.content_id,
     contentTitle: titles?.get(r.content_id) ?? null,
+    // A post written for this booking (news_offers), for editing.
+    post: null,
     startsAt: r.starts_at,
     endsAt: r.ends_at,
     status: r.status,
@@ -79,12 +81,26 @@ export async function getMyBookings(businessId) {
 
   const titles = new Map();
   const ids = (kind) => rows.filter((r) => r.content_kind === kind).map((r) => r.content_id);
-  const [articles, events] = await Promise.all([
+  const [articles, events, posts] = await Promise.all([
     ids("business_article").length ? supabase.from("business_articles").select("id, title").in("id", ids("business_article")) : { data: [] },
     ids("business_event").length ? supabase.from("business_events").select("id, title").in("id", ids("business_event")) : { data: [] },
+    ids("news_offer").length ? supabase.from("news_offers").select("*").in("id", ids("news_offer")) : { data: [] },
   ]);
-  for (const r of [...(articles.data ?? []), ...(events.data ?? [])]) titles.set(String(r.id), r.title);
-  return rows.map((r) => bookingFromRow(r, titles));
+  for (const r of [...(articles.data ?? []), ...(events.data ?? []), ...(posts.data ?? [])]) titles.set(String(r.id), r.title);
+  const postById = new Map((posts.data ?? []).map((n) => [String(n.id), {
+    type: n.type === "offer" ? "offer" : "news",
+    title: n.title ?? "",
+    excerpt: n.excerpt ?? "",
+    body: n.body ?? "",
+    image: n.image ?? "",
+    startDate: n.start_date ?? "",
+    endDate: n.end_date ?? "",
+    published: n.status === "Published",
+  }]));
+  return rows.map((r) => ({
+    ...bookingFromRow(r, titles),
+    post: r.content_kind === "news_offer" ? postById.get(r.content_id) ?? null : null,
+  }));
 }
 
 export async function getBooking(placementId) {
@@ -93,15 +109,20 @@ export async function getBooking(placementId) {
   return data ? bookingFromRow(data) : null;
 }
 
-// What this business can put in a slot: its own live posts or events.
+// What this business can put in a slot: its own posts (live or waiting for
+// approval) or live events.
 export async function getMyContentOptions(businessId, slotType) {
   const kind = SLOT_CONTENT[slotType]?.kind;
   if (kind === "business_article") {
     const { data, error } = await supabase.from("business_articles")
-      .select("id, title, type, hero_image, thumbnail")
-      .eq("business_id", businessId).eq("status", "Live").order("date", { ascending: false });
+      .select("id, title, type, status, hero_image, thumbnail")
+      .eq("business_id", businessId).in("status", ["Live", "Pending Approval"]).order("date", { ascending: false });
     if (error) throw error;
-    return (data ?? []).map((r) => ({ kind, id: String(r.id), title: r.title, detail: r.type ?? "News", image: r.hero_image || r.thumbnail }));
+    return (data ?? []).map((r) => ({
+      kind, id: String(r.id), title: r.title,
+      detail: [r.type ?? "News", r.status === "Live" ? null : "waiting for approval"].filter(Boolean).join(" · "),
+      image: r.hero_image || r.thumbnail,
+    }));
   }
   if (kind === "business_event") {
     const { data, error } = await supabase.from("business_events")
@@ -116,6 +137,22 @@ export async function getMyContentOptions(businessId, slotType) {
 export async function chooseBookingContent(placementId, kind, contentId) {
   const { error } = await supabase.rpc("set_placement_content", {
     p_placement_id: placementId, p_kind: kind, p_content_id: contentId,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// Writes (or edits) a post for this booking and sends it for approval. Any
+// plan can do this; the post goes live when admin approves the booking.
+export async function saveBookingPost(placementId, post) {
+  const { error } = await supabase.rpc("save_placement_post", {
+    p_placement_id: placementId,
+    p_type: post.type,
+    p_title: post.title,
+    p_excerpt: post.excerpt,
+    p_body: post.body,
+    p_image: post.image || null,
+    p_start_date: post.startDate || null,
+    p_end_date: post.endDate || null,
   });
   if (error) throw new Error(error.message);
 }
