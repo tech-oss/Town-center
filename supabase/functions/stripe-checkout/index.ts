@@ -1,5 +1,6 @@
-// stripe-checkout — starts a Stripe Checkout session for the Visibility Plan
-// or for a homepage slot booking (kind: "placement").
+// stripe-checkout — starts a Stripe Checkout session for the Visibility Plan,
+// for a homepage slot booking (kind: "placement"), or for extra article slots
+// (kind: "article_slots").
 //
 // Called by the business dashboard's Subscribe and Homepage Promotions flows. The browser is sent to
 // the returned Stripe-hosted page to pay; the plan itself only changes when
@@ -52,7 +53,7 @@ Deno.serve(async (req) => {
     const { data: { user } } = await caller.auth.getUser();
     if (!user) return json({ error: "Please sign in again." }, 401);
 
-    const { businessId, interval, kind, slotType } = await req.json().catch(() => ({}));
+    const { businessId, interval, kind, slotType, pack } = await req.json().catch(() => ({}));
     if (!businessId) return json({ error: "Missing business." }, 400);
 
     // Only the approved Owner of an approved business can pay for it.
@@ -136,6 +137,53 @@ Deno.serve(async (req) => {
         await admin.from("homepage_placements").delete().eq("id", hold.id).eq("status", "held");
         throw e;
       }
+    }
+
+    // Extra article slots. The packs are defined here, never taken from the
+    // browser, so a caller can't invent a price. Each slot is valid 12 months
+    // and can be re-used for different content during that time; the slots
+    // themselves are granted by the webhook once Stripe confirms payment.
+    if (kind === "article_slots") {
+      const PACKS: Record<string, { quantity: number; amount: number; name: string }> = {
+        "1": { quantity: 1, amount: 999,  name: "1 extra article slot" },
+        "3": { quantity: 3, amount: 2499, name: "3 extra article slots" },
+        "6": { quantity: 6, amount: 3999, name: "6 extra article slots" },
+      };
+      const chosen = PACKS[String(pack)];
+      if (!chosen) return json({ error: "Choose one of the article slot packages." }, 400);
+
+      // Add-ons ride on an active Visibility Plan.
+      if (sub?.plan !== "premium") {
+        return json({ error: "Extra article slots are available with an active Business Visibility subscription." }, 409);
+      }
+
+      const metadata = {
+        kind: "article_slots",
+        business_id: businessId,
+        quantity: String(chosen.quantity),
+      };
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        customer: customerId,
+        client_reference_id: businessId,
+        line_items: [{
+          quantity: 1,
+          price_data: {
+            currency: "gbp",
+            unit_amount: chosen.amount,
+            product_data: {
+              name: chosen.name,
+              description: "Valid 12 months. Re-usable — edit or replace the content as often as you like.",
+            },
+          },
+        }],
+        metadata,
+        payment_intent_data: { metadata },
+        invoice_creation: { enabled: true, invoice_data: { metadata } },
+        success_url: `${base}/business/articles?slots=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${base}/business/articles?slots=cancelled`,
+      });
+      return json({ url: session.url });
     }
 
     // Monthly or annual Visibility Plan. Only these two Stripe prices can be

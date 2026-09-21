@@ -23,17 +23,37 @@ function StatusBadge({ status }) {
   return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: c.bg, color: c.fg }}>{status}</span>;
 }
 
-function TicketDetail({ ticket, onBack, onUpdate, notify }) {
+function TicketDetail({ ticket, onBack, onUpdate, notify, businessId }) {
   const [reply, setReply] = useState("");
+  // A picture can go on any message, not just the first one — most support
+  // problems are easier to show than to describe, and they rarely come up in
+  // the opening message.
+  const [files, setFiles] = useState([]);
+  const [sending, setSending] = useState(false);
 
   async function handleSend() {
-    if (!reply.trim()) return;
-    const msg = { from: "business", author: "You", date: new Date().toISOString().slice(0, 16).replace("T", " "), body: reply.trim() };
-    const nextThread = [...ticket.thread, msg];
-    await addTicketMessage(ticket.id, nextThread);
-    onUpdate({ ...ticket, thread: nextThread });
-    setReply("");
-    notify("Message sent.");
+    if (!reply.trim() || sending) return;
+    setSending(true);
+    try {
+      const attachments = [];
+      for (const file of files) attachments.push(await uploadToStorage(file, `${businessId}/support`));
+      const msg = {
+        from: "business", author: "You",
+        date: new Date().toISOString().slice(0, 16).replace("T", " "),
+        body: reply.trim(),
+        ...(attachments.length ? { attachments } : {}),
+      };
+      const nextThread = [...ticket.thread, msg];
+      await addTicketMessage(ticket.id, nextThread);
+      onUpdate({ ...ticket, thread: nextThread });
+      setReply("");
+      setFiles([]);
+      notify("Message sent.");
+    } catch (e) {
+      notify(e.message || "Could not send that message.");
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -57,7 +77,7 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
             {m.attachments?.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
                 {m.attachments.map((url) => (
-                  <a key={url} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Attachment" className="w-32 max-h-32 rounded-lg object-cover" /></a>
+                  <a key={url} href={url} target="_blank" rel="noopener noreferrer"><img src={url} alt="Attachment" className="w-32 max-h-32 rounded-lg object-cover" style={{ border: `1px solid ${BORDER}` }} /></a>
                 ))}
               </div>
             )}
@@ -69,8 +89,23 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
         <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
           <p className="text-sm font-bold" style={{ color: FOREST }}>Send a follow-up message</p>
           <TextArea rows={3} value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Type your message…" />
-          <button onClick={handleSend} disabled={!reply.trim()} className="self-start px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-            Send
+          <label className="text-xs font-semibold w-fit px-3 py-2 rounded-xl cursor-pointer" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>
+            Attach a picture
+            <input type="file" accept="image/*" multiple className="hidden"
+              onChange={(e) => { setFiles((f) => [...f, ...Array.from(e.target.files ?? [])]); e.target.value = ""; }} />
+          </label>
+          {files.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {files.map((file, i) => (
+                <span key={`${file.name}-${i}`} className="text-[11px] px-2 py-1 rounded-lg inline-flex items-center gap-1.5" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: FOREST }}>
+                  {file.name}
+                  <button type="button" onClick={() => setFiles((f) => f.filter((_, j) => j !== i))} className="font-bold" aria-label={`Remove ${file.name}`}>✕</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <button onClick={handleSend} disabled={!reply.trim() || sending} className="self-start px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
+            {sending ? "Sending…" : "Send"}
           </button>
         </div>
       )}
@@ -164,7 +199,7 @@ export default function SupportPage() {
     return (
       <BusinessLayout>
         <Toast message={toast} />
-        <TicketDetail ticket={viewing} onBack={() => setViewing(null)} onUpdate={updateTicket} notify={notify} />
+        <TicketDetail ticket={viewing} onBack={() => setViewing(null)} onUpdate={updateTicket} notify={notify} businessId={user.id} />
       </BusinessLayout>
     );
   }

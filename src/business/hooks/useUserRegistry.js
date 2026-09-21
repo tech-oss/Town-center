@@ -92,6 +92,9 @@ export async function submitUserRegistration({ businessId, firstName, lastName, 
     last_name: lastName,
     email,
     status: "pending",
+    // Stamped so the registration shows a join date in Maidenhead admin's
+    // Users tab, the same as an Owner's does.
+    requested_at: new Date().toISOString(),
   });
 
   if (insertError) {

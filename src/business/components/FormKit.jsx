@@ -4,7 +4,12 @@ import { canEditField } from "../../Data/plans";
 import { supabase } from "../../lib/supabaseClient";
 
 export async function uploadToStorage(file, pathPrefix) {
-  const path = `${pathPrefix}/${Date.now()}-${file.name}`;
+  // A filename straight off a phone ("Photo 12 Apr, 09.14.png") makes a
+  // storage key with spaces and commas in it, and the public URL for that key
+  // did not resolve — which is why an attached screenshot arrived in admin as
+  // a broken image. Everything outside [a-z0-9._-] is folded to a dash.
+  const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "upload";
+  const path = `${pathPrefix}/${Date.now()}-${safeName}`;
   const { error } = await supabase.storage.from("business-media").upload(path, file);
   if (error) throw error;
   return supabase.storage.from("business-media").getPublicUrl(path).data.publicUrl;
@@ -144,6 +149,26 @@ export function Toast({ message }) {
   );
 }
 
+// Why admin turned an edit down. This used to live only in the badge's hover
+// tooltip, so on the business's side a rejection arrived with no explanation
+// at all — and on a touch screen there was no way to read it.
+export function RejectionNotice({ reason, what = "These changes" }) {
+  if (!reason) return null;
+  return (
+    <div className="w-full rounded-xl px-4 py-3 flex gap-2.5 items-start"
+      style={{ backgroundColor: "rgba(220,38,38,0.07)", border: "1.5px solid rgba(220,38,38,0.25)" }}>
+      <span aria-hidden="true" style={{ color: "#991B1B" }}>⚠</span>
+      <div className="flex flex-col gap-0.5 min-w-0">
+        <span className="text-xs font-bold" style={{ color: "#991B1B" }}>{what} were not approved</span>
+        <span className="text-sm" style={{ color: "#7F1D1D" }}>{reason}</span>
+        <span className="text-[11px]" style={{ color: "#991B1B", opacity: 0.8 }}>
+          Make the changes asked for and save again to send it back for review.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function SaveBar({ onSave, saving, status, rejectionReason }) {
   return (
     <div className="flex items-center gap-3 pt-4 mt-2 flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
@@ -153,6 +178,7 @@ export function SaveBar({ onSave, saving, status, rejectionReason }) {
         {saving ? "Submitting…" : "Save Changes"}
       </button>
       {status && <ApprovalBadge status={status} rejectionReason={rejectionReason} />}
+      {status === "Changes Rejected" && <RejectionNotice reason={rejectionReason} />}
     </div>
   );
 }

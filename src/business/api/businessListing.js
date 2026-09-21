@@ -181,10 +181,21 @@ export async function saveBusinessListing(businessId, listing, tabKey) {
   };
 
   if (!autoPublish) {
-    const fields = SECTION_FIELDS[tabKey] ?? [];
-    const snapshot = {};
-    for (const f of fields) snapshot[f] = current[f] ?? null;
-    patch.pending_snapshot = { ...(current.pendingSnapshot ?? {}), [tabKey]: snapshot };
+    // The snapshot is the last APPROVED state: it is what the approval queue
+    // shows as "before", what a rejection reverts to, and what the public site
+    // keeps serving while the edit is under review (see
+    // supabase/sql/listing_edits_await_approval_2026_09.sql). Editing a second
+    // time while the first edit is still pending must therefore leave it
+    // alone — overwriting it would bake the unapproved values in as the
+    // approved ones.
+    const alreadyPending = current.approvalStatus?.[tabKey] === "Pending Approval"
+      && current.pendingSnapshot?.[tabKey];
+    if (!alreadyPending) {
+      const fields = SECTION_FIELDS[tabKey] ?? [];
+      const snapshot = {};
+      for (const f of fields) snapshot[f] = current[f] ?? null;
+      patch.pending_snapshot = { ...(current.pendingSnapshot ?? {}), [tabKey]: snapshot };
+    }
   }
 
   const { error } = await supabase

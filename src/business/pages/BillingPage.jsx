@@ -10,6 +10,7 @@ import {
 import { listPayments, getSubscription } from "../api/businessSubscription";
 import { openBillingPortal } from "../api/stripeBilling";
 import HomepagePromotions from "../components/HomepagePromotions";
+import ArticleSlotsCard from "../components/ArticleSlotsCard";
 
 function fmtDate(d) {
   return new Date(d).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
@@ -143,6 +144,9 @@ export default function BillingPage() {
           onToast={setToast}
           onBooked={() => listPayments(user.id).then(setPayments)}
         />
+
+        {/* Extra article slots — the other ad-hoc add-on */}
+        <ArticleSlotsCard businessId={user.id} premium={premium} onToast={setToast} />
 
         {/* Payment history */}
         <div className="bg-white rounded-2xl p-5" style={CARD}>

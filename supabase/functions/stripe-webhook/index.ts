@@ -11,7 +11,8 @@
 //
 // Stripe → Developers → Webhooks → endpoint URL:
 //   https://<project-ref>.supabase.co/functions/v1/stripe-webhook
-// Events: checkout.session.completed, checkout.session.expired,
+// Events: checkout.session.completed (subscriptions, homepage slot bookings
+//         and extra article slots), checkout.session.expired,
 //   customer.subscription.created,
 //   customer.subscription.updated, customer.subscription.deleted,
 //   invoice.paid, invoice.payment_failed
@@ -181,6 +182,48 @@ async function recordLatestInvoice(sub: Stripe.Subscription) {
   if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
 }
 
+// Paid extra article slots: grant them (12 months, re-usable), record the
+// payment and tell the business. grant_article_slots is keyed on the Stripe
+// session, so a replayed event never grants a pack twice.
+// deno-lint-ignore no-explicit-any
+async function settleArticleSlots(session: any) {
+  const meta = session.metadata ?? {};
+  const quantity = Number(meta.quantity ?? 0);
+  if (!meta.business_id || !quantity) return;
+
+  const { error } = await admin.rpc("grant_article_slots", {
+    p_business_id: meta.business_id,
+    p_quantity: quantity,
+    p_amount_pence: session.amount_total ?? 0,
+    p_stripe_ref: session.id,
+  });
+  if (error) throw error;
+
+  const description = `${quantity} extra article slot${quantity === 1 ? "" : "s"} (12 months)`;
+  const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
+  if (invoiceId) {
+    await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid");
+  } else {
+    const { error: payError } = await admin.from("business_payments").upsert({
+      business_id: meta.business_id,
+      date: new Date().toISOString().slice(0, 10),
+      description,
+      amount: money(session.amount_total ?? 0, session.currency ?? "gbp"),
+      status: "Paid",
+      stripe_invoice_id: session.id,
+    }, { onConflict: "stripe_invoice_id" });
+    if (payError) throw payError;
+  }
+
+  await admin.from("business_activity").insert({
+    business_id: meta.business_id, action: "article_slots.purchased",
+    entity_type: "article_slots", entity_id: session.id,
+    title: description,
+    detail: "Use them for News or Offers — edit or replace the content as often as you like for 12 months.",
+    actor: "system",
+  });
+}
+
 // A paid homepage slot booking: confirm the reserved slot (or the next free
 // one if the hold lapsed) and record the payment in billing history.
 // deno-lint-ignore no-explicit-any
@@ -252,6 +295,10 @@ Deno.serve(async (req) => {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.metadata?.kind === "placement") {
           if (session.payment_status === "paid") await settlePlacement(session);
+          break;
+        }
+        if (session.metadata?.kind === "article_slots") {
+          if (session.payment_status === "paid") await settleArticleSlots(session);
           break;
         }
         if (session.mode === "subscription" && session.subscription) {
