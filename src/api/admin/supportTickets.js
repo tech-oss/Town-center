@@ -41,7 +41,7 @@ export async function getTicketById(id) {
 
 // Appending rather than replacing, so a reply can't clobber a message the
 // business posted while the admin was typing.
-export async function replyToTicket(id, { body, author = "Admin", status }) {
+export async function replyToTicket(id, { body, author = "Admin", status, attachments = [] }) {
   const { data: row, error: readError } = await supabase
     .from("business_tickets").select("thread").eq("id", id).maybeSingle();
   if (readError) throw readError;
@@ -51,6 +51,8 @@ export async function replyToTicket(id, { body, author = "Admin", status }) {
     author,
     date: new Date().toISOString().slice(0, 16).replace("T", " "),
     body,
+    // Admin can attach pictures to any reply, the same as the business can.
+    ...(attachments.length ? { attachments } : {}),
   }];
 
   const patch = { thread };

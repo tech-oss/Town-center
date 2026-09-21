@@ -3,6 +3,7 @@ import { TICKET_CATEGORIES } from "../../Data/adminMissingScreensMock";
 import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness } from "../../api/admin";
 import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
+import { uploadImage } from "../../lib/uploadImage";
 import { formatUK } from "../../lib/ukDate";
 import { formatUKDateTime } from "../../lib/ukDateTime";
 
@@ -32,18 +33,27 @@ function Toast({ message, onDismiss }) {
 // ─── Ticket detail / thread panel ─────────────────────────────────────────────
 function TicketDetail({ ticket, onBack, onUpdate, notify }) {
   const [reply, setReply] = useState("");
+  const [replyFiles, setReplyFiles] = useState([]);
   const [status, setStatus] = useState(ticket.status);
   const [sending, setSending] = useState(false);
 
   async function handleSendReply() {
     if (!reply.trim()) return;
     setSending(true);
-    // TODO: trigger Resend email notification to business on reply
-    await replyToTicket(ticket.id, { body: reply.trim(), author: "Admin Support" });
-    setReply("");
-    setSending(false);
-    notify("Reply sent.");
-    onUpdate();
+    try {
+      const attachments = [];
+      for (const file of replyFiles) attachments.push(await uploadImage(file, "support"));
+      // TODO: trigger Resend email notification to business on reply
+      await replyToTicket(ticket.id, { body: reply.trim(), author: "Admin Support", attachments });
+      setReply("");
+      setReplyFiles([]);
+      notify("Reply sent.");
+      onUpdate();
+    } catch (e) {
+      notify(e.message || "Could not send that reply.");
+    } finally {
+      setSending(false);
+    }
   }
 
   async function handleUpdateStatus() {
@@ -96,6 +106,21 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
         <textarea value={reply} onChange={(e) => setReply(e.target.value)} rows={4}
           placeholder="Type your reply to the business…"
           className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={INPUT} />
+        <label className="text-xs font-semibold w-fit px-3 py-2 rounded-xl cursor-pointer" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
+          Attach a picture
+          <input type="file" accept="image/*" multiple className="hidden"
+            onChange={(e) => { setReplyFiles((f) => [...f, ...Array.from(e.target.files ?? [])]); e.target.value = ""; }} />
+        </label>
+        {replyFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {replyFiles.map((file, i) => (
+              <span key={`${file.name}-${i}`} className="text-[11px] px-2 py-1 rounded-lg inline-flex items-center gap-1.5" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: NAVY }}>
+                {file.name}
+                <button type="button" onClick={() => setReplyFiles((f) => f.filter((_, j) => j !== i))} className="font-bold" aria-label={`Remove ${file.name}`}>✕</button>
+              </span>
+            ))}
+          </div>
+        )}
         <button onClick={handleSendReply} disabled={sending || !reply.trim()}
           className="self-start px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40 transition-opacity hover:opacity-90"
           style={{ backgroundColor: BLUE }}>
