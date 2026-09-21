@@ -229,7 +229,11 @@ end $$;
 revoke all on function public.grant_addon_slots(text, text, int, int, text) from public, anon, authenticated;
 
 -- The article-only name the currently deployed webhook calls, kept working.
-create or replace function public.grant_article_slots(
+-- Dropped first: it used to return business_article_slots, and a replace
+-- cannot change a function's return type (42P13).
+drop function if exists public.grant_article_slots(text, int, int, text);
+
+create function public.grant_article_slots(
   p_business_id text,
   p_quantity int,
   p_amount_pence int,
