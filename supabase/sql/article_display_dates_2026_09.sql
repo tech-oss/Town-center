@@ -26,9 +26,14 @@ update public.news_offers
  where display_dates is null and nullif(date_label, '') is not null;
 
 
--- ── Offers page view: carry the public dates, drop nothing else ───────────
+-- ── Offers page view: carry the public dates ──────────────────────────────
+-- Dropped and rebuilt rather than CREATE OR REPLACE: replacing a view can
+-- only append columns, so adding display_dates ahead of published_on reads as
+-- renaming that column and is refused (42P16).
 
-create or replace view public.public_promoted_posts
+drop view if exists public.public_promoted_posts;
+
+create view public.public_promoted_posts
 with (security_invoker = false) as
 with promoted as (
   select distinct p.content_kind, p.content_id
@@ -90,7 +95,9 @@ notify pgrst, 'reload schema';
 -- ── Business posts view: same, so a business's own posts carry their public
 --    dates through to its profile and the Offers page ──────────────────────
 
-create or replace view public.public_business_articles
+drop view if exists public.public_business_articles;
+
+create view public.public_business_articles
 with (security_invoker = false) as
 select a.id, a.business_id, a.title, a.type, a.date, a.start_date, a.end_date,
        a.display_dates, a.hero_image, a.thumbnail, a.body

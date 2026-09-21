@@ -69,7 +69,11 @@ end $$;
 
 -- ── The public profile view, now reading approved values ──────────────────
 
-create or replace view public.public_business_profiles
+-- Dropped and rebuilt for the same reason as the views above: replacing a
+-- view can only append columns, never reorder or retype them.
+drop view if exists public.public_business_profiles;
+
+create view public.public_business_profiles
 with (security_invoker = false) as
 select
   b.id                                   as business_id,
