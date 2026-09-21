@@ -8,7 +8,9 @@ import { supabase } from "../../lib/supabaseClient";
 
 export const SLOT_CONTENT = {
   spotlight: { kind: "business_article", noun: "news or offer post", manage: "/business/articles" },
-  featured_article: { kind: "business_article", noun: "news or offer post", manage: "/business/articles" },
+  // The Featured Article slot takes either a real Featured Article the
+  // business has written or one of its News & Offers posts.
+  featured_article: { kind: "business_article", noun: "Featured Article or post", manage: "/business/featured-articles" },
   whats_on: { kind: "business_event", noun: "event", manage: "/business/events" },
   featured_business: { kind: "business", noun: "listing", manage: "/business/listing" },
 };
@@ -81,12 +83,15 @@ export async function getMyBookings(businessId) {
 
   const titles = new Map();
   const ids = (kind) => rows.filter((r) => r.content_kind === kind).map((r) => r.content_id);
-  const [articles, events, posts] = await Promise.all([
+  const [articles, events, posts, features] = await Promise.all([
     ids("business_article").length ? supabase.from("business_articles").select("id, title").in("id", ids("business_article")) : { data: [] },
     ids("business_event").length ? supabase.from("business_events").select("id, title").in("id", ids("business_event")) : { data: [] },
     ids("news_offer").length ? supabase.from("news_offers").select("*").in("id", ids("news_offer")) : { data: [] },
+    // A Featured Article the business wrote, booked onto the homepage.
+    ids("feature_article").length ? supabase.from("feature_articles").select("id, title, card_heading").in("id", ids("feature_article")) : { data: [] },
   ]);
   for (const r of [...(articles.data ?? []), ...(events.data ?? []), ...(posts.data ?? [])]) titles.set(String(r.id), r.title);
+  for (const r of features.data ?? []) titles.set(String(r.id), r.card_heading || r.title);
   const postById = new Map((posts.data ?? []).map((n) => [String(n.id), {
     type: n.type === "offer" ? "offer" : "news",
     title: n.title ?? "",
@@ -113,17 +118,32 @@ export async function getBooking(placementId) {
 // approval) or live events.
 export async function getMyContentOptions(businessId, slotType) {
   const kind = SLOT_CONTENT[slotType]?.kind;
+  let options = [];
   if (kind === "business_article") {
     const { data, error } = await supabase.from("business_articles")
       .select("id, title, type, status, hero_image, thumbnail")
       .eq("business_id", businessId).in("status", ["Live", "Pending Approval"]).order("date", { ascending: false });
     if (error) throw error;
-    return (data ?? []).map((r) => ({
+    options = (data ?? []).map((r) => ({
       kind, id: String(r.id), title: r.title,
       detail: [r.type ?? "News", r.status === "Live" ? null : "waiting for approval"].filter(Boolean).join(" · "),
       image: r.hero_image || r.thumbnail,
     }));
   }
+  // The Featured Article slot also offers the business's own Featured
+  // Articles — the longer editorial pieces — ahead of its short posts.
+  if (slotType === "featured_article") {
+    const { data } = await supabase.from("feature_articles")
+      .select("id, title, card_heading, hero_image, card_image, status")
+      .eq("business_id", businessId).eq("author", "business").eq("status", "Live")
+      .order("updated_at", { ascending: false });
+    const featured = (data ?? []).map((r) => ({
+      kind: "feature_article", id: String(r.id), title: r.card_heading || r.title,
+      detail: "Featured Article", image: r.hero_image || r.card_image,
+    }));
+    return [...featured, ...options];
+  }
+
   if (kind === "business_event") {
     const { data, error } = await supabase.from("business_events")
       .select("id, title, event_date, date_label, hero_image")
@@ -131,7 +151,7 @@ export async function getMyContentOptions(businessId, slotType) {
     if (error) throw error;
     return (data ?? []).map((r) => ({ kind, id: String(r.id), title: r.title, detail: r.date_label || r.event_date || "", image: r.hero_image }));
   }
-  return [];
+  return options;
 }
 
 export async function chooseBookingContent(placementId, kind, contentId) {
