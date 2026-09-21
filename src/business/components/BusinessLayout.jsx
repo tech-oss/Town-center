@@ -14,6 +14,7 @@ const NAV = [
   { to: "/business/analytics", label: "Analytics", icon: "📊" },
   { to: "/business/listing",   label: "My Listing", icon: "📄" },
   { to: "/business/articles",  label: "News & Articles", icon: "📰" },
+  { to: "/business/featured-articles", label: "Featured Articles", icon: "✨" },
   { to: "/business/events",    label: "Request Event", icon: "📅" },
   { to: "/business/billing",   label: "Subscriptions & Billing", icon: "💳" },
   { to: "/business/reviews",   label: "Reviews", icon: "⭐" },
@@ -22,7 +23,7 @@ const NAV = [
 ];
 
 // Pages that open a Visibility Plan prompt instead on the Free plan.
-const PAID_ONLY = new Set(["/business/analytics", "/business/articles", "/business/events", "/business/reviews"]);
+const PAID_ONLY = new Set(["/business/analytics", "/business/articles", "/business/featured-articles", "/business/events", "/business/reviews"]);
 
 export default function BusinessLayout({ children }) {
   const { user, logout } = useBusinessAuth();

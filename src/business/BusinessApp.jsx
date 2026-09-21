@@ -9,6 +9,8 @@ import RegisterUserPage from "./pages/RegisterUserPage";
 import ClaimBusinessPage from "./pages/ClaimBusinessPage";
 import ClaimOnboardingPage from "./pages/ClaimOnboardingPage";
 import DashboardPage from "./pages/DashboardPage";
+import FeaturedArticlesPage from "./pages/FeaturedArticlesPage";
+import FeaturedArticleEditorPage from "./pages/FeaturedArticleEditorPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import ContentAnalyticsDetailPage from "./pages/ContentAnalyticsDetailPage";
 import AnalyticsReportPage from "./pages/AnalyticsReportPage";
@@ -80,6 +82,7 @@ function RequirePremium({ title, description, children }) {
 }
 
 const NEWS_GATE = { title: "News & Offers is part of the Visibility Plan", description: "Upgrade to publish news, updates and special offers on your business page." };
+const FEATURED_GATE = { title: "Featured Articles are part of the Visibility Plan", description: "Upgrade, then buy a Featured Article slot to publish a longer, editorial-style piece about your business." };
 const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions." };
 const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page." };
 const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention." };
@@ -121,6 +124,9 @@ export default function BusinessApp() {
       <Route path="articles" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticlesPage /></RequirePremium></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
       <Route path="articles/:id/edit" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
+      <Route path="featured-articles" element={<RequireAuth><RequirePremium {...FEATURED_GATE}><FeaturedArticlesPage /></RequirePremium></RequireAuth>} />
+      <Route path="featured-articles/new" element={<RequireAuth><RequirePremium {...FEATURED_GATE}><FeaturedArticleEditorPage /></RequirePremium></RequireAuth>} />
+      <Route path="featured-articles/:id/edit" element={<RequireAuth><RequirePremium {...FEATURED_GATE}><FeaturedArticleEditorPage /></RequirePremium></RequireAuth>} />
       <Route path="events" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventsPage /></RequirePremium></RequireAuth>} />
       <Route path="events/new" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventEditorPage /></RequirePremium></RequireAuth>} />
       <Route path="events/:id/edit" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventEditorPage /></RequirePremium></RequireAuth>} />
