@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import useViewedCategory from "../../lib/viewedCategory";
 import { useTrackView, businessView } from "../../lib/trackView";
 import { externalUrl } from "../../lib/externalUrl";
 import { useState } from "react";
@@ -40,6 +41,10 @@ function BusinessDetailScreen({ place, goBack }) {
   // Free plan: name, hero, address, phone and email; everything else shows a
   // "coming soon" line or is left out — same rules as the website.
   const free = isFreeListing(place);
+  // A business can sit in several categories; the breadcrumb follows the one
+  // the visitor opened it from (?category=), the same as the website.
+  const viewed = useViewedCategory(place);
+
   const section = sections[place.section];
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
   const websiteUrl = !free ? externalUrl(place.website) : null;
@@ -84,7 +89,7 @@ function BusinessDetailScreen({ place, goBack }) {
           <div className="min-w-0 flex-1">
             <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
-              {section?.label} · {place.tag}
+              {section?.label} · {viewed.label || place.tag}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
           </div>

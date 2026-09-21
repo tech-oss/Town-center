@@ -10,6 +10,7 @@ import { getEventBySlug, getEvents } from "../../api";
 import { categoryColors } from "../../Data/events";
 import useMobileBack from "../hooks/useMobileBack";
 import ShareButton from "../components/ShareButton";
+import MobilePhoto from "../components/MobilePhoto";
 
 export default function EventDetailScreen() {
   const { slug } = useParams();
@@ -51,7 +52,7 @@ export default function EventDetailScreen() {
         </div>
 
         <div className="px-5 pt-4">
-          <img src={gallery[0]} alt={event.title} className="w-full h-56 object-cover rounded-2xl" />
+          <MobilePhoto src={gallery[0]} alt={event.title} aspect="aspect-[16/9]" rounded="rounded-2xl" />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">

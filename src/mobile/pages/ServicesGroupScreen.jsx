@@ -4,7 +4,7 @@ import useSectionItems from "../hooks/useSectionItems";
 import { useParams, Navigate } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills, OffersLink } from "../components/ListSearch";
-import { sections } from "../../Data/pages";
+import { sections, categoryTitles } from "../../Data/pages";
 
 const servicesSection = sections.services;
 
@@ -16,40 +16,63 @@ function categoriesForGroup(groupConfig) {
   if (!groupConfig) return null;
   const column = servicesSection.columns.find((c) => c.heading === groupConfig.heading);
   if (!column) return null;
-  return new Set(
-    column.links.filter((l) => l.to.includes("?category=")).map((l) => l.to.split("?category=")[1])
-  );
+  // Kept in the column's own order so the app's filter bar reads the same
+  // way as the website's dropdown.
+  return column.links
+    .filter((l) => l.to.includes("?category="))
+    .map((l) => {
+      const slug = l.to.split("?category=")[1];
+      return { slug, label: categoryTitles[slug] ?? l.label };
+    });
 }
 
 export default function ServicesGroupScreen() {
   const { group } = useParams();
   const groupConfig = servicesSection.groups.find((g) => g.key === group);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
 
   const serviceItems = useSectionItems("services");
   const groupCategories = useMemo(() => categoriesForGroup(groupConfig), [groupConfig]);
+  const groupSlugs = useMemo(
+    () => new Set((groupCategories ?? []).map((c) => c.slug)),
+    [groupCategories]
+  );
   const groupItems = useMemo(
-    () => (groupCategories ? serviceItems.filter((i) => groupCategories.has(i.category)) : []),
-    [groupCategories, serviceItems]
+    () => serviceItems.filter((i) => groupSlugs.has(i.category) || i.categories?.some((c) => groupSlugs.has(c))),
+    [groupSlugs, serviceItems]
   );
 
   const filters = useMemo(
-    () => ["All", ...Array.from(new Set(groupItems.map((i) => i.tag).filter(Boolean)))],
-    [groupItems]
+    () => [
+      { key: "all", label: "All" },
+      ...(groupCategories ?? []).filter((c) =>
+        groupItems.some((i) => i.category === c.slug || i.categories?.includes(c.slug))
+      ),
+    ],
+    [groupCategories, groupItems]
   );
 
   const items = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return groupItems.filter((i) => {
-      if (filter !== "All" && i.tag !== filter) return false;
-      if (!q) return true;
-      return (
-        i.name.toLowerCase().includes(q) ||
-        i.tag.toLowerCase().includes(q) ||
-        (i.description ?? "").toLowerCase().includes(q)
+    const active = filter === "all" ? null : filter;
+    return groupItems
+      .filter((i) => {
+        if (active && !(i.category === active || i.categories?.includes(active))) return false;
+        if (!q) return true;
+        return (
+          i.name.toLowerCase().includes(q) ||
+          (i.tag ?? "").toLowerCase().includes(q) ||
+          (i.description ?? "").toLowerCase().includes(q)
+        );
+      })
+      // The card carries the category being browsed so the detail screen's
+      // breadcrumb follows the way in.
+      .map((i) =>
+        active
+          ? { ...i, tag: categoryTitles[active] ?? i.tag, to: `/mobile/place/${i.slug}?category=${encodeURIComponent(active)}` }
+          : { ...i, to: `/mobile/place/${i.slug}` }
       );
-    });
   }, [groupItems, filter, query]);
 
   if (!groupConfig) return <Navigate to="/mobile/services" replace />;
@@ -67,7 +90,7 @@ export default function ServicesGroupScreen() {
 
         <div className="grid grid-cols-2 gap-3">
           {items.map((it) => (
-            <ListingCard key={it.slug} item={it} to={`/mobile/place/${it.slug}`} />
+            <ListingCard key={it.slug} item={it} to={it.to} />
           ))}
           {items.length === 0 && (
             <p className="col-span-2 text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>

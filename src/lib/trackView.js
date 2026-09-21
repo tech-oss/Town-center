@@ -2,10 +2,12 @@ import { useEffect } from "react";
 import { supabase } from "./supabaseClient";
 
 // Records a view of a business page, post or event for the business's
-// analytics (supabase/sql/analytics_live_2026_09.sql → record_view). The
-// database counts one view per visitor per item per UK day, using an
-// anonymous per-browser token — no personal data. Fire and forget: a failed
-// recording never affects the page.
+// analytics (supabase/sql/analytics_every_view_2026_09.sql → record_view).
+// Every page load of a live item counts as its own view — there is no
+// per-minute, per-session or per-device deduplication. The anonymous
+// per-browser token is still sent (no personal data) so abuse can be spotted,
+// but it no longer suppresses a view. Fire and forget: a failed recording
+// never affects the page.
 
 const SESSION_KEY = "mh_view_session";
 
@@ -18,7 +20,8 @@ function sessionId() {
     }
     return id;
   } catch {
-    // Storage blocked (private mode): a per-page-load token still dedups refreshes poorly but counts the visit.
+    // Storage blocked (private mode): a per-page-load token still labels the
+    // visit; nothing depends on it being stable.
     return (window.__mhViewSession ??= crypto.randomUUID());
   }
 }

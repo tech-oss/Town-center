@@ -60,14 +60,13 @@ const listOrUndefined = (v) => (Array.isArray(v) && v.length > 0 ? v : undefined
 const shortDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-// The dates a business set on its post, as one line: "14 Sep – 30 Sep 2026",
-// "Ends 30 Sep 2026" or "From 14 Sep". The end date always shows, so people
-// know when an offer finishes.
+// The dates printed on a post for readers. `display_dates` is free text the
+// author typed ("Offer only 1.11.26 to 20.11.26"); start_date/end_date are
+// instructions to the system about when the post is live on the site and are
+// deliberately NOT shown — a post scheduled to run 20/10–14/11 used to tell
+// readers the offer itself ran on those dates.
 function articleDates(a) {
-  if (a.start_date && a.end_date) return `${shortDate(a.start_date)} – ${longDate(a.end_date)}`;
-  if (a.end_date) return `Ends ${longDate(a.end_date)}`;
-  if (a.start_date) return `From ${shortDate(a.start_date)}`;
-  return a.date ? shortDate(a.date) : "";
+  return a.display_dates?.trim() || "";
 }
 
 function mapArticle(a, business) {
@@ -77,7 +76,7 @@ function mapArticle(a, business) {
     slug,
     category: a.type ?? "News",
     date: articleDates(a),
-    endsOn: a.end_date ? longDate(a.end_date) : null,
+    endsOn: null,
     title: a.title,
     excerpt: String(a.body ?? "").split(/\n\s*\n/)[0]?.slice(0, 180) ?? "",
     image: a.hero_image || a.thumbnail || business.image,
@@ -90,14 +89,15 @@ function mapArticle(a, business) {
 // that business's page and the Offers page alongside the business's own posts.
 function mapNewsOffer(n, business) {
   const offer = n.category === "Offer" || n.type === "offer";
-  const date = n.end_date ? `Ends ${longDate(n.end_date)}` : (n.date_label || (n.start_date ? shortDate(n.start_date) : ""));
+  // Reader-facing dates only — never the schedule (see articleDates above).
+  const date = n.display_dates?.trim() || n.date_label || "";
   return {
     id: `news-offer-${n.id}`,
     newsOfferId: n.id,
     slug: n.slug,
     category: offer ? "Offer" : "News",
     date,
-    endsOn: n.end_date ? longDate(n.end_date) : null,
+    endsOn: null,
     title: n.title,
     excerpt: n.excerpt ?? "",
     image: n.image || business.image,
@@ -107,6 +107,9 @@ function mapNewsOffer(n, business) {
 }
 
 const notEnded = (n) => !n.end_date || n.end_date >= new Date().toISOString().slice(0, 10);
+
+// How many approved reviews a business profile shows at once.
+export const MAX_PUBLIC_REVIEWS = 6;
 
 // An approved review, in both shapes the pages use: `reviews` for the
 // Eat & Drink / Shop / See & Do / Stay pages and `reviewsList` for the
@@ -190,8 +193,10 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     ...(articles[row.business_id] ?? []).map((a) => mapArticle(a, item)),
     ...(newsOffers[row.business_id] ?? []).map((n) => mapNewsOffer(n, item)),
   ];
-  // Only approved reviews of Visibility Plan businesses reach the view.
-  const approved = (reviews[row.business_id] ?? []).map(mapReview);
+  // Only approved reviews of Visibility Plan businesses reach the view, and
+  // a profile shows at most six of them at a time (newest first) on both the
+  // website and the app — a business can hold more, but only six are public.
+  const approved = (reviews[row.business_id] ?? []).slice(0, MAX_PUBLIC_REVIEWS).map(mapReview);
   if (approved.length) {
     item.reviews = approved;
     item.reviewsList = approved.map((rv) => ({ area: rv.reviewer, stars: rv.rating, timeAgo: rv.date, text: rv.text, sourceUrl: rv.sourceUrl }));

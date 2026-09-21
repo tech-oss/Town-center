@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useViewedCategory from "../../lib/viewedCategory";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
 import ComingSoonCard from "../components/ComingSoonCard";
 import { useState } from "react";
@@ -88,6 +89,10 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${place.name} reviews`)}`;
   // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
   const free = isFreeListing(place);
+  // A business can sit in several categories; the breadcrumb follows the one
+  // the visitor opened it from (?category=), the same as the website.
+  const viewed = useViewedCategory(place);
+
   const websiteUrl = !free && place.website ? `https://${place.website.replace(/^https?:\/\//, "")}` : null;
   const news = free ? [] : (place.news ?? []);
   const social = !free && place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k]) : [];
@@ -134,7 +139,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--leaf)" }} />
-              {section?.label} · {place.tag}
+              {section?.label} · {viewed.label || place.tag}
             </span>
             <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
             {skills.length > 0 && (

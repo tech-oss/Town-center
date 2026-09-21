@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import MobilePhoto from "../components/MobilePhoto";
 import { getGuides, getGuideBySlug } from "../../api";
 import useFetch from "../../hooks/useFetch";
 import useMobileBack from "../hooks/useMobileBack";
@@ -12,7 +13,7 @@ import useMobileBack from "../hooks/useMobileBack";
 function PlaceSection({ s }) {
   return (
     <div className="flex flex-col overflow-hidden bg-white" style={{ borderRadius: 18, boxShadow: "0 12px 30px -16px rgba(28,46,56,0.35)" }}>
-      <img src={s.image} alt={s.title} loading="lazy" className="w-full h-48 object-cover" />
+      <MobilePhoto src={s.image} alt={s.title} aspect="aspect-[4/3]" />
       <div className="p-4 flex flex-col gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
@@ -81,7 +82,7 @@ export default function GuideDetailScreen() {
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
-          <img src={guide.heroImage} alt="" className="w-full h-48 object-cover" />
+          <MobilePhoto src={guide.heroImage} aspect="aspect-[4/3]" />
         </div>
 
         <div className="px-5 pt-2 flex flex-col gap-6 pb-10 mobile-stagger">

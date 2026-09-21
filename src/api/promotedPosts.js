@@ -9,9 +9,10 @@ const SECTION_FOR_TYPE = { "eat-drink": "eat-drink", shop: "shop", "see-do": "se
 const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const today = () => new Date().toISOString().slice(0, 10);
 
+// Only the dates the author wrote for readers. start_date/end_date tell the
+// system when the post is live and are never printed on it.
 function dateLine(p) {
-  if (p.end_date) return `Ends ${longDate(p.end_date)}`;
-  return p.published_on ? longDate(p.published_on) : "";
+  return p.display_dates?.trim() || "";
 }
 
 function toArticle(p, live) {
@@ -24,7 +25,7 @@ function toArticle(p, live) {
     slug: p.slug,
     category: p.type,
     date: dateLine(p),
-    endsOn: p.end_date ? longDate(p.end_date) : null,
+    endsOn: null,
     title: p.title,
     excerpt: p.excerpt ?? "",
     image: p.image || business.image || "/logo-mark.svg",

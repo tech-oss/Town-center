@@ -142,15 +142,34 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
     const room = barWidth - chip.getBoundingClientRect().width - BAR_PADDING;
     const maxWidth = widths.length ? Math.max(...widths) : 0;
 
-    // Everything fits — no "More" control, so none of its width to set aside.
-    // Fit is computed against each item's equal (widest) width rather than
-    // its own natural width, since that's what will actually be rendered.
-    const next = maxWidth * widths.length <= room
-      ? widths.length
-      : Math.max(1, Math.floor((room - MORE_WIDTH) / maxWidth));
+    // Everything fits at equal width — no "More" control, so none of its
+    // width to set aside.
+    if (maxWidth * widths.length <= room) {
+      setFitCount((prev) => (prev === widths.length ? prev : widths.length));
+      setItemWidth((prev) => (prev === maxWidth ? prev : maxWidth));
+      return;
+    }
+
+    // Otherwise pack greedily from the section's own order using each item's
+    // NATURAL width, then give the ones that made it the widest of their own
+    // widths so they still sit in equal slots. Sizing every slot to the
+    // widest label in the whole section instead meant one outlier — Shop's
+    // "Clothing, Footwear Alterations & Repairs" — squeezed the bar down to a
+    // single category followed by a long empty stretch.
+    const available = room - MORE_WIDTH;
+    let count = 0;
+    let widest = 0;
+    for (const w of widths) {
+      const nextWidest = Math.max(widest, w);
+      if (nextWidest * (count + 1) > available) break;
+      widest = nextWidest;
+      count += 1;
+    }
+    const next = Math.max(1, count);
+    const width = count ? widest : widths[0];
 
     setFitCount((prev) => (prev === next ? prev : next));
-    setItemWidth((prev) => (prev === maxWidth ? prev : maxWidth));
+    setItemWidth((prev) => (prev === width ? prev : width));
   };
 
   // Re-measure after every render (cheap, and settles in one extra pass since

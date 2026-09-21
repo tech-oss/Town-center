@@ -57,7 +57,9 @@ export default function HomeScreen() {
   const { data: spotlight } = useFetch(getSpotlightPosts, []);
   const appOffers = (spotlight ?? []).slice(0, 4);
   // The same three homepage slots admin fills on the website, so both agree.
-  const upcomingEvents = (events ?? []).slice(0, 3);
+  // However many What's On slots admin has booked — the website shows them
+  // all, so the app must not cap the list at three.
+  const upcomingEvents = events ?? [];
   // The same guides admin ticked for the website's homepage.
   const featuredGuides = guideList ?? [];
   const featuredStories = stories ?? [];

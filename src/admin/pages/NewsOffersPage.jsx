@@ -224,6 +224,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
     body: "",
     image: "",
     date: "",
+    displayDates: "",
     startDate: "",
     endDate: "",
     status: "Published",
@@ -354,6 +355,23 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
           />
         </label>
 
+        {/* Dates printed on the article — nothing to do with scheduling. */}
+        <label className="flex flex-col gap-1 sm:col-span-2">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Dates shown on the article (optional)</span>
+          <input
+            value={form.displayDates}
+            onChange={(e) => set("displayDates", e.target.value)}
+            placeholder="e.g. Offer only 1.11.26 to 20.11.26"
+            className="rounded-xl px-3 py-2.5 text-sm outline-none"
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
+          />
+          <span className="text-[11px]" style={{ color: "#6B7280" }}>
+            Free text readers see on the post — the offer's own dates, whatever the business wants to say.
+            Leave blank to show no dates. This is separate from the go-live schedule below, which only tells
+            the system when to put the post on the site and is never shown to the public.
+          </span>
+        </label>
+
         {/* Body */}
         <label className="flex flex-col gap-1 sm:col-span-2">
           <span className="flex items-center justify-between gap-2">
@@ -469,10 +487,10 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
             <span className="text-sm font-bold" style={{ color: "#92400E" }}>★ Homepage Spotlight schedule</span>
             <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(232,163,61,0.2)", color: "#92400E" }}>UK time</span>
           </div>
-          <p className="text-xs -mt-1" style={{ color: "#92400E", opacity: 0.8 }}>Set when this post appears in the "In the Spotlight" section. Leave dates blank to publish immediately with no expiry.</p>
+          <p className="text-xs -mt-1" style={{ color: "#92400E", opacity: 0.8 }}>Instructions to the system: when this post appears in the "In the Spotlight" section and when it comes off. These dates are never shown to the public — use "Dates shown on the article" above for that. Leave blank to publish immediately with no expiry.</p>
           <div className="grid sm:grid-cols-2 gap-4">
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Start date</span>
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Goes live</span>
               <UKDateInput                 value={form.startDate}
                 onChange={(e) => set("startDate", e.target.value)}
                 className="rounded-xl px-3 py-2.5 text-sm outline-none"
@@ -480,7 +498,7 @@ function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], business
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>End date</span>
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Comes off</span>
               <UKDateInput                 value={form.endDate}
                 min={form.startDate || undefined}
                 onChange={(e) => set("endDate", e.target.value)}

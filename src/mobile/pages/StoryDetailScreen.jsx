@@ -4,6 +4,7 @@ import useFetch from "../../hooks/useFetch";
 import { getStoryBySlug, getStories } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
 import ShareButton from "../components/ShareButton";
+import MobilePhoto from "../components/MobilePhoto";
 import { typeColor } from "../lib/typeColors";
 import { storySectionImages } from "../../lib/storyImages";
 
@@ -53,7 +54,7 @@ export default function StoryDetailScreen() {
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
-          <img src={story.heroImage} alt={story.title} className="w-full h-56 object-cover" />
+          <MobilePhoto src={story.heroImage} alt={story.title} aspect="aspect-[16/9]" />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
@@ -76,7 +77,7 @@ export default function StoryDetailScreen() {
               {story.body?.map((block, i) => (
                 <div key={i} className="flex flex-col gap-3">
                   {sectionImages[i] && (
-                    <img src={sectionImages[i].src} alt={block.heading || story.title} loading="lazy" className="w-full h-48 object-cover rounded-2xl" />
+                    <MobilePhoto src={sectionImages[i].src} alt={block.heading || story.title} aspect="aspect-[4/3]" rounded="rounded-2xl" />
                   )}
                   <BlockText block={block} />
                 </div>

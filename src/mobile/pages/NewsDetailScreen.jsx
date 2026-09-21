@@ -1,6 +1,7 @@
 import { useParams, Navigate, Link } from "react-router-dom";
 import { useTrackView, articleView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
+import MobilePhoto from "../components/MobilePhoto";
 import useFetch from "../../hooks/useFetch";
 import { getArticleBySlug } from "../../api";
 import useMobileBack from "../hooks/useMobileBack";
@@ -26,7 +27,7 @@ export default function NewsDetailScreen() {
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
-          <img src={article.image} alt={article.title} className="w-full h-56 object-cover" />
+          <MobilePhoto src={article.image} alt={article.title} aspect="aspect-[16/9]" />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
