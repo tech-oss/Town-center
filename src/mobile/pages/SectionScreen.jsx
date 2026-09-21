@@ -30,7 +30,8 @@ function sectionCategories(section) {
     const slug = l.to.split("?category=")[1];
     if (seen.has(slug)) continue;
     seen.add(slug);
-    out.push({ slug, label: categoryTitles[slug] ?? l.label });
+    // `key` is what FilterPills renders and compares by.
+    out.push({ key: slug, slug, label: categoryTitles[slug] ?? l.label });
   }
   return out;
 }

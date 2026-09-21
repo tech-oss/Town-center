@@ -22,7 +22,8 @@ function categoriesForGroup(groupConfig) {
     .filter((l) => l.to.includes("?category="))
     .map((l) => {
       const slug = l.to.split("?category=")[1];
-      return { slug, label: categoryTitles[slug] ?? l.label };
+      // `key` is what FilterPills renders and compares by.
+      return { key: slug, slug, label: categoryTitles[slug] ?? l.label };
     });
 }
 
