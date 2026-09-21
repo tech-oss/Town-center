@@ -12,7 +12,7 @@
 // Stripe → Developers → Webhooks → endpoint URL:
 //   https://<project-ref>.supabase.co/functions/v1/stripe-webhook
 // Events: checkout.session.completed (subscriptions, homepage slot bookings
-//         and extra article slots), checkout.session.expired,
+//         and add-on slots), checkout.session.expired,
 //   customer.subscription.created,
 //   customer.subscription.updated, customer.subscription.deleted,
 //   invoice.paid, invoice.payment_failed
@@ -182,24 +182,35 @@ async function recordLatestInvoice(sub: Stripe.Subscription) {
   if (invoice.status === "paid") await recordInvoice(invoice, "Paid");
 }
 
-// Paid extra article slots: grant them (12 months, re-usable), record the
-// payment and tell the business. grant_article_slots is keyed on the Stripe
-// session, so a replayed event never grants a pack twice.
+// Paid add-on slots — articles, events or featured articles. Grants them (12
+// months, re-usable), records the payment and tells the business.
+// grant_addon_slots is keyed on the Stripe session, so a replayed event never
+// grants a pack twice.
 // deno-lint-ignore no-explicit-any
-async function settleArticleSlots(session: any) {
+async function settleAddonSlots(session: any) {
   const meta = session.metadata ?? {};
   const quantity = Number(meta.quantity ?? 0);
+  // kind "article_slots" was the older call shape and only ever meant articles.
+  const addon = String(meta.addon ?? "article");
   if (!meta.business_id || !quantity) return;
 
-  const { error } = await admin.rpc("grant_article_slots", {
+  const { error } = await admin.rpc("grant_addon_slots", {
     p_business_id: meta.business_id,
+    p_kind: addon,
     p_quantity: quantity,
     p_amount_pence: session.amount_total ?? 0,
     p_stripe_ref: session.id,
   });
   if (error) throw error;
 
-  const description = `${quantity} extra article slot${quantity === 1 ? "" : "s"} (12 months)`;
+  const NOUN: Record<string, string> = {
+    article: "article slot",
+    event: "event slot",
+    featured_article: "featured article slot",
+  };
+  const noun = NOUN[addon] ?? "slot";
+  const description = `${quantity} extra ${noun}${quantity === 1 ? "" : "s"} (12 months)`;
+
   const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
   if (invoiceId) {
     await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid");
@@ -216,10 +227,12 @@ async function settleArticleSlots(session: any) {
   }
 
   await admin.from("business_activity").insert({
-    business_id: meta.business_id, action: "article_slots.purchased",
-    entity_type: "article_slots", entity_id: session.id,
+    business_id: meta.business_id, action: "addon_slots.purchased",
+    entity_type: "addon_slots", entity_id: session.id,
     title: description,
-    detail: "Use them for News or Offers — edit or replace the content as often as you like for 12 months.",
+    detail: addon === "event"
+      ? "Create an event now, and re-use the slot for the next one once it has finished."
+      : "Edit or replace the content as often as you like for 12 months.",
     actor: "system",
   });
 }
@@ -297,8 +310,8 @@ Deno.serve(async (req) => {
           if (session.payment_status === "paid") await settlePlacement(session);
           break;
         }
-        if (session.metadata?.kind === "article_slots") {
-          if (session.payment_status === "paid") await settleArticleSlots(session);
+        if (session.metadata?.kind === "article_slots" || session.metadata?.kind === "addon_slots") {
+          if (session.payment_status === "paid") await settleAddonSlots(session);
           break;
         }
         if (session.mode === "subscription" && session.subscription) {

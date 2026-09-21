@@ -1,6 +1,6 @@
 // stripe-checkout — starts a Stripe Checkout session for the Visibility Plan,
-// for a homepage slot booking (kind: "placement"), or for extra article slots
-// (kind: "article_slots").
+// for a homepage slot booking (kind: "placement"), or for add-on slots —
+// articles, events and featured articles (kind: "addon_slots").
 //
 // Called by the business dashboard's Subscribe and Homepage Promotions flows. The browser is sent to
 // the returned Stripe-hosted page to pay; the plan itself only changes when
@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const { data: { user } } = await caller.auth.getUser();
     if (!user) return json({ error: "Please sign in again." }, 401);
 
-    const { businessId, interval, kind, slotType, pack } = await req.json().catch(() => ({}));
+    const { businessId, interval, kind, slotType, pack, addon } = await req.json().catch(() => ({}));
     if (!businessId) return json({ error: "Missing business." }, 400);
 
     // Only the approved Owner of an approved business can pay for it.
@@ -139,29 +139,39 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Extra article slots. The packs are defined here, never taken from the
-    // browser, so a caller can't invent a price. Each slot is valid 12 months
-    // and can be re-used for different content during that time; the slots
-    // themselves are granted by the webhook once Stripe confirms payment.
-    if (kind === "article_slots") {
-      const PACKS: Record<string, { quantity: number; amount: number; name: string }> = {
-        "1": { quantity: 1, amount: 999,  name: "1 extra article slot" },
-        "3": { quantity: 3, amount: 2499, name: "3 extra article slots" },
-        "6": { quantity: 6, amount: 3999, name: "6 extra article slots" },
+    // Add-on slots: articles, events and featured articles. The packs are
+    // defined here, never taken from the browser, so a caller can't invent a
+    // price. Each slot is valid 12 months and is re-usable for different
+    // content during that time; the slots are granted by the webhook once
+    // Stripe confirms payment. Being on the homepage is a separate purchase.
+    if (kind === "article_slots" || kind === "addon_slots") {
+      const CATALOGUE: Record<string, { noun: string; packs: Record<string, number> }> = {
+        article:          { noun: "article slot",          packs: { "1": 999,  "3": 2499,  "6": 3999  } },
+        event:            { noun: "event slot",            packs: { "1": 999,  "3": 2499,  "6": 3999  } },
+        featured_article: { noun: "featured article slot", packs: { "1": 4999, "3": 11999, "6": 19999 } },
       };
-      const chosen = PACKS[String(pack)];
-      if (!chosen) return json({ error: "Choose one of the article slot packages." }, 400);
+      // kind "article_slots" is the older call shape, which only ever meant
+      // articles.
+      const slotKind = kind === "article_slots" ? "article" : String(addon ?? "");
+      const entry = CATALOGUE[slotKind];
+      const amount = entry?.packs[String(pack)];
+      if (!entry || !amount) return json({ error: "Choose one of the packages offered." }, 400);
+
+      const quantity = Number(pack);
+      const name = `${quantity} extra ${entry.noun}${quantity === 1 ? "" : "s"}`;
 
       // Add-ons ride on an active Visibility Plan.
       if (sub?.plan !== "premium") {
-        return json({ error: "Extra article slots are available with an active Business Visibility subscription." }, 409);
+        return json({ error: "Add-ons are available with an active Business Visibility subscription." }, 409);
       }
 
       const metadata = {
-        kind: "article_slots",
+        kind: "addon_slots",
+        addon: slotKind,
         business_id: businessId,
-        quantity: String(chosen.quantity),
+        quantity: String(quantity),
       };
+      const backTo = slotKind === "event" ? "events" : "articles";
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         customer: customerId,
@@ -170,9 +180,9 @@ Deno.serve(async (req) => {
           quantity: 1,
           price_data: {
             currency: "gbp",
-            unit_amount: chosen.amount,
+            unit_amount: amount,
             product_data: {
-              name: chosen.name,
+              name,
               description: "Valid 12 months. Re-usable — edit or replace the content as often as you like.",
             },
           },
@@ -180,8 +190,8 @@ Deno.serve(async (req) => {
         metadata,
         payment_intent_data: { metadata },
         invoice_creation: { enabled: true, invoice_data: { metadata } },
-        success_url: `${base}/business/articles?slots=success&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${base}/business/articles?slots=cancelled`,
+        success_url: `${base}/business/${backTo}?slots=success&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${base}/business/${backTo}?slots=cancelled`,
       });
       return json({ url: session.url });
     }

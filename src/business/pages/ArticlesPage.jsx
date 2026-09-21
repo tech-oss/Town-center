@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { formatUK } from "../../lib/ukDate";
-import { ARTICLE_SLOT_PACKS, ARTICLE_SLOT_TERMS, getArticleAllowance, buyArticleSlots, INCLUDED_ARTICLE_SLOTS } from "../api/articleSlots";
+import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -70,7 +70,7 @@ function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy, allowance,
           </div>
 
           <div className="flex flex-col gap-2">
-            {ARTICLE_SLOT_PACKS.map((p) => (
+            {ADDON_KINDS.article.packs.map((p) => (
               <div key={p.pack} className="flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 bg-white" style={{ border: `1.5px solid ${BORDER}` }}>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold" style={{ color: FOREST }}>{p.label}</p>
@@ -92,7 +92,7 @@ function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy, allowance,
           <div className="flex flex-col gap-1">
             <p className="text-xs font-bold" style={{ color: FOREST }}>Your slots give you flexibility:</p>
             <ul className="flex flex-col gap-0.5">
-              {ARTICLE_SLOT_TERMS.map((t) => (
+              {ADDON_KINDS.article.terms.map((t) => (
                 <li key={t} className="text-[11px] flex gap-1.5" style={{ color: MUTED }}><span>•</span>{t}</li>
               ))}
             </ul>
@@ -139,7 +139,7 @@ export default function ArticlesPage() {
 
   useEffect(() => {
     let cancelled = false;
-    getArticleAllowance(user.id)
+    getAddonAllowance(user.id, "article")
       .then((s) => { if (!cancelled) setSlots(s); })
       .catch(() => { /* the included 3 still apply */ });
     return () => { cancelled = true; };
@@ -150,7 +150,7 @@ export default function ArticlesPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("slots") === "success") {
       setToast("Thanks — your extra article slots are ready to use.");
-      getArticleAllowance(user.id).then(setSlots).catch(() => {});
+      getAddonAllowance(user.id, "article").then(setSlots).catch(() => {});
       window.history.replaceState({}, "", window.location.pathname);
     } else if (params.get("slots") === "cancelled") {
       window.history.replaceState({}, "", window.location.pathname);
@@ -161,7 +161,7 @@ export default function ArticlesPage() {
   async function handleBuySlots(pack) {
     setBuying(true);
     try {
-      await buyArticleSlots(user.id, pack);
+      await buyAddonSlots(user.id, "article", pack);
     } catch (e) {
       setToast(e.message);
       setBuying(false);
@@ -255,7 +255,7 @@ export default function ArticlesPage() {
         {!loading && articles.length > 0 && (
           <div className="rounded-2xl px-5 py-3.5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
             <p className="text-sm" style={{ color: FOREST }}>
-              <strong>{liveArticles.length} of {allowance}</strong> live article{liveArticles.length === 1 ? "" : "s"} in use{slots?.extra ? ` (${INCLUDED_ARTICLE_SLOTS} included + ${slots.extra} purchased)` : ""}
+              <strong>{liveArticles.length} of {allowance}</strong> live article{liveArticles.length === 1 ? "" : "s"} in use{slots?.extra ? ` (${ADDON_KINDS.article.included} included + ${slots.extra} purchased)` : ""}
             </p>
             {atLiveLimit && (
               <p className="text-xs" style={{ color: "#92400E" }}>

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import AddonSlotsCard from "../components/AddonSlotsCard";
+import { ADDON_KINDS, getAddonAllowance } from "../api/addonSlots";
 import { formatUK } from "../../lib/ukDate";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
@@ -31,6 +33,24 @@ export default function EventsPage() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useToast();
   const [deleting, setDeleting] = useState(null);
+  const [slots, setSlots] = useState(null);
+  const [showSlots, setShowSlots] = useState(false);
+
+  // How many events this business may have on the site at once. An event slot
+  // is bought as an add-on; a recurring event is still one event, so it uses
+  // one slot however many dates it runs on.
+  const reload = () => getAddonAllowance(user.id, "event").then(setSlots).catch(() => {});
+  useEffect(() => { reload(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user.id]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("slots") === "success") {
+      setToast("Thanks — your event slots are ready to use.");
+      reload();
+    }
+    if (params.get("slots")) window.history.replaceState({}, "", window.location.pathname);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +79,13 @@ export default function EventsPage() {
     setDeleting(null);
   }
 
+  // An event counts against a slot while it is on the site or waiting on
+  // admin; a hidden or finished one frees its slot for the next event.
+  const onSite = events.filter((e) => e.status === "Live" || e.status === "Pending Approval");
+  const allowance = slots?.allowance ?? ADDON_KINDS.event.included;
+  const atSlotLimit = onSite.length >= allowance;
+  const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
+
   return (
     <BusinessLayout>
       <Toast message={toast} />
@@ -73,12 +100,31 @@ export default function EventsPage() {
             <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Request Event</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>Request a See & Do event for your business — admin approval is required before it goes live.</p>
           </div>
-          <button onClick={() => navigate("/business/events/new")}
+          <button onClick={() => (atSlotLimit ? setShowSlots(true) : navigate("/business/events/new"))}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
             style={{ backgroundColor: SAGE }}>
             + Add New Event
           </button>
         </div>
+
+        {/* What the business's event slots allow, and how to get more. */}
+        <div className="rounded-xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap"
+          style={{ backgroundColor: atSlotLimit ? "rgba(217,119,6,0.08)" : "rgba(37,99,235,0.06)" }}>
+          <span className="text-sm" style={{ color: atSlotLimit ? "#92400E" : FOREST }}>
+            {allowance === 0
+              ? "You have no event slots yet. An event slot puts one of your events on the site, and you can re-use it for the next one once that event has finished."
+              : <><strong>{onSite.length} of {allowance}</strong> event slot{allowance === 1 ? "" : "s"} in use{slots?.extra ? ` (${slots.extra} purchased)` : ""}.</>}
+          </span>
+          <button onClick={() => setShowSlots((v) => !v)} className="text-xs font-bold px-3 py-1.5 rounded-lg shrink-0"
+            style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+            {showSlots ? "Hide packages" : allowance === 0 ? "Get an event slot" : "Get more slots"}
+          </button>
+        </div>
+
+        {showSlots && (
+          <AddonSlotsCard businessId={user.id} kind="event" premium={premium}
+            isOwner={user.role === "Owner"} onToast={setToast} />
+        )}
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading events…</p>

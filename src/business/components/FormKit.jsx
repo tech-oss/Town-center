@@ -238,11 +238,25 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
         className={`relative overflow-hidden ${round ? "w-24 h-24 rounded-full" : `w-full max-w-md ${aspect} rounded-2xl`}`}
         style={{ border: dragOver ? `2px dashed ${SAGE}` : `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
         {src ? (
-          <img src={src} alt={label || "preview"} className="w-full h-full object-cover" />
+          <>
+            <img src={src} alt={label || "preview"} className="w-full h-full object-cover" />
+            {/* Clearing a picture used to be impossible — the only way out of
+                an unwanted logo or header was to upload a different one. */}
+            <button
+              type="button"
+              onClick={() => { setError(""); onChange(""); }}
+              aria-label={`Remove ${label || "image"}`}
+              title="Remove image"
+              className="absolute top-1.5 right-1.5 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+              style={{ width: 24, height: 24, backgroundColor: "rgba(16,24,40,0.65)", color: "#fff", lineHeight: 1 }}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-1">
             <span className="text-2xl" style={{ color: "#9CA3AF" }}>+</span>
-            <span className="text-[10px] text-center px-2" style={{ color: "#9CA3AF" }}>Drop image or click Replace</span>
+            <span className="text-[10px] text-center px-2" style={{ color: "#9CA3AF" }}>Drop image or click Upload</span>
           </div>
         )}
       </div>
