@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getBusinessArticles, approveArticle, rejectArticle } from "../../api/admin";
+import { getBusinessArticles, approveArticle, rejectArticle, takeDownArticle, restoreArticle, deleteBusinessArticle } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
@@ -9,7 +9,7 @@ import Toast from "../components/Toast";
 import { formatUK } from "../../lib/ukDate";
 import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
-const FILTERS = ["Pending Approval", "Live", "Rejected", "All"];
+const FILTERS = ["Pending Approval", "Live", "Hidden", "Rejected", "Removed", "All"];
 
 function runDates(a) {
   if (!a.startDate) return "";
@@ -30,7 +30,7 @@ function Paragraphs({ text }) {
 // The full-page review of one submission: laid out like the public article
 // (hero, heading, meta, readable column of text), capped to a reading width
 // so long posts can be checked properly before approving or rejecting.
-function ArticleReview({ article: a, position, total, onBack, onPrev, onNext, onApprove, onReject }) {
+function ArticleReview({ article: a, position, total, onBack, onPrev, onNext, onApprove, onReject, onTakeDown, onRestore, onDelete }) {
   return (
     <div className="max-w-3xl mx-auto flex flex-col gap-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -86,10 +86,89 @@ function ArticleReview({ article: a, position, total, onBack, onPrev, onNext, on
         </div>
       </article>
 
-      {a.status === "Pending Approval" && (
+      {a.status === "Pending Approval" ? (
         <div className="sticky bottom-4 bg-white rounded-2xl px-6 py-4" style={{ ...CARD, boxShadow: "0 8px 30px rgba(16,24,40,0.12)" }}>
           <p className="text-xs font-semibold" style={{ color: MUTED }}>Decision</p>
           <ReviewActions onApprove={onApprove} onReject={onReject} />
+        </div>
+      ) : (
+        /* Approval isn't infallible. Anything already published can still be
+           taken off the site — or deleted — and the business is told why. */
+        <TakeDownPanel article={a} onTakeDown={onTakeDown} onRestore={onRestore} onDelete={onDelete} />
+      )}
+    </div>
+  );
+}
+
+
+// Pulling a published post off the site, restoring it, or deleting it. The
+// reason is mandatory: it is what the business is shown and notified with.
+function TakeDownPanel({ article, onTakeDown, onRestore, onDelete }) {
+  const [mode, setMode] = useState(null); // "remove" | "delete"
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function confirm() {
+    if (!reason.trim()) return;
+    setBusy(true);
+    try {
+      await (mode === "delete" ? onDelete(reason.trim()) : onTakeDown(reason.trim()));
+    } finally {
+      setBusy(false);
+      setMode(null);
+      setReason("");
+    }
+  }
+
+  return (
+    <div className="sticky bottom-4 bg-white rounded-2xl px-6 py-4 flex flex-col gap-3" style={{ ...CARD, boxShadow: "0 8px 30px rgba(16,24,40,0.12)" }}>
+      <p className="text-xs font-semibold" style={{ color: MUTED }}>Moderation</p>
+      {mode ? (
+        <>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs font-semibold" style={{ color: MUTED }}>
+              Reason — {article.businessName} is shown this{mode === "delete" ? " before the post is deleted" : ""} *
+            </span>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              autoFocus
+              placeholder="Explain what is wrong with this post…"
+              className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
+              style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}
+            />
+          </label>
+          <div className="flex gap-2 flex-wrap">
+            <button onClick={confirm} disabled={busy || !reason.trim()}
+              className="px-5 py-2 rounded-xl text-xs font-semibold text-white disabled:opacity-40"
+              style={{ backgroundColor: mode === "delete" ? "#991B1B" : "#D97706" }}>
+              {busy ? "Working…" : mode === "delete" ? "Delete permanently" : "Take off the site"}
+            </button>
+            <button onClick={() => { setMode(null); setReason(""); }}
+              className="px-5 py-2 rounded-xl text-xs font-semibold"
+              style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
+              Cancel
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {article.status === "Removed" ? (
+            <button onClick={() => onRestore()}
+              className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#16A34A" }}>
+              Put back (hidden)
+            </button>
+          ) : (
+            <button onClick={() => setMode("remove")}
+              className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#D97706" }}>
+              Take off the site
+            </button>
+          )}
+          <button onClick={() => setMode("delete")}
+            className="px-5 py-2 rounded-xl text-xs font-semibold" style={{ border: "1.5px solid rgba(153,27,27,0.35)", color: "#991B1B" }}>
+            Delete
+          </button>
         </div>
       )}
     </div>
@@ -134,6 +213,23 @@ export default function ArticleApprovalsPage() {
     if (filter !== "All") advance();
     refresh();
   }
+  async function handleTakeDown(a, reason) {
+    await takeDownArticle(a.id, reason);
+    flash(`"${a.title}" taken off the site. ${a.businessName} has been told why.`);
+    if (filter !== "All") advance();
+    refresh();
+  }
+  async function handleRestore(a) {
+    await restoreArticle(a.id);
+    flash(`"${a.title}" put back — hidden until ${a.businessName} makes it live.`);
+    refresh();
+  }
+  async function handleDelete(a, reason) {
+    await deleteBusinessArticle(a.id, reason);
+    flash(`"${a.title}" deleted. ${a.businessName} has been told why.`);
+    advance();
+    refresh();
+  }
 
   if (open) {
     return (
@@ -148,6 +244,9 @@ export default function ArticleApprovalsPage() {
           onNext={() => setOpenId(list[openIndex + 1]?.id ?? open.id)}
           onApprove={() => handleApprove(open)}
           onReject={(r) => handleReject(open, r)}
+          onTakeDown={(r) => handleTakeDown(open, r)}
+          onRestore={() => handleRestore(open)}
+          onDelete={(r) => handleDelete(open, r)}
         />
       </>
     );

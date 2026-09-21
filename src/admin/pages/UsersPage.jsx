@@ -18,6 +18,11 @@ const ROLE_FILTERS = [
 ];
 
 const TABS = [
+  // "All" exists so every registered portal login is reachable, whatever
+  // status it carries — a Content Manager approved by their own business
+  // owner has never needed admin's attention, so nothing under the
+  // status-specific tabs would ever surface them.
+  { key: "All",       label: "All Users" },
   { key: "Pending",   label: "Pending Approvals" },
   { key: "Approved",  label: "Approved Users" },
   { key: "Rejected",  label: "Rejected Users" },
@@ -224,7 +229,7 @@ function DeleteUserModal({ user, onClose, onConfirm, deleting }) {
 
 export default function UsersPage() {
   const navigate = useNavigate();
-  const [tab, setTab]           = useState("Pending");
+  const [tab, setTab]           = useState("All");
   const [busy, setBusy]         = useState(null);
   const [tick, setTick]         = useState(0);
   const [rejectingId, setRejectingId] = useState(null);
@@ -263,7 +268,7 @@ export default function UsersPage() {
   // This used to fetch Business Owners only, which hid every Content
   // Manager — including the ones admin registers here.
   const fetch = useCallback(
-    () => getUsers({ status: tab, role: roleFilter === "All" ? undefined : roleFilter }),
+    () => getUsers({ status: tab === "All" ? undefined : tab, role: roleFilter === "All" ? undefined : roleFilter }),
     [tab, roleFilter, tick],
   );
   const { data: rawUsers, loading } = useFetch(fetch, [tab, roleFilter, tick]);
@@ -434,7 +439,7 @@ export default function UsersPage() {
             <p className="text-sm text-center py-12" style={{ color: MUTED }}>
               {search
                 ? `No results for "${search}"`
-                : `No ${tab.toLowerCase()} ${roleFilter === "All" ? "users" : `${roleFilter.toLowerCase()}s`}.`}
+                : `No ${tab === "All" ? "" : `${tab.toLowerCase()} `}${roleFilter === "All" ? "users" : `${roleFilter.toLowerCase()}s`}.`}
             </p>
           ) : (
             // Nine columns (including a multi-button Actions column) don't fit
@@ -478,19 +483,21 @@ export default function UsersPage() {
                       <td className="px-4 py-3"><StatusTag status={u.status} /></td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          {tab === "Pending" && (
+                          {/* Driven by the row's own status, not the tab, so
+                              the actions still work under "All Users". */}
+                          {u.status === "Pending" && (
                             <>
                               <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
                               <ActionBtn color="#DC2626" disabled={busy === u.id} onClick={(e) => openReject(u.id, e)}>Reject</ActionBtn>
                             </>
                           )}
-                          {tab === "Approved" && (
+                          {u.status === "Approved" && (
                             <ActionBtn color="#D97706" disabled={busy === u.id} onClick={(e) => action(suspendUser, u.id, e)}>Suspend</ActionBtn>
                           )}
-                          {tab === "Suspended" && (
+                          {u.status === "Suspended" && (
                             <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Reinstate</ActionBtn>
                           )}
-                          {tab === "Rejected" && (
+                          {u.status === "Rejected" && (
                             <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
                           )}
                           <ActionBtn color={BLUE} onClick={(e) => { e.stopPropagation(); navigate(`/admin/users/${u.id}`); }}>View</ActionBtn>

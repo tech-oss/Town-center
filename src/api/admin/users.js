@@ -9,7 +9,9 @@ import { getCurrentAdmin } from "../../admin/hooks/useAdminAuth";
 // The DB stores status lowercase ("approved"); the admin UI has always shown it
 // title-cased, so the two are mapped at this boundary.
 
-const TO_UI = { approved: "Approved", pending: "Pending", rejected: "Rejected", suspended: "Suspended" };
+// The business portal writes "declined" when a business owner turns down a
+// Content Manager's join request; admin has always called that Rejected.
+const TO_UI = { approved: "Approved", pending: "Pending", rejected: "Rejected", declined: "Rejected", suspended: "Suspended" };
 const TO_DB = { Approved: "approved", Pending: "pending", Rejected: "rejected", Suspended: "suspended" };
 
 function fromRow(row) {
@@ -83,8 +85,13 @@ export async function deleteAdminLogs(ids) {
 // ── Queries ───────────────────────────────────────────────────────────────────
 
 export async function getUsers({ role, status } = {}) {
-  let q = supabase.from("business_users").select(SELECT).order("requested_at", { ascending: false });
-  if (status) q = q.eq("status", TO_DB[status] ?? status);
+  // Nulls last: a Content Manager row is written without requested_at, and
+  // ordering it to the top of the list made it easy to miss.
+  let q = supabase.from("business_users").select(SELECT)
+    .order("requested_at", { ascending: false, nullsFirst: false });
+  // "Rejected" covers both spellings the two portals write.
+  if (status === "Rejected") q = q.in("status", ["rejected", "declined"]);
+  else if (status) q = q.eq("status", TO_DB[status] ?? status);
   const { data, error } = await q;
   if (error) throw error;
 

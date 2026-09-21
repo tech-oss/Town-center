@@ -192,3 +192,52 @@ export async function deleteReview(id) {
   const { error } = await supabase.from("business_reviews").delete().eq("id", id);
   if (error) throw error;
 }
+
+// ─── Taking an already-published post down ────────────────────────────────
+// Approval isn't infallible: something can get through that shouldn't have.
+// Admin can pull any business post off the site, or delete it outright, and
+// both require a reason — which is written to rejection_reason so the
+// business reads it on their own News & Articles page, and to their activity
+// feed so they're notified.
+
+export async function takeDownArticle(id, reason) {
+  if (!reason?.trim()) throw new Error("A reason is required — the business is shown it.");
+  const ctx = await articleContext(id);
+  const { error } = await supabase
+    .from("business_articles")
+    .update({ status: "Removed", rejection_reason: reason.trim() })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, {
+    action: "article.removed", entityType: "article", entityId: id,
+    title: ctx?.title, detail: reason.trim(),
+  });
+}
+
+// Back on the site after a take-down, if the decision is reversed. It returns
+// as Hidden rather than Live so it never jumps the business's 3-live limit;
+// the business chooses when to swap it back in.
+export async function restoreArticle(id) {
+  const ctx = await articleContext(id);
+  const { error } = await supabase
+    .from("business_articles")
+    .update({ status: "Hidden", rejection_reason: null })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, {
+    action: "article.restored", entityType: "article", entityId: id, title: ctx?.title,
+  });
+}
+
+export async function deleteBusinessArticle(id, reason) {
+  if (!reason?.trim()) throw new Error("A reason is required — the business is shown it.");
+  const ctx = await articleContext(id);
+  // Logged against the business BEFORE the row goes, so the notice survives
+  // the post it's about.
+  await logBusinessActivity(ctx?.business_id, {
+    action: "article.deleted", entityType: "article", entityId: id,
+    title: ctx?.title, detail: reason.trim(),
+  });
+  const { error } = await supabase.from("business_articles").delete().eq("id", id);
+  if (error) throw error;
+}
