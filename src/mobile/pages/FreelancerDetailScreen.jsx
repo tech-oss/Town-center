@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import useViewedCategory from "../../lib/viewedCategory";
+import useRelatedBusinesses from "../hooks/useRelatedBusinesses";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
 import ComingSoonCard from "../components/ComingSoonCard";
 import { useState } from "react";
@@ -104,9 +105,8 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   const workMode = place.workMode || "Remote & on-site";
   const responseTime = place.responseTime || "Usually within 24 hours";
   const experience = place.experience || place.stats?.[0]?.value;
-  const related = (section?.items ?? [])
-    .filter((it) => it.slug !== place.slug && it.category === place.category)
-    .slice(0, 3);
+  // Live businesses, same category first — the website's "You might also like".
+  const related = useRelatedBusinesses(place);
 
   const infoRows = [
     availability && { label: "Availability", value: availability, icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" /></svg> },
@@ -297,7 +297,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
 
           {related.length > 0 && (
             <div className="mt-2">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Similar Freelancers</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>You might also like</p>
               <div className="flex flex-col gap-3">
                 {related.map((it) => (
                   <Link key={it.slug} to={`/mobile/place/${it.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>

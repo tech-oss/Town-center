@@ -7,6 +7,10 @@ import { getBuildings } from "../api";
 import useTapReveal from "../hooks/useTapReveal";
 import LocationMap from "./LocationMap";
 import ConnectivitySection from "./ConnectivitySection";
+
+// Developments / New Homes are hidden across the site for now. Flip this to
+// true to bring the section back.
+export const SHOW_DEVELOPMENTS = false;
 // Property search platform (for sale / for rent) — paused for now, kept for
 // a future relaunch. See the commented-out routes in src/App.jsx.
 // import { FeaturedProperties } from "./PropertySearch";
@@ -339,7 +343,13 @@ export default function LivePage() {
       </section>
 
       {/* ── 8. Developments — squared cards, same card typography as the
-          See & Do / Eat & Drink / Shop / Services listing grids. ── */}
+          See & Do / Eat & Drink / Shop / Services listing grids.
+
+          Hidden for now at the client's request, along with the Developments
+          column in the Live & Stay menu. The section is kept rather than
+          deleted so it can be switched back on in one line when the
+          development content is ready. ── */}
+      {SHOW_DEVELOPMENTS && (
       <section className="py-16 md:py-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
           <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>New Homes</p>
@@ -379,6 +389,7 @@ export default function LivePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ── 9. Closing statement ── */}
       <section className="px-6 md:px-12 pb-16 md:pb-24">

@@ -15,6 +15,7 @@ import MiniMap from "../components/MiniMap";
 import { itemBySlug, sections } from "../../Data/pages";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import useMobileBack from "../hooks/useMobileBack";
+import useRelatedBusinesses from "../hooks/useRelatedBusinesses";
 import { typeColor } from "../lib/typeColors";
 import { FREELANCER_CATEGORIES } from "../lib/freelancerCategories";
 import ServicesBusinessDetailScreen from "./ServicesBusinessDetailScreen";
@@ -41,6 +42,8 @@ function BusinessDetailScreen({ place, goBack }) {
   // Free plan: name, hero, address, phone and email; everything else shows a
   // "coming soon" line or is left out — same rules as the website.
   const free = isFreeListing(place);
+  // Same section, same category first — the website's "You might also like".
+  const more = useRelatedBusinesses(place);
   // A business can sit in several categories; the breadcrumb follows the one
   // the visitor opened it from (?category=), the same as the website.
   const viewed = useViewedCategory(place);
@@ -55,7 +58,7 @@ function BusinessDetailScreen({ place, goBack }) {
   const social = !free && place.social
     ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k])
     : [];
-  const more = (section?.items ?? []).filter((it) => it.slug !== place.slug).slice(0, 3);
+
   const gallery = free ? [] : (place.gallery ?? []).filter((g) => g !== place.image);
 
   async function handleShare() {
@@ -249,7 +252,7 @@ function BusinessDetailScreen({ place, goBack }) {
 
           {more.length > 0 && (
             <div className="mt-2">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>More {section?.label}</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>You might also like</p>
               <div className="flex flex-col gap-3">
                 {more.map((it) => (
                   <Link key={it.slug} to={`/mobile/place/${it.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
@@ -257,6 +260,7 @@ function BusinessDetailScreen({ place, goBack }) {
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{it.tag}</span>
                       <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{it.name}</p>
+                      {it.address && <p className="text-[11px] mt-0.5 truncate" style={{ color: "#000000" }}>{it.address}</p>}
                     </div>
                   </Link>
                 ))}

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import useViewedCategory from "../../lib/viewedCategory";
+import useRelatedBusinesses from "../hooks/useRelatedBusinesses";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
 import ComingSoonCard from "../components/ComingSoonCard";
 import { useState } from "react";
@@ -114,9 +115,8 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
   const reviewsList = place.reviewsList ?? [];
   const accreditations = place.accreditations ?? [];
   const faq = free ? [] : (place.faq ?? []);
-  const related = (section?.items ?? [])
-    .filter((it) => it.slug !== place.slug && it.category === place.category)
-    .slice(0, 3);
+  // Live businesses, same category first — the website's "You might also like".
+  const related = useRelatedBusinesses(place);
 
   async function handleShare() {
     const url = `${window.location.origin}/${place.section}/place/${place.slug}`;
@@ -357,7 +357,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
 
           {related.length > 0 && (
             <div className="mt-2">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Similar Businesses</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>You might also like</p>
               <div className="flex flex-col gap-3">
                 {related.map((it) => (
                   <Link key={it.slug} to={`/mobile/place/${it.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
