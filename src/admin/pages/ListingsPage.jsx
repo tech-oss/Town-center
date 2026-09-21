@@ -166,7 +166,8 @@ function ImageStrip({ images, onChange, label = "Header Images", max = 5 }) {
           <div key={i} className="relative group">
             <img src={img.src} alt={img.name} className="w-24 h-16 rounded-xl object-cover" style={{ border: `1.5px solid ${BORDER}` }} />
             <button onClick={() => remove(i)}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              title="Remove image" aria-label="Remove image"
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center transition-opacity hover:opacity-80"
               style={{ backgroundColor: "#DC2626" }}>✕</button>
           </div>
         ))}
@@ -244,7 +245,8 @@ function OffersEditor({ bizId, offers, onRefresh }) {
                 <div className="relative group shrink-0">
                   <img src={form.image} alt="offer" className="w-24 h-16 rounded-xl object-cover" style={{ border: `1.5px solid ${BORDER}` }} />
                   <button type="button" onClick={() => setF("image", null)}
-                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove image" aria-label="Remove image"
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center transition-opacity hover:opacity-80"
                     style={{ backgroundColor: "#DC2626" }}>✕</button>
                 </div>
               )}

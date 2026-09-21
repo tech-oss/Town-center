@@ -870,6 +870,20 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
             {biz.logo ? "Replace" : "Upload"}
           </span>
         </button>
+        {/* Clearing a logo used to be impossible — the only way out of an
+            unwanted one was to upload a different picture. */}
+        {biz.logo && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onUploadLogo(biz.id, ""); }}
+            aria-label={`Remove ${biz.name}'s logo`}
+            title="Remove logo"
+            className="-ml-4 -mt-1 shrink-0 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+            style={{ width: 20, height: 20, backgroundColor: "rgba(16,24,40,0.7)", lineHeight: 1 }}
+          >
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+        )}
         {uploadingLogo && (
           <LogoUploadModal biz={biz}
             onCancel={() => setUploadingLogo(false)}
