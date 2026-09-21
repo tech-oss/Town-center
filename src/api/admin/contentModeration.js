@@ -241,3 +241,97 @@ export async function deleteBusinessArticle(id, reason) {
   const { error } = await supabase.from("business_articles").delete().eq("id", id);
   if (error) throw error;
 }
+
+// ─── Business-written Featured Articles ───────────────────────────────────
+// Longer editorial pieces a business writes for itself, against a Featured
+// Article slot it has bought. They sit in feature_articles alongside admin's
+// own stories, told apart by author = 'business', and need approving before
+// they reach the site.
+
+function featureFromRow(row) {
+  return {
+    id: row.id,
+    slug: row.slug,
+    businessId: row.business_id,
+    businessName: row.businesses?.name ?? row.business_id,
+    status: row.status,
+    title: row.title,
+    standfirst: row.standfirst ?? "",
+    category: row.category ?? "",
+    heroImage: row.hero_image,
+    cardImage: row.card_image,
+    website: row.website ?? "",
+    location: row.location ?? "",
+    body: Array.isArray(row.body) ? row.body : [],
+    submittedAt: row.submitted_at,
+    rejectionReason: row.rejection_reason,
+  };
+}
+
+export async function getBusinessFeatureArticles({ status } = {}) {
+  let q = supabase
+    .from("feature_articles")
+    .select("*, businesses(name)")
+    .eq("author", "business")
+    .order("submitted_at", { ascending: false, nullsFirst: false });
+  if (status && status !== "All") q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []).map(featureFromRow);
+}
+
+export async function approveFeatureArticle(id) {
+  const { data: row, error: readError } = await supabase
+    .from("feature_articles").select("business_id, title").eq("id", id).maybeSingle();
+  if (readError) throw readError;
+  const { error } = await supabase
+    .from("feature_articles")
+    .update({ status: "Live", rejection_reason: null })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(row?.business_id, {
+    action: "featured_article.approved", entityType: "featured_article", entityId: id, title: row?.title,
+  });
+}
+
+export async function rejectFeatureArticle(id, reason) {
+  if (!reason?.trim()) throw new Error("A reason is required — the business is shown it.");
+  const { data: row } = await supabase
+    .from("feature_articles").select("business_id, title").eq("id", id).maybeSingle();
+  const { error } = await supabase
+    .from("feature_articles")
+    .update({ status: "Rejected", rejection_reason: reason.trim() })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(row?.business_id, {
+    action: "featured_article.rejected", entityType: "featured_article", entityId: id,
+    title: row?.title, detail: reason.trim(),
+  });
+}
+
+// Pulling a live one off the site, with the reason the business reads.
+export async function takeDownFeatureArticle(id, reason) {
+  if (!reason?.trim()) throw new Error("A reason is required — the business is shown it.");
+  const { data: row } = await supabase
+    .from("feature_articles").select("business_id, title").eq("id", id).maybeSingle();
+  const { error } = await supabase
+    .from("feature_articles")
+    .update({ status: "Removed", rejection_reason: reason.trim() })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(row?.business_id, {
+    action: "featured_article.removed", entityType: "featured_article", entityId: id,
+    title: row?.title, detail: reason.trim(),
+  });
+}
+
+// How many business Featured Articles are waiting, for the sidebar badge.
+export async function countFeatureArticlesNeedingApproval() {
+  const { count, error } = await supabase
+    .from("feature_articles")
+    .select("id", { count: "exact", head: true })
+    .eq("author", "business")
+    .eq("status", "Pending Approval");
+  if (error) return 0;
+  return count ?? 0;
+}

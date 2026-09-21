@@ -44,6 +44,7 @@ const NAV = [
   },
   { to: "/admin/event-approvals",    label: "Events",                icon: I.events },
   { to: "/admin/article-approvals",  label: "Business News & Offers",icon: I.articles },
+  { to: "/admin/featured-article-approvals", label: "Business Featured Articles", icon: I.articles },
   { to: "/admin/review-moderation",  label: "Review Moderation",     icon: I.stories },
   { to: "/admin/properties",         label: "Properties",            icon: I.properties },
   {

@@ -23,8 +23,11 @@ function fromRow(r) {
     standfirst: r.standfirst,
     location: r.location,
     website: r.website,
-    // Set when admin attached the story to a registered business.
+    // Set when the story belongs to a business — either one a business wrote
+    // against a Featured Article slot, or one admin attached to it.
     businessId: r.business_id ?? null,
+    businessName: r.business_name ?? null,
+    author: r.author ?? "admin",
     body: r.body ?? [],
     gallery: r.gallery ?? [],
   };
@@ -33,7 +36,7 @@ function fromRow(r) {
 // Every story. `homepage` is true while it's booked into a Featured Article slot.
 export async function getStories() {
   const [{ data, error }, placements] = await Promise.all([
-    supabase.from("feature_articles").select("*").order("sort_order"),
+    supabase.from("feature_articles").select("*").eq("status", "Live").order("sort_order"),
     getLivePlacements(),
   ]);
   if (error) throw error;
@@ -51,7 +54,7 @@ export async function getHomepageStories() {
   const storyIds = slots.filter((p) => p.content_kind === "feature_article").map((p) => p.content_id);
   const postIds = slots.filter((p) => p.content_kind === "news_offer").map((p) => p.content_id);
   const [storiesRes, live, postsRes] = await Promise.all([
-    storyIds.length ? supabase.from("feature_articles").select("*").in("id", storyIds) : Promise.resolve({ data: [] }),
+    storyIds.length ? supabase.from("feature_articles").select("*").eq("status", "Live").in("id", storyIds) : Promise.resolve({ data: [] }),
     slots.some((p) => p.content_kind === "business_article") ? loadLiveBusinesses().catch(() => []) : [],
     postIds.length ? supabase.from("news_offers").select("*").in("id", postIds).eq("status", "Published") : Promise.resolve({ data: [] }),
   ]);
@@ -97,6 +100,7 @@ export async function getStoryBySlug(slug) {
     .from("feature_articles")
     .select("*")
     .eq("slug", slug)
+    .eq("status", "Live")
     .maybeSingle();
   if (error) throw error;
   return data ? fromRow(data) : null;

@@ -56,7 +56,7 @@ export async function getOffersFeed() {
       excerpt: s.cardBody,
       date: s.date,
       type: "Featured",
-      businessName: null,
+      businessName: s.businessName ?? null,
       businessSection: storySection(s),
       // Searchable: the section and category it's filed under.
       category: [s.eyebrow, s.category].filter(Boolean).join(" "),
@@ -89,6 +89,9 @@ export async function getOffersFeed() {
       homepage: onHome.has(`business_event:${e.id}`),
     })),
   ].filter((it) => it.slug && once(it.key))
-    // What's on the homepage now leads the page.
-    .sort((a, b) => Number(b.homepage) - Number(a.homepage));
+    // Featured articles always lead the page, then whatever is on the
+    // homepage now, then the rest — in that order of precedence.
+    .sort((a, b) =>
+      Number(b.type === "Featured") - Number(a.type === "Featured") ||
+      Number(b.homepage) - Number(a.homepage));
 }

@@ -68,6 +68,25 @@ function articleDates(a) {
   return a.display_dates?.trim() || "";
 }
 
+// A business's own Featured Article, in the same shape as its other posts so
+// the profile and the Offers page can list them together. It opens at
+// /story/:slug, the full editorial layout.
+function mapFeature(f, business) {
+  return {
+    id: `feature-${f.id}`,
+    slug: f.slug,
+    to: `/story/${f.slug}`,
+    category: "Featured",
+    date: f.date_label ?? "",
+    endsOn: null,
+    title: f.card_heading || f.title,
+    excerpt: f.card_body ?? f.standfirst ?? "",
+    image: f.card_image || f.hero_image || business.image,
+    body: [],
+    business,
+  };
+}
+
 function mapArticle(a, business) {
   const slug = `live-${a.id}`;
   return {
@@ -128,7 +147,7 @@ function mapReview(r) {
   };
 }
 
-function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set()) {
+function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}) {
   const type = row.business_type;
   const section = SECTION_FOR_TYPE[type];
   const categories = categoriesFor(type, row.business_type_detail);
@@ -188,7 +207,11 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     // Hotels vs accommodation, for the Live & Stay section.
     stayKind: row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
   };
+  // Featured Articles lead the business's own page, then its news and
+  // offers — the same precedence the Offers page uses.
+  item.featured = (features[row.business_id] ?? []).map((f) => mapFeature(f, item));
   item.news = [
+    ...item.featured,
     ...(articles[row.business_id] ?? []).map((a) => mapArticle(a, item)),
     ...(newsOffers[row.business_id] ?? []).map((n) => mapNewsOffer(n, item)),
   ];
@@ -228,12 +251,17 @@ export function invalidateLiveBusinesses() {
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
-    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, placements] = await Promise.all([
+    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, featuresRes, placements] = await Promise.all([
       withSchemaRetry(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false })),
       withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
       // Reviews are optional: if the view isn't there yet, pages just show none.
       withSchemaRetry(() => supabase.from("public_business_reviews").select("*").order("date", { ascending: false })),
       supabase.from("news_offers").select("*").eq("status", "Published").order("created_at", { ascending: false }),
+      // Featured Articles a business wrote against a slot it bought. Live
+      // only — RLS also lets a signed-in business read its own drafts, which
+      // must never reach a public list.
+      withSchemaRetry(() => supabase.from("feature_articles").select("*")
+        .eq("author", "business").eq("status", "Live").order("updated_at", { ascending: false })),
       getLivePlacements(),
     ]);
     // A missing view (migration not run yet) or a network failure must not
@@ -251,6 +279,10 @@ export function loadLiveBusinesses() {
     for (const n of (newsOffersRes.data ?? []).filter(notEnded)) {
       if (n.business_id) (newsOffers[n.business_id] ??= []).push(n);
     }
+    const features = {};
+    for (const f of featuresRes?.data ?? []) {
+      if (f.business_id) (features[f.business_id] ??= []).push(f);
+    }
     const featuredIds = new Set(placements.featured_business.map((p) => p.business_id ?? p.content_id));
     const reviews = {};
     for (const rv of reviewsRes.data ?? []) (reviews[rv.business_id] ??= []).push(rv);
@@ -259,7 +291,7 @@ export function loadLiveBusinesses() {
     // stays off the public site until its type is set.
     return (profilesRes.data ?? [])
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
-      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds));
+      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds, features));
   })();
   // A thrown error (e.g. offline) likewise retries on the next page.
   const pending = cache;
