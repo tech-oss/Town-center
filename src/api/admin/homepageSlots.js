@@ -84,8 +84,19 @@ export async function getSlotContentOptions(slotType) {
       return (data ?? []).map((r) => ({ kind, id: String(r.id), title: r.title, detail: `${r.businesses?.name ?? "Business"} · ${r.type ?? "News"}`, businessId: r.business_id, image: r.hero_image || r.thumbnail }));
     }
     if (kind === "feature_article") {
-      const { data } = await supabase.from("feature_articles").select("id, title, card_heading, card_image").order("sort_order");
-      return (data ?? []).map((r) => ({ kind, id: String(r.id), title: r.card_heading || r.title, detail: "Featured story", businessId: null, image: r.card_image }));
+      // Live only — a business's drafts and submissions are not bookable, and
+      // a business-written piece is labelled with whose it is.
+      const { data } = await supabase.from("feature_articles")
+        .select("id, title, card_heading, card_image, author, business_id, businesses(name)")
+        .eq("status", "Live").order("sort_order");
+      return (data ?? []).map((r) => ({
+        kind, id: String(r.id), title: r.card_heading || r.title,
+        detail: r.author === "business"
+          ? `${r.businesses?.name ?? "Business"} · Featured Article`
+          : "Featured story",
+        businessId: r.business_id ?? null,
+        image: r.card_image,
+      }));
     }
     if (kind === "business_event") {
       const { data } = await supabase.from("business_events").select("id, title, event_date, date_label, business_id, hero_image, businesses(name)")
