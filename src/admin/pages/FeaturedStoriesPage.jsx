@@ -11,6 +11,7 @@ import {
   deleteFeatureArticle,
   setArticleHomepageFeature,
   swapArticleHomepageFeature,
+  getSpotlightBusinesses,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
@@ -183,11 +184,12 @@ function SectionsEditor({ blocks, onChange }) {
 }
 
 // ─── Edit / Create form ───────────────────────────────────────────────────────
-function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
+function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
   const blank = {
     eyebrow: "", category: "", date: "",
     cardHeading: "", cardBody: "", cardImage: "",
     title: "", heroImage: "", standfirst: "", location: "", website: "",
+    businessId: "",
     body: [], gallery: [], homepage: false,
   };
   // An older story's gallery pictures open on the sections they already sit
@@ -278,6 +280,24 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [] }) {
             <input value={form.date} onChange={(e) => set("date", e.target.value)} placeholder="e.g. Now open · One Maidenhead" className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
           </label>
         </div>
+
+        {/* Any story admin writes can belong to a registered business, the
+            same as an admin-written event or News & Offer post can. */}
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Attach to a business (optional)</span>
+          <select
+            value={form.businessId ?? ""}
+            onChange={(e) => set("businessId", e.target.value)}
+            className="rounded-xl px-3 py-2.5 text-sm outline-none"
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}
+          >
+            <option value="">Town story — no business</option>
+            {(businesses ?? []).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          </select>
+          <span className="text-[11px]" style={{ color: "#6B7280" }}>
+            Attached, the story also shows on that business's profile and its views count towards their analytics.
+          </span>
+        </label>
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Card heading *</span>
           <input value={form.cardHeading} onChange={(e) => set("cardHeading", e.target.value)} className="rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
@@ -422,6 +442,7 @@ function StoryRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function FeaturedStoriesPage() {
   const { data: items, loading } = useFetch(getFeatureArticles, []);
+  const { data: businesses } = useFetch(getSpotlightBusinesses, []);
   const [localItems, setLocalItems] = useState(null);
   const [editing, setEditing] = useState(null);
   const [toast, setToast] = useState(null);
@@ -502,6 +523,7 @@ export default function FeaturedStoriesPage() {
           onSave={handleSave}
           onCancel={() => setEditing(null)}
           featuredItems={featured}
+          businesses={businesses ?? []}
         />
       </div>
     );

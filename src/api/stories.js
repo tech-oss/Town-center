@@ -23,6 +23,8 @@ function fromRow(r) {
     standfirst: r.standfirst,
     location: r.location,
     website: r.website,
+    // Set when admin attached the story to a registered business.
+    businessId: r.business_id ?? null,
     body: r.body ?? [],
     gallery: r.gallery ?? [],
   };

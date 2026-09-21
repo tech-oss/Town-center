@@ -25,6 +25,9 @@ function fromRow(r, slot) {
     standfirst: r.standfirst ?? "",
     location: r.location ?? "",
     website: r.website ?? "",
+    // Any admin-written story can be attached to a registered business, so it
+    // shows on that business's profile and counts towards its analytics.
+    businessId: r.business_id ?? "",
     body: r.body ?? [],
     gallery: r.gallery ?? [],
   };
@@ -49,6 +52,7 @@ function toRow(item) {
     standfirst: item.standfirst || null,
     location: item.location || null,
     website: item.website || null,
+    business_id: item.businessId || null,
     body: item.body ?? [],
     gallery: item.gallery ?? [],
     updated_at: new Date().toISOString(),
