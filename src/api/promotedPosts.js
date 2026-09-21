@@ -6,7 +6,6 @@ import { loadLiveBusinesses } from "./liveBusinesses";
 
 const SECTION_FOR_TYPE = { "eat-drink": "eat-drink", shop: "shop", "see-do": "see-do", services: "services", freelancer: "services", hotel: "stay" };
 
-const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const today = () => new Date().toISOString().slice(0, 10);
 
 // Only the dates the author wrote for readers. start_date/end_date tell the

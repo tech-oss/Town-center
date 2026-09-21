@@ -57,7 +57,6 @@ function mapHours(hours) {
 
 const listOrUndefined = (v) => (Array.isArray(v) && v.length > 0 ? v : undefined);
 
-const shortDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 // The dates printed on a post for readers. `display_dates` is free text the

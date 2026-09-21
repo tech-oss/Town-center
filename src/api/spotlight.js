@@ -8,16 +8,15 @@ import { getLivePlacements } from "./homepageSlots";
 
 const HOMEPAGE_SLOTS = 4;
 
-const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 const today = () => new Date().toISOString().slice(0, 10);
 
 // Offer or News. Older rows saved as "What's On" (no longer offered) read as News.
 const typeOf = (n) => (n.category === "Offer" || n.type === "offer" ? "Offer" : "News");
 
+// Only the dates the author wrote for readers. start_date/end_date tell the
+// system when the post is on the homepage and are never printed on it.
 function dateLine(n) {
-  if (n.end_date) return `Ends ${longDate(n.end_date)}`;
-  if (n.date_label) return n.date_label;
-  return n.start_date ? longDate(n.start_date) : "";
+  return n.display_dates?.trim() || n.date_label || "";
 }
 
 const notExpired = (n) => !n.end_date || n.end_date >= today();
@@ -115,7 +114,7 @@ export async function getSpotlightArticleBySlug(slug) {
     slug: n.slug,
     category: typeOf(n),
     date: dateLine(n),
-    endsOn: n.end_date ? longDate(n.end_date) : null,
+    endsOn: null,
     title: n.title,
     excerpt: n.excerpt ?? "",
     image: n.image || business.image || "/logo-mark.svg",
