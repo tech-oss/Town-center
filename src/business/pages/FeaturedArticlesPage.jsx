@@ -114,7 +114,7 @@ export default function FeaturedArticlesPage() {
 
         {showSlots && (
           <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium}
-            isOwner={user.role === "Owner"} onToast={setToast} />
+            isOwner={user.role === "Owner"} requestedBy={`${user.firstName} ${user.lastName}`} onToast={setToast} />
         )}
 
         {loading ? (

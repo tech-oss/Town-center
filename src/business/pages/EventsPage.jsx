@@ -123,7 +123,7 @@ export default function EventsPage() {
 
         {showSlots && (
           <AddonSlotsCard businessId={user.id} kind="event" premium={premium}
-            isOwner={user.role === "Owner"} onToast={setToast} />
+            isOwner={user.role === "Owner"} requestedBy={`${user.firstName} ${user.lastName}`} onToast={setToast} />
         )}
 
         {loading ? (

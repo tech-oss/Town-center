@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ActivePromotions from "../components/ActivePromotions";
+import PurchaseRequests from "../components/PurchaseRequests";
 import { isPremium, BILLING_OPTIONS } from "../../Data/plans";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
@@ -148,6 +149,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Paid homepage promotions (ad-hoc services) running or booked */}
+        {user.role === "Owner" && <PurchaseRequests businessId={user.id} onToast={setToast} />}
         {user.role === "Owner" && <ActivePromotions businessId={user.id} />}
 
         {/* Profile completeness — worked out from the real listing */}

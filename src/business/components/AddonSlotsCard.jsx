@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { formatUK } from "../../lib/ukDate";
 import { CARD, FOREST, SAGE, MUTED, BORDER } from "./FormKit";
 import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
+import { raisePurchaseRequest } from "../api/purchaseRequests";
 
 // One add-on's packages, what the business already holds, and what a slot
 // gets them. Used for articles, events and featured articles alike —
@@ -10,10 +11,14 @@ import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from 
 // `isOwner` false (a Content Manager) shows the packages but no Purchase
 // button: a Content Manager can edit everything the business has bought, and
 // asks the owner when more is needed.
-export default function AddonSlotsCard({ businessId, kind, premium, isOwner = true, onToast, compact = false }) {
+export default function AddonSlotsCard({ businessId, kind, premium, isOwner = true, requestedBy, onToast, compact = false }) {
   const spec = ADDON_KINDS[kind];
   const [slots, setSlots] = useState(null);
   const [buying, setBuying] = useState(false);
+  // Which pack a Content Manager is asking the owner for, and the note.
+  const [asking, setAsking] = useState(null);
+  const [note, setNote] = useState("");
+  const [asked, setAsked] = useState(() => new Set());
 
   const load = useCallback(() => {
     getAddonAllowance(businessId, kind)
@@ -30,6 +35,18 @@ export default function AddonSlotsCard({ businessId, kind, premium, isOwner = tr
     } catch (e) {
       onToast?.(e.message);
       setBuying(false);
+    }
+  }
+
+  async function ask(pack) {
+    try {
+      await raisePurchaseRequest(businessId, { kind, pack, note, requestedName: requestedBy });
+      setAsked((prev) => new Set(prev).add(pack));
+      setAsking(null);
+      setNote("");
+      onToast?.("Sent to the business owner.");
+    } catch (e) {
+      onToast?.(e.message);
     }
   }
 
@@ -80,12 +97,42 @@ export default function AddonSlotsCard({ businessId, kind, premium, isOwner = tr
                 style={{ backgroundColor: SAGE }}>
                 {buying ? "Opening…" : "Purchase"}
               </button>
+            ) : asked.has(p.pack) ? (
+              <span className="text-[11px] font-semibold shrink-0" style={{ color: "#15803D" }}>Requested ✓</span>
             ) : (
-              <span className="text-[11px] font-semibold shrink-0" style={{ color: MUTED }}>Ask the business owner</span>
+              <button onClick={() => { setAsking(p.pack); setNote(""); }}
+                className="text-xs font-bold px-4 py-2 rounded-lg shrink-0"
+                style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+                Ask the owner
+              </button>
             )}
           </div>
         ))}
       </div>
+
+      {/* A Content Manager can't buy, so this sends the request — with the
+          package already chosen — to the owner's dashboard and bell. */}
+      {asking != null && (
+        <div className="rounded-xl p-3.5 flex flex-col gap-2" style={{ backgroundColor: "rgba(37,99,235,0.06)" }}>
+          <p className="text-xs font-bold" style={{ color: FOREST }}>
+            Ask the owner for {spec.packs.find((p) => p.pack === asking)?.label}
+          </p>
+          <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
+            placeholder="Why you need it (optional) — e.g. we want to promote the Christmas menu."
+            className="rounded-xl px-3 py-2 text-sm outline-none resize-none"
+            style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }} />
+          <div className="flex gap-2">
+            <button onClick={() => ask(asking)}
+              className="text-xs font-bold px-4 py-2 rounded-lg text-white" style={{ backgroundColor: SAGE }}>
+              Send request
+            </button>
+            <button onClick={() => { setAsking(null); setNote(""); }}
+              className="text-xs font-semibold px-4 py-2 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       {!premium && (
         <p className="text-xs" style={{ color: "#92400E" }}>

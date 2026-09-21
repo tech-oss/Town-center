@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { listTickets } from "../api/businessTickets";
+import { countOpenRequests } from "../api/purchaseRequests";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
@@ -32,6 +33,9 @@ export default function BusinessLayout({ children }) {
   const navigate = useNavigate();
 
   const [openTickets, setOpenTickets] = useState(0);
+  // Purchases a content manager has asked the owner for. Only the owner can
+  // act on them, so only the owner is shown the count.
+  const [openRequests, setOpenRequests] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -41,6 +45,13 @@ export default function BusinessLayout({ children }) {
     });
     return () => { cancelled = true; };
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user || user.role !== "Owner") return;
+    let cancelled = false;
+    countOpenRequests(user.id).then((n) => { if (!cancelled) setOpenRequests(n); }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [user?.id, user?.role]);
 
   if (!user) return null;
 
@@ -151,9 +162,22 @@ export default function BusinessLayout({ children }) {
           <span className="text-base font-bold hidden sm:block" style={{ color: FOREST }}>{user.businessName}</span>
           <div className="flex-1" />
 
-          <button className="relative w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100">
+          <button
+            onClick={() => navigate(openRequests > 0 ? "/business/dashboard" : "/business/support")}
+            title={openRequests > 0
+              ? `${openRequests} purchase request${openRequests === 1 ? "" : "s"} from your team`
+              : openTickets > 0 ? `${openTickets} open support ticket${openTickets === 1 ? "" : "s"}` : "Nothing new"}
+            aria-label="Notifications"
+            className="relative w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:bg-gray-100">
             🔔
-            {openTickets > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ backgroundColor: "#DC2626" }} />}
+            {(openTickets > 0 || openRequests > 0) && (
+              openRequests > 0 ? (
+                <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 px-1 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+                  style={{ backgroundColor: "#DC2626" }}>{openRequests}</span>
+              ) : (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full" style={{ backgroundColor: "#DC2626" }} />
+              )
+            )}
           </button>
 
           <div className="relative">

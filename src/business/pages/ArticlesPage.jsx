@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatUK } from "../../lib/ukDate";
 import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
+import { raisePurchaseRequest } from "../api/purchaseRequests";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -27,7 +28,7 @@ function StatusBadge({ status }) {
 // another article on the site. It carries the subscribe message and the way
 // out of it in the same place — picking which live article to stand down —
 // so the cap isn't a dead end.
-function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy, allowance, isOwner, onBuy, buying }) {
+function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy, allowance, isOwner, onBuy, buying, onAsk, requested }) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-6 overflow-y-auto" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
       <div className="bg-white rounded-2xl p-6 max-w-2xl w-full flex flex-col gap-5 my-6" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
@@ -82,8 +83,14 @@ function SwapModal({ candidate, liveArticles, onSwap, onCancel, busy, allowance,
                     style={{ backgroundColor: SAGE }}>
                     {buying ? "Opening…" : "Purchase"}
                   </button>
+                ) : requested.has(p.pack) ? (
+                  <span className="text-[11px] font-semibold shrink-0" style={{ color: "#15803D" }}>Requested ✓</span>
                 ) : (
-                  <span className="text-[11px] font-semibold shrink-0" style={{ color: MUTED }}>Ask the business owner</span>
+                  <button onClick={() => onAsk(p.pack)}
+                    className="text-xs font-bold px-4 py-2 rounded-lg shrink-0"
+                    style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+                    Ask the owner
+                  </button>
                 )}
               </div>
             ))}
@@ -157,6 +164,24 @@ export default function ArticlesPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [requested, setRequested] = useState(() => new Set());
+
+  // A Content Manager can't buy — this sends the owner the request with the
+  // package already chosen.
+  async function handleAskOwner(pack) {
+    try {
+      await raisePurchaseRequest(user.id, {
+        kind: "article", pack,
+        note: swapFor ? `To get "${swapFor.title}" live.` : "",
+        requestedName: `${user.firstName} ${user.lastName}`,
+      });
+      setRequested((prev) => new Set(prev).add(pack));
+      setToast("Sent to the business owner.");
+    } catch (e) {
+      setToast(e.message);
+    }
+  }
 
   async function handleBuySlots(pack) {
     setBuying(true);
@@ -232,6 +257,7 @@ export default function ArticlesPage() {
       {swapFor && (
         <SwapModal candidate={swapFor} liveArticles={liveArticles} busy={busy}
           allowance={allowance} isOwner={user.role === "Owner"} onBuy={handleBuySlots} buying={buying}
+          onAsk={handleAskOwner} requested={requested}
           onSwap={handleSwap} onCancel={() => setSwapFor(null)} />
       )}
 
