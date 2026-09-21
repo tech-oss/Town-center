@@ -53,10 +53,30 @@ async function loadSubscriptions() {
   return data ?? [];
 }
 
+// business_payments.amount is stored the way it is displayed — a formatted
+// string like "£9.99" (see money() in the stripe-webhook function), so
+// Number() on it is NaN and any total built from it came out as "£NaN".
+// Everything outside digits, a dot and a minus sign is stripped before
+// parsing, which handles "£9.99", "GBP 9.99" and "1,234.00" alike.
+function paymentAmount(p) {
+  const n = Number(String(p?.amount ?? "").replace(/[^0-9.-]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+// The day a payment belongs to. The column is `date` (a plain YYYY-MM-DD);
+// there is no paid_at, and reading one gave undefined for every row.
+function paymentDay(p) {
+  return String(p?.date ?? p?.created_at ?? "").slice(0, 10);
+}
+
+// Only money actually taken counts towards revenue — a failed charge is still
+// a row in this table.
+const isPaid = (p) => String(p?.status ?? "Paid").toLowerCase() === "paid";
+
 async function loadPayments() {
   const { data, error } = await supabase.from("business_payments").select("*");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).filter(isPaid);
 }
 
 // ─── Summary KPIs ──────────────────────────────────────────────────────────
@@ -225,10 +245,10 @@ export async function getRevenueTrend({ days = 30 } = {}) {
   const data = buckets.map(({ key, date }) => ({
     date,
     revenue: payments
-      .filter((p) => String(p.paid_at ?? p.created_at ?? "").slice(0, 10) === key)
-      .reduce((sum, p) => sum + Number(p.amount ?? 0), 0),
+      .filter((p) => paymentDay(p) === key)
+      .reduce((sum, p) => sum + paymentAmount(p), 0),
   }));
-  const total = data.reduce((s, d) => s + d.revenue, 0);
+  const total = Math.round(data.reduce((s, d) => s + d.revenue, 0) * 100) / 100;
 
   // Previous period of equal length, for the "+N% on previous X days" line.
   // Only meaningful for the trailing-days form — a custom range has no
@@ -239,12 +259,14 @@ export async function getRevenueTrend({ days = 30 } = {}) {
     prevStart.setDate(prevStart.getDate() - days * 2);
     const prevEnd = new Date();
     prevEnd.setDate(prevEnd.getDate() - days);
+    const prevStartKey = prevStart.toISOString().slice(0, 10);
+    const prevEndKey = prevEnd.toISOString().slice(0, 10);
     const prevTotal = payments
       .filter((p) => {
-        const d = new Date(p.paid_at ?? p.created_at ?? 0);
-        return d >= prevStart && d < prevEnd;
+        const day = paymentDay(p);
+        return day && day >= prevStartKey && day < prevEndKey;
       })
-      .reduce((sum, p) => sum + Number(p.amount ?? 0), 0);
+      .reduce((sum, p) => sum + paymentAmount(p), 0);
     change = prevTotal > 0 ? Math.round(((total - prevTotal) / prevTotal) * 1000) / 10 : 0;
   }
 
