@@ -29,9 +29,9 @@ const I = {
 
 const NAV = [
   { to: "/admin",                    label: "Dashboard",             icon: I.dashboard,      end: true },
-  { to: "/admin/users",              label: "Users",                 icon: I.users },
-  { to: "/admin/businesses",         label: "Business Registrations",icon: I.businesses },
-  { to: "/admin/approvals",          label: "Approval Queue",        icon: I.approvals,      badge: "pending" },
+  { to: "/admin/users",              label: "Users",                 icon: I.users,          badge: "users" },
+  { to: "/admin/businesses",         label: "Business Registrations",icon: I.businesses,     badge: "businesses" },
+  { to: "/admin/approvals",          label: "Approval Queue",        icon: I.approvals,      badge: "approvals" },
   { to: "/admin/business-content",   label: "Manage Business Content", icon: I.listings },
   {
     label: "Home Page Featured", icon: I.featured, group: true,
@@ -42,10 +42,10 @@ const NAV = [
       { to: "/admin/featured-see-do",  label: "See & Do",         icon: I.events },
     ],
   },
-  { to: "/admin/event-approvals",    label: "Events",                icon: I.events },
-  { to: "/admin/article-approvals",  label: "Business News & Offers",icon: I.articles },
-  { to: "/admin/featured-article-approvals", label: "Business Featured Articles", icon: I.articles },
-  { to: "/admin/review-moderation",  label: "Review Moderation",     icon: I.stories },
+  { to: "/admin/event-approvals",    label: "Events",                icon: I.events,         badge: "events" },
+  { to: "/admin/article-approvals",  label: "Business News & Offers",icon: I.articles,       badge: "articles" },
+  { to: "/admin/featured-article-approvals", label: "Business Featured Articles", icon: I.articles, badge: "featured" },
+  { to: "/admin/review-moderation",  label: "Review Moderation",     icon: I.stories,        badge: "reviews" },
   { to: "/admin/properties",         label: "Properties",            icon: I.properties },
   {
     label: "Explore", icon: I.projects, group: true,
@@ -58,7 +58,7 @@ const NAV = [
   { to: "/admin/reporting",          label: "Reporting",             icon: I.reporting },
   { to: "/admin/business-analytics", label: "Business Analytics",    icon: I.reporting },
   { to: "/admin/push-notifications", label: "Push Notifications",    icon: I.notifications },
-  { to: "/admin/support-tickets",    label: "Support Tickets",       icon: I.tickets },
+  { to: "/admin/support-tickets",    label: "Support Tickets",       icon: I.tickets,        badge: "tickets" },
   { to: "/admin/site-content",       label: "Site Content",          icon: I.siteContent },
   { to: "/admin/settings",           label: "Settings",              icon: I.settings },
   { to: "/admin/admin-logs",         label: "Admin Logs",            icon: I.logs },
@@ -123,7 +123,7 @@ function NavGroup({ item, closeSidebar, counts = {} }) {
 }
 
 // ─── AdminLayout ──────────────────────────────────────────────────────────────
-export default function AdminLayout({ pendingCount = 0, slotsPending = 0 }) {
+export default function AdminLayout({ counts = {} }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { admin, logout } = useAdminAuth();
 
@@ -162,7 +162,7 @@ export default function AdminLayout({ pendingCount = 0, slotsPending = 0 }) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-0.5">
           {NAV.map((item) => {
-            if (item.group) return <NavGroup key={item.label} item={item} counts={{ slots: slotsPending }} closeSidebar={() => setSidebarOpen(false)} />;
+            if (item.group) return <NavGroup key={item.label} item={item} counts={counts} closeSidebar={() => setSidebarOpen(false)} />;
             const { to, label, icon, end, badge } = item;
             return (
               <NavLink
@@ -177,11 +177,7 @@ export default function AdminLayout({ pendingCount = 0, slotsPending = 0 }) {
               >
                 <span className="shrink-0 w-4 flex items-center justify-center" style={{ color: "inherit" }}>{icon}</span>
                 <span className="flex-1 leading-snug">{label}</span>
-                {badge === "pending" && pendingCount > 0 && (
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 6px", borderRadius: 20, backgroundColor: BRASS, color: "#fff" }}>
-                    {pendingCount}
-                  </span>
-                )}
+                {badge && <CountBadge n={counts[badge]} />}
               </NavLink>
             );
           })}

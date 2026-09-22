@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import AdminLayout from "./components/AdminLayout";
 import AdminLoginPage from "./pages/AdminLoginPage";
@@ -32,16 +33,23 @@ import NeighbourhoodGuidesPage from "./pages/NeighbourhoodGuidesPage";
 import NeighbourhoodGuideEditorPage from "./pages/NeighbourhoodGuideEditorPage";
 import SiteContentPage from "./pages/SiteContentPage";
 import useFetch from "../hooks/useFetch";
-import { getApprovals, countPlacementsNeedingApproval } from "../api/admin";
+import { getAdminPendingCounts } from "../api/admin";
 import { useLocation } from "react-router-dom";
 
 export default function AdminApp() {
   const { isLoggedIn, restored } = useAdminAuth();
   // Re-counted on every page change, so badges clear once items are handled.
   const { pathname } = useLocation();
-  const { data: pending } = useFetch(() => getApprovals({ status: "Pending" }), [pathname]);
-  const pendingCount = pending?.length ?? 0;
-  const { data: slotsPending } = useFetch(countPlacementsNeedingApproval, [pathname]);
+  // One call counts every queue, so each sidebar item can show what's
+  // waiting in it — not just the Approval Queue.
+  // Also re-counted every minute, so something a business submits while admin
+  // sits on one page still shows up without navigating away.
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const { data: counts } = useFetch(getAdminPendingCounts, [pathname, tick]);
 
   // Hold rendering until the initial Supabase getSession() resolves, otherwise
   // a signed-in admin flashes the login screen on every page load.
@@ -50,7 +58,7 @@ export default function AdminApp() {
 
   return (
     <Routes>
-      <Route element={<AdminLayout pendingCount={pendingCount} slotsPending={slotsPending ?? 0} />}>
+      <Route element={<AdminLayout counts={counts ?? {}} />}>
         <Route index element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="users/:id" element={<UserDetailPage />} />

@@ -16,3 +16,4 @@ export * from "./subscriptions";
 export * from "./reporting";
 export * from "./pushAttachments";
 export * from "./homepageSlots";
+export * from "./pendingCounts";
