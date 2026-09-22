@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, forwardRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, forwardRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { header } from "../Data/content";
 import { menus } from "../Data/pages";
@@ -38,6 +38,94 @@ function withFeatured(businesses) {
 // Routes whose hero banner the header floats transparently over.
 const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/guides", "/getting-here", "/live", "/live/stay/hotels", "/live/stay/accommodation", "/work"];
 const TRANSPARENT_HERO_PREFIXES = ["/guides/", "/work/developments/", "/live/building/"];
+
+// ─── Desktop mega-menu ───────────────────────────────────────────────────
+// A column only wraps into a second sub-column when it would otherwise run
+// off the bottom of the visitor's screen — Eat & Drink's Cuisine Type list is
+// 17 long and used to disappear below the fold on a laptop. How many rows fit
+// is worked out from the real space below the header, so a tall monitor keeps
+// every list in one column and a short laptop screen wraps only what it must.
+//
+// Wrapping everything past a fixed count was tried and rejected: it squeezed
+// Services' four columns into sub-columns ~120px wide and broke nearly every
+// label onto two lines, for a menu that already fitted.
+//
+// A wrapped column is split evenly (17 → 9 + 8) so no item is left stranded,
+// and it takes proportionally more width. As a final backstop the panel never
+// grows taller than the space left below the header, and scrolls inside
+// itself if it ever has to.
+const ROW_PX = 37;        // one link plus the gap under it
+const PANEL_CHROME = 110; // vertical padding plus the column heading
+const MIN_ROWS = 8;
+
+function MegaMenu({ menu, explore, onEnter, onLeave, onNavigate }) {
+  const [top, setTop] = useState(0);
+  const [viewport, setViewport] = useState(() => (typeof window === "undefined" ? 900 : window.innerHeight));
+  const measure = useCallback((el) => {
+    if (el) setTop(el.getBoundingClientRect().top);
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => setViewport(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  const rowsThatFit = Math.max(MIN_ROWS, Math.floor((viewport - (top || 200) - PANEL_CHROME) / ROW_PX));
+  const cols = menu.columns.map((col) => {
+    const span = Math.max(1, Math.ceil(col.links.length / rowsThatFit));
+    return { ...col, span, rows: Math.ceil(col.links.length / span) };
+  });
+  const units = cols.reduce((n, c) => n + c.span, 0);
+
+  return (
+    <div
+      ref={measure}
+      className="hidden lg:block absolute inset-x-0 top-full overflow-y-auto overscroll-contain"
+      style={{
+        backgroundColor: "#fff",
+        boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)",
+        maxHeight: top ? `calc(100vh - ${top}px)` : undefined,
+      }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
+      <div
+        className={`py-8 grid gap-x-10 gap-y-6 ${explore ? "ml-auto px-8 w-max" : "max-w-6xl mx-auto px-8"}`}
+        style={{ gridTemplateColumns: `repeat(${units}, minmax(0, 1fr))` }}
+      >
+        {cols.map((col) => (
+          <div key={col.heading} style={{ gridColumn: `span ${col.span}` }}>
+            <p className="section-eyebrow mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
+            <ul
+              className="grid gap-y-2.5 gap-x-10"
+              style={{
+                gridTemplateRows: `repeat(${col.rows}, auto)`,
+                gridAutoFlow: "column",
+                gridAutoColumns: "minmax(0, 1fr)",
+              }}
+            >
+              {col.links.map((l) => (
+                <li key={l.to}>
+                  <Link
+                    to={l.to}
+                    onClick={onNavigate}
+                    className="text-sm transition-colors duration-150"
+                    style={{ color: "#000000" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "var(--leaf)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "#000000")}
+                  >
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const Header = forwardRef(function Header(_, ref) {
   const { data: liveBusinesses } = useFetch(loadLiveBusinesses, []);
@@ -265,34 +353,13 @@ const Header = forwardRef(function Header(_, ref) {
 
       {/* Desktop mega-menu dropdown */}
       {openDropdown && menusByLabel[openDropdown] && (
-        <div className="hidden lg:block absolute inset-x-0 top-full" style={{ backgroundColor: "#fff", boxShadow: "0 24px 48px -24px rgba(28,46,56,0.4)" }} onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-          <div
-            className={`py-8 grid gap-10 ${openDropdown === "Explore" ? "ml-auto px-8 w-max" : "max-w-6xl mx-auto px-8"}`}
-            style={{ gridTemplateColumns: `repeat(${menusByLabel[openDropdown].columns.length}, minmax(0, 1fr))` }}
-          >
-            {menusByLabel[openDropdown].columns.map((col) => (
-              <div key={col.heading}>
-                <p className="section-eyebrow mb-4" style={{ color: "var(--leaf)" }}>{col.heading}</p>
-                <ul className="flex flex-col gap-2.5">
-                  {col.links.map((l) => (
-                    <li key={l.to}>
-                      <Link
-                        to={l.to}
-                        onClick={() => setOpenDropdown(null)}
-                        className="text-sm transition-colors duration-150"
-                        style={{ color: "#000000" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = "var(--leaf)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--forest)")}
-                      >
-                        {l.label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
+        <MegaMenu
+          menu={menusByLabel[openDropdown]}
+          explore={openDropdown === "Explore"}
+          onEnter={cancelClose}
+          onLeave={scheduleClose}
+          onNavigate={() => setOpenDropdown(null)}
+        />
       )}
 
       {/* Mobile drawer — flex-1 within the header, which itself stretches to
