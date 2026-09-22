@@ -90,6 +90,37 @@ function one(embedded) {
 // separate Manage Business Content editor (description, hours, gallery,
 // FAQs, amenities, …), which belongs on that screen, not the registration
 // approval card.
+const ADDON_NAMES = {
+  article: ["article slot", "article slots"],
+  event: ["event slot", "event slots"],
+  featured_article: ["Featured Article slot", "Featured Article slots"],
+};
+
+// How a paying plan is billed, for the badge. Empty for Free or admin-granted.
+function describeBilling(sub) {
+  if (!isPayingSubscription(sub)) return "";
+  const yearly = sub.billing_interval === "year";
+  const amount = Number(sub.price_amount ?? sub.monthly_fee ?? 0);
+  const price = amount ? `£${Number.isInteger(amount) ? amount : amount.toFixed(2)}` : "";
+  return [yearly ? "Annual" : "Monthly", price].filter(Boolean).join(" · ");
+}
+
+// Unexpired add-on slots, totalled per kind, with the soonest expiry.
+function summariseAddOns(rows) {
+  const now = Date.now();
+  const byKind = {};
+  for (const r of Array.isArray(rows) ? rows : []) {
+    if (!r?.expires_at || new Date(r.expires_at).getTime() <= now) continue;
+    const k = (byKind[r.kind] ??= { kind: r.kind, quantity: 0, expiresAt: r.expires_at });
+    k.quantity += r.quantity;
+    if (r.expires_at < k.expiresAt) k.expiresAt = r.expires_at;
+  }
+  return Object.values(byKind).map((a) => {
+    const [one, many] = ADDON_NAMES[a.kind] ?? [a.kind, a.kind];
+    return { ...a, label: `${a.quantity} ${a.quantity === 1 ? one : many}` };
+  });
+}
+
 function fromRow(row) {
   const listing = one(row.business_listings);
   const users = Array.isArray(row.business_users) ? row.business_users : [row.business_users].filter(Boolean);
@@ -158,8 +189,20 @@ function fromRow(row) {
     // ── "Plan" step ──
     // Plans are stored lowercase ("standard"); the admin UI title-cases them.
     plan: subscription.plan === "premium" ? "Visibility Plan" : (titleCase(subscription.plan) || "Free"),
-    // A Visibility Plan admin gave the business, with nothing billed through Stripe.
+    // A Visibility Plan admin gave the business, with nothing billed through
+    // Stripe. This used to read true for EVERY Visibility Plan: the query
+    // never loaded stripe_subscription_id, so a paying business looked
+    // exactly like a comp one and was labelled "Not paying".
     planNotPaying: isAdminGrantedSubscription(subscription),
+    planPaying: isPayingSubscription(subscription),
+    // "Monthly · £29.99" / "Annual · £329" — the exact plan they're on.
+    planBilling: describeBilling(subscription),
+    planStatus: subscription.plan_status ?? null,
+    planRenews: subscription.renewal_date ?? null,
+    planCancelling: !!subscription.cancel_at_period_end,
+    // Ad-hoc purchases that are still valid: extra article / event / featured
+    // article slots. Homepage placements are added separately (withFeatured).
+    addOns: summariseAddOns(row.business_addon_slots),
     // ── "Terms" step ──
     termsAcceptedAt: subscription.terms_accepted_at ?? null,
 
@@ -173,30 +216,85 @@ const SELECT = `
   *,
   business_listings(*),
   business_users(role, first_name, last_name, email, phone, status),
-  business_subscriptions(plan, terms_accepted_at)
+  business_subscriptions(plan, terms_accepted_at, stripe_subscription_id, cancelled, plan_status,
+    billing_interval, price_amount, monthly_fee, renewal_date, cancel_at_period_end, granted_by_admin),
+  business_addon_slots(kind, quantity, expires_at)
 `;
 
 // `featured` means a live Featured Business booking (see ./homepageSlots).
-function withFeatured(biz, live) {
+// `promotions` is every paid homepage booking that hasn't finished — running,
+// waiting for approval or still to start — which is the other half of what a
+// business can buy ad hoc.
+function withFeatured(biz, live, promotions = new Map()) {
   const slot = live.get(biz.id);
-  return { ...biz, featured: !!slot, featuredStartsAt: slot?.startsAt ?? null, featuredEndsAt: slot?.endsAt ?? null };
+  return {
+    ...biz,
+    featured: !!slot,
+    featuredStartsAt: slot?.startsAt ?? null,
+    featuredEndsAt: slot?.endsAt ?? null,
+    promotions: promotions.get(biz.id) ?? [],
+  };
+}
+
+const PROMOTION_NAMES = {
+  spotlight: "In the Spotlight",
+  featured_article: "Featured Article",
+  whats_on: "What's On",
+  featured_business: "Featured Business",
+};
+
+const PROMOTION_STATES = {
+  awaiting_content: "choosing content",
+  pending_approval: "awaiting approval",
+  approved: "approved",
+  rejected: "rejected",
+};
+
+// Paid homepage bookings still running or to come, grouped by business.
+async function loadPromotions() {
+  const { data, error } = await supabase
+    .from("homepage_placements")
+    .select("business_id, slot_type, status, starts_at, ends_at")
+    .not("paid_at", "is", null)
+    .not("status", "in", "(held,cancelled)")
+    .gt("ends_at", new Date().toISOString())
+    .order("starts_at", { ascending: true });
+  if (error) return new Map();
+  const now = Date.now();
+  const byBusiness = new Map();
+  for (const p of data ?? []) {
+    if (!p.business_id) continue;
+    const live = p.status === "approved" && new Date(p.starts_at).getTime() <= now;
+    const list = byBusiness.get(p.business_id) ?? [];
+    list.push({
+      slotType: p.slot_type,
+      label: `Homepage ${PROMOTION_NAMES[p.slot_type] ?? p.slot_type}`,
+      state: live ? "live now" : (PROMOTION_STATES[p.status] ?? p.status),
+      live,
+      startsAt: p.starts_at,
+      endsAt: p.ends_at,
+    });
+    byBusiness.set(p.business_id, list);
+  }
+  return byBusiness;
 }
 
 export async function getBusinesses({ status } = {}) {
   let q = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
-  const [{ data, error }, live] = await Promise.all([q, getLivePlacementMap("featured_business")]);
+  const [{ data, error }, live, promotions] = await Promise.all([q, getLivePlacementMap("featured_business"), loadPromotions()]);
   if (error) throw error;
-  return (data ?? []).map((row) => withFeatured(fromRow(row), live));
+  return (data ?? []).map((row) => withFeatured(fromRow(row), live, promotions));
 }
 
 export async function getBusinessById(id) {
-  const [{ data, error }, live] = await Promise.all([
+  const [{ data, error }, live, promotions] = await Promise.all([
     supabase.from("businesses").select(SELECT).eq("id", id).maybeSingle(),
     getLivePlacementMap("featured_business"),
+    loadPromotions(),
   ]);
   if (error) throw error;
-  return data ? withFeatured(fromRow(data), live) : null;
+  return data ? withFeatured(fromRow(data), live, promotions) : null;
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────

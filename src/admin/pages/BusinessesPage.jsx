@@ -897,21 +897,26 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
               <span className="text-base font-bold" style={{ color: NAVY }}>{biz.name}</span>
               <StatusTag status={biz.status} />
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>{biz.plan}</span>
-              {biz.featured && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>★ Featured</span>
+                style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>
+                {biz.plan}{biz.planBilling ? ` · ${biz.planBilling}` : ""}
+              </span>
+              {biz.planPaying && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                  title={biz.planRenews ? `Billed through Stripe · renews ${formatUK(biz.planRenews)}` : "Billed through Stripe"}
+                  style={{ backgroundColor: "rgba(22,163,74,0.12)", color: "#15803D" }}>
+                  {biz.planCancelling ? "Paying · cancels at period end" : "Paying"}
+                </span>
               )}
               {biz.planNotPaying && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" title="Given by admin — nothing is billed through Stripe"
-                  style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Not paying</span>
+                  style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Given by admin · not paying</span>
               )}
               {!biz.hasContent && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
               )}
               {biz.featured && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                  style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>★ Featured</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>★ Featured</span>
               )}
               {/* Unclaimed is a normal, expected state now that admin can list
                   a business without an owner — flagged so admin can see at a
@@ -935,6 +940,32 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
                 <span key={l} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
                   style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "#1D4ED8", border: "1px solid rgba(37,99,235,0.15)" }}>{l}</span>
               ))}
+            </div>
+          )}
+
+          {/* Everything bought on top of the plan: homepage bookings still
+              running or to come, and add-on slots still inside their 12
+              months. */}
+          {(biz.promotions?.length > 0 || biz.addOns?.length > 0) && (
+            <div className="flex flex-col gap-1.5 pt-2.5" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "#9CA3AF" }}>Ad-hoc purchases</p>
+              <div className="flex flex-wrap gap-1.5">
+                {biz.promotions?.map((p, i) => (
+                  <span key={`p-${i}`} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
+                    title={`${formatUK(p.startsAt?.slice(0, 10))} – ${formatUK(p.endsAt?.slice(0, 10))}`}
+                    style={p.live
+                      ? { backgroundColor: "rgba(22,163,74,0.1)", color: "#15803D", border: "1px solid rgba(22,163,74,0.25)" }
+                      : { backgroundColor: "rgba(217,119,6,0.08)", color: "#92400E", border: "1px solid rgba(217,119,6,0.2)" }}>
+                    {p.label} · {p.state} · until {formatUK(p.endsAt?.slice(0, 10))}
+                  </span>
+                ))}
+                {biz.addOns?.map((a) => (
+                  <span key={`a-${a.kind}`} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"
+                    style={{ backgroundColor: "rgba(124,58,237,0.08)", color: "#6D28D9", border: "1px solid rgba(124,58,237,0.2)" }}>
+                    {a.label} · valid until {formatUK(a.expiresAt?.slice(0, 10))}
+                  </span>
+                ))}
+              </div>
             </div>
           )}
 
