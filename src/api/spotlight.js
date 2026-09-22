@@ -91,7 +91,9 @@ export async function getStandaloneNewsOffers() {
       title: n.title,
       excerpt: n.excerpt ?? "",
       image: n.image || "/logo-mark.svg",
-      business: n.business_name ? { name: n.business_name, section: null } : null,
+      // Keep the business id even when the business isn't in the public
+      // listings, so a view of the post is still credited to it.
+      business: n.business_name || n.business_id ? { name: n.business_name, businessId: n.business_id ?? null, section: null } : null,
     }));
 }
 
@@ -107,7 +109,9 @@ export async function getSpotlightArticleBySlug(slug) {
 
   const live = await loadLiveBusinesses().catch(() => []);
   const business = live.find((b) => b.businessId === n.business_id)
-    ?? { name: n.business_name, news: [], slug: null };
+    // Not in the public listings, but still this business's post — the id is
+    // kept so the view is credited to it.
+    ?? { name: n.business_name, businessId: n.business_id ?? null, news: [], slug: null };
 
   return {
     id: `spotlight-${n.id}`,
