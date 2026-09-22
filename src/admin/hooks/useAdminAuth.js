@@ -57,6 +57,10 @@ export async function login(email, password) {
     await supabase.auth.signOut();
     return { ok: false, error: "This account does not have admin access." };
   }
+  // For the Reporting page's User Activity chart. Fire and forget: a failure
+  // to record must never block signing in.
+  supabase.rpc("record_login", { p_portal: "admin" })
+    .then(({ error: e }) => { if (e) console.warn("Login not recorded:", e.message); });
   return { ok: true };
 }
 

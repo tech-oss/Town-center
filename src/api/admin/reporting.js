@@ -140,7 +140,11 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
   if (usersRes.error) throw usersRes.error;
   if (bizRes.error) throw bizRes.error;
 
-  const scoped = tier === "All" ? subs : subs.filter((s) => label(s.plan) === tier);
+  // Filter by the three real plans (paying / admin-given / free).
+  const scoped = tier === "All" ? subs : subs.filter((s) => {
+    const bucket = isPayingSubscription(s) ? "paying" : isAdminGrantedSubscription(s) ? "granted" : "free";
+    return bucket === BUCKET_FOR_LABEL[tier];
+  });
   // Admin-granted Visibility Plans earn nothing, so only Stripe-backed plans
   // count towards revenue and paying accounts.
   const mrr = scoped.reduce((sum, s) => sum + monthlyRevenue(s), 0);
@@ -220,55 +224,126 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
 
 // ─── Revenue ───────────────────────────────────────────────────────────────
 
+// ─── Plans ─────────────────────────────────────────────────────────────────
+// There are two plans — Free and the Visibility Plan — and a Visibility Plan
+// is either paid through Stripe or given by admin at no charge. Those three
+// are the "tiers" every chart below uses. (These charts used to be built on
+// Basic / Standard / Premium / Agent, which no longer exist, and counted
+// paying and admin-given together as "Premium".)
+export const TIER_OPTIONS = ["All", BUCKET_LABELS.paying, BUCKET_LABELS.granted, BUCKET_LABELS.free];
+const BUCKET_FOR_LABEL = Object.fromEntries(Object.entries(BUCKET_LABELS).map(([k, v]) => [v, k]));
+const inTier = (tier) => (b) => tier === "All" || b.bucket === BUCKET_FOR_LABEL[tier];
+
+// Accounts and monthly recurring revenue on each plan, plus a row for ad-hoc
+// purchases (money taken this calendar month for homepage slots and add-ons).
 export async function getRevenueByTier({ tier = "All" } = {}) {
-  const all = await loadSubscriptions();
-  const subs = tier === "All" ? all : all.filter((s) => label(s.plan) === tier);
-  const byTier = {};
-  for (const s of subs) {
-    const t = planBucket(s);
-    byTier[t] ??= { tier: t, revenue: 0, count: 0 };
-    byTier[t].revenue += monthlyRevenue(s);
-    byTier[t].count += 1;
+  const [businesses, adhoc] = await Promise.all([loadClassifiedBusinesses(), loadAdhocPurchases()]);
+  const rows = ["paying", "granted", "free"].map((bucket) => {
+    const list = businesses.filter((b) => b.bucket === bucket);
+    return {
+      tier: BUCKET_LABELS[bucket],
+      count: list.length,
+      revenue: Math.round(list.reduce((sum, b) => sum + monthlyRevenue(b.sub), 0) * 100) / 100,
+    };
+  }).filter((r) => tier === "All" || r.tier === tier);
+
+  if (tier === "All") {
+    const thisMonth = monthKey(new Date().toISOString());
+    const month = adhoc.filter((p) => monthKey(p.at) === thisMonth);
+    rows.push({
+      tier: "Ad-hoc purchases",
+      count: month.length,
+      revenue: Math.round(month.reduce((sum, p) => sum + p.amount, 0) * 100) / 100,
+    });
   }
-  const list = Object.values(byTier).sort((a, b) => b.revenue - a.revenue);
-  return list;
+  return rows;
 }
 
+// Businesses on each plan over time — cumulative, by when each registered,
+// shown on its current plan (plan history isn't recorded).
 export async function getSubscriptionTrend({ range = "6m", tier = "All" } = {}) {
-  const subs = await loadSubscriptions();
+  const businesses = (await loadClassifiedBusinesses()).filter(inTier(tier));
   const { since, until } = resolveRange(range);
   const buckets = monthBuckets(since, until);
-  const tiers = tier === "All" ? ["Premium", "Standard", "Agent", "Basic", "Free"] : [tier];
+  const series = tier === "All" ? [BUCKET_LABELS.paying, BUCKET_LABELS.granted, BUCKET_LABELS.free] : [tier];
 
-  // Cumulative: a subscription counts in every month from its start onward.
   return buckets.map(({ key, month }) => {
     const row = { month };
-    for (const t of tiers) row[t] = 0;
-    for (const s of subs) {
-      const started = monthKey(s.terms_accepted_at);
-      if (!started || started > key) continue;
-      const t = label(s.plan);
+    for (const t of series) row[t] = 0;
+    for (const b of businesses) {
+      const joined = monthKey(b.submittedAt);
+      if (!joined || joined > key) continue;
+      const t = BUCKET_LABELS[b.bucket];
       if (row[t] !== undefined) row[t] += 1;
     }
     return row;
   });
 }
 
+// Sign-ins and new listings per month.
+//
+// Logins come from portal_logins (supabase/sql/portal_logins_2026_09.sql) —
+// before that nothing recorded a sign-in at all, so this line was always
+// empty. New listings are counted by when the business registered; they used
+// to be counted by when the listing was last edited, so every edit looked
+// like a new listing.
 export async function getActivityTrend({ range = "6m" } = {}) {
   const { since, until } = resolveRange(range);
   const buckets = monthBuckets(since, until);
-  const [usersRes, listingsRes] = await Promise.all([
-    supabase.from("business_users").select("requested_at"),
-    supabase.from("business_listings").select("updated_at"),
+  const [loginsRes, bizRes] = await Promise.all([
+    supabase.from("portal_logins").select("created_at, portal").gte("created_at", since.toISOString()),
+    supabase.from("businesses").select("submitted_at"),
   ]);
-  if (usersRes.error) throw usersRes.error;
-  if (listingsRes.error) throw listingsRes.error;
+  // No login table yet (migration not run) reads as no logins, not an error.
+  const logins = loginsRes.error ? [] : (loginsRes.data ?? []);
+  if (bizRes.error) throw bizRes.error;
 
   return buckets.map(({ key, month }) => ({
     month,
-    signups: (usersRes.data ?? []).filter((u) => monthKey(u.requested_at) === key).length,
-    listings: (listingsRes.data ?? []).filter((l) => monthKey(l.updated_at) === key).length,
+    logins: logins.filter((l) => monthKey(l.created_at) === key).length,
+    listings: (bizRes.data ?? []).filter((b) => monthKey(b.submitted_at) === key).length,
   }));
+}
+
+// ─── Ad-hoc purchases ──────────────────────────────────────────────────────
+// Everything a business buys on top of its plan: homepage slot bookings and
+// add-on slots (articles, events, featured articles).
+
+export const ADHOC_GROUPS = ["Homepage promotions", "Article slots", "Event slots", "Featured Article slots"];
+const ADDON_GROUP = { article: "Article slots", event: "Event slots", featured_article: "Featured Article slots" };
+
+async function loadAdhocPurchases() {
+  const [placements, slots] = await Promise.all([
+    supabase.from("homepage_placements").select("slot_type, paid_at, amount_pence").not("paid_at", "is", null),
+    supabase.from("business_addon_slots").select("kind, quantity, amount_pence, purchased_at, stripe_ref"),
+  ]);
+  const out = [];
+  for (const p of placements.data ?? []) {
+    out.push({ group: "Homepage promotions", at: p.paid_at, amount: (p.amount_pence ?? 0) / 100, units: 1 });
+  }
+  // Only slots that were paid for — admin can grant slots too, and those
+  // aren't purchases.
+  for (const a of slots.data ?? []) {
+    if (!a.stripe_ref) continue;
+    out.push({ group: ADDON_GROUP[a.kind] ?? "Add-ons", at: a.purchased_at, amount: (a.amount_pence ?? 0) / 100, units: a.quantity });
+  }
+  return out;
+}
+
+// Ad-hoc purchases per month: how many of each kind, and the revenue.
+export async function getAdhocTrend({ range = "6m" } = {}) {
+  const purchases = await loadAdhocPurchases();
+  const { since, until } = resolveRange(range);
+  return monthBuckets(since, until).map(({ key, month }) => {
+    const row = { month, revenue: 0 };
+    for (const g of ADHOC_GROUPS) row[g] = 0;
+    for (const p of purchases.filter((x) => monthKey(x.at) === key)) {
+      row[p.group] = (row[p.group] ?? 0) + 1;
+      row.revenue += p.amount;
+    }
+    row.revenue = Math.round(row.revenue * 100) / 100;
+    return row;
+  });
 }
 
 // Daily buckets between two dates, inclusive — used by the revenue and signup

@@ -6,8 +6,11 @@ import {
   getSubscriptionTrend,
   getActivityTrend,
   getListingsBySection,
+  getAdhocTrend,
+  TIER_OPTIONS,
+  ADHOC_GROUPS,
 } from "../../api/admin";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
+import { BarChart, Bar, Cell, LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import LoadingState from "../components/LoadingState";
 import RangeSelector from "../components/RangeSelector";
 import InfoTip from "../components/InfoTip";
@@ -37,9 +40,21 @@ function StatBadge({ label, value, sub, accent = "#1E293B" }) {
   );
 }
 
-const TIER_COLOURS = { Premium: "#2563EB", Standard: "#60A5FA", Agent: "#F59E0B", Basic: "#93C5FD" };
-// Bars in the revenue/tier breakdown are split by whether the plan is paid for.
-const BUCKET_COLOURS = { "Visibility Plan (paying)": "#2563EB", "Visibility Plan (admin, not paying)": "#F59E0B", Free: "#93C5FD" };
+// The three real plans, coloured the same way as the dashboard: paying green,
+// admin-given amber, free grey — plus purple for ad-hoc purchases.
+const BUCKET_COLOURS = {
+  "Visibility Plan (paying)": "#16A34A",
+  "Visibility Plan (admin, not paying)": "#D97706",
+  Free: "#94A3B8",
+  "Ad-hoc purchases": "#7C3AED",
+};
+const TIER_COLOURS = BUCKET_COLOURS;
+const ADHOC_COLOURS = {
+  "Homepage promotions": "#7C3AED",
+  "Article slots": "#2563EB",
+  "Event slots": "#0891B2",
+  "Featured Article slots": "#DB2777",
+};
 const SECTION_COLOURS = ["#2563EB", "#60A5FA", "#F59E0B"];
 
 const RANGES = [
@@ -48,7 +63,7 @@ const RANGES = [
   { key: "6m", label: "Last 6 months" },
   { key: "12m", label: "Last 12 months" },
 ];
-const TIERS = ["All", "Premium", "Standard", "Agent", "Basic"];
+const TIERS = TIER_OPTIONS;
 
 // Exports the numbers actually on screen — the summary KPIs plus the two
 // breakdown tables — rather than raw rows, since Reporting is aggregates by
@@ -90,12 +105,13 @@ export default function ReportingPage() {
   const { data: subTrend, loading: loadingT } = useFetch(() => getSubscriptionTrend({ range, tier }), [range, tier]);
   const { data: activityTrend, loading: loadingA } = useFetch(() => getActivityTrend({ range }), [range]);
   const { data: bySection } = useFetch(getListingsBySection, []);
+  const { data: adhocTrend } = useFetch(() => getAdhocTrend({ range }), [range]);
 
   if (loadingS || loadingR || loadingT || loadingA) return <LoadingState />;
 
   const s = summary ?? {};
   const rangeLabel = typeof range === "object" ? `${range.from} to ${range.to}` : (RANGES.find((r) => r.key === range)?.label ?? "");
-  const visibleTiers = tier === "All" ? Object.keys(TIER_COLOURS) : [tier];
+  const visibleTiers = tier === "All" ? TIER_OPTIONS.filter((t) => t !== "All") : [tier];
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
@@ -155,7 +171,7 @@ export default function ReportingPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Revenue by tier */}
-        <Card title="Revenue by Tier" subtitle={`This month${tier !== "All" ? ` · ${tier}` : ""}`} info="Monthly subscription revenue contributed by each plan tier. Taller bars earn more; use it to see which tiers drive income.">
+        <Card title="Revenue by Tier" subtitle={`This month${tier !== "All" ? ` · ${tier}` : ""}`} info="Monthly recurring revenue from each plan — paying Visibility Plans earn, admin-given ones and Free earn nothing — plus what was taken this month in ad-hoc purchases (homepage slots and add-on slots).">
 
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={revenueByTier} barSize={32}>
@@ -163,13 +179,15 @@ export default function ReportingPage() {
               <XAxis dataKey="tier" tick={{ fontSize: 11, fill: "#6B7280" }} />
               <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v) => `£${v}`} />
               <Tooltip formatter={(v) => [`£${v}`, "Revenue"]} contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }} />
-              <Bar dataKey="revenue" fill="#2563EB" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="revenue" radius={[6, 6, 0, 0]}>
+                {(revenueByTier ?? []).map((r) => <Cell key={r.tier} fill={BUCKET_COLOURS[r.tier] ?? "#2563EB"} />)}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </Card>
 
         {/* Subscriptions by tier over time */}
-        <Card title="Subscriptions by Tier" subtitle={rangeLabel} info="Number of active subscriptions per plan tier over time. Each line is a tier, so you can track how each one grows or declines across the range.">
+        <Card title="Businesses by Plan" subtitle={rangeLabel} info="How many businesses are on each plan over time: Visibility Plan paid through Stripe, Visibility Plan given by admin (not paying), and Free. Plan history isn't recorded, so each business is shown on its current plan from the month it registered.">
 
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={subTrend}>
@@ -186,7 +204,7 @@ export default function ReportingPage() {
         </Card>
 
         {/* Activity trend */}
-        <Card title="User Activity" subtitle={`Logins & new listings · ${rangeLabel}`} info="Platform engagement over time: the navy line tracks user logins and the brass line tracks new listings created in each period.">
+        <Card title="User Activity" subtitle={`Logins & new listings · ${rangeLabel}`} info="Sign-ins to the business dashboard and Maidenhead admin (blue), and new businesses registered (green), per month. Sign-ins are recorded from now on; before tracking began only each account's most recent sign-in is known.">
 
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={activityTrend}>
@@ -195,9 +213,31 @@ export default function ReportingPage() {
               <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} allowDecimals={false} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Line type="monotone" dataKey="logins" stroke="#2563EB" strokeWidth={2} dot={false} />
-              <Line type="monotone" dataKey="listings" stroke="#2563EB" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="logins" name="Logins" stroke="#2563EB" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="listings" name="New listings" stroke="#16A34A" strokeWidth={2} dot={false} />
             </LineChart>
+          </ResponsiveContainer>
+        </Card>
+
+        {/* Ad-hoc purchases */}
+        <Card title="Ad-hoc Purchases" subtitle={`Homepage slots & add-ons · ${rangeLabel}`} info="Everything businesses bought on top of their plan, per month: homepage promotions (In the Spotlight, Featured Article, What's On, Featured Business) and add-on slots for articles, events and Featured Articles. Hover a month for the revenue it brought in.">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={adhocTrend ?? []} barSize={22}>
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,24,40,0.08)" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6B7280" }} />
+              <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}
+                labelFormatter={(m, items) => {
+                  const rev = items?.[0]?.payload?.revenue ?? 0;
+                  return `${m} · £${rev.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`;
+                }}
+              />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              {ADHOC_GROUPS.map((g) => (
+                <Bar key={g} dataKey={g} stackId="adhoc" fill={ADHOC_COLOURS[g]} />
+              ))}
+            </BarChart>
           </ResponsiveContainer>
         </Card>
 
@@ -218,7 +258,7 @@ export default function ReportingPage() {
 
       {/* Bottom row: tier breakdown + listings status */}
       <div className="grid lg:grid-cols-2 gap-6">
-        <Card title="Tier Breakdown" subtitle="Accounts and monthly revenue per tier" info="A per-tier summary table: how many accounts sit on each plan and the monthly revenue each tier generates.">
+        <Card title="Tier Breakdown" subtitle="Accounts and monthly revenue per plan" info="How many businesses are on each plan and the monthly recurring revenue each earns, plus this month's ad-hoc purchases and what they brought in.">
 
           <div className="flex flex-col gap-3">
             {(revenueByTier ?? []).map((t) => {
@@ -227,7 +267,11 @@ export default function ReportingPage() {
                 <div key={t.tier} className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold" style={{ color: "#1E293B" }}>{t.tier}</span>
-                    <span className="text-xs" style={{ color: "#6B7280" }}>{t.count} accounts · £{t.revenue}/mo</span>
+                    <span className="text-xs" style={{ color: "#6B7280" }}>
+                      {t.tier === "Ad-hoc purchases"
+                        ? `${t.count} purchase${t.count === 1 ? "" : "s"} · £${t.revenue} this month`
+                        : `${t.count} account${t.count === 1 ? "" : "s"} · £${t.revenue}/mo`}
+                    </span>
                   </div>
                   <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(16,24,40,0.1)" }}>
                     <div className="h-full rounded-full" style={{ width: `${(t.revenue / maxRevenue) * 100}%`, backgroundColor: BUCKET_COLOURS[t.tier] ?? TIER_COLOURS[t.tier] }} />
