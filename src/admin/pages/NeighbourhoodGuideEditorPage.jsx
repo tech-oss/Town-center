@@ -155,7 +155,7 @@ export default function NeighbourhoodGuideEditorPage() {
         <RepeatList
           items={c.sections}
           onChange={(v) => setContent("sections", v)}
-          blank={() => ({ id: `place-${Date.now()}`, icon: "", eyebrow: "", title: "", location: "", address: "", phone: "", image: "", body: [], tryItFor: "" })}
+          blank={() => ({ id: `place-${Date.now()}`, icon: "", eyebrow: "", title: "", location: "", address: "", phone: "", url: "", linkLabel: "", image: "", body: [], tryItFor: "" })}
           addLabel="+ Add place"
           itemLabel="Place"
           renderItem={(s, update) => (
@@ -170,10 +170,30 @@ export default function NeighbourhoodGuideEditorPage() {
               <Field label="Try it for" hint="The highlighted line in the sand-coloured card">
                 <Inp value={s.tryItFor ?? ""} onChange={(e) => update({ tryItFor: e.target.value })} />
               </Field>
-              <div className="grid sm:grid-cols-3 gap-3">
-                <Field label="Location" hint="Short label under the name"><Inp value={s.location ?? ""} onChange={(e) => update({ location: e.target.value })} /></Field>
-                <Field label="Address" hint="Optional"><Inp value={s.address ?? ""} onChange={(e) => update({ address: e.target.value })} /></Field>
-                <Field label="Phone" hint="Optional"><Inp value={s.phone ?? ""} onChange={(e) => update({ phone: e.target.value })} /></Field>
+              <Field label="Location" hint="Short label under the name">
+                <Inp value={s.location ?? ""} onChange={(e) => update({ location: e.target.value })} />
+              </Field>
+
+              {/* How to get there — every field optional, and anything left
+                  blank doesn't show on the page. */}
+              <div className="rounded-xl p-3.5 flex flex-col gap-3" style={{ backgroundColor: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.12)" }}>
+                <p className="text-xs font-bold" style={{ color: "#1E293B" }}>Contact &amp; directions (all optional)</p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Field label="Address" hint="Shown with a Get directions link">
+                    <Inp value={s.address ?? ""} onChange={(e) => update({ address: e.target.value })} placeholder="Cliveden, Taplow, SL6 0JF" />
+                  </Field>
+                  <Field label="Phone" hint="Tap to call on a phone">
+                    <Inp value={s.phone ?? ""} onChange={(e) => update({ phone: e.target.value })} placeholder="+44 (0)1628 668 561" />
+                  </Field>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <Field label="Link" hint="A website (clivedenhouse.co.uk) or a page on this site (/see-do/place/cliveden)">
+                    <Inp value={s.url ?? ""} onChange={(e) => update({ url: e.target.value })} placeholder="clivedenhouse.co.uk" />
+                  </Field>
+                  <Field label="Link button text" hint='Optional — defaults to "Visit website" or "View [name]"'>
+                    <Inp value={s.linkLabel ?? ""} onChange={(e) => update({ linkLabel: e.target.value })} placeholder="More details" />
+                  </Field>
+                </div>
               </div>
               <ImageField label="Image" value={s.image} onChange={(v) => update({ image: v })} />
             </>

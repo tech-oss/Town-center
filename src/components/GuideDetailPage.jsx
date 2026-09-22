@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import { card, pill } from "../utils/design";
 import useTapReveal from "../hooks/useTapReveal";
+import GuidePlaceContact from "./GuidePlaceContact";
 
 function ShareButton({ guide }) {
   const [copied, setCopied] = useState(false);
@@ -69,16 +70,14 @@ function PlaceSection({ s, index }) {
             <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>{p}</p>
           ))}
         </div>
-        <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--sand)" }}>
-          <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>
-            <span className="font-bold">Try it for:</span> {s.tryItFor}
-          </p>
-        </div>
-        {(s.address || s.phone) && (
-          <p className="text-xs mt-4 leading-relaxed" style={{ color: "rgba(0,0,0,0.6)" }}>
-            {s.address}{s.address && s.phone ? " · " : ""}{s.phone}
-          </p>
+        {s.tryItFor && (
+          <div className="rounded-2xl p-4" style={{ backgroundColor: "var(--sand)" }}>
+            <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>
+              <span className="font-bold">Try it for:</span> {s.tryItFor}
+            </p>
+          </div>
         )}
+        <GuidePlaceContact place={s} />
       </div>
     </div>
   );

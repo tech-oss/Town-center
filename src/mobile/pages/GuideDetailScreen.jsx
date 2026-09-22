@@ -5,6 +5,7 @@ import MobilePhoto from "../components/MobilePhoto";
 import { getGuides, getGuideBySlug } from "../../api";
 import useFetch from "../../hooks/useFetch";
 import useMobileBack from "../hooks/useMobileBack";
+import GuidePlaceContact from "../../components/GuidePlaceContact";
 
 // One "place" section of a guide — hero photo, eyebrow/title/location, full
 // body copy, a "Try it for" callout and address/phone footer. Desktop lays
@@ -37,11 +38,7 @@ function PlaceSection({ s }) {
           </div>
         )}
 
-        {(s.address || s.phone) && (
-          <p className="text-xs leading-relaxed" style={{ color: "#000000" }}>
-            {s.address}{s.address && s.phone ? " · " : ""}{s.phone}
-          </p>
-        )}
+        <GuidePlaceContact place={s} mobile />
       </div>
     </div>
   );
