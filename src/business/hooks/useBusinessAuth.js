@@ -178,6 +178,10 @@ export async function login(email, password) {
 
   await refreshFromSession(data.session);
   if (!currentUser) return { ok: false, error: "No approved business account found for this login." };
+  // For Maidenhead admin's User Activity chart. Fire and forget: a failure to
+  // record must never block signing in.
+  supabase.rpc("record_login", { p_portal: "business", p_business_id: row.business_id })
+    .then(({ error: e }) => { if (e) console.warn("Login not recorded:", e.message); });
   return { ok: true };
 }
 
