@@ -267,7 +267,10 @@ export default function ArticlesPage() {
           <div>
             <h1 className="text-2xl font-bold" style={{ color: FOREST }}>News &amp; Articles</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>
-              Write as many as you like. Up to {allowance} can be live on your business page at a time.
+              Manage your News and Offer articles from here. {ADDON_KINDS.article.included} are included in your subscription.
+              You can purchase more any time you need. Edit / Hide / Delete as needed and all will show on your
+              business homepage and the News &amp; Offers main page across the website and app. Promote your
+              articles for prime visibility on the homepage of the website and app by upgrading.
             </p>
           </div>
           <button onClick={() => navigate("/business/articles/new")}
