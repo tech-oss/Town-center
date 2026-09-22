@@ -79,18 +79,60 @@ async function loadPayments() {
   return (data ?? []).filter(isPaid);
 }
 
+// ─── Every business, classified once ──────────────────────────────────────
+// The single answer to "what plan is this business on, and is it paying?",
+// used by every figure on the dashboard so none of them can disagree.
+//
+// It starts from `businesses`, not `business_subscriptions`: a business admin
+// registered and nobody has subscribed has no subscription row at all, and
+// counting from the subscriptions table left it out entirely — which is why
+// Plan Distribution showed fewer Free businesses than Business Profiles did.
+//
+//   paying  — Visibility Plan billed through Stripe
+//   granted — Visibility Plan admin gave it, nothing billed (not revenue)
+//   free    — everything else
+export async function loadClassifiedBusinesses() {
+  const [bizRes, subs] = await Promise.all([
+    supabase.from("businesses").select("id, status, submitted_at"),
+    loadSubscriptions(),
+  ]);
+  if (bizRes.error) throw bizRes.error;
+  const subByBusiness = new Map(subs.map((s) => [s.business_id, s]));
+  return (bizRes.data ?? []).map((b) => {
+    const sub = subByBusiness.get(b.id) ?? null;
+    const bucket = isPayingSubscription(sub) ? "paying" : isAdminGrantedSubscription(sub) ? "granted" : "free";
+    return { id: b.id, status: b.status, submittedAt: b.submitted_at, sub, bucket };
+  });
+}
+
+export const BUCKET_LABELS = {
+  paying: "Visibility Plan (paying)",
+  granted: "Visibility Plan (admin, not paying)",
+  free: "Free",
+};
+
+// Money actually collected in a calendar month, from every paid charge —
+// subscriptions AND ad-hoc purchases (homepage slots, add-on slots).
+function revenueInMonth(payments, year, month) {
+  const key = `${year}-${String(month + 1).padStart(2, "0")}`;
+  return Math.round(
+    payments.filter((p) => paymentDay(p).slice(0, 7) === key).reduce((sum, p) => sum + paymentAmount(p), 0) * 100
+  ) / 100;
+}
+
 // ─── Summary KPIs ──────────────────────────────────────────────────────────
 
 export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
   const { since } = resolveRange(range);
   const sinceIso = since.toISOString();
 
-  const [subs, listingsRes, usersRes, bizRes, occRes] = await Promise.all([
+  const [subs, listingsRes, usersRes, bizRes, occRes, payments] = await Promise.all([
     loadSubscriptions(),
     supabase.from("business_listings").select("business_id, approval_status"),
     supabase.from("business_users").select("id, status, requested_at"),
     supabase.from("businesses").select("id, status, submitted_at"),
     supabase.from("business_events").select("id, status"),
+    loadPayments().catch(() => []),
   ]);
   if (listingsRes.error) throw listingsRes.error;
   if (usersRes.error) throw usersRes.error;
@@ -133,8 +175,22 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
 
   const cancelled = subs.filter((s) => s.cancelled).length;
 
+  // What was actually collected this calendar month versus last, including
+  // one-off purchases. `mrr` stays alongside as the recurring rate — the two
+  // answer different questions and used to be shown as if they were one.
+  const now = new Date();
+  const revenueThisMonth = revenueInMonth(payments, now.getFullYear(), now.getMonth());
+  const last = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const revenueLastMonth = revenueInMonth(payments, last.getFullYear(), last.getMonth());
+  const revenueChange = revenueLastMonth > 0
+    ? Math.round(((revenueThisMonth - revenueLastMonth) / revenueLastMonth) * 1000) / 10
+    : null;
+
   return {
-    mrr,
+    revenueThisMonth,
+    revenueLastMonth,
+    revenueChange,
+    mrr: Math.round(mrr * 100) / 100,
     mrrChange: 0,
     arpa: paying > 0 ? Math.round(mrr / paying) : 0,
     activeSubscriptions: paying,
@@ -273,18 +329,31 @@ export async function getRevenueTrend({ days = 30 } = {}) {
   return { data, total, change };
 }
 
-// Dashboard's Platform Overview chart plots cumulative sign-ups per plan tier
-// as separate lines (PLAN_KEYS in DashboardPage.jsx), not a single daily count.
+// Dashboard's Platform Overview chart: cumulative businesses on each plan,
+// dated by when the business registered. Three lines — Free, paying, and
+// admin-granted — because those are the only plans that exist; it used to
+// plot Basic, Standard and Agent (retired) and fold paying and admin-granted
+// together as "Premium", which hid exactly the difference that matters.
+//
+// It shows each business's CURRENT plan at the date it joined, since plan
+// history isn't recorded — so the right-hand end always matches the other
+// figures on the page.
+export const SIGNUP_SERIES = ["Free", "Visibility (paying)", "Visibility (admin, not paying)"];
+const SERIES_FOR_BUCKET = {
+  free: "Free",
+  paying: "Visibility (paying)",
+  granted: "Visibility (admin, not paying)",
+};
+
 export async function getSignupTrend({ days = 30 } = {}) {
-  const subs = await loadSubscriptions();
+  const businesses = await loadClassifiedBusinesses();
   return dayBuckets(days).map(({ key, date }) => {
     const row = { date };
-    for (const tier of ["Free", "Basic", "Standard", "Premium", "Agent"]) row[tier] = 0;
-    for (const s of subs) {
-      const started = String(s.terms_accepted_at ?? "").slice(0, 10);
-      if (!started || started > key) continue;
-      const t = label(s.plan);
-      if (row[t] !== undefined) row[t] += 1;
+    for (const series of SIGNUP_SERIES) row[series] = 0;
+    for (const b of businesses) {
+      const joined = String(b.submittedAt ?? "").slice(0, 10);
+      if (!joined || joined > key) continue;
+      row[SERIES_FOR_BUCKET[b.bucket]] += 1;
     }
     return row;
   });
@@ -302,11 +371,17 @@ const SECTION_ICONS = {
 const PALETTE = ["#2563EB", "#1D4ED8", "#60A5FA", "#93C5FD", "#3B82F6", "#1E40AF"];
 
 export async function getTopCategories() {
-  const { data, error } = await supabase.from("business_listings").select("business_type, category");
+  // Approved businesses only — a rejected or still-pending registration isn't
+  // on the site, so it shouldn't shape what the site's top categories are.
+  const [{ data, error }, bizRes] = await Promise.all([
+    supabase.from("business_listings").select("business_id, business_type, category"),
+    supabase.from("businesses").select("id").eq("status", "Approved"),
+  ]);
   if (error) throw error;
+  const approved = new Set((bizRes.data ?? []).map((b) => b.id));
 
   const counts = {};
-  for (const l of data ?? []) {
+  for (const l of (data ?? []).filter((r) => approved.has(r.business_id))) {
     const name = SECTION_LABELS[l.business_type] ?? l.category ?? "Uncategorised";
     counts[name] = (counts[name] ?? 0) + 1;
   }
@@ -325,15 +400,22 @@ export async function getTopCategories() {
 }
 
 export async function getPlanDistribution() {
-  const subs = await loadSubscriptions();
+  const businesses = await loadClassifiedBusinesses();
   const counts = {};
-  for (const s of subs) {
-    const plan = planBucket(s);
+  for (const b of businesses) {
+    const plan = BUCKET_LABELS[b.bucket];
     counts[plan] = (counts[plan] ?? 0) + 1;
   }
   const rows = Object.entries(counts).map(([plan, count]) => ({ plan, count })).sort((a, b) => b.count - a.count);
   const total = rows.reduce((s, d) => s + d.count, 0) || 1;
-  return rows.map((d, i) => ({ ...d, colour: PALETTE[i % PALETTE.length], pct: Math.round((d.count / total) * 100) }));
+  // The same colours as the Platform Overview lines, so paying and
+  // not-paying read the same way everywhere on the dashboard.
+  const colourFor = {
+    [BUCKET_LABELS.free]: "#94A3B8",
+    [BUCKET_LABELS.paying]: "#16A34A",
+    [BUCKET_LABELS.granted]: "#D97706",
+  };
+  return rows.map((d, i) => ({ ...d, colour: colourFor[d.plan] ?? PALETTE[i % PALETTE.length], pct: Math.round((d.count / total) * 100) }));
 }
 
 export async function getListingsBySection() {

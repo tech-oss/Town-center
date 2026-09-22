@@ -3,6 +3,7 @@ import { logBusinessActivity } from "./businessActivity";
 import { getLivePlacementMap, featureNow, unfeature } from "./homepageSlots";
 import { planFor } from "../../Data/plans";
 import { isPayingSubscription, isAdminGrantedSubscription } from "../../lib/subscriptionStatus";
+import { loadClassifiedBusinesses } from "./reporting";
 import { assertValidCoords } from "../../lib/geo";
 import { addLog } from "./users";
 import {
@@ -544,31 +545,27 @@ export async function deleteBusiness(id) {
 // with no business_users row at all, which is exactly "unclaimed"). Computed
 // here rather than stored, so it can never drift out of sync with reality.
 export async function getBusinessStats() {
-  const [bizRes, subsRes, ownersRes] = await Promise.all([
-    supabase.from("businesses").select("id"),
-    supabase.from("business_subscriptions").select("business_id, plan, monthly_fee, stripe_subscription_id, cancelled"),
+  // Paying / admin-granted / free come from the same classification every
+  // other dashboard figure uses, so the Business Profiles card, Plan
+  // Distribution and Platform Overview always add up to the same totals.
+  const [businesses, ownersRes] = await Promise.all([
+    loadClassifiedBusinesses(),
     supabase.from("business_users").select("business_id").eq("role", "Owner").eq("status", "approved"),
   ]);
-  if (bizRes.error) throw bizRes.error;
-  if (subsRes.error) throw subsRes.error;
   if (ownersRes.error) throw ownersRes.error;
 
   const claimedIds = new Set((ownersRes.data ?? []).map((r) => r.business_id));
-  const subs = subsRes.data ?? [];
-  const paidByBusiness = new Map(subs.map((s) => [s.business_id, isPayingSubscription(s)]));
-  const adminGranted = subs.filter(isAdminGrantedSubscription).length;
-
-  const total = (bizRes.data ?? []).length;
-  const claimed = (bizRes.data ?? []).filter((b) => claimedIds.has(b.id)).length;
-  const paid = [...paidByBusiness.values()].filter(Boolean).length;
+  const total = businesses.length;
+  const claimed = businesses.filter((b) => claimedIds.has(b.id)).length;
+  const tally = (bucket) => businesses.filter((b) => b.bucket === bucket).length;
 
   return {
     total,
     claimed,
     unclaimed: total - claimed,
-    paid,
-    adminGranted,
-    free: total - paid - adminGranted,
+    paid: tally("paying"),
+    adminGranted: tally("granted"),
+    free: tally("free"),
   };
 }
 

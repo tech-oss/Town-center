@@ -8,7 +8,7 @@ import useFetch from "../../hooks/useFetch";
 import {
   getReportingSummary, getApprovals, getBusinesses, getUsers,
   getRevenueTrend, getSignupTrend, getPlanDistribution, getTopCategories,
-  getBusinessStats,
+  getBusinessStats, getAdminPendingCounts, SIGNUP_SERIES,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import InfoTip from "../components/InfoTip";
@@ -115,6 +115,12 @@ function BusinessBreakdownCard({ stats }) {
       </div>
     </div>
   );
+}
+
+// "1,234.50" — two decimals only when there are pence, so £40 stays £40.
+function formatMoney(n) {
+  const v = Math.round(Number(n ?? 0) * 100) / 100;
+  return v.toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(v) ? 0 : 2, maximumFractionDigits: 2 });
 }
 
 // ─── Period selector ──────────────────────────────────────────────────────────
@@ -238,8 +244,14 @@ function PlanDistributionChart() {
 }
 
 // ─── Platform overview ────────────────────────────────────────────────────────
-const PLAN_COLOURS = PLAN_COLOURS_MAP;
-const PLAN_KEYS = ["Free", "Basic", "Standard", "Premium", "Agent"];
+// The three plans that actually exist. Paying and admin-granted are drawn
+// separately — lumping them together hid the difference that matters most.
+const PLAN_KEYS = SIGNUP_SERIES;
+const PLAN_COLOURS = {
+  "Free": "#94A3B8",
+  "Visibility (paying)": "#16A34A",
+  "Visibility (admin, not paying)": "#D97706",
+};
 
 function SignupTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -267,7 +279,7 @@ function SignupChart() {
       <div className="flex items-start justify-between gap-4 mb-4 flex-wrap gap-y-3">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>Platform Overview</h2>
-          <InfoTip text="Cumulative business sign-ups over the selected period, with a separate line for each plan tier — Free, Basic, Standard, Premium and Agent — so you can compare growth across tiers." />
+          <InfoTip text="Cumulative registered businesses over the selected period, split by the plan each is on now: Free, Visibility Plan paid through Stripe, and Visibility Plan given by admin with nothing billed. Plan history isn't recorded, so each business is shown on its current plan from the day it registered." />
         </div>
         <PeriodSelector days={days} setDays={setDays} />
       </div>
@@ -369,9 +381,17 @@ export default function DashboardPage() {
   // registration) show up here.
   const { data: pendingUsers }     = useFetch(() => getUsers({ status: "Pending", role: "Business Owner" }), []);
   const { data: bizStats }         = useFetch(getBusinessStats, []);
+  const { data: counts }           = useFetch(getAdminPendingCounts, []);
 
   if (loadingSummary) return <LoadingState />;
   const s = summary ?? {};
+  // Everything content-shaped waiting on admin — listing edits, events,
+  // News & Offers, Featured Articles, reviews and homepage bookings. It used
+  // to count listing edits alone.
+  const contentPending = counts
+    ? (counts.approvals ?? 0) + (counts.events ?? 0) + (counts.articles ?? 0)
+      + (counts.featured ?? 0) + (counts.reviews ?? 0) + (counts.slots ?? 0)
+    : (approvals?.length ?? 0);
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl">
@@ -415,10 +435,18 @@ export default function DashboardPage() {
 
       {/* ── 6 stat cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard icon={Icons.revenue}       label="Total Revenue This Month"   value={`£${(s.mrr ?? 0).toLocaleString()}`}  sub={`+${s.mrrChange}% on this month`}     to="/admin/subscriptions" />
+        <StatCard icon={Icons.revenue}       label="Revenue This Month"
+          value={`£${formatMoney(s.revenueThisMonth)}`}
+          sub={[
+            s.revenueChange == null
+              ? (s.revenueLastMonth ? null : "no revenue last month")
+              : `${s.revenueChange >= 0 ? "+" : ""}${s.revenueChange}% on last month`,
+            `£${formatMoney(s.mrr)}/mo recurring`,
+          ].filter(Boolean).join(" · ")}
+          to="/admin/subscriptions" />
         <StatCard icon={Icons.subscriptions} label="Active Paid Subscriptions" value={s.payingSubscriptions ?? "—"}          sub={`${s.adminGrantedSubscriptions ?? 0} more on admin-granted plans (not paying)`} to="/admin/subscriptions" />
         <StatCard icon={Icons.users}         label="Total Users"          value={s.totalUsers ?? "—"}                   sub={`+${s.newUsersThisMonth} this month`}   to="/admin/users" />
-        <StatCard icon={Icons.content}       label="Content Approvals"    value={approvals?.length ?? 0}                pending to="/admin/approvals" />
+        <StatCard icon={Icons.content}       label="Content Approvals"    value={contentPending}                        pending to="/admin/approvals" />
         <StatCard icon={Icons.business}      label="Business Approvals"   value={pendingBusinesses?.length ?? 0}        pending to="/admin/businesses" />
         <StatCard icon={Icons.user}          label="User Approvals"       value={pendingUsers?.length ?? 0}             pending to="/admin/users" />
       </div>
