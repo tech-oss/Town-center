@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { formatUK } from "../../lib/ukDate";
 import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
 import { raisePurchaseRequest } from "../api/purchaseRequests";
+import PurchasedSlots from "../components/PurchasedSlots";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -290,6 +291,9 @@ export default function ArticlesPage() {
             )}
           </div>
         )}
+
+        {/* What's been bought, and when each slot runs out. */}
+        <PurchasedSlots businessId={user.id} kind="article" refreshKey={slots?.extra ?? 0} />
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading articles…</p>

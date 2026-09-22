@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AddonSlotsCard from "../components/AddonSlotsCard";
+import PurchasedSlots from "../components/PurchasedSlots";
 import { ADDON_KINDS, getAddonAllowance } from "../api/addonSlots";
 import { formatUK } from "../../lib/ukDate";
 import { useNavigate } from "react-router-dom";
@@ -120,6 +121,9 @@ export default function EventsPage() {
             {showSlots ? "Hide packages" : allowance === 0 ? "Get an event slot" : "Get more slots"}
           </button>
         </div>
+
+        {/* What's been bought, and when each slot runs out. */}
+        <PurchasedSlots businessId={user.id} kind="event" refreshKey={slots?.extra ?? 0} />
 
         {showSlots && (
           <AddonSlotsCard businessId={user.id} kind="event" premium={premium}

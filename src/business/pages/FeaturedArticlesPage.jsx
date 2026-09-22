@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import AddonSlotsCard from "../components/AddonSlotsCard";
+import PurchasedSlots from "../components/PurchasedSlots";
 import { ADDON_KINDS, getAddonAllowance } from "../api/addonSlots";
 import { listFeatureArticles, setFeatureArticleStatus, deleteFeatureArticle } from "../api/businessFeatureArticles";
 import { Toast, useToast, ConfirmModal, CARD, FOREST, SAGE, MUTED, BORDER } from "../components/FormKit";
@@ -111,6 +112,9 @@ export default function FeaturedArticlesPage() {
             {showSlots ? "Hide packages" : allowance === 0 ? "Get a slot" : "Get more slots"}
           </button>
         </div>
+
+        {/* What's been bought, and when each slot runs out. */}
+        <PurchasedSlots businessId={user.id} kind="featured_article" refreshKey={slots?.extra ?? 0} />
 
         {showSlots && (
           <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium}
