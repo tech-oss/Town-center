@@ -108,7 +108,7 @@ export default function ServicesDetailPage() {
         afterGrid={free
           ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
           : <NewsOffers item={item} />}
-        relatedHeading="Similar Freelancers"
+        relatedHeading="You might also like"
         related={related.map((it) => ({
           slug: it.slug,
           to: `/${it.section}/place/${it.slug}`,
@@ -161,7 +161,7 @@ export default function ServicesDetailPage() {
       afterGrid={free
         ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
         : <NewsOffers item={item} />}
-      relatedHeading="Similar Businesses"
+      relatedHeading="You might also like"
       related={related.map((it) => ({
         slug: it.slug,
         to: `/${it.section}/place/${it.slug}`,
