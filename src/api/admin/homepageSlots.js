@@ -349,3 +349,12 @@ export async function swapFeatured(slotType, contentKind, addId, removeId) {
   });
   return { ok: true };
 }
+
+// How many homepage slots of a type there are, and how many are in use now.
+// `used` counts every live placement — an admin story or a business's own
+// booked post alike — since both take a slot.
+export async function getSlotUsage(slotType) {
+  const [types, live] = await Promise.all([getSlotTypes(), getLivePlacementMap(slotType)]);
+  const type = types.find((t) => t.key === slotType);
+  return { capacity: type?.capacity ?? 0, used: live.size };
+}

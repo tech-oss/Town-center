@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { getArticles } from "../api";
 import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
+import { postPath } from "../lib/postPath";
 
 // Story card — keeps the "In the Spotlight" framed-photo hover: a sharp
 // foreground photo that insets on hover/tap to reveal a blurred, dimmed
@@ -12,7 +13,7 @@ function StoryCard({ story }) {
   return (
     <div className="bg-white rounded-3xl overflow-hidden flex flex-col" style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}>
       <Link
-        to={`/news/${story.slug}`}
+        to={postPath(story)}
         onClick={onImageClick}
         className={`spotlight-card group block ${revealed ? "is-revealed" : ""}`}
       >
@@ -31,7 +32,7 @@ function StoryCard({ story }) {
         <p className="text-[11px] font-medium" style={{ color: "#000000" }}>{story.date}</p>
         <h3 className="font-bold text-lg leading-snug" style={{ color: "#000000" }}>{story.title}</h3>
         <p className="text-sm leading-relaxed line-clamp-3" style={{ color: "#000000" }}>{story.excerpt}</p>
-        <Link to={`/news/${story.slug}`} className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
+        <Link to={postPath(story)} className="group/more inline-flex items-center gap-1.5 text-sm font-semibold mt-auto pt-2" style={{ color: "var(--leaf)" }}>
           Read more
           <span className="transition-transform duration-200 group-hover/more:translate-x-1">→</span>
         </Link>

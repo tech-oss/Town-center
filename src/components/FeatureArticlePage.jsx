@@ -133,6 +133,13 @@ export default function FeatureArticlePage() {
                 {story.category}
               </span>
               <span className="text-sm" style={{ color: "#000000" }}>{story.date}</span>
+              {/* Whose story this is, linking to their page. */}
+              {story.business && (
+                <Link to={`/${story.business.section}/place/${story.business.slug}`}
+                  className="text-sm font-bold underline underline-offset-2 hover:opacity-75" style={{ color: "var(--teal-deep)" }}>
+                  {story.business.name}
+                </Link>
+              )}
               <span className="ml-auto">
                 <ShareButton path={`/story/${story.slug}`} title={story.title} text={story.standfirst} />
               </span>

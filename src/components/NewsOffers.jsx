@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { postPath } from "../lib/postPath";
 
 // Per-business "News & Offers" — same glassmorphic look as the homepage
 // "In the Spotlight" section. Content comes from the item's `news` array.
@@ -41,7 +42,7 @@ export default function NewsOffers({ item, placeholder }) {
             return (
               <Link
                 key={post.id}
-                to={`/news/${post.slug}`}
+                to={postPath(post)}
                 className="group relative flex flex-row md:flex-col overflow-hidden p-3 gap-3 md:gap-0
                            transition-all duration-300 ease-out hover:-translate-y-1"
                 style={{

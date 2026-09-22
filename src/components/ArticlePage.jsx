@@ -8,6 +8,7 @@ import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import ShareButton from "./ui/ShareButton";
 import { typeColor } from "../lib/typeColors";
+import { postPath } from "../lib/postPath";
 
 export default function ArticlePage() {
   const { articleSlug } = useParams();
@@ -131,7 +132,7 @@ export default function ArticlePage() {
               {more.map((a) => (
                 <Link
                   key={a.slug}
-                  to={`/news/${a.slug}`}
+                  to={postPath(a)}
                   className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1.5"
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >

@@ -22,6 +22,7 @@ import ServicesBusinessDetailScreen from "./ServicesBusinessDetailScreen";
 import FreelancerDetailScreen from "./FreelancerDetailScreen";
 import MobileReviews from "../components/MobileReviews";
 import MobileFaqs from "../components/MobileFaqs";
+import { postPath } from "../../lib/postPath";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -231,7 +232,7 @@ function BusinessDetailScreen({ place, goBack }) {
                 {news.map((n) => (
                   <Link
                     key={n.slug}
-                    to={`/mobile/news/${n.slug}`}
+                    to={postPath(n, { mobile: true })}
                     className="shrink-0 w-48 overflow-hidden flex flex-col"
                     style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}
                   >

@@ -260,8 +260,12 @@ export function loadLiveBusinesses() {
       // Featured Articles a business wrote against a slot it bought. Live
       // only — RLS also lets a signed-in business read its own drafts, which
       // must never reach a public list.
+      // Any live Featured Article attached to a business shows on its page —
+      // one the business wrote, or one admin wrote and attached to it. This
+      // used to take business-written ones only, so an admin story attached
+      // to Solas never appeared on Solas's page.
       withSchemaRetry(() => supabase.from("feature_articles").select("*")
-        .eq("author", "business").eq("status", "Live").order("updated_at", { ascending: false })),
+        .not("business_id", "is", null).eq("status", "Live").order("updated_at", { ascending: false })),
       getLivePlacements(),
     ]);
     // A missing view (migration not run yet) or a network failure must not

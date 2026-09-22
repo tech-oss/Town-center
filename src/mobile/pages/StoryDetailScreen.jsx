@@ -67,6 +67,13 @@ export default function StoryDetailScreen() {
                 <h1 className="text-xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{heroTitle}</h1>
                 {heroSubtitle && <p className="text-xs uppercase tracking-wide mt-1" style={{ color: "#000000" }}>{heroSubtitle}</p>}
                 {story.date && <p className="text-xs mt-2" style={{ color: "#000000" }}>{story.date}</p>}
+                {/* Whose story this is, opening their page in the app. */}
+                {story.business && (
+                  <Link to={`/mobile/place/${story.business.slug}`}
+                    className="inline-block text-sm font-bold mt-2 underline underline-offset-2 active:opacity-70" style={{ color: "var(--teal-deep)" }}>
+                    {story.business.name}
+                  </Link>
+                )}
               </div>
               <ShareButton path={`/story/${story.slug}`} title={story.title} text={story.standfirst} className="mt-0.5" />
             </div>

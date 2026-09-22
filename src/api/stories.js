@@ -24,13 +24,34 @@ function fromRow(r) {
     location: r.location,
     website: r.website,
     // Set when the story belongs to a business — either one a business wrote
-    // against a Featured Article slot, or one admin attached to it.
+    // against a Featured Article slot, or one admin attached to it. The name
+    // and page link are filled in by withBusiness() below.
     businessId: r.business_id ?? null,
-    businessName: r.business_name ?? null,
+    businessName: null,
+    business: null,
     author: r.author ?? "admin",
     body: r.body ?? [],
     gallery: r.gallery ?? [],
   };
+}
+
+// Fills in the business a story belongs to — its name, and its page on the
+// site — from the live businesses. Without this an admin story attached to a
+// business carried only the id, so the article never said whose it was.
+async function withBusiness(stories) {
+  const needed = stories.some((st) => st?.businessId);
+  if (!needed) return stories;
+  const live = await loadLiveBusinesses().catch(() => []);
+  const byId = new Map(live.map((b) => [b.businessId, b]));
+  return stories.map((st) => {
+    const b = st?.businessId ? byId.get(st.businessId) : null;
+    if (!b) return st;
+    return {
+      ...st,
+      businessName: b.name,
+      business: { name: b.name, slug: b.slug, section: b.section, businessId: b.businessId },
+    };
+  });
 }
 
 // Every story. `homepage` is true while it's booked into a Featured Article slot.
@@ -42,7 +63,7 @@ export async function getStories() {
   if (error) throw error;
   const live = new Set(placements.featured_article
     .filter((p) => p.content_kind === "feature_article").map((p) => p.content_id));
-  return (data ?? []).map((r) => ({ ...fromRow(r), homepage: live.has(String(r.id)) }));
+  return withBusiness((data ?? []).map((r) => ({ ...fromRow(r), homepage: live.has(String(r.id)) })));
 }
 
 // The homepage Featured Stories, in slot order: an admin story, or a
@@ -103,5 +124,7 @@ export async function getStoryBySlug(slug) {
     .eq("status", "Live")
     .maybeSingle();
   if (error) throw error;
-  return data ? fromRow(data) : null;
+  if (!data) return null;
+  const [story] = await withBusiness([fromRow(data)]);
+  return story;
 }

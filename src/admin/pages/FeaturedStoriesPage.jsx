@@ -12,6 +12,7 @@ import {
   setArticleHomepageFeature,
   swapArticleHomepageFeature,
   getSpotlightBusinesses,
+  getSlotUsage,
 } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
@@ -79,7 +80,7 @@ function HomeBadge({ active }) {
   );
 }
 
-// ─── Swap picker modal (max 2 homepage slots) ───────────────────────────────────
+// ─── Swap picker modal (when every homepage slot is taken) ───────────────────────────────────
 function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(16,24,40,0.55)" }}>
@@ -184,7 +185,7 @@ function SectionsEditor({ blocks, onChange }) {
 }
 
 // ─── Edit / Create form ───────────────────────────────────────────────────────
-function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
+function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [], capacity = 2 }) {
   const blank = {
     eyebrow: "", category: "", date: "",
     cardHeading: "", cardBody: "", cardImage: "",
@@ -210,7 +211,8 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses =
       setSwapOutId(null);
       return;
     }
-    if (swapCandidates.length < 2) {
+    // How many slots there are is set in Homepage Slots, not fixed at two.
+    if (swapCandidates.length < capacity) {
       set("homepage", true);
       return;
     }
@@ -352,7 +354,7 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses =
           <div className="flex flex-col gap-0.5">
             <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Show in "FEATURED STORIES" on the homepage</span>
             {!form.homepage && (
-              <span className="text-xs" style={{ color: "#9CA3AF" }}>{swapCandidates.length}/2 slots used</span>
+              <span className="text-xs" style={{ color: "#9CA3AF" }}>{swapCandidates.length}/{capacity} slots used</span>
             )}
             {form.homepage && swapOutItem && (
               <span className="text-xs" style={{ color: "#92400E" }}>Will swap out "{swapOutItem.cardHeading || swapOutItem.title}" when saved</span>
@@ -369,7 +371,7 @@ function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses =
           candidates={swapCandidates}
           onPick={handleSwapPick}
           onCancel={() => setShowSwapPicker(false)}
-          title="Homepage is full (2/2)"
+          title={`Homepage is full (${capacity}/${capacity})`}
           description="Featured Stories shows a maximum of two. Pick one of the two live stories below to swap it out with."
         />
       )}
@@ -444,12 +446,21 @@ export default function FeaturedStoriesPage() {
   const { data: items, loading } = useFetch(getFeatureArticles, []);
   const { data: businesses } = useFetch(getSpotlightBusinesses, []);
   const [localItems, setLocalItems] = useState(null);
+  // The number of Featured Article slots comes from Homepage Slots, where
+  // admin can raise it — it used to be written in as 2, so raising it showed
+  // "3/2 slots used".
+  const [usageTick, setUsageTick] = useState(0);
+  const { data: usage } = useFetch(() => getSlotUsage("featured_article"), [usageTick]);
   const [editing, setEditing] = useState(null);
   const [toast, setToast] = useState(null);
   const [swapPicker, setSwapPicker] = useState(null);
 
   const list = localItems ?? items ?? [];
   const featured = list.filter((n) => n.homepage);
+  const capacity = usage?.capacity || 2;
+  // Every live Featured Article placement uses a slot, including a business's
+  // own booked post — not only the stories listed on this page.
+  const used = Math.max(usage?.used ?? 0, featured.length);
 
   function showToast(msg, error = false) {
     setToast({ msg, error });
@@ -457,6 +468,7 @@ export default function FeaturedStoriesPage() {
   }
 
   function handleSave(saved, swappedOutId) {
+    setUsageTick((t) => t + 1);
     setLocalItems((prev) => {
       let base = prev ?? items ?? [];
       const idx = base.findIndex((n) => n.id === saved.id);
@@ -484,6 +496,7 @@ export default function FeaturedStoriesPage() {
       }
       setLocalItems((prev) => (prev ?? items ?? []).map((n) => n.id === item.id ? { ...n, homepage: res.homepage } : n));
       showToast(res.homepage ? `"${item.cardHeading}" added to Featured Stories.` : `"${item.cardHeading}" removed from Featured Stories.`);
+      setUsageTick((t) => t + 1);
     });
   }
 
@@ -524,6 +537,7 @@ export default function FeaturedStoriesPage() {
           onCancel={() => setEditing(null)}
           featuredItems={featured}
           businesses={businesses ?? []}
+          capacity={capacity}
         />
       </div>
     );
@@ -536,7 +550,7 @@ export default function FeaturedStoriesPage() {
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Featured Stories</h1>
-          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage the long-form "FEATURED STORIES" section and its /story/ detail pages on the homepage. Max 2 live at once.</p>
+          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage the long-form "FEATURED STORIES" section and its /story/ detail pages on the homepage. Up to {capacity} live at once — set in Homepage Slots.</p>
         </div>
         <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>
           + Add Story
@@ -548,12 +562,12 @@ export default function FeaturedStoriesPage() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "rgba(216,243,220,0.7)" }}>Homepage</p>
             <h2 className="text-lg font-bold text-white">Featured Stories</h2>
-            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{featured.length}/2 slots used.</p>
+            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{used}/{capacity} slots used.</p>
           </div>
           <div className="flex items-center gap-1">
-            {[0, 1].map((i) => (
-              <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={i < featured.length ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
-                {i < featured.length ? "★" : "○"}
+            {Array.from({ length: capacity }, (_, i) => (
+              <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={i < used ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
+                {i < used ? "★" : "○"}
               </div>
             ))}
           </div>
@@ -599,7 +613,7 @@ export default function FeaturedStoriesPage() {
           candidates={swapPicker.candidates}
           onPick={handleSwapConfirm}
           onCancel={() => setSwapPicker(null)}
-          title={swapPicker.replacing ? `Swap out "${swapPicker.item.cardHeading}"` : "Homepage is full (2/2)"}
+          title={swapPicker.replacing ? `Swap out "${swapPicker.item.cardHeading}"` : `Homepage is full (${capacity}/${capacity})`}
           description={swapPicker.replacing
             ? "Pick a story below to put live in its place."
             : "Featured Stories shows a maximum of two. Pick one of the two live stories below to swap it out with."}
