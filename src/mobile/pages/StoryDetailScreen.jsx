@@ -7,6 +7,7 @@ import ShareButton from "../components/ShareButton";
 import MobilePhoto from "../components/MobilePhoto";
 import { typeColor } from "../lib/typeColors";
 import { storySectionImages } from "../../lib/storyImages";
+import { useTrackView, featureView } from "../../lib/trackView";
 
 function BlockText({ block }) {
   return (
@@ -37,6 +38,8 @@ function BlockText({ block }) {
 export default function StoryDetailScreen() {
   const { slug } = useParams();
   const { data: story, loading } = useFetch(() => getStoryBySlug(slug), [slug]);
+  // A Featured Article that belongs to a business counts towards its analytics.
+  useTrackView(featureView(story));
   const { data: stories } = useFetch(getStories, []);
 
   const goBack = useMobileBack("/mobile/offers");

@@ -50,6 +50,14 @@ export function eventView(event) {
   return event?.businessId && event.id ? { businessId: event.businessId, type: "event", id: String(event.id) } : null;
 }
 
+// A Featured Article that belongs to a business — either one the business
+// wrote against a slot it bought, or an admin story attached to it.
+export function featureView(story) {
+  return story?.businessId && story.id
+    ? { businessId: story.businessId, type: "featured", id: String(story.id) }
+    : null;
+}
+
 export function trackView(target) {
   if (!target || typeof window === "undefined") return;
   supabase.rpc("record_view", {
@@ -58,10 +66,17 @@ export function trackView(target) {
     p_content_id: target.id,
     p_source: source(),
     p_session_id: sessionId(),
-  }).then(() => {}, () => {});
+  }).then(({ error }) => {
+    // Never breaks the page, but never silent either: this used to discard
+    // every error, which is how a database rule rejecting repeat views went
+    // unnoticed while the numbers quietly stopped moving.
+    if (error) console.warn("View not recorded:", error.message, target);
+  }, (e) => console.warn("View not recorded:", e?.message ?? e, target));
 }
 
-// Records once per item shown (call it before any early return).
+// Records a view every time an item is shown — each page load, and each time
+// the visitor navigates to it again within the site. Call it before any early
+// return.
 export function useTrackView(target) {
   const key = target ? `${target.businessId}|${target.type}|${target.id}` : null;
   useEffect(() => {

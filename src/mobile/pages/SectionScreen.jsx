@@ -70,7 +70,12 @@ export default function SectionScreen({ sectionKey }) {
   // the same running order as the website's See & Do listing.
   const pool = useMemo(() => {
     if (sectionKey !== "see-do") return sectionItems;
-    const activities = sectionItems.map((i) => ({ ...i, to: `/mobile/event/${i.slug}` }));
+    // A See & Do BUSINESS opens its own business screen. The website sends
+    // these to /event/:slug because its event page falls back to the
+    // business; the app's event screen doesn't, and redirected a business
+    // straight to What's On — so it must use the place screen instead, which
+    // also records the profile view.
+    const activities = sectionItems.map((i) => ({ ...i, to: `/mobile/place/${i.slug}` }));
     return [
       ...activities.filter((i) => i.featured),
       ...(whatsOnEvents ?? []).map(toEventCard),

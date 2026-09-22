@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useLiveTick from "../hooks/useLiveTick";
 import { useNavigate, useParams } from "react-router-dom";
 import { getBusinesses } from "../../api/admin";
 import { getProfileViewsSeries, getContentViewsSeries, getContentBreakdown } from "../../api/admin/businessAnalytics";
@@ -64,11 +65,17 @@ export default function BusinessAnalyticsPage() {
   useEffect(() => { getBusinesses().then(setBusinesses); }, []);
 
   const business = businesses?.find((b) => b.id === businessId) ?? null;
+  // Refreshes every 30s and on returning to the tab, so views appear live.
+  const tick = useLiveTick();
+  const [loadedKey, setLoadedKey] = useState(null);
+  const rangeKey = `${businessId}|${JSON.stringify(range)}`;
 
   useEffect(() => {
     if (!businessId) return;
     let cancelled = false;
-    setLoading(true);
+    // A live refresh updates the figures in place; only a change of business
+    // or range shows the loading state.
+    if (loadedKey !== rangeKey) setLoading(true);
     setError(null);
     Promise.all([
       getProfileViewsSeries(businessId, range),
@@ -78,6 +85,7 @@ export default function BusinessAnalyticsPage() {
       if (cancelled) return;
       setProfile(p); setContent(c); setBreakdown(b);
       setLoading(false);
+      setLoadedKey(rangeKey);
     }).catch((e) => {
       if (cancelled) return;
       setError(e.message);
@@ -85,7 +93,7 @@ export default function BusinessAnalyticsPage() {
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [businessId, JSON.stringify(range)]);
+  }, [businessId, JSON.stringify(range), tick]);
 
   if (!businessId) {
     if (!businesses) return <LoadingState />;

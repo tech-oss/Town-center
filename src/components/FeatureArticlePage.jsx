@@ -8,6 +8,7 @@ import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import ShareButton from "./ui/ShareButton";
 import { typeColor } from "../lib/typeColors";
+import { useTrackView, featureView } from "../lib/trackView";
 
 // Feature photo — keeps the "In the Spotlight" framed-photo hover: a sharp
 // foreground photo that insets on hover/tap to reveal a blurred, dimmed
@@ -59,6 +60,8 @@ function BlockText({ block }) {
 export default function FeatureArticlePage() {
   const { slug } = useParams();
   const { data: story, loading, error } = useFetch(() => getStoryBySlug(slug), [slug]);
+  // A Featured Article that belongs to a business counts towards its analytics.
+  useTrackView(featureView(story));
   const { data: stories, loading: loadingList } = useFetch(getStories, []);
 
   useEffect(() => {

@@ -51,9 +51,9 @@ create index if not exists analytics_events_content_idx
 -- the session timezone, so Postgres won't call it immutable. Casting via a
 -- fixed 'utc' offset first pins the result regardless of caller timezone,
 -- which is immutable.
-create unique index if not exists analytics_events_dedup_idx
-  on public.analytics_events (business_id, content_type, content_id, session_id, ((created_at at time zone 'utc')::date))
-  where session_id is not null;
+-- analytics_events_dedup_idx (one view per session per item per day) was
+-- removed: every page view is counted. See analytics_every_view_fix_2026_09.sql.
+-- Do not reintroduce it — it silently discarded every repeat view.
 
 alter table public.analytics_events enable row level security;
 
