@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./components/AdminLayout";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import useAdminAuth from "./hooks/useAdminAuth";
@@ -9,7 +9,6 @@ import UserDetailPage from "./pages/UserDetailPage";
 import BusinessesPage from "./pages/BusinessesPage";
 import ApprovalQueuePage from "./pages/ApprovalQueuePage";
 import ApprovalDetailPage from "./pages/ApprovalDetailPage";
-import ListingsPage from "./pages/ListingsPage";
 import BusinessContentPage from "./pages/BusinessContentPage";
 import PropertiesPage from "./pages/PropertiesPage";
 import EventApprovalsPage from "./pages/EventApprovalsPage";
@@ -65,7 +64,9 @@ export default function AdminApp() {
         <Route path="businesses" element={<BusinessesPage />} />
         <Route path="approvals" element={<ApprovalQueuePage />} />
         <Route path="approvals/:id" element={<ApprovalDetailPage />} />
-        <Route path="listings" element={<ListingsPage />} />
+        {/* The old placeholder Listings page, removed — anything bookmarked or
+            linked to it lands on the real editor instead. */}
+        <Route path="listings" element={<Navigate to="/admin/business-content" replace />} />
         <Route path="business-content" element={<BusinessContentPage />} />
         <Route path="properties" element={<PropertiesPage />} />
         <Route path="event-approvals" element={<EventApprovalsPage />} />

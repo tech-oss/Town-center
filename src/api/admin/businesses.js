@@ -28,7 +28,7 @@ export const SECTION_OPTIONS = [
   { value: "live",     label: "Live" },
 ];
 
-// Keyed by section, the shape ListingsPage expects. Eat & Drink's two pickers
+// Keyed by section. Eat & Drink's two pickers
 // (venue + cuisine) flatten into one pool here because a listing filter
 // doesn't care which of the two a category came from.
 export const SUBCATEGORIES = {

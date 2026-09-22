@@ -318,7 +318,7 @@ function TopCategoriesCard() {
           <h2 className="font-semibold text-base" style={{ color: NAVY, fontFamily: CINZEL }}>No of Listings for Categories</h2>
           <InfoTip text="Business categories ranked by number of active listings. Each bar and percentage show that category's share of all listings on the platform." />
         </div>
-        <Link to="/admin/listings" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: BRASS }}>View All</Link>
+        <Link to="/admin/business-content" className="text-xs font-medium transition-opacity hover:opacity-70" style={{ color: BRASS }}>View All</Link>
       </div>
       <div className="flex flex-col gap-4 flex-1 justify-center">
         {rows.map((r, i) => (
@@ -549,7 +549,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl p-6 print:hidden" style={CARD}>
           <h2 className="font-semibold text-sm mb-5" style={{ color: NAVY, fontFamily: CINZEL }}>Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">
-            <QuickAction icon="➕" label="Add Listing"  to="/admin/listings" />
+            <QuickAction icon="➕" label="Add Listing"  to="/admin/businesses" />
             <QuickAction icon="📅" label="Add Event"    to="/admin/events-news" />
             <QuickAction icon="📊" label="View Reports" to="/admin/reporting" />
           </div>
