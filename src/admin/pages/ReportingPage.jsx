@@ -202,7 +202,7 @@ export default function ReportingPage() {
         </Card>
 
         {/* Listings by section */}
-        <Card title="Active Listings by Section" subtitle="Current directory breakdown" info="How current live directory listings are distributed across site sections. Longer bars mean more active listings in that section.">
+        <Card title="Active Listings by Section" subtitle="Current directory breakdown" info="The businesses each section of the public site lists right now — counted the same way the site builds its pages, so these match what a visitor sees. See & Do's page also mixes in What's On events; those aren't business listings and aren't counted here.">
 
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={bySection ?? []} layout="vertical" barSize={26}>

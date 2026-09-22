@@ -1,4 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
+import { getBusinesses as getSiteBusinesses } from "../businesses";
+import { getHotels, getAccommodations } from "../stay";
 import { isPayingSubscription, isAdminGrantedSubscription, monthlyRevenue, planBucket } from "../../lib/subscriptionStatus";
 
 // Reporting has no tables of its own — every figure is derived from
@@ -370,30 +372,36 @@ const SECTION_ICONS = {
 };
 const PALETTE = ["#2563EB", "#1D4ED8", "#60A5FA", "#93C5FD", "#3B82F6", "#1E40AF"];
 
+// ─── What the public site actually lists, per section ─────────────────────
+// Counted with the very functions the site's own section pages use to build
+// their lists, so these numbers always match what a visitor sees.
+//
+// This used to count every row in business_listings, which included pending,
+// rejected and hidden businesses, filed freelancers under "Uncategorised",
+// and left out the directory entries the site shows — so every section was
+// off (Eat & Drink said 14 while the site listed 13).
+const SITE_SECTIONS = [
+  { name: "Eat & Drink", load: () => getSiteBusinesses({ section: "eat-drink" }) },
+  { name: "Shop",        load: () => getSiteBusinesses({ section: "shop" }) },
+  { name: "See & Do",    load: () => getSiteBusinesses({ section: "see-do" }) },
+  { name: "Services",    load: () => getSiteBusinesses({ section: "services" }) },
+  { name: "Live & Stay", load: async () => [...(await getHotels()), ...(await getAccommodations())] },
+];
+
+async function siteSectionCounts() {
+  const lists = await Promise.all(SITE_SECTIONS.map((sec) => sec.load().catch(() => [])));
+  return SITE_SECTIONS
+    .map((sec, i) => ({ name: sec.name, count: lists[i].length }))
+    .sort((a, b) => b.count - a.count);
+}
+
 export async function getTopCategories() {
-  // Approved businesses only — a rejected or still-pending registration isn't
-  // on the site, so it shouldn't shape what the site's top categories are.
-  const [{ data, error }, bizRes] = await Promise.all([
-    supabase.from("business_listings").select("business_id, business_type, category"),
-    supabase.from("businesses").select("id").eq("status", "Approved"),
-  ]);
-  if (error) throw error;
-  const approved = new Set((bizRes.data ?? []).map((b) => b.id));
-
-  const counts = {};
-  for (const l of (data ?? []).filter((r) => approved.has(r.business_id))) {
-    const name = SECTION_LABELS[l.business_type] ?? l.category ?? "Uncategorised";
-    counts[name] = (counts[name] ?? 0) + 1;
-  }
-  const rows = Object.entries(counts)
-    .map(([category, count]) => ({ category, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
-
-  const total = rows.reduce((s, d) => s + d.count, 0) || 1;
-  return rows.map((d, i) => ({
-    ...d,
-    icon: SECTION_ICONS[d.category] ?? "📍",
+  const counts = (await siteSectionCounts()).filter((c) => c.count > 0).slice(0, 5);
+  const total = counts.reduce((sum, d) => sum + d.count, 0) || 1;
+  return counts.map((d, i) => ({
+    category: d.name,
+    count: d.count,
+    icon: SECTION_ICONS[d.name] ?? "📍",
     colour: PALETTE[i % PALETTE.length],
     pct: Math.round((d.count / total) * 100),
   }));
@@ -419,13 +427,5 @@ export async function getPlanDistribution() {
 }
 
 export async function getListingsBySection() {
-  const { data, error } = await supabase.from("business_listings").select("business_type, category");
-  if (error) throw error;
-
-  const counts = {};
-  for (const l of data ?? []) {
-    const name = SECTION_LABELS[l.business_type] ?? l.category ?? "Uncategorised";
-    counts[name] = (counts[name] ?? 0) + 1;
-  }
-  return Object.entries(counts).map(([section, count]) => ({ section, count })).sort((a, b) => b.count - a.count);
+  return (await siteSectionCounts()).map((c) => ({ section: c.name, count: c.count }));
 }
