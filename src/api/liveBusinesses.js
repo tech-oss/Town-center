@@ -14,6 +14,7 @@ import { categoryLabel } from "../Data/taxonomy";
 import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
 import { parseCoords } from "../lib/geo";
+import { resolveCategory, TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES, FREELANCER_CATEGORIES } from "../Data/taxonomy";
 
 // Registration stores a type slug; the site's sections are keyed a little
 // differently for hotels, which live under Live & Stay.
@@ -38,6 +39,21 @@ function categoriesFor(type, detail = {}) {
     case "freelancer": return pick(detail.freelancerCategories);
     default: return [];
   }
+}
+
+// "Tradesperson" → "tradespeople" and so on, the keys the Services groups use.
+const GROUP_FOR_KIND = { tradesperson: "tradespeople", professional: "professionals", freelancer: "freelancers" };
+const GROUP_FOR_CATEGORY = Object.fromEntries([
+  ...TRADESPERSON_CATEGORIES.map((c) => [c.value, "tradespeople"]),
+  ...PROFESSIONAL_CATEGORIES.map((c) => [c.value, "professionals"]),
+  ...FREELANCER_CATEGORIES.map((c) => [c.value, "freelancers"]),
+]);
+
+function serviceGroupFor(detail = {}, categories = []) {
+  const kind = String(detail?.freelancerKind ?? "").toLowerCase();
+  if (GROUP_FOR_KIND[kind]) return GROUP_FOR_KIND[kind];
+  for (const c of categories) if (GROUP_FOR_CATEGORY[c]) return GROUP_FOR_CATEGORY[c];
+  return null;
 }
 
 // "biz_cocoba-ab12c" → "cocoba-ab12c" for a readable URL; reversed on lookup.
@@ -150,7 +166,11 @@ function mapReview(r) {
 function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}) {
   const type = row.business_type;
   const section = SECTION_FOR_TYPE[type];
-  const categories = categoriesFor(type, row.business_type_detail);
+  // Old category slugs (graphic-designers, web-developers, …) are translated
+  // to the current ones, so a business registered before a rename still
+  // lands in the right place — the website, the app and admin's counts all
+  // read this, so they can't disagree.
+  const categories = [...new Set(categoriesFor(type, row.business_type_detail).map(resolveCategory))];
   const category = categories[0] ?? null;
   const premium = row.plan === "premium";
   const coords = parseCoords(row.lat, row.lng);
@@ -206,6 +226,11 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     stars: row.star_rating,
     // Hotels vs accommodation, for the Live & Stay section.
     stayKind: row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
+    // Tradespeople / Professionals / Freelancers — for a Services business,
+    // taken from the kind it chose at signup, else worked out from its
+    // category. The app's Services groups and the website's group pages both
+    // use it, so a business is never left out of every group.
+    serviceGroup: section === "services" ? serviceGroupFor(row.business_type_detail, categories) : null,
   };
   // Featured Articles lead the business's own page, then its news and
   // offers — the same precedence the Offers page uses.

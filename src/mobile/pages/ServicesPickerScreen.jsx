@@ -10,6 +10,18 @@ import MobileShell from "../components/MobileShell";
 // listing + filters — matching the website's structure instead of
 // flattening it.
 const OPTIONS = [
+  // The whole list, as on the website's Services page — so every listed
+  // service business is reachable, including any not yet in a group.
+  {
+    key: "all",
+    label: "All Services",
+    description: "Every trade, professional and freelancer in one list",
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+      </svg>
+    ),
+  },
   {
     key: "tradespeople",
     label: "Tradesperson",

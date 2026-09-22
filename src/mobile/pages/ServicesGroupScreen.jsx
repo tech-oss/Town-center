@@ -29,19 +29,32 @@ function categoriesForGroup(groupConfig) {
 
 export default function ServicesGroupScreen() {
   const { group } = useParams();
-  const groupConfig = servicesSection.groups.find((g) => g.key === group);
+  const groupConfig = group === "all"
+    ? { key: "all", label: "All Services", heading: null, intro: "Every trade, professional and freelancer listed in Maidenhead." }
+    : servicesSection.groups.find((g) => g.key === group);
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
 
   const serviceItems = useSectionItems("services");
-  const groupCategories = useMemo(() => categoriesForGroup(groupConfig), [groupConfig]);
+  const groupCategories = useMemo(
+    () => (group === "all"
+      ? servicesSection.groups.flatMap((g) => categoriesForGroup(g) ?? [])
+      : categoriesForGroup(groupConfig)),
+    [group, groupConfig]
+  );
   const groupSlugs = useMemo(
     () => new Set((groupCategories ?? []).map((c) => c.slug)),
     [groupCategories]
   );
+  // "All" is every Services business, the same list as the website's
+  // Services page. A group takes the businesses assigned to it (by the kind
+  // they chose at signup) plus anything filed under one of its categories.
   const groupItems = useMemo(
-    () => serviceItems.filter((i) => groupSlugs.has(i.category) || i.categories?.some((c) => groupSlugs.has(c))),
-    [groupSlugs, serviceItems]
+    () => (group === "all"
+      ? serviceItems
+      : serviceItems.filter((i) =>
+          i.serviceGroup === group || groupSlugs.has(i.category) || i.categories?.some((c) => groupSlugs.has(c)))),
+    [group, groupSlugs, serviceItems]
   );
 
   const filters = useMemo(

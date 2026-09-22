@@ -65,8 +65,12 @@ export default function CategoryPage() {
     ? new Set(groupColumn.links.filter((l) => l.to.includes("?category=")).map((l) => l.to.split("?category=")[1]))
     : null;
 
+  // A group page takes the businesses assigned to it (by the kind they chose
+  // at signup) plus anything filed under one of its categories — the same
+  // rule as the app, so the two list the same businesses.
   const baseItems = groupCategoryValues
-    ? (sectionItems ?? []).filter((i) => groupCategoryValues.has(i.category))
+    ? (sectionItems ?? []).filter((i) =>
+        i.serviceGroup === group || groupCategoryValues.has(i.category) || i.categories?.some((c) => groupCategoryValues.has(c)))
     : sectionItems ?? [];
   const eventCards = (whatsOnEvents ?? []).map(toEventCard);
 
