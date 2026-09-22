@@ -2,13 +2,16 @@ import { supabase } from "../../lib/supabaseClient";
 import { resolveRange, eachDay } from "./analyticsRanges";
 
 // A business's analytics, read through the database functions in
-// supabase/sql/analytics_live_2026_09.sql. Views are recorded by the website
-// and app (lib/trackView.js): one per visitor per item per UK day.
+// supabase/sql/analytics_every_view_fix_2026_09.sql. Views are recorded by
+// the website and app (lib/trackView.js): every page load counts, with no
+// per-visitor, per-session or per-day deduplication.
 //
 // Every series covers every day in the range (days with no views are 0), so
 // charts and totals line up with the range picked.
 
-const CONTENT_TYPES = ["news", "offer", "article", "event"];
+// Featured Articles — the longer pieces a business writes — count as content
+// views alongside its news, offers and events.
+const CONTENT_TYPES = ["news", "offer", "article", "event", "featured"];
 
 // "YYYY-MM-DD" from a local-midnight Date's own calendar components — never
 // toISOString, which shifts the day for anyone away from UTC.
@@ -76,7 +79,7 @@ export async function getContentSeries(businessId, contentId, range) {
   return { ...result, item };
 }
 
-const TYPE_LABELS = { news: "News", offer: "Offer", article: "Article", event: "Event" };
+const TYPE_LABELS = { news: "News", offer: "Offer", article: "Article", event: "Event", featured: "Featured Article" };
 
 // Views per post / event in the range, most viewed first.
 export async function getContentBreakdown(businessId, range) {

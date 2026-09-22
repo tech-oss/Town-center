@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useLiveTick from "../hooks/useLiveTick";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -32,10 +33,16 @@ export default function AnalyticsPage() {
   const [content, setContent] = useState({ total: 0, series: [] });
   const [breakdown, setBreakdown] = useState([]);
   const [error, setError] = useState("");
+  // Refreshes every 30s and on returning to the tab, so views appear live.
+  const tick = useLiveTick();
+  const [loadedKey, setLoadedKey] = useState(null);
+  const rangeKey = `${user.id}|${JSON.stringify(range)}`;
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    // Only a change of range shows the loading state; a live refresh updates
+    // the numbers in place rather than flashing the page empty.
+    if (loadedKey !== rangeKey) setLoading(true);
     Promise.all([
       getProfileViewsSeries(user.id, range),
       getContentViewsSeries(user.id, range),
@@ -47,6 +54,7 @@ export default function AnalyticsPage() {
       setBreakdown(b);
       setError("");
       setLoading(false);
+      setLoadedKey(rangeKey);
     }).catch((e) => {
       if (cancelled) return;
       setError(e.message ?? "Analytics couldn't be loaded.");
@@ -54,7 +62,7 @@ export default function AnalyticsPage() {
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id, JSON.stringify(range)]);
+  }, [user.id, JSON.stringify(range), tick]);
 
   const { label: rangeLabel } = resolveRange(range);
 

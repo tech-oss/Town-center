@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useLiveTick from "../hooks/useLiveTick";
 import ActivePromotions from "../components/ActivePromotions";
 import PurchaseRequests from "../components/PurchaseRequests";
 import { isPremium, BILLING_OPTIONS } from "../../Data/plans";
@@ -61,17 +62,24 @@ export default function DashboardPage() {
     getBusinessListing(user.id)
       .then((listing) => { if (!cancelled) setCompleteness(profileCompleteness(listing, isPremium(user.plan))); })
       .catch(() => {});
-    if (isPremium(user.plan)) {
-      Promise.all([getMonthComparison(user.id, PROFILE_TYPES), getMonthComparison(user.id, CONTENT_VIEW_TYPES)])
-        .then(([profile, content]) => { if (!cancelled) setViews({ profile, content }); })
-        .catch(() => { if (!cancelled) setViews({ profile: false, content: false }); });
-    }
     listActivity(user.id, 10)
       .then((rows) => { if (!cancelled) { setActivity(rows); setActivityError(""); } })
       .catch((e) => { if (!cancelled) setActivityError(`Couldn't load your recent activity: ${e.message}`); })
       .finally(() => { if (!cancelled) setActivityLoading(false); });
     return () => { cancelled = true; };
   }, [user.id, user.plan]);
+
+  // The view counts refresh on their own, so a visit shows up here without
+  // reloading the dashboard.
+  const tick = useLiveTick();
+  useEffect(() => {
+    if (!isPremium(user.plan)) return;
+    let cancelled = false;
+    Promise.all([getMonthComparison(user.id, PROFILE_TYPES), getMonthComparison(user.id, CONTENT_VIEW_TYPES)])
+      .then(([profile, content]) => { if (!cancelled) setViews({ profile, content }); })
+      .catch(() => { if (!cancelled) setViews({ profile: false, content: false }); });
+    return () => { cancelled = true; };
+  }, [user.id, user.plan, tick]);
 
   async function handleToggle() {
     const goingLive = !user.visible;
