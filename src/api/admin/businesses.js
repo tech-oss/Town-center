@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { assertNoDataUrls } from "../../lib/noDataUrls";
 import { logBusinessActivity } from "./businessActivity";
 import { getLivePlacementMap, featureNow, unfeature } from "./homepageSlots";
 import { planFor } from "../../Data/plans";
@@ -573,6 +574,9 @@ export async function getBusinessStats() {
 // Saves a business's logo straight onto its listing. The public site only
 // shows it while the business is on the Visibility Plan.
 export async function setBusinessLogo(id, url) {
+  // A logo is a Storage URL. Pasting the picture itself in as base64 put
+  // 1.7 MB inside a row, which every query selecting `logo` then carried.
+  assertNoDataUrls({ logo: url });
   const { error } = await supabase
     .from("business_listings")
     .update({ logo: url || null, updated_at: new Date().toISOString() })

@@ -247,6 +247,60 @@ export async function getApprovals({ status } = {}) {
   return status ? items.filter((i) => i.status === status) : items;
 }
 
+// How many listing edits are waiting — for the sidebar badge, which wants a
+// number and nothing else.
+//
+// The badge used to call getApprovals(), which selects every column of every
+// listing. Two businesses store their logo as a base64 data URL in the
+// database, so that query moved 2.3 MB — 95% of it those two logos — and the
+// sidebar refetched it every 60 seconds on every admin page. It was the bulk
+// of the project's database egress.
+//
+// This reads the three small decision columns for every row, then fetches the
+// comparison columns only for rows that actually have something pending,
+// which is normally none or a handful.
+export async function countPendingApprovals() {
+  const { data, error } = await supabase
+    .from("business_listings")
+    .select("business_id, approval_status, edited_by");
+  if (error) throw error;
+
+  // Which sections on which rows could count, before the field comparison.
+  const candidates = [];
+  for (const row of data ?? []) {
+    for (const [section, state] of Object.entries(row.approval_status ?? {})) {
+      if (state !== PENDING) continue;
+      if (AUTO_PUBLISHED_SECTIONS.has(section)) continue;
+      if (!row.edited_by?.[section]) continue;
+      candidates.push({ businessId: row.business_id, section, editor: row.edited_by[section] });
+    }
+  }
+  if (!candidates.length) return 0;
+
+  // Only the columns those candidate sections compare, never the whole row.
+  const ids = [...new Set(candidates.map((c) => c.businessId))];
+  const cols = new Set(["business_id", "pending_snapshot"]);
+  for (const c of candidates) for (const [col] of SECTION_FIELDS[c.section] ?? []) cols.add(col);
+
+  const { data: rows, error: rowsError } = await supabase
+    .from("business_listings")
+    .select([...cols].join(", "))
+    .in("business_id", ids);
+  if (rowsError) throw rowsError;
+  const byId = new Map((rows ?? []).map((r) => [r.business_id, r]));
+
+  // The same rule getApprovals applies, so the badge and the queue agree.
+  return candidates.filter(({ businessId, section, editor }) => {
+    const row = byId.get(businessId);
+    if (!row) return false;
+    const snapshot = row.pending_snapshot?.[section];
+    if (!snapshot) return editor === "admin";
+    return (SECTION_FIELDS[section] ?? []).some(
+      ([col, camelKey]) => !sameValue(snapshot[camelKey] ?? null, row[col])
+    );
+  }).length;
+}
+
 export async function getApprovalById(id) {
   const { businessId, section } = parseId(id);
   const { data, error } = await supabase

@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
-import { getApprovals } from "./approvals";
+import { countPendingApprovals } from "./approvals";
 
 // How much is waiting in every admin queue, for the sidebar badges.
 //
@@ -33,9 +33,9 @@ export async function getAdminPendingCounts() {
     businesses,
     tickets,
   ] = await Promise.all([
-    // The listing-edit queue already applies its own rules about what counts
-    // as a real submission, so it's reused rather than re-derived here.
-    getApprovals({ status: "Pending" }).then((l) => l?.length ?? 0).catch(() => 0),
+    // Counted with the queue's own rules, but without loading the queue: see
+    // countPendingApprovals for why that mattered.
+    countPendingApprovals().catch(() => 0),
     count("homepage_placements", (q) => q.eq("status", "pending_approval").gt("ends_at", new Date().toISOString())),
     count("business_events", (q) => q.eq("status", "Pending Approval")),
     // One date of a recurring event, edited or cancelled on its own.
