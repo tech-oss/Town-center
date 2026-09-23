@@ -79,9 +79,12 @@ export default function AdminApp() {
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="subscriptions/:id/documents" element={<SubscriptionDocumentsPage />} />
         <Route path="homepage-slots" element={<HomepageSlotsPage />} />
-        <Route path="news-offers" element={<NewsOffersPage />} />
-        <Route path="featured-stories" element={<FeaturedStoriesPage />} />
-        <Route path="featured-see-do" element={<FeaturedSeeDoPage />} />
+        {/* Retired: the homepage work happens in Homepage Slots, and the
+            editors these pages carried now sit on the business queues. Old
+            links land on Homepage Slots rather than a dead route. */}
+        <Route path="news-offers" element={<Navigate to="/admin/homepage-slots" replace />} />
+        <Route path="featured-stories" element={<Navigate to="/admin/homepage-slots" replace />} />
+        <Route path="featured-see-do" element={<Navigate to="/admin/homepage-slots" replace />} />
         <Route path="explore/the-future" element={<TheFuturePage />} />
         <Route path="reporting" element={<ReportingPage />} />
         <Route path="push-notifications" element={<PushNotificationsPage />} />

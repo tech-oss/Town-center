@@ -185,7 +185,9 @@ function SectionsEditor({ blocks, onChange }) {
 }
 
 // ─── Edit / Create form ───────────────────────────────────────────────────────
-function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [], capacity = 2 }) {
+// Exported so the Business Featured Articles tab can offer the same form
+// for writing one on a business's behalf.
+export function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [], capacity = 2 }) {
   const blank = {
     eyebrow: "", category: "", date: "",
     cardHeading: "", cardBody: "", cardImage: "",

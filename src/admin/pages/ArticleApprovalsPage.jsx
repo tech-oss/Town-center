@@ -1,6 +1,9 @@
 import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getBusinessArticles, approveArticle, rejectArticle, takeDownArticle, restoreArticle, deleteBusinessArticle } from "../../api/admin";
+import { getBusinessArticles, approveArticle, rejectArticle, takeDownArticle, restoreArticle, deleteBusinessArticle, getSpotlightBusinesses } from "../../api/admin";
+// The same form In the Spotlight used, so a post admin writes for a business
+// is written exactly the way a business writes its own.
+import { NewsOfferForm } from "./NewsOffersPage";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
@@ -180,7 +183,9 @@ export default function ArticleApprovalsPage() {
   const [nonce, setNonce] = useState(0);
   const [toast, setToast] = useState("");
   const [openId, setOpenId] = useState(null);
+  const [writing, setWriting] = useState(false);
   const { data: articles, loading } = useFetch(() => getBusinessArticles({ status: filter }), [filter, nonce]);
+  const { data: businesses } = useFetch(getSpotlightBusinesses, []);
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   const list = articles ?? [];
@@ -231,6 +236,28 @@ export default function ArticleApprovalsPage() {
     refresh();
   }
 
+  // Writing a post on a business's behalf — the Spotlight form, unchanged.
+  if (writing) {
+    return (
+      <div className="max-w-3xl flex flex-col gap-4">
+        <Toast message={toast} />
+        <button onClick={() => setWriting(false)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>
+          ← Back to the list
+        </button>
+        <NewsOfferForm
+          initial={null}
+          businesses={businesses ?? []}
+          onCancel={() => setWriting(false)}
+          onSave={(saved) => {
+            setWriting(false);
+            flash(`"${saved?.title ?? "Post"}" saved.`);
+            refresh();
+          }}
+        />
+      </div>
+    );
+  }
+
   if (open) {
     return (
       <>
@@ -255,10 +282,18 @@ export default function ArticleApprovalsPage() {
   return (
     <div className="max-w-5xl">
       <Toast message={toast} />
-      <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Business News &amp; Offers</h1>
-      <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
-        Review the news posts and offers businesses submit for their listing. Open one to read it in full before deciding — rejecting sends your reason back to the business.
-      </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Business News &amp; Offers</h1>
+          <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
+            Review the news posts and offers businesses submit for their listing. Open one to read it in full before deciding — rejecting sends your reason back to the business. You can also write a post for a business yourself.
+          </p>
+        </div>
+        <button onClick={() => setWriting(true)}
+          className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white shrink-0" style={{ backgroundColor: BLUE }}>
+          + New news or offer
+        </button>
+      </div>
 
       <div className="flex gap-2 flex-wrap mb-5">
         {FILTERS.map((f) => (

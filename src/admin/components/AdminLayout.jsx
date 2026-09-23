@@ -33,15 +33,11 @@ const NAV = [
   { to: "/admin/businesses",         label: "Business Registrations",icon: I.businesses,     badge: "businesses" },
   { to: "/admin/approvals",          label: "Approval Queue",        icon: I.approvals,      badge: "approvals" },
   { to: "/admin/business-content",   label: "Manage Business Content", icon: I.listings },
-  {
-    label: "Home Page Featured", icon: I.featured, group: true,
-    children: [
-      { to: "/admin/homepage-slots",   label: "Homepage Slots",   icon: I.featured, badge: "slots" },
-      { to: "/admin/news-offers",      label: "In the Spotlight", icon: I.spotlight },
-      { to: "/admin/featured-stories", label: "Featured Stories", icon: I.stories },
-      { to: "/admin/featured-see-do",  label: "See & Do",         icon: I.events },
-    ],
-  },
+  // In the Spotlight, Featured Stories and See & Do are gone: every homepage
+  // placement is booked and approved in Homepage Slots, and the two editors
+  // they carried now live on the Business News & Offers and Business Featured
+  // Articles tabs, next to the queues they belong to.
+  { to: "/admin/homepage-slots", label: "Home Page Featured", icon: I.featured, badge: "slots" },
   { to: "/admin/event-approvals",    label: "Events",                icon: I.events,         badge: "events" },
   { to: "/admin/article-approvals",  label: "Business News & Offers",icon: I.articles,       badge: "articles" },
   { to: "/admin/featured-article-approvals", label: "Business Featured Articles", icon: I.articles, badge: "featured" },

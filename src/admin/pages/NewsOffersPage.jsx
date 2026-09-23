@@ -213,7 +213,9 @@ function PayTypeToggle({ value, onChange }) {
 }
 
 // ─── Edit / Create form ───────────────────────────────────────────────────────
-function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
+// Exported so the Business News & Offers tab can offer the same form for
+// creating a post, rather than a second, subtly different one.
+export function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
   const blank = {
     businessId: businesses[0]?.id ?? "",
     businessName: businesses[0]?.name ?? "",

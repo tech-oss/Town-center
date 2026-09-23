@@ -2,7 +2,11 @@ import { useCallback, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinessFeatureArticles, approveFeatureArticle, rejectFeatureArticle, takeDownFeatureArticle,
+  getSpotlightBusinesses, getSlotUsage,
 } from "../../api/admin";
+// The same editor Featured Stories used, so one admin writes for a business
+// is built exactly like one a business writes itself.
+import { StoryForm } from "./FeaturedStoriesPage";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
@@ -116,7 +120,10 @@ export default function FeatureArticleApprovalsPage() {
   const [nonce, setNonce] = useState(0);
   const [toast, setToast] = useState("");
   const [openId, setOpenId] = useState(null);
+  const [writing, setWriting] = useState(false);
   const { data, loading } = useFetch(() => getBusinessFeatureArticles({ status: filter }), [filter, nonce]);
+  const { data: businesses } = useFetch(getSpotlightBusinesses, []);
+  const { data: usage } = useFetch(() => getSlotUsage("featured_article"), [nonce]);
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
   const list = data ?? [];
@@ -151,6 +158,29 @@ export default function FeatureArticleApprovalsPage() {
     refresh();
   }
 
+  // Writing a Featured Article on a business's behalf.
+  if (writing) {
+    return (
+      <div className="max-w-3xl flex flex-col gap-4">
+        <Toast message={toast} />
+        <button onClick={() => setWriting(false)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>
+          ← Back to the list
+        </button>
+        <StoryForm
+          initial={null}
+          businesses={businesses ?? []}
+          capacity={usage?.capacity ?? 4}
+          onCancel={() => setWriting(false)}
+          onSave={(saved) => {
+            setWriting(false);
+            flash(`"${saved?.title ?? "Featured Article"}" saved.`);
+            refresh();
+          }}
+        />
+      </div>
+    );
+  }
+
   if (open) {
     return (
       <>
@@ -173,11 +203,19 @@ export default function FeatureArticleApprovalsPage() {
   return (
     <div className="max-w-5xl">
       <Toast message={toast} />
-      <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Business Featured Articles</h1>
-      <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
-        The longer editorial pieces businesses write against a Featured Article slot. Open one to read it in full —
-        rejecting sends your reason back to the business.
-      </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Business Featured Articles</h1>
+          <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
+            The longer editorial pieces businesses write against a Featured Article slot. Open one to read it in full —
+            rejecting sends your reason back to the business. You can also write one for a business yourself.
+          </p>
+        </div>
+        <button onClick={() => setWriting(true)}
+          className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white shrink-0" style={{ backgroundColor: BLUE }}>
+          + New featured article
+        </button>
+      </div>
 
       <div className="flex gap-2 flex-wrap mb-5">
         {FILTERS.map((f) => (
