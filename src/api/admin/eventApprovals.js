@@ -124,11 +124,12 @@ function eventToRow(item) {
   return {
     id: item.id || undefined,
     business_id: item.businessId || null,
-    // Only on creation. An event admin writes is free and must not spend a
-    // slot the business paid for (admin_added_free_2026_09.sql) — but admin
-    // also edits businesses' own submissions through this same editor, and
-    // saving one of those must not quietly turn it into free content.
-    ...(item.id ? {} : { author: "admin" }),
+    // Who wrote it. An event admin writes is free and must not spend a slot
+    // the business paid for (admin_added_free_2026_09.sql); a business's own
+    // submission stays the business's, because admin edits those through this
+    // same editor. saveBusinessEvent fills this in for an existing event, so
+    // a missing author here only ever means "admin is creating this".
+    author: item.author ?? "admin",
     slug: item.slug || slugify(item.title),
     title: item.title,
     subtitle: item.subtitle || item.excerpt || null,
@@ -158,9 +159,19 @@ function eventToRow(item) {
 
 export async function saveBusinessEvent(item) {
   assertValidCoords(item.lat, item.lng);
+  // An existing event keeps whoever wrote it. The save is an upsert, so a
+  // column left out is written back as its default — omitting the author on
+  // an edit silently turned admin's own free event into the business's, and
+  // the slot limit then refused to save it at all.
+  let author = item.author;
+  if (item.id && !author) {
+    const { data: current } = await supabase
+      .from("business_events").select("author").eq("id", item.id).maybeSingle();
+    author = current?.author ?? "business";
+  }
   const { data, error } = await supabase
     .from("business_events")
-    .upsert(eventToRow(item))
+    .upsert(eventToRow({ ...item, author }))
     .select("*, businesses(name)")
     .single();
   if (error) throw error;
