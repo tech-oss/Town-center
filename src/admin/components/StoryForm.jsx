@@ -1,23 +1,16 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import PlacementTimer from "../components/PlacementTimer";
-import { Card, Field, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "./explore/contentKit";
+import { Card, Field, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "../pages/explore/contentKit";
 import { withSectionImages } from "../../lib/storyImages";
 import { uploadImage } from "../../lib/uploadImage";
-import useFetch from "../../hooks/useFetch";
-import {
-  getFeatureArticles,
-  saveFeatureArticle,
-  deleteFeatureArticle,
-  setArticleHomepageFeature,
-  swapArticleHomepageFeature,
-  getSpotlightBusinesses,
-  getSlotUsage,
-} from "../../api/admin";
-import LoadingState from "../components/LoadingState";
-import EmptyState from "../components/EmptyState";
-
+import { saveFeatureArticle, setArticleHomepageFeature } from "../../api/admin";
 import { VENUE_TYPES, CUISINE_TYPES, SEE_DO_CATEGORIES, SHOP_CATEGORIES, SERVICES_CATEGORIES, HOTEL_KINDS } from "../../Data/taxonomy";
+
+// The editor for a Featured Article — the longer editorial pieces, with a
+// hero, a standfirst and sections that each carry their own picture.
+//
+// It came from the Featured Stories page, which is gone: choosing what sits
+// on the homepage is Homepage Slots' job now, so only the writing was left.
+// It opens from the Business Featured Articles queue.
 
 // The eyebrow is the site section a story belongs to (the small label above
 // the heading on the homepage card), and the category narrows it within that
@@ -50,35 +43,6 @@ function StorySelect({ value, onChange, options, placeholder }) {
 // / "In Focus" section (src/components/FeatureBlocks.jsx) and its detail
 // pages at /story/:slug (src/components/FeatureArticlePage.jsx). Field names
 // mirror that component's expectations exactly (see src/api/stories.js).
-
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function Toast({ message, error, onDismiss }) {
-  if (!message) return null;
-  return (
-    <div
-      className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-3 max-w-sm"
-      style={{ backgroundColor: error ? "#991B1B" : "#1E293B", color: "#fff" }}
-    >
-      <span className="flex-1">{message}</span>
-      <button onClick={onDismiss} className="opacity-60 hover:opacity-100 text-lg leading-none">✕</button>
-    </div>
-  );
-}
-
-// ─── Homepage badge ─────────────────────────────────────────────────────────────
-function HomeBadge({ active }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap"
-      style={active
-        ? { backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }
-        : { backgroundColor: "rgba(16,24,40,0.07)", color: "#9CA3AF" }
-      }
-    >
-      {active ? "● LIVE ON HOME PAGE" : "Not featured"}
-    </span>
-  );
-}
 
 // ─── Swap picker modal (when every homepage slot is taken) ───────────────────────────────────
 function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
@@ -184,10 +148,7 @@ function SectionsEditor({ blocks, onChange }) {
   );
 }
 
-// ─── Edit / Create form ───────────────────────────────────────────────────────
-// Exported so the Business Featured Articles tab can offer the same form
-// for writing one on a business's behalf.
-export function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [], capacity = 2 }) {
+export default function StoryForm({ initial, onSave, onCancel, featuredItems = [], businesses = [], capacity = 2 }) {
   const blank = {
     eyebrow: "", category: "", date: "",
     cardHeading: "", cardBody: "", cardImage: "",
@@ -391,236 +352,6 @@ export function StoryForm({ initial, onSave, onCancel, featuredItems = [], busin
           Cancel
         </button>
       </div>
-    </div>
-  );
-}
-
-// ─── Single row card ──────────────────────────────────────────────────────────
-function StoryRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
-  return (
-    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: item.homepage ? "1.5px solid rgba(220,38,38,0.35)" : "1px solid rgba(16,24,40,0.08)" }}>
-      {item.cardImage && <img src={item.cardImage} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-1">
-          <span className="text-sm font-bold truncate" style={{ color: "#1E293B" }}>{item.cardHeading || item.title}</span>
-          <HomeBadge active={item.homepage} />
-        </div>
-        <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>
-          {item.eyebrow?.trim()
-            ? <><span className="uppercase tracking-wide text-[10px]" style={{ color: "#2F8C8C" }}>{item.eyebrow.trim()}</span>{item.category ? ` · ${item.category}` : ""}</>
-            : <span style={{ color: "#B45309" }}>⚠ No eyebrow set{item.category ? ` · ${item.category}` : ""}</span>}
-        </p>
-        <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.cardBody}</p>
-        <p className="text-[11px] mt-1 font-mono" style={{ color: "#9CA3AF" }}>/story/{item.slug}</p>
-          {item.homepage && (
-            <>
-              <PlacementTimer startsAt={item.homeStartsAt} endsAt={item.homeEndsAt} compact />
-              <Link to="/admin/homepage-slots" className="text-[11px] font-semibold" style={{ color: "#2563EB" }}>Change times in Homepage Slots →</Link>
-            </>
-          )}
-      </div>
-      <div className="flex flex-col items-end gap-2 shrink-0">
-        {item.homepage ? (
-          <div className="flex gap-2">
-            <button onClick={() => onToggleFeature(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#B91C1C", border: "1.5px solid rgba(220,38,38,0.3)" }}>
-              Remove from Homepage
-            </button>
-            <button onClick={() => onOpenSwap(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}>
-              Swap →
-            </button>
-          </div>
-        ) : (
-          <button onClick={() => onToggleFeature(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}>
-            ☆ Add to Homepage
-          </button>
-        )}
-        <div className="flex gap-2">
-          <button onClick={() => onEdit(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>Edit</button>
-          <button onClick={() => onDelete(item.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
-export default function FeaturedStoriesPage() {
-  const { data: items, loading } = useFetch(getFeatureArticles, []);
-  const { data: businesses } = useFetch(getSpotlightBusinesses, []);
-  const [localItems, setLocalItems] = useState(null);
-  // The number of Featured Article slots comes from Homepage Slots, where
-  // admin can raise it — it used to be written in as 2, so raising it showed
-  // "3/2 slots used".
-  const [usageTick, setUsageTick] = useState(0);
-  const { data: usage } = useFetch(() => getSlotUsage("featured_article"), [usageTick]);
-  const [editing, setEditing] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [swapPicker, setSwapPicker] = useState(null);
-
-  const list = localItems ?? items ?? [];
-  const featured = list.filter((n) => n.homepage);
-  const capacity = usage?.capacity || 2;
-  // Every live Featured Article placement uses a slot, including a business's
-  // own booked post — not only the stories listed on this page.
-  const used = Math.max(usage?.used ?? 0, featured.length);
-
-  function showToast(msg, error = false) {
-    setToast({ msg, error });
-    setTimeout(() => setToast(null), 4000);
-  }
-
-  function handleSave(saved, swappedOutId) {
-    setUsageTick((t) => t + 1);
-    setLocalItems((prev) => {
-      let base = prev ?? items ?? [];
-      const idx = base.findIndex((n) => n.id === saved.id);
-      base = idx >= 0 ? base.map((n) => n.id === saved.id ? saved : n) : [...base, saved];
-      if (swappedOutId) base = base.map((n) => n.id === swappedOutId ? { ...n, homepage: false } : n);
-      return base;
-    });
-    setEditing(null);
-    showToast(swappedOutId ? "Saved and swapped onto the homepage." : (editing?.id ? "Changes saved." : "Featured story created."));
-  }
-
-  function handleDelete(id) {
-    if (!confirm("Delete this story permanently? This also removes its /story/ page. To only take it off the homepage, use \"Remove from Homepage\" instead.")) return;
-    deleteFeatureArticle(id).then(() => {
-      setLocalItems((prev) => (prev ?? items ?? []).filter((n) => n.id !== id));
-      showToast("Deleted.");
-    });
-  }
-
-  function handleToggleFeature(item) {
-    setArticleHomepageFeature(item.id, !item.homepage).then((res) => {
-      if (res?.full) {
-        setSwapPicker({ item, candidates: list.filter((n) => n.homepage) });
-        return;
-      }
-      setLocalItems((prev) => (prev ?? items ?? []).map((n) => n.id === item.id ? { ...n, homepage: res.homepage } : n));
-      showToast(res.homepage ? `"${item.cardHeading}" added to Featured Stories.` : `"${item.cardHeading}" removed from Featured Stories.`);
-      setUsageTick((t) => t + 1);
-    });
-  }
-
-  function handleOpenSwap(item) {
-    const candidates = list.filter((n) => !n.homepage && n.id !== item.id);
-    if (candidates.length === 0) {
-      showToast("No other stories available to swap in.", true);
-      return;
-    }
-    setSwapPicker({ item, candidates, replacing: true });
-  }
-
-  function handleSwapConfirm(pickedId) {
-    if (!swapPicker) return;
-    const { item, replacing } = swapPicker;
-    const addId = replacing ? pickedId : item.id;
-    const removeId = replacing ? item.id : pickedId;
-    swapArticleHomepageFeature(addId, removeId).then(() => {
-      setLocalItems((prev) => (prev ?? items ?? []).map((n) => {
-        if (n.id === addId) return { ...n, homepage: true };
-        if (n.id === removeId) return { ...n, homepage: false };
-        return n;
-      }));
-      showToast("Homepage story swapped.");
-      setSwapPicker(null);
-    });
-  }
-
-  if (loading) return <LoadingState />;
-
-  if (editing !== null) {
-    return (
-      <div className="max-w-3xl flex flex-col gap-4">
-        <button onClick={() => setEditing(null)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: "#1E293B" }}>← Back to list</button>
-        <StoryForm
-          initial={editing?.id ? editing : null}
-          onSave={handleSave}
-          onCancel={() => setEditing(null)}
-          featuredItems={featured}
-          businesses={businesses ?? []}
-          capacity={capacity}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col gap-6 max-w-5xl">
-      <Toast message={toast?.msg} error={toast?.error} onDismiss={() => setToast(null)} />
-
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Featured Stories</h1>
-          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage the long-form "FEATURED STORIES" section and its /story/ detail pages on the homepage. Up to {capacity} live at once — set in Homepage Slots.</p>
-        </div>
-        <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>
-          + Add Story
-        </button>
-      </div>
-
-      <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 60%, #2F8C8C 100%)" }}>
-        <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "rgba(216,243,220,0.7)" }}>Homepage</p>
-            <h2 className="text-lg font-bold text-white">Featured Stories</h2>
-            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{used}/{capacity} slots used.</p>
-          </div>
-          <div className="flex items-center gap-1">
-            {Array.from({ length: capacity }, (_, i) => (
-              <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={i < used ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
-                {i < used ? "★" : "○"}
-              </div>
-            ))}
-          </div>
-        </div>
-        {featured.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {featured.map((f) => (
-              <div key={f.id} className="flex items-center gap-3 rounded-xl px-3 py-2 flex-wrap" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-                {f.cardImage && <img src={f.cardImage} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate text-white">{f.cardHeading}</p>
-                  <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>{f.eyebrow}</p>
-                </div>
-                <button onClick={() => setEditing(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#fff", border: "1px solid rgba(255,255,255,0.35)" }}>Edit</button>
-                <button onClick={() => handleToggleFeature(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#E8A33D", border: "1px solid rgba(232,163,61,0.5)" }}>Remove</button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-center py-2" style={{ color: "rgba(255,255,255,0.35)" }}>No stories featured — toggle "Add to Homepage" on any story below.</p>
-        )}
-      </div>
-
-      {list.length === 0 ? (
-        <EmptyState title="No featured stories yet" message='Click "Add Story" to create the first one.' icon="📰" />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {list.map((item) => (
-            <StoryRow
-              key={item.id}
-              item={item}
-              onEdit={setEditing}
-              onDelete={handleDelete}
-              onToggleFeature={handleToggleFeature}
-              onOpenSwap={handleOpenSwap}
-            />
-          ))}
-        </div>
-      )}
-
-      {swapPicker && (
-        <SwapPickerModal
-          candidates={swapPicker.candidates}
-          onPick={handleSwapConfirm}
-          onCancel={() => setSwapPicker(null)}
-          title={swapPicker.replacing ? `Swap out "${swapPicker.item.cardHeading}"` : `Homepage is full (${capacity}/${capacity})`}
-          description={swapPicker.replacing
-            ? "Pick a story below to put live in its place."
-            : "Featured Stories shows a maximum of two. Pick one of the two live stories below to swap it out with."}
-        />
-      )}
     </div>
   );
 }

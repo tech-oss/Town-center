@@ -1,25 +1,20 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import PlacementTimer from "../components/PlacementTimer";
 import { uploadImage } from "../../lib/uploadImage";
-import useFetch from "../../hooks/useFetch";
-import {
-  getNewsOffers,
-  saveNewsOffer,
-  deleteNewsOffer,
-  setHomepageFeature,
-  swapHomepageFeature,
-  getSpotlightBusinesses,
-} from "../../api/admin";
-import StatusTag from "../components/StatusTag";
-import UKDateInput from "../components/UKDateInput";
+import { saveNewsOffer, setHomepageFeature } from "../../api/admin";
+import UKDateInput from "./UKDateInput";
 import { formatUK } from "../../lib/ukDate";
-import LoadingState from "../components/LoadingState";
-import EmptyState from "../components/EmptyState";
+
+// The editor for an admin-written News or Offer post, with everything it
+// needs to stand on its own: the word counters the site's card layout
+// depends on, the homepage schedule, and the swap picker for when all four
+// Spotlight slots are taken.
+//
+// This began life inside the In the Spotlight page. That page is gone — the
+// homepage side of its job moved to Homepage Slots — so the editor lives
+// here, beside the Business News & Offers queue that now opens it.
 
 // Same two types businesses can post under.
 const CATEGORIES = ["News", "Offer"];
-const TYPES = ["news", "offer"];
 
 // ─── UK-time schedule helpers ─────────────────────────────────────────────────
 // Format a YYYY-MM-DD date string for display in UK locale.
@@ -129,35 +124,6 @@ function SpotlightSchedule({ startDate, endDate }) {
   );
 }
 
-// ─── Toast ────────────────────────────────────────────────────────────────────
-function Toast({ message, error, onDismiss }) {
-  if (!message) return null;
-  return (
-    <div
-      className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg flex items-center gap-3 max-w-sm"
-      style={{ backgroundColor: error ? "#991B1B" : "#1E293B", color: "#fff" }}
-    >
-      <span className="flex-1">{message}</span>
-      <button onClick={onDismiss} className="opacity-60 hover:opacity-100 text-lg leading-none">✕</button>
-    </div>
-  );
-}
-
-// ─── Spotlight badge ──────────────────────────────────────────────────────────
-function SpotlightBadge({ active }) {
-  return (
-    <span
-      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide whitespace-nowrap"
-      style={active
-        ? { backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }
-        : { backgroundColor: "rgba(16,24,40,0.07)", color: "#9CA3AF" }
-      }
-    >
-      {active ? "● LIVE ON HOME PAGE" : "Not featured"}
-    </span>
-  );
-}
-
 // ─── Swap picker modal ─────────────────────────────────────────────────────────
 // Shown whenever adding a 5th item to the 4 homepage slots — lets the admin
 // pick which currently-live item gets swapped out for the new one, rather
@@ -212,10 +178,7 @@ function PayTypeToggle({ value, onChange }) {
   );
 }
 
-// ─── Edit / Create form ───────────────────────────────────────────────────────
-// Exported so the Business News & Offers tab can offer the same form for
-// creating a post, rather than a second, subtly different one.
-export function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
+export default function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], businesses = [] }) {
   const blank = {
     businessId: businesses[0]?.id ?? "",
     businessName: businesses[0]?.name ?? "",
@@ -536,286 +499,6 @@ export function NewsOfferForm({ initial, onSave, onCancel, featuredItems = [], b
           Cancel
         </button>
       </div>
-    </div>
-  );
-}
-
-// ─── Single row card ──────────────────────────────────────────────────────────
-function NewsOfferRow({ item, onEdit, onDelete, onToggleFeature, onOpenSwap }) {
-  return (
-    <div className="bg-white rounded-2xl p-4 flex items-start gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: item.featuredOnHome ? "1.5px solid rgba(220,38,38,0.35)" : "1px solid rgba(16,24,40,0.08)" }}>
-      {item.image && (
-        <img src={item.image} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-1">
-          <span className="text-sm font-bold truncate" style={{ color: "#1E293B" }}>{item.title}</span>
-          <SpotlightBadge active={item.featuredOnHome} />
-          <StatusTag status={item.status} />
-        </div>
-        <p className="text-xs font-semibold mb-1" style={{ color: "#1E293B" }}>{item.businessName} · {item.category}</p>
-        <p className="text-xs line-clamp-2" style={{ color: "#6B7280" }}>{item.excerpt}</p>
-        {item.date && <p className="text-[11px] mt-1 font-medium" style={{ color: "#9CA3AF" }}>{formatUK(item.date)}</p>}
-          {item.featuredOnHome && (
-            <>
-              <PlacementTimer startsAt={item.homeStartsAt} endsAt={item.homeEndsAt} compact />
-              <Link to="/admin/homepage-slots" className="text-[11px] font-semibold" style={{ color: "#2563EB" }}>Change times in Homepage Slots →</Link>
-            </>
-          )}
-      </div>
-      <div className="flex flex-col items-end gap-2 shrink-0">
-        {item.featuredOnHome ? (
-          <div className="flex gap-2">
-            <button
-              onClick={() => onToggleFeature(item)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
-              style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#B91C1C", border: "1.5px solid rgba(220,38,38,0.3)" }}
-            >
-              Remove from Homepage
-            </button>
-            <button
-              onClick={() => onOpenSwap(item)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
-              style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}
-            >
-              Swap →
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => onToggleFeature(item)}
-            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap"
-            style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.15)" }}
-          >
-            ☆ Add to Homepage
-          </button>
-        )}
-        <div className="flex gap-2">
-          <button onClick={() => onEdit(item)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}>Edit</button>
-          <button onClick={() => onDelete(item.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
-export default function NewsOffersPage() {
-  const { data: items, loading } = useFetch(getNewsOffers, []);
-  const { data: businesses } = useFetch(getSpotlightBusinesses, []);
-
-  // Only businesses that actually have a spotlight post get a filter chip —
-  // every registered business would be an unusable row of 40+.
-  const chipBusinesses = Array.from(
-    new Map((items ?? []).filter((i) => i.businessId)
-      .map((i) => [i.businessId, { id: i.businessId, name: i.businessName ?? i.businessId }])).values()
-  );
-  const [localItems, setLocalItems] = useState(null);
-  const [editing, setEditing] = useState(null);        // null = list, {} = new form, item = edit form
-  const [bizFilter, setBizFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [toast, setToast] = useState(null);
-  const [swapPicker, setSwapPicker] = useState(null);   // { item, candidates } — a live item picking its replacement
-
-  const list = localItems ?? items ?? [];
-  const featuredCount = list.filter((n) => n.featuredOnHome && n.status === "Published").length;
-
-  const filtered = list.filter((n) => {
-    if (bizFilter !== "all" && n.businessId !== bizFilter) return false;
-    if (statusFilter !== "all" && n.status !== statusFilter) return false;
-    return true;
-  });
-
-  const featured = list.filter((n) => n.featuredOnHome && n.status === "Published");
-
-  function showToast(msg, error = false) {
-    setToast({ msg, error });
-    setTimeout(() => setToast(null), 4000);
-  }
-
-  function handleSave(saved, swappedOutId) {
-    setLocalItems((prev) => {
-      let base = prev ?? items ?? [];
-      const idx = base.findIndex((n) => n.id === saved.id);
-      base = idx >= 0 ? base.map((n) => n.id === saved.id ? saved : n) : [...base, saved];
-      if (swappedOutId) base = base.map((n) => n.id === swappedOutId ? { ...n, featuredOnHome: false } : n);
-      return base;
-    });
-    setEditing(null);
-    showToast(swappedOutId ? "Saved and swapped onto the homepage." : (editing?.id ? "Changes saved." : "News / offer created."));
-  }
-
-  function handleDelete(id) {
-    deleteNewsOffer(id).then(() => {
-      setLocalItems((prev) => (prev ?? items ?? []).filter((n) => n.id !== id));
-      showToast("Deleted.");
-    });
-  }
-
-  function handleToggleFeature(item) {
-    setHomepageFeature(item.id, !item.featuredOnHome).then((res) => {
-      if (res?.full) {
-        setSwapPicker({ item, candidates: list.filter((n) => n.featuredOnHome && n.status === "Published") });
-        return;
-      }
-      setLocalItems((prev) =>
-        (prev ?? items ?? []).map((n) => n.id === item.id ? { ...n, featuredOnHome: res.featuredOnHome } : n)
-      );
-      showToast(res.featuredOnHome ? `"${item.title}" added to homepage spotlight.` : `"${item.title}" removed from spotlight.`);
-    });
-  }
-
-  // Opened from a live item's own "Swap →" — offers other published, non-live
-  // items as the replacement instead of the usual "pick which slot to free".
-  function handleOpenSwap(item) {
-    const candidates = list.filter((n) => !n.featuredOnHome && n.status === "Published" && n.id !== item.id);
-    if (candidates.length === 0) {
-      showToast("No other published items available to swap in.", true);
-      return;
-    }
-    setSwapPicker({ item, candidates, replacing: true });
-  }
-
-  function handleSwapConfirm(pickedId) {
-    if (!swapPicker) return;
-    const { item, replacing } = swapPicker;
-    const addId = replacing ? pickedId : item.id;
-    const removeId = replacing ? item.id : pickedId;
-    swapHomepageFeature(addId, removeId).then(() => {
-      setLocalItems((prev) =>
-        (prev ?? items ?? []).map((n) => {
-          if (n.id === addId) return { ...n, featuredOnHome: true };
-          if (n.id === removeId) return { ...n, featuredOnHome: false };
-          return n;
-        })
-      );
-      showToast("Homepage spotlight swapped.");
-      setSwapPicker(null);
-    });
-  }
-
-  if (loading) return <LoadingState />;
-
-  // ── Editor view ──────────────────────────────────────────────────────────
-  if (editing !== null) {
-    return (
-      <div className="max-w-3xl flex flex-col gap-4">
-        <button onClick={() => setEditing(null)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: "#1E293B" }}>← Back to list</button>
-        <NewsOfferForm
-          initial={editing?.id ? editing : null}
-          onSave={handleSave}
-          onCancel={() => setEditing(null)}
-          featuredItems={list.filter((n) => n.featuredOnHome && n.status === "Published")}
-          businesses={businesses ?? []}
-        />
-      </div>
-    );
-  }
-
-  // ── List view ─────────────────────────────────────────────────────────────
-  return (
-    <div className="flex flex-col gap-6 max-w-5xl">
-      <Toast message={toast?.msg} error={toast?.error} onDismiss={() => setToast(null)} />
-
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Business News & Offers</h1>
-          <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Manage news and promotions for Eat & Drink businesses. Featured items appear in the homepage "In the Spotlight" section.</p>
-        </div>
-        <button onClick={() => setEditing({})} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: "#2563EB" }}>
-          + Create News / Offer
-        </button>
-      </div>
-
-      {/* Homepage spotlight summary */}
-      <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 60%, #2F8C8C 100%)" }}>
-        <div className="flex items-start justify-between gap-4 flex-wrap mb-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "rgba(216,243,220,0.7)" }}>Homepage</p>
-            <h2 className="text-lg font-bold text-white">In the Spotlight</h2>
-            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{featuredCount}/4 slots used — the first 4 published, featured items appear on the homepage.</p>
-          </div>
-          <div className="flex items-center gap-1">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={i < featuredCount ? { backgroundColor: "#E8A33D", color: "#fff" } : { backgroundColor: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.3)" }}>
-                {i < featuredCount ? "★" : "○"}
-              </div>
-            ))}
-          </div>
-        </div>
-        {featured.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            {featured.map((f, i) => {
-              const schedule = getScheduleStatus(f.startDate, f.endDate);
-              return (
-                <div key={f.id} className="flex items-center gap-3 rounded-xl px-3 py-2 flex-wrap" style={{ backgroundColor: "rgba(255,255,255,0.1)" }}>
-                  <span className="text-xs font-bold w-4 text-center" style={{ color: "#E8A33D" }}>{i + 1}</span>
-                  {f.image && <img src={f.image} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold truncate text-white">{f.title}</p>
-                    <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.5)" }}>{f.businessName} · {durationText(f.startDate, f.endDate)}</p>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>
-                    {f.payType ?? "Complimentary"}
-                  </span>
-                  {schedule?.state === "scheduled" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap" style={{ backgroundColor: "rgba(232,163,61,0.3)", color: "#fff" }}>Scheduled</span>
-                  )}
-                  <button onClick={() => setEditing(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#fff", border: "1px solid rgba(255,255,255,0.35)" }}>Edit</button>
-                  <button onClick={() => handleToggleFeature(f)} className="text-[10px] font-semibold px-2 py-1 rounded-lg transition-opacity hover:opacity-70" style={{ color: "#E8A33D", border: "1px solid rgba(232,163,61,0.5)" }}>Remove</button>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-center py-2" style={{ color: "rgba(255,255,255,0.35)" }}>No items featured — toggle "Add to Homepage" on any published item below.</p>
-        )}
-      </div>
-
-      {/* Filters */}
-      <div className="flex gap-3 flex-wrap items-center">
-        <div className="flex gap-2 flex-wrap">
-          <button onClick={() => setBizFilter("all")} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === "all" ? { backgroundColor: "#2563EB", color: "#fff" } : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>All businesses</button>
-          {chipBusinesses.map((b) => (
-            <button key={b.id} onClick={() => setBizFilter(b.id)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={bizFilter === b.id ? { backgroundColor: "#2563EB", color: "#fff" } : { backgroundColor: "#fff", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>{b.name}</button>
-          ))}
-        </div>
-        <div className="flex gap-2 ml-auto">
-          {["all", "Published", "Draft", "Hidden"].map((s) => (
-            <button key={s} onClick={() => setStatusFilter(s)} className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all" style={statusFilter === s ? { backgroundColor: "#2563EB", color: "#fff" } : { backgroundColor: "#fff", color: "#374151", border: "1.5px solid rgba(16,24,40,0.15)" }}>{s === "all" ? "All statuses" : s}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* List */}
-      {filtered.length === 0 ? (
-        <EmptyState title="Nothing here yet" message="Create a news item or offer, or adjust the filter." icon="📰" />
-      ) : (
-        <div className="flex flex-col gap-3">
-          {filtered.map((item) => (
-            <NewsOfferRow
-              key={item.id}
-              item={item}
-              onEdit={setEditing}
-              onDelete={handleDelete}
-              onToggleFeature={handleToggleFeature}
-              onOpenSwap={handleOpenSwap}
-            />
-          ))}
-        </div>
-      )}
-
-      {swapPicker && (
-        <SwapPickerModal
-          candidates={swapPicker.candidates}
-          onPick={handleSwapConfirm}
-          onCancel={() => setSwapPicker(null)}
-          title={swapPicker.replacing ? `Swap out "${swapPicker.item.title}"` : "Homepage is full (4/4)"}
-          description={swapPicker.replacing
-            ? "Pick a published item below to put live in its place."
-            : "Do you want to show this on the homepage? Pick one of the four live items below to swap it out with."}
-        />
-      )}
     </div>
   );
 }

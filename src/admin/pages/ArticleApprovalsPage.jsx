@@ -1,9 +1,7 @@
 import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
 import { getBusinessArticles, approveArticle, rejectArticle, takeDownArticle, restoreArticle, deleteBusinessArticle, getSpotlightBusinesses } from "../../api/admin";
-// The same form In the Spotlight used, so a post admin writes for a business
-// is written exactly the way a business writes its own.
-import { NewsOfferForm } from "./NewsOffersPage";
+import NewsOfferForm from "../components/NewsOfferForm";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";

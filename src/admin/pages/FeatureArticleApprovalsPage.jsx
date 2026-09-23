@@ -4,9 +4,7 @@ import {
   getBusinessFeatureArticles, approveFeatureArticle, rejectFeatureArticle, takeDownFeatureArticle,
   getSpotlightBusinesses, getSlotUsage,
 } from "../../api/admin";
-// The same editor Featured Stories used, so one admin writes for a business
-// is built exactly like one a business writes itself.
-import { StoryForm } from "./FeaturedStoriesPage";
+import StoryForm from "../components/StoryForm";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";

@@ -20,9 +20,6 @@ import SubscriptionsPage, { SubscriptionDetailPage } from "./pages/Subscriptions
 import SubscriptionDocumentsPage from "./pages/SubscriptionDocumentsPage";
 import ReportingPage from "./pages/ReportingPage";
 import SettingsPage from "./pages/SettingsPage";
-import NewsOffersPage from "./pages/NewsOffersPage";
-import FeaturedStoriesPage from "./pages/FeaturedStoriesPage";
-import FeaturedSeeDoPage from "./pages/FeaturedSeeDoPage";
 import HomepageSlotsPage from "./pages/HomepageSlotsPage";
 import TheFuturePage from "./pages/explore/TheFuturePage";
 import PushNotificationsPage from "./pages/PushNotificationsPage";
