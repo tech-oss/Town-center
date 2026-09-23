@@ -142,8 +142,10 @@ export default function EventPage() {
       website={free ? null : event.website}
       social={free ? null : buildSocial(event.social)}
       directionsQuery={free ? null : (event.mapQuery || event.location)}
-      // Only paid events get a ticket button, and it goes to the booking link.
-      extraButtonLabel={!free && event.paid && event.bookingUrl ? "Buy Tickets" : undefined}
+      // A booking link is shown whenever the event has one. A free event can
+      // still need booking — that link used to be dropped, so a "Free" event
+      // published its booking URL nowhere at all.
+      extraButtonLabel={!free && event.bookingUrl ? (event.paid ? "Buy Tickets" : "Book Your Place") : undefined}
       extraButtonHref={event.bookingUrl}
       afterMap={event.isBusiness && (free
         ? <NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} />

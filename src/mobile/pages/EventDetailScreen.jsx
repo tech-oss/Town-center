@@ -24,8 +24,9 @@ export default function EventDetailScreen() {
 
   const dot = categoryColors[event.category] ?? "var(--leaf)";
   const gallery = event.gallery?.length ? event.gallery : [event.image];
-  // Ticket buttons only for paid events, pointing at the booking link.
-  const websiteUrl = event.paid ? externalUrl(event.bookingUrl) : null;
+  // The booking link, whether the event is paid or free — a free event can
+  // still take bookings, and its link was being dropped entirely.
+  const websiteUrl = externalUrl(event.bookingUrl);
   // Every category the event is filed under.
   const categoryNames = toSeeDoSlugs(event.categories ?? event.category).map((c) => eventCategoryLabel(c));
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location ?? "")}`;
@@ -102,7 +103,7 @@ export default function EventDetailScreen() {
             )}
             {websiteUrl && (
               <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                Buy Tickets
+                {event.paid ? "Buy Tickets" : "Book Your Place"}
               </a>
             )}
           </div>
@@ -128,7 +129,7 @@ export default function EventDetailScreen() {
       </div>
 
       {/* Sticky ticket CTA — only when the event has a ticket/booking link. */}
-      {websiteUrl && <StickyCta label="Buy a Ticket" href={websiteUrl} icon={<TicketIcon />} />}
+      {websiteUrl && <StickyCta label={event.paid ? "Buy a Ticket" : "Book Your Place"} href={websiteUrl} icon={<TicketIcon />} />}
     </MobileShell>
   );
 }

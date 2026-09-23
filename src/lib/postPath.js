@@ -5,7 +5,12 @@
 // Building "/news/" + slug for everything sent a Featured Article to a news
 // page that doesn't exist for it.
 export function postPath(post, { mobile = false } = {}) {
+  // A post that knows where it lives says so: a Featured Article at /story/,
+  // an event at /event/. Only plain News & Offers posts fall through to
+  // /news/, which is the one path that can be built from a slug alone.
   const own = post?.to;
-  if (own && own.startsWith("/story/")) return mobile ? `/mobile${own}` : own;
+  if (own && (own.startsWith("/story/") || own.startsWith("/event/"))) {
+    return mobile ? `/mobile${own}` : own;
+  }
   return mobile ? `/mobile/news/${post.slug}` : `/news/${post.slug}`;
 }

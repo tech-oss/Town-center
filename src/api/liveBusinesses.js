@@ -15,6 +15,7 @@ import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
 import { parseCoords } from "../lib/geo";
 import { imageUrl } from "../lib/imageUrl";
+import { formatEventDate } from "./events";
 import { resolveCategory, TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES, FREELANCER_CATEGORIES } from "../Data/taxonomy";
 
 // Registration stores a type slug; the site's sections are keyed a little
@@ -141,6 +142,31 @@ function mapNewsOffer(n, business) {
   };
 }
 
+// A Live event the business is running. It shows on its own page as usual,
+// and also as a card in the business's News & Offers section — an approved
+// event is news about that business, and was previously reachable only from
+// See & Do and the calendar.
+function mapEvent(e, business) {
+  const slug = e.slug || e.id;
+  return {
+    id: `event-${e.id}`,
+    slug,
+    to: `/event/${slug}`,
+    category: "Event",
+    date: e.date_label || formatEventDate(e.event_date) || "",
+    endsOn: null,
+    title: e.title,
+    excerpt: e.excerpt || e.subtitle || String(e.description ?? "").slice(0, 180),
+    image: imageUrl(e.hero_image || (e.gallery ?? [])[0], "card") || business.image,
+    body: [],
+    business,
+  };
+}
+
+// An event that has already happened is not news. One with no date at all
+// (a standing "open all year" entry) keeps showing.
+const eventUpcoming = (e) => !e.event_date || e.event_date >= new Date().toISOString().slice(0, 10);
+
 const notEnded = (n) => !n.end_date || n.end_date >= new Date().toISOString().slice(0, 10);
 
 // How many approved reviews a business profile shows at once.
@@ -164,7 +190,7 @@ function mapReview(r) {
   };
 }
 
-function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}) {
+function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}, events = {}) {
   const type = row.business_type;
   const section = SECTION_FOR_TYPE[type];
   // Old category slugs (graphic-designers, web-developers, …) are translated
@@ -246,6 +272,7 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   item.featuredArticles = (features[row.business_id] ?? []).map((f) => mapFeature(f, item));
   item.news = [
     ...item.featuredArticles,
+    ...(events[row.business_id] ?? []).map((e) => mapEvent(e, item)),
     ...(articles[row.business_id] ?? []).map((a) => mapArticle(a, item)),
     ...(newsOffers[row.business_id] ?? []).map((n) => mapNewsOffer(n, item)),
   ];
@@ -285,7 +312,7 @@ export function invalidateLiveBusinesses() {
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
-    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, featuresRes, placements] = await Promise.all([
+    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, featuresRes, eventsRes, placements] = await Promise.all([
       withSchemaRetry(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false })),
       withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
       // Reviews are optional: if the view isn't there yet, pages just show none.
@@ -300,6 +327,8 @@ export function loadLiveBusinesses() {
       // to Solas never appeared on Solas's page.
       withSchemaRetry(() => supabase.from("feature_articles").select("*")
         .not("business_id", "is", null).eq("status", "Live").order("updated_at", { ascending: false })),
+      // Live events show as cards on their business's page too.
+      supabase.from("business_events").select("*").eq("status", "Live").order("event_date", { ascending: true }),
       getLivePlacements(),
     ]);
     // A missing view (migration not run yet) or a network failure must not
@@ -321,6 +350,10 @@ export function loadLiveBusinesses() {
     for (const f of featuresRes?.data ?? []) {
       if (f.business_id) (features[f.business_id] ??= []).push(f);
     }
+    const events = {};
+    for (const e of (eventsRes?.data ?? []).filter(eventUpcoming)) {
+      if (e.business_id) (events[e.business_id] ??= []).push(e);
+    }
     const featuredIds = new Set(placements.featured_business.map((p) => p.business_id ?? p.content_id));
     const reviews = {};
     for (const rv of reviewsRes.data ?? []) (reviews[rv.business_id] ??= []).push(rv);
@@ -329,7 +362,7 @@ export function loadLiveBusinesses() {
     // stays off the public site until its type is set.
     return (profilesRes.data ?? [])
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
-      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds, features));
+      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds, features, events));
   })();
   // A thrown error (e.g. offline) likewise retries on the next page.
   const pending = cache;
