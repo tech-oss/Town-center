@@ -182,6 +182,10 @@ export default function MyListingPage() {
   }
 
   const status = listing.approvalStatus?.[tab];
+  // Why admin turned this tab's changes down. It is stored per section, the
+  // same way the status is — every SaveBar showed the status but was never
+  // given the reason, so a rejection arrived with no explanation.
+  const rejectionReason = listing.rejectionReason?.[tab];
   const registrationSummary = registrationCategorySummary(user, listing);
   const subCatConfig = subCategoryEditConfig(user, listing);
   function setSubCategory(key, values) {
@@ -267,7 +271,7 @@ export default function MyListingPage() {
                 </div>
                 <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>This image appears at the top of your public business page.</p>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("profile")} saving={saving} status={status} />
+              <SaveBar onSave={() => handleSave("profile")} saving={saving} status={status} rejectionReason={rejectionReason} />
             </>
           )}
 
@@ -282,7 +286,7 @@ export default function MyListingPage() {
                   )}
                 </Locked>
               </EditorSection>
-              {tabEditable("hours") && <SaveBar onSave={() => handleSave("hours")} saving={saving} status={status} />}
+              {tabEditable("hours") && <SaveBar onSave={() => handleSave("hours")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -293,7 +297,7 @@ export default function MyListingPage() {
                   <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
                 </Locked>
               </EditorSection>
-              {tabEditable("gallery") && <SaveBar onSave={() => handleSave("gallery")} saving={saving} status={status} />}
+              {tabEditable("gallery") && <SaveBar onSave={() => handleSave("gallery")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -312,7 +316,7 @@ export default function MyListingPage() {
                   </Locked>
                 </div>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("location")} saving={saving} status={status} />
+              <SaveBar onSave={() => handleSave("location")} saving={saving} status={status} rejectionReason={rejectionReason} />
             </>
           )}
 
@@ -343,7 +347,7 @@ export default function MyListingPage() {
                   <SocialFields links={listing.social} onChange={(v) => set("social", v)} />
                 </Locked>
               </EditorSection>
-              <SaveBar onSave={() => handleSave("contact")} saving={saving} status={status} />
+              <SaveBar onSave={() => handleSave("contact")} saving={saving} status={status} rejectionReason={rejectionReason} />
             </>
           )}
 
@@ -374,7 +378,7 @@ export default function MyListingPage() {
                 <FaqListEditor items={listing.faqs ?? []} onChange={(v) => set("faqs", v)} />
                 </Locked>
               </EditorSection>
-              {tabEditable("faqs") && <SaveBar onSave={() => handleSave("faqs")} saving={saving} status={status} />}
+              {tabEditable("faqs") && <SaveBar onSave={() => handleSave("faqs")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -395,7 +399,7 @@ export default function MyListingPage() {
                 <StatsEditor items={listing.stats ?? []} onChange={(v) => set("stats", v)} />
                 </Locked>
               </EditorSection>
-              {tabEditable("services") && <SaveBar onSave={() => handleSave("services")} saving={saving} status={status} />}
+              {tabEditable("services") && <SaveBar onSave={() => handleSave("services")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -406,7 +410,7 @@ export default function MyListingPage() {
                 <RepeatableList items={listing.areasCoveredList ?? AREAS_COVERED_LIST} onChange={(v) => set("areasCoveredList", v)} placeholder="e.g. Maidenhead" />
                 </Locked>
               </EditorSection>
-              {tabEditable("areas") && <SaveBar onSave={() => handleSave("areas")} saving={saving} status={status} />}
+              {tabEditable("areas") && <SaveBar onSave={() => handleSave("areas")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -422,7 +426,7 @@ export default function MyListingPage() {
                 </div>
                 </Locked>
               </EditorSection>
-              {tabEditable("workingwithme") && <SaveBar onSave={() => handleSave("workingwithme")} saving={saving} status={status} />}
+              {tabEditable("workingwithme") && <SaveBar onSave={() => handleSave("workingwithme")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -433,7 +437,7 @@ export default function MyListingPage() {
                 <RepeatableList items={listing.skills ?? []} onChange={(v) => set("skills", v)} placeholder="e.g. Logo Design" />
                 </Locked>
               </EditorSection>
-              {tabEditable("skills") && <SaveBar onSave={() => handleSave("skills")} saving={saving} status={status} />}
+              {tabEditable("skills") && <SaveBar onSave={() => handleSave("skills")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -444,7 +448,7 @@ export default function MyListingPage() {
                 <PortfolioEditor items={listing.portfolio ?? []} onChange={(v) => set("portfolio", v)} pathPrefix={user.id} max={6} />
                 </Locked>
               </EditorSection>
-              {tabEditable("portfolio") && <SaveBar onSave={() => handleSave("portfolio")} saving={saving} status={status} />}
+              {tabEditable("portfolio") && <SaveBar onSave={() => handleSave("portfolio")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 
@@ -481,7 +485,7 @@ export default function MyListingPage() {
               ))}
               </Locked>
 
-              {tabEditable("amenities") && <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} />}
+              {tabEditable("amenities") && <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} rejectionReason={rejectionReason} />}
             </>
           )}
 

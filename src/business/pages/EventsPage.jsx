@@ -158,6 +158,14 @@ export default function EventsPage() {
                     )}
                   </div>
                   <p className="text-sm font-bold" style={{ color: FOREST }}>{e.title}</p>
+                  {/* Why it was turned down. The card showed a "Rejected"
+                      badge and nothing else, so the business had no idea what
+                      to change. */}
+                  {(e.status === "Rejected" || e.status === "Removed") && e.rejectionReason && (
+                    <p className="text-xs rounded-lg px-2.5 py-2" style={{ backgroundColor: "rgba(220,38,38,0.07)", color: "#7F1D1D" }}>
+                      <span className="font-bold">{e.status === "Removed" ? "Taken down" : "Not approved"}:</span> {e.rejectionReason}
+                    </p>
+                  )}
                   {e.category?.length > 0 && <p className="text-xs" style={{ color: MUTED }}>{categoryLabels(e.category)}</p>}
                   {e.isRecurring ? (
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>
