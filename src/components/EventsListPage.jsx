@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
 import { categoryColors } from "../Data/events";
 import { getEvents } from "../api";
@@ -28,6 +29,8 @@ function HostIcon() {
 }
 
 export default function EventsListPage() {
+  // Header wording, editable in Site Content.
+  const copy = useSiteSection("whats-on");
   const { data: events } = useFetch(getEvents, []);
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -36,10 +39,10 @@ export default function EventsListPage() {
       {/* Hero band */}
       <section className="relative flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 60% at 50% 110%, rgba(47,164,164,0.28) 0%, transparent 70%)" }} />
-        <span className="section-eyebrow relative mb-4" style={{ color: "var(--sage)" }}>What's On</span>
-        <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-4 text-white">All Events</h1>
+        <span className="section-eyebrow relative mb-4" style={{ color: "var(--sage)" }}>{copy.eyebrow}</span>
+        <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-4 text-white">{copy.title}</h1>
         <p className="relative text-base md:text-lg max-w-xl leading-relaxed" style={{ color: "var(--mint)" }}>
-          Every event happening across Maidenhead — markets, music, festivals and family days out.
+          {copy.intro}
         </p>
         <Link to="/whats-on" className="relative mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-colors" style={{ backgroundColor: "var(--leaf)", color: "white" }}>
           View calendar →

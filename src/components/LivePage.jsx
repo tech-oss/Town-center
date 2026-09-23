@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
 import { liveStory } from "../Data/live";
 import { getGuides } from "../api";
@@ -192,6 +193,8 @@ export default function LivePage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   const { hero, lede, sections, nicholson, pullQuote, closing } = liveStory;
+  // Header wording, editable in Site Content.
+  const copy = useSiteSection("live-stay");
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
@@ -202,13 +205,13 @@ export default function LivePage() {
         <img src={hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
-          {hero.eyebrow}
+          {copy.eyebrow}
         </span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
-          {hero.title}
+          {copy.title}
         </h1>
         <p className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium text-white" style={{ letterSpacing: "-0.01em" }}>
-          {hero.subtitle}
+          {copy.intro}
         </p>
       </section>
 

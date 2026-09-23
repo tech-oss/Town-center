@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
 import AppBadges from "./AppBadges";
 
@@ -10,6 +11,8 @@ const features = [
 ];
 
 export default function GetAppPage() {
+  // Header wording, editable in Site Content.
+  const copy = useSiteSection("get-the-app");
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
@@ -28,9 +31,9 @@ export default function GetAppPage() {
               <span className="mx-2 opacity-50">/</span>
               <span className="text-white">Get the App</span>
             </nav>
-            <p className="section-eyebrow mb-4" style={{ color: "var(--sage)" }}>The Maidenhead App</p>
+            <p className="section-eyebrow mb-4" style={{ color: "var(--sage)" }}>{copy.eyebrow}</p>
             <h1 className="hero-title uppercase text-3xl md:text-5xl lg:text-6xl leading-tight text-white mb-6" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
-              Get the Maidenhead App
+              {copy.title}
             </h1>
             <div className="flex flex-col gap-4">
               <p className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>

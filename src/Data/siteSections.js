@@ -146,8 +146,71 @@ export const SITE_SECTIONS = [
     ],
     defaults: {
       eyebrow: "Live & Stay",
-      title: "Make Maidenhead Home",
-      intro: "Discover what makes Maidenhead home — from new developments along the river to hotels and serviced apartments for every visit.",
+      title: "Live in Maidenhead",
+      intro: "A town by the river. Surrounded by green space. Connected to London. And changing for the future.",
+    },
+  },
+  {
+    key: "whats-on",
+    label: "What's On",
+    page: "/events",
+    blurb: "The header of the All Events page.",
+    fields: [
+      text("eyebrow", "Small line above the title"),
+      text("title", "Page title"),
+      area("intro", "Intro paragraph"),
+    ],
+    defaults: {
+      eyebrow: "What's On",
+      title: "All Events",
+      intro: "Every event happening across Maidenhead — markets, music, festivals and family days out.",
+    },
+  },
+  {
+    key: "guides-index",
+    label: "Neighbourhood Guides",
+    page: "/guides",
+    blurb: "The header of the Guides index. The guides themselves are edited under Explore.",
+    fields: [
+      text("eyebrow", "Small line above the title"),
+      text("title", "Page title"),
+      // The page renders this as `subtitle`, not `intro`.
+      area("subtitle", "Intro paragraph"),
+      image("heroImage", "Header image (mobile)"),
+      image("heroImageDesktop", "Header image (desktop)"),
+    ],
+    // This page has always rendered from the database, so its saved row is
+    // the only source — there is no wording in the component to fall back to.
+    defaults: {},
+  },
+  {
+    key: "about",
+    label: "About / Our Story",
+    page: "/about",
+    blurb: "The header of the Our Story page.",
+    fields: [
+      text("eyebrow", "Small line above the title"),
+      text("title", "Page title"),
+      area("intro", "Intro paragraph"),
+    ],
+    defaults: {
+      eyebrow: "About Us",
+      title: "Our Story",
+      intro: "An independent platform built to celebrate and connect the best of Maidenhead.",
+    },
+  },
+  {
+    key: "get-the-app",
+    label: "Get the App",
+    page: "/get-the-app",
+    blurb: "The header of the Get the App page.",
+    fields: [
+      text("eyebrow", "Small line above the title"),
+      text("title", "Page title"),
+    ],
+    defaults: {
+      eyebrow: "The Maidenhead App",
+      title: "Get the Maidenhead App",
     },
   },
 ];

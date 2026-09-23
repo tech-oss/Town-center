@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useSiteSection from "../hooks/useSiteSection";
 
 const paragraphs = [
   "Maidenhead.com is a privately run, independent platform created to help people discover and connect with everything happening in Maidenhead.",
@@ -10,6 +11,8 @@ const paragraphs = [
 ];
 
 export default function OurStoryPage() {
+  // Header wording, editable in Site Content.
+  const copy = useSiteSection("about");
   return (
     <div style={{ backgroundColor: "var(--sand)", minHeight: "100vh" }}>
       {/* Hero band */}
@@ -29,17 +32,17 @@ export default function OurStoryPage() {
           className="relative text-xs font-bold uppercase tracking-[0.02em] mb-4"
           style={{ color: "var(--sage)" }}
         >
-          About Us
+          {copy.eyebrow}
         </span>
         <h1
           className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white"
         >
-          Our Story
+          {copy.title}
         </h1>
         <p
           className="relative text-base md:text-lg max-w-xl leading-relaxed text-white"
         >
-          An independent platform built to celebrate and connect the best of Maidenhead.
+          {copy.intro}
         </p>
       </section>
 
