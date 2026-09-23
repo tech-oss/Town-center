@@ -17,6 +17,7 @@ function eventFromRow(row) {
   return {
     id: row.id,
     businessId: row.business_id,
+    author: row.author ?? "business",
     // An admin-authored event can stand alone with no business attached, so
     // there's no name to fall back to — don't leak a raw id into the UI.
     businessName: row.businesses?.name ?? (row.business_id ? row.business_id : null),
@@ -123,6 +124,11 @@ function eventToRow(item) {
   return {
     id: item.id || undefined,
     business_id: item.businessId || null,
+    // Only on creation. An event admin writes is free and must not spend a
+    // slot the business paid for (admin_added_free_2026_09.sql) — but admin
+    // also edits businesses' own submissions through this same editor, and
+    // saving one of those must not quietly turn it into free content.
+    ...(item.id ? {} : { author: "admin" }),
     slug: item.slug || slugify(item.title),
     title: item.title,
     subtitle: item.subtitle || item.excerpt || null,
