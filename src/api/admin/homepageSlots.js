@@ -9,7 +9,9 @@ import { logBusinessActivity } from "./businessActivity";
 
 export const SLOT_KINDS = {
   spotlight: ["news_offer", "business_article"],
-  featured_article: ["feature_article", "business_article", "news_offer"],
+  // A Featured Article slot shows a Featured Article — never a news or offer
+  // post, which is what the Spotlight slot is for.
+  featured_article: ["feature_article"],
   whats_on: ["business_event"],
   featured_business: ["business"],
 };
@@ -47,24 +49,95 @@ export async function getSlotTypes() {
   return (data ?? []).map(typeFromRow).sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
 }
 
-export async function saveSlotType(key, { price, durationDays, capacity, bookable, description }) {
-  const pence = Math.round(Number(price) * 100);
-  if (!Number.isFinite(pence) || pence < 0) throw new Error("Enter a price of £0 or more.");
-  const days = Number(durationDays);
-  if (!Number.isInteger(days) || days < 1 || days > 365) throw new Error("Length must be 1–365 days.");
-  const cap = Number(capacity);
-  if (!Number.isInteger(cap) || cap < 1 || cap > 50) throw new Error("Slots must be 1–50.");
+// The slot type itself now only carries whether businesses may book it and the
+// wording they see. How many slots exist is fixed in the database, and what
+// they cost lives in the packages below.
+export async function saveSlotType(key, { bookable, description }) {
   const { data, error } = await supabase
     .from("homepage_slot_types")
-    .update({
-      price_pence: pence, duration_days: days, capacity: cap, bookable: !!bookable,
-      description: description ?? null, updated_at: new Date().toISOString(),
-    })
+    .update({ bookable: !!bookable, description: description ?? null, updated_at: new Date().toISOString() })
     .eq("key", key)
     .select()
     .single();
   if (error) throw error;
   return typeFromRow(data);
+}
+
+// ── Packages (what businesses pay) ────────────────────────────────────────
+
+// Up to three packages per slot type — a name, a price and a length. A
+// business picks one when it buys, so the length is no longer fixed per slot.
+
+export const MAX_PACKAGES_PER_SLOT = 3;
+
+function packageFromRow(r) {
+  return {
+    id: r.id,
+    slotType: r.slot_type,
+    name: r.name,
+    price: r.price_pence / 100,
+    durationDays: r.duration_days,
+    active: r.active,
+    sortOrder: r.sort_order,
+    stripePriceId: r.stripe_price_id,
+    stripeProductId: r.stripe_product_id,
+  };
+}
+
+export async function getSlotPackages() {
+  const { data, error } = await supabase
+    .from("homepage_slot_packages")
+    .select("*")
+    .order("sort_order")
+    .order("price_pence");
+  if (error) throw error;
+  return (data ?? []).map(packageFromRow);
+}
+
+// Mirrors a package into Stripe as a product + price. A Stripe failure is
+// reported but never loses the package itself — admin can retry the sync.
+async function syncPackageWithStripe(packageId, action = "upsert") {
+  const { data, error } = await supabase.functions.invoke("stripe-slot-package", {
+    body: { packageId, action },
+  });
+  if (error) {
+    let message = error.message;
+    try { message = (await error.context?.json())?.error ?? message; } catch { /* keep generic */ }
+    throw new Error(`Saved, but Stripe wasn't updated: ${message}`);
+  }
+  if (data?.error) throw new Error(`Saved, but Stripe wasn't updated: ${data.error}`);
+  return data;
+}
+
+function validatePackage({ name, price, durationDays }) {
+  const label = String(name ?? "").trim();
+  if (!label) throw new Error("Give the package a name businesses will recognise.");
+  const pence = Math.round(Number(price) * 100);
+  if (!Number.isFinite(pence) || pence < 0) throw new Error("Enter a price of £0 or more.");
+  const days = Number(durationDays);
+  if (!Number.isInteger(days) || days < 1 || days > 365) throw new Error("Length must be 1–365 days.");
+  return { name: label, price_pence: pence, duration_days: days };
+}
+
+export async function saveSlotPackage({ id = null, slotType, name, price, durationDays, sortOrder = 0 }) {
+  const fields = validatePackage({ name, price, durationDays });
+  const row = { ...fields, slot_type: slotType, sort_order: sortOrder, active: true };
+  const query = id
+    ? supabase.from("homepage_slot_packages").update(row).eq("id", id)
+    : supabase.from("homepage_slot_packages").insert(row);
+  const { data, error } = await query.select().single();
+  if (error) throw error;
+  const saved = packageFromRow(data);
+  await syncPackageWithStripe(saved.id);
+  return saved;
+}
+
+// Deleting takes the package off sale and archives it in Stripe. Bookings
+// already paid for keep their own price and dates.
+export async function deleteSlotPackage(id) {
+  await syncPackageWithStripe(id, "archive").catch(() => {});
+  const { error } = await supabase.from("homepage_slot_packages").delete().eq("id", id);
+  if (error) throw error;
 }
 
 // ── Content that can go in a slot ──────────────────────────────────────────

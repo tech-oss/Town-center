@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getSlotTypes, saveSlotType, getPlacements, getSlotContentOptions,
+  getSlotPackages, saveSlotPackage, deleteSlotPackage, MAX_PACKAGES_PER_SLOT,
   schedulePlacement, endPlacement, cancelPlacement, approvePlacement, rejectPlacement,
   PLACEMENT_STATUS_LABELS,
 } from "../../api/admin";
@@ -76,7 +77,7 @@ function StatusChip({ status }) {
 }
 
 // ─── Add / edit a booking ───────────────────────────────────────────────────
-function PlacementDialog({ slotType, placement, onClose, onSaved }) {
+function PlacementDialog({ slotType, packages, placement, onClose, onSaved }) {
   const { data: options, loading } = useFetch(() => getSlotContentOptions(slotType.key), [slotType.key]);
   const defaultStart = placement?.startsAt ? new Date(placement.startsAt) : nextFiveMinutes();
   const defaultEnd = placement?.endsAt ? new Date(placement.endsAt) : new Date(defaultStart.getTime() + slotType.durationDays * DAY_MS);
@@ -183,7 +184,7 @@ function PlacementDialog({ slotType, placement, onClose, onSaved }) {
         </div>
         <div className="flex gap-2 flex-wrap items-center">
           <span className="text-xs" style={{ color: MUTED }}>Length:</span>
-          {[...new Set([1, 7, 14, 30, slotType.durationDays])].sort((a, b) => a - b).map((d) => (
+          {[...new Set([...packages.map((p) => p.durationDays), 1, 7, 14, 30, slotType.durationDays])].sort((a, b) => a - b).map((d) => (
             <button key={d} type="button" onClick={() => setLength(d)} className="text-xs font-semibold px-2.5 py-1 rounded-lg"
               style={{ border: `1px solid ${BORDER}`, color: NAVY }}>{d} day{d === 1 ? "" : "s"}</button>
           ))}
@@ -205,39 +206,43 @@ function PlacementDialog({ slotType, placement, onClose, onSaved }) {
   );
 }
 
-// ─── Pricing ────────────────────────────────────────────────────────────────
-function PricingCard({ slotType, onSaved, onError }) {
-  const [form, setForm] = useState({
-    price: slotType.price, durationDays: slotType.durationDays, capacity: slotType.capacity,
-    bookable: slotType.bookable, description: slotType.description,
-  });
+// ─── What businesses pay: the packages ──────────────────────────────────────
+// Each slot offers up to three packages — a name, a price and a length. The
+// business picks one when it buys. Saving a package also creates or updates
+// the matching product and price in Stripe.
+
+const BLANK_PACKAGE = { name: "", price: "", durationDays: "" };
+
+function PackageForm({ slotType, pkg, sortOrder, onDone, onCancel, onError }) {
+  const [form, setForm] = useState(() => (pkg
+    ? { name: pkg.name, price: String(pkg.price), durationDays: String(pkg.durationDays) }
+    : BLANK_PACKAGE));
   const [saving, setSaving] = useState(false);
-  useEffect(() => {
-    setForm({ price: slotType.price, durationDays: slotType.durationDays, capacity: slotType.capacity, bookable: slotType.bookable, description: slotType.description });
-  }, [slotType]);
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   async function save() {
     setSaving(true);
     try {
-      await saveSlotType(slotType.key, form);
-      onSaved(`${slotType.label} pricing saved.`);
+      await saveSlotPackage({
+        id: pkg?.id ?? null, slotType: slotType.key,
+        name: form.name, price: form.price, durationDays: form.durationDays,
+        sortOrder: pkg?.sortOrder ?? sortOrder,
+      });
+      onDone(pkg ? "Package updated and synced with Stripe." : "Package created and added to Stripe.");
     } catch (e) {
       onError(e.message);
-    } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="bg-white rounded-2xl p-5 flex flex-col gap-4" style={CARD}>
-      <div>
-        <p className="text-sm font-bold" style={{ color: NAVY }}>What businesses pay</p>
-        <p className="text-xs mt-0.5" style={{ color: MUTED }}>
-          A business pays once and gets the next free slot for this length. Changes apply to new bookings only.
-        </p>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="rounded-xl p-4 flex flex-col gap-3" style={{ backgroundColor: "#F8FAFC", border: `1px solid ${BORDER}` }}>
+      <div className="grid sm:grid-cols-3 gap-3">
+        <label className="flex flex-col gap-1 sm:col-span-1">
+          <span className="text-xs font-semibold" style={{ color: MUTED }}>Package name</span>
+          <input value={form.name} onChange={(e) => set("name", e.target.value)}
+            placeholder={`e.g. ${slotType.label} — 2 weeks`} className={INPUT} style={INPUT_STYLE} />
+        </label>
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold" style={{ color: MUTED }}>Price (£)</span>
           <input type="number" min="0" step="0.01" value={form.price} onChange={(e) => set("price", e.target.value)} className={INPUT} style={INPUT_STYLE} />
@@ -246,28 +251,126 @@ function PricingCard({ slotType, onSaved, onError }) {
           <span className="text-xs font-semibold" style={{ color: MUTED }}>Length (days)</span>
           <input type="number" min="1" max="365" value={form.durationDays} onChange={(e) => set("durationDays", e.target.value)} className={INPUT} style={INPUT_STYLE} />
         </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: MUTED }}>{slotType.perBusinessType ? "Slots per type" : "Slots at once"}</span>
-          <input type="number" min="1" max="50" value={form.capacity} onChange={(e) => set("capacity", e.target.value)} className={INPUT} style={INPUT_STYLE} />
-        </label>
-        <label className="flex items-center gap-2 mt-5 cursor-pointer">
-          <input type="checkbox" checked={form.bookable} onChange={(e) => set("bookable", e.target.checked)} className="w-4 h-4" />
-          <span className="text-sm font-medium" style={{ color: NAVY }}>Businesses can book</span>
-        </label>
       </div>
-      <label className="flex flex-col gap-1">
-        <span className="text-xs font-semibold" style={{ color: MUTED }}>Description shown to businesses</span>
-        <input value={form.description} onChange={(e) => set("description", e.target.value)} className={INPUT} style={INPUT_STYLE} />
-      </label>
-      {Number(form.capacity) < slotType.capacity && (
-        <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "#FFFBEB", color: "#92400E" }}>
-          Fewer slots only affects new bookings. Existing bookings in the removed slots stay until they end.
-        </p>
-      )}
-      <div>
+      <div className="flex gap-2">
         <button onClick={save} disabled={saving} className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50" style={{ backgroundColor: BLUE }}>
-          {saving ? "Saving…" : "Save pricing"}
+          {saving ? "Saving to Stripe…" : pkg ? "Save package" : "Create package"}
         </button>
+        <button onClick={onCancel} className="px-5 py-2 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function PackagesCard({ slotType, packages, onSaved, onError }) {
+  const [editing, setEditing] = useState(null); // package id, or "new"
+  const [settings, setSettings] = useState({ bookable: slotType.bookable, description: slotType.description });
+  const [savingSettings, setSavingSettings] = useState(false);
+  useEffect(() => {
+    setEditing(null);
+    setSettings({ bookable: slotType.bookable, description: slotType.description });
+  }, [slotType]);
+
+  const mine = packages.filter((p) => p.slotType === slotType.key);
+  const full = mine.length >= MAX_PACKAGES_PER_SLOT;
+
+  async function saveSettings() {
+    setSavingSettings(true);
+    try {
+      await saveSlotType(slotType.key, settings);
+      onSaved(`${slotType.label} settings saved.`);
+    } catch (e) {
+      onError(e.message);
+    } finally {
+      setSavingSettings(false);
+    }
+  }
+
+  async function remove(pkg) {
+    if (!window.confirm(`Delete “${pkg.name}”? Businesses won't be able to buy it any more. Bookings already paid for are unaffected.`)) return;
+    try {
+      await deleteSlotPackage(pkg.id);
+      onSaved("Package deleted and archived in Stripe.");
+    } catch (e) {
+      onError(e.message);
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl p-5 flex flex-col gap-4" style={CARD}>
+      <div>
+        <p className="text-sm font-bold" style={{ color: NAVY }}>What businesses pay</p>
+        <p className="text-xs mt-0.5" style={{ color: MUTED }}>
+          Up to {MAX_PACKAGES_PER_SLOT} packages for {slotType.label}. The business chooses one when it buys, and
+          each package is created in Stripe as its own product and price. Changes apply to new bookings only.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {mine.length === 0 && editing !== "new" && (
+          <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "#FFFBEB", color: "#92400E" }}>
+            No packages yet — businesses can't buy this slot until you add one.
+          </p>
+        )}
+        {mine.map((pkg, i) => (
+          editing === pkg.id ? (
+            <PackageForm key={pkg.id} slotType={slotType} pkg={pkg} sortOrder={i + 1}
+              onDone={(m) => { setEditing(null); onSaved(m); }} onCancel={() => setEditing(null)} onError={onError} />
+          ) : (
+            <div key={pkg.id} className="flex items-center gap-3 flex-wrap rounded-xl px-4 py-3" style={{ border: `1px solid ${BORDER}` }}>
+              <span className="flex-1 min-w-0">
+                <span className="block text-sm font-semibold truncate" style={{ color: NAVY }}>{pkg.name}</span>
+                <span className="block text-xs" style={{ color: MUTED }}>
+                  £{pkg.price.toFixed(2)} · {pkg.durationDays} day{pkg.durationDays === 1 ? "" : "s"}
+                  {pkg.stripePriceId ? " · in Stripe" : " · not in Stripe yet"}
+                </span>
+              </span>
+              <button onClick={() => setEditing(pkg.id)} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: NAVY }}>Edit</button>
+              <button onClick={() => remove(pkg)} className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+                style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
+            </div>
+          )
+        ))}
+
+        {editing === "new" ? (
+          <PackageForm slotType={slotType} sortOrder={mine.length + 1}
+            onDone={(m) => { setEditing(null); onSaved(m); }} onCancel={() => setEditing(null)} onError={onError} />
+        ) : (
+          <div>
+            <button onClick={() => setEditing("new")} disabled={full}
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40" style={{ backgroundColor: BLUE }}>
+              + Add a package
+            </button>
+            {full && (
+              <span className="text-xs ml-3" style={{ color: MUTED }}>
+                {MAX_PACKAGES_PER_SLOT} packages is the maximum — delete one to add another.
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="pt-3 flex flex-col gap-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: MUTED }}>Description shown to businesses</span>
+          <input value={settings.description} onChange={(e) => setSettings((s) => ({ ...s, description: e.target.value }))} className={INPUT} style={INPUT_STYLE} />
+        </label>
+        <div className="flex items-center gap-4 flex-wrap">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={settings.bookable} onChange={(e) => setSettings((s) => ({ ...s, bookable: e.target.checked }))} className="w-4 h-4" />
+            <span className="text-sm font-medium" style={{ color: NAVY }}>Businesses can book</span>
+          </label>
+          <button onClick={saveSettings} disabled={savingSettings} className="px-5 py-2 rounded-xl text-sm font-semibold disabled:opacity-50"
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: NAVY }}>
+            {savingSettings ? "Saving…" : "Save settings"}
+          </button>
+        </div>
+        <p className="text-xs" style={{ color: MUTED }}>
+          {slotType.perBusinessType
+            ? `${slotType.capacity} slots for each business type`
+            : `${slotType.capacity} slots on the homepage at once`} — this number is fixed and can't be changed here.
+        </p>
       </div>
     </div>
   );
@@ -344,6 +447,7 @@ export default function HomepageSlotsPage() {
   const [version, setVersion] = useState(0);
   const [showEnded, setShowEnded] = useState(false);
   const { data: types, loading: loadingTypes } = useFetch(getSlotTypes, [version]);
+  const { data: packages } = useFetch(getSlotPackages, [version]);
   const { data: placements, loading } = useFetch(() => getPlacements({ includeEnded: showEnded }), [version, showEnded]);
   const [active, setActive] = useState("spotlight");
   const [dialog, setDialog] = useState(null); // { placement? }
@@ -385,6 +489,13 @@ export default function HomepageSlotsPage() {
     return counts;
   }, [all]);
 
+  const packageSummary = useMemo(() => {
+    const mine = (packages ?? []).filter((p) => p.slotType === active);
+    if (!mine.length) return "No packages on sale yet.";
+    const list = mine.map((p) => `£${p.price.toFixed(2)} for ${p.durationDays} days`).join(", ");
+    return `Business packages: ${list}${slotType?.bookable ? "" : " (not bookable)"}.`;
+  }, [packages, active, slotType]);
+
   // Featured Business slots are counted per business type.
   const pools = slotType?.perBusinessType
     ? [...new Set(forType.map((p) => p.pool))].sort()
@@ -415,6 +526,7 @@ export default function HomepageSlotsPage() {
       {dialog && slotType && (
         <PlacementDialog
           slotType={slotType}
+          packages={(packages ?? []).filter((p) => p.slotType === slotType.key)}
           placement={dialog.placement}
           onClose={() => setDialog(null)}
           onSaved={(msg) => { setDialog(null); notify(msg); reload(); }}
@@ -468,17 +580,22 @@ export default function HomepageSlotsPage() {
 
       {slotType && (
         <>
+          {/* What businesses pay comes first: the packages define everything
+              a booking below is sold as. */}
+          <PackagesCard slotType={slotType} packages={packages ?? []}
+            onSaved={(m) => { notify(m); reload(); }} onError={(m) => notify(m, true)} />
+
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-sm" style={{ color: MUTED }}>
               {slotType.perBusinessType
                 ? `${slotType.capacity} slots for each business type.`
                 : `${slotType.capacity} slots on the homepage at once.`}
-              {" "}Business bookings: £{slotType.price.toFixed(2)} for {slotType.durationDays} days{slotType.bookable ? "" : " (not bookable)"}.
+              {" "}{packageSummary}
             </p>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2 text-xs font-medium cursor-pointer" style={{ color: MUTED }}>
                 <input type="checkbox" checked={showEnded} onChange={(e) => setShowEnded(e.target.checked)} />
-                Show ended (60 days)
+                Show the slots which are ending in 60 days
               </label>
               <button onClick={() => setDialog({})} className="px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: BLUE }}>
                 + Add to {slotType.label}
@@ -511,7 +628,6 @@ export default function HomepageSlotsPage() {
             })
           )}
 
-          <PricingCard slotType={slotType} onSaved={(m) => { notify(m); reload(); }} onError={(m) => notify(m, true)} />
         </>
       )}
     </div>
