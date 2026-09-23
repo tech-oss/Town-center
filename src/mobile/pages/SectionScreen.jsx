@@ -50,7 +50,8 @@ const toEventCard = (e) => {
     image: e.image,
     date: e.date,
     address: e.location,
-    description: e.excerpt,
+    // Whose event it is, so a business's event reads as theirs on the card.
+    description: e.businessName ? `${e.businessName} · ${e.excerpt ?? ""}`.trim().replace(/ ·\s*$/, "") : e.excerpt,
     to: `/mobile/event/${e.slug}`,
   };
 };

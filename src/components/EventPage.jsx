@@ -58,6 +58,15 @@ function buildSocial(social) {
   ].filter(Boolean);
 }
 
+// Storefront glyph for the "Hosted by" row.
+function HostIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l1.5-5h15L21 9" /><path d="M4 9v11h16V9" /><path d="M9 20v-6h6v6" />
+    </svg>
+  );
+}
+
 export default function EventPage() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
@@ -102,6 +111,19 @@ export default function EventPage() {
   const metaRows = [
     event.date && { icon: <CalendarIcon />, text: event.date + (event.time ? ` · ${event.time}` : "") },
     event.tickets && { icon: <TicketIcon />, text: event.tickets },
+    // Whose event this is, linking to their page. An event attached to a
+    // business used to show no sign of the business at all.
+    event.businessName && {
+      icon: <HostIcon />,
+      text: (
+        <>
+          Hosted by{" "}
+          <Link to={event.businessTo} className="font-bold underline underline-offset-2 hover:opacity-75" style={{ color: "var(--teal-deep)" }}>
+            {event.businessName}
+          </Link>
+        </>
+      ),
+    },
   ].filter(Boolean);
 
   const description = event.standfirst

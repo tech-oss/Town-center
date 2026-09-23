@@ -15,7 +15,7 @@ import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
 import { parseCoords } from "../lib/geo";
 import { imageUrl } from "../lib/imageUrl";
-import { formatEventDate } from "./events";
+import { formatEventDate } from "../lib/eventDates";
 import { resolveCategory, TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES, FREELANCER_CATEGORIES } from "../Data/taxonomy";
 
 // Registration stores a type slug; the site's sections are keyed a little
@@ -163,9 +163,10 @@ function mapEvent(e, business) {
   };
 }
 
-// An event that has already happened is not news. One with no date at all
-// (a standing "open all year" entry) keeps showing.
-const eventUpcoming = (e) => !e.event_date || e.event_date >= new Date().toISOString().slice(0, 10);
+// Every Live event shows, whatever its date. "Live" is the editorial switch
+// the rest of the site already goes by — What's On and See & Do list a Live
+// event whether or not its date has passed — so filtering by date here would
+// have made the business's own page the one place its event did not appear.
 
 const notEnded = (n) => !n.end_date || n.end_date >= new Date().toISOString().slice(0, 10);
 
@@ -351,7 +352,7 @@ export function loadLiveBusinesses() {
       if (f.business_id) (features[f.business_id] ??= []).push(f);
     }
     const events = {};
-    for (const e of (eventsRes?.data ?? []).filter(eventUpcoming)) {
+    for (const e of eventsRes?.data ?? []) {
       if (e.business_id) (events[e.business_id] ??= []).push(e);
     }
     const featuredIds = new Set(placements.featured_business.map((p) => p.business_id ?? p.content_id));

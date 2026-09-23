@@ -8,17 +8,9 @@
 import { supabase } from "../lib/supabaseClient";
 import { imageUrl } from "../lib/imageUrl";
 import { parseCoords } from "../lib/geo";
+import { formatEventDate } from "../lib/eventDates";
+import { loadLiveBusinesses } from "./liveBusinesses";
 import { getLivePlacements, getPromotedEventIds } from "./homepageSlots";
-
-// Formats a date the way the hardcoded content did ("Sunday 14 June 2026"),
-// used when an event has a real date but no explicit label. Recurring events
-// carry their own phrasing ("2nd Sunday of each month") in date_label.
-export function formatEventDate(iso) {
-  if (!iso) return "";
-  return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
-  });
-}
 
 function fromRow(r) {
   const gallery = r.gallery ?? [];
@@ -66,6 +58,29 @@ function fromRow(r) {
   };
 }
 
+
+// An event run by a business carries that business with it: its name, and
+// where its page is. Nothing did this before, so an event admin attached to
+// a business showed no sign of whose it was — on its own page or on any card.
+async function withBusiness(events) {
+  const list = Array.isArray(events) ? events : [events].filter(Boolean);
+  if (!list.some((e) => e?.businessId)) return events;
+  const live = await loadLiveBusinesses().catch(() => []);
+  const byId = new Map(live.map((b) => [b.businessId, b]));
+  const attach = (e) => {
+    const b = e?.businessId ? byId.get(e.businessId) : null;
+    if (!b) return e;
+    return {
+      ...e,
+      businessName: b.name,
+      businessSlug: b.slug,
+      businessSection: b.section,
+      businessTo: `/${b.section}/place/${b.slug}`,
+    };
+  };
+  return Array.isArray(events) ? list.map(attach) : attach(events);
+}
+
 export async function getEvents() {
   const { data, error } = await supabase
     .from("business_events")
@@ -73,7 +88,7 @@ export async function getEvents() {
     .eq("status", "Live")
     .order("event_date", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  return withBusiness((data ?? []).map(fromRow));
 }
 
 export async function getEventBySlug(slug) {
@@ -84,7 +99,7 @@ export async function getEventBySlug(slug) {
     .eq("status", "Live")
     .maybeSingle();
   if (error) throw error;
-  if (data) return fromRow(data);
+  if (data) return withBusiness(fromRow(data));
 
   // Slug-less business submissions are addressed by id (see fromRow).
   if (!/^[0-9a-f-]{36}$/i.test(slug)) return null;
@@ -95,7 +110,7 @@ export async function getEventBySlug(slug) {
     .eq("status", "Live")
     .maybeSingle();
   if (idError) throw idError;
-  return byId ? fromRow(byId) : null;
+  return byId ? withBusiness(fromRow(byId)) : null;
 }
 
 // The events booked into the homepage "WHAT'S ON" slots right now, in slot order.

@@ -291,6 +291,10 @@ export default function WhatsOnScreen() {
                       <p className="text-sm font-bold leading-snug truncate" style={{ color: "#000000" }}>{e.title}</p>
                       {e.subtitle && <p className="text-xs truncate" style={{ color: "rgba(0,0,0,0.65)" }}>{e.subtitle}</p>}
                       {e.location && <p className="text-xs mt-0.5 truncate" style={{ color: "#000000" }}>{e.location}</p>}
+                      {/* Whose event it is — the card showed no business. */}
+                      {e.businessName && (
+                        <p className="text-xs mt-0.5 font-bold truncate" style={{ color: "var(--teal-deep)" }}>{e.businessName}</p>
+                      )}
                     </div>
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M9 18l6-6-6-6" /></svg>
                   </div>

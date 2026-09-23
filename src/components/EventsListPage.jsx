@@ -19,6 +19,14 @@ function PinIcon() {
   );
 }
 
+function HostIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 9l1.5-5h15L21 9" /><path d="M4 9v11h16V9" /><path d="M9 20v-6h6v6" />
+    </svg>
+  );
+}
+
 export default function EventsListPage() {
   const { data: events } = useFetch(getEvents, []);
   useEffect(() => { window.scrollTo(0, 0); }, []);
@@ -70,6 +78,12 @@ export default function EventsListPage() {
                   <div className="flex items-center gap-2 text-sm" style={{ color: "#000000" }}>
                     <span style={{ color: "#000000" }}><PinIcon /></span>{e.location}
                   </div>
+                  {/* Whose event it is — the card gave no clue before. */}
+                  {e.businessName && (
+                    <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: "var(--teal-deep)" }}>
+                      <span><HostIcon /></span>{e.businessName}
+                    </div>
+                  )}
                   <p className="text-sm leading-relaxed line-clamp-2 mt-0.5" style={{ color: "#000000" }}>{e.excerpt}</p>
                   <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: "var(--leaf)" }}>
                     Read more <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
