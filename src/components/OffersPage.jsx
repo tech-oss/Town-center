@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useSiteSection from "../hooks/useSiteSection";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getOffersFeed } from "../api";
 import { sections } from "../Data/pages";
@@ -283,6 +284,8 @@ function BusinessTypeFilter({ active, onChange }) {
 }
 
 export default function OffersPage() {
+  // Header wording, editable in Site Content.
+  const copy = useSiteSection("offers");
   // Stories, every live news post and offer, and What's On events that have
   // been promoted — the same list the app shows (api/offers.js).
   const { data: feed } = useFetch(getOffersFeed, []);
@@ -333,18 +336,16 @@ export default function OffersPage() {
           }}
         />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
-          Offers &amp; Stories
+          {copy.eyebrow}
         </span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
-          Every Story, In One Place
+          {copy.title}
         </h1>
         <p
           className="relative text-sm md:text-base max-w-xl leading-relaxed font-medium mb-5"
           style={{ color: "#ffffff", letterSpacing: "-0.01em" }}
         >
-          Discover the complete collection of Featured Stories and Spotlight Articles. Find and search for
-          offers and the latest news from businesses around Maidenhead. Download The Maidenhead App to get
-          all the offers direct to you anytime you need.
+          {copy.intro}
         </p>
         <div className="relative">
           <AppBadges size="sm" />

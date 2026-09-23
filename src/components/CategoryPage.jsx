@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useSiteSection from "../hooks/useSiteSection";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card } from "../utils/design";
 import { sections, categoryTitles } from "../Data/pages";
@@ -43,6 +44,9 @@ export default function CategoryPage() {
   // the category rename still land on the right filter instead of an empty page.
   const category = searchParams.get("category") ? resolveCategory(searchParams.get("category")) : undefined;
   const sec = sections[section];
+  // Admin's wording for this landing page, falling back to the component's
+  // own (see Data/siteSections.js).
+  const copy = useSiteSection(section ?? "");
   const groupConfig = group ? sec?.groups?.find((g) => g.key === group) : null;
   const [search, setSearch] = useState("");
   // Clear a typed search when the user switches to a different listing
@@ -115,12 +119,14 @@ export default function CategoryPage() {
   }
 
   const isCategory = Boolean(category);
-  const title = isCategory ? categoryTitles[category] ?? sec.label : groupConfig?.label ?? sec.landing.title;
+  // The landing page's own title, intro and header images are editable in
+  // Site Content; a category view keeps the category's own title.
+  const title = isCategory ? categoryTitles[category] ?? sec.label : groupConfig?.label ?? copy.title;
   // The intro line stays constant regardless of which category is selected,
   // rather than swapping in a per-category sentence — that kept the text
   // (and the category bar underneath it) shifting every time the user
   // browsed between categories.
-  const intro = groupConfig?.intro ?? sec.landing.intro;
+  const intro = groupConfig?.intro ?? copy.intro;
 
   // Grouped pages (e.g. /services/tradespeople) only offer that group's own
   // chips — not every category across all of Services.
@@ -137,13 +143,13 @@ export default function CategoryPage() {
   const basePath = groupConfig ? `/services/${group}` : sec.path;
 
   const catHero = category && sec.categoryHeroes?.[category];
-  const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero;
+  const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || copy.hero || sec.landing.hero;
   const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
   const heroBg  = typeof catHero === "object" ? catHero.bg  : undefined;
   // A separate desktop hero image, only set up for the Shop/Eat & Drink/
   // Services landing pages so far — falls back to the single `heroSrc`
   // everywhere else.
-  const heroDesktopSrc = !isCategory && sec.landing.heroDesktop;
+  const heroDesktopSrc = !isCategory && (copy.heroDesktop || sec.landing.heroDesktop);
   // Services' desktop photo has its subject (a tradesperson up a ladder)
   // near the top of the frame — cover-cropping from dead center at wide
   // viewports (container aspect ~2:1 vs. the photo's own ~1.8:1) sliced

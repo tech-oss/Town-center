@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import useSiteSection from "../hooks/useSiteSection";
 import { Link } from "react-router-dom";
 import { hero } from "../Data/content";
 import SmartLink from "./SmartLink";
@@ -25,6 +26,8 @@ const prefersReducedMotion =
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export default function Hero() {
+  // Headline, tagline and the line above them are editable in Site Content.
+  const copy = useSiteSection("homepage");
   const videoRef = useRef(null);
 
   // Always-on tap fallback: if the video is paused (e.g. iOS Low Power Mode
@@ -169,10 +172,10 @@ export default function Hero() {
             className="block text-base sm:text-lg md:text-2xl font-medium mb-3 md:mb-5"
             style={{ letterSpacing: "-0.01em", color: "#ffffff" }}
           >
-            Welcome to
+            {copy.eyebrow}
           </span>
           <span className="hero-title block text-5xl sm:text-7xl md:text-8xl lg:text-9xl leading-none">
-            Maidenhead
+            {copy.title}
           </span>
         </h1>
 
@@ -186,7 +189,7 @@ export default function Hero() {
               textShadow: "0 1px 12px rgba(0,0,0,0.5)",
             }}
           >
-            Riverside · Connected · Thriving
+            {copy.tagline}
           </p>
           <span className="hidden sm:block" style={{ height: 1, width: 36, background: "rgba(255,255,255,0.55)" }} />
         </div>

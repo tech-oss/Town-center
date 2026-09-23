@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
 import { getArticles } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -42,6 +43,8 @@ function StoryCard({ story }) {
 }
 
 export default function NewsIndexPage() {
+  // Header wording, editable in Site Content.
+  const copy = useSiteSection("news");
   const { data: articles } = useFetch(getArticles, []);
   // Show the hand-written, real stories (Coppa Club, COCOBA, …) rather than the
   // auto-generated per-business placeholders (which end in -offer / -news / -event).
@@ -66,14 +69,13 @@ export default function NewsIndexPage() {
           }}
         />
         <span className="section-eyebrow relative mb-4" style={{ color: "var(--sage)" }}>
-          From the Journal
+          {copy.eyebrow}
         </span>
         <h1 className="relative text-4xl md:text-6xl font-bold leading-tight mb-6 text-white">
-          In the Spotlight
+          {copy.title}
         </h1>
         <p className="relative text-base md:text-lg max-w-xl leading-relaxed" style={{ color: "var(--mint)" }}>
-          News, offers and events from Maidenhead's independent businesses — the latest on what's new,
-          what's on and what's worth discovering in town.
+          {copy.intro}
         </p>
       </section>
 

@@ -9,13 +9,7 @@ import MobileShell from "../components/MobileShell";
 import { ListSearch, FilterPills, OffersLink } from "../components/ListSearch";
 import { sections, categoryTitles } from "../../Data/pages";
 import { toSeeDoSlug, toSeeDoSlugs } from "../../lib/eventCategories";
-
-const SECTION_INTROS = {
-  "see-do": "Explore the best attractions, green spaces, and things to do in and around Maidenhead.",
-  "eat-drink": "From riverside dining to cosy cafés, explore Maidenhead's food and drink scene.",
-  shop: "From high-street favourites to independent boutiques, discover Maidenhead's shops.",
-  services: "Trades, professionals and local businesses serving Maidenhead.",
-};
+import useSiteSection from "../../hooks/useSiteSection";
 
 // The section's categories in the order the website's dropdown lists them, so
 // the app's filter bar reads top-to-bottom exactly as the menu does. The menu
@@ -60,6 +54,9 @@ const inCategory = (item, slug) => item.category === slug || item.categories?.in
 
 export default function SectionScreen({ sectionKey }) {
   const section = sections[sectionKey];
+  // The same wording the website's landing page shows, edited in one place
+  // (Site Content) rather than kept as a second copy here.
+  const copy = useSiteSection(sectionKey);
   const sectionItems = useSectionItems(sectionKey);
   const { data: whatsOnEvents } = useFetch(getEvents, []);
   const [filter, setFilter] = useState("all");
@@ -123,7 +120,7 @@ export default function SectionScreen({ sectionKey }) {
   return (
     <MobileShell title={appSectionLabel(sectionKey, section.label)} onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
-        <p className="text-sm font-medium" style={{ color: "#000000" }}>{SECTION_INTROS[sectionKey] ?? section.landing?.intro}</p>
+        <p className="text-sm font-medium" style={{ color: "#000000" }}>{copy.intro ?? section.landing?.intro}</p>
 
         <OffersLink />
 
