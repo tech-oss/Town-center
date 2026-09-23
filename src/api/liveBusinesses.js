@@ -234,9 +234,14 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   };
   // Featured Articles lead the business's own page, then its news and
   // offers — the same precedence the Offers page uses.
-  item.featured = (features[row.business_id] ?? []).map((f) => mapFeature(f, item));
+  //
+  // Named featuredArticles, NOT `featured`: that is the boolean saying the
+  // business holds a paid Featured Business booking. Writing the article list
+  // over it gave every business an empty array, which counts as true — so
+  // every listing on the site wore a Featured tag and sorted to the top.
+  item.featuredArticles = (features[row.business_id] ?? []).map((f) => mapFeature(f, item));
   item.news = [
-    ...item.featured,
+    ...item.featuredArticles,
     ...(articles[row.business_id] ?? []).map((a) => mapArticle(a, item)),
     ...(newsOffers[row.business_id] ?? []).map((n) => mapNewsOffer(n, item)),
   ];
