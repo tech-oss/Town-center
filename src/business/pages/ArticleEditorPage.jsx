@@ -4,7 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, TextArea, Select, SingleImageUpload, EditorSection, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
-import { getArticle, createArticle, updateArticle } from "../api/businessArticles";
+import { getArticle, createArticle, updateArticle, getArticleAllowance } from "../api/businessArticles";
+import { Link } from "react-router-dom";
 
 function wordCount(text) {
   const t = (text ?? "").trim();
@@ -22,6 +23,18 @@ export default function ArticleEditorPage() {
   const [loading, setLoading] = useState(!!id);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useToast();
+  // What this business is allowed to have on the site. A post can always be
+  // written and saved; only sending it for approval needs a free slot.
+  const [allowance, setAllowance] = useState(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    getArticleAllowance(user.id, id ?? null)
+      .then((a) => { if (!cancelled) setAllowance(a); })
+      .catch(() => { if (!cancelled) setAllowance(null); });
+    return () => { cancelled = true; };
+  }, [user?.id, id]);
 
   useEffect(() => {
     if (!id) return;
@@ -35,6 +48,7 @@ export default function ArticleEditorPage() {
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
   async function handleSave(submit) {
+    if (submit && allowance?.atLimit) return;
     setSaving(true);
     const status = submit ? "Pending Approval" : "Draft";
     const next = { ...form, status };
@@ -109,9 +123,29 @@ export default function ArticleEditorPage() {
             </div>
           </EditorSection>
 
+          {allowance?.atLimit && (
+            <div className="rounded-xl px-4 py-3 text-sm flex flex-col gap-1" style={{ backgroundColor: "#FFFBEB", color: "#92400E", border: "1px solid rgba(217,119,6,0.3)" }}>
+              <span className="font-semibold">
+                You're using all {allowance.allowance} of your article slots
+                {allowance.pending > 0 ? ` (${allowance.live} live, ${allowance.pending} waiting for approval)` : ""}.
+              </span>
+              <span>
+                You can still save this as a draft. To send it for approval, hide one of your live
+                articles to free a slot, or <Link to="/business/articles" className="underline font-semibold">buy extra article slots</Link>.
+              </span>
+            </div>
+          )}
+
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
             <button onClick={() => handleSave(false)} disabled={saving} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ backgroundColor: "rgba(16,24,40,0.06)", color: FOREST }}>Save as Draft</button>
-            <button onClick={() => handleSave(true)} disabled={saving} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: SAGE }}>Submit for Approval</button>
+            <button
+              onClick={() => handleSave(true)}
+              disabled={saving || !!allowance?.atLimit}
+              title={allowance?.atLimit ? "All your article slots are in use — save it as a draft for now." : undefined}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: SAGE }}>
+              Submit for Approval
+            </button>
             <button onClick={() => navigate("/business/articles")} className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-70" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
           </div>
         </div>

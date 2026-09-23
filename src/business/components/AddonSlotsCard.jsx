@@ -60,18 +60,14 @@ export default function AddonSlotsCard({ businessId, kind, premium, isOwner = tr
         <p className="text-xs mt-1" style={{ color: MUTED }}>{spec.intro}</p>
       </div>
 
-      <div className="rounded-xl px-3.5 py-3 text-sm" style={{ backgroundColor: "rgba(37,99,235,0.06)", color: FOREST }}>
-        {allowance === 0 ? (
-          <>You have no {spec.noun} slots yet.</>
-        ) : (
-          <>
-            <strong>{allowance}</strong> {spec.noun}{allowance === 1 ? "" : "s"} can be on the site at once
-            {slots?.extra
-              ? ` — ${spec.included} included plus ${slots.extra} purchased.`
-              : ` — the ${spec.included} included with your plan.`}
-          </>
-        )}
-      </div>
+      {/* Only the "you have none yet" prompt is worth saying here. The
+          allowance itself is spelled out on the page the slots are used on,
+          where it actually bears on what the business can do next. */}
+      {allowance === 0 && (
+        <div className="rounded-xl px-3.5 py-3 text-sm" style={{ backgroundColor: "rgba(37,99,235,0.06)", color: FOREST }}>
+          You have no {spec.noun} slots yet.
+        </div>
+      )}
 
       {slots?.packs?.length > 0 && (
         <div className="flex flex-col gap-1.5">

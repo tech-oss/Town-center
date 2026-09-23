@@ -192,7 +192,11 @@ Deno.serve(async (req) => {
         business_id: businessId,
         quantity: String(quantity),
       };
-      const backTo = slotKind === "event" ? "events" : "articles";
+      // Back to the page the slots were bought from: a featured article slot
+      // belongs to Featured Articles, not the News & Offers tab.
+      const backTo = slotKind === "event" ? "events"
+        : slotKind === "featured_article" ? "featured-articles"
+        : "articles";
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
         customer: customerId,

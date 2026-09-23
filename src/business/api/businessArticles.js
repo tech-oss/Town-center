@@ -136,3 +136,29 @@ export async function deleteArticle(id) {
   if (error) throw error;
   await logActivity(owner?.business_id, { action: "article.deleted", entityType: "article", entityId: id, title: owner?.title });
 }
+
+// How many articles this business may have live, and how many of its slots
+// are already spoken for. A post waiting for approval counts: it becomes live
+// the moment admin approves it, so letting a business queue up more than it
+// can show would only produce approvals that can't take effect.
+//
+// `excludeId` leaves out the article being edited, so re-submitting a change
+// to one that is already live isn't treated as asking for another slot.
+export async function getArticleAllowance(businessId, excludeId = null) {
+  const [{ data: allowance }, { data: rows, error }] = await Promise.all([
+    supabase.rpc("addon_slot_allowance", { p_business_id: businessId, p_kind: "article" }),
+    supabase.from("business_articles").select("id, status").eq("business_id", businessId),
+  ]);
+  if (error) throw error;
+  const counted = (rows ?? []).filter(
+    (r) => r.id !== excludeId && (r.status === "Live" || r.status === "Pending Approval")
+  );
+  const limit = allowance ?? LIVE_ARTICLE_LIMIT;
+  return {
+    allowance: limit,
+    used: counted.length,
+    live: counted.filter((r) => r.status === "Live").length,
+    pending: counted.filter((r) => r.status === "Pending Approval").length,
+    atLimit: counted.length >= limit,
+  };
+}
