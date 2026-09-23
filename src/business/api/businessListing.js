@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { stripDataUrls } from "../../lib/noDataUrls";
 import { logActivity } from "./businessActivity";
 
 // business_listings: My Listing page content (profile, hours, gallery,
@@ -87,6 +88,12 @@ const SECTION_LABELS = {
 };
 
 function toRow(listing) {
+  // Pictures live in Storage; a pasted-in data URL is never written to a
+  // column (see lib/noDataUrls).
+  return stripDataUrls(buildRow(listing)).row;
+}
+
+function buildRow(listing) {
   return {
     name: listing.name,
     category: listing.category,

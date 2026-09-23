@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from "react";
+import { uploadImage } from "../../lib/uploadImage";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness,
@@ -129,13 +130,16 @@ function RegisterBusinessForm({ onSave, onCancel }) {
   function handleLogoChange(e) {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      set("logo", ev.target.result);
-      set("logoName", file.name);
-      setLogoPreview(ev.target.result);
-    };
-    reader.readAsDataURL(file);
+    // Upload to Storage and keep the URL. Reading the file into the field as
+    // base64 put the whole picture inside the database row — two logos done
+    // this way were 95% of the admin approvals query, refetched every minute.
+    uploadImage(file, "logos")
+      .then((url) => {
+        set("logo", url);
+        set("logoName", file.name);
+        setLogoPreview(url);
+      })
+      .catch((err) => alert(err.message));
   }
 
   function handleSectionChange(val) {
