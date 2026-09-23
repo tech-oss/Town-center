@@ -54,7 +54,11 @@ export default function FeaturedArticlesPage() {
 
   // A piece uses its slot while it is live or waiting on admin; hiding it
   // frees the slot for the next one.
-  const active = articles.filter((a) => a.status === "Live" || a.status === "Pending Approval");
+  // A piece Maidenhead wrote is free and never counted towards these slots —
+  // the database has always excluded it, and so does this.
+  const active = articles.filter(
+    (a) => !a.addedByAdmin && (a.status === "Live" || a.status === "Pending Approval")
+  );
   const allowance = slots?.allowance ?? ADDON_KINDS.featured_article.included;
   const atLimit = active.length >= allowance;
   const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
@@ -135,7 +139,12 @@ export default function FeaturedArticlesPage() {
                   ? <img src={a.cardImage || a.heroImage} alt="" className="w-full h-32 object-cover" />
                   : <div className="w-full h-32" style={{ backgroundColor: "#f1f5f9" }} />}
                 <div className="p-4 flex flex-col gap-2 flex-1">
-                  <StatusBadge status={a.status} />
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <StatusBadge status={a.status} />
+                    {a.addedByAdmin && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#ECFDF5", color: "#047857" }}>ADDED BY MAIDENHEAD · FREE</span>
+                    )}
+                  </div>
                   <p className="text-sm font-bold" style={{ color: FOREST }}>{a.title}</p>
                   {a.submittedAt && (
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>Submitted {formatUK(a.submittedAt.slice(0, 10))}</p>
@@ -145,6 +154,12 @@ export default function FeaturedArticlesPage() {
                       <span className="font-bold">{a.status === "Removed" ? "Taken down" : "Not approved"}:</span> {a.rejectionReason}
                     </p>
                   )}
+                  {/* Maidenhead's piece stays Maidenhead's to change. */}
+                  {a.addedByAdmin ? (
+                    <p className="text-xs mt-auto pt-2" style={{ color: MUTED }}>
+                      Written for you by Maidenhead. Ask through Support if it needs changing.
+                    </p>
+                  ) : (
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/featured-articles/${a.id}/edit`)}
                       className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>
@@ -158,6 +173,7 @@ export default function FeaturedArticlesPage() {
                     <button onClick={() => setDeleting(a)}
                       className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
                   </div>
+                  )}
                 </div>
               </div>
             ))}

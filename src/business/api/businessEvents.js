@@ -92,7 +92,9 @@ export async function listEvents(businessId) {
     .eq("business_id", businessId)
     .order("event_date", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  // An event Maidenhead added for this business shows here too, so the
+  // business knows what is on under its name. It is free and read-only.
+  return (data ?? []).map((r) => ({ ...fromRow(r), addedByAdmin: r.author === "admin" }));
 }
 
 export async function getEvent(id) {

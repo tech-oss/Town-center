@@ -8,7 +8,7 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import {
-  listArticles, setArticleStatus, deleteArticle, swapLiveArticle,
+  listArticles, listAdminPosts, setArticleStatus, deleteArticle, swapLiveArticle,
   LIVE_ARTICLE_LIMIT,
 } from "../api/businessArticles";
 
@@ -136,12 +136,17 @@ export default function ArticlesPage() {
   const [buying, setBuying] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  const [adminPosts, setAdminPosts] = useState([]);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     listArticles(user.id).then((data) => {
       if (!cancelled) { setArticles(data); setLoading(false); }
     });
+    // Posts Maidenhead wrote for this business, shown separately: they are
+    // free, they don't touch the slot count, and the business doesn't edit them.
+    listAdminPosts(user.id).then((data) => { if (!cancelled) setAdminPosts(data); });
     return () => { cancelled = true; };
   }, [user.id]);
 
@@ -297,6 +302,35 @@ export default function ArticlesPage() {
 
         {/* What's been bought, and when each slot runs out. */}
         <PurchasedSlots businessId={user.id} kind="article" refreshKey={slots?.extra ?? 0} />
+
+        {/* Added by Maidenhead — free, and outside the slot count entirely. */}
+        {adminPosts.length > 0 && (
+          <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
+            <div>
+              <p className="text-sm font-bold" style={{ color: FOREST }}>Added by Maidenhead</p>
+              <p className="text-xs mt-0.5" style={{ color: MUTED }}>
+                Written for you by the Maidenhead team, free of charge. These don't use any of your
+                article slots. To change one, get in touch through Support.
+              </p>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {adminPosts.map((a) => (
+                <div key={a.id} className="rounded-xl overflow-hidden flex flex-col" style={{ border: `1px solid ${BORDER}` }}>
+                  {a.image && <img src={a.image} alt="" className="w-full h-28 object-cover" />}
+                  <div className="p-3 flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{a.type}</span>
+                      <StatusBadge status={a.status} />
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#ECFDF5", color: "#047857" }}>FREE</span>
+                    </div>
+                    <p className="text-sm font-bold leading-snug" style={{ color: FOREST }}>{a.title}</p>
+                    {a.date && <p className="text-[11px]" style={{ color: MUTED }}>{a.date}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading articles…</p>

@@ -82,7 +82,11 @@ export default function EventsPage() {
 
   // An event counts against a slot while it is on the site or waiting on
   // admin; a hidden or finished one frees its slot for the next event.
-  const onSite = events.filter((e) => e.status === "Live" || e.status === "Pending Approval");
+  // An event Maidenhead added is free and sits outside the count entirely,
+  // matching what the database enforces (admin_added_free_2026_09.sql).
+  const onSite = events.filter(
+    (e) => !e.addedByAdmin && (e.status === "Live" || e.status === "Pending Approval")
+  );
   const allowance = slots?.allowance ?? ADDON_KINDS.event.included;
   const atSlotLimit = onSite.length >= allowance;
   const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
@@ -148,6 +152,10 @@ export default function EventsPage() {
                     {e.isRecurring && (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.16)", color: "#2563EB" }}>↻ Recurring</span>
                     )}
+                    {/* Free, and outside the slot count. */}
+                    {e.addedByAdmin && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#ECFDF5", color: "#047857" }}>ADDED BY MAIDENHEAD · FREE</span>
+                    )}
                   </div>
                   <p className="text-sm font-bold" style={{ color: FOREST }}>{e.title}</p>
                   {e.category?.length > 0 && <p className="text-xs" style={{ color: MUTED }}>{categoryLabels(e.category)}</p>}
@@ -159,6 +167,12 @@ export default function EventsPage() {
                   ) : (
                     <p className="text-xs" style={{ color: "#9CA3AF" }}>{formatUK(e.eventDate)}{e.eventTime ? ` · ${e.eventTime}` : ""}</p>
                   )}
+                  {/* What Maidenhead wrote stays Maidenhead's to change. */}
+                  {e.addedByAdmin ? (
+                    <p className="text-xs mt-auto pt-2" style={{ color: MUTED }}>
+                      Added for you by Maidenhead. Ask through Support if it needs changing.
+                    </p>
+                  ) : (
                   <div className="flex gap-2 flex-wrap mt-auto pt-2">
                     <button onClick={() => navigate(`/business/events/${e.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>
                     {e.isRecurring && (
@@ -171,6 +185,7 @@ export default function EventsPage() {
                     ) : null}
                     <button onClick={() => setDeleting(e)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
                   </div>
+                  )}
                 </div>
               </div>
             ))}

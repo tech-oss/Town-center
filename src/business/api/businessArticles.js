@@ -162,3 +162,31 @@ export async function getArticleAllowance(businessId, excludeId = null) {
     atLimit: counted.length >= limit,
   };
 }
+
+// Posts Maidenhead wrote for this business.
+//
+// They are rows in news_offers, not business_articles — a different table —
+// so they have never counted towards the business's article slots and never
+// will. They are listed on the dashboard only so the business can see what is
+// live under its name; it does not edit them.
+export async function listAdminPosts(businessId) {
+  const { data, error } = await supabase
+    .from("news_offers")
+    .select("id, slug, title, excerpt, image, type, category, status, date_label, display_dates, created_at")
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false });
+  // The read policy arrives with admin_added_free_2026_09.sql; until it does,
+  // the dashboard simply shows none rather than failing to load.
+  if (error) return [];
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    slug: r.slug,
+    title: r.title,
+    excerpt: r.excerpt ?? "",
+    image: r.image,
+    type: r.category === "Offer" || r.type === "offer" ? "Offer" : "News",
+    status: r.status === "Published" ? "Live" : r.status,
+    date: r.display_dates?.trim() || r.date_label || "",
+    addedByAdmin: true,
+  }));
+}

@@ -60,10 +60,12 @@ export async function listFeatureArticles(businessId) {
     .from("feature_articles")
     .select("*")
     .eq("business_id", businessId)
-    .eq("author", "business")
     .order("updated_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  // Admin-written pieces attached to this business come through too, so the
+  // business can see what is live under its name. They are free — they never
+  // counted towards its slots — and it does not edit them.
+  return (data ?? []).map((r) => ({ ...fromRow(r), addedByAdmin: r.author !== "business" }));
 }
 
 export async function getFeatureArticle(id) {
