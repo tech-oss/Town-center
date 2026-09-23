@@ -150,17 +150,16 @@ const EMPTY_FORM = {
   logo: null, logoName: "",
   // "Plan"
   planKey: "free",
-  // Editorial promotion — capped platform-wide, so it isn't part of any one
-  // business type's details.
+  // Never set here — see RegisterBusinessForm.
   featured: false,
 };
 
-function RegisterBusinessForm({ onSave, onCancel, featuredCounts, featuredLimit }) {
+// Registering a business never features it. Featuring is a 30-day promotion
+// that takes one of only 10 slots for that business type — and one people pay
+// for — so it is always its own deliberate action on the business card, never
+// a box ticked in passing while filling in a registration.
+function RegisterBusinessForm({ onSave, onCancel }) {
   const [form, setForm] = useState(EMPTY_FORM);
-  // Slots are counted per business type, so this follows the type picked above.
-  const typeLabel = FEATURED_GROUP_LABELS[featuredGroup(form.section)] ?? "this business type";
-  const featuredCount = form.section ? (featuredCounts?.[featuredGroup(form.section)] ?? 0) : 0;
-  const featuredFull = !!form.section && featuredCount >= featuredLimit;
   const [logoPreview, setLogoPreview] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -432,21 +431,6 @@ function RegisterBusinessForm({ onSave, onCancel, featuredCounts, featuredLimit 
       </Section>
 
       {/* ── Featured ── */}
-      <Section title="Featured" note={form.section ? `${typeLabel}: ${featuredCount} of ${featuredLimit} featured slots in use` : `Choose a business type first — each type has ${featuredLimit} featured slots`}>
-        <label className={`flex items-start gap-3 rounded-xl p-3.5 ${featuredFull && !form.featured ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
-          style={{ backgroundColor: form.featured ? "rgba(217,119,6,0.06)" : "#f8fafc", border: `1px solid ${form.featured ? "rgba(217,119,6,0.3)" : "rgba(16,24,40,0.1)"}` }}>
-          <input type="checkbox" checked={form.featured} disabled={featuredFull && !form.featured}
-            onChange={(e) => set("featured", e.target.checked)} className="w-4 h-4 mt-0.5" />
-          <span className="flex flex-col gap-0.5">
-            <span className="text-sm font-semibold" style={{ color: NAVY }}>Feature this business</span>
-            <span className="text-xs" style={{ color: MUTED }}>
-              {featuredFull && !form.featured
-                ? `All ${featuredLimit} ${typeLabel} featured slots are taken. Un-feature another ${typeLabel} business first.`
-                : `Featured businesses get promoted placement. Maximum ${featuredLimit} per business type.`}
-            </span>
-          </span>
-        </label>
-      </Section>
 
       {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
 
@@ -1009,14 +993,20 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
         {needsUserApproval(biz) && (
           <BizBtn color={BLUE} disabled={isBusy} onClick={() => navigate("/admin/users")}>Approve the User</BizBtn>
         )}
-        <BizBtn
-          color={biz.featured ? "#D97706" : NAVY}
-          disabled={isBusy || (!biz.featured && featuredFull)}
-          onClick={() => onToggleFeatured(biz)}
-          title={!biz.featured && featuredFull ? `All ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} featured slots are in use` : undefined}
-        >
-          {biz.featured ? "★ Unfeature" : "☆ Feature"}
-        </BizBtn>
+        {/* Only an approved business can be featured, and never from beside
+            the Approve button — this used to sit immediately left of
+            "✓ Approve" on every pending registration, which is how businesses
+            ended up featured without anyone meaning to. */}
+        {biz.status === "Approved" && (
+          <BizBtn
+            color={biz.featured ? "#D97706" : NAVY}
+            disabled={isBusy || (!biz.featured && featuredFull)}
+            onClick={() => onToggleFeatured(biz)}
+            title={!biz.featured && featuredFull ? `All ${FEATURED_LIMIT} ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? ""} featured slots are in use` : undefined}
+          >
+            {biz.featured ? "★ Unfeature" : "☆ Feature"}
+          </BizBtn>
+        )}
         {biz.status === "Pending" && (
           <>
             <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onApprove(biz)}>✓ Approve</BizBtn>
@@ -1208,6 +1198,13 @@ export default function BusinessesPage() {
 
   function handleToggleFeatured(biz) {
     const next = !biz.featured;
+    // Featuring gives away a 30-day promotion that businesses pay £40 for,
+    // and takes one of ten slots for its type — so it is confirmed first.
+    if (next && !window.confirm(
+      `Feature "${biz.name}" free of charge for 30 days?\n\n` +
+      `It will be shown first in ${FEATURED_GROUP_LABELS[featuredGroup(biz.section)] ?? "its"} listings and take one of the ${FEATURED_LIMIT} featured slots for that type. ` +
+      `Businesses normally pay for this. You can undo it at any time.`
+    )) return;
     setBusy(biz.id);
     setFeatured(biz.id, next)
       .then(() => {
@@ -1287,8 +1284,7 @@ export default function BusinessesPage() {
             onLater={handleDismissRegistration}
           />
         ) : (
-          <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)}
-            featuredCounts={featuredCounts} featuredLimit={FEATURED_LIMIT} />
+          <RegisterBusinessForm onSave={handleRegister} onCancel={() => setShowForm(false)} />
         )
       )}
 

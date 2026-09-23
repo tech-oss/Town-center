@@ -681,9 +681,11 @@ begin
     union all
     select 'whats_on', 'business_event', e.id::text, e.business_id
       from business_events e where e.homepage and e.status = 'Live'
-    union all
-    select 'featured_business', 'business', b.id, b.id
-      from businesses b where b.featured and b.status = 'Approved'
+    -- businesses.featured is NOT carried over. It is a retired column from
+    -- before this booking system, and copying it gave 14 businesses a free
+    -- 30-day Featured Business promotion — one people pay £40 for — every
+    -- time this file was run. Featuring is now only ever done deliberately
+    -- from the business card in admin, or bought.
   loop
     if exists (select 1 from homepage_placements p
                where p.content_kind = r.kind and p.content_id = r.content_id and p.status <> 'cancelled') then
