@@ -2,15 +2,24 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { canEditField } from "../../Data/plans";
 import { supabase } from "../../lib/supabaseClient";
+import { compressImage } from "../../lib/compressImage";
 
 export async function uploadToStorage(file, pathPrefix) {
   // A filename straight off a phone ("Photo 12 Apr, 09.14.png") makes a
   // storage key with spaces and commas in it, and the public URL for that key
   // did not resolve — which is why an attached screenshot arrived in admin as
   // a broken image. Everything outside [a-z0-9._-] is folded to a dash.
-  const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "upload";
+  // Resized and re-encoded first: pictures came off phones at 2-3 MB and were
+  // then served at full resolution into cards a few hundred pixels wide.
+  const upload = await compressImage(file);
+  const safeName = upload.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").replace(/^-+|-+$/g, "") || "upload";
   const path = `${pathPrefix}/${Date.now()}-${safeName}`;
-  const { error } = await supabase.storage.from("business-media").upload(path, file);
+  // Without this, Storage falls back to one hour, so every visitor
+  // re-downloaded every listing picture hourly. The path carries a timestamp,
+  // so a file is never replaced in place and can be cached for a year.
+  const { error } = await supabase.storage.from("business-media").upload(path, upload, {
+    cacheControl: "31536000",
+  });
   if (error) throw error;
   return supabase.storage.from("business-media").getPublicUrl(path).data.publicUrl;
 }
