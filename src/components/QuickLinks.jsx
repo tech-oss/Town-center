@@ -1,4 +1,5 @@
 import { quickLinks } from "../Data/content";
+import LazyVideo from "./LazyVideo";
 import SmartLink from "./SmartLink";
 
 export default function QuickLinks() {
@@ -53,15 +54,10 @@ export default function QuickLinks() {
                     object-cover + object-center fills the card at any aspect
                     ratio (portrait 9:16 clips cleanly into the square / 3:4 card). */}
                 {item.video ? (
-                  <video
+                  <LazyVideo
                     src={item.video}
                     poster={item.image}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    aria-label={item.label}
+                    ariaLabel={item.label}
                     className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-105"
                   />
                 ) : (
