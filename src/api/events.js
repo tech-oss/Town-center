@@ -6,6 +6,7 @@
 // lives in the table (see supabase/seed/seed_events_from_data.js), so the
 // admin Events editor can actually change what the site shows.
 import { supabase } from "../lib/supabaseClient";
+import { imageUrl } from "../lib/imageUrl";
 import { parseCoords } from "../lib/geo";
 import { getLivePlacements, getPromotedEventIds } from "./homepageSlots";
 
@@ -44,11 +45,12 @@ function fromRow(r) {
     time: r.event_time,
     location: r.location,
     tickets: r.tickets || r.entry_type,
-    image: r.hero_image || gallery[0],
-    heroImage: r.hero_image || null,
+    image: imageUrl(r.hero_image || gallery[0], "card"),
+    heroImage: imageUrl(r.hero_image, "hero") || null,
     // The hero is stored apart from the gallery. Pages use gallery[0] as the
     // banner and the rest as photos, so the hero leads the list here.
-    gallery: [r.hero_image, ...gallery.filter((g) => g !== r.hero_image)].filter(Boolean),
+    gallery: [r.hero_image, ...gallery.filter((g) => g !== r.hero_image)]
+      .filter(Boolean).map((g) => imageUrl(g, "card")),
     excerpt: r.excerpt || r.subtitle || null,
     standfirst: r.description,
     body: r.body ?? [],

@@ -3,6 +3,7 @@
 // The homepage (web) and the app's home screen read these, and their cards
 // open a normal article page.
 import { supabase } from "../lib/supabaseClient";
+import { imageUrl } from "../lib/imageUrl";
 import { loadLiveBusinesses } from "./liveBusinesses";
 import { getLivePlacements } from "./homepageSlots";
 
@@ -48,7 +49,7 @@ export async function getSpotlightPosts() {
         category: [n.business_name, typeOf(n)].filter(Boolean).join(" · "),
         title: n.title,
         excerpt: n.excerpt,
-        imageSrc: n.image || "/logo-mark.svg",
+        imageSrc: imageUrl(n.image, "card") || "/logo-mark.svg",
         imageAlt: n.title,
         href: `/news/${n.slug}`,
         date: dateLine(n),
@@ -63,7 +64,7 @@ export async function getSpotlightPosts() {
       category: [a.business?.name, a.category].filter(Boolean).join(" · "),
       title: a.title,
       excerpt: a.excerpt,
-      imageSrc: a.image || "/logo-mark.svg",
+      imageSrc: imageUrl(a.image, "card") || "/logo-mark.svg",
       imageAlt: a.title,
       href: `/news/${a.slug}`,
       date: a.date,
@@ -90,7 +91,7 @@ export async function getStandaloneNewsOffers() {
       date: dateLine(n),
       title: n.title,
       excerpt: n.excerpt ?? "",
-      image: n.image || "/logo-mark.svg",
+      image: imageUrl(n.image, "card") || "/logo-mark.svg",
       // Keep the business id even when the business isn't in the public
       // listings, so a view of the post is still credited to it.
       business: n.business_name || n.business_id ? { name: n.business_name, businessId: n.business_id ?? null, section: null } : null,
@@ -121,7 +122,7 @@ export async function getSpotlightArticleBySlug(slug) {
     endsOn: null,
     title: n.title,
     excerpt: n.excerpt ?? "",
-    image: n.image || business.image || "/logo-mark.svg",
+    image: imageUrl(n.image, "card") || business.image || "/logo-mark.svg",
     body: String(n.body ?? n.excerpt ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
     business,
   };

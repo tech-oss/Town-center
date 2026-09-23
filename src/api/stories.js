@@ -4,6 +4,7 @@
 // replacing what used to be a hardcoded Data/features.js array so the admin
 // Featured Stories editor can actually manage this content.
 import { supabase } from "../lib/supabaseClient";
+import { imageUrl } from "../lib/imageUrl";
 import { getLivePlacements } from "./homepageSlots";
 import { loadLiveBusinesses } from "./liveBusinesses";
 
@@ -17,9 +18,9 @@ function fromRow(r) {
     date: r.date_label,
     cardHeading: r.card_heading,
     cardBody: r.card_body,
-    cardImage: r.card_image,
+    cardImage: imageUrl(r.card_image, "card"),
     title: r.title,
-    heroImage: r.hero_image,
+    heroImage: imageUrl(r.hero_image, "hero"),
     standfirst: r.standfirst,
     location: r.location,
     website: r.website,
@@ -98,7 +99,7 @@ export async function getHomepageStories() {
         eyebrow: n.business_name ?? (n.type === "offer" ? "Offer" : "News"),
         cardHeading: n.title,
         cardBody: n.excerpt,
-        cardImage: n.image || "/logo-mark.svg",
+        cardImage: imageUrl(n.image, "card") || "/logo-mark.svg",
       };
     }
     const a = articles.get(p.content_id);
@@ -110,7 +111,7 @@ export async function getHomepageStories() {
       eyebrow: a.business?.name ?? a.category,
       cardHeading: a.title,
       cardBody: a.excerpt,
-      cardImage: a.image,
+      cardImage: imageUrl(a.image, "card"),
       date: a.date,
     };
   }).filter(Boolean);

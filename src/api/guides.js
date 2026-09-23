@@ -4,6 +4,7 @@
 // the hardcoded src/Data/guides.js array so the admin editor can change what
 // the site shows.
 import { supabase } from "../lib/supabaseClient";
+import { imageUrl } from "../lib/imageUrl";
 import { getSiteSection } from "./siteContent";
 
 // Flattens the row back into the shape the pages have always consumed, so the
@@ -12,8 +13,8 @@ function fromRow(r) {
   return {
     slug: r.slug,
     title: r.title,
-    heroImage: r.hero_image,
-    cardImage: r.thumbnail,
+    heroImage: imageUrl(r.hero_image, "hero"),
+    cardImage: imageUrl(r.thumbnail, "card"),
     status: r.status,
     showOnHomepage: !!r.show_on_homepage,
     ...(r.content ?? {}),

@@ -2,6 +2,7 @@
 // whatever the business's plan — see supabase/sql/promoted_posts_2026_09.sql.
 // The Offers page lists all of them, and their links always open.
 import { supabase } from "../lib/supabaseClient";
+import { imageUrl } from "../lib/imageUrl";
 import { loadLiveBusinesses } from "./liveBusinesses";
 
 const SECTION_FOR_TYPE = { "eat-drink": "eat-drink", shop: "shop", "see-do": "see-do", services: "services", freelancer: "services", hotel: "stay" };
@@ -27,7 +28,7 @@ function toArticle(p, live) {
     endsOn: null,
     title: p.title,
     excerpt: p.excerpt ?? "",
-    image: p.image || business.image || "/logo-mark.svg",
+    image: imageUrl(p.image, "card") || business.image || "/logo-mark.svg",
     body: String(p.body ?? p.excerpt ?? "").split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean),
     business,
   };

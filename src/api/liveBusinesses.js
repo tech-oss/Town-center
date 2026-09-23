@@ -14,6 +14,7 @@ import { categoryLabel } from "../Data/taxonomy";
 import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
 import { parseCoords } from "../lib/geo";
+import { imageUrl } from "../lib/imageUrl";
 import { resolveCategory, TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES, FREELANCER_CATEGORIES } from "../Data/taxonomy";
 
 // Registration stores a type slug; the site's sections are keyed a little
@@ -97,7 +98,7 @@ function mapFeature(f, business) {
     endsOn: null,
     title: f.card_heading || f.title,
     excerpt: f.card_body ?? f.standfirst ?? "",
-    image: f.card_image || f.hero_image || business.image,
+    image: imageUrl(f.card_image || f.hero_image, "card") || business.image,
     body: [],
     business,
   };
@@ -113,7 +114,7 @@ function mapArticle(a, business) {
     endsOn: null,
     title: a.title,
     excerpt: String(a.body ?? "").split(/\n\s*\n/)[0]?.slice(0, 180) ?? "",
-    image: a.hero_image || a.thumbnail || business.image,
+    image: imageUrl(a.hero_image || a.thumbnail, "card") || business.image,
     body: String(a.body ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
     business,
   };
@@ -134,7 +135,7 @@ function mapNewsOffer(n, business) {
     endsOn: null,
     title: n.title,
     excerpt: n.excerpt ?? "",
-    image: n.image || business.image,
+    image: imageUrl(n.image, "card") || business.image,
     body: String(n.body ?? n.excerpt ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
     business,
   };
@@ -176,8 +177,11 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   const coords = parseCoords(row.lat, row.lng);
   // A free listing may not have uploaded a hero yet; cards and the page
   // header still need an image, so fall back to the site mark.
-  const hero = row.hero_image || row.logo || "/logo-mark.svg";
-  const gallery = premium ? [hero, ...(row.gallery ?? [])].filter(Boolean) : [hero].filter(Boolean);
+  // Sized on the way out of Storage: the full-resolution upload is
+  // never what a card or a page banner needs (see lib/imageUrl).
+  const hero = imageUrl(row.hero_image || row.logo || "/logo-mark.svg", "card");
+  const gallery = (premium ? [hero, ...(row.gallery ?? [])] : [hero])
+    .filter(Boolean).map((g) => imageUrl(g, "card"));
   const address = [row.address, row.postal_code].filter(Boolean).join(", ");
 
   const item = {
@@ -193,7 +197,7 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     categories,
     tag: category ? categoryLabel(category) : "",
     image: hero,
-    logo: row.logo,
+    logo: imageUrl(row.logo, "icon"),
     // The logo stays a logo: cards and page banners use the hero whenever
     // one exists, and only fall back to the logo when it doesn't.
     hasHero: !!row.hero_image,
