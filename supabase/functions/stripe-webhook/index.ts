@@ -249,6 +249,9 @@ async function settlePlacement(session: any) {
     p_session_id: session.id,
     p_payment_intent: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null,
     p_amount_pence: session.amount_total ?? 0,
+    // The package the business bought decides the length, so a hold that
+    // lapsed is re-placed for what they actually paid for.
+    p_duration_days: meta.duration_days ? Number(meta.duration_days) : null,
   });
   if (error) throw error;
 

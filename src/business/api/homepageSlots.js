@@ -8,9 +8,9 @@ import { supabase } from "../../lib/supabaseClient";
 
 export const SLOT_CONTENT = {
   spotlight: { kind: "business_article", noun: "news or offer post", manage: "/business/articles" },
-  // The Featured Article slot takes either a real Featured Article the
-  // business has written or one of its News & Offers posts.
-  featured_article: { kind: "business_article", noun: "Featured Article or post", manage: "/business/featured-articles" },
+  // A Featured Article slot shows a Featured Article — one of the longer
+  // editorial pieces — and nothing else.
+  featured_article: { kind: "feature_article", noun: "Featured Article", manage: "/business/featured-articles" },
   whats_on: { kind: "business_event", noun: "event", manage: "/business/events" },
   featured_business: { kind: "business", noun: "listing", manage: "/business/listing" },
 };
@@ -26,6 +26,8 @@ export const BOOKING_STATUS = {
 
 function availabilityFromRow(r) {
   return {
+    packageId: r.package_id,
+    packageName: r.package_name,
     slotType: r.slot_type,
     label: r.label,
     description: r.description ?? "",
@@ -41,11 +43,28 @@ function availabilityFromRow(r) {
   };
 }
 
-// Each slot type with its price, what ends soonest and the next free slot.
+// Every package on sale, with its price and length, what ends soonest in that
+// slot and the slot this business would get if it bought that package now.
+// Grouped by slot type so each card can offer its packages side by side.
 export async function getSlotAvailability(businessId) {
-  const { data, error } = await supabase.rpc("homepage_slot_availability", { p_business_id: businessId });
+  const { data, error } = await supabase.rpc("homepage_package_availability", { p_business_id: businessId });
   if (error) throw error;
-  return (data ?? []).map(availabilityFromRow);
+  const rows = (data ?? []).map(availabilityFromRow);
+  const bySlot = new Map();
+  for (const r of rows) {
+    const slot = bySlot.get(r.slotType) ?? {
+      slotType: r.slotType, label: r.label, description: r.description,
+      capacity: r.capacity, bookable: r.bookable, liveCount: r.liveCount,
+      soonestEndingAt: r.soonestEndingAt, soonestEnding: r.soonestEnding,
+      packages: [],
+    };
+    slot.packages.push({
+      id: r.packageId, name: r.packageName, price: r.price,
+      durationDays: r.durationDays, nextStart: r.nextStart, nextEnd: r.nextEnd,
+    });
+    bySlot.set(r.slotType, slot);
+  }
+  return [...bySlot.values()];
 }
 
 function bookingFromRow(r, titles) {
@@ -130,18 +149,18 @@ export async function getMyContentOptions(businessId, slotType) {
       image: r.hero_image || r.thumbnail,
     }));
   }
-  // The Featured Article slot also offers the business's own Featured
-  // Articles — the longer editorial pieces — ahead of its short posts.
-  if (slotType === "featured_article") {
-    const { data } = await supabase.from("feature_articles")
+  // A Featured Article slot shows a Featured Article — the longer editorial
+  // pieces — and never a short news or offer post.
+  if (kind === "feature_article") {
+    const { data, error } = await supabase.from("feature_articles")
       .select("id, title, card_heading, hero_image, card_image, status")
-      .eq("business_id", businessId).eq("author", "business").eq("status", "Live")
+      .eq("business_id", businessId).eq("status", "Live")
       .order("updated_at", { ascending: false });
-    const featured = (data ?? []).map((r) => ({
-      kind: "feature_article", id: String(r.id), title: r.card_heading || r.title,
+    if (error) throw error;
+    return (data ?? []).map((r) => ({
+      kind, id: String(r.id), title: r.card_heading || r.title,
       detail: "Featured Article", image: r.hero_image || r.card_image,
     }));
-    return [...featured, ...options];
   }
 
   if (kind === "business_event") {
@@ -177,10 +196,11 @@ export async function saveBookingPost(placementId, post) {
   if (error) throw new Error(error.message);
 }
 
-// Reserves the next free slot and sends the browser to Stripe to pay for it.
-export async function startSlotCheckout(businessId, slotType) {
+// Reserves the next free slot for the chosen package and sends the browser to
+// Stripe to pay for it.
+export async function startSlotCheckout(businessId, slotType, packageId) {
   const { data, error } = await supabase.functions.invoke("stripe-checkout", {
-    body: { kind: "placement", businessId, slotType },
+    body: { kind: "placement", businessId, slotType, packageId },
   });
   if (error) {
     let message = error.message;

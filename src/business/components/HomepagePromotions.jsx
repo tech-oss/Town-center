@@ -55,31 +55,52 @@ function BookingTimer({ startsAt, endsAt }) {
 function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
   const now = useNow(15_000);
   const needs = SLOT_CONTENT[slot.slotType];
-  const startsNow = slot.nextStart && new Date(slot.nextStart).getTime() <= now + 60_000;
+  const packages = slot.packages ?? [];
+  // The cheapest package leads, and is what's selected until they choose.
+  const [picked, setPicked] = useState(() => packages[0]?.id ?? null);
+  const chosen = packages.find((p) => p.id === picked) ?? packages[0] ?? null;
+  const startsNow = chosen?.nextStart && new Date(chosen.nextStart).getTime() <= now + 60_000;
   const full = slot.liveCount >= slot.capacity;
-  // Posts can be chosen or written after paying; only an event must exist first.
-  const needsContent = needs.kind === "business_event" && !hasContent;
+  // Posts can be chosen or written after paying; an event or a Featured
+  // Article must already exist.
+  const needsContent = needs.kind !== "business_article" && needs.kind !== "business" && !hasContent;
 
   let blocker = null;
   // One Featured Business booking at a time.
   if (activeBooking) blocker = `Your business is already featured until ${formatUKDateTime(activeBooking.endsAt)}. You can book again after that.`;
   else if (!slot.bookable) blocker = "Not available to book right now.";
-  else if (!slot.nextStart) blocker = "Fully booked — check back soon.";
+  else if (!packages.length) blocker = "No packages on sale for this slot yet.";
+  else if (!chosen?.nextStart) blocker = "Fully booked — check back soon.";
   else if (needsContent && !premium) blocker = `Needs the Visibility Plan: this slot shows one of your ${needs.noun}s.`;
-  else if (needsContent) blocker = `Publish ${/^[aeiou]/.test(needs.noun) ? "an" : "a"} ${needs.noun} first — that's what this slot shows.`;
+  else if (needsContent) blocker = `Publish ${/^[aeiou]/i.test(needs.noun) ? "an" : "a"} ${needs.noun} first — that's what this slot shows.`;
 
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-base font-bold" style={{ color: FOREST }}>{slot.label}</p>
-          <p className="text-xs mt-0.5" style={{ color: MUTED }}>{slot.description}</p>
-        </div>
-        <div className="text-right shrink-0">
-          <p className="text-lg font-extrabold" style={{ color: FOREST }}>£{slot.price.toFixed(2)}</p>
-          <p className="text-[11px]" style={{ color: MUTED }}>for {slot.durationDays} days</p>
-        </div>
+      <div>
+        <p className="text-base font-bold" style={{ color: FOREST }}>{slot.label}</p>
+        <p className="text-xs mt-0.5" style={{ color: MUTED }}>{slot.description}</p>
       </div>
+
+      {packages.length > 0 && (
+        <div className="flex flex-col gap-2" role="radiogroup" aria-label={`${slot.label} packages`}>
+          <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: MUTED }}>Choose a package</p>
+          {packages.map((pkg) => {
+            const on = pkg.id === chosen?.id;
+            return (
+              <button key={pkg.id} type="button" role="radio" aria-checked={on} onClick={() => setPicked(pkg.id)}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-left"
+                style={{ border: `1.5px solid ${on ? SAGE : BORDER}`, backgroundColor: on ? "#F0FDF4" : "#fff" }}>
+                <span className="w-4 h-4 rounded-full shrink-0" style={{ border: `2px solid ${on ? SAGE : BORDER}`, backgroundColor: on ? SAGE : "transparent" }} />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-sm font-semibold truncate" style={{ color: FOREST }}>{pkg.name}</span>
+                  <span className="block text-[11px]" style={{ color: MUTED }}>{pkg.durationDays} day{pkg.durationDays === 1 ? "" : "s"} on the homepage</span>
+                </span>
+                <span className="text-base font-extrabold shrink-0" style={{ color: FOREST }}>£{pkg.price.toFixed(2)}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="rounded-xl p-3 flex flex-col gap-1.5 text-xs" style={{ backgroundColor: "#F8FAFC", border: `1px solid ${BORDER}` }}>
         <p style={{ color: FOREST }}>
@@ -97,15 +118,15 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
         )}
       </div>
 
-      {slot.nextStart && !activeBooking && (
+      {chosen?.nextStart && !activeBooking && (
         <div className="rounded-xl p-3" style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}>
           <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: "#1D4ED8" }}>Your slot if you book now</p>
           <p className="text-sm font-semibold mt-1 tabular-nums" style={{ color: FOREST }}>
-            {startsNow ? "Now (shows once approved)" : formatUKDateTime(slot.nextStart)} → {formatUKDateTime(slot.nextEnd)}
+            {startsNow ? "Now (shows once approved)" : formatUKDateTime(chosen.nextStart)} → {formatUKDateTime(chosen.nextEnd)}
           </p>
           {!startsNow && (
             <p className="text-xs mt-0.5" style={{ color: "#1D4ED8" }}>
-              <Countdown to={slot.nextStart} prefix="Starts in" /> · UK time
+              <Countdown to={chosen.nextStart} prefix="Starts in" /> · UK time
             </p>
           )}
         </div>
@@ -114,16 +135,16 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
       {blocker ? (
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-xs" style={{ color: "#92400E" }}>{blocker}</p>
-          {slot.bookable && slot.nextStart && needsContent && (
+          {slot.bookable && chosen?.nextStart && needsContent && (
             <Link to={premium ? needs.manage : "/business/upgrade"} className="text-xs font-semibold" style={{ color: SAGE }}>
-              {premium ? `Go to ${needs.noun === "event" ? "Events" : "News & Offers"} →` : "See the Visibility Plan →"}
+              {premium ? `Go to ${needs.kind === "business_event" ? "Events" : "Featured Articles"} →` : "See the Visibility Plan →"}
             </Link>
           )}
         </div>
       ) : (
-        <button onClick={() => onBook(slot)} disabled={busy}
+        <button onClick={() => onBook(slot, chosen)} disabled={busy}
           className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: SAGE }}>
-          {busy ? "Reserving your slot…" : `Book for £${slot.price.toFixed(2)}`}
+          {busy ? "Reserving your slot…" : `Book for £${chosen.price.toFixed(2)}`}
         </button>
       )}
     </div>
@@ -295,7 +316,7 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
   const [params, setParams] = useSearchParams();
   const [slots, setSlots] = useState(null);
   const [bookings, setBookings] = useState([]);
-  const [options, setOptions] = useState({ spotlight: [], whats_on: [] });
+  const [options, setOptions] = useState({ spotlight: [], whats_on: [], featured_article: [] });
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
   const [confirming, setConfirming] = useState(null); // "waiting" | "late"
@@ -308,9 +329,10 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
         getMyContentOptions(businessId, "spotlight").catch(() => []),
         getMyContentOptions(businessId, "whats_on").catch(() => []),
       ]);
+      const featured = await getMyContentOptions(businessId, "featured_article").catch(() => []);
       setSlots(s);
       setBookings(b);
-      setOptions({ spotlight: articles, whats_on: events });
+      setOptions({ spotlight: articles, whats_on: events, featured_article: featured });
     } catch (e) {
       setError(e.message);
     }
@@ -354,11 +376,11 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function book(slot) {
+  async function book(slot, pkg) {
     setBusy(slot.slotType);
     setError("");
     try {
-      await startSlotCheckout(businessId, slot.slotType);
+      await startSlotCheckout(businessId, slot.slotType, pkg?.id ?? null);
     } catch (e) {
       setError(e.message);
       setBusy(null);
@@ -379,7 +401,11 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
   }
 
   const labelFor = (key) => slots?.find((s) => s.slotType === key)?.label ?? "Homepage slot";
-  const contentFor = (key) => (SLOT_CONTENT[key].kind === "business_event" ? options.whats_on : options.spotlight);
+  const contentFor = (key) => {
+    if (SLOT_CONTENT[key].kind === "business_event") return options.whats_on;
+    if (SLOT_CONTENT[key].kind === "feature_article") return options.featured_article;
+    return options.spotlight;
+  };
   const active = bookings.filter((b) => new Date(b.endsAt) > new Date());
   const past = bookings.filter((b) => new Date(b.endsAt) <= new Date());
 

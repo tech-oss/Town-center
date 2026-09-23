@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const { data: { user } } = await caller.auth.getUser();
     if (!user) return json({ error: "Please sign in again." }, 401);
 
-    const { businessId, interval, kind, slotType, pack, addon } = await req.json().catch(() => ({}));
+    const { businessId, interval, kind, slotType, packageId, pack, addon } = await req.json().catch(() => ({}));
     if (!businessId) return json({ error: "Missing business." }, 400);
 
     // Only the approved Owner of an approved business can pay for it.
@@ -94,33 +94,54 @@ Deno.serve(async (req) => {
       const { data: hold, error: holdError } = await caller.rpc("book_homepage_slot", {
         p_business_id: businessId,
         p_slot_type: slotType,
+        p_package_id: packageId ?? null,
       });
       if (holdError || !hold) {
         return json({ error: holdError?.message ?? "That slot couldn't be reserved." }, 409);
       }
       const { data: type } = await admin
-        .from("homepage_slot_types").select("label, duration_days").eq("key", slotType).single();
+        .from("homepage_slot_types").select("label").eq("key", slotType).single();
+      // The package decides the price and the length — and carries the Stripe
+      // price admin created for it, so Checkout sells the catalogue entry
+      // itself rather than an ad-hoc amount.
+      const { data: pkg } = packageId
+        ? await admin.from("homepage_slot_packages")
+            .select("name, duration_days, stripe_price_id").eq("id", packageId).maybeSingle()
+        : { data: null };
+      const days = pkg?.duration_days
+        ?? Math.round((new Date(hold.ends_at).getTime() - new Date(hold.starts_at).getTime()) / 86_400_000);
 
       const fmt = (iso: string) => new Date(iso).toLocaleString("en-GB", {
         timeZone: "Europe/London", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
       });
-      const metadata = { kind: "placement", business_id: businessId, placement_id: hold.id, slot_type: slotType };
-      try {
-        const session = await stripe.checkout.sessions.create({
-          mode: "payment",
-          customer: customerId,
-          client_reference_id: businessId,
-          line_items: [{
+      const metadata = {
+        kind: "placement", business_id: businessId, placement_id: hold.id,
+        slot_type: slotType, package_id: packageId ?? "", duration_days: String(days),
+      };
+      // Stripe won't take a description alongside a catalogue price, so the
+      // dates ride in the session's custom text instead.
+      const lineItem = pkg?.stripe_price_id
+        ? { quantity: 1, price: pkg.stripe_price_id }
+        : {
             quantity: 1,
             price_data: {
               currency: "gbp",
               unit_amount: hold.amount_pence,
               product_data: {
-                name: `Homepage ${type?.label ?? "slot"} — ${type?.duration_days ?? ""} days`,
+                name: `Homepage ${type?.label ?? "slot"}${pkg?.name ? ` — ${pkg.name}` : ` — ${days} days`}`,
                 description: `${fmt(hold.starts_at)} to ${fmt(hold.ends_at)} (UK time)`,
               },
             },
-          }],
+          };
+      try {
+        const session = await stripe.checkout.sessions.create({
+          mode: "payment",
+          customer: customerId,
+          client_reference_id: businessId,
+          line_items: [lineItem],
+          custom_text: {
+            submit: { message: `Your slot runs ${fmt(hold.starts_at)} to ${fmt(hold.ends_at)} (UK time).` },
+          },
           metadata,
           payment_intent_data: { metadata },
           // An invoice for the business's billing history.
