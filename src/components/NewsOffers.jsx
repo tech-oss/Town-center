@@ -4,8 +4,15 @@ import { postPath } from "../lib/postPath";
 // Per-business "News & Offers" — same glassmorphic look as the homepage
 // "In the Spotlight" section. Content comes from the item's `news` array.
 export default function NewsOffers({ item, placeholder }) {
-  const posts = placeholder ? [] : (item.news ?? []);
-  if (posts.length === 0 && !placeholder) return null;
+  // The placeholder is what a Free listing shows in place of news it has not
+  // written. It used to replace the list outright, so a Free business that
+  // admin had attached a Featured Article or an event to showed "Business
+  // will add offers soon" with the article sitting right there unrendered.
+  // A Free business cannot post for itself, so anything here was put there by
+  // admin or paid for — either way it belongs on the page.
+  const posts = item.news ?? [];
+  const showPlaceholder = !!placeholder && posts.length === 0;
+  if (posts.length === 0 && !showPlaceholder) return null;
 
   return (
     <section
@@ -24,14 +31,14 @@ export default function NewsOffers({ item, placeholder }) {
             </p>
             <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">News &amp; Offers</h2>
           </div>
-          {!placeholder && (
+          {!showPlaceholder && (
             <span className="text-sm font-semibold self-start sm:self-auto text-white/70">
               {posts.length} update{posts.length === 1 ? "" : "s"}
             </span>
           )}
         </div>
 
-        {placeholder && (
+        {showPlaceholder && (
           <p className="text-base md:text-lg italic text-white/80">{placeholder}</p>
         )}
 

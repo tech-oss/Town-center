@@ -55,7 +55,12 @@ function BusinessDetailScreen({ place, goBack }) {
   // The booking button opens the business's booking link, falling back to its
   // website — the same rule as the website's page.
   const bookingUrl = !free ? (externalUrl(place.bookingUrl) ?? websiteUrl) : null;
-  const news = free ? [] : (place.news ?? []);
+  // Admin can attach a Featured Article or an event to any business, whatever
+  // plan it is on, and a paid slot can outlive a downgrade. Blanking this for
+  // a Free listing hid that content while still rendering "Business will add
+  // offers soon" above the gap. The placeholder below now gives way as soon
+  // as there is something real to show.
+  const news = place.news ?? [];
   const social = !free && place.social
     ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k])
     : [];
@@ -208,7 +213,7 @@ function BusinessDetailScreen({ place, goBack }) {
           {/* News & Offers — same glassmorphic dark-teal card treatment as
               the website's Eat & Drink business pages, condensed to a
               horizontal scroller for mobile. */}
-          {free && (
+          {free && news.length === 0 && (
             <div
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
               style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}

@@ -62,19 +62,28 @@ export async function getOffersFeed() {
       category: [s.eyebrow, s.category].filter(Boolean).join(" "),
       homepage: !!s.homepage,
     })),
-    ...[...articles, ...standalone, ...promoted].map((a) => ({
-      key: `news:${a.slug}`,
-      slug: a.slug,
-      to: `/news/${a.slug}`,
-      image: a.image,
-      title: a.title,
-      excerpt: a.excerpt,
-      date: a.date,
-      type: a.category,
-      businessName: a.business?.name ?? null,
-      businessSection: a.business?.section ?? null,
-      homepage: onHome.has(articleKey(a)),
-    })),
+    // Featured Articles attached to a business now sit in that business's
+    // `news` list too, so they show on its profile — which means getArticles()
+    // hands them back here as well. They are already in `stories` above, with
+    // the right /story/ link; the copy coming through here carried a /news/
+    // one that does not resolve, and the two keys differ so the de-duplication
+    // below never caught it. Every business-attached featured article was
+    // listed twice on this page, once broken.
+    ...[...articles, ...standalone, ...promoted]
+      .filter((a) => !String(a.id ?? "").startsWith("feature-"))
+      .map((a) => ({
+        key: `news:${a.slug}`,
+        slug: a.slug,
+        to: `/news/${a.slug}`,
+        image: a.image,
+        title: a.title,
+        excerpt: a.excerpt,
+        date: a.date,
+        type: a.category,
+        businessName: a.business?.name ?? null,
+        businessSection: a.business?.section ?? null,
+        homepage: onHome.has(articleKey(a)),
+      })),
     ...events.map((e) => ({
       key: `event:${e.slug}`,
       slug: e.slug,

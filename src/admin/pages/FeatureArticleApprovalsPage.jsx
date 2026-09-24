@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinessFeatureArticles, approveFeatureArticle, rejectFeatureArticle, takeDownFeatureArticle,
+  setFeatureArticleStatus, getFeatureArticleById, deleteFeatureArticle,
   getSpotlightBusinesses, getSlotUsage,
 } from "../../api/admin";
 import StoryForm from "../components/StoryForm";
@@ -15,10 +16,18 @@ import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
 const FILTERS = ["Pending Approval", "Live", "Hidden", "Rejected", "Removed", "All"];
 
+// Who wrote it. Admin-written articles used to be missing from this screen
+// altogether, so once saved there was nowhere to edit or hide one.
+const AUTHORS = [
+  { key: "All", label: "Everyone" },
+  { key: "business", label: "Written by the business" },
+  { key: "admin", label: "Written here" },
+];
+
 // A business's Featured Article read the way the public page lays it out —
 // hero, title, standfirst, then each section with its own picture — so the
 // whole piece can be judged before it goes live.
-function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, onApprove, onReject, onTakeDown }) {
+function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, onApprove, onReject, onTakeDown, onEdit, onSetStatus, onDelete }) {
   const [mode, setMode] = useState(null);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -51,7 +60,9 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
           </div>
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>{a.title}</h1>
           <p className="text-xs" style={{ color: MUTED }}>
-            {a.businessName}{a.submittedAt ? ` · submitted ${formatUK(a.submittedAt.slice(0, 10))}` : ""}
+            {a.businessId ? a.businessName : "No business attached — shows on the Offers page only"}
+            {a.author === "admin" ? " · written here" : ""}
+            {a.submittedAt ? ` · submitted ${formatUK(a.submittedAt.slice(0, 10))}` : ""}
           </p>
           {a.standfirst && <p className="text-[17px] leading-8" style={{ color: "#1F2937" }}>{a.standfirst}</p>}
 
@@ -86,7 +97,7 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
       ) : (
         <div className="sticky bottom-4 bg-white rounded-2xl px-6 py-4 flex flex-col gap-3" style={{ ...CARD, boxShadow: "0 8px 30px rgba(16,24,40,0.12)" }}>
           <p className="text-xs font-semibold" style={{ color: MUTED }}>Moderation</p>
-          {mode ? (
+          {mode === "remove" ? (
             <>
               <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} autoFocus
                 placeholder="Explain what is wrong with this article…"
@@ -102,10 +113,38 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
               </div>
             </>
           ) : (
-            <button onClick={() => setMode("remove")}
-              className="self-start px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#D97706" }}>
-              Take off the site
-            </button>
+            <div className="flex gap-2 flex-wrap items-center">
+              <button onClick={onEdit}
+                className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: BLUE }}>
+                Edit article
+              </button>
+
+              {/* Hiding is the reversible one: off the site and off the
+                  homepage, nothing lost, no reason owed to anybody. */}
+              {a.status === "Live" ? (
+                <button onClick={() => onSetStatus("Hidden")}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                  Hide from the site
+                </button>
+              ) : (
+                <button onClick={() => onSetStatus("Live")}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#15803D" }}>
+                  Put back on the site
+                </button>
+              )}
+
+              {a.status === "Live" && (
+                <button onClick={() => setMode("remove")}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#D97706" }}>
+                  Take off the site
+                </button>
+              )}
+
+              <button onClick={onDelete}
+                className="px-5 py-2 rounded-xl text-xs font-semibold ml-auto" style={{ border: "1.5px solid rgba(153,27,27,0.3)", color: "#991B1B" }}>
+                Delete for good
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -115,11 +154,13 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
 
 export default function FeatureArticleApprovalsPage() {
   const [filter, setFilter] = useState("Pending Approval");
+  const [author, setAuthor] = useState("All");
   const [nonce, setNonce] = useState(0);
   const [toast, setToast] = useState("");
   const [openId, setOpenId] = useState(null);
-  const [writing, setWriting] = useState(false);
-  const { data, loading } = useFetch(() => getBusinessFeatureArticles({ status: filter }), [filter, nonce]);
+  // null = the list; { article } = the editor, with a null article for a new one.
+  const [editing, setEditing] = useState(null);
+  const { data, loading } = useFetch(() => getBusinessFeatureArticles({ status: filter, author }), [filter, author, nonce]);
   const { data: businesses } = useFetch(getSpotlightBusinesses, []);
   const { data: usage } = useFetch(() => getSlotUsage("featured_article"), [nonce]);
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
@@ -156,22 +197,58 @@ export default function FeatureArticleApprovalsPage() {
     refresh();
   }
 
-  // Writing a Featured Article on a business's behalf.
-  if (writing) {
+  async function handleSetStatus(a, status) {
+    await setFeatureArticleStatus(a.id, status);
+    flash(status === "Live"
+      ? `"${a.title}" is back on the site.`
+      : `"${a.title}" is hidden — it is off the site and off the homepage.`);
+    if (filter !== "All") advance();
+    refresh();
+  }
+
+  async function handleDelete(a) {
+    if (!window.confirm(`Delete "${a.title}" for good? This cannot be undone.`)) return;
+    await deleteFeatureArticle(a.id);
+    flash(`"${a.title}" deleted.`);
+    advance();
+    refresh();
+  }
+
+  // Opening one in the editor. The list row carries only what the review
+  // screen shows, so the full article is fetched before the form is built.
+  async function handleEdit(a) {
+    const full = await getFeatureArticleById(a.id);
+    if (!full) return flash("That article could not be opened.");
+    setEditing({
+      article: {
+        ...full,
+        // A business writes a title and standfirst but no card wording, so
+        // fall back rather than leaving the editor's required boxes empty
+        // with no hint of what belongs in them.
+        cardHeading: full.cardHeading || full.title,
+        cardBody: full.cardBody || full.standfirst,
+        eyebrow: full.eyebrow || a.businessName || full.category,
+      },
+    });
+  }
+
+  // Writing a Featured Article, or editing one that exists.
+  if (editing) {
+    const isNew = !editing.article;
     return (
       <div className="max-w-3xl flex flex-col gap-4">
         <Toast message={toast} />
-        <button onClick={() => setWriting(false)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>
+        <button onClick={() => setEditing(null)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>
           ← Back to the list
         </button>
         <StoryForm
-          initial={null}
+          initial={editing.article}
           businesses={businesses ?? []}
           capacity={usage?.capacity ?? 4}
-          onCancel={() => setWriting(false)}
+          onCancel={() => setEditing(null)}
           onSave={(saved) => {
-            setWriting(false);
-            flash(`"${saved?.title ?? "Featured Article"}" saved.`);
+            setEditing(null);
+            flash(`"${saved?.title ?? "Featured Article"}" ${isNew ? "saved" : "updated"}.`);
             refresh();
           }}
         />
@@ -193,6 +270,9 @@ export default function FeatureArticleApprovalsPage() {
           onApprove={() => handleApprove(open)}
           onReject={(r) => handleReject(open, r)}
           onTakeDown={(r) => handleTakeDown(open, r)}
+          onEdit={() => handleEdit(open)}
+          onSetStatus={(s) => handleSetStatus(open, s)}
+          onDelete={() => handleDelete(open)}
         />
       </>
     );
@@ -203,13 +283,15 @@ export default function FeatureArticleApprovalsPage() {
       <Toast message={toast} />
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Business Featured Articles</h1>
+          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Featured Articles</h1>
           <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
-            The longer editorial pieces businesses write against a Featured Article slot. Open one to read it in full —
-            rejecting sends your reason back to the business. You can also write one for a business yourself.
+            Every longer editorial piece on the site — the ones businesses write against a Featured Article slot, and the
+            ones written here. Open one to read it in full, edit it, hide it or put it on the homepage. Rejecting or taking
+            one down sends your reason back to the business. An article attached to a business shows on that business's page
+            as well as on Offers; one with no business attached shows on Offers only.
           </p>
         </div>
-        <button onClick={() => setWriting(true)}
+        <button onClick={() => setEditing({ article: null })}
           className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white shrink-0" style={{ backgroundColor: BLUE }}>
           + New featured article
         </button>
@@ -227,8 +309,21 @@ export default function FeatureArticleApprovalsPage() {
         ))}
       </div>
 
+      <div className="flex gap-2 flex-wrap mb-5 items-center">
+        <span className="text-xs font-semibold" style={{ color: MUTED }}>Written by</span>
+        {AUTHORS.map((a) => (
+          <button key={a.key} onClick={() => setAuthor(a.key)}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold"
+            style={author === a.key
+              ? { backgroundColor: NAVY, color: "#fff" }
+              : { border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#fff" }}>
+            {a.label}
+          </button>
+        ))}
+      </div>
+
       {loading ? <LoadingState /> : !list.length ? (
-        <EmptyState title="Nothing here" message={`No business Featured Articles with status "${filter}".`} />
+        <EmptyState title="Nothing here" message={`No Featured Articles with status "${filter}"${author === "All" ? "" : `, ${AUTHORS.find((a) => a.key === author).label.toLowerCase()}`}.`} />
       ) : (
         <div className="flex flex-col gap-3">
           {list.map((a) => (
@@ -241,9 +336,14 @@ export default function FeatureArticleApprovalsPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <p className="text-sm font-bold" style={{ color: NAVY }}>{a.title}</p>
                   <StatusTag status={a.status} />
+                  {a.author === "admin" && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{ backgroundColor: "rgba(15,23,42,0.07)", color: NAVY }}>Written here</span>
+                  )}
                 </div>
                 <p className="text-xs mt-1" style={{ color: MUTED }}>
-                  {a.businessName}{a.submittedAt ? ` · ${formatUK(a.submittedAt.slice(0, 10))}` : ""}
+                  {a.businessId ? a.businessName : "No business attached — Offers page only"}
+                  {a.submittedAt ? ` · ${formatUK(a.submittedAt.slice(0, 10))}` : ""}
                 </p>
                 {a.standfirst && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: MUTED }}>{a.standfirst}</p>}
               </div>

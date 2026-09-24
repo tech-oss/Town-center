@@ -1,5 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity, articleContext, reviewContext } from "./businessActivity";
+import { unfeature } from "./homepageSlots";
 
 // Moderation of the two remaining things businesses publish to the public
 // site: their News & Offers articles, and the customer reviews shown on their
@@ -242,18 +243,27 @@ export async function deleteBusinessArticle(id, reason) {
   if (error) throw error;
 }
 
-// ─── Business-written Featured Articles ───────────────────────────────────
-// Longer editorial pieces a business writes for itself, against a Featured
-// Article slot it has bought. They sit in feature_articles alongside admin's
-// own stories, told apart by author = 'business', and need approving before
-// they reach the site.
+// ─── Featured Articles ────────────────────────────────────────────────────
+// The longer editorial pieces, from either side:
+//   • author = 'business' — written by a business against a Featured Article
+//     slot it has bought, and needing approval before it reaches the site;
+//   • author = 'admin'    — written here, live the moment it is saved.
+//
+// Both kinds may be attached to a business, and then show on that business's
+// profile as well as on the Offers page. An unattached one is a town story
+// and shows on the Offers page only.
+//
+// This list used to be filtered to author = 'business', which meant the nine
+// admin-written articles — six of them attached to a business — could not be
+// seen, edited or hidden from anywhere in admin once written.
 
 function featureFromRow(row) {
   return {
     id: row.id,
     slug: row.slug,
     businessId: row.business_id,
-    businessName: row.businesses?.name ?? row.business_id,
+    businessName: row.businesses?.name ?? row.business_id ?? "",
+    author: row.author ?? "admin",
     status: row.status,
     title: row.title,
     standfirst: row.standfirst ?? "",
@@ -268,13 +278,17 @@ function featureFromRow(row) {
   };
 }
 
-export async function getBusinessFeatureArticles({ status } = {}) {
+// Every Featured Article, whoever wrote it. `author` narrows to one side when
+// a filter is on; `status` narrows to one state. Admin-written pieces have no
+// submitted_at, so ordering falls back to when they were last touched.
+export async function getBusinessFeatureArticles({ status, author } = {}) {
   let q = supabase
     .from("feature_articles")
     .select("*, businesses(name)")
-    .eq("author", "business")
-    .order("submitted_at", { ascending: false, nullsFirst: false });
+    .order("submitted_at", { ascending: false, nullsFirst: false })
+    .order("updated_at", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
+  if (author && author !== "All") q = q.eq("author", author);
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []).map(featureFromRow);
@@ -319,9 +333,38 @@ export async function takeDownFeatureArticle(id, reason) {
     .update({ status: "Removed", rejection_reason: reason.trim() })
     .eq("id", id);
   if (error) throw error;
+  // An article that is off the site must not still be holding a homepage
+  // slot — that left the Featured Stories row pointing at nothing.
+  await unfeature("featured_article", id).catch(() => {});
   await logBusinessActivity(row?.business_id, {
     action: "featured_article.removed", entityType: "featured_article", entityId: id,
     title: row?.title, detail: reason.trim(),
+  });
+}
+
+// Hiding and restoring, for admin's own housekeeping rather than moderation.
+//
+// Hidden is the quiet one: the article comes off the site and off the
+// homepage but keeps everything it has, and putting it back is one click.
+// Restoring also clears any reason left over from an earlier rejection or
+// take-down, so the business no longer reads a complaint about a live piece.
+export async function setFeatureArticleStatus(id, status) {
+  if (!["Live", "Hidden", "Draft"].includes(status)) {
+    throw new Error(`Use approve, reject or take down for "${status}".`);
+  }
+  const { data: row } = await supabase
+    .from("feature_articles").select("business_id, title").eq("id", id).maybeSingle();
+
+  const patch = { status };
+  if (status === "Live") patch.rejection_reason = null;
+
+  const { error } = await supabase.from("feature_articles").update(patch).eq("id", id);
+  if (error) throw error;
+  if (status !== "Live") await unfeature("featured_article", id).catch(() => {});
+
+  await logBusinessActivity(row?.business_id, {
+    action: status === "Live" ? "featured_article.restored" : "featured_article.hidden",
+    entityType: "featured_article", entityId: id, title: row?.title,
   });
 }
 

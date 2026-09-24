@@ -40,7 +40,7 @@ const NAV = [
   { to: "/admin/homepage-slots", label: "Home Page Featured", icon: I.featured, badge: "slots" },
   { to: "/admin/event-approvals",    label: "Events",                icon: I.events,         badge: "events" },
   { to: "/admin/article-approvals",  label: "Business News & Offers",icon: I.articles,       badge: "articles" },
-  { to: "/admin/featured-article-approvals", label: "Business Featured Articles", icon: I.articles, badge: "featured" },
+  { to: "/admin/featured-article-approvals", label: "Featured Articles", icon: I.articles, badge: "featured" },
   { to: "/admin/review-moderation",  label: "Review Moderation",     icon: I.stories,        badge: "reviews" },
   { to: "/admin/properties",         label: "Properties",            icon: I.properties },
   {

@@ -28,6 +28,11 @@ function fromRow(r, slot) {
     // Any admin-written story can be attached to a registered business, so it
     // shows on that business's profile and counts towards its analytics.
     businessId: r.business_id ?? "",
+    // Who wrote it, and whether it is on the site. Both are carried through
+    // the editor so saving an edit cannot quietly change them.
+    author: r.author ?? "admin",
+    status: r.status ?? "Live",
+    rejectionReason: r.rejection_reason ?? "",
     body: r.body ?? [],
     gallery: r.gallery ?? [],
   };
@@ -78,7 +83,25 @@ export async function getFeatureArticleById(id) {
 }
 
 export async function saveFeatureArticle(item) {
-  const { data, error } = await supabase.from("feature_articles").upsert(toRow(item)).select().single();
+  const row = toRow(item);
+
+  // An upsert writes the column defaults for anything left out, so editing a
+  // business's article without naming `author` and `status` would silently
+  // re-stamp it as admin's and shove it live — including one still sitting in
+  // the approval queue. Read back what it is and keep it.
+  if (row.id) {
+    const { data: existing } = await supabase
+      .from("feature_articles").select("author, status, submitted_at, rejection_reason")
+      .eq("id", row.id).maybeSingle();
+    if (existing) {
+      row.author = existing.author;
+      row.status = existing.status;
+      row.submitted_at = existing.submitted_at;
+      row.rejection_reason = existing.rejection_reason;
+    }
+  }
+
+  const { data, error } = await supabase.from("feature_articles").upsert(row).select().single();
   if (error) throw error;
   // The homepage toggle books (or ends) a Featured Article slot.
   const live = await getLivePlacementMap("featured_article");
@@ -93,6 +116,9 @@ export async function saveFeatureArticle(item) {
 }
 
 export async function deleteFeatureArticle(id) {
+  // Free the homepage slot first: deleting the row leaves the placement
+  // behind, and the Featured Stories row then renders a gap.
+  await unfeature("featured_article", id).catch(() => {});
   const { error } = await supabase.from("feature_articles").delete().eq("id", id);
   if (error) throw error;
   return { id, deleted: true };
