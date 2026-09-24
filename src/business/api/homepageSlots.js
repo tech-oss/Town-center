@@ -6,13 +6,15 @@ import { supabase } from "../../lib/supabaseClient";
 // Payment goes through Stripe Checkout (stripe-checkout, kind "placement");
 // the booking is confirmed only when Stripe tells stripe-webhook it's paid.
 
+// What each slot shows, and where that kind of thing is written. `tab` is
+// the name on the sidebar, so a link reads the way the nav does.
 export const SLOT_CONTENT = {
-  spotlight: { kind: "business_article", noun: "news or offer post", manage: "/business/articles" },
+  spotlight: { kind: "business_article", noun: "news or offer post", manage: "/business/articles", tab: "News & Articles" },
   // A Featured Article slot shows a Featured Article — one of the longer
   // editorial pieces — and nothing else.
-  featured_article: { kind: "feature_article", noun: "Featured Article", manage: "/business/featured-articles" },
-  whats_on: { kind: "business_event", noun: "event", manage: "/business/events" },
-  featured_business: { kind: "business", noun: "listing", manage: "/business/listing" },
+  featured_article: { kind: "feature_article", noun: "Featured Article", manage: "/business/featured-articles", tab: "Featured Articles" },
+  whats_on: { kind: "business_event", noun: "event", manage: "/business/events", tab: "Request Event" },
+  featured_business: { kind: "business", noun: "listing", manage: "/business/listing", tab: "My Listing" },
 };
 
 export const BOOKING_STATUS = {
