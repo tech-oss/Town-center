@@ -1,6 +1,6 @@
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity, articleContext, reviewContext } from "./businessActivity";
-import { unfeature } from "./homepageSlots";
+import { unfeature, featureNow, getLivePlacementMap } from "./homepageSlots";
 
 // Moderation of the two remaining things businesses publish to the public
 // site: their News & Offers articles, and the customer reviews shown on their
@@ -36,6 +36,110 @@ export async function getBusinessArticles({ status } = {}) {
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []).map(articleFromRow);
+}
+
+// Every news post and offer on the platform, from both sides.
+//
+// Two tables hold them and they had no screen in common: business_articles is
+// what a business writes and admin approves, news_offers is what admin writes
+// itself. This list showed only the first, so admin's own posts could be
+// created on the Home Page Featured screen and then never found again.
+//
+// `source` says which table a row came from, because that decides what can be
+// done to it — a business's post is moderated, admin's own is simply edited.
+// The two are mapped to one shape so the list can render them side by side.
+const ADMIN_STATUS = { Published: "Live", Draft: "Draft", Hidden: "Hidden" };
+
+export async function getAllNewsOffers({ status, source } = {}) {
+  const wantBusiness = !source || source === "All" || source === "business";
+  const wantAdmin = !source || source === "All" || source === "admin";
+
+  const [biz, adm] = await Promise.all([
+    wantBusiness
+      ? supabase.from("business_articles").select("*, businesses(name)").order("date", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    wantAdmin
+      ? supabase.from("news_offers").select("*").order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+  ]);
+  if (biz.error) throw biz.error;
+  if (adm.error) throw adm.error;
+
+  const rows = [
+    ...(biz.data ?? []).map((r) => ({ ...articleFromRow(r), source: "business" })),
+    ...(adm.data ?? []).map((r) => ({
+      id: r.id,
+      slug: r.slug,
+      businessId: r.business_id,
+      businessName: r.business_name ?? r.business_id ?? "",
+      title: r.title,
+      type: r.type,
+      // news_offers says Published/Draft where business_articles says
+      // Live/Draft. One vocabulary, so a single status filter works.
+      status: ADMIN_STATUS[r.status] ?? r.status,
+      date: r.date_label,
+      startDate: r.start_date,
+      endDate: r.end_date,
+      heroImage: r.image,
+      thumbnail: r.image,
+      body: r.body,
+      excerpt: r.excerpt,
+      rejectionReason: null,
+      source: "admin",
+    })),
+  ];
+
+  // Which of them hold an In the Spotlight slot right now, so the list can
+  // show it and the toggle knows which way it points.
+  const live = await getLivePlacementMap("spotlight");
+  for (const r of rows) r.homepage = live.has(String(r.id));
+
+  const filtered = status && status !== "All" ? rows.filter((r) => r.status === status) : rows;
+  return filtered.sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")));
+}
+
+// Putting a post in the homepage In the Spotlight section, or taking it out.
+// Only something actually on the site can go up there — featuring a hidden or
+// unapproved post would put a dead link on the homepage.
+export async function setNewsOfferHomepage(post, on) {
+  if (!on) {
+    await unfeature("spotlight", post.id);
+    return { homepage: false };
+  }
+  if (post.status !== "Live") {
+    throw new Error("Only a post that is live on the site can go on the homepage.");
+  }
+  const kind = post.source === "admin" ? "news_offer" : "business_article";
+  const res = await featureNow("spotlight", kind, String(post.id));
+  if (res.full) return { full: true };
+  return { homepage: true };
+}
+
+// Admin's own post, off the site and back on. It has no business to answer
+// to unless it is attached to one, in which case the reason reaches them the
+// same way a business's own post's would.
+export async function setNewsOfferHidden(id, hidden, reason) {
+  const { data: row } = await supabase
+    .from("news_offers").select("business_id, title").eq("id", id).maybeSingle();
+  if (hidden && row?.business_id && !reason?.trim()) {
+    throw new Error("A reason is required — the business is shown it.");
+  }
+  const { error } = await supabase.from("news_offers")
+    .update({ status: hidden ? "Hidden" : "Published", updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) throw error;
+  if (hidden) await unfeature("spotlight", id).catch(() => {});
+  await logBusinessActivity(row?.business_id, {
+    action: hidden ? "news_offer.hidden" : "news_offer.restored",
+    entityType: "news_offer", entityId: id, title: row?.title,
+    detail: hidden ? (reason?.trim() || null) : null,
+  });
+}
+
+export async function deleteNewsOfferPost(id) {
+  await unfeature("spotlight", id).catch(() => {});
+  const { error } = await supabase.from("news_offers").delete().eq("id", id);
+  if (error) throw error;
 }
 
 // Approving is a judgement about the content, not about whether the business
