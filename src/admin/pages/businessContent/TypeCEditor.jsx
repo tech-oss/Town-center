@@ -2,7 +2,7 @@
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
   SingleImageUpload, PlanImageNote, GalleryGrid, SocialFields, LocationFields, RepeatableList,
-  CARD, BORDER, Locked,
+  Toggle, CARD, BORDER, MUTED, Locked,
 } from "./shared";
 
 export default function TypeCEditor({ form, set, onSave, saving }) {
@@ -59,12 +59,35 @@ export default function TypeCEditor({ form, set, onSave, saving }) {
           </Locked>
         </EditorSection>
 
-        <EditorSection title="Availability" hint="Free text — hotels don't open and close daily.">
+        <EditorSection title="Availability & Check-in" hint="Free text — hotels don't open and close daily.">
+          <Locked field="checkInTime">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Check-in Times" hint="Shown as written">
+              <Inp value={form.checkInTime ?? ""} maxLength={60} onChange={(e) => set("checkInTime", e.target.value)}
+                placeholder="e.g. From 3pm" />
+            </Field>
+            <Field label="Check-out Times" hint="Shown as written">
+              <Inp value={form.checkOutTime ?? ""} maxLength={60} onChange={(e) => set("checkOutTime", e.target.value)}
+                placeholder="e.g. By 11am" />
+            </Field>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-2 mt-4">
+            <Toggle checked={!!form.earlyCheckin} label="Offers early check-in"
+              onChange={(v) => set("earlyCheckin", v)} />
+            <Toggle checked={!!form.lateCheckout} label="Offers late check-out"
+              onChange={(v) => set("lateCheckout", v)} />
+          </div>
+          <p className="text-[11px] mt-2" style={{ color: MUTED }}>
+            These two drive the Live &amp; Stay filters on the site and the app.
+          </p>
+          </Locked>
           <Locked field="availabilityInfo">
-          <Field label="Availability / Check-in Information">
+          <div className="mt-5">
+          <Field label="Anything Else About Arriving">
             <TextArea rows={3} value={form.availabilityInfo ?? ""} onChange={(e) => set("availabilityInfo", e.target.value)}
-              placeholder="e.g. Check-in from 3pm. 24-hour reception." />
+              placeholder="e.g. 24-hour reception. Late arrivals by arrangement." />
           </Field>
+          </div>
           </Locked>
         </EditorSection>
 

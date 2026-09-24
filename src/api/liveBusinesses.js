@@ -263,6 +263,17 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     portfolio: listOrUndefined(row.portfolio),
     amenities: listOrUndefined(row.amenities),
     stars: row.star_rating,
+    // Hotels: shown as written, and the two options guests filter on.
+    // Null/false for a free listing (the view withholds them), so the page
+    // shows nothing there rather than empty labels.
+    // The prose box beside them. It has been in the view all along but was
+    // never mapped onto an item, so anything a hotel wrote here reached
+    // nothing; it now sits under the times on the stay page.
+    availabilityInfo: row.availability_info || null,
+    checkIn: row.check_in_time || null,
+    checkOut: row.check_out_time || null,
+    earlyCheckin: !!row.early_checkin,
+    lateCheckout: !!row.late_checkout,
     // Hotels vs accommodation, for the Live & Stay section.
     stayKind: row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
     // Tradespeople / Professionals / Freelancers — for a Services business,

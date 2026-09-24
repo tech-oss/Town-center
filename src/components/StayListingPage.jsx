@@ -182,12 +182,28 @@ export default function StayListingPage({ kind }) {
   };
   const [starsOpen, setStarsOpen] = useState(false);
 
+  // Arrival options (checkin_times_2026_09.sql). Two booleans a stay ticks,
+  // so this is one dropdown of two checkboxes rather than a list built from
+  // the data. Ticking both means "does early check-in AND late check-out",
+  // matching the amenity filters beside it.
+  const checkinFilter = useMemo(() => paramToSet(searchParams.get("checkin")), [searchParams]);
+  const setCheckinFilter = (setOrFn) => {
+    const next = typeof setOrFn === "function" ? setOrFn(checkinFilter) : setOrFn;
+    patchParams({ checkin: setToParam(next) });
+  };
+  const toggleCheckin = (v) => setCheckinFilter((prev) => {
+    const next = new Set(prev);
+    next.has(v) ? next.delete(v) : next.add(v);
+    return next;
+  });
+  const [checkinOpen, setCheckinOpen] = useState(false);
+
   // Close any open filter dropdown when the user clicks anywhere outside
   // the filter bar — matching normal dropdown behaviour instead of
   // requiring a second click on the same trigger button to dismiss it.
   const filterBarRef = useRef(null);
   useEffect(() => {
-    const closeAll = () => { setLocationOpen(false); setOpenDropdown(null); setStarsOpen(false); };
+    const closeAll = () => { setLocationOpen(false); setOpenDropdown(null); setStarsOpen(false); setCheckinOpen(false); };
     const onPointerDown = (e) => {
       if (filterBarRef.current && !filterBarRef.current.contains(e.target)) closeAll();
     };
@@ -270,6 +286,8 @@ export default function StayListingPage({ kind }) {
   if (isHotels && starsFilter.size > 0) {
     items = items.filter((i) => starsFilter.has(i.stars));
   }
+  if (checkinFilter.has("early")) items = items.filter((i) => i.earlyCheckin);
+  if (checkinFilter.has("late")) items = items.filter((i) => i.lateCheckout);
   filterDefs.forEach(({ field }) => {
     const set = checkboxFilters[field];
     if (set && set.size > 0) {
@@ -317,7 +335,7 @@ export default function StayListingPage({ kind }) {
   const clearCheckboxField = (field) => patchParams({ [field]: undefined });
 
   const checkboxFilterCount = filterDefs.reduce((n, { field }) => n + (checkboxFilters[field]?.size ?? 0), 0);
-  const activeFilterCount = checkboxFilterCount + starsFilter.size + (appliedLocation ? 1 : 0);
+  const activeFilterCount = checkboxFilterCount + starsFilter.size + checkinFilter.size + (appliedLocation ? 1 : 0);
 
   // When any filter/search/category is active, carry the current filtered
   // URL forward as a `back` param on every card link, so the detail page
@@ -518,12 +536,52 @@ export default function StayListingPage({ kind }) {
               </div>
             )}
 
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setCheckinOpen((o) => !o); setLocationOpen(false); setOpenDropdown(null); setStarsOpen(false); }}
+                className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
+                style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: checkinFilter.size > 0 ? "var(--sand)" : "#fff" }}
+              >
+                Check-in options{checkinFilter.size > 0 ? ` (${checkinFilter.size})` : ""}
+                <ChevronIcon />
+              </button>
+              {checkinOpen && (
+                <div className="absolute z-20 top-full mt-2 left-0 bg-white rounded-2xl p-2 shadow-xl w-60 flex flex-col gap-0.5" style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}>
+                  {[
+                    { value: "early", label: "Early check-in" },
+                    { value: "late", label: "Late check-out" },
+                  ].map((o) => (
+                    <label key={o.value} className="flex items-center gap-2.5 text-sm px-2.5 py-2 rounded-lg hover:bg-black/5 cursor-pointer" style={{ color: "#000000" }}>
+                      <input type="checkbox" checked={checkinFilter.has(o.value)} onChange={() => toggleCheckin(o.value)} className="accent-[var(--leaf)]" />
+                      {o.label}
+                    </label>
+                  ))}
+                  <div className="flex items-center gap-3 mt-2 pt-2 px-1.5 border-t" style={{ borderColor: "rgba(28,46,56,0.08)" }}>
+                    {checkinFilter.size > 0 && (
+                      <button type="button" onClick={() => setCheckinFilter(new Set())} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
+                        Clear
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setCheckinOpen(false)}
+                      className="flex-1 text-sm font-semibold py-2 rounded-full text-white"
+                      style={{ backgroundColor: "var(--forest)" }}
+                    >
+                      Show Results
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {activeFilterCount > 0 && (
               <button
                 type="button"
                 onClick={() => {
                   clearLocation();
-                  const patch = { stars: undefined };
+                  const patch = { stars: undefined, checkin: undefined };
                   filterDefs.forEach(({ field }) => { patch[field] = undefined; });
                   patchParams(patch);
                 }}

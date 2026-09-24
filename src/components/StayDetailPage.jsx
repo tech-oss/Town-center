@@ -93,6 +93,61 @@ function amenityMeta(label) {
   return hit ? { icon: hit[1], blurb: hit[2] } : { icon: "star", blurb: "A thoughtful extra included with your stay." };
 }
 
+// Arrival times, above the amenities. Each of the four parts is independent:
+// a hotel that has filled in only a check-out time shows only that, and a
+// hotel that has filled in nothing shows no section at all — the same rule
+// StarBadge follows. A free listing never reaches here, because the database
+// withholds all four.
+function CheckInSection({ checkIn, checkOut, earlyCheckin, lateCheckout, note }) {
+  const times = [
+    checkIn && { label: "Check-in", value: checkIn },
+    checkOut && { label: "Check-out", value: checkOut },
+  ].filter(Boolean);
+  const options = [
+    earlyCheckin && "Early check-in available",
+    lateCheckout && "Late check-out available",
+  ].filter(Boolean);
+  if (!times.length && !options.length && !note) return null;
+
+  return (
+    <section className="py-14 md:py-16 px-6 md:px-12" style={{ backgroundColor: "var(--mint)" }}>
+      <div className="max-w-5xl mx-auto">
+        <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Your Stay</p>
+        <h2 className="hero-title uppercase text-3xl md:text-4xl mb-8" style={{ color: "#000000" }}>
+          Availability &amp; Check-in
+        </h2>
+
+        {times.length > 0 && (
+          <div className="grid sm:grid-cols-2 gap-5 mb-6">
+            {times.map((t) => (
+              <div key={t.label} className="bg-white rounded-2xl p-5"
+                style={{ boxShadow: "0 6px 24px -16px rgba(28,46,56,0.25)" }}>
+                <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>{t.label}</p>
+                <p className="text-xl font-bold" style={{ color: "#000000" }}>{t.value}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {options.length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-6">
+            {options.map((o) => (
+              <span key={o} className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full bg-white"
+                style={{ color: "#000000", boxShadow: "0 4px 16px -10px rgba(28,46,56,0.3)" }}>
+                <span style={{ color: "var(--leaf)" }}>✓</span>{o}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {note && (
+          <p className="text-base leading-relaxed max-w-2xl" style={{ color: "rgba(0,0,0,0.75)" }}>{note}</p>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // Feature-card amenities section — icon, title, one-line blurb and a
 // checkmark per amenity, matching the reference design exactly. Rendered via
 // PlaceDetailLayout's afterGallery slot, directly below the photo grid.
@@ -201,10 +256,19 @@ export default function StayDetailPage({ kind }) {
       relatedBackground="#ffffff"
       related={STAY_DISCOVER}
       afterGallery={!free && (
+        <>
+        <CheckInSection
+          checkIn={item.checkIn}
+          checkOut={item.checkOut}
+          earlyCheckin={item.earlyCheckin}
+          lateCheckout={item.lateCheckout}
+          note={item.availabilityInfo}
+        />
         <AmenitiesSection
           amenities={item.amenities}
           heading={isHotels ? "Amenities" : "What This Place Offers"}
         />
+        </>
       )}
       afterMap={free
         ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />

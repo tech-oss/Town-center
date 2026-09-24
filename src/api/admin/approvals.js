@@ -50,7 +50,7 @@ const SECTION_FIELDS = {
     ["hero_image", "heroImage", "Header Image", "image"],
     ["business_type_detail", "businessTypeDetail", "Categories"],
   ],
-  hours: [["hours", "hours", "Opening Hours"], ["availability_info", "availabilityInfo", "Availability Info"]],
+  hours: [["hours", "hours", "Opening Hours"], ["availability_info", "availabilityInfo", "Availability Info"], ["check_in_time", "checkInTime", "Check-in Times"], ["check_out_time", "checkOutTime", "Check-out Times"], ["early_checkin", "earlyCheckin", "Early Check-in Offered"], ["late_checkout", "lateCheckout", "Late Check-out Offered"]],
   gallery: [["gallery", "gallery", "Gallery Images", "gallery"]],
   location: [["address", "address", "Address"], ["postal_code", "postalCode", "Postcode"], ["lat", "lat", "Latitude"], ["lng", "lng", "Longitude"]],
   contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"], ["availability_tag", "availabilityTag", "Availability Tag"]],

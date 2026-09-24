@@ -228,6 +228,49 @@ export default function StayDetailScreen() {
             ? <ComingSoonCard heading="Photos" text={FREE_PLACEHOLDERS.gallery} />
             : <PhotoGallery images={gallery} title={place.name} />}
 
+          {!free && (place.checkIn || place.checkOut || place.earlyCheckin || place.lateCheckout || place.availabilityInfo) && (
+            <div>
+              <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>
+                Availability &amp; Check-in
+              </p>
+              <MobileCard className="p-3.5 flex flex-col gap-3">
+                {(place.checkIn || place.checkOut) && (
+                  <div className="flex gap-3">
+                    {place.checkIn && (
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>Check-in</p>
+                        <p className="text-base font-bold" style={{ color: "#000000" }}>{place.checkIn}</p>
+                      </div>
+                    )}
+                    {place.checkOut && (
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>Check-out</p>
+                        <p className="text-base font-bold" style={{ color: "#000000" }}>{place.checkOut}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {(place.earlyCheckin || place.lateCheckout) && (
+                  <div className="flex flex-wrap gap-2">
+                    {place.earlyCheckin && (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
+                        ✓ Early check-in
+                      </span>
+                    )}
+                    {place.lateCheckout && (
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>
+                        ✓ Late check-out
+                      </span>
+                    )}
+                  </div>
+                )}
+                {place.availabilityInfo && (
+                  <p className="text-xs leading-snug" style={{ color: "#000000" }}>{place.availabilityInfo}</p>
+                )}
+              </MobileCard>
+            </div>
+          )}
+
           {!free && place.amenities?.length > 0 && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>

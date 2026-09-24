@@ -174,6 +174,15 @@ export default function StayListingScreen() {
   }, [searchParams, kind]);
   const setCheckboxField = (field) => (next) => patchParams({ [field]: setToParam(next) });
 
+  // Arrival options (checkin_times_2026_09.sql) — the same two the website
+  // filters on, so a link shared from either one filters the same way.
+  const checkinFilter = useMemo(() => paramToSet(searchParams.get("checkin")), [searchParams]);
+  const setCheckinFilter = (next) => patchParams({ checkin: setToParam(next) });
+  const CHECKIN_OPTIONS = [
+    { key: "early", label: "Early check-in" },
+    { key: "late", label: "Late check-out" },
+  ];
+
   const postcode = searchParams.get("postcode");
   const locParam = searchParams.get("loc"); // "lat,lng,radius"
   const appliedLocation = useMemo(() => {
@@ -214,6 +223,8 @@ export default function StayListingScreen() {
     if (category) {
       list = isHotels ? list.filter((h) => String(h.stars) === category) : list.filter((a) => slugify(a.type) === category);
     }
+    if (checkinFilter.has("early")) list = list.filter((i) => i.earlyCheckin);
+    if (checkinFilter.has("late")) list = list.filter((i) => i.lateCheckout);
     filterDefs.forEach(({ field }) => {
       const set = checkboxFilters[field];
       if (set && set.size > 0) {
@@ -231,7 +242,7 @@ export default function StayListingScreen() {
     }
     return list;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allItems, category, checkboxFilters, appliedLocation, query, isHotels]);
+  }, [allItems, category, checkboxFilters, checkinFilter, appliedLocation, query, isHotels]);
 
   if (!landing) return <Navigate to="/mobile/live" replace />;
 
@@ -275,6 +286,14 @@ export default function StayListingScreen() {
             appliedLocation={appliedLocation}
             onApply={applyLocation}
             onClear={clearLocation}
+          />
+          <FilterSheet
+            title="Check-in Options"
+            triggerLabel={`Check-in options${checkinFilter.size > 0 ? ` (${checkinFilter.size})` : ""}`}
+            options={CHECKIN_OPTIONS}
+            multi
+            value={checkinFilter}
+            onChange={setCheckinFilter}
           />
           {filterDefs.map(({ field, label }) => {
             const options = filterOptions[field] ?? [];
