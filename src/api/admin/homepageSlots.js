@@ -181,11 +181,26 @@ export async function getSlotContentOptions(slotType) {
       return (data ?? []).map((r) => ({ kind, id: String(r.id), title: r.title, detail: [r.businesses?.name, r.date_label || r.event_date].filter(Boolean).join(" · "), businessId: r.business_id, image: r.hero_image }));
     }
     if (kind === "business") {
-      const { data } = await supabase.from("businesses").select("id, name, business_listings(business_type, hero_image)")
-        .eq("status", "Approved").order("name");
+      // The plan comes along so the picker can say which businesses have a
+      // page worth sending people to. A free listing has its description,
+      // logo, hours, gallery and socials withheld by the public view, so
+      // featuring one puts it top of its category and then shows nothing
+      // about it — which is why businesses cannot buy this slot without the
+      // Visibility Plan (promotions_need_subscription_2026_09.sql).
+      const [{ data }, subs] = await Promise.all([
+        supabase.from("businesses").select("id, name, business_listings(business_type, hero_image)")
+          .eq("status", "Approved").order("name"),
+        supabase.from("business_subscriptions").select("business_id, plan"),
+      ]);
+      const premium = new Set((subs.data ?? []).filter((s) => s.plan === "premium").map((s) => s.business_id));
       return (data ?? []).map((r) => {
         const l = Array.isArray(r.business_listings) ? r.business_listings[0] : r.business_listings;
-        return { kind, id: r.id, title: r.name, detail: l?.business_type ?? "", businessId: r.id, image: l?.hero_image };
+        const onPlan = premium.has(r.id);
+        return {
+          kind, id: r.id, title: r.name,
+          detail: [l?.business_type, onPlan ? null : "Free listing — its page is mostly hidden"].filter(Boolean).join(" · "),
+          businessId: r.id, image: l?.hero_image, premium: onPlan,
+        };
       });
     }
     return [];

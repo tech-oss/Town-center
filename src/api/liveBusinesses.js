@@ -217,7 +217,15 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     live: true,
     plan: premium ? "premium" : "free",
     // A live Featured Business booking: listed first in its categories.
-    featured: featuredIds.has(row.business_id),
+    //
+    // Only for a subscriber. Featuring a free listing sends people to a page
+    // the database deliberately empties — public_business_profiles withholds
+    // a free business's description, logo, hours, gallery and socials — so it
+    // would promote a business to the top of its category and then show
+    // nothing about it. Booking is gated on the subscription now
+    // (promotions_need_subscription_2026_09.sql); this covers a booking made
+    // before that rule, and a business that has since lapsed.
+    featured: premium && featuredIds.has(row.business_id),
     name: row.name,
     section,
     category,
