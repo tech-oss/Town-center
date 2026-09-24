@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinessFeatureArticles, approveFeatureArticle, rejectFeatureArticle, takeDownFeatureArticle,
-  setFeatureArticleStatus, getFeatureArticleById, deleteFeatureArticle,
+  setFeatureArticleStatus, getFeatureArticleById, deleteFeatureArticle, getFeatureArticles,
   getSpotlightBusinesses, getSlotUsage,
 } from "../../api/admin";
 import StoryForm from "../components/StoryForm";
@@ -11,6 +11,7 @@ import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
 import ReviewActions from "../components/ReviewActions";
 import Toast from "../components/Toast";
+import SearchBar, { matchesQuery } from "../components/SearchBar";
 import { formatUK } from "../../lib/ukDate";
 import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
@@ -36,6 +37,16 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
     if (!reason.trim()) return;
     setBusy(true);
     try { await onTakeDown(reason.trim()); } finally { setBusy(false); setMode(null); setReason(""); }
+  }
+
+  // Hiding an article that belongs to a business owes that business an
+  // explanation; a town story with nobody behind it does not.
+  const owesReason = !!a.businessId;
+  async function confirmHide() {
+    if (owesReason && !reason.trim()) return;
+    setBusy(true);
+    try { await onSetStatus("Hidden", reason.trim()); }
+    finally { setBusy(false); setMode(null); setReason(""); }
   }
 
   return (
@@ -97,16 +108,25 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
       ) : (
         <div className="sticky bottom-4 bg-white rounded-2xl px-6 py-4 flex flex-col gap-3" style={{ ...CARD, boxShadow: "0 8px 30px rgba(16,24,40,0.12)" }}>
           <p className="text-xs font-semibold" style={{ color: MUTED }}>Moderation</p>
-          {mode === "remove" ? (
+          {mode ? (
             <>
+              <p className="text-xs" style={{ color: MUTED }}>
+                {mode === "hide"
+                  ? (owesReason
+                      ? `Why is this coming off the site? ${a.businessName} is shown this.`
+                      : "Why is this coming off the site? (optional — no business is attached)")
+                  : "Why is this being taken off the site? The business is shown this."}
+              </p>
               <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} autoFocus
                 placeholder="Explain what is wrong with this article…"
                 className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
                 style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
               <div className="flex gap-2 flex-wrap">
-                <button onClick={confirmTakeDown} disabled={busy || !reason.trim()}
+                <button
+                  onClick={mode === "hide" ? confirmHide : confirmTakeDown}
+                  disabled={busy || ((mode === "remove" || owesReason) && !reason.trim())}
                   className="px-5 py-2 rounded-xl text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: "#D97706" }}>
-                  {busy ? "Working…" : "Take off the site"}
+                  {busy ? "Working…" : mode === "hide" ? "Hide from the site" : "Take off the site"}
                 </button>
                 <button onClick={() => { setMode(null); setReason(""); }}
                   className="px-5 py-2 rounded-xl text-xs font-semibold" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Cancel</button>
@@ -120,9 +140,9 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
               </button>
 
               {/* Hiding is the reversible one: off the site and off the
-                  homepage, nothing lost, no reason owed to anybody. */}
+                  homepage, nothing lost. */}
               {a.status === "Live" ? (
-                <button onClick={() => onSetStatus("Hidden")}
+                <button onClick={() => setMode("hide")}
                   className="px-5 py-2 rounded-xl text-xs font-semibold" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
                   Hide from the site
                 </button>
@@ -158,14 +178,20 @@ export default function FeatureArticleApprovalsPage() {
   const [nonce, setNonce] = useState(0);
   const [toast, setToast] = useState("");
   const [openId, setOpenId] = useState(null);
+  const [query, setQuery] = useState("");
   // null = the list; { article } = the editor, with a null article for a new one.
   const [editing, setEditing] = useState(null);
   const { data, loading } = useFetch(() => getBusinessFeatureArticles({ status: filter, author }), [filter, author, nonce]);
   const { data: businesses } = useFetch(getSpotlightBusinesses, []);
   const { data: usage } = useFetch(() => getSlotUsage("featured_article"), [nonce]);
+  // The stories holding a Featured Article slot right now, for the editor's
+  // slot count and its swap picker.
+  const { data: onHomepage } = useFetch(
+    () => getFeatureArticles().then((all) => all.filter((a) => a.homepage)), [nonce]);
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
 
-  const list = data ?? [];
+  const all = data ?? [];
+  const list = all.filter((a) => matchesQuery(a, query, ["businessName", "title", "standfirst", "category"]));
   const openIndex = list.findIndex((a) => a.id === openId);
   const open = openIndex >= 0 ? list[openIndex] : null;
 
@@ -197,11 +223,13 @@ export default function FeatureArticleApprovalsPage() {
     refresh();
   }
 
-  async function handleSetStatus(a, status) {
-    await setFeatureArticleStatus(a.id, status);
+  async function handleSetStatus(a, status, reason) {
+    await setFeatureArticleStatus(a.id, status, reason);
     flash(status === "Live"
       ? `"${a.title}" is back on the site.`
-      : `"${a.title}" is hidden — it is off the site and off the homepage.`);
+      : a.businessId
+        ? `"${a.title}" is hidden — off the site and the homepage. ${a.businessName} has been told why.`
+        : `"${a.title}" is hidden — it is off the site and off the homepage.`);
     if (filter !== "All") advance();
     refresh();
   }
@@ -245,6 +273,11 @@ export default function FeatureArticleApprovalsPage() {
           initial={editing.article}
           businesses={businesses ?? []}
           capacity={usage?.capacity ?? 4}
+          // What is on the homepage now. Without this the editor read
+          // "0/4 slots used", let the toggle go on, and then failed the save
+          // with "swap one out first" — while the swap picker it was telling
+          // you to use had nothing in it to pick.
+          featuredItems={onHomepage ?? []}
           onCancel={() => setEditing(null)}
           onSave={(saved) => {
             setEditing(null);
@@ -271,7 +304,7 @@ export default function FeatureArticleApprovalsPage() {
           onReject={(r) => handleReject(open, r)}
           onTakeDown={(r) => handleTakeDown(open, r)}
           onEdit={() => handleEdit(open)}
-          onSetStatus={(s) => handleSetStatus(open, s)}
+          onSetStatus={(s, r) => handleSetStatus(open, s, r)}
           onDelete={() => handleDelete(open)}
         />
       </>
@@ -321,6 +354,9 @@ export default function FeatureArticleApprovalsPage() {
           </button>
         ))}
       </div>
+
+      <SearchBar value={query} onChange={setQuery}
+        placeholder="Search by business, title or category…" />
 
       {loading ? <LoadingState /> : !list.length ? (
         <EmptyState title="Nothing here" message={`No Featured Articles with status "${filter}"${author === "All" ? "" : `, ${AUTHORS.find((a) => a.key === author).label.toLowerCase()}`}.`} />

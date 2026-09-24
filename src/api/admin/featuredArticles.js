@@ -108,7 +108,8 @@ export async function saveFeatureArticle(item) {
   const onHome = live.has(String(data.id));
   if (item.homepage && !onHome) {
     const res = await featureNow("featured_article", "feature_article", String(data.id));
-    if (res.full) throw new Error("Both Featured Article slots are taken. Swap one out first.");
+    // "Both" dated from when there were two slots; there are four.
+    if (res.full) throw new Error("Every Featured Article slot is taken. Swap one out first.");
   } else if (!item.homepage && onHome) {
     await unfeature("featured_article", data.id);
   }

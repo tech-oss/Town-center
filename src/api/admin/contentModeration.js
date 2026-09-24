@@ -342,21 +342,31 @@ export async function takeDownFeatureArticle(id, reason) {
   });
 }
 
-// Hiding and restoring, for admin's own housekeeping rather than moderation.
+// Hiding and restoring.
 //
-// Hidden is the quiet one: the article comes off the site and off the
-// homepage but keeps everything it has, and putting it back is one click.
-// Restoring also clears any reason left over from an earlier rejection or
-// take-down, so the business no longer reads a complaint about a live piece.
-export async function setFeatureArticleStatus(id, status) {
+// Hiding takes an article off the site and off the homepage while keeping
+// everything it has, so putting it back is one click. It asks for a reason
+// whenever the article belongs to a business: something the business wrote,
+// or something admin wrote and attached to it, is content that business can
+// see on its own dashboard — it should not simply vanish. A town story with
+// no business behind it answers to nobody, so no reason is required.
+//
+// Restoring clears the reason, so the business is not left reading a
+// complaint about a piece that is live again.
+export async function setFeatureArticleStatus(id, status, reason) {
   if (!["Live", "Hidden", "Draft"].includes(status)) {
     throw new Error(`Use approve, reject or take down for "${status}".`);
   }
   const { data: row } = await supabase
     .from("feature_articles").select("business_id, title").eq("id", id).maybeSingle();
 
+  const attached = !!row?.business_id;
+  if (status !== "Live" && attached && !reason?.trim()) {
+    throw new Error("A reason is required — the business is shown it.");
+  }
+
   const patch = { status };
-  if (status === "Live") patch.rejection_reason = null;
+  patch.rejection_reason = status === "Live" ? null : (reason?.trim() || null);
 
   const { error } = await supabase.from("feature_articles").update(patch).eq("id", id);
   if (error) throw error;
@@ -365,6 +375,7 @@ export async function setFeatureArticleStatus(id, status) {
   await logBusinessActivity(row?.business_id, {
     action: status === "Live" ? "featured_article.restored" : "featured_article.hidden",
     entityType: "featured_article", entityId: id, title: row?.title,
+    detail: status === "Live" ? null : (reason?.trim() || null),
   });
 }
 

@@ -335,7 +335,7 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
           onPick={handleSwapPick}
           onCancel={() => setShowSwapPicker(false)}
           title={`Homepage is full (${capacity}/${capacity})`}
-          description="Featured Stories shows a maximum of two. Pick one of the two live stories below to swap it out with."
+          description={`Featured Stories shows ${capacity} at a time. Pick the one below to swap out.`}
         />
       )}
 
