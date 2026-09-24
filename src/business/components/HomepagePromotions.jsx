@@ -66,12 +66,24 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
   const needsContent = needs.kind !== "business_article" && needs.kind !== "business" && !hasContent;
 
   let blocker = null;
+  // Needs the plan, rather than needs a post written.
+  let needsPlan = false;
   // One Featured Business booking at a time.
   if (activeBooking) blocker = `Your business is already featured until ${formatUKDateTime(activeBooking.endsAt)}. You can book again after that.`;
   else if (!slot.bookable) blocker = "Not available to book right now.";
   else if (!packages.length) blocker = "No packages on sale for this slot yet.";
+  else if (!premium) {
+    // Every homepage promotion is a Visibility Plan feature. This used to be
+    // checked only on the two slots that need a piece of content first, so In
+    // the Spotlight and Featured Business were offered to free businesses —
+    // and Featured Business is the worst of the two to sell them, because a
+    // free listing's page shows no description, logo, hours or photos.
+    needsPlan = true;
+    blocker = slot.slotType === "featured_business"
+      ? "Needs the Visibility Plan — being featured sends people to your page, and a free listing's page has no description, photos or opening hours yet."
+      : `Needs the Visibility Plan: ${slot.label} is a paid promotion.`;
+  }
   else if (!chosen?.nextStart) blocker = "Fully booked — check back soon.";
-  else if (needsContent && !premium) blocker = `Needs the Visibility Plan: this slot shows one of your ${needs.noun}s.`;
   else if (needsContent) blocker = `Publish ${/^[aeiou]/i.test(needs.noun) ? "an" : "a"} ${needs.noun} first — that's what this slot shows.`;
 
   return (
@@ -135,11 +147,15 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
       {blocker ? (
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <p className="text-xs" style={{ color: "#92400E" }}>{blocker}</p>
-          {slot.bookable && chosen?.nextStart && needsContent && (
-            <Link to={premium ? needs.manage : "/business/upgrade"} className="text-xs font-semibold" style={{ color: SAGE }}>
-              {premium ? `Go to ${needs.kind === "business_event" ? "Events" : "Featured Articles"} →` : "See the Visibility Plan →"}
+          {needsPlan ? (
+            <Link to="/business/upgrade" className="text-xs font-semibold" style={{ color: SAGE }}>
+              See the Visibility Plan →
             </Link>
-          )}
+          ) : slot.bookable && chosen?.nextStart && needsContent ? (
+            <Link to={needs.manage} className="text-xs font-semibold" style={{ color: SAGE }}>
+              Go to {needs.kind === "business_event" ? "Events" : "Featured Articles"} →
+            </Link>
+          ) : null}
         </div>
       ) : (
         <button onClick={() => onBook(slot, chosen)} disabled={busy}
