@@ -1,4 +1,7 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import SmartImage from "./SmartImage";
+import { focalPosition } from "../lib/focalPoint";
+import { imageUrl } from "../lib/imageUrl";
 import { storySectionImages } from "../lib/storyImages";
 import { useEffect } from "react";
 import { getStoryBySlug, getStories } from "../api";
@@ -21,8 +24,10 @@ function SpotlightImage({ src, alt, aspect = "aspect-[16/9]", className = "" }) 
       className={`spotlight-card group/img block cursor-pointer ${revealed ? "is-revealed" : ""} ${className}`}
     >
       <div className={`relative overflow-hidden ${aspect}`} style={{ backgroundColor: "#1a1a1a" }}>
-        <img src={src} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
-        <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+        <img src={imageUrl(src, "card")} alt="" aria-hidden="true" loading="lazy"
+          className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" style={{ objectPosition: focalPosition(src) }} />
+        <SmartImage src={src} alt={alt} size="hero" sizes="(min-width: 768px) 800px, 100vw"
+          className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
       </div>
     </div>
   );

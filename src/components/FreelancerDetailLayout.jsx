@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartImage from "./SmartImage";
 import { useEffect, useRef, useState } from "react";
 import {
   PinIcon,
@@ -223,7 +224,7 @@ export default function FreelancerDetailLayout({
             {/* ── Profile header — one profile picture, name, rating, skills ── */}
             <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5 mb-6" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
               <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-                <img src={heroImage} alt={title} className="w-full h-full object-cover" />
+                <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl md:text-3xl mb-1.5" style={{ color: "#000000" }}>{title}</h1>

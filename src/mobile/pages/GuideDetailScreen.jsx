@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SmartImage from "../../components/SmartImage";
 import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import MobilePhoto from "../components/MobilePhoto";
@@ -171,7 +172,7 @@ export default function GuideDetailScreen() {
           {/* Closing */}
           {guide.closing && (
             <div className="-mx-5 relative overflow-hidden" style={{ minHeight: 220 }}>
-              <img src={guide.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+              <SmartImage src={guide.heroImage} size="card" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.92), rgba(31,155,181,0.85))" }} />
               <div className="relative px-5 py-9 flex flex-col gap-3">
                 <h2 className="text-lg font-bold text-white leading-snug">{guide.closing.heading}</h2>

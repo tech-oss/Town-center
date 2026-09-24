@@ -1,4 +1,5 @@
 import { Link, useParams, Navigate } from "react-router-dom";
+import SmartImage from "./SmartImage";
 import { useEffect, useState } from "react";
 import { getGuideBySlug, getGuides } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -101,7 +102,7 @@ export default function GuideDetailPage() {
         className="relative w-full flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
         style={{ minHeight: "max(70vh, 520px)", paddingTop: "calc(var(--header-height, 96px) + 2rem)" }}
       >
-        <img src={guide.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <SmartImage src={guide.heroImage} size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{guide.category}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
@@ -210,7 +211,7 @@ export default function GuideDetailPage() {
       {guide.closing && (
         <section className="px-6 md:px-12 pb-16 md:pb-20">
           <div className="max-w-6xl mx-auto overflow-hidden relative">
-            <img src={guide.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <SmartImage src={guide.heroImage} size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(20,33,42,0.92), rgba(31,155,181,0.82))" }} />
             <div className="relative z-10 px-8 md:px-14 py-14 md:py-20 max-w-3xl">
               <h2 className="section-heading text-2xl md:text-4xl font-bold text-white mb-5 leading-tight">{guide.closing.heading}</h2>

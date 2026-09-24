@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartImage from "./SmartImage";
 import { useEffect, useState } from "react";
 import LocationMap from "./LocationMap";
 
@@ -312,7 +313,7 @@ export default function PlaceDetailLayout({
           </div>
         )}
         <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[4/3] sm:aspect-[16/10] bg-black">
-          <img src={heroImage} alt={title} className="w-full h-full object-cover" />
+          <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />
         </div>
       </section>
 
@@ -562,10 +563,11 @@ export default function PlaceDetailLayout({
                   aria-label={`Enlarge photo ${i + 2}`}
                   className="aspect-[25/24] overflow-hidden cursor-pointer"
                 >
-                  <img
+                  <SmartImage
                     src={src}
                     alt={`${title} ${i + 2}`}
-                    loading="lazy"
+                    size="card"
+                    sizes="(min-width: 640px) 33vw, 45vw"
                     className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110"
                   />
                 </button>

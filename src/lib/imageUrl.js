@@ -16,6 +16,8 @@
 // /public, an external URL, a blob: preview mid-upload — is returned as it
 // came in.
 
+import { stripFocal, focalSuffix } from "./focalPoint";
+
 const PUBLIC_PATH = "/storage/v1/object/public/";
 const RENDER_PATH = "/storage/v1/render/image/public/";
 
@@ -30,24 +32,36 @@ export const IMAGE_SIZES = {
 
 export function imageUrl(src, size = "card", { quality = 75 } = {}) {
   if (typeof src !== "string" || !src) return src;
-  if (!src.includes(PUBLIC_PATH)) return src;
+  // A focal point rides along on the fragment (lib/focalPoint.js). It has to
+  // come off before the query string is built — splitting on "?" would fold
+  // it into the params and break the URL — and go back on afterwards.
+  //
+  // Putting it back matters more than it looks: most API modules map their
+  // rows through imageUrl() before any component sees them, so a focal point
+  // dropped here is a focal point that never reaches the picture it belongs
+  // to. A trailing fragment is never sent to the server, so the request and
+  // the CDN cache key are unchanged.
+  const focal = focalSuffix(src);
+  const bare = stripFocal(src);
+  if (!bare.includes(PUBLIC_PATH)) return src;
   // Already a render URL (double-wrapped somewhere): leave it be.
-  if (src.includes(RENDER_PATH)) return src;
+  if (bare.includes(RENDER_PATH)) return src;
 
   const width = typeof size === "number" ? size : IMAGE_SIZES[size] ?? IMAGE_SIZES.card;
-  const [base, query] = src.split("?");
+  const [base, query] = bare.split("?");
   const url = base.replace(PUBLIC_PATH, RENDER_PATH);
   const params = new URLSearchParams(query);
   params.set("width", String(width));
   params.set("quality", String(quality));
   // Never upscale a picture that was uploaded smaller than the box.
   params.set("resize", "contain");
-  return `${url}?${params.toString()}`;
+  return `${url}?${params.toString()}${focal}`;
 }
 
 // A `srcset` so a phone doesn't download the desktop picture. Pass the width
 // the image occupies at its largest, and the `sizes` attribute alongside it.
 export function imageSrcSet(src, widths = [400, 800, 1600], { quality = 75 } = {}) {
+  src = stripFocal(src);
   if (typeof src !== "string" || !src.includes(PUBLIC_PATH)) return undefined;
   return widths.map((w) => `${imageUrl(src, w, { quality })} ${w}w`).join(", ");
 }

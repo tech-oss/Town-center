@@ -4,6 +4,7 @@ import { SITE_SECTIONS, withDefaults } from "../../Data/siteSections";
 import { GETTING_HERE_DEFAULTS } from "../../Data/adminMissingScreensMock";
 import { getSiteContent, saveSiteSection } from "../../api/admin";
 import GettingHereEditor from "./siteContent/GettingHereEditor";
+import FocalPointPicker from "../components/FocalPointPicker";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 // Edits the words and pictures at the top of each public page.
@@ -65,6 +66,7 @@ function ImageField({ label, hint, value, onChange }) {
           </button>
         )}
       </div>
+      <FocalPointPicker value={value} onChange={onChange} />
       {hint && <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{hint}</span>}
     </div>
   );

@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
+import SmartImage from "./SmartImage";
 import { useEffect, useMemo } from "react";
 import { getGuides, getGuidesIndex } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -46,8 +47,8 @@ export default function GuidesPage() {
         className="relative w-full flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
         style={{ minHeight: "max(70vh, 520px)", paddingTop: "calc(var(--header-height, 96px) + 2rem)" }}
       >
-        <img src={guidesIndex.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover md:hidden" />
-        <img src={guidesIndex.heroImageDesktop} alt="" className="absolute inset-0 w-full h-full object-cover hidden md:block" />
+        <SmartImage src={guidesIndex.heroImage} size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover md:hidden" />
+        <SmartImage src={guidesIndex.heroImageDesktop} size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover hidden md:block" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0) 0%, rgba(20,33,42,0.15) 55%, rgba(20,33,42,0.6) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{guidesIndex.eyebrow}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>

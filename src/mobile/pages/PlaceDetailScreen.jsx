@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import SmartImage from "../../components/SmartImage";
 import useViewedCategory from "../../lib/viewedCategory";
 import { useTrackView, businessView } from "../../lib/trackView";
 import { externalUrl } from "../../lib/externalUrl";
@@ -90,7 +91,7 @@ function BusinessDetailScreen({ place, goBack }) {
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
-          <img src={place.image} alt={place.name} className="w-full h-56 object-cover" />
+          <SmartImage src={place.image} alt={place.name} size="card" eager sizes="100vw" className="w-full h-56 object-cover" />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
