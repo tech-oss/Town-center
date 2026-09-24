@@ -61,9 +61,12 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
   const chosen = packages.find((p) => p.id === picked) ?? packages[0] ?? null;
   const startsNow = chosen?.nextStart && new Date(chosen.nextStart).getTime() <= now + 60_000;
   const full = slot.liveCount >= slot.capacity;
-  // Posts can be chosen or written after paying; an event or a Featured
-  // Article must already exist.
-  const needsContent = needs.kind !== "business_article" && needs.kind !== "business" && !hasContent;
+  // Nothing has to exist before paying. The slot is reserved, and what goes
+  // in it is chosen afterwards — so a business can take the slot it is
+  // looking at now rather than losing it while it writes something and waits
+  // for approval. An empty slot shows nothing on the homepage until it is
+  // filled and approved.
+  const willNeedContent = needs.kind !== "business" && !hasContent;
 
   let blocker = null;
   // Needs the plan, rather than needs a post written.
@@ -84,7 +87,6 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
       : `Needs the Visibility Plan: ${slot.label} is a paid promotion.`;
   }
   else if (!chosen?.nextStart) blocker = "Fully booked — check back soon.";
-  else if (needsContent) blocker = `Publish ${/^[aeiou]/i.test(needs.noun) ? "an" : "a"} ${needs.noun} first — that's what this slot shows.`;
 
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
@@ -151,17 +153,21 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
             <Link to="/business/upgrade" className="text-xs font-semibold" style={{ color: SAGE }}>
               See the Visibility Plan →
             </Link>
-          ) : slot.bookable && chosen?.nextStart && needsContent ? (
-            <Link to={needs.manage} className="text-xs font-semibold" style={{ color: SAGE }}>
-              Go to {needs.kind === "business_event" ? "Events" : "Featured Articles"} →
-            </Link>
           ) : null}
         </div>
       ) : (
-        <button onClick={() => onBook(slot, chosen)} disabled={busy}
-          className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: SAGE }}>
-          {busy ? "Reserving your slot…" : `Book for £${chosen.price.toFixed(2)}`}
-        </button>
+        <>
+          {willNeedContent && (
+            <p className="text-[11px] rounded-xl px-3 py-2" style={{ backgroundColor: "#FFFBEB", color: "#92400E", border: "1px solid #FDE68A" }}>
+              You have no {needs.noun}s yet. You can still book — the slot is held for your dates, and you choose what
+              goes in it afterwards from {needs.tab}.
+            </p>
+          )}
+          <button onClick={() => onBook(slot, chosen)} disabled={busy}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: SAGE }}>
+            {busy ? "Reserving your slot…" : `Book for £${chosen.price.toFixed(2)}`}
+          </button>
+        </>
       )}
     </div>
   );
