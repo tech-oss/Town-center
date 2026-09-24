@@ -110,6 +110,58 @@ export async function rejectEvent(id, reason) {
   await logBusinessActivity(ctx?.business_id, { action: "event.rejected", entityType: "event", entityId: id, title: ctx?.title, detail: reason || null });
 }
 
+// Taking a live event off the site without throwing it away.
+//
+// Rejecting is for something never published; this is for something that is
+// out there and should not be. The reason is required and is stored on the
+// row, so the business reads why its event disappeared instead of finding a
+// hole on its page — the same bargain as rejecting.
+//
+// This writes 'Removed', NOT 'Hidden', though admin's button says Hide.
+// 'Hidden' already belongs to the business: it is what its own Deactivate
+// button sets, and its dashboard offers a Make Live button beside it. Hiding
+// something as 'Hidden' would hand the business a one-click undo of a
+// moderation decision. 'Removed' shows there as "Taken down", with the reason
+// and no way to put it back.
+export async function hideEvent(id, reason) {
+  if (!reason?.trim()) throw new Error("A reason is required — the business is shown it.");
+  const ctx = await eventContext(id);
+  const { error } = await supabase
+    .from("business_events")
+    .update({ status: "Removed", rejection_reason: reason.trim() })
+    .eq("id", id);
+  if (error) {
+    // The column only accepts 'Removed' once event_takedown_2026_09.sql has
+    // been run. Say that, rather than showing the raw constraint name.
+    if (error.code === "23514") {
+      throw new Error(
+        "Hiding an event needs the database migration event_takedown_2026_09.sql to be run first."
+      );
+    }
+    throw error;
+  }
+  // An event that is off the site must not keep its What's On booking, or
+  // the homepage row points at a page nobody can open.
+  await unfeature("whats_on", id).catch(() => {});
+  await logBusinessActivity(ctx?.business_id, {
+    action: "event.removed", entityType: "event", entityId: id, title: ctx?.title, detail: reason.trim(),
+  });
+}
+
+// Putting it back. The reason goes with it, so the business is not left
+// reading a complaint about an event that is live again.
+export async function unhideEvent(id) {
+  const ctx = await eventContext(id);
+  const { error } = await supabase
+    .from("business_events")
+    .update({ status: "Live", rejection_reason: null })
+    .eq("id", id);
+  if (error) throw error;
+  await logBusinessActivity(ctx?.business_id, {
+    action: "event.restored", entityType: "event", entityId: id, title: ctx?.title,
+  });
+}
+
 // ── Admin-authored events ──────────────────────────────────────────────────
 // Admin writes straight to Live: an admin approving their own submission
 // would be meaningless, the same bypass the business content editor uses.
