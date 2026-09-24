@@ -190,7 +190,8 @@ export default function StayListingScreen() {
   const categories = useMemo(() => {
     if (!allItems) return [];
     if (isHotels) {
-      const stars = [...new Set(allItems.map((h) => h.stars))].sort((a, b) => b - a);
+      // No rating is not a rating — it used to show as a "null-Star" chip.
+      const stars = [...new Set(allItems.map((h) => h.stars).filter(Boolean))].sort((a, b) => b - a);
       return stars.map((s) => ({ key: String(s), label: `${s}-Star` }));
     }
     const types = [...new Set(allItems.map((a) => a.type))];
@@ -299,7 +300,7 @@ export default function StayListingScreen() {
               key={p.slug}
               item={p}
               to={`/mobile/stay/${kind}/${p.slug}${backParam}`}
-              tag={isHotels ? `${p.stars}-Star Hotel` : p.type}
+              tag={isHotels ? (p.stars ? `${p.stars}-Star Hotel` : "Hotel") : p.type}
               tagColor={isHotels && p.stars >= 4 ? "#c9962c" : "var(--leaf)"}
               address={isHotels ? p.address : (p.area ?? p.address)}
               description={p.tagline}

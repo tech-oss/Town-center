@@ -13,7 +13,14 @@ import { STAY_DISCOVER } from "../Data/stayDiscover";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
 // category pill, same pill styling as the rest of the layout.
+//
+// A hotel that has no rating gets no badge. With `stars` null this drew five
+// empty stars and the words "null-Star Hotel", which reads as a nought-star
+// hotel — a claim about the business rather than an absence of data. A free
+// listing has the field withheld by the database, and a subscriber may simply
+// not have filled it in; neither is something to publish.
 function StarBadge({ stars }) {
+  if (!stars) return null;
   return (
     <span
       className="inline-flex items-center gap-2 text-sm font-semibold px-3.5 py-1.5 rounded-full"

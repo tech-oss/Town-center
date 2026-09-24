@@ -75,7 +75,7 @@ function FeaturedStay({ kind, basePath }) {
             key={item.slug}
             item={item}
             basePath={basePath}
-            tag={isHotels ? `${item.stars}-Star Hotel` : item.type}
+            tag={isHotels ? (item.stars ? `${item.stars}-Star Hotel` : "Hotel") : item.type}
             align={i % 2 === 1 ? "right" : "left"}
           />
         ))}
@@ -219,7 +219,9 @@ export default function StayListingPage({ kind }) {
   const categories = (() => {
     if (!allItems) return [];
     if (isHotels) {
-      const stars = [...new Set(allItems.map((h) => h.stars))].sort((a, b) => b - a);
+      // Unrated hotels are not a rating to filter by: this offered a
+      // "null-Star" option alongside 4-Star.
+      const stars = [...new Set(allItems.map((h) => h.stars).filter(Boolean))].sort((a, b) => b - a);
       return stars.map((s) => ({ value: String(s), label: `${s}-Star` }));
     }
     const types = [...new Set(allItems.map((a) => a.type))];
@@ -556,8 +558,8 @@ export default function StayListingPage({ kind }) {
                   key={it.slug}
                   item={it}
                   to={`${basePath}/${it.slug}${backParam}`}
-                  tag={isHotels ? `${it.stars}-Star Hotel` : it.type}
-                  tagColor={isHotels ? STAR_COLORS[it.stars] : (TYPE_COLORS[slugify(it.type)] ?? "var(--leaf)")}
+                  tag={isHotels ? (it.stars ? `${it.stars}-Star Hotel` : "Hotel") : it.type}
+                  tagColor={isHotels ? (STAR_COLORS[it.stars] ?? "var(--leaf)") : (TYPE_COLORS[slugify(it.type)] ?? "var(--leaf)")}
                   address={isHotels ? it.address : it.area}
                   description={it.tagline}
                 />
