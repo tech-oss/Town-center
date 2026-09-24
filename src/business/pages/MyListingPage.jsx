@@ -280,7 +280,39 @@ export default function MyListingPage() {
               <EditorSection title={user.businessType === "hotel" ? "Availability & Check-in" : "Opening Hours"}>
                 <Locked field="hours">
                   {user.businessType === "hotel" ? (
-                    <TextArea rows={4} value={listing.availabilityInfo ?? ""} onChange={(e) => set("availabilityInfo", e.target.value)} placeholder="e.g. Check-in from 3pm. 24-hour reception." />
+                    <>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <Field label="Check-in times">
+                          <Inp value={listing.checkInTime ?? ""} maxLength={60}
+                            onChange={(e) => set("checkInTime", e.target.value)}
+                            placeholder="e.g. From 3pm" />
+                        </Field>
+                        <Field label="Check-out times">
+                          <Inp value={listing.checkOutTime ?? ""} maxLength={60}
+                            onChange={(e) => set("checkOutTime", e.target.value)}
+                            placeholder="e.g. By 11am" />
+                        </Field>
+                      </div>
+                      <p className="text-[11px] mt-2" style={{ color: MUTED }}>
+                        Shown on your page exactly as you write them. Leave either blank and nothing appears in its place.
+                      </p>
+
+                      <div className="mt-4 grid sm:grid-cols-2 gap-2">
+                        <Toggle checked={!!listing.earlyCheckin} label="We offer early check-in"
+                          onChange={(v) => set("earlyCheckin", v)} />
+                        <Toggle checked={!!listing.lateCheckout} label="We offer late check-out"
+                          onChange={(v) => set("lateCheckout", v)} />
+                      </div>
+                      <p className="text-[11px] mt-2" style={{ color: MUTED }}>
+                        Guests filter Live &amp; Stay by these, so only tick them if you can usually say yes.
+                      </p>
+
+                      <div className="mt-5">
+                        <Field label="Anything else about arriving">
+                          <TextArea rows={3} value={listing.availabilityInfo ?? ""} onChange={(e) => set("availabilityInfo", e.target.value)} placeholder="e.g. 24-hour reception. Late arrivals by arrangement." />
+                        </Field>
+                      </div>
+                    </>
                   ) : (
                     <HoursEditor hours={listing.hours ?? DEFAULT_HOURS()} onChange={(v) => set("hours", v)} />
                   )}
