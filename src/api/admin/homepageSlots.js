@@ -23,6 +23,10 @@ export const PLACEMENT_STATUS_LABELS = {
   approved: "Approved",
   rejected: "Content rejected",
   cancelled: "Cancelled",
+  // Admin's own pick, stepped aside because a business paid for the slot.
+  // It does not come back on its own: the slot frees up when the booking
+  // ends and admin chooses what goes in it.
+  bumped: "Stepped aside · paid booking",
 };
 
 const DAY_MS = 86_400_000;
@@ -247,6 +251,8 @@ function placementFromRow(r, titles, businesses) {
     amount: r.amount_pence != null ? r.amount_pence / 100 : null,
     paidAt: r.paid_at,
     rejectionReason: r.rejection_reason,
+    bumpedAt: r.bumped_at ?? null,
+    bumpedBy: r.bumped_by ?? null,
     holdExpiresAt: r.hold_expires_at,
     createdAt: r.created_at,
     phase,

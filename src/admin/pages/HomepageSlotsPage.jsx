@@ -41,6 +41,7 @@ const STATUS_TONES = {
   approved: ["rgba(22,163,74,0.12)", "#15803D"],
   rejected: ["rgba(16,24,40,0.08)", "#991B1B"],
   cancelled: ["rgba(16,24,40,0.06)", MUTED],
+  bumped: ["rgba(217,119,6,0.12)", "#92400E"],
 };
 
 const DAY_MS = 86_400_000;

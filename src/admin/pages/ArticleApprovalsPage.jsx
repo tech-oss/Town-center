@@ -3,6 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import { getAllNewsOffers, approveArticle, rejectArticle, takeDownArticle, restoreArticle, deleteBusinessArticle,
   setNewsOfferHidden, deleteNewsOfferPost, getNewsOfferById, setNewsOfferHomepage, getSpotlightBusinesses } from "../../api/admin";
 import SearchBar, { matchesQuery } from "../components/SearchBar";
+import BusinessArticleForm from "../components/BusinessArticleForm";
 import NewsOfferForm from "../components/NewsOfferForm";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
@@ -173,12 +174,10 @@ function TakeDownPanel({ article, onTakeDown, onRestore, onDelete, onEdit, onTog
         </>
       ) : (
         <div className="flex gap-2 flex-wrap items-center">
-          {article.source === "admin" && (
-            <button onClick={onEdit}
-              className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: BLUE }}>
-              Edit post
-            </button>
-          )}
+          <button onClick={onEdit}
+            className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: BLUE }}>
+            Edit post
+          </button>
 
           {/* In the Spotlight on the homepage. Only something live can go up
               there, or the homepage links to a page nobody can open. */}
@@ -304,12 +303,12 @@ export default function ArticleApprovalsPage() {
     }
   }
   async function handleEdit(a) {
-    if (a.source !== "admin") {
-      return flash("Posts a business wrote are edited by the business — you can hide or take this one down.");
-    }
+    // A business's post is edited in place; admin's own opens in the
+    // Spotlight form it was written in.
+    if (a.source === "business") return setEditing(a);
     const full = await getNewsOfferById(a.id);
     if (!full) return flash("That post could not be opened.");
-    setEditing(full);
+    setEditing({ ...full, source: "admin" });
   }
 
   // Writing a post on a business's behalf, or editing one written here.
@@ -321,6 +320,13 @@ export default function ArticleApprovalsPage() {
         <button onClick={close} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>
           ← Back to the list
         </button>
+        {editing?.source === "business" ? (
+          <BusinessArticleForm
+            initial={editing}
+            onCancel={close}
+            onSave={(saved) => { close(); flash(`"${saved?.title ?? "Post"}" updated.`); refresh(); }}
+          />
+        ) : (
         <NewsOfferForm
           initial={editing}
           businesses={businesses ?? []}
@@ -331,6 +337,7 @@ export default function ArticleApprovalsPage() {
             refresh();
           }}
         />
+        )}
       </div>
     );
   }

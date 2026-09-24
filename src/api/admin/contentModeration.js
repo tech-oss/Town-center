@@ -136,6 +136,38 @@ export async function setNewsOfferHidden(id, hidden, reason) {
   });
 }
 
+// Admin editing a post a business wrote.
+//
+// Only the words and pictures: business_id, author, status and the rejection
+// reason are all left alone, so an edit cannot quietly take a post off the
+// approval queue, publish it, or move it to another business. That is the
+// same mistake the feature_articles upsert made, and an UPDATE of named
+// columns cannot make it.
+export async function saveBusinessArticle(item) {
+  if (!item.id) throw new Error("Only an existing post can be edited here.");
+  const { data, error } = await supabase
+    .from("business_articles")
+    .update({
+      title: item.title,
+      type: item.type,
+      start_date: item.startDate || null,
+      end_date: item.endDate || null,
+      hero_image: item.heroImage || null,
+      thumbnail: item.heroImage || null,
+      body: item.body,
+    })
+    .eq("id", item.id)
+    .select("*, businesses(name)")
+    .single();
+  if (error) throw error;
+
+  await logBusinessActivity(data.business_id, {
+    action: "article.edited", entityType: "article", entityId: data.id,
+    title: data.title, detail: "Edited by Maidenhead.",
+  });
+  return { ...articleFromRow(data), source: "business" };
+}
+
 export async function deleteNewsOfferPost(id) {
   await unfeature("spotlight", id).catch(() => {});
   const { error } = await supabase.from("news_offers").delete().eq("id", id);
