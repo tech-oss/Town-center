@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { canEditField } from "../../Data/plans";
 import { supabase } from "../../lib/supabaseClient";
 import { compressImage } from "../../lib/compressImage";
+import { focalPosition, stripFocal } from "../../lib/focalPoint";
+import FocalPointPicker from "./FocalPointPicker";
 
 export async function uploadToStorage(file, pathPrefix) {
   // A filename straight off a phone ("Photo 12 Apr, 09.14.png") makes a
@@ -207,13 +209,23 @@ function readImageDimensions(file) {
 // Checks a file's aspect ratio against an expected ratio (width/height),
 // within a small tolerance to allow for rounding. Returns an error message
 // string if it doesn't match, or null if it's fine / no ratio was required.
+// Advice, not a gate.
+//
+// This used to refuse any picture more than 5% off the suggested ratio. It
+// was refusing good photographs to prevent cropping that happened anyway:
+// the same file is shown at 2.29:1 across the top of a page, 1.33:1 in a
+// card and 1.67:1 in the app, so no single ratio satisfies them all. A
+// business with a perfectly good 16:9 photo simply could not upload it.
+//
+// The suggested ratio still earns its place — a picture near it is cropped
+// least — so the note stays. What decides where the crop falls is the focal
+// point, which is set after the upload, on a picture that is actually there.
 async function checkAspectRatio(file, ratio) {
   if (!ratio) return null;
   const { width, height } = await readImageDimensions(file);
   const actual = width / height;
-  const tolerance = 0.05; // ±5%
-  if (Math.abs(actual - ratio) / ratio > tolerance) {
-    return `This image is ${width}×${height} (${(actual).toFixed(2)}:1) — please upload an image close to the ${ratio === 1 ? "1:1" : ratio.toFixed(2) + ":1"} aspect ratio noted above.`;
+  if (Math.abs(actual - ratio) / ratio > 0.05) {
+    return `This picture is ${width}×${height} (${actual.toFixed(2)}:1), not the suggested ${ratio === 1 ? "1:1" : ratio.toFixed(2) + ":1"}. It will still be used — set what stays in shot below so the right part is kept.`;
   }
   return null;
 }
@@ -222,13 +234,13 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(null);
 
   async function handleFiles(files) {
     const file = files?.[0];
     if (!file) return;
     setError("");
-    const mismatch = await checkAspectRatio(file, ratio).catch(() => null);
-    if (mismatch) { setError(mismatch); return; }
+    setNotice(await checkAspectRatio(file, ratio).catch(() => null));
     setUploading(true);
     try {
       const url = await uploadToStorage(file, pathPrefix ?? "misc");
@@ -248,7 +260,8 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
         style={{ border: dragOver ? `2px dashed ${SAGE}` : `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
         {src ? (
           <>
-            <img src={src} alt={label || "preview"} className="w-full h-full object-cover" />
+            <img src={stripFocal(src)} alt={label || "preview"} className="w-full h-full object-cover"
+              style={{ objectPosition: focalPosition(src) }} />
             {/* Clearing a picture used to be impossible — the only way out of
                 an unwanted logo or header was to upload a different one. */}
             <button
@@ -276,6 +289,11 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
       </label>
       {ratioLabel && <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>Best aspect ratio: {ratioLabel}</p>}
       {error && <p className="text-[11px] mt-1 font-medium" style={{ color: "#DC2626" }}>{error}</p>}
+      {notice && <p className="text-[11px] mt-1 font-medium" style={{ color: "#B45309" }}>{notice}</p>}
+      {/* Whatever ratio the picture arrives at, it still gets cropped to
+          several different shapes. This is where the owner says which part
+          of it must survive that. */}
+      <FocalPointPicker value={src} onChange={onChange} />
     </div>
   );
 }
@@ -284,13 +302,16 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
 export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix, ratio, ratioLabel }) {
   const [uploadingIndex, setUploadingIndex] = useState(null);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState(null);
+  // Which picture is having its focal point set. One picker under the grid
+  // rather than six crowded into the thumbnails.
+  const [focusIndex, setFocusIndex] = useState(null);
   const slots = Array.from({ length: max }, (_, i) => images[i] ?? null);
   async function handleFile(i, files) {
     const file = files?.[0];
     if (!file) return;
     setError("");
-    const mismatch = await checkAspectRatio(file, ratio).catch(() => null);
-    if (mismatch) { setError(mismatch); return; }
+    setNotice(await checkAspectRatio(file, ratio).catch(() => null));
     setUploadingIndex(i);
     try {
       const url = await uploadToStorage(file, pathPrefix ?? "misc");
@@ -315,10 +336,15 @@ export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix, rati
             style={{ border: `1.5px ${src ? "solid" : "dashed"} ${BORDER}`, backgroundColor: "#f8fafc" }}>
             {src ? (
               <>
-                <img src={src} alt={`gallery ${i + 1}`} className="w-full h-full object-cover" />
+                <img src={stripFocal(src)} alt={`gallery ${i + 1}`} className="w-full h-full object-cover"
+                  style={{ objectPosition: focalPosition(src) }} />
                 <button onClick={() => remove(i)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ backgroundColor: "#DC2626" }}>✕</button>
+                <button onClick={() => setFocusIndex(focusIndex === i ? null : i)}
+                  title="Choose what stays in shot"
+                  className="absolute bottom-1 right-1 px-1.5 h-5 rounded-full text-[9px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ backgroundColor: focusIndex === i ? "#2563EB" : "rgba(16,24,40,0.65)" }}>crop</button>
               </>
             ) : (
               <label className="w-full h-full flex items-center justify-center cursor-pointer">
@@ -331,6 +357,13 @@ export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix, rati
       </div>
       {ratioLabel && <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>Best aspect ratio: {ratioLabel}</p>}
       {error && <p className="text-[11px] mt-1 font-medium" style={{ color: "#DC2626" }}>{error}</p>}
+      {notice && <p className="text-[11px] mt-1 font-medium" style={{ color: "#B45309" }}>{notice}</p>}
+      {focusIndex !== null && images[focusIndex] && (
+        <FocalPointPicker
+          value={images[focusIndex]}
+          onChange={(v) => onChange(images.map((img, idx) => (idx === focusIndex ? v : img)))}
+        />
+      )}
     </div>
   );
 }
