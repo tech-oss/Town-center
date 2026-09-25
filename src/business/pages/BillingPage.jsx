@@ -118,7 +118,7 @@ export default function BillingPage() {
           )}
           <div className="flex gap-3 flex-wrap pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
             {user.stripeCustomerId && (
-              <button onClick={manageBilling} disabled={opening} className="px-5 py-2 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 disabled:opacity-50" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>
+              <button onClick={manageBilling} disabled={opening} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50" style={{ backgroundColor: SAGE }}>
                 {opening ? "Opening…" : premium ? "Manage billing or cancel" : "Billing history & cards"}
               </button>
             )}
