@@ -263,7 +263,7 @@ export default function MyListingPage() {
                 </div>
                 <div className="flex flex-wrap gap-8">
                   <Locked field="logo">
-                  <SingleImageUpload label="Business Logo" src={listing.logo} round pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
+                  <SingleImageUpload label="Business Logo" src={listing.logo} logo pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
                   </Locked>
                   <Locked field="heroImage" message="Upgrade to Visibility to change the hero picture of your business.">
                   <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />

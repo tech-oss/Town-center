@@ -230,7 +230,14 @@ async function checkAspectRatio(file, ratio) {
   return null;
 }
 
-export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel }) {
+// `logo` previews the picture the way the public site actually shows a logo:
+// a rounded square, object-contain on white, so the whole mark is visible.
+// It used to be `round` — a circle, object-cover — which was wrong twice
+// over. Nothing on the site shows a logo in a circle (the business page and
+// the app both use rounded-xl; listing cards just contain-fit it), and
+// object-cover cropped the edges off any logo that wasn't square, so what a
+// business signed off here wasn't what went out.
+export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -256,12 +263,13 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
-        className={`relative overflow-hidden ${round ? "w-24 h-24 rounded-full" : `w-full max-w-md ${aspect} rounded-2xl`}`}
-        style={{ border: dragOver ? `2px dashed ${SAGE}` : `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
+        className={`relative overflow-hidden ${logo ? "w-24 h-24 rounded-xl" : `w-full max-w-md ${aspect} rounded-2xl`}`}
+        style={{ border: dragOver ? `2px dashed ${SAGE}` : `1.5px solid ${BORDER}`, backgroundColor: logo && src ? "#fff" : "#f8fafc" }}>
         {src ? (
           <>
-            <img src={stripFocal(src)} alt={label || "preview"} className="w-full h-full object-cover"
-              style={{ objectPosition: focalPosition(src) }} />
+            <img src={stripFocal(src)} alt={label || "preview"}
+              className={logo ? "w-full h-full object-contain p-1.5" : "w-full h-full object-cover"}
+              style={logo ? undefined : { objectPosition: focalPosition(src) }} />
             {/* Clearing a picture used to be impossible — the only way out of
                 an unwanted logo or header was to upload a different one. */}
             <button
@@ -292,8 +300,11 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
       {notice && <p className="text-[11px] mt-1 font-medium" style={{ color: "#B45309" }}>{notice}</p>}
       {/* Whatever ratio the picture arrives at, it still gets cropped to
           several different shapes. This is where the owner says which part
-          of it must survive that. */}
-      <FocalPointPicker value={src} onChange={onChange} />
+          of it must survive that.
+          Not for a logo: every place the site shows one fits it whole
+          (object-contain), so nothing is ever cropped and there is nothing
+          to choose. */}
+      {!logo && <FocalPointPicker value={src} onChange={onChange} />}
     </div>
   );
 }
