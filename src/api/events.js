@@ -34,6 +34,21 @@ function fromRow(r) {
     categories: Array.isArray(r.category) ? r.category : [r.category].filter(Boolean),
     date: r.date_label || formatEventDate(r.event_date),
     iso: r.event_date,
+    // The recurrence rule, for the calendar to expand into real dates. None of
+    // this reached the front end before: a business could set "every Sunday",
+    // the columns were written, and the site still showed the single
+    // event_date — because this mapper stopped at `iso` and the calendar's
+    // only notion of recurrence was `recurringWeekday`, which nothing but the
+    // old hardcoded src/Data/events.js ever set.
+    recurrence: r.is_recurring && r.recurrence_type
+      ? {
+          type: r.recurrence_type,
+          days: r.recurrence_days ?? [],
+          ordinals: r.recurrence_ordinals ?? [],
+          startDate: r.recurrence_start_date || r.event_date,
+          endDate: r.recurrence_end_date || null,
+        }
+      : null,
     time: r.event_time,
     location: r.location,
     tickets: r.tickets || r.entry_type,

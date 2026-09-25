@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { categoryColors } from "../Data/events";
 import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs, eventCategoryLabel } from "../lib/eventCategories";
+import { expandRecurrence } from "../lib/eventRecurrence";
 
 // Filter options are the See & Do categories events are actually tagged with.
 const categories = Object.fromEntries(EVENT_CATEGORY_OPTIONS.map((c) => [c.value, { label: c.label, color: "var(--leaf)" }]));
@@ -28,6 +29,11 @@ const QUICK_FILTERS = [
 // (e.g. { recurringWeekday: 0, nthWeekday: 2 } = 2nd Sunday of the month)
 // only that specific week counts, not every matching weekday.
 function eventOccursOnDate(e, date) {
+  // A business's recurrence rule is checked first: these events also carry an
+  // `iso` (the first occurrence), so testing `iso` first would pin "every
+  // Sunday" to a single day — which is exactly what used to happen.
+  const dates = recurrenceDates(e, date, date);
+  if (dates) return dates.includes(toIso(date));
   if (e.iso) return e.iso === toIso(date);
   if (e.recurringWeekday != null) {
     if (date.getDay() !== e.recurringWeekday) return false;
@@ -35,6 +41,15 @@ function eventOccursOnDate(e, date) {
     return true;
   }
   return false;
+}
+
+// The real dates a rule produces between two days, or null when the event has
+// no rule. `recurringWeekday`/`nthWeekday` is the older, weaker shape the
+// hardcoded seed data uses; `recurrence` is what a business actually sets,
+// and supports several weekdays, fortnightly, and a start and end date.
+function recurrenceDates(e, from, to) {
+  if (!e.recurrence?.type) return null;
+  return expandRecurrence(e.recurrence, { from: toIso(from), to: toIso(to) });
 }
 
 // Expands events (including recurring ones) into concrete dated occurrences
@@ -54,6 +69,14 @@ function generateOccurrences(events, range) {
   const spanDays = Math.round((cappedEnd - start) / 86400000);
   const results = [];
   for (const e of events) {
+    // Checked before `iso`, for the same reason as eventOccursOnDate: a
+    // recurring event has a first-occurrence date too, and matching on that
+    // alone is what made "every Sunday" appear exactly once.
+    const ruleDates = recurrenceDates(e, start, cappedEnd);
+    if (ruleDates) {
+      for (const iso of ruleDates) results.push({ e, date: new Date(`${iso}T00:00:00`) });
+      continue;
+    }
     if (e.iso) {
       const d = new Date(`${e.iso}T00:00:00`);
       if (d >= start && d <= cappedEnd) results.push({ e, date: d });

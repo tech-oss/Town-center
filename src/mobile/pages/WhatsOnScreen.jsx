@@ -8,6 +8,7 @@ import FilterSheet from "../components/FilterSheet";
 import { getEvents } from "../../api";
 import { categoryColors } from "../../Data/events";
 import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs, eventCategoryLabel } from "../../lib/eventCategories";
+import { expandRecurrence } from "../../lib/eventRecurrence";
 
 const RANGE_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const formatUkShort = (iso) => {
@@ -34,6 +35,11 @@ const QUICK_FILTERS = [
 // recurring event (e.g. "2nd Sunday of the month") only counts on the
 // specific date(s) it actually falls on.
 function eventOccursOnDate(e, date) {
+  // The business's own rule wins over `iso`: a recurring event carries a
+  // first-occurrence date too, so matching that first pinned "every Sunday"
+  // to one day.
+  const dates = recurrenceDates(e, date, date);
+  if (dates) return dates.includes(toIso(date));
   if (e.iso) return e.iso === toIso(date);
   if (e.recurringWeekday != null) {
     if (date.getDay() !== e.recurringWeekday) return false;
@@ -43,12 +49,23 @@ function eventOccursOnDate(e, date) {
   return false;
 }
 
+// The real dates a business's rule produces, or null when it has none.
+function recurrenceDates(e, from, to) {
+  if (!e.recurrence?.type) return null;
+  return expandRecurrence(e.recurrence, { from: toIso(from), to: toIso(to) });
+}
+
 function generateOccurrences(events, range) {
   const start = range?.start ?? startOfDay(new Date());
   const end = range?.end ?? (() => { const d = new Date(start); d.setDate(d.getDate() + 180); return d; })();
   const spanDays = Math.round((end - start) / 86400000);
   const results = [];
   for (const e of events) {
+    const ruleDates = recurrenceDates(e, start, end);
+    if (ruleDates) {
+      for (const iso of ruleDates) results.push({ e, date: new Date(`${iso}T00:00:00`) });
+      continue;
+    }
     if (e.iso) {
       const d = new Date(`${e.iso}T00:00:00`);
       if (d >= start && d <= end) results.push({ e, date: d });

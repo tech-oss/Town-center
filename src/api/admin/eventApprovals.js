@@ -215,15 +215,34 @@ export async function saveBusinessEvent(item) {
   // column left out is written back as its default — omitting the author on
   // an edit silently turned admin's own free event into the business's, and
   // the slot limit then refused to save it at all.
+  //
+  // The recurrence is the same trap, and there is no admin UI for it at all:
+  // this editor has no "repeats every Sunday" field, so every column below
+  // would go back to its default and a business's recurring event would
+  // quietly become a one-off the first time admin opened and saved it. Read
+  // back and carry them through untouched.
   let author = item.author;
-  if (item.id && !author) {
+  let recurrence = null;
+  if (item.id) {
     const { data: current } = await supabase
-      .from("business_events").select("author").eq("id", item.id).maybeSingle();
-    author = current?.author ?? "business";
+      .from("business_events")
+      .select("author, is_recurring, recurrence_type, recurrence_days, recurrence_ordinals, recurrence_start_date, recurrence_end_date")
+      .eq("id", item.id).maybeSingle();
+    if (!author) author = current?.author ?? "business";
+    if (current) {
+      recurrence = {
+        is_recurring: current.is_recurring ?? false,
+        recurrence_type: current.recurrence_type ?? null,
+        recurrence_days: current.recurrence_days ?? [],
+        recurrence_ordinals: current.recurrence_ordinals ?? [],
+        recurrence_start_date: current.recurrence_start_date ?? null,
+        recurrence_end_date: current.recurrence_end_date ?? null,
+      };
+    }
   }
   const { data, error } = await supabase
     .from("business_events")
-    .upsert(eventToRow({ ...item, author }))
+    .upsert({ ...eventToRow({ ...item, author }), ...(recurrence ?? {}) })
     .select("*, businesses(name)")
     .single();
   if (error) throw error;
