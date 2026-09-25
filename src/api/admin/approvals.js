@@ -219,7 +219,14 @@ function isRealSubmission(row, section, state) {
   if (!editor) return false;
   if (state !== PENDING) return true;
   const snapshot = row.pending_snapshot?.[section];
-  if (!snapshot) return editor === "admin";
+  // No snapshot to diff against, but somebody saved this and it is waiting on
+  // a decision, so it belongs in the queue. This used to return false for
+  // anyone but admin, which made the section unreviewable: the business read
+  // "Pending Approval" on its own dashboard indefinitely while admin had
+  // nothing to approve. Two businesses were sitting in exactly that state.
+  // The before/after just shows "—" for the missing side, which the queue
+  // already renders for any field it has no previous value for.
+  if (!snapshot) return true;
   return (SECTION_FIELDS[section] ?? []).some(([col, camelKey]) => !sameValue(snapshot[camelKey] ?? null, row[col]));
 }
 
@@ -290,11 +297,13 @@ export async function countPendingApprovals() {
   const byId = new Map((rows ?? []).map((r) => [r.business_id, r]));
 
   // The same rule getApprovals applies, so the badge and the queue agree.
-  return candidates.filter(({ businessId, section, editor }) => {
+  return candidates.filter(({ businessId, section }) => {
     const row = byId.get(businessId);
     if (!row) return false;
     const snapshot = row.pending_snapshot?.[section];
-    if (!snapshot) return editor === "admin";
+    // Matches isRealSubmission: a pending section with no snapshot still
+    // counts, or the badge would disagree with the queue it is counting.
+    if (!snapshot) return true;
     return (SECTION_FIELDS[section] ?? []).some(
       ([col, camelKey]) => !sameValue(snapshot[camelKey] ?? null, row[col])
     );

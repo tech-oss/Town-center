@@ -236,6 +236,11 @@ export default function StayDetailPage({ kind }) {
       categoryLabel={isHotels ? "Hotel" : item.type}
       extraBadges={isHotels ? <StarBadge stars={item.stars} /> : null}
       title={item.name}
+      // Every other section shows the business's logo beside its name; this
+      // page never passed one, so a hotel that had uploaded a logo simply
+      // never showed it. A free listing has it withheld by the database
+      // anyway, so there is nothing to gate here beyond what already exists.
+      logo={item.logo}
       heroImage={gallery[0]}
       extraImages={free ? [] : gallery.slice(1)}
       faq={free ? null : item.faq}

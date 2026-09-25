@@ -7,7 +7,7 @@ import useTapReveal from "../hooks/useTapReveal";
 import CategoryFilterBar from "./CategoryFilterBar";
 import Loading from "./ui/Loading";
 import { featuredHotels, featuredAccommodations } from "../Data/featuredStay";
-import { POSTCODE_COORDS, RADIUS_OPTIONS, milesBetween } from "../lib/postcodeDistance";
+import { RADIUS_OPTIONS, milesBetween, lookupPostcode, isValidPostcode } from "../lib/postcodeDistance";
 
 // ── Featured Hotels / Featured Accommodation — the same "In the Spotlight"
 // hover-reveal card, alternating layout, and typography as the homepage's
@@ -174,6 +174,8 @@ export default function StayListingPage({ kind }) {
   const radius = Number(searchParams.get("radius")) || RADIUS_OPTIONS[1];
   const setRadius = (v) => patchParams({ radius: String(v) });
   const [locationOpen, setLocationOpen] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [postcodeError, setPostcodeError] = useState("");
   const [openDropdown, setOpenDropdown] = useState(null); // field name currently open, or null
   const starsFilter = useMemo(() => new Set([...paramToSet(searchParams.get("stars"))].map(Number)), [searchParams]);
   const setStarsFilter = (setOrFn) => {
@@ -304,15 +306,26 @@ export default function StayListingPage({ kind }) {
     ? categories.find((c) => c.value === activeCategory)?.label ?? landing.title
     : landing.title;
 
-  const outwardCode = postcode.trim().toUpperCase().split(/\s+/)[0];
-  const matchedCoords = POSTCODE_COORDS[outwardCode];
+  // Any valid UK postcode resolves, not just the handful this page used to
+  // know (see lib/postcodeDistance). The lookup happens when Apply is
+  // pressed rather than on every keystroke.
+  const postcodeUsable = isValidPostcode(postcode);
 
-  const applyLocation = () => {
-    if (!matchedCoords) return;
-    patchParams({ postcode, loc: `${matchedCoords.lat},${matchedCoords.lng},${radius}` });
+  const applyLocation = async () => {
+    if (!postcodeUsable || locating) return;
+    setLocating(true);
+    setPostcodeError("");
+    const coords = await lookupPostcode(postcode);
+    setLocating(false);
+    if (!coords) {
+      setPostcodeError("We couldn't find that postcode. Check it and try again.");
+      return;
+    }
+    patchParams({ postcode, loc: `${coords.lat},${coords.lng},${radius}` });
     setLocationOpen(false);
   };
   const clearLocation = () => {
+    setPostcodeError("");
     patchParams({ postcode: undefined, loc: undefined });
     setLocationOpen(false);
   };
@@ -417,7 +430,7 @@ export default function StayListingPage({ kind }) {
                     <input
                       type="text"
                       value={postcode}
-                      onChange={(e) => setPostcode(e.target.value)}
+                      onChange={(e) => { setPostcode(e.target.value); setPostcodeError(""); }}
                       placeholder="e.g. SL6 1QJ"
                       className="text-sm rounded-lg px-3 py-2 outline-none border"
                       style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
@@ -436,12 +449,15 @@ export default function StayListingPage({ kind }) {
                       ))}
                     </select>
                   </label>
-                  {postcode.trim() && !matchedCoords && (
-                    <p className="text-xs" style={{ color: "#C0392B" }}>Postcode area not recognised — try SL6, SL4, SL1, SL7, SL8 or RG9.</p>
+                  {postcode.trim() && !postcodeUsable && (
+                    <p className="text-xs" style={{ color: "#C0392B" }}>That doesn't look like a UK postcode.</p>
+                  )}
+                  {postcodeError && (
+                    <p className="text-xs" style={{ color: "#C0392B" }}>{postcodeError}</p>
                   )}
                   <div className="flex items-center gap-3 mt-1">
-                    <button type="button" onClick={applyLocation} disabled={!matchedCoords} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--forest)" }}>
-                      Apply
+                    <button type="button" onClick={applyLocation} disabled={!postcodeUsable || locating} className="text-sm font-semibold px-4 py-2 rounded-full text-white disabled:opacity-40" style={{ backgroundColor: "var(--forest)" }}>
+                      {locating ? "Finding…" : "Apply"}
                     </button>
                     {appliedLocation && (
                       <button type="button" onClick={clearLocation} className="text-xs font-semibold underline" style={{ color: "#000000" }}>

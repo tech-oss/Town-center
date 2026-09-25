@@ -141,12 +141,25 @@ export default function StayDetailScreen() {
               Back to results
             </Link>
           )}
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>
-              {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}
-            </span>
-            <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
-            {!free && place.tagline && <p className="text-sm mt-1" style={{ color: "#000000" }}>{place.tagline}</p>}
+          {/* The logo beside the name, as every other section's detail
+              screen shows it. This screen never rendered one, so a hotel's
+              logo went nowhere on the app either. */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>
+                {isHotel ? `Hotel${place.stars ? ` · ${"★".repeat(place.stars)}` : ""}` : place.type}
+              </span>
+              <h1 className="text-2xl font-bold mt-1 leading-snug" style={{ color: "#000000" }}>{place.name}</h1>
+              {!free && place.tagline && <p className="text-sm mt-1" style={{ color: "#000000" }}>{place.tagline}</p>}
+            </div>
+            {place.logo && (
+              <img
+                src={place.logo}
+                alt={`${place.name} logo`}
+                className="w-14 h-14 shrink-0 rounded-xl object-contain bg-white p-1"
+                style={{ border: "1px solid rgba(0,0,0,0.08)" }}
+              />
+            )}
           </div>
 
           {!isHotel && (place.guests || place.bedrooms || place.host) && (

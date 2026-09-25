@@ -7,7 +7,7 @@ import { ListSearch, OffersLink } from "../components/ListSearch";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
 import { getHotels, getAccommodations } from "../../api";
-import { POSTCODE_COORDS, RADIUS_OPTIONS, milesBetween } from "../../lib/postcodeDistance";
+import { RADIUS_OPTIONS, milesBetween, lookupPostcode, isValidPostcode, outwardOf } from "../../lib/postcodeDistance";
 
 // "Near a postcode" — same postcode + radius search as the web listing
 // page, in the app's bottom-sheet pattern rather than a plain option list
@@ -16,6 +16,8 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
   const [open, setOpen] = useState(false);
   const [postcode, setPostcode] = useState("");
   const [radius, setRadius] = useState(RADIUS_OPTIONS[1]);
+  const [locating, setLocating] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!open) return;
@@ -23,16 +25,26 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  const outwardCode = postcode.trim().toUpperCase().split(/\s+/)[0];
-  const matchedCoords = POSTCODE_COORDS[outwardCode];
+  // Any valid UK postcode, not just the handful this used to know
+  // (see lib/postcodeDistance). Resolved on Apply, not per keystroke.
+  const postcodeUsable = isValidPostcode(postcode);
 
-  const apply = () => {
-    if (!matchedCoords) return;
-    onApply({ ...matchedCoords, radius, outwardCode });
+  const apply = async () => {
+    if (!postcodeUsable || locating) return;
+    setLocating(true);
+    setError("");
+    const coords = await lookupPostcode(postcode);
+    setLocating(false);
+    if (!coords) {
+      setError("We couldn't find that postcode. Check it and try again.");
+      return;
+    }
+    onApply({ ...coords, radius, outwardCode: outwardOf(postcode) });
     setOpen(false);
   };
   const clear = () => {
     setPostcode("");
+    setError("");
     onClear();
     setOpen(false);
   };
@@ -61,7 +73,7 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
               <input
                 type="text"
                 value={postcode}
-                onChange={(e) => setPostcode(e.target.value)}
+                onChange={(e) => { setPostcode(e.target.value); setError(""); }}
                 placeholder="e.g. SL6 1QJ"
                 className="text-sm rounded-xl px-3.5 py-3 outline-none border"
                 style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000" }}
@@ -80,9 +92,10 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
                 ))}
               </select>
             </label>
-            {postcode.trim() && !matchedCoords && (
-              <p className="text-xs" style={{ color: "#C0392B" }}>Postcode area not recognised — try SL6, SL4, SL1, SL7, SL8 or RG9.</p>
+            {postcode.trim() && !postcodeUsable && (
+              <p className="text-xs" style={{ color: "#C0392B" }}>That doesn't look like a UK postcode.</p>
             )}
+            {error && <p className="text-xs" style={{ color: "#C0392B" }}>{error}</p>}
             <div className="flex items-center gap-3 mt-1">
               {appliedLocation && (
                 <button type="button" onClick={clear} className="text-xs font-semibold underline" style={{ color: "#000000" }}>
@@ -92,11 +105,11 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
               <button
                 type="button"
                 onClick={apply}
-                disabled={!matchedCoords}
+                disabled={!postcodeUsable || locating}
                 className="flex-1 py-3 rounded-full text-sm font-bold text-white disabled:opacity-40"
                 style={{ backgroundColor: "var(--forest)" }}
               >
-                Apply
+                {locating ? "Finding…" : "Apply"}
               </button>
             </div>
           </div>
