@@ -146,6 +146,12 @@ export default function BillingPage() {
         />
 
         {/* The re-usable add-on slots: articles, events, featured articles */}
+        <div>
+          <p className="text-lg font-bold" style={{ color: FOREST }}>Add On Services</p>
+          <p className="text-sm mt-0.5" style={{ color: MUTED }}>
+            Extra slots for News &amp; Offers, Events and Featured Articles — buy once, use whenever you like within the period.
+          </p>
+        </div>
         <AddonSlotsCard businessId={user.id} kind="article" premium={premium} onToast={setToast} />
         <AddonSlotsCard businessId={user.id} kind="event" premium={premium} onToast={setToast} />
         <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium} onToast={setToast} />
