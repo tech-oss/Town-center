@@ -62,7 +62,13 @@ function toRow(form) {
     gallery: form.gallery,
     status: form.status,
     is_recurring: !!form.isRecurring,
-    recurrence_type: form.isRecurring ? form.recurrenceType : null,
+    // Defaulted, never left null for a recurring event: an event created
+    // before recurrence existed loads with recurrenceType null, and the
+    // "Repeats" dropdown *displays* Weekly without firing a change — so a
+    // business could tick Sunday, see "Weekly", save, and get a rule with
+    // no type. Nothing expands such a rule, so the event showed on its
+    // start date only.
+    recurrence_type: form.isRecurring ? (form.recurrenceType || "weekly") : null,
     recurrence_days: form.isRecurring ? (form.recurrenceDays ?? []) : [],
     recurrence_ordinals: form.isRecurring ? (form.recurrenceOrdinals ?? []) : [],
     recurrence_start_date: form.isRecurring ? (form.eventDate || null) : null,

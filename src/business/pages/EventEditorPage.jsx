@@ -40,7 +40,11 @@ function RecurrenceFields({ form, set }) {
   return (
     <div className="flex flex-col gap-4 mt-4 p-4 rounded-xl" style={{ backgroundColor: "#f8fafc", border: `1.5px solid ${BORDER}` }}>
       <Field label="Repeats">
-        <Select value={form.recurrenceType} onChange={(e) => set("recurrenceType", e.target.value)}>
+        {/* ?? "weekly" so the value matches what the dropdown actually shows.
+            With a null value the browser displays the first option anyway, so
+            a business editing an older event saw "Weekly", never touched the
+            dropdown, and saved a rule with no type at all. */}
+        <Select value={form.recurrenceType ?? "weekly"} onChange={(e) => set("recurrenceType", e.target.value)}>
           <option value="weekly">Weekly</option>
           <option value="biweekly">Every 2 weeks</option>
           <option value="monthly_by_weekday">Monthly, on a specific weekday</option>
