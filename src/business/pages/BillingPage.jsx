@@ -85,7 +85,7 @@ export default function BillingPage() {
 
       <div className="visibility-plan-page flex flex-col gap-6 max-w-4xl">
         <div>
-          <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Subscriptions & Billing</h1>
+          <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Subscriptions & Accepted Terms</h1>
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your plan, homepage promotions and payment history.</p>
         </div>
 
@@ -153,7 +153,7 @@ export default function BillingPage() {
         <div>
           <p className="text-lg font-bold" style={{ color: FOREST }}>Add On Services</p>
           <p className="text-sm mt-0.5" style={{ color: MUTED }}>
-            Extra slots for News &amp; Offers, Events and Featured Articles — buy once, use whenever you like within the period.
+            Extra slots for News &amp; Offer Articles, Events and Feature Articles — buy once, use whenever you like within the period.
           </p>
         </div>
         {/* isOwner matters here as much as on the pages these slots are used

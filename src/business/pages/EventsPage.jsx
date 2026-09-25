@@ -110,7 +110,7 @@ export default function EventsPage() {
       <div className="flex flex-col gap-6 max-w-5xl">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Request Event</h1>
+            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Events</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>Request a See &amp; Do event for your business. This event is shown on your profile page, the See &amp; Do main page and the events calendar if you add dates to your event. Admin approval is required before it goes live.</p>
           </div>
           <button onClick={() => (atSlotLimit ? setShowSlots(true) : navigate("/business/events/new"))}

@@ -9,11 +9,11 @@ import { supabase } from "../../lib/supabaseClient";
 // What each slot shows, and where that kind of thing is written. `tab` is
 // the name on the sidebar, so a link reads the way the nav does.
 export const SLOT_CONTENT = {
-  spotlight: { kind: "business_article", noun: "news or offer post", manage: "/business/articles", tab: "News & Articles" },
+  spotlight: { kind: "business_article", noun: "news or offer post", manage: "/business/articles", tab: "News & Offer Articles" },
   // A Featured Article slot shows a Featured Article — one of the longer
   // editorial pieces — and nothing else.
-  featured_article: { kind: "feature_article", noun: "Featured Article", manage: "/business/featured-articles", tab: "Featured Articles" },
-  whats_on: { kind: "business_event", noun: "event", manage: "/business/events", tab: "Request Event" },
+  featured_article: { kind: "feature_article", noun: "Featured Article", manage: "/business/featured-articles", tab: "Feature Articles" },
+  whats_on: { kind: "business_event", noun: "event", manage: "/business/events", tab: "Events" },
   featured_business: { kind: "business", noun: "listing", manage: "/business/listing", tab: "My Listing" },
 };
 

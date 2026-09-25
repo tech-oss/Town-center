@@ -93,7 +93,20 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking, isOw
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
       <div>
         <p className="text-base font-bold" style={{ color: FOREST }}>{slot.label}</p>
-        <p className="text-xs mt-0.5" style={{ color: MUTED }}>{slot.description}</p>
+        {/* A description with line breaks (Featured Business's is a bulleted
+            list of what the slot actually gets you) renders as bullets;
+            everything else stays the plain one-line blurb it always was. */}
+        {slot.description?.includes("\n") ? (
+          <ul className="text-xs mt-1 flex flex-col gap-0.5">
+            {slot.description.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => (
+              <li key={line} className="flex gap-1.5" style={{ color: MUTED }}>
+                <span>•</span><span>{line.replace(/^•\s*/, "")}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-xs mt-0.5" style={{ color: MUTED }}>{slot.description}</p>
+        )}
       </div>
 
       {packages.length > 0 && (

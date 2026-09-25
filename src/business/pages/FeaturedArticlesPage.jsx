@@ -95,7 +95,7 @@ export default function FeaturedArticlesPage() {
       <div className="flex flex-col gap-6 max-w-5xl">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Featured Articles</h1>
+            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Feature Articles</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>
               Longer, editorial-style pieces with a hero image and pictures through the text. They go to admin for
               approval, then appear on your profile and first on the Offers page.

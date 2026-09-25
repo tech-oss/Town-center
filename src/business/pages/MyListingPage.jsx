@@ -86,7 +86,7 @@ function tabsFor(user, listing) {
     ...(isFreelancer ? [] : [{ key: "gallery", label: user.businessType === "hotel" ? "Photos" : "Gallery" }]),
     { key: "location", label: "Location" },
     { key: "contact", label: "Contact & Social" },
-    { key: "articles", label: "News & Articles" },
+    { key: "articles", label: "News & Offer Articles" },
     { key: "reviews", label: "Reviews" },
     { key: "faqs", label: "FAQs" },
   ];
@@ -384,7 +384,7 @@ export default function MyListingPage() {
           )}
 
           {tab === "articles" && (
-            <EditorSection title="News & Articles">
+            <EditorSection title="News & Offer Articles">
               <Locked field="articles">
                 <p className="text-sm mb-4" style={{ color: MUTED }}>Manage up to 3 articles that appear on your business page and in the Offers section of the public site.</p>
                 <Link to="/business/articles" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 w-fit inline-block" style={{ backgroundColor: SAGE }}>

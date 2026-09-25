@@ -89,7 +89,7 @@ export default function FeaturedArticleEditorPage() {
       <Toast message={toast} />
       <div className="flex flex-col gap-6 max-w-3xl">
         <button onClick={() => navigate("/business/featured-articles")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>
-          ← Featured Articles
+          ← Feature Articles
         </button>
 
         <div>

@@ -156,7 +156,7 @@ export default function EventEditorPage() {
     <BusinessLayout>
       <Toast message={toast} />
       <div className="flex flex-col gap-6 max-w-3xl pb-10">
-        <button onClick={() => navigate("/business/events")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← Request Event</button>
+        <button onClick={() => navigate("/business/events")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← Events</button>
         <h1 className="text-2xl font-bold" style={{ color: FOREST }}>{id ? "Edit Event" : "New Event"}</h1>
 
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-8" style={CARD}>

@@ -78,7 +78,7 @@ export default function ArticleEditorPage() {
     <BusinessLayout>
       <Toast message={toast} />
       <div className="flex flex-col gap-6 max-w-4xl pb-10">
-        <button onClick={() => navigate("/business/articles")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← News & Articles</button>
+        <button onClick={() => navigate("/business/articles")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← News & Offer Articles</button>
         <h1 className="text-2xl font-bold" style={{ color: FOREST }}>{id ? "Edit Article" : "New Article"}</h1>
 
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-8" style={CARD}>

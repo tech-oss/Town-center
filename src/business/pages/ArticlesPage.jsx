@@ -289,7 +289,7 @@ export default function ArticlesPage() {
       <div className="flex flex-col gap-6 max-w-5xl">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>News &amp; Articles</h1>
+            <h1 className="text-2xl font-bold" style={{ color: FOREST }}>News &amp; Offer Articles</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>
               Manage your News and Offer articles from here. {ADDON_KINDS.article.included} are included in your subscription.
               You can purchase more any time you need. Edit / Hide / Delete as needed and all will show on your
