@@ -85,6 +85,14 @@ export async function approvePushRequest(request) {
     delivery = { error: e.message };
   }
 
+  // How many devices it actually reached, when delivery reports it. Left
+  // null otherwise rather than written as 0, which would read as "sent to
+  // nobody" instead of "not measured".
+  if (typeof delivery?.sent === "number") {
+    await supabase.from("push_notifications")
+      .update({ reach: delivery.sent }).eq("id", sent.id);
+  }
+
   const { error } = await supabase
     .from("business_push_requests")
     .update({

@@ -228,7 +228,14 @@ function ComposeTab() {
                   {n.channels.map((c) => (
                     <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(16,24,40,0.1)", color: "#1E293B" }}>{c}</span>
                   ))}
-                  <span className="text-[11px]" style={{ color: "#9CA3AF" }}>· {n.audience} · {n.reach.toLocaleString()} reached</span>
+                  {/* reach is null until delivery reports a number — a send
+                      recorded while the send-push function isn't deployed
+                      never gets one. This read `n.reach.toLocaleString()`
+                      unguarded, which threw and blanked the whole page the
+                      moment the history had a single row in it. */}
+                  <span className="text-[11px]" style={{ color: "#9CA3AF" }}>
+                    · {n.audience}{typeof n.reach === "number" ? ` · ${n.reach.toLocaleString()} reached` : ""}
+                  </span>
                 </div>
               </div>
               <span className="text-[11px] shrink-0 whitespace-nowrap" style={{ color: "#9CA3AF" }}>{n.sentAt}</span>

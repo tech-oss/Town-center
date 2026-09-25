@@ -429,5 +429,11 @@ export async function sendPush(form) {
     delivery = { error: e.message };
   }
 
+  // Record what delivery actually reached, when it reports a number.
+  if (typeof delivery?.sent === "number") {
+    await supabase.from("push_notifications").update({ reach: delivery.sent }).eq("id", data.id);
+    data.reach = delivery.sent;
+  }
+
   return { ...pushFromRow(data), delivery };
 }
