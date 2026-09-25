@@ -35,7 +35,10 @@ function viewValue(m) {
 }
 function viewChange(m) {
   if (!m) return null;
-  if (m.change === null) return m.lastMonth === 0 && m.thisMonth > 0 ? "First views this month" : null;
+  // Nothing to compare against a month with no views in it. This used to say
+  // "First views this month", which told the business nothing the number
+  // above it didn't already.
+  if (m.change === null) return null;
   return `${m.change >= 0 ? "+" : ""}${m.change}% vs last month`;
 }
 
