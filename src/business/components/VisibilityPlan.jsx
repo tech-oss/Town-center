@@ -45,6 +45,11 @@ const PATHS = {
   trend: <><path d="M3 17l6-6 4 4 8-8" /><path d="M14 7h7v7" /></>,
   check: <path d="M20 6L9 17l-5-5" />,
   lock: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></>,
+  reviews: <path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z" />,
+  moreArticles: <><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5M9 12h6M9 16h6" /><circle cx="18.5" cy="18.5" r="3.2" /><path d="M18.5 17.3v3.4M16.8 19h3.4" /></>,
+  events: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /><circle cx="9.5" cy="15" r="1.2" /><circle cx="14.5" cy="15" r="1.2" /></>,
+  push: <><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></>,
+  spotlight: <><path d="M3 11l14-7v16L3 13z" /><path d="M7 13v4a2 2 0 002 2h1" /><path d="M17 8a3 3 0 010 6" /></>,
 };
 
 export function Icon({ name, size = 22, color = SAGE, stroke = 1.8 }) {
@@ -231,7 +236,12 @@ export function VisibilityFeatures({ included = false }) {
         What you'll get with the Visibility Plan
       </h2>
       <div className="grid md:grid-cols-2 mt-6">
-        {[VISIBILITY_FEATURES.slice(0, 5), VISIBILITY_FEATURES.slice(5)].map((column, ci) => (
+        {(() => {
+          // Split evenly rather than a fixed 5/5, so the two columns stay
+          // balanced as features are added or removed.
+          const half = Math.ceil(VISIBILITY_FEATURES.length / 2);
+          return [VISIBILITY_FEATURES.slice(0, half), VISIBILITY_FEATURES.slice(half)];
+        })().map((column, ci) => (
           <ul key={ci} className={ci === 0 ? "md:pr-10 md:border-r" : "md:pl-10"} style={{ borderColor: BORDER }}>
             {column.map((f) => (
               <li key={f.title} className="flex items-start gap-4 py-3">

@@ -40,8 +40,8 @@ export const BILLING_OPTIONS = {
   },
 };
 
-// The ten things the Visibility Plan is sold on, in the order they appear on
-// the subscription page. Events, FAQs and services lists also unlock but are
+// What the Visibility Plan is sold on, in the order they appear on the
+// subscription page. FAQs and services lists also unlock but are
 // deliberately not advertised here.
 export const VISIBILITY_FEATURES = [
   { icon: "logo",        title: "Your business logo",       detail: "Make your business instantly recognisable." },
@@ -54,6 +54,11 @@ export const VISIBILITY_FEATURES = [
   { icon: "booking",     title: "Direct booking link",      detail: "Make it easy for customers to book with you." },
   { icon: "articles",    title: "Up to 3 articles",         detail: "Publish news, offers and updates." },
   { icon: "analytics",   title: "Business analytics",       detail: "See your page views and article views, so you can understand what's getting attention." },
+  { icon: "reviews",      title: "Customer reviews",                        detail: "Add verified customer reviews to your profile page to enhance trust in your business." },
+  { icon: "moreArticles", title: "Access to more articles",                 detail: "Get access to publish more articles across the platform." },
+  { icon: "events",       title: "Access to events",                        detail: "Publish events that your business may have on the calendar pages." },
+  { icon: "push",         title: "Access to in app push notifications",     detail: "Let everyone know instantly of important business announcements direct to their devices." },
+  { icon: "spotlight",    title: "Access to homepage featuring of your business", detail: "The prime visibility on both website and app for your business." },
 ];
 
 export const PREMIUM_PLAN = {
