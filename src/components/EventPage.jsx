@@ -173,7 +173,10 @@ export default function EventPage() {
         ? <NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} />
         : <NewsOffers item={business} />)}
       shareTitle={`${event.title} — Maidenhead`}
-      relatedHeading="More See & Do"
+      // "More What's On", as the app's event screen calls the same list.
+      // These are other events, and See & Do is the business section, so the
+      // old "More See & Do" pointed at the wrong part of the site.
+      relatedHeading="More What's On"
       related={allEvents
         .filter((e) => e.slug !== event.slug)
         .slice(0, 3)
