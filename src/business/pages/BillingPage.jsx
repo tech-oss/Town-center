@@ -157,8 +157,10 @@ export default function BillingPage() {
         <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium} onToast={setToast} />
 
         {/* Payment history */}
+        <div>
+          <p className="text-lg font-bold" style={{ color: FOREST }}>Payment History</p>
+        </div>
         <div className="bg-white rounded-2xl p-5" style={CARD}>
-          <p className="text-sm font-bold mb-3" style={{ color: FOREST }}>Payment History</p>
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr style={{ backgroundColor: "rgba(16,24,40,0.04)" }}>
@@ -191,8 +193,10 @@ export default function BillingPage() {
         </div>
 
         {/* Terms acceptance record */}
+        <div>
+          <p className="text-lg font-bold" style={{ color: FOREST }}>Terms Acceptance Record</p>
+        </div>
         <div className="bg-white rounded-2xl p-5" style={CARD}>
-          <p className="text-sm font-bold mb-2" style={{ color: FOREST }}>Terms Acceptance Record</p>
           <p className="text-sm" style={{ color: MUTED }}>{user.termsAcceptedAt ? `Terms accepted on ${fmtDateTime(user.termsAcceptedAt)}.` : "Terms accepted when your business was registered."} <button type="button" onClick={() => setShowAcceptedTerms(true)} className="font-semibold hover:underline" style={{ color: "#2563EB" }}>View accepted terms →</button></p>
         </div>
       </div>
