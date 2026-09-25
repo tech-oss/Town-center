@@ -398,7 +398,7 @@ export default function MyListingPage() {
             <EditorSection title="Reviews">
               <p className="text-xs mb-4" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine.</p>
               <Locked field="reviews">
-              <ReviewsList reviews={reviews} onAdd={handleReviewAdd} onUpdate={handleReviewUpdate} onDelete={handleReviewDelete} />
+              <ReviewsList reviews={reviews} onAdd={handleReviewAdd} onUpdate={handleReviewUpdate} onDelete={handleReviewDelete} premium={premium} />
               </Locked>
             </EditorSection>
           )}

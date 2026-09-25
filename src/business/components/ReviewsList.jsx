@@ -38,15 +38,25 @@ export function ReviewsSummary({ reviews }) {
   );
 }
 
+// Only the 6 most recent approved reviews actually show on the public page
+// (MAX_PUBLIC_REVIEWS in town-center's src/api/liveBusinesses.js) — approving
+// a 7th doesn't reject it, it just doesn't reach the site until an older one
+// goes, the same as an article approved but held because the business's 3
+// live slots are full. "Visible" alone used to be labelled "Live"
+// unconditionally, which was wrong for anything past the 6th.
+const MAX_LIVE_REVIEWS = 6;
+
 const STATUS_STYLES = {
   "Pending Approval": { label: "Awaiting approval", bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
   Visible: { label: "Live", bg: "rgba(22,163,74,0.14)", fg: "#15803D" },
+  VisibleQueued: { label: "Approved — not shown yet", bg: "rgba(37,99,235,0.1)", fg: "#1D4ED8" },
   Rejected: { label: "Not approved", bg: "rgba(185,28,28,0.1)", fg: "#991B1B" },
   Hidden: { label: "Hidden by admin", bg: "rgba(107,114,128,0.13)", fg: "#374151" },
 };
 
-function ReviewStatus({ status }) {
-  const s = STATUS_STYLES[status] ?? STATUS_STYLES["Pending Approval"];
+function ReviewStatus({ status, onSite }) {
+  const key = status === "Visible" && !onSite ? "VisibleQueued" : status;
+  const s = STATUS_STYLES[key] ?? STATUS_STYLES["Pending Approval"];
   return <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: s.bg, color: s.fg }}>{s.label}</span>;
 }
 
@@ -112,12 +122,24 @@ function ReviewForm({ initial, onSave, onCancel }) {
   );
 }
 
-export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
+// `premium` defaults true so a caller that forgets to pass it fails toward
+// not showing an incorrect "needs the Visibility Plan" note, rather than
+// wrongly flagging a subscribed business's reviews as plan-gated.
+export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete, premium = true }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
   const canManage = !!onAdd;
+
+  // `reviews` is already newest-first (listReviews orders by date desc), so
+  // filtering to the approved ones keeps that order — the first 6 are
+  // exactly what the public page shows. Anything after that is approved but
+  // waiting its turn. None of them show at all on a free plan
+  // (public_business_reviews requires plan = 'premium').
+  const onSiteIds = premium
+    ? new Set(reviews.filter((r) => r.status === "Visible").slice(0, MAX_LIVE_REVIEWS).map((r) => r.id))
+    : new Set();
 
   return (
     <div className="flex flex-col gap-3">
@@ -149,7 +171,7 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold" style={{ color: FOREST }}>{r.reviewer}</span>
               <Stars rating={r.rating} />
-              {r.status && <ReviewStatus status={r.status} />}
+              {r.status && <ReviewStatus status={r.status} onSite={onSiteIds.has(r.id)} />}
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs" style={{ color: "#9CA3AF" }}>{formatUK(r.date)}</span>
@@ -162,6 +184,13 @@ export default function ReviewsList({ reviews, onAdd, onUpdate, onDelete }) {
             </div>
           </div>
           <p className="text-sm" style={{ color: FOREST }}>{r.text}</p>
+          {/* Not premium is already explained once, above the whole list —
+              repeating it on every card would be noise. */}
+          {premium && r.status === "Visible" && !onSiteIds.has(r.id) && (
+            <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(37,99,235,0.06)", color: "#1D4ED8" }}>
+              Approved, but only your 6 most recent reviews show at once and those slots are full. This one appears automatically once one of them is removed or hidden.
+            </p>
+          )}
           {r.status === "Rejected" && r.moderationNote && (
             <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(185,28,28,0.08)", color: "#991B1B" }}>Not approved: {r.moderationNote}. Edit the review to send it again.</p>
           )}

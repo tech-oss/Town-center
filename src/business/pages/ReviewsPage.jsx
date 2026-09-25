@@ -4,9 +4,15 @@ import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, MUTED } from "../components/FormKit";
 import ReviewsList from "../components/ReviewsList";
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
+import { isPremium } from "../../Data/plans";
 
 export default function ReviewsPage() {
   const { user } = useBusinessAuth();
+  // Reviews are a Visibility Plan feature on the public site
+  // (public_business_reviews requires plan = 'premium', same gate every
+  // homepage promotion uses) — a free business's approved reviews never
+  // reach its page at all, regardless of how many it has.
+  const premium = isPremium(user.plan);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useToast();
@@ -45,12 +51,18 @@ export default function ReviewsPage() {
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage the reviews listed for your business.</p>
         </div>
 
-        <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine. Every new or edited review is checked by an admin before it appears on your page.</p>
+        <p className="text-xs" style={{ color: "#9CA3AF" }}>Add, edit or remove reviews for your business, and include a verification link for each to confirm it's genuine. Every new or edited review is checked by an admin before it appears on your page — and only your 6 most recent approved reviews show at once.</p>
+
+        {!premium && (
+          <p className="text-xs px-3.5 py-2.5 rounded-xl" style={{ backgroundColor: "rgba(217,119,6,0.08)", color: "#92400E", border: "1px solid rgba(217,119,6,0.25)" }}>
+            Reviews are part of the Visibility Plan — approved reviews are saved here but won't show on your page until you subscribe.
+          </p>
+        )}
 
         {loading ? (
           <p className="text-sm" style={{ color: MUTED }}>Loading reviews…</p>
         ) : (
-          <ReviewsList reviews={reviews} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} />
+          <ReviewsList reviews={reviews} onAdd={handleAdd} onUpdate={handleUpdate} onDelete={handleDelete} premium={premium} />
         )}
       </div>
     </BusinessLayout>
