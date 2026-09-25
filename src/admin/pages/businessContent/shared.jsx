@@ -155,7 +155,13 @@ export function PlanImageNote() {
   );
 }
 
-export function SingleImageUpload({ src, onChange, label, round = false, aspect = "aspect-video" }) {
+// `logo` previews the picture the way the public site actually shows a
+// logo: a rounded square, object-contain on white, so the whole mark is
+// visible. It used to be `round` — a circle, object-cover — which was
+// wrong twice over. Nothing on the site shows a logo in a circle (the
+// business page and the app both use rounded-xl), and object-cover
+// cropped the edges off any logo that was not square.
+export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video" }) {
   const [dragOver, setDragOver] = useState(false);
 
   function handleFiles(files) {
@@ -171,11 +177,12 @@ export function SingleImageUpload({ src, onChange, label, round = false, aspect 
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
-        className={`relative overflow-hidden ${round ? "w-24 h-24 rounded-full" : `w-full max-w-md ${aspect} rounded-2xl`}`}
-        style={{ border: dragOver ? `2px dashed ${BLUE}` : `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}
+        className={`relative overflow-hidden ${logo ? "w-24 h-24 rounded-xl" : `w-full max-w-md ${aspect} rounded-2xl`}`}
+        style={{ border: dragOver ? `2px dashed ${BLUE}` : `1.5px solid ${BORDER}`, backgroundColor: logo && src ? "#fff" : "#f8fafc" }}
       >
         {src ? (
-          <img src={src} alt={label || "preview"} className="w-full h-full object-cover" />
+          <img src={src} alt={label || "preview"}
+            className={logo ? "w-full h-full object-contain p-1.5" : "w-full h-full object-cover"} />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-1">
             <span className="text-2xl" style={{ color: "#9CA3AF" }}>+</span>

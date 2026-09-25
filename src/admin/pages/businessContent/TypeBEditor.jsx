@@ -13,7 +13,7 @@ export default function TypeBEditor({ form, set, onSave, saving }) {
         <EditorSection title="Header Card">
           <div className="flex items-start gap-6 mb-4">
             <Locked field="logo">
-              <SingleImageUpload label="Logo" src={form.logo} round onChange={(v) => set("logo", v)} />
+              <SingleImageUpload label="Logo" src={form.logo} logo onChange={(v) => set("logo", v)} />
             </Locked>
             <div className="flex-1 grid sm:grid-cols-2 gap-4">
               <Field label="Business Name" hint={`${(form.name ?? "").length}/60`}>

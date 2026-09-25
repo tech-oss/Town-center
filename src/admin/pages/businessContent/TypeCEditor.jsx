@@ -28,7 +28,7 @@ export default function TypeCEditor({ form, set, onSave, saving }) {
           <div className="flex flex-wrap gap-8">
             <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]"
               onChange={(v) => set("heroImage", v)} />
-            <SingleImageUpload label="Logo" src={form.logo} round onChange={(v) => set("logo", v)} />
+            <SingleImageUpload label="Logo" src={form.logo} logo onChange={(v) => set("logo", v)} />
           </div>
           <PlanImageNote />
         </EditorSection>
