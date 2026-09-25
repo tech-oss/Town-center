@@ -23,6 +23,7 @@ import EventOccurrencesPage from "./pages/EventOccurrencesPage";
 import BillingPage from "./pages/BillingPage";
 import UpgradeFlowPage from "./pages/UpgradeFlowPage";
 import ReviewsPage from "./pages/ReviewsPage";
+import PushNotificationsPage from "./pages/PushNotificationsPage";
 import SupportPage from "./pages/SupportPage";
 import SettingsPage from "./pages/SettingsPage";
 
@@ -84,6 +85,7 @@ function RequirePremium({ title, description, children }) {
 const NEWS_GATE = { title: "News & Offers is part of the Visibility Plan", description: "Upgrade to publish news, updates and special offers on your business page." };
 const FEATURED_GATE = { title: "Featured Articles are part of the Visibility Plan", description: "Upgrade, then buy a Featured Article slot to publish a longer, editorial-style piece about your business." };
 const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions." };
+const PUSH_GATE = { title: "Push notifications are part of the Visibility Plan", description: "Upgrade to ask Maidenhead to send a notification about your business to everyone with notifications turned on." };
 const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page." };
 const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention." };
 
@@ -135,6 +137,7 @@ export default function BusinessApp() {
       <Route path="upgrade" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
       <Route path="subscription" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
       <Route path="reviews" element={<RequireAuth><RequirePremium {...REVIEWS_GATE}><ReviewsPage /></RequirePremium></RequireAuth>} />
+      <Route path="push-notifications" element={<RequireAuth><RequirePremium {...PUSH_GATE}><PushNotificationsPage /></RequirePremium></RequireAuth>} />
       <Route path="support" element={<RequireAuth><SupportPage /></RequireAuth>} />
       <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
 
