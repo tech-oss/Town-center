@@ -368,7 +368,7 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
       <div>
         <p className="text-lg font-bold" style={{ color: FOREST }}>Homepage Promotions</p>
         <p className="text-sm mt-0.5" style={{ color: MUTED }}>
-          Pay once to appear on the Maidenhead homepage and app for a set time. Everything you promote also stays on the Offers page. All times are UK time.
+          Pay once to appear on the Maidenhead homepage and The Maidenhead App for a set time. Everything you promote also stays on the Offers page and your own business profile page. All times are UK time.
         </p>
       </div>
 
