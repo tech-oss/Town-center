@@ -15,3 +15,4 @@ export { request } from "./client";
 export * from "./spotlight";
 export * from "./offers";
 export * from "./homepageSlots";
+export * from "./stayDiscover";

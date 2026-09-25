@@ -1,7 +1,7 @@
 import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { useTrackView, businessView } from "../lib/trackView";
 import { useEffect } from "react";
-import { getHotelBySlug, getAccommodationBySlug } from "../api";
+import { getHotelBySlug, getAccommodationBySlug, getStayDiscover } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
@@ -9,7 +9,6 @@ import PlaceDetailLayout from "./PlaceDetailLayout";
 import NewsOffers from "./NewsOffers";
 import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
-import { STAY_DISCOVER } from "../Data/stayDiscover";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
 // category pill, same pill styling as the rest of the layout.
@@ -202,6 +201,9 @@ export default function StayDetailPage({ kind }) {
   const backTo = searchParams.get("back");
   const fetcher = isHotels ? () => getHotelBySlug(slug) : () => getAccommodationBySlug(slug);
   const { data: item, loading, error } = useFetch(fetcher, [slug, kind]);
+  // Built from live businesses and guides, so it can't quietly shrink to
+  // one card when a hardcoded slug stops resolving (see api/stayDiscover).
+  const { data: discover } = useFetch(getStayDiscover, []);
   useTrackView(businessView(item));
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
@@ -259,7 +261,7 @@ export default function StayDetailPage({ kind }) {
       stickyBooking={!free && isHotels && !!item.website}
       relatedHeading="Stay Here & Discover"
       relatedBackground="#ffffff"
-      related={STAY_DISCOVER}
+      related={discover ?? []}
       afterGallery={!free && (
         <>
         <CheckInSection

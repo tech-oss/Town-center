@@ -636,17 +636,36 @@ export default function PlaceDetailLayout({
                     ) : (
                       <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     )}
-                    {it.tag && (
+                    {/* The white pill belongs to event cards, where the
+                        coloured dot carries the category. Anything else
+                        shows its label as the green eyebrow below, so a
+                        card never states its category twice. */}
+                    {it.tag && it.tagDotColor && (
                       <span className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}>
-                        {it.tagDotColor && <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: it.tagDotColor }} />}
+                        <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full" style={{ backgroundColor: it.tagDotColor }} />
                         {it.tag}
                       </span>
                     )}
                   </div>
                   <div className="flex flex-col gap-0.5 sm:gap-2 p-2 sm:p-6">
-                    {!it.tag && it.category && <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{it.category}</span>}
+                    {/* The green label above the name, and the green "Read
+                        more" under it — the app's cards have had both all
+                        along and the website's had neither, so the same card
+                        read as two different components. `tag` used to render
+                        only as the white pill over the photo, which meant a
+                        card that had one showed no green label at all. */}
+                    {(it.category ?? (it.tagDotColor ? null : it.tag)) && (
+                      <span className="text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>
+                        {it.category ?? it.tag}
+                      </span>
+                    )}
                     <h3 className="font-bold text-xs sm:text-xl leading-snug line-clamp-2" style={{ color: "#000000" }}>{it.name}</h3>
                     {it.date && <p className="text-[9px] sm:text-xs line-clamp-1" style={{ color: "#000000" }}>{it.date}</p>}
+                    {it.address && <p className="text-[9px] sm:text-xs line-clamp-1" style={{ color: "rgba(0,0,0,0.6)" }}>{it.address}</p>}
+                    <span className="inline-flex items-center gap-1 text-[9px] sm:text-xs font-bold mt-0.5 sm:mt-1" style={{ color: "var(--leaf)" }}>
+                      Read more
+                      <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+                    </span>
                   </div>
                 </Link>
               ))}

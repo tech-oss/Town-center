@@ -10,8 +10,7 @@ import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
 import useFetch from "../../hooks/useFetch";
-import { getHotelBySlug, getAccommodationBySlug } from "../../api";
-import { STAY_DISCOVER } from "../../Data/stayDiscover";
+import { getHotelBySlug, getAccommodationBySlug, getStayDiscover } from "../../api";
 import { typeColor } from "../lib/typeColors";
 import useMobileBack from "../hooks/useMobileBack";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
@@ -83,6 +82,8 @@ export default function StayDetailScreen() {
     () => (isHotel ? getHotelBySlug(slug) : getAccommodationBySlug(slug)),
     [kind, slug]
   );
+  // Live businesses and guides, not hardcoded slugs (see api/stayDiscover).
+  const { data: discover } = useFetch(getStayDiscover, []);
   useTrackView(businessView(place));
 
   const [searchParams] = useSearchParams();
@@ -353,11 +354,11 @@ export default function StayDetailScreen() {
             </div>
           )}
 
-          {STAY_DISCOVER.length > 0 && (
+          {(discover ?? []).length > 0 && (
             <div className="mt-2">
               <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Stay Here &amp; Discover</p>
               <div className="flex flex-col gap-3">
-                {STAY_DISCOVER.map((it) => (
+                {(discover ?? []).map((it) => (
                   <Link key={it.slug} to={it.mobileTo} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                     <img src={it.image} alt="" className="w-20 h-20 object-cover shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
