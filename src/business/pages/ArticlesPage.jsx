@@ -3,6 +3,7 @@ import { formatUK } from "../../lib/ukDate";
 import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
 import { raisePurchaseRequest } from "../api/purchaseRequests";
 import PurchasedSlots from "../components/PurchasedSlots";
+import AddonSlotsCard from "../components/AddonSlotsCard";
 import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -135,6 +136,11 @@ export default function ArticlesPage() {
   const [slots, setSlots] = useState(null);
   const [buying, setBuying] = useState(false);
   const [busy, setBusy] = useState(false);
+  // Opened straight away when the owner arrives from a Content Manager's
+  // purchase request (?packages=1 — see requestDestination).
+  const [showSlots, setShowSlots] = useState(
+    () => new URLSearchParams(window.location.search).get("packages") === "1"
+  );
 
   const [adminPosts, setAdminPosts] = useState([]);
 
@@ -202,6 +208,7 @@ export default function ArticlesPage() {
   const liveArticles = articles.filter((a) => a.status === "Live");
   // 3 included, plus any extra slots the owner has bought.
   const allowance = slots?.allowance ?? LIVE_ARTICLE_LIMIT;
+  const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
   const atLiveLimit = liveArticles.length >= allowance;
 
   function patch(id, changes) {
@@ -304,12 +311,27 @@ export default function ArticlesPage() {
             <p className="text-sm" style={{ color: FOREST }}>
               <strong>{liveArticles.length} of {allowance}</strong> live article{liveArticles.length === 1 ? "" : "s"} in use{slots?.extra ? ` (${ADDON_KINDS.article.included} included + ${slots.extra} purchased)` : ""}
             </p>
-            {atLiveLimit && (
-              <p className="text-xs" style={{ color: "#92400E" }}>
-                At your limit — subscribe for more, or swap one out when you publish something new.
-              </p>
-            )}
+            <div className="flex items-center gap-3 flex-wrap">
+              {atLiveLimit && (
+                <p className="text-xs" style={{ color: "#92400E" }}>
+                  At your limit — get another slot, or swap one out when you publish something new.
+                </p>
+              )}
+              {/* Getting more slots was only reachable from inside the swap
+                  modal, which a Content Manager only ever sees if they happen
+                  to be at the limit AND trying to publish. Events and Featured
+                  Articles both offer it here, on the page; so does this now. */}
+              <button onClick={() => setShowSlots((v) => !v)} className="text-xs font-bold px-3 py-1.5 rounded-lg shrink-0"
+                style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+                {showSlots ? "Hide packages" : "Get more slots"}
+              </button>
+            </div>
           </div>
+        )}
+
+        {showSlots && (
+          <AddonSlotsCard businessId={user.id} kind="article" premium={premium}
+            isOwner={user.role === "Owner"} requestedBy={`${user.firstName} ${user.lastName}`} onToast={setToast} />
         )}
 
         {/* What's been bought, and when each slot runs out. */}

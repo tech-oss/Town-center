@@ -25,10 +25,18 @@ export function requestLabel(r) {
 }
 
 // Where the owner goes to actually buy it.
+//
+// ?packages=1 opens the packages on arrival. Without it the owner lands on a
+// page with the packages still collapsed behind a "Get more slots" button and
+// has to go looking for the thing they have just agreed to buy — which
+// defeats the point of the request carrying the package with it.
+//
+// Deliberately NOT "slots": these pages already use ?slots=success as the
+// return from Stripe, and strip it on arrival.
 export function requestDestination(r) {
-  if (r.kind === "event") return "/business/events";
-  if (r.kind === "featured_article") return "/business/featured-articles";
-  if (r.kind === "article") return "/business/articles";
+  if (r.kind === "event") return "/business/events?packages=1";
+  if (r.kind === "featured_article") return "/business/featured-articles?packages=1";
+  if (r.kind === "article") return "/business/articles?packages=1";
   return "/business/billing";
 }
 

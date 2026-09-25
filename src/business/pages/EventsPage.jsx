@@ -35,7 +35,11 @@ export default function EventsPage() {
   const [toast, setToast] = useToast();
   const [deleting, setDeleting] = useState(null);
   const [slots, setSlots] = useState(null);
-  const [showSlots, setShowSlots] = useState(false);
+  // Opened straight away when the owner arrives from a Content Manager's
+  // purchase request (?packages=1 — see requestDestination).
+  const [showSlots, setShowSlots] = useState(
+    () => new URLSearchParams(window.location.search).get("packages") === "1"
+  );
 
   // How many events this business may have on the site at once. An event slot
   // is bought as an add-on; a recurring event is still one event, so it uses

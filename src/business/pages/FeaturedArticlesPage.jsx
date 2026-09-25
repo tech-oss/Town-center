@@ -29,7 +29,11 @@ export default function FeaturedArticlesPage() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [slots, setSlots] = useState(null);
-  const [showSlots, setShowSlots] = useState(false);
+  // Opened straight away when the owner arrives from a Content Manager's
+  // purchase request (?packages=1 — see requestDestination).
+  const [showSlots, setShowSlots] = useState(
+    () => new URLSearchParams(window.location.search).get("packages") === "1"
+  );
   const [deleting, setDeleting] = useState(null);
   const [toast, setToast] = useToast();
 

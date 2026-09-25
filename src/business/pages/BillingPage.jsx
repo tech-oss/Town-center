@@ -50,6 +50,8 @@ export default function BillingPage() {
   const vp = useVisibilityCheckout(user.id);
 
   const premium = isPremium(user.plan);
+  const isOwner = user.role === "Owner";
+  const requestedBy = `${user.firstName} ${user.lastName}`;
   const cancelled = !premium && (!!user.cancelled || user.planStatus === "Cancelled");
 
   // Returning from Stripe's portal may follow a cancellation or card update,
@@ -141,6 +143,8 @@ export default function BillingPage() {
         <HomepagePromotions
           businessId={user.id}
           premium={premium}
+          isOwner={isOwner}
+          requestedBy={requestedBy}
           onToast={setToast}
           onBooked={() => listPayments(user.id).then(setPayments)}
         />
@@ -152,9 +156,17 @@ export default function BillingPage() {
             Extra slots for News &amp; Offers, Events and Featured Articles — buy once, use whenever you like within the period.
           </p>
         </div>
-        <AddonSlotsCard businessId={user.id} kind="article" premium={premium} onToast={setToast} />
-        <AddonSlotsCard businessId={user.id} kind="event" premium={premium} onToast={setToast} />
-        <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium} onToast={setToast} />
+        {/* isOwner matters here as much as on the pages these slots are used
+            on: without it a Content Manager was shown Purchase buttons that
+            start a checkout they aren't allowed to complete, instead of the
+            "Ask the owner" request. This is the page they'd naturally come
+            looking to buy on, so it was the likeliest place to hit it. */}
+        <AddonSlotsCard businessId={user.id} kind="article" premium={premium}
+          isOwner={isOwner} requestedBy={requestedBy} onToast={setToast} />
+        <AddonSlotsCard businessId={user.id} kind="event" premium={premium}
+          isOwner={isOwner} requestedBy={requestedBy} onToast={setToast} />
+        <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium}
+          isOwner={isOwner} requestedBy={requestedBy} onToast={setToast} />
 
         {/* Payment history */}
         <div>

@@ -9,6 +9,7 @@ import {
   getSlotAvailability, getMyBookings, getMyContentOptions,
   chooseBookingContent, startSlotCheckout, releaseHold, waitForBookingPaid,
 } from "../api/homepageSlots";
+import { raisePurchaseRequest } from "../api/purchaseRequests";
 
 // Homepage Promotions — the paid homepage slots (In the Spotlight, Featured
 // Article, What's On, Featured Business). Each card shows the price, what on
@@ -52,7 +53,7 @@ function BookingTimer({ startsAt, endsAt }) {
 }
 
 // ─── One slot type ─────────────────────────────────────────────────────────
-function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
+function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking, isOwner, onAsk, asked }) {
   const now = useNow(15_000);
   const needs = SLOT_CONTENT[slot.slotType];
   const packages = slot.packages ?? [];
@@ -163,10 +164,25 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking }) {
               goes in it afterwards from {needs.tab}.
             </p>
           )}
-          <button onClick={() => onBook(slot, chosen)} disabled={busy}
-            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: SAGE }}>
-            {busy ? "Reserving your slot…" : `Book for £${chosen.price.toFixed(2)}`}
-          </button>
+          {/* Booking charges the business, so it is the owner's alone —
+              book_homepage_slot refuses anyone else. A Content Manager gets
+              the request instead of a button that fails at the database. */}
+          {isOwner ? (
+            <button onClick={() => onBook(slot, chosen)} disabled={busy}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: SAGE }}>
+              {busy ? "Reserving your slot…" : `Book for £${chosen.price.toFixed(2)}`}
+            </button>
+          ) : asked ? (
+            <p className="w-full py-2.5 text-center text-sm font-semibold" style={{ color: "#15803D" }}>
+              Requested ✓ — the owner has been asked
+            </p>
+          ) : (
+            <button onClick={() => onAsk(slot, chosen)}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold"
+              style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+              Ask the owner to book this
+            </button>
+          )}
         </>
       )}
     </div>
@@ -271,7 +287,7 @@ function BookingRow({ booking: b, label, options, premium, businessId, onChoose 
 }
 
 // ─── Section ───────────────────────────────────────────────────────────────
-export default function HomepagePromotions({ businessId, premium, onToast, onBooked }) {
+export default function HomepagePromotions({ businessId, premium, onToast, onBooked, isOwner = true, requestedBy }) {
   const [params, setParams] = useSearchParams();
   const [slots, setSlots] = useState(null);
   const [bookings, setBookings] = useState([]);
@@ -279,6 +295,8 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState("");
   const [confirming, setConfirming] = useState(null); // "waiting" | "late"
+  // Slot types a Content Manager has already asked the owner about.
+  const [asked, setAsked] = useState(() => new Set());
 
   const refresh = useCallback(async () => {
     try {
@@ -347,6 +365,22 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
     }
   }
 
+  // A Content Manager can't book — this carries the slot, and which package
+  // they picked, to the owner's dashboard and bell instead.
+  async function ask(slot, pkg) {
+    try {
+      await raisePurchaseRequest(businessId, {
+        kind: slot.slotType,
+        note: pkg ? `${pkg.name} — £${pkg.price.toFixed(2)}` : "",
+        requestedName: requestedBy,
+      });
+      setAsked((prev) => new Set(prev).add(slot.slotType));
+      onToast?.("Sent to the business owner.");
+    } catch (e) {
+      onToast?.(e.message);
+    }
+  }
+
 
   async function choose(booking, kind, contentId) {
     await chooseBookingContent(booking.id, kind, contentId);
@@ -408,6 +442,7 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
             <SlotCard key={slot.slotType} slot={slot} premium={premium}
               hasContent={contentFor(slot.slotType).length > 0}
               busy={busy === slot.slotType} onBook={book}
+              isOwner={isOwner} onAsk={ask} asked={asked.has(slot.slotType)}
               activeBooking={slot.slotType === "featured_business"
                 ? bookings.find((b) => b.slotType === "featured_business" && b.status !== "cancelled" && new Date(b.endsAt) > new Date())
                 : null} />
