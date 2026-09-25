@@ -1,14 +1,14 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
-import { getPushHistory, sendPush } from "../../api/admin";
+import {
+  getPushHistory, sendPush,
+  getPushRequests, approvePushRequest, rejectPushRequest, countPendingPushRequests,
+} from "../../api/admin";
 import ArticleTypeahead from "../components/ArticleTypeahead";
-
-// UI-only mock of previously sent notifications.
-const SENT_HISTORY = [
-  { id: "n1", title: "Summer in the Spotlight", body: "New offers from Coppa Club & COCOBA are live — see what's on this week.", channels: ["Web", "Mobile"], audience: "All users", sentAt: "2026-06-20 09:00", reach: 1240 },
-  { id: "n2", title: "New restaurant now open", body: "Spice Garden has joined the Maidenhead directory. Take a look!", channels: ["Mobile"], audience: "All users", sentAt: "2026-06-12 12:30", reach: 1198 },
-  { id: "n3", title: "Renew your listing", body: "Your subscription renews soon — keep your business visible in town.", channels: ["Web"], audience: "Business owners", sentAt: "2026-06-01 08:00", reach: 42 },
-];
+import LoadingState from "../components/LoadingState";
+import EmptyState from "../components/EmptyState";
+import { formatUK } from "../../lib/ukDate";
+import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
 function Toast({ message, onDismiss }) {
   if (!message) return null;
@@ -54,7 +54,7 @@ function PushPreview({ title, body, channel, image }) {
   );
 }
 
-export default function PushNotificationsPage() {
+function ComposeTab() {
   const [form, setForm] = useState({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
   const [nonce, setNonce] = useState(0);
   const { data: fetchedHistory } = useFetch(getPushHistory, [nonce]);
@@ -100,13 +100,8 @@ export default function PushNotificationsPage() {
   const field = { border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" };
 
   return (
-    <div className="flex flex-col gap-6 max-w-5xl">
+    <div className="flex flex-col gap-6">
       <Toast message={toast} onDismiss={() => setToast(null)} />
-
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#1E293B" }}>Push Notifications</h1>
-        <p className="text-sm mt-1" style={{ color: "#6B7280" }}>Send custom push notifications to mobile and web users.</p>
-      </div>
 
       <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
         {/* Compose form */}
@@ -241,6 +236,221 @@ export default function PushNotificationsPage() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── Business requests ─────────────────────────────────────────────────────
+// What businesses have asked to send. Approving sends it there and then;
+// rejecting takes a reason, which the business reads on its own Push
+// Notifications page.
+
+const REQUEST_FILTERS = [
+  { key: "pending", label: "Pending" },
+  { key: "approved", label: "Approved" },
+  { key: "rejected", label: "Rejected" },
+  { key: "All", label: "All" },
+];
+
+const REQUEST_STATUS = {
+  pending: { label: "Pending", bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
+  approved: { label: "Approved & sent", bg: "rgba(22,163,74,0.14)", fg: "#15803D" },
+  rejected: { label: "Rejected", bg: "rgba(185,28,28,0.1)", fg: "#991B1B" },
+};
+
+function RequestsTab({ notify, onCountChange }) {
+  const [filter, setFilter] = useState("pending");
+  const [nonce, setNonce] = useState(0);
+  const [rejecting, setRejecting] = useState(null);
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(null);
+  const { data: requests, loading } = useFetch(() => getPushRequests({ status: filter }), [filter, nonce]);
+
+  const refresh = () => { setNonce((n) => n + 1); onCountChange?.(); };
+
+  async function approve(r) {
+    setBusy(r.id);
+    try {
+      const { delivery } = await approvePushRequest(r);
+      if (delivery?.error) {
+        notify(`Approved and recorded — delivery isn't live yet (${delivery.error}).`);
+      } else if (delivery) {
+        notify(`Approved — sent to ${delivery.sent}/${delivery.total} subscribed device(s).`);
+      } else {
+        notify("Approved and sent.");
+      }
+      refresh();
+    } catch (e) {
+      notify(e.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function reject(r) {
+    if (!reason.trim()) return;
+    setBusy(r.id);
+    try {
+      await rejectPushRequest(r, reason);
+      notify(`Rejected. ${r.businessName} has been told why.`);
+      setRejecting(null);
+      setReason("");
+      refresh();
+    } catch (e) {
+      notify(e.message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex gap-2 flex-wrap">
+        {REQUEST_FILTERS.map((f) => (
+          <button key={f.key} onClick={() => setFilter(f.key)}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-semibold"
+            style={filter === f.key
+              ? { backgroundColor: BLUE, color: "#fff" }
+              : { border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#fff" }}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <LoadingState />
+      ) : !requests?.length ? (
+        <EmptyState title="Nothing here"
+          message={filter === "pending" ? "No businesses are waiting on a push notification." : `No ${filter === "All" ? "" : filter} requests.`} />
+      ) : (
+        <div className="flex flex-col gap-3">
+          {requests.map((r) => {
+            const s = REQUEST_STATUS[r.status] ?? REQUEST_STATUS.pending;
+            return (
+              <div key={r.id} className="rounded-2xl p-5" style={CARD}>
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-bold" style={{ color: NAVY }}>{r.title}</p>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: s.bg, color: s.fg }}>{s.label}</span>
+                    </div>
+                    <p className="text-xs mt-1" style={{ color: MUTED }}>
+                      {r.businessName}{r.requestedName ? ` · ${r.requestedName}` : ""} · {formatUK(String(r.createdAt).slice(0, 10))}
+                    </p>
+                    {r.body && <p className="text-xs mt-2" style={{ color: NAVY }}>{r.body}</p>}
+
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      {r.channels.map((c) => (
+                        <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                          style={{ backgroundColor: "rgba(16,24,40,0.1)", color: NAVY }}>{c}</span>
+                      ))}
+                      {r.url && <span className="text-[11px] font-mono truncate" style={{ color: MUTED }}>→ {r.url}</span>}
+                    </div>
+
+                    {r.attachedArticle && (
+                      <div className="mt-2.5 flex items-center gap-2 rounded-xl p-2 w-fit"
+                        style={{ backgroundColor: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.18)" }}>
+                        {r.attachedArticle.thumbnail && <img src={r.attachedArticle.thumbnail} alt="" className="w-10 h-8 rounded object-cover" />}
+                        <span className="text-[11px] font-semibold" style={{ color: NAVY }}>{r.attachedArticle.title}</span>
+                      </div>
+                    )}
+
+                    {r.status === "rejected" && r.rejectionReason && (
+                      <p className="text-[11px] mt-2" style={{ color: "#991B1B" }}>Rejected: {r.rejectionReason}</p>
+                    )}
+                  </div>
+
+                  {/* The same device preview the business saw when writing it. */}
+                  <div className="w-full sm:w-72 shrink-0">
+                    <PushPreview title={r.title} body={r.body} channel="mobile" image={r.attachedArticle?.thumbnail} />
+                  </div>
+                </div>
+
+                {r.status === "pending" && (
+                  rejecting === r.id ? (
+                    <div className="mt-3 pt-3 flex flex-col gap-2" style={{ borderTop: `1px solid ${BORDER}` }}>
+                      <label className="text-xs font-semibold" style={{ color: MUTED }}>
+                        Why isn't this going out? {r.businessName} is shown this.
+                      </label>
+                      <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} autoFocus
+                        placeholder="Explain what needs changing…"
+                        className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
+                        style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
+                      <div className="flex gap-2">
+                        <button onClick={() => reject(r)} disabled={busy === r.id || !reason.trim()}
+                          className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40"
+                          style={{ backgroundColor: "#B91C1C" }}>
+                          {busy === r.id ? "Rejecting…" : "Reject request"}
+                        </button>
+                        <button onClick={() => { setRejecting(null); setReason(""); }}
+                          className="px-4 py-1.5 rounded-lg text-xs font-semibold"
+                          style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 mt-3 pt-3 flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
+                      <button onClick={() => approve(r)} disabled={busy === r.id}
+                        className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50"
+                        style={{ backgroundColor: BLUE }}>
+                        {busy === r.id ? "Sending…" : "Approve & send"}
+                      </button>
+                      <button onClick={() => { setRejecting(r.id); setReason(""); }}
+                        className="px-4 py-1.5 rounded-lg text-xs font-semibold"
+                        style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>
+                        Reject
+                      </button>
+                    </div>
+                  )
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function PushNotificationsPage() {
+  const [tab, setTab] = useState("compose");
+  const [pending, setPending] = useState(0);
+  const [toast, setToast] = useState(null);
+
+  const loadCount = useCallback(() => {
+    countPendingPushRequests().then(setPending).catch(() => {});
+  }, []);
+  useEffect(loadCount, [loadCount]);
+
+  function notify(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4000);
+  }
+
+  return (
+    <div className="flex flex-col gap-6 max-w-5xl">
+      <Toast message={toast} onDismiss={() => setToast(null)} />
+
+      <div>
+        <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Push Notifications</h1>
+        <p className="text-sm mt-1" style={{ color: MUTED }}>
+          Send custom push notifications to mobile and web users, and review the ones businesses have asked you to send.
+        </p>
+      </div>
+
+      <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
+        {[["compose", "Compose"], ["requests", "Business Requests"]].map(([key, label]) => (
+          <button key={key} onClick={() => setTab(key)}
+            className="px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2"
+            style={tab === key ? { backgroundColor: "#fff", color: NAVY, boxShadow: "0 1px 2px rgba(16,24,40,0.08)" } : { color: MUTED }}>
+            {label}
+            {key === "requests" && pending > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#DC2626", color: "#fff" }}>{pending}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {tab === "compose" ? <ComposeTab /> : <RequestsTab notify={notify} onCountChange={loadCount} />}
     </div>
   );
 }

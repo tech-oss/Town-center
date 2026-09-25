@@ -32,6 +32,7 @@ export async function getAdminPendingCounts() {
     users,
     businesses,
     tickets,
+    push,
   ] = await Promise.all([
     // Counted with the queue's own rules, but without loading the queue: see
     // countPendingApprovals for why that mattered.
@@ -49,6 +50,8 @@ export async function getAdminPendingCounts() {
     count("businesses", (q) => q.eq("status", "Pending")),
     // A ticket nobody has picked up yet.
     count("business_tickets", (q) => q.eq("status", "Open")),
+    // A push notification a business has asked us to send.
+    count("business_push_requests", (q) => q.eq("status", "pending")),
   ]);
 
   return {
@@ -61,5 +64,6 @@ export async function getAdminPendingCounts() {
     users,
     businesses,
     tickets,
+    push,
   };
 }

@@ -53,7 +53,7 @@ const NAV = [
   { to: "/admin/subscriptions",      label: "Subscriptions",         icon: I.subscriptions },
   { to: "/admin/reporting",          label: "Reporting",             icon: I.reporting },
   { to: "/admin/business-analytics", label: "Business Analytics",    icon: I.reporting },
-  { to: "/admin/push-notifications", label: "Push Notifications",    icon: I.notifications },
+  { to: "/admin/push-notifications", label: "Push Notifications",    icon: I.notifications, badge: "push" },
   { to: "/admin/support-tickets",    label: "Support Tickets",       icon: I.tickets,        badge: "tickets" },
   { to: "/admin/site-content",       label: "Site Content",          icon: I.siteContent },
   { to: "/admin/settings",           label: "Settings",              icon: I.settings },
