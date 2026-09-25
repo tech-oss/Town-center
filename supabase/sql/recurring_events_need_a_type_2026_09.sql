@@ -32,11 +32,15 @@
 
 -- ── 1. Repair rules that never had a type ─────────────────────────────────
 
+-- recurrence_days is jsonb, not text[] — jsonb_typeof() guards the length
+-- call, which errors on a non-array, and excludes NULL at the same time
+-- (NULL = 'array' is NULL, not true).
 update public.business_events
 set recurrence_type = 'weekly'
 where is_recurring
   and recurrence_type is null
-  and coalesce(array_length(recurrence_days, 1), 0) > 0;
+  and jsonb_typeof(recurrence_days) = 'array'
+  and jsonb_array_length(recurrence_days) > 0;
 
 -- Anything still recurring with nothing to recur on was never a working rule.
 -- Turn it off rather than leave it half-set: the event keeps its own date and
