@@ -221,12 +221,20 @@ export default function ArticlesPage() {
   // Putting an article on the site. At the limit this opens the swap modal
   // rather than failing — the trigger would reject it anyway, and a refusal
   // with no way forward isn't much use to the business.
+  //
+  // Only a Hidden article goes straight back to Live — it was already
+  // approved once and the business just switched it off. A Draft or
+  // Rejected one has never been in front of Maidenhead admin, so it goes to
+  // Pending Approval instead; the database refuses "Live" from here for
+  // exactly that reason (business_content_needs_approval_2026_09.sql).
   async function handleMakeLive(a) {
     if (atLiveLimit) { setSwapFor(a); return; }
+    const goLive = a.status === "Hidden";
+    const status = goLive ? "Live" : "Pending Approval";
     try {
-      await setArticleStatus(a.id, "Live");
-      patch(a.id, { status: "Live" });
-      setToast(`"${a.title}" is now live.`);
+      await setArticleStatus(a.id, status);
+      patch(a.id, { status });
+      setToast(goLive ? `"${a.title}" is now live.` : `"${a.title}" sent to Maidenhead for approval.`);
     } catch (e) {
       setToast(e.message);
     }
@@ -234,11 +242,15 @@ export default function ArticlesPage() {
 
   async function handleSwap(toHide) {
     setBusy(true);
+    const goLive = swapFor.status === "Hidden";
+    const status = goLive ? "Live" : "Pending Approval";
     try {
-      await swapLiveArticle(toHide.id, swapFor.id);
+      await swapLiveArticle(toHide.id, swapFor.id, status);
       patch(toHide.id, { status: "Hidden" });
-      patch(swapFor.id, { status: "Live" });
-      setToast(`"${swapFor.title}" is now live in place of "${toHide.title}".`);
+      patch(swapFor.id, { status });
+      setToast(goLive
+        ? `"${swapFor.title}" is now live in place of "${toHide.title}".`
+        : `"${toHide.title}" was hidden, and "${swapFor.title}" was sent to Maidenhead for approval.`);
       setSwapFor(null);
     } catch (e) {
       setToast(e.message);
@@ -361,8 +373,10 @@ export default function ArticlesPage() {
                     <button onClick={() => navigate(`/business/articles/${a.id}/edit`)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: `1.5px solid ${BORDER}`, color: FOREST }}>Edit</button>
                     {a.status === "Live" ? (
                       <button onClick={() => handleHide(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>Hide</button>
-                    ) : a.status === "Hidden" || a.status === "Draft" ? (
+                    ) : a.status === "Hidden" ? (
                       <button onClick={() => handleMakeLive(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: "#2563EB" }}>Make Live</button>
+                    ) : a.status === "Draft" || a.status === "Rejected" ? (
+                      <button onClick={() => handleMakeLive(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: "#2563EB" }}>Submit for Approval</button>
                     ) : null}
                     <button onClick={() => setDeleting(a)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
                   </div>

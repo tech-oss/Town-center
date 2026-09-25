@@ -103,6 +103,11 @@ export async function updateArticle(id, form) {
   });
 }
 
+// The database itself refuses "Live" from a business unless the article was
+// already Hidden (business_content_needs_approval_2026_09.sql) — from Draft
+// or Rejected this call must ask for "Pending Approval" instead, or the
+// trigger throws. The two branches below are what the caller uses to tell
+// those apart (see handleMakeLive in ArticlesPage.jsx).
 export async function setArticleStatus(id, status) {
   const owner = await articleOwner(id);
   const { error } = await supabase.from("business_articles").update({ status }).eq("id", id);
@@ -112,16 +117,24 @@ export async function setArticleStatus(id, status) {
   }
   // Only the business reaches this — admin's own approve/reject logs its own
   // entry from the admin panel.
-  const action = status === "Live" ? "article.published" : status === "Hidden" ? "article.hidden" : "article.updated";
+  const action = status === "Live" ? "article.published"
+    : status === "Hidden" ? "article.hidden"
+    : status === "Pending Approval" ? "article.submitted"
+    : "article.updated";
   await logActivity(owner?.business_id, { action, entityType: "article", entityId: id, title: owner?.title });
 }
 
 // Swap: take one article off the site and put another on, in that order, so
 // the pair never momentarily exceeds the cap and trips the trigger.
-export async function swapLiveArticle(hideId, showId) {
+//
+// showStatus is "Live" only when the article being swapped in was already
+// Hidden (previously approved, just switched off) — a Draft or Rejected one
+// must go to "Pending Approval" instead, same as making it live on its own
+// would.
+export async function swapLiveArticle(hideId, showId, showStatus = "Pending Approval") {
   await setArticleStatus(hideId, "Hidden");
   try {
-    await setArticleStatus(showId, "Live");
+    await setArticleStatus(showId, showStatus);
   } catch (e) {
     // Put the first one back rather than leaving the business with one fewer
     // live article than it started with.

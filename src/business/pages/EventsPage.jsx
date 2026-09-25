@@ -68,10 +68,14 @@ export default function EventsPage() {
     setEvents((prev) => prev.map((x) => (x.id === e.id ? { ...x, status } : x)));
     setToast(e.status === "Hidden" ? `"${e.title}" is live again.` : `"${e.title}" deactivated.`);
   }
+  // Reached from Draft or Rejected — an event that has never been in front
+  // of Maidenhead admin. The database refuses a direct write to "Live" from
+  // here (business_content_needs_approval_2026_09.sql), same as Articles;
+  // Live comes from admin's approval, not this button.
   async function handleMakeLive(e) {
-    await setEventStatus(e.id, "Live");
-    setEvents((prev) => prev.map((x) => (x.id === e.id ? { ...x, status: "Live" } : x)));
-    setToast(`"${e.title}" is now live.`);
+    await setEventStatus(e.id, "Pending Approval");
+    setEvents((prev) => prev.map((x) => (x.id === e.id ? { ...x, status: "Pending Approval" } : x)));
+    setToast(`"${e.title}" sent to Maidenhead for approval.`);
   }
   async function confirmDelete() {
     await deleteEvent(deleting.id);
@@ -188,8 +192,8 @@ export default function EventsPage() {
                     )}
                     {e.status === "Live" || e.status === "Hidden" ? (
                       <button onClick={() => handleHide(e)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>{e.status === "Hidden" ? "Make Live" : "Deactivate"}</button>
-                    ) : e.status === "Draft" ? (
-                      <button onClick={() => handleMakeLive(e)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: "#2563EB" }}>Make Live</button>
+                    ) : e.status === "Draft" || e.status === "Rejected" ? (
+                      <button onClick={() => handleMakeLive(e)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: "#2563EB" }}>Submit for Approval</button>
                     ) : null}
                     <button onClick={() => setDeleting(e)} className="text-xs font-semibold px-2.5 py-1 rounded-lg" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
                   </div>
