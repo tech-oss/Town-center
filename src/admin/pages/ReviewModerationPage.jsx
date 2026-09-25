@@ -8,9 +8,11 @@ import ReviewActions from "../components/ReviewActions";
 import { NAVY, BLUE, MUTED, BORDER, CARD, FIELD_STYLE } from "../theme";
 import { formatUK } from "../../lib/ukDate";
 
-// "Visible" reviews are the live ones.
+// "Visible" means approved, not necessarily live: only a business's 6 most
+// recent Visible reviews actually reach the site (MAX_LIVE_REVIEWS below),
+// so the tab is labelled by what the status actually means.
 const FILTERS = ["Pending Approval", "Visible", "Rejected", "Hidden", "All"];
-const FILTER_LABELS = { Visible: "Live" };
+const FILTER_LABELS = { Visible: "Approved" };
 
 function Stars({ rating }) {
   const n = Math.round(Number(rating) || 0);
@@ -64,7 +66,10 @@ export default function ReviewModerationPage() {
   }
   async function handleApproveReview(r) {
     await approveReview(r.id);
-    flash(`Review from ${r.reviewer} is now live on ${r.businessName}.`);
+    // Not necessarily live yet — only the 6 most recent approved reviews per
+    // business reach the site, and this one might not be among them. The
+    // list refreshes with the accurate badge right after.
+    flash(`Review from ${r.reviewer} approved.`);
     refresh();
   }
   async function handleRejectReview(r, reason) {
@@ -95,7 +100,7 @@ export default function ReviewModerationPage() {
       <Toast message={toast} />
       <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Review Moderation</h1>
       <p className="text-sm mt-1 mb-6" style={{ color: MUTED }}>
-        Reviews businesses add to their listing. Each new or edited review waits here for approval before it appears on the business's page. Hiding pulls a live review off the site but keeps it on record; deleting is permanent.
+        Reviews businesses add to their listing. Each new or edited review waits here for approval before it can appear on the business's page — and only the 6 most recent approved reviews actually show at once, so an approved review can still be waiting its turn. Hiding pulls a live review off the site but keeps it on record; deleting is permanent.
       </p>
 
       <div className="flex gap-2 flex-wrap mb-5">
@@ -126,8 +131,9 @@ export default function ReviewModerationPage() {
                         ? { backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }
                         : { backgroundColor: "rgba(220,38,38,0.1)", color: "#991B1B" }}>{r.status}</span>
                     )}
-                    {r.status === "Visible" && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(22,163,74,0.14)", color: "#15803D" }}>Live</span>
+                    {r.status === "Visible" && (r.onSite
+                      ? <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(22,163,74,0.14)", color: "#15803D" }}>Live</span>
+                      : <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.12)", color: "#1D4ED8" }}>Approved — not shown</span>
                     )}
                   </div>
                   <p className="text-xs mt-1" style={{ color: MUTED }}>{r.businessName} · {formatUK(r.date)}</p>
@@ -169,6 +175,13 @@ export default function ReviewModerationPage() {
                           onReject={(reason) => handleRejectReply(r, reason)} />
                       )}
                     </div>
+                  )}
+                  {r.status === "Visible" && !r.onSite && (
+                    <p className="text-[11px] mt-2" style={{ color: "#1D4ED8" }}>
+                      {r.offSiteReason === "plan"
+                        ? `Approved, but reviews are a Visibility Plan feature and ${r.businessName} isn't currently on it (or isn't approved/visible). Nothing here will show until that changes.`
+                        : `Approved, but ${r.businessName} already has 6 more recent reviews live. This one shows automatically once one of those is removed or hidden.`}
+                    </p>
                   )}
                   {(r.status === "Hidden" || r.status === "Rejected") && r.moderationNote && (
                     <p className="text-[11px] mt-2" style={{ color: "#991B1B" }}>{r.status}: {r.moderationNote}</p>

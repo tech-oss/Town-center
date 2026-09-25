@@ -243,6 +243,64 @@ function reviewFromRow(row) {
   };
 }
 
+// Only a business's 6 most recent approved reviews actually reach the site
+// (MAX_PUBLIC_REVIEWS in src/api/liveBusinesses.js) — approving a 7th doesn't
+// reject it, it just doesn't show until an older one goes, the same as an
+// article approved but held because the business's 3 live slots are full.
+// "Visible" alone was being shown as "Live" here regardless, which was wrong
+// for anything past the 6th.
+const MAX_LIVE_REVIEWS = 6;
+
+// public_business_reviews (plan_rules_and_reviews_2026_09.sql) withholds a
+// business's reviews entirely unless it's Approved, visible, AND on the
+// Visibility Plan — reviews are a paid-plan feature, same gate
+// business_is_subscribed() applies to every homepage promotion. A Visible
+// review on a free or unapproved business is never on the site regardless of
+// the 6-cap below, so that gate has to be checked first or a free business's
+// reviews would wrongly show as "Live".
+async function getPubliclyEligibleBusinessIds() {
+  const [{ data: bizs, error: bizErr }, { data: subs, error: subErr }] = await Promise.all([
+    supabase.from("businesses").select("id, status, visible"),
+    supabase.from("business_subscriptions").select("business_id").eq("plan", "premium"),
+  ]);
+  if (bizErr) throw bizErr;
+  if (subErr) throw subErr;
+  const premium = new Set((subs ?? []).map((s) => s.business_id));
+  return new Set(
+    (bizs ?? [])
+      .filter((b) => b.status === "Approved" && (b.visible ?? true) && premium.has(b.id))
+      .map((b) => b.id)
+  );
+}
+
+// For every Visible review: null if it's actually on the site, or why it
+// isn't — 'plan' (its business isn't Approved/visible/subscribed, so none of
+// its reviews show at all) or 'cap' (the business qualifies but this one is
+// past its 6 most-recent). Same rule, same order (date desc, no secondary
+// key) as the public site's slice: one globally-sorted query, counted per
+// business as it's walked, so the per-business order matches exactly what a
+// filter on that business alone would give.
+async function getReviewOnSiteReasons() {
+  const [{ data, error }, eligible] = await Promise.all([
+    supabase
+      .from("business_reviews")
+      .select("id, business_id")
+      .eq("status", "Visible")
+      .order("date", { ascending: false }),
+    getPubliclyEligibleBusinessIds(),
+  ]);
+  if (error) throw error;
+  const counts = new Map();
+  const reasons = new Map();
+  for (const r of data ?? []) {
+    if (!eligible.has(r.business_id)) { reasons.set(r.id, "plan"); continue; }
+    const n = counts.get(r.business_id) ?? 0;
+    reasons.set(r.id, n < MAX_LIVE_REVIEWS ? null : "cap");
+    counts.set(r.business_id, n + 1);
+  }
+  return reasons;
+}
+
 export async function approveReply(id) {
   const { data: row, error: readError } = await supabase
     .from("business_reviews").select("reply").eq("id", id).maybeSingle();
@@ -275,9 +333,16 @@ export async function getReviews({ status } = {}) {
     .select("*, businesses(name)")
     .order("date", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
-  const { data, error } = await q;
+  const [{ data, error }, reasons] = await Promise.all([q, getReviewOnSiteReasons()]);
   if (error) throw error;
-  return (data ?? []).map(reviewFromRow);
+  // onSite/offSiteReason only mean anything for a Visible review — everything
+  // else isn't a candidate for the public page at all.
+  return (data ?? []).map((row) => {
+    const r = reviewFromRow(row);
+    if (r.status !== "Visible") return { ...r, onSite: null, offSiteReason: null };
+    const reason = reasons.get(r.id) ?? null;
+    return { ...r, onSite: !reason, offSiteReason: reason };
+  });
 }
 
 // Reviews a business adds (or edits) wait as "Pending Approval" until admin
