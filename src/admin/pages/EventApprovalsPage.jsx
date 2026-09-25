@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinessEvents, approveEvent, rejectEvent, deleteBusinessEvent,
-  hideEvent, unhideEvent,
+  hideEvent, unhideEvent, setEventHomepageFeature,
   getPendingOccurrences, approveOccurrence, rejectOccurrence,
 } from "../../api/admin";
 import EventEditor from "./EventEditor";
@@ -88,6 +88,20 @@ function EventsTab({ setToast, onEdit, nonce, refresh }) {
       setToast(err.message);
     }
   }
+  // Same pathway as Featured Articles and News & Offers: a What's On booking
+  // is a homepage_placements row (see api/admin/homepageSlots.js), so putting
+  // one on or taking it off is the same featureNow/unfeature call either
+  // section uses.
+  async function handleToggleHome(e, on) {
+    try {
+      const res = await setEventHomepageFeature(e.id, on);
+      if (res.full) return setToast("Every What's On slot is taken. Take one off first.");
+      setToast(on ? `"${e.title}" is on the homepage.` : `"${e.title}" is off the homepage.`);
+      refresh();
+    } catch (err) {
+      setToast(err.message);
+    }
+  }
 
   return (
     <>
@@ -163,11 +177,23 @@ function EventsTab({ setToast, onEdit, nonce, refresh }) {
               {e.status === "Pending Approval" && (
                 <ReviewActions onApprove={() => handleApprove(e)} onReject={(r) => handleReject(e, r)} />
               )}
-              <div className="flex gap-2 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <div className="flex gap-2 mt-3 pt-3 items-center flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
                 {e.homepage && (
                   <span className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wide self-center" style={{ backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }}>
                     ● Live on home page
                   </span>
+                )}
+                {/* Only something actually on the site can go up there, or the
+                    homepage links to a page nobody can open — same rule as
+                    Featured Articles and News & Offers. */}
+                {e.status === "Live" && (
+                  <button onClick={() => handleToggleHome(e, !e.homepage)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70"
+                    style={e.homepage
+                      ? { border: "1.5px solid rgba(217,119,6,0.35)", color: "#B45309" }
+                      : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                    {e.homepage ? "Take off the homepage" : "Put on the homepage"}
+                  </button>
                 )}
                 <button onClick={() => onEdit(e)} className="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Edit</button>
                 {e.status === "Live" && (

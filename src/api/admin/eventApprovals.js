@@ -231,6 +231,10 @@ export async function saveBusinessEvent(item) {
 }
 
 export async function deleteBusinessEvent(id) {
+  // If it's on the homepage, take it off first — deleting the row leaves the
+  // placement pointing at a page that no longer exists, same as
+  // deleteNewsOfferPost already does for a Spotlight post.
+  await unfeature("whats_on", id).catch(() => {});
   const { error } = await supabase.from("business_events").delete().eq("id", id);
   if (error) throw error;
   return { id, deleted: true };
