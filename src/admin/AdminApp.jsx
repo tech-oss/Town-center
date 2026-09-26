@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import useLiveTick from "./hooks/useLiveTick";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./components/AdminLayout";
 import AdminLoginPage from "./pages/AdminLoginPage";
@@ -38,13 +38,11 @@ export default function AdminApp() {
   const { pathname } = useLocation();
   // One call counts every queue, so each sidebar item can show what's
   // waiting in it — not just the Approval Queue.
-  // Also re-counted every minute, so something a business submits while admin
-  // sits on one page still shows up without navigating away.
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 60_000);
-    return () => clearInterval(id);
-  }, []);
+  // Also re-counted every few minutes while the tab is on screen (and on coming
+  // back to it), so something a business submits while admin sits on one page
+  // still shows up without navigating away. This was every minute whether or
+  // not anyone was looking — 13 requests a minute from each forgotten tab.
+  const tick = useLiveTick(5 * 60_000);
   const { data: counts } = useFetch(getAdminPendingCounts, [pathname, tick]);
 
   // Hold rendering until the initial Supabase getSession() resolves, otherwise
