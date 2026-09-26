@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { FOREST, SAGE, MUTED, BORDER, CARD, Field, Inp, TextArea, SingleImageUpload } from "./FormKit";
 import UKDateInput from "./UKDateInput";
 import useNow from "../../hooks/useNow";
+import useLiveTick from "../hooks/useLiveTick";
 import { formatUKDateTime, formatCountdown } from "../../lib/ukDateTime";
 import {
   SLOT_CONTENT, BOOKING_STATUS,
@@ -17,7 +18,7 @@ import { raisePurchaseRequest } from "../api/purchaseRequests";
 // now. Booking reserves that slot while the owner pays on Stripe, so nobody
 // else can take it; everyone else then sees the next free one.
 
-const REFRESH_MS = 30_000;
+const REFRESH_MS = 2 * 60_000;
 
 const STATUS_TONE = {
   awaiting_content: ["#FFFBEB", "#92400E"],
@@ -328,14 +329,12 @@ export default function HomepagePromotions({ businessId, premium, onToast, onBoo
     }
   }, [businessId]);
 
-  // Availability changes as other businesses book, so keep it current.
-  useEffect(() => {
-    refresh();
-    const id = setInterval(refresh, REFRESH_MS);
-    const onFocus = () => refresh();
-    window.addEventListener("focus", onFocus);
-    return () => { clearInterval(id); window.removeEventListener("focus", onFocus); };
-  }, [refresh]);
+  // Availability changes as other businesses book, so keep it current — while
+  // the page is on screen, and once more on coming back to it. A hidden tab
+  // doesn't poll: each refresh is several API requests, and Supabase's free
+  // plan caps how much request logging a project can produce.
+  const tick = useLiveTick(REFRESH_MS);
+  useEffect(() => { refresh(); }, [refresh, tick]);
 
   // Back from Stripe.
   useEffect(() => {
