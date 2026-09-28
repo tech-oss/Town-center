@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
+import useUnreadCounts, { SUPPORT_TAB } from "../hooks/useUnreadCounts";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { listTickets } from "../api/businessTickets";
 import { countOpenRequests } from "../api/purchaseRequests";
@@ -37,6 +38,11 @@ export default function BusinessLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Approvals, rejections and ticket replies from Maidenhead admin since each
+  // tab was last opened.
+  const { pathname } = useLocation();
+  const unread = useUnreadCounts(user, pathname);
 
   const [openTickets, setOpenTickets] = useState(0);
   // Purchases a content manager has asked the owner for. Only the owner can
@@ -136,7 +142,13 @@ export default function BusinessLayout({ children }) {
                 {user.plan !== "premium" && PAID_ONLY.has(item.to) && (
                   <span className="text-[11px] opacity-70" title="Visibility Plan">🔒</span>
                 )}
-                {item.to === "/business/support" && openTickets > 0 && (
+                {unread[item.to] > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#EF4444", color: "#fff" }}
+                    title={item.to === SUPPORT_TAB
+                      ? `${unread[item.to]} ticket${unread[item.to] === 1 ? "" : "s"} answered by Maidenhead admin`
+                      : `${unread[item.to]} update${unread[item.to] === 1 ? "" : "s"} from Maidenhead admin`}>{unread[item.to]}</span>
+                )}
+                {item.to === "/business/support" && openTickets > 0 && !(unread[item.to] > 0) && (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>{openTickets}</span>
                 )}
                 {item.to === "/business/push-notifications" && ownerDrafts > 0 && (
