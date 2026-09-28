@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinessEvents, approveEvent, rejectEvent, deleteBusinessEvent,
-  hideEvent, unhideEvent, setEventHomepageFeature,
+  unhideEvent, setEventHomepageFeature,
   getPendingOccurrences, approveOccurrence, rejectOccurrence,
 } from "../../api/admin";
 import EventEditor from "./EventEditor";
@@ -28,10 +28,6 @@ function formatDate(str) {
 function EventsTab({ setToast, onEdit, nonce, refresh }) {
   const [filter, setFilter] = useState("All");
   const [query, setQuery] = useState("");
-  // Which event is having its reason typed, and what has been typed.
-  const [hiding, setHiding] = useState(null);
-  const [reason, setReason] = useState("");
-  const [busy, setBusy] = useState(false);
   const { data: events, loading } = useFetch(() => getBusinessEvents({ status: filter }), [filter, nonce]);
 
   // Searching by business, which is how admin looks for an event in practice —
@@ -59,23 +55,6 @@ function EventsTab({ setToast, onEdit, nonce, refresh }) {
     await deleteBusinessEvent(e.id);
     setToast(`"${e.title}" deleted.`);
     refresh();
-  }
-  async function confirmHide(e) {
-    if (!reason.trim()) return;
-    setBusy(true);
-    try {
-      await hideEvent(e.id, reason.trim());
-      setToast(e.businessName
-        ? `"${e.title}" is off the site. ${e.businessName} has been told why.`
-        : `"${e.title}" is off the site.`);
-      setHiding(null);
-      setReason("");
-      refresh();
-    } catch (err) {
-      setToast(err.message);
-    } finally {
-      setBusy(false);
-    }
   }
   async function handleUnhide(e) {
     try {
@@ -196,11 +175,6 @@ function EventsTab({ setToast, onEdit, nonce, refresh }) {
                   </button>
                 )}
                 <button onClick={() => onEdit(e)} className="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Edit</button>
-                {e.status === "Live" && (
-                  <button onClick={() => { setHiding(e.id); setReason(""); }}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70"
-                    style={{ border: "1.5px solid rgba(217,119,6,0.35)", color: "#B45309" }}>Hide</button>
-                )}
                 {e.status === "Removed" && (
                   <button onClick={() => handleUnhide(e)}
                     className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-70"
@@ -214,30 +188,6 @@ function EventsTab({ setToast, onEdit, nonce, refresh }) {
                 )}
                 <button onClick={() => handleDelete(e)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
               </div>
-
-              {/* Hiding takes a reason, because the business reads it. */}
-              {hiding === e.id && (
-                <div className="mt-3 pt-3 flex flex-col gap-2" style={{ borderTop: `1px solid ${BORDER}` }}>
-                  <label className="text-xs font-semibold" style={{ color: MUTED }}>
-                    Why is this coming off the site?
-                    {e.businessName ? ` ${e.businessName} is shown this.` : ""}
-                  </label>
-                  <textarea value={reason} onChange={(ev) => setReason(ev.target.value)} rows={3} autoFocus
-                    placeholder="Explain what is wrong with this event…"
-                    className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none"
-                    style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
-                  <div className="flex gap-2">
-                    <button onClick={() => confirmHide(e)} disabled={busy || !reason.trim()}
-                      className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-40"
-                      style={{ backgroundColor: "#D97706" }}>
-                      {busy ? "Hiding…" : "Hide from the site"}
-                    </button>
-                    <button onClick={() => { setHiding(null); setReason(""); }}
-                      className="px-4 py-1.5 rounded-lg text-xs font-semibold"
-                      style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Cancel</button>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>

@@ -310,6 +310,15 @@ export default function ArticleApprovalsPage() {
     if (!full) return flash("That post could not be opened.");
     setEditing({ ...full, source: "admin" });
   }
+  // The same delete the review screen offers, reached straight from the card
+  // — same rule either way: a business's post always owes it a reason.
+  async function quickDelete(a) {
+    if (a.source === "admin") return handleDelete(a);
+    const reason = window.prompt(`Delete "${a.title}"? ${a.businessName || "The business"} is shown this. Reason:`, "");
+    if (reason === null) return;
+    if (!reason.trim()) return flash("A reason is required — the business is shown it.");
+    await handleDelete(a, reason);
+  }
 
   // Writing a post on a business's behalf, or editing one written here.
   if (writing || editing) {
@@ -416,33 +425,51 @@ export default function ArticleApprovalsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {list.map((a) => (
-            <button key={a.id} type="button" onClick={() => setOpenId(a.id)}
-              className="rounded-2xl p-4 flex items-center gap-4 text-left transition-shadow hover:shadow-md" style={CARD}>
-              {a.heroImage
-                ? <img src={a.heroImage} alt="" className="w-24 h-20 rounded-xl object-cover shrink-0" />
-                : <div className="w-24 h-20 rounded-xl shrink-0" style={{ backgroundColor: "#F1F5F9" }} />}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-bold" style={{ color: NAVY }}>{a.title}</p>
-                  <StatusTag status={a.status} />
-                  {a.type && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{a.type}</span>
-                  )}
-                  {a.source === "admin" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(15,23,42,0.07)", color: NAVY }}>Written here</span>
-                  )}
+            <div key={a.id} className="rounded-2xl p-4 flex flex-col gap-3" style={CARD}>
+              <div className="flex items-center gap-4">
+                {a.heroImage
+                  ? <img src={a.heroImage} alt="" className="w-24 h-20 rounded-xl object-cover shrink-0" />
+                  : <div className="w-24 h-20 rounded-xl shrink-0" style={{ backgroundColor: "#F1F5F9" }} />}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-bold" style={{ color: NAVY }}>{a.title}</p>
+                    <StatusTag status={a.status} />
+                    {a.type && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>{a.type}</span>
+                    )}
+                    {a.source === "admin" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(15,23,42,0.07)", color: NAVY }}>Written here</span>
+                    )}
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: MUTED }}>
+                    {a.businessId ? a.businessName : "No business attached"}{a.date ? ` · ${formatUK(a.date)}` : ""}{runDates(a) ? ` · ${runDates(a)}` : ""}
+                  </p>
+                  {a.body && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: MUTED }}>{a.body}</p>}
                 </div>
-                <p className="text-xs mt-1" style={{ color: MUTED }}>
-                  {a.businessId ? a.businessName : "No business attached"}{a.date ? ` · ${formatUK(a.date)}` : ""}{runDates(a) ? ` · ${runDates(a)}` : ""}
-                </p>
-                {a.body && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: MUTED }}>{a.body}</p>}
+                <button type="button" onClick={() => setOpenId(a.id)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold shrink-0 transition-opacity hover:opacity-70" style={a.status === "Pending Approval"
+                  ? { backgroundColor: BLUE, color: "#fff" }
+                  : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                  {a.status === "Pending Approval" ? "Review" : "View"}
+                </button>
               </div>
-              <span className="px-4 py-2 rounded-xl text-xs font-semibold shrink-0" style={a.status === "Pending Approval"
-                ? { backgroundColor: BLUE, color: "#fff" }
-                : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
-                {a.status === "Pending Approval" ? "Review" : "View"}
-              </span>
-            </button>
+              {/* Same quick actions as Events and Featured Articles — the
+                  full moderation flow (approve/reject, take off the site with
+                  a reason) still lives behind Review/View. */}
+              <div className="flex gap-2 pt-3 items-center flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
+                {a.status === "Live" && (
+                  <button onClick={() => handleToggleHome(a, !a.homepage)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70"
+                    style={a.homepage
+                      ? { border: "1.5px solid rgba(217,119,6,0.35)", color: "#B45309" }
+                      : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                    {a.homepage ? "Take off the homepage" : "Put on the homepage"}
+                  </button>
+                )}
+                <button onClick={() => handleEdit(a)} className="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Edit</button>
+                <button onClick={() => quickDelete(a)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
+              </div>
+            </div>
           ))}
         </div>
       )}

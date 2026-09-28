@@ -371,32 +371,50 @@ export default function FeatureArticleApprovalsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {list.map((a) => (
-            <button key={a.id} type="button" onClick={() => setOpenId(a.id)}
-              className="rounded-2xl p-4 flex items-center gap-4 text-left transition-shadow hover:shadow-md" style={CARD}>
-              {a.heroImage || a.cardImage
-                ? <img src={a.heroImage || a.cardImage} alt="" className="w-24 h-20 rounded-xl object-cover shrink-0" />
-                : <div className="w-24 h-20 rounded-xl shrink-0" style={{ backgroundColor: "#F1F5F9" }} />}
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-sm font-bold" style={{ color: NAVY }}>{a.title}</p>
-                  <StatusTag status={a.status} />
-                  {a.author === "admin" && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: "rgba(15,23,42,0.07)", color: NAVY }}>Written here</span>
-                  )}
+            <div key={a.id} className="rounded-2xl p-4 flex flex-col gap-3" style={CARD}>
+              <div className="flex items-center gap-4">
+                {a.heroImage || a.cardImage
+                  ? <img src={a.heroImage || a.cardImage} alt="" className="w-24 h-20 rounded-xl object-cover shrink-0" />
+                  : <div className="w-24 h-20 rounded-xl shrink-0" style={{ backgroundColor: "#F1F5F9" }} />}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-bold" style={{ color: NAVY }}>{a.title}</p>
+                    <StatusTag status={a.status} />
+                    {a.author === "admin" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: "rgba(15,23,42,0.07)", color: NAVY }}>Written here</span>
+                    )}
+                  </div>
+                  <p className="text-xs mt-1" style={{ color: MUTED }}>
+                    {a.businessId ? a.businessName : "No business attached — Offers page only"}
+                    {a.submittedAt ? ` · ${formatUK(a.submittedAt.slice(0, 10))}` : ""}
+                  </p>
+                  {a.standfirst && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: MUTED }}>{a.standfirst}</p>}
                 </div>
-                <p className="text-xs mt-1" style={{ color: MUTED }}>
-                  {a.businessId ? a.businessName : "No business attached — Offers page only"}
-                  {a.submittedAt ? ` · ${formatUK(a.submittedAt.slice(0, 10))}` : ""}
-                </p>
-                {a.standfirst && <p className="text-xs mt-1.5 line-clamp-2" style={{ color: MUTED }}>{a.standfirst}</p>}
+                <button type="button" onClick={() => setOpenId(a.id)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold shrink-0 transition-opacity hover:opacity-70" style={a.status === "Pending Approval"
+                  ? { backgroundColor: BLUE, color: "#fff" }
+                  : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                  {a.status === "Pending Approval" ? "Review" : "View"}
+                </button>
               </div>
-              <span className="px-4 py-2 rounded-xl text-xs font-semibold shrink-0" style={a.status === "Pending Approval"
-                ? { backgroundColor: BLUE, color: "#fff" }
-                : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
-                {a.status === "Pending Approval" ? "Review" : "View"}
-              </span>
-            </button>
+              {/* Same quick actions as Events and News & Offers — the full
+                  moderation flow (approve/reject, take off the site with a
+                  reason) still lives behind Review/View. */}
+              <div className="flex gap-2 pt-3 items-center flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
+                {a.status === "Live" && (
+                  <button onClick={() => handleToggleHome(a, !a.homepage)}
+                    className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70"
+                    style={a.homepage
+                      ? { border: "1.5px solid rgba(217,119,6,0.35)", color: "#B45309" }
+                      : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                    {a.homepage ? "Take off the homepage" : "Put on the homepage"}
+                  </button>
+                )}
+                <button onClick={() => handleEdit(a)} className="ml-auto px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Edit</button>
+                <button onClick={() => handleDelete(a)} className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-opacity hover:opacity-70" style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>Delete</button>
+              </div>
+            </div>
           ))}
         </div>
       )}
