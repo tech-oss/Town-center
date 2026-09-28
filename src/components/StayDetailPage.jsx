@@ -259,7 +259,7 @@ export default function StayDetailPage({ kind }) {
       website={free ? null : item.website}
       directionsQuery={free ? null : item.mapQuery}
       shareInActions
-      stickyBooking={!free && isHotels && !!item.website}
+      stickyBooking={!free && item.bookingUrl ? item.bookingUrl : null}
       relatedHeading="Stay Here & Discover"
       relatedBackground="#ffffff"
       related={discover ?? []}

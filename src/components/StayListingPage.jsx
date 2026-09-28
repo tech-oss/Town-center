@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../lib/amenityCategories";
 import ListingCard from "./ListingCard";
 import { Link, useSearchParams } from "react-router-dom";
 import { getHotels, getAccommodations } from "../api";
@@ -132,6 +133,8 @@ function PinIcon({ size = 14 }) {
   );
 }
 
+const FILTER_TAXONOMY = { facilities: FACILITIES, roomFacilities: ROOM_FACILITIES, travelGroup: TRAVEL_GROUP, meals: MEALS };
+
 export default function StayListingPage({ kind }) {
   const isHotels = kind === "hotels";
   const basePath = isHotels ? "/live/stay/hotels" : "/live/stay/accommodation";
@@ -228,6 +231,9 @@ export default function StayListingPage({ kind }) {
     ? [
         { field: "facilities", label: "Facilities" },
         { field: "roomFacilities", label: "Room facilities" },
+        // Hotels pick a Travel Group in the same Amenities tab as
+        // accommodation does; this filter was just never offered here.
+        { field: "travelGroup", label: "Travel group" },
       ]
     : [
         { field: "facilities", label: "Facilities" },
@@ -258,6 +264,10 @@ export default function StayListingPage({ kind }) {
     filterDefs.forEach(({ field }) => {
       const set = new Set();
       (allItems ?? []).forEach((i) => (i[field] ?? []).forEach((v) => set.add(v)));
+      // Offered in full, as the business portal lists them, rather than only
+      // what a listing has already ticked — with no hotel having chosen a
+      // travel group yet, the whole filter disappeared.
+      (FILTER_TAXONOMY[field] ?? []).forEach((v) => set.add(v));
       out[field] = [...set].sort();
     });
     return out;
@@ -420,7 +430,7 @@ export default function StayListingPage({ kind }) {
             <div className="relative">
               <button
                 type="button"
-                onClick={() => { setLocationOpen((o) => !o); setOpenDropdown(null); setStarsOpen(false); }}
+                onClick={() => { setLocationOpen((o) => !o); setOpenDropdown(null); setStarsOpen(false); setCheckinOpen(false); }}
                 className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
                 style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: appliedLocation ? "var(--sand)" : "#fff" }}
               >
@@ -482,7 +492,7 @@ export default function StayListingPage({ kind }) {
                 <div className="relative" key={field}>
                   <button
                     type="button"
-                    onClick={() => { setOpenDropdown((o) => (o === field ? null : field)); setLocationOpen(false); setStarsOpen(false); }}
+                    onClick={() => { setOpenDropdown((o) => (o === field ? null : field)); setLocationOpen(false); setStarsOpen(false); setCheckinOpen(false); }}
                     className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
                     style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: selected.size > 0 ? "var(--sand)" : "#fff" }}
                   >
@@ -522,7 +532,7 @@ export default function StayListingPage({ kind }) {
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => { setStarsOpen((o) => !o); setLocationOpen(false); setOpenDropdown(null); }}
+                  onClick={() => { setStarsOpen((o) => !o); setLocationOpen(false); setOpenDropdown(null); setCheckinOpen(false); }}
                   className="flex items-center gap-1.5 text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full border cursor-pointer transition-colors hover:bg-black/[0.03]"
                   style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: starsFilter.size > 0 ? "var(--sand)" : "#fff" }}
                 >

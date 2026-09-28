@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../../lib/amenityCategories";
 import ListingCard from "../../components/ListingCard";
 import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -135,6 +136,8 @@ const LANDING = {
 
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+const FILTER_TAXONOMY = { facilities: FACILITIES, roomFacilities: ROOM_FACILITIES, travelGroup: TRAVEL_GROUP, meals: MEALS };
+
 export default function StayListingScreen() {
   const { kind } = useParams();
   const isHotels = kind === "hotels";
@@ -166,12 +169,13 @@ export default function StayListingScreen() {
   const setCategory = (v) => patchParams({ category: v });
 
   // Same filter set as the web listing page — Facilities, Room facilities,
-  // and (accommodation only) Meals, Travel group — each backed by a field
+  // Travel group, and (accommodation only) Meals — each backed by a field
   // on the hotel/accommodation data (Data/stay.js).
   const filterDefs = isHotels
     ? [
         { field: "facilities", label: "Facilities" },
         { field: "roomFacilities", label: "Room Facilities" },
+        { field: "travelGroup", label: "Travel Group" },
       ]
     : [
         { field: "facilities", label: "Facilities" },
@@ -225,6 +229,9 @@ export default function StayListingScreen() {
     filterDefs.forEach(({ field }) => {
       const set = new Set();
       (allItems ?? []).forEach((i) => (i[field] ?? []).forEach((v) => set.add(v)));
+      // The full list, as on the website, so a filter shows before anyone
+      // has ticked one of its options.
+      (FILTER_TAXONOMY[field] ?? []).forEach((v) => set.add(v));
       out[field] = [...set].sort().map((v) => ({ key: v, label: v }));
     });
     return out;

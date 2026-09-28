@@ -105,9 +105,10 @@ export default function StayDetailScreen() {
   // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
   const free = isFreeListing(place);
   const websiteUrl = !free ? externalUrl(place.website) : null;
-  // The booking button opens the business's booking link, falling back to its
-  // website — the same rule as the website's page.
-  const bookingUrl = !free ? (externalUrl(place.bookingUrl) ?? websiteUrl) : null;
+  // The booking button is the business's booking link, and only that: no
+  // link, no button. Falling back to the website sent guests to the wrong
+  // place and showed the button when no booking link was ever given.
+  const bookingUrl = !free ? externalUrl(place.bookingUrl) : null;
   const gallery = free ? [] : (place.gallery?.length ? place.gallery : [place.image]).filter((g) => g !== place.image);
   const social = !free && place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k]) : [];
   // Admin can attach a Featured Article or an event to any business, whatever

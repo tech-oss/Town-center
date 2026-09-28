@@ -216,10 +216,10 @@ export default function PlaceDetailLayout({
   // (hotels/accommodation) to match its mobile layout. Everything else
   // keeps the small Find Us icon.
   shareInActions = false,
-  // Floats a "Make a Booking" button in once the page's own website/CTA
-  // button has scrolled out of view — used by Stay hotels with a website,
-  // independently of whether a "Booking" action-rail button exists.
-  stickyBooking = false,
+  // The booking link for the floating "Make a Booking" button. The button
+  // shows only when there is one, and goes exactly there — it used to show
+  // for any hotel with a website and open the website.
+  stickyBooking = null,
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -743,7 +743,7 @@ export default function PlaceDetailLayout({
           in-card booking button is out of view. */}
       {stickyBooking && (
         <a
-          href={websiteHref || "#"}
+          href={normalizeUrl(stickyBooking)}
           target="_blank"
           rel="noopener noreferrer"
           className="fixed z-40 bottom-6 right-6 inline-flex items-center gap-2 text-sm font-bold px-5 py-3.5 rounded-full transition-all duration-300"

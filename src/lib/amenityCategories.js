@@ -31,6 +31,7 @@ export const ROOM_FACILITIES = [
   "Salt water pool", "Computer Game console", "Refrigerator", "Fax",
   "Video games", "Kitchen", "Flat-screen TV", "Pool cover",
   "Reading light", "Plunge pool", "Bath", "Lake view",
+  "Clothes Iron", "Ironing Board", "Kettle", "Desk",
 ];
 
 export const TRAVEL_GROUP = ["Solo travellers", "Couples", "Family", "Groups", "Business travellers"];
