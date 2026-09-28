@@ -96,6 +96,7 @@ const ADDON_NAMES = {
   article: ["article slot", "article slots"],
   event: ["event slot", "event slots"],
   featured_article: ["Featured Article slot", "Featured Article slots"],
+  push_notification: ["push notification", "push notifications"],
 };
 
 // How a paying plan is billed, for the badge. Empty for Free or admin-granted.

@@ -37,6 +37,11 @@ export async function getPushRequests({ status } = {}) {
     .select("*, businesses(name)")
     .order("created_at", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
+  // A "draft" is a Content Manager's composed notification, still waiting on
+  // its own business owner to submit and pay for it — it never reaches
+  // Maidenhead at all until then, so it must never show up here, "All"
+  // included.
+  else q = q.neq("status", "draft");
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []).map(fromRow);

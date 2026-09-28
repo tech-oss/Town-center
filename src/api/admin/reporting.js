@@ -309,8 +309,8 @@ export async function getActivityTrend({ range = "6m" } = {}) {
 // Everything a business buys on top of its plan: homepage slot bookings and
 // add-on slots (articles, events, featured articles).
 
-export const ADHOC_GROUPS = ["Homepage promotions", "Article slots", "Event slots", "Featured Article slots"];
-const ADDON_GROUP = { article: "Article slots", event: "Event slots", featured_article: "Featured Article slots" };
+export const ADHOC_GROUPS = ["Homepage promotions", "Article slots", "Event slots", "Featured Article slots", "Push Notifications"];
+const ADDON_GROUP = { article: "Article slots", event: "Event slots", featured_article: "Featured Article slots", push_notification: "Push Notifications" };
 
 async function loadAdhocPurchases() {
   const [placements, slots] = await Promise.all([
@@ -328,6 +328,44 @@ async function loadAdhocPurchases() {
     out.push({ group: ADDON_GROUP[a.kind] ?? "Add-ons", at: a.purchased_at, amount: (a.amount_pence ?? 0) / 100, units: a.quantity });
   }
   return out;
+}
+
+// ─── Push notifications, on their own ──────────────────────────────────────
+// A quick read of the whole add-on: total revenue, how many credits have
+// been bought vs. actually used, and which businesses are buying it — for
+// admin's own Push Notifications page, rather than only the general Ad-hoc
+// Purchases chart above.
+export async function getPushNotificationStats() {
+  const [{ data: slots, error: slotsError }, { data: requests, error: reqError }] = await Promise.all([
+    supabase.from("business_addon_slots")
+      .select("business_id, quantity, amount_pence, purchased_at, stripe_ref, businesses(name)")
+      .eq("kind", "push_notification")
+      .order("purchased_at", { ascending: false }),
+    supabase.from("business_push_requests").select("business_id, status"),
+  ]);
+  if (slotsError) throw slotsError;
+  if (reqError) throw reqError;
+
+  const bought = (slots ?? []).filter((s) => s.stripe_ref); // admin can grant these free; those aren't revenue
+  const revenue = bought.reduce((n, s) => n + (s.amount_pence ?? 0), 0) / 100;
+  const purchased = (slots ?? []).reduce((n, s) => n + (s.quantity ?? 0), 0);
+  const used = (requests ?? []).filter((r) => r.status === "pending" || r.status === "approved").length;
+  const businesses = new Set((slots ?? []).map((s) => s.business_id)).size;
+
+  return {
+    revenue,
+    purchased,
+    used,
+    remaining: Math.max(0, purchased - used),
+    businesses,
+    recent: bought.slice(0, 20).map((s) => ({
+      businessId: s.business_id,
+      businessName: s.businesses?.name ?? s.business_id,
+      quantity: s.quantity,
+      amount: (s.amount_pence ?? 0) / 100,
+      purchasedAt: s.purchased_at,
+    })),
+  };
 }
 
 // Ad-hoc purchases per month: how many of each kind, and the revenue.

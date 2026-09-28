@@ -54,6 +54,7 @@ const ADHOC_COLOURS = {
   "Article slots": "#2563EB",
   "Event slots": "#0891B2",
   "Featured Article slots": "#DB2777",
+  "Push Notifications": "#EA580C",
 };
 const SECTION_COLOURS = ["#2563EB", "#60A5FA", "#F59E0B"];
 
@@ -220,7 +221,7 @@ export default function ReportingPage() {
         </Card>
 
         {/* Ad-hoc purchases */}
-        <Card title="Ad-hoc Purchases" subtitle={`Homepage slots & add-ons · ${rangeLabel}`} info="Everything businesses bought on top of their plan, per month: homepage promotions (In the Spotlight, Featured Article, What's On, Featured Business) and add-on slots for articles, events and Featured Articles. Hover a month for the revenue it brought in.">
+        <Card title="Ad-hoc Purchases" subtitle={`Homepage slots & add-ons · ${rangeLabel}`} info="Everything businesses bought on top of their plan, per month: homepage promotions (In the Spotlight, Featured Article, What's On, Featured Business), add-on slots for articles, events and Featured Articles, and push notification packs. Hover a month for the revenue it brought in.">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={adhocTrend ?? []} barSize={22}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,24,40,0.08)" />

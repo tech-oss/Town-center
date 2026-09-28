@@ -3,6 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import {
   getPushHistory, sendPush,
   getPushRequests, approvePushRequest, rejectPushRequest, countPendingPushRequests,
+  getPushNotificationStats,
 } from "../../api/admin";
 import ArticleTypeahead from "../components/ArticleTypeahead";
 import LoadingState from "../components/LoadingState";
@@ -418,6 +419,55 @@ function RequestsTab({ notify, onCountChange }) {
   );
 }
 
+// Revenue and usage across every business — the add-on tracked as its own
+// line on Reporting's Ad-hoc Purchases chart, but worth seeing right here
+// where admin is already looking at push notifications.
+function UsageTab() {
+  const { data: stats, loading } = useFetch(getPushNotificationStats, []);
+
+  if (loading) return <LoadingState />;
+  if (!stats) return null;
+
+  const cards = [
+    { label: "Revenue", value: `£${stats.revenue.toLocaleString("en-GB", { minimumFractionDigits: 2 })}` },
+    { label: "Businesses using it", value: stats.businesses },
+    { label: "Purchased", value: stats.purchased },
+    { label: "Used", value: stats.used },
+    { label: "Left unused", value: stats.remaining },
+  ];
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {cards.map((c) => (
+          <div key={c.label} className="rounded-2xl p-4" style={CARD}>
+            <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: MUTED }}>{c.label}</p>
+            <p className="text-xl font-bold mt-1" style={{ color: NAVY }}>{c.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="rounded-2xl p-5" style={CARD}>
+        <p className="font-bold text-sm mb-3" style={{ color: NAVY }}>Recent purchases</p>
+        {stats.recent.length === 0 ? (
+          <EmptyState title="Nothing bought yet" message="No business has purchased a push notification pack yet." />
+        ) : (
+          <div className="flex flex-col divide-y" style={{ borderColor: BORDER }}>
+            {stats.recent.map((r, i) => (
+              <div key={i} className="py-2.5 flex items-center justify-between gap-4 flex-wrap first:pt-0">
+                <span className="text-sm" style={{ color: NAVY }}>{r.businessName}</span>
+                <span className="text-xs" style={{ color: MUTED }}>
+                  {r.quantity} for £{r.amount.toFixed(2)} · {formatUK(r.purchasedAt?.slice(0, 10))}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PushNotificationsPage() {
   const [tab, setTab] = useState("compose");
   const [pending, setPending] = useState(0);
@@ -445,7 +495,7 @@ export default function PushNotificationsPage() {
       </div>
 
       <div className="flex gap-1 p-1 rounded-xl w-fit" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
-        {[["compose", "Compose"], ["requests", "Business Requests"]].map(([key, label]) => (
+        {[["compose", "Compose"], ["requests", "Business Requests"], ["usage", "Revenue & Usage"]].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)}
             className="px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2"
             style={tab === key ? { backgroundColor: "#fff", color: NAVY, boxShadow: "0 1px 2px rgba(16,24,40,0.08)" } : { color: MUTED }}>
@@ -457,7 +507,9 @@ export default function PushNotificationsPage() {
         ))}
       </div>
 
-      {tab === "compose" ? <ComposeTab /> : <RequestsTab notify={notify} onCountChange={loadCount} />}
+      {tab === "compose" ? <ComposeTab />
+        : tab === "requests" ? <RequestsTab notify={notify} onCountChange={loadCount} />
+        : <UsageTab />}
     </div>
   );
 }
