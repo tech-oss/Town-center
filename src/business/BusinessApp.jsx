@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import AnalyticsUpsell from "./components/AnalyticsUpsell";
 import BusinessLayout from "./components/BusinessLayout";
 import { PlanContext, PremiumFeatureGate } from "./components/FormKit";
 import { isPremium } from "../Data/plans";
@@ -80,9 +81,11 @@ function RequireOwner({ children }) {
 // News & Offers, Events and Analytics are Visibility Plan features. A Free business reaching
 // any of those routes — the list, the editor, or a deep link — sees a
 // Subscribe screen instead of the page.
-function RequirePremium({ title, description, children }) {
+function RequirePremium({ title, description, upsell: Upsell, children }) {
   const { user } = useBusinessAuth();
   if (isPremium(user?.plan)) return children;
+  // A feature with its own sales page shows that instead of the generic lock.
+  if (Upsell) return <BusinessLayout><Upsell role={user?.role} /></BusinessLayout>;
   return (
     <BusinessLayout>
       <PlanContext.Provider value={{ plan: user?.plan, role: user?.role }}>
@@ -97,7 +100,7 @@ const FEATURED_GATE = { title: "Featured Articles are part of the Visibility Pla
 const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions." };
 const PUSH_GATE = { title: "Push notifications are part of the Visibility Plan", description: "Upgrade to ask Maidenhead to send a notification about your business to everyone with notifications turned on." };
 const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page." };
-const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention." };
+const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention.", upsell: AnalyticsUpsell };
 
 // The one route that requires onboarding to still be outstanding — once it's
 // done, landing here again would just show a form with nothing left to save.
