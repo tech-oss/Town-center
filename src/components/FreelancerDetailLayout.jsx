@@ -240,7 +240,7 @@ export default function FreelancerDetailLayout({
             {/* ── Header picture, once, across the top. Only when a logo fills
                 the square below — otherwise the header is that square. ── */}
             {logo && heroImage && (
-              <div className="mb-6 overflow-hidden aspect-[3/1]" style={{ backgroundColor: "var(--forest)" }}>
+              <div className="mb-6 overflow-hidden aspect-[16/9]" style={{ backgroundColor: "var(--forest)" }}>
                 <SmartImage src={heroImage} alt="" size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover" />
               </div>
             )}

@@ -134,6 +134,7 @@ export default function ServicesDetailPage() {
       categoryLabel={viewed.label}
       title={item.name}
       heroImage={heroImage}
+      logo={free ? null : item.logo}
       extraImages={free ? [] : extraImages}
       description={free ? null : item.description}
       descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}

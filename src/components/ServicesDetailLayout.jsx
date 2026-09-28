@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartImage from "./SmartImage";
 import { useRef, useState } from "react";
 import LocationMap from "./LocationMap";
 import {
@@ -64,6 +65,9 @@ export default function ServicesDetailLayout({
   categoryLabel,
   title,
   heroImage,
+  // The business logo for the square beside the name. The header picture
+  // filled it before, so the page showed that picture twice.
+  logo,
   extraImages = [],
   description,
   hours,
@@ -152,9 +156,11 @@ export default function ServicesDetailLayout({
           <div className="min-w-0">
             {/* ── 2. Business header ── */}
             <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5 mb-6" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-              <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-                <img src={heroImage} alt={title} className="w-full h-full object-cover" />
-              </div>
+              {logo && (
+                <div className="w-36 h-36 shrink-0 overflow-hidden flex items-center justify-center" style={{ backgroundColor: "#fff", boxShadow: "0 0 0 1px rgba(28,46,56,0.08)" }}>
+                  <SmartImage src={logo} alt={`${title} logo`} size="card" eager sizes="144px" className="w-full h-full object-contain p-3" />
+                </div>
+              )}
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <h1 className="text-2xl md:text-3xl" style={{ color: "#000000" }}>{title}</h1>
@@ -191,8 +197,11 @@ export default function ServicesDetailLayout({
             {!galleryPlaceholder && galleryImages.length > 0 && (
               <div className="mb-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-2 sm:row-span-2 aspect-[16/9] sm:aspect-auto overflow-hidden cursor-pointer">
-                    <img src={galleryImages[0]} alt={title} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                  {/* The header, whole: the same 16:9 it was uploaded at, so
+                      nothing is cut off. It used to be squeezed into a
+                      square beside the two thumbnails. */}
+                  <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-2 sm:col-span-3 aspect-[16/9] overflow-hidden cursor-pointer">
+                    <SmartImage src={galleryImages[0]} alt={title} size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
                   </button>
                   {galleryImages.slice(1, 3).map((src, i) => (
                     <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="aspect-square overflow-hidden cursor-pointer">

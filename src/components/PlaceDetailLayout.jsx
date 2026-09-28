@@ -312,7 +312,7 @@ export default function PlaceDetailLayout({
             </Link>
           </div>
         )}
-        <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[4/3] sm:aspect-[16/10] bg-black">
+        <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[16/9] bg-black">
           <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />
         </div>
       </section>
