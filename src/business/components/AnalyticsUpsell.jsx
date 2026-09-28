@@ -30,7 +30,7 @@ const FEATURES = [
 
 const BARS = [28, 36, 31, 44, 40, 52, 48, 61, 57, 70, 66, 82];
 
-function Icon({ children }) {
+export function Icon({ children }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       {children}
@@ -60,84 +60,97 @@ function Preview() {
   );
 }
 
-export default function AnalyticsUpsell({ role }) {
+// Shared with the other upgrade pages (NewsUpsell) so they read as one set.
+export function UpsellCta({ role, light }) {
   const navigate = useNavigate();
-  const canSubscribe = role !== "Content Manager";
-
-  const cta = canSubscribe ? (
+  if (role === "Content Manager") {
+    return light
+      ? <p className="shrink-0 text-xs font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>Ask your business owner to upgrade.</p>
+      : <p className="text-sm font-semibold px-4 py-2.5 rounded-xl" style={{ backgroundColor: "#FFFBEB", color: "#92400E" }}>Ask your business owner to upgrade to the Visibility Plan.</p>;
+  }
+  return light ? (
+    <button onClick={() => navigate("/business/upgrade")}
+      className="shrink-0 px-6 py-3 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
+      style={{ backgroundColor: "#fff", color: "#1E3A8A" }}>
+      See the Visibility Plan →
+    </button>
+  ) : (
     <button onClick={() => navigate("/business/upgrade")}
       className="px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
       style={{ backgroundColor: SAGE }}>
       See the Visibility Plan →
     </button>
-  ) : (
-    <p className="text-sm font-semibold px-4 py-2.5 rounded-xl" style={{ backgroundColor: "#FFFBEB", color: "#92400E" }}>
-      Ask your business owner to upgrade to the Visibility Plan.
-    </p>
   );
+}
 
+export function FeatureCard({ f }) {
+  return (
+    <div className="bg-white rounded-2xl p-5 flex gap-4 items-start" style={CARD}>
+      <span className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+        style={{ backgroundColor: "rgba(37,99,235,0.08)", color: SAGE }}>
+        <Icon>{f.icon}</Icon>
+      </span>
+      <div>
+        <p className="text-sm font-bold" style={{ color: FOREST }}>{f.title}</p>
+        <p className="text-sm mt-1 leading-relaxed" style={{ color: MUTED }}>{f.body}</p>
+      </div>
+    </div>
+  );
+}
+
+export function UpsellHero({ role, title, preview, children }) {
+  return (
+    <section className="relative overflow-hidden rounded-3xl" style={{ background: "linear-gradient(160deg, #EFF6FF 0%, #F8FAFC 55%, #EEF2FF 100%)", border: "1px solid #E0E7FF" }}>
+      {preview}
+      <div className="relative px-6 py-12 sm:px-12 sm:py-16 flex flex-col items-center text-center gap-5">
+        <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] px-3 py-1 rounded-full"
+          style={{ backgroundColor: "rgba(37,99,235,0.1)", color: SAGE }}>
+          🔒 Visibility Plan feature
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight max-w-2xl" style={{ color: FOREST }}>{title}</h1>
+        {children}
+        <UpsellCta role={role} />
+      </div>
+    </section>
+  );
+}
+
+export function UpsellBand({ role, title, children }) {
+  return (
+    <section className="rounded-2xl px-6 py-8 sm:px-10 flex flex-col md:flex-row md:items-center gap-6"
+      style={{ background: "linear-gradient(135deg, #13213B 0%, #1E3A8A 100%)" }}>
+      <div className="flex-1">
+        <h2 className="text-xl font-bold text-white">{title}</h2>
+        <p className="text-sm mt-2 leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.8)" }}>{children}</p>
+      </div>
+      <UpsellCta role={role} light />
+    </section>
+  );
+}
+
+export default function AnalyticsUpsell({ role }) {
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
-      {/* Hero, over a blurred preview of the dashboard */}
-      <section className="relative overflow-hidden rounded-3xl" style={{ background: "linear-gradient(160deg, #EFF6FF 0%, #F8FAFC 55%, #EEF2FF 100%)", border: "1px solid #E0E7FF" }}>
-        <Preview />
-        <div className="relative px-6 py-12 sm:px-12 sm:py-16 flex flex-col items-center text-center gap-5">
-          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] px-3 py-1 rounded-full"
-            style={{ backgroundColor: "rgba(37,99,235,0.1)", color: SAGE }}>
-            🔒 Visibility Plan feature
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight max-w-2xl" style={{ color: FOREST }}>
-            See how customers find your business
-          </h1>
-          <p className="text-base leading-relaxed max-w-2xl" style={{ color: MUTED }}>
-            Your business is already being discovered on <strong style={{ color: FOREST }}>Maidenhead.com</strong> and{" "}
-            <strong style={{ color: FOREST }}>The Maidenhead App</strong> — but do you know how many people are viewing your profile?
-          </p>
-          {cta}
-        </div>
-      </section>
+      <UpsellHero role={role} title="See how customers find your business" preview={<Preview />}>
+        <p className="text-base leading-relaxed max-w-2xl" style={{ color: MUTED }}>
+          Your business is already being discovered on <strong style={{ color: FOREST }}>Maidenhead.com</strong> and{" "}
+          <strong style={{ color: FOREST }}>The Maidenhead App</strong> — but do you know how many people are viewing your profile?
+        </p>
+      </UpsellHero>
 
-      {/* What's unlocked */}
       <section className="flex flex-col gap-4">
         <p className="text-sm font-semibold" style={{ color: FOREST }}>
           Upgrade to the Visibility Plan to unlock your business analytics and see:
         </p>
         <div className="grid sm:grid-cols-2 gap-4">
-          {FEATURES.map((f) => (
-            <div key={f.title} className="bg-white rounded-2xl p-5 flex gap-4 items-start" style={CARD}>
-              <span className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                style={{ backgroundColor: "rgba(37,99,235,0.08)", color: SAGE }}>
-                <Icon>{f.icon}</Icon>
-              </span>
-              <div>
-                <p className="text-sm font-bold" style={{ color: FOREST }}>{f.title}</p>
-                <p className="text-sm mt-1 leading-relaxed" style={{ color: MUTED }}>{f.body}</p>
-              </div>
-            </div>
-          ))}
+          {FEATURES.map((f) => <FeatureCard key={f.title} f={f} />)}
         </div>
       </section>
 
-      {/* Why it matters */}
-      <section className="rounded-2xl px-6 py-8 sm:px-10 flex flex-col md:flex-row md:items-center gap-6"
-        style={{ background: "linear-gradient(135deg, #13213B 0%, #1E3A8A 100%)" }}>
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-white">Turn views into valuable insight</h2>
-          <p className="text-sm mt-2 leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.8)" }}>
-            Knowing how many people are looking at your business helps you understand your visibility and make
-            better decisions about how you promote your business.
-          </p>
-        </div>
-        {canSubscribe ? (
-          <button onClick={() => navigate("/business/upgrade")}
-            className="shrink-0 px-6 py-3 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#fff", color: "#1E3A8A" }}>
-            See the Visibility Plan →
-          </button>
-        ) : (
-          <p className="shrink-0 text-xs font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>Ask your business owner to upgrade.</p>
-        )}
-      </section>
+      <UpsellBand role={role} title="Turn views into valuable insight">
+        Knowing how many people are looking at your business helps you understand your visibility and make
+        better decisions about how you promote your business.
+      </UpsellBand>
     </div>
   );
 }
