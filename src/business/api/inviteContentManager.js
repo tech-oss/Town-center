@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { checkEmail } from "../../lib/emailCheck";
 
 // Owner invites a Content Manager by email (supabase/functions/invite-content-manager).
 // Inviting them IS the owner's approval — Maidenhead admin is not asked to
@@ -7,6 +8,9 @@ import { supabase } from "../../lib/supabaseClient";
 // their own acceptance of the Terms of Use / Privacy Policy — SetPasswordPage
 // and AcceptTermsPage gate the dashboard on both before letting them in.
 export async function inviteContentManager({ businessId, firstName, lastName, email }) {
+  // The invite is an email; don't send one that will bounce (lib/emailCheck).
+  const emailProblem = await checkEmail(email);
+  if (emailProblem) return { ok: false, error: emailProblem };
   const { data, error } = await supabase.functions.invoke("invite-content-manager", {
     body: {
       businessId,

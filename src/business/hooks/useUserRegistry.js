@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
+import { checkEmail } from "../../lib/emailCheck";
 
 // ─── Supabase-backed business_users registry ───────────────────────────────
 // business_users is the single source of truth for portal logins (Owner +
@@ -81,7 +82,12 @@ export async function submitUserRegistration({ businessId, firstName, lastName, 
     return { ok: false, error: "This business already has a content manager registered or awaiting approval." };
   }
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+  // Checked before Supabase is asked to email it — a bounce counts against
+  // the whole project's sending (lib/emailCheck).
+  const emailProblem = await checkEmail(email);
+  if (emailProblem) return { ok: false, error: emailProblem };
+
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
   if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
 
   const { error: insertError } = await supabase.from("business_users").insert({
@@ -116,7 +122,12 @@ export async function submitBusinessClaim({ businessId, firstName, lastName, ema
     return { ok: false, error: "This business has already been claimed, or has a claim awaiting approval." };
   }
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+  // Checked before Supabase is asked to email it — a bounce counts against
+  // the whole project's sending (lib/emailCheck).
+  const emailProblem = await checkEmail(email);
+  if (emailProblem) return { ok: false, error: emailProblem };
+
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
   if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
 
   const { error: insertError } = await supabase.from("business_users").insert({

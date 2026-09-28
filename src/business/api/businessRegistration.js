@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { checkEmail } from "../../lib/emailCheck";
 import { FREE_PLAN } from "../../Data/plans";
 
 function slugify(name) {
@@ -32,8 +33,13 @@ function readableBusinessNameError(error, name) {
 }
 
 export async function registerBusiness(form) {
+  // Checked before Supabase is asked to email it — a bounce counts against
+  // the whole project's sending (lib/emailCheck).
+  const emailProblem = await checkEmail(form.email);
+  if (emailProblem) return { ok: false, error: emailProblem };
+
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: form.email,
+    email: form.email.trim(),
     password: form.password,
   });
   if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
