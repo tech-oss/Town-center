@@ -146,7 +146,7 @@ export default function AdminLogsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 max-w-6xl">
+    <div className="flex flex-col gap-6">
       <Toast message={toast} />
       <div>
         <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Admin Logs</h1>
