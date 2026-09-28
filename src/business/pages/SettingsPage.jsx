@@ -4,8 +4,9 @@ import { supabase } from "../../lib/supabaseClient";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, Toggle, Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD, INPUT } from "../components/FormKit";
-import { usePendingRequests, useApprovedTeam, approveRequest, declineRequest } from "../hooks/useUserRegistry";
+import { usePendingRequests, useApprovedTeam, approveRequest, declineRequest, removeTeamMember } from "../hooks/useUserRegistry";
 import { inviteContentManager } from "../api/inviteContentManager";
+import { AcceptedTermsDialog } from "./BillingPage";
 
 // Account settings: who you're signed in as, your details, your password,
 // your team and your account. Same layout as the admin panel's Settings —
@@ -281,6 +282,7 @@ export default function SettingsPage() {
   const [profileDeleted, setProfileDeleted] = useState(false);
   const [accountDeleted, setAccountDeleted] = useState(false);
   const isOwner = user.role !== "Content Manager";
+  const [showTerms, setShowTerms] = useState(false);
   const pendingRequests = usePendingRequests(user.id);
 
   useEffect(() => {
@@ -334,7 +336,11 @@ export default function SettingsPage() {
     setAddingMember(false);
     setToast(`Invite sent to ${memberForm.email}.`);
   }
-  function removeMember(id) {
+  // This only ever hid them on screen — the database row and login stayed,
+  // so a "removed" Content Manager could still sign in.
+  async function removeMember(id) {
+    const res = await removeTeamMember(id);
+    if (!res.ok) { setToast(res.error || "Couldn't remove that team member."); return; }
     setTeamOverride((prev) => (prev ?? team).filter((m) => m.id !== id));
     setToast("Team member removed.");
   }
@@ -427,6 +433,18 @@ export default function SettingsPage() {
                 {savingPersonal ? "Saving…" : "Save changes"}
               </button>
             </Panel>
+
+            {/* A Content Manager can't open Subscriptions & Accepted Terms
+                (owner only), so their own acceptance is shown here instead. */}
+            {!isOwner && (
+              <Panel icon={Icon.check} title="Accepted Terms" description="The Terms of Use and Privacy Policy you agreed to.">
+                <p className="text-sm" style={{ color: MUTED }}>
+                  {user.personalTermsAcceptedAt ? `You accepted the terms on ${formatDateTime(user.personalTermsAcceptedAt)}.` : "You haven't accepted the terms yet."}{" "}
+                  <button type="button" onClick={() => setShowTerms(true)} className="font-semibold hover:underline" style={{ color: "#2563EB" }}>View accepted terms →</button>
+                </p>
+              </Panel>
+            )}
+            {showTerms && <AcceptedTermsDialog acceptedAt={user.personalTermsAcceptedAt} onClose={() => setShowTerms(false)} />}
 
             <PasswordPanel />
 

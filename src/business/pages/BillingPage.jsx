@@ -21,7 +21,7 @@ function fmtDateTime(iso) {
 }
 
 // The Terms of Use the business agreed to at signup, with when they agreed.
-function AcceptedTermsDialog({ acceptedAt, onClose }) {
+export function AcceptedTermsDialog({ acceptedAt, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(15,23,42,0.55)" }} onClick={onClose}>
       <div role="dialog" aria-modal="true" aria-labelledby="accepted-terms-title"

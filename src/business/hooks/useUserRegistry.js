@@ -161,6 +161,20 @@ export async function declineRequest(businessId, reqId) {
     .eq("business_id", businessId);
 }
 
+// Removing a Content Manager deletes their login outright (row + Supabase
+// Auth account), which signs them out and frees the email to register again.
+// Service-role work, so it goes through the delete-business-user function.
+export async function removeTeamMember(reqId) {
+  const { data, error } = await supabase.functions.invoke("delete-business-user", { body: { businessUserId: reqId } });
+  if (error) {
+    let message = error.message;
+    try { message = (await error.context?.json())?.error ?? message; } catch { /* keep generic */ }
+    return { ok: false, error: message };
+  }
+  if (data?.error) return { ok: false, error: data.error };
+  return { ok: true };
+}
+
 function useBusinessUsersByStatus(businessId, status) {
   const [rows, setRows] = useState([]);
 

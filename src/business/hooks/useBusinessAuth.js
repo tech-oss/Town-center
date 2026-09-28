@@ -179,7 +179,16 @@ export async function login(email, password) {
   }
   if (row.status !== "approved") {
     await supabase.auth.signOut();
-    return { ok: false, error: "Your account is still awaiting admin approval." };
+    // Only 'pending' is actually waiting on anyone. A Content Manager's
+    // request is decided by the business owner, not Maidenhead admin.
+    const isCM = row.role === "Content Manager";
+    const byWhom = isCM ? "the business owner" : "Maidenhead admin";
+    const message = {
+      declined: "The business owner rejected your request for an account.",
+      rejected: isCM ? "The business owner rejected your request for an account." : "Your account request was rejected by Maidenhead admin.",
+      suspended: "Your account has been suspended. Please contact Maidenhead admin.",
+    }[row.status] ?? `Your account is still awaiting approval by ${byWhom}.`;
+    return { ok: false, error: message };
   }
   if (row.businesses?.status !== "Approved") {
     await supabase.auth.signOut();

@@ -10,6 +10,10 @@ const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (di
 const TEXT_ON  = "rgba(255,255,255,0.75)";
 const TEXT_DIM = "rgba(255,255,255,0.45)";
 const DIVIDER  = "rgba(255,255,255,0.10)";
+// The public Maidenhead site (the admin-panel branch's deployment). Override
+// with VITE_PUBLIC_SITE_URL once the site has its production domain.
+const PUBLIC_SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_URL
+  || "https://town-center-git-admin-panel-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
 
 const NAV = [
   { to: "/business/dashboard", label: "Dashboard", icon: "🏠" },
@@ -147,7 +151,9 @@ export default function BusinessLayout({ children }) {
         <div style={{ height: 1, backgroundColor: DIVIDER, margin: "0 20px" }} />
 
         <div className="px-5 py-4 flex flex-col gap-2">
-          <a href="/" target="_blank" rel="noopener noreferrer"
+          {/* The site is a separate deployment — "/" here was this portal's own
+              stale copy of it. /b/:id on the real site finds this business's page. */}
+          <a href={`${PUBLIC_SITE_URL}/b/${String(user.id).replace(/^biz_/, "")}`} target="_blank" rel="noopener noreferrer"
             className="text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: SAGE }}>
             View my public page →
           </a>
