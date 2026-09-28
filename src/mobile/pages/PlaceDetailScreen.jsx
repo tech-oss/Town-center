@@ -309,7 +309,7 @@ export default function PlaceDetailScreen() {
   if (!place) return <Navigate to="/mobile/explore" replace />;
 
   if (place.section === "services") {
-    if (FREELANCER_CATEGORIES.has(place.category)) {
+    if (place.serviceGroup === "freelancers" || FREELANCER_CATEGORIES.has(place.category)) {
       return <FreelancerDetailScreen place={place} goBack={goBack} />;
     }
     return <ServicesBusinessDetailScreen place={place} goBack={goBack} />;

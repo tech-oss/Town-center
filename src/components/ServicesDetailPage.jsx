@@ -12,21 +12,17 @@ import NewsOffers from "./NewsOffers";
 import ClaimBusinessBox from "./ClaimBusinessBox";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 import useViewedCategory from "../lib/viewedCategory";
+import { FREELANCER_CATEGORIES } from "../mobile/lib/freelancerCategories";
 
-// Categories under the Services "Freelancers" menu column — these get the
-// lighter, portfolio-first profile layout instead of the local-directory
-// business profile (opening hours, areas covered, business info) that
-// tradespeople and professionals use.
-const FREELANCER_CATEGORIES = new Set([
-  "graphic-designers",
-  "web-developers",
-  "photographers",
-  "copywriters",
-  "marketing-consultants",
-  "personal-trainers",
-  "tutors",
-  "virtual-assistants",
-]);
+// A freelancer gets the portfolio-first profile rather than the
+// tradesperson layout (services offered, why choose us, areas covered).
+// This used to test a hand-kept list of eight old category slugs, so every
+// freelancer in a newer category — most of them — got the tradesperson page
+// with none of their Skills, Portfolio or Working With Me. The kind they
+// chose at signup decides it now, with the taxonomy list as a fallback, the
+// same test the app uses.
+const isFreelancerItem = (item) =>
+  item?.serviceGroup === "freelancers" || FREELANCER_CATEGORIES.has(item?.category);
 
 function buildSocial(item) {
   const s = item.social;
@@ -56,13 +52,13 @@ export default function ServicesDetailPage() {
   if (!item) return <Navigate to="/" replace />;
   const sec = sections[item.section];
 
-  const isFreelancer = FREELANCER_CATEGORIES.has(item.category);
+  const isFreelancer = isFreelancerItem(item);
 
   // Freelancers only pair up with other freelancers — a graphic designer's
   // "similar" list shouldn't surface builders or electricians.
   const sectionItems = allBusinesses
     .filter((i) => i.section === item.section)
-    .filter((i) => FREELANCER_CATEGORIES.has(i.category) === isFreelancer);
+    .filter((i) => isFreelancerItem(i) === isFreelancer);
   const sameCat = sectionItems.filter((i) => i.category === item.category && i.slug !== item.slug);
   const others = sectionItems.filter((i) => i.category !== item.category && i.slug !== item.slug);
   const related = [...sameCat, ...others].slice(0, 4);
@@ -85,6 +81,9 @@ export default function ServicesDetailPage() {
         categoryLabel={viewed.label}
         title={item.name}
         heroImage={item.image}
+        logo={free ? null : item.logo}
+        hours={free ? null : item.hours}
+        hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
         description={free ? null : item.description}
         descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
         galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
@@ -97,12 +96,14 @@ export default function ServicesDetailPage() {
         reviewCount={item.reviewCount}
         aboutHeading={item.aboutHeading}
         aboutText={item.aboutText}
-        skills={free ? [] : (item.skills || item.servicesOffered)}
-        portfolio={free ? [] : (item.portfolio || gallery.map((src) => ({ image: src })))}
-        availability={item.availability || "Accepting new projects"}
-        workMode={item.workMode || "Remote & on-site"}
-        responseTime={item.responseTime || "Usually within 24 hours"}
-        experience={item.experience || item.stats?.[0]?.value}
+        // Only what the freelancer entered — no borrowed fields, no example
+        // wording. An empty section is simply not shown.
+        skills={free ? [] : (item.skills ?? [])}
+        portfolio={free ? [] : (item.portfolio ?? [])}
+        availability={free ? null : item.workingWithMe?.availability}
+        workMode={free ? null : item.workingWithMe?.workMode}
+        responseTime={free ? null : item.workingWithMe?.responseTime}
+        experience={free ? null : item.workingWithMe?.experience}
         reviewsBreakdown={item.reviewsBreakdown}
         reviewsList={item.reviewsList}
         faq={free ? [] : item.faq}

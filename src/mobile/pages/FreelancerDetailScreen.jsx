@@ -104,14 +104,21 @@ export default function FreelancerDetailScreen({ place, goBack }) {
   // as there is something real to show.
   const news = place.news ?? [];
   const social = !free && place.social ? Object.entries(place.social).filter(([k]) => SOCIAL_ICONS[k] && place.social[k]) : [];
-  const portfolio = free ? [] : (place.gallery ?? []).filter((g) => g !== place.image);
-  const skills = free ? [] : (place.skills ?? place.servicesOffered ?? []);
+  // The Portfolio tab's entries ({ image, link, title }). This read the
+  // Gallery, which freelancers don't have, so the app never showed one.
+  const portfolioItems = free ? [] : (place.portfolio ?? []);
+  const portfolio = portfolioItems.map((p) => p.image).filter(Boolean);
+  const portfolioLinks = portfolioItems.filter((p) => p.link);
+  const skills = free ? [] : (place.skills ?? []);
   const reviewsList = place.reviewsList ?? [];
   const faq = free ? [] : (place.faq ?? []);
-  const availability = place.availability || "Accepting new projects";
-  const workMode = place.workMode || "Remote & on-site";
-  const responseTime = place.responseTime || "Usually within 24 hours";
-  const experience = place.experience || place.stats?.[0]?.value;
+  // Only what the freelancer filled in on Working With Me — this used to
+  // fall back to example wording, which showed before anything was entered.
+  const wwm = free ? null : place.workingWithMe;
+  const availability = wwm?.availability;
+  const workMode = wwm?.workMode;
+  const responseTime = wwm?.responseTime;
+  const experience = wwm?.experience;
   // Live businesses, same category first — the website's "You might also like".
   const related = useRelatedBusinesses(place);
 
@@ -229,6 +236,30 @@ export default function FreelancerDetailScreen({ place, goBack }) {
           {free
             ? <ComingSoonCard heading="Portfolio" text={FREE_PLACEHOLDERS.gallery} />
             : <PhotoGallery images={portfolio} title={`${place.name} portfolio`} max={9} />}
+          {portfolioLinks.length > 0 && (
+            <MobileCard className="p-4 flex flex-col gap-2.5">
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>Portfolio links</p>
+              {portfolioLinks.map((p, i) => (
+                <a key={p.id ?? i} href={p.link} target="_blank" rel="noopener noreferrer"
+                  className="text-sm font-semibold break-all" style={{ color: "var(--teal-deep)" }}>
+                  {p.title || p.link.replace(/^https?:\/\//, "")} ↗
+                </a>
+              ))}
+            </MobileCard>
+          )}
+
+          {free && <ComingSoonCard heading="Opening Hours" text={FREE_PLACEHOLDERS.hours} />}
+          {!free && place.hours?.length > 0 && (
+            <MobileCard className="p-4 flex flex-col gap-2">
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Opening Hours</p>
+              {place.hours.map((h) => (
+                <div key={h.day} className="flex items-center justify-between text-sm">
+                  <span style={{ color: "#000000" }}>{h.day}</span>
+                  <span className="font-semibold" style={{ color: h.time === "Closed" ? "#C0392B" : "#000000" }}>{h.time}</span>
+                </div>
+              ))}
+            </MobileCard>
+          )}
 
           {place.aboutText && (
             <MobileCard className="p-4 flex flex-col gap-2">

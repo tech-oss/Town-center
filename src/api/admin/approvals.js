@@ -55,7 +55,7 @@ const SECTION_FIELDS = {
   location: [["address", "address", "Address"], ["postal_code", "postalCode", "Postcode"], ["lat", "lat", "Latitude"], ["lng", "lng", "Longitude"]],
   contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"], ["availability_tag", "availabilityTag", "Availability Tag"]],
   faqs: [["faqs", "faqs", "FAQs"]],
-  portfolio: [["portfolio", "portfolio", "Portfolio"], ["skills", "skills", "Skills"]],
+  portfolio: [["portfolio", "portfolio", "Portfolio", "portfolio"], ["skills", "skills", "Skills"]],
   services: [["services_list", "servicesList", "Services"], ["areas_covered_list", "areasCoveredList", "Areas Covered"], ["why_choose_us", "whyChooseUs", "Why Choose Us"], ["stats", "stats", "Stats"]],
   areas: [["areas_covered_list", "areasCoveredList", "Areas Covered"]],
   skills: [["skills", "skills", "Skills"]],
@@ -83,7 +83,7 @@ function parseId(id) {
 // Writes a value out in full so admin can read exactly what the business
 // entered — FAQs as Q/A pairs, social links as "Instagram: url", opening hours
 // day by day — rather than a count like "2 fields".
-const LABELS = { instagram: "Instagram", facebook: "Facebook", x: "X / Twitter", twitter: "X / Twitter", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
+const LABELS = { availability: "Availability", works: "Works", responseTime: "Response time", experience: "Experience", instagram: "Instagram", facebook: "Facebook", x: "X / Twitter", twitter: "X / Twitter", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
 
 function describeEntry(item) {
   if (item == null) return "";
@@ -128,6 +128,8 @@ function sameValue(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
+const RAW_KINDS = new Set(["image", "gallery", "portfolio"]);
+
 function toItem(row, section, state, owner = {}) {
   const fields = SECTION_FIELDS[section] ?? [];
   const snapshot = row.pending_snapshot?.[section] ?? null;
@@ -146,8 +148,10 @@ function toItem(row, section, state, owner = {}) {
     return {
       field: label,
       kind: kind ?? "text",
-      before: kind === "image" || kind === "gallery" ? before : describe(before),
-      after: kind === "image" || kind === "gallery" ? after : describe(after),
+      // Pictures are passed through as-is for the page to draw; everything
+      // else is written out as text.
+      before: RAW_KINDS.has(kind) ? before : describe(before),
+      after: RAW_KINDS.has(kind) ? after : describe(after),
       hasBefore: snapshot != null,
       changed,
     };

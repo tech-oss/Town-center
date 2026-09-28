@@ -64,6 +64,20 @@ export const liveSlug = (businessId) => String(businessId).replace(/^biz_/, "");
 export const businessIdFromSlug = (slug) => (String(slug).startsWith("biz_") ? slug : `biz_${slug}`);
 export const isLiveSlug = (slug) => typeof slug === "string" && /-[a-z0-9]{5}$/.test(slug);
 
+// Working With Me as the portal saves it: { availability, works,
+// responseTime, experience }, any of which may be blank.
+function workingWithMeOf(w) {
+  if (!w || typeof w !== "object") return null;
+  const clean = (v) => (typeof v === "string" && v.trim() ? v.trim() : null);
+  const out = {
+    availability: clean(w.availability),
+    workMode: clean(w.works),
+    responseTime: clean(w.responseTime),
+    experience: clean(w.experience),
+  };
+  return Object.values(out).some(Boolean) ? out : null;
+}
+
 // The dashboard's hours editor stores {day, from, to, open}; the pages render
 // {day, time}.
 function mapHours(hours) {
@@ -262,6 +276,9 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     stats: listOrUndefined(row.stats),
     skills: listOrUndefined(row.skills),
     portfolio: listOrUndefined(row.portfolio),
+    // A freelancer's Working With Me box, exactly as they filled it in — no
+    // example wording, so an unfilled line simply isn't shown.
+    workingWithMe: workingWithMeOf(row.working_with_me),
     amenities: listOrUndefined(row.amenities),
     // The Hotels/Accommodation listing pages' Facilities, Room facilities,
     // Meals and Travel group filters (StayListingPage.jsx) — restored from

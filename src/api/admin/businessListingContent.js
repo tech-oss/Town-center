@@ -37,15 +37,16 @@ const ALL_SECTIONS = Object.keys(SECTION_FIELDS);
 // HoursEditor (shared.jsx) unconditionally maps over `hours` — it expects
 // the full 7-day array business-dashboard's DEFAULT_HOURS() produces, not
 // null. A business with no hours saved yet needs this same default, or the
-// editor crashes the moment its business is selected.
+// editor crashes the moment its business is selected. Every day starts
+// closed: nothing is shown as open until the business says so.
 function defaultHours() {
   return [
-    { day: "Monday", open: true, from: "09:00", to: "17:00" },
-    { day: "Tuesday", open: true, from: "09:00", to: "17:00" },
-    { day: "Wednesday", open: true, from: "09:00", to: "17:00" },
-    { day: "Thursday", open: true, from: "09:00", to: "17:00" },
-    { day: "Friday", open: true, from: "09:00", to: "17:00" },
-    { day: "Saturday", open: true, from: "10:00", to: "16:00" },
+    { day: "Monday", open: false, from: "09:00", to: "17:00" },
+    { day: "Tuesday", open: false, from: "09:00", to: "17:00" },
+    { day: "Wednesday", open: false, from: "09:00", to: "17:00" },
+    { day: "Thursday", open: false, from: "09:00", to: "17:00" },
+    { day: "Friday", open: false, from: "09:00", to: "17:00" },
+    { day: "Saturday", open: false, from: "10:00", to: "16:00" },
     { day: "Sunday", open: false, from: "10:00", to: "16:00" },
   ];
 }

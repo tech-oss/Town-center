@@ -78,6 +78,11 @@ export default function FreelancerDetailLayout({
   categoryLabel,
   title,
   heroImage,
+  // The business's logo, shown in the square beside the name. The header
+  // picture used to fill that square too, so the page showed it twice.
+  logo,
+  hours,
+  hoursPlaceholder,
   description,
   address,
   phone,
@@ -167,10 +172,21 @@ export default function FreelancerDetailLayout({
   const PortfolioTile = ({ p, index, big = false }) => {
     const shapeClass = big ? "col-span-2 sm:row-span-2 aspect-[16/9] sm:aspect-auto" : "aspect-square";
     if (p.image) {
+      // A picture with a link keeps both: the picture opens the lightbox,
+      // the badge opens the work itself. The link used to be dropped.
       return (
-        <button type="button" onClick={() => setGalleryIndex(portfolioImageIndex[index])} className={`${shapeClass} overflow-hidden cursor-pointer`}>
-          <img src={p.image} alt={p.title || `${title} portfolio ${index + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
-        </button>
+        <div className={`${shapeClass} relative overflow-hidden`}>
+          <button type="button" onClick={() => setGalleryIndex(portfolioImageIndex[index])} className="w-full h-full cursor-pointer">
+            <img src={p.image} alt={p.title || `${title} portfolio ${index + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+          </button>
+          {p.link && (
+            <a href={p.link} target="_blank" rel="noopener noreferrer"
+              className="absolute bottom-2 left-2 inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--forest)" }}>
+              <LinkIcon size={12} /> View project ↗
+            </a>
+          )}
+        </div>
       );
     }
     if (p.link) {
@@ -221,10 +237,19 @@ export default function FreelancerDetailLayout({
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8">
           {/* ══ Main column ══ */}
           <div className="min-w-0">
-            {/* ── Profile header — one profile picture, name, rating, skills ── */}
+            {/* ── Header picture, once, across the top. Only when a logo fills
+                the square below — otherwise the header is that square. ── */}
+            {logo && heroImage && (
+              <div className="mb-6 overflow-hidden aspect-[3/1]" style={{ backgroundColor: "var(--forest)" }}>
+                <SmartImage src={heroImage} alt="" size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover" />
+              </div>
+            )}
+            {/* ── Profile header — logo, name, rating, skills ── */}
             <div className="bg-white p-5 md:p-7 flex flex-col sm:flex-row gap-5 mb-6" style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-              <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-                <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />
+              <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden flex items-center justify-center" style={{ backgroundColor: logo ? "#fff" : "var(--forest)", boxShadow: logo ? "0 0 0 1px rgba(28,46,56,0.08)" : undefined }}>
+                {logo
+                  ? <SmartImage src={logo} alt={`${title} logo`} size="card" eager sizes="144px" className="w-full h-full object-contain p-3" />
+                  : <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />}
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl md:text-3xl mb-1.5" style={{ color: "#000000" }}>{title}</h1>
@@ -416,8 +441,26 @@ export default function FreelancerDetailLayout({
               )}
             </div>
 
-            {/* Practical info a prospective client actually needs, in place
-                of storefront details like opening hours or areas covered. */}
+            {hoursPlaceholder && (
+              <Section heading="Opening Hours">
+                <p className="text-sm font-semibold" style={{ color: "rgba(0,0,0,0.55)" }}>{hoursPlaceholder}</p>
+              </Section>
+            )}
+            {hours?.length > 0 && (
+              <Section heading="Opening Hours">
+                <ul className="flex flex-col">
+                  {hours.map((h, i) => (
+                    <li key={h.day} className="flex items-center justify-between text-sm py-2" style={i < hours.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.08)" } : undefined}>
+                      <span style={{ color: "#000000" }}>{h.day}</span>
+                      <span className="font-semibold" style={{ color: h.time === "Closed" ? "#C0392B" : "#000000" }}>{h.time}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            )}
+
+            {/* Practical info a prospective client actually needs — only
+                what the freelancer filled in themselves. */}
             {infoRows.length > 0 && (
               <Section heading="Working With Me">
                 <div className="flex flex-col gap-3.5">

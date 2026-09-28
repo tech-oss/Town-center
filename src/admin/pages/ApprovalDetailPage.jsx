@@ -55,6 +55,25 @@ function ValueCell({ kind, value, hasBefore, empty }) {
       </div>
     );
   }
+  // A freelancer's portfolio: { image, link, title } entries. Written out as
+  // text this was just a storage URL — admin couldn't see the picture.
+  if (kind === "portfolio") {
+    const entries = Array.isArray(value) ? value.filter((p) => p && (p.image || p.link)) : [];
+    if (!entries.length) return <span className="text-xs px-2 py-1 rounded-lg italic" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>No portfolio items</span>;
+    return (
+      <div className="flex flex-wrap gap-2">
+        {entries.map((p, i) => (
+          <div key={p.id ?? i} className="w-28 flex flex-col gap-1">
+            {p.image
+              ? <a href={p.image} target="_blank" rel="noopener noreferrer"><img src={p.image} alt="" className="w-28 h-20 rounded-lg object-cover" style={{ border: "1.5px solid rgba(16,24,40,0.15)" }} /></a>
+              : <div className="w-28 h-20 rounded-lg flex items-center justify-center text-[10px]" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: "#9CA3AF" }}>Link only</div>}
+            {p.title && <span className="text-[11px] font-semibold truncate" style={{ color: "#1E293B" }}>{p.title}</span>}
+            {p.link && <a href={p.link} target="_blank" rel="noopener noreferrer" className="text-[11px] truncate hover:underline" style={{ color: "#2563EB" }}>{p.link.replace(/^https?:\/\//, "")}</a>}
+          </div>
+        ))}
+      </div>
+    );
+  }
   return <span className="inline-block text-xs px-2 py-1 rounded-lg break-words whitespace-pre-line leading-relaxed" style={{ backgroundColor: "rgba(16,24,40,0.06)", color: "#1E293B" }}>{value}</span>;
 }
 
