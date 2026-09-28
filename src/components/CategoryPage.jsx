@@ -143,13 +143,18 @@ export default function CategoryPage() {
   const basePath = groupConfig ? `/services/${group}` : sec.path;
 
   const catHero = category && sec.categoryHeroes?.[category];
-  const heroSrc = (typeof catHero === "object" ? catHero.src : catHero) || copy.hero || sec.landing.hero;
+  // The landing header is whatever admin set in Site Content, or nothing —
+  // the built-in pictures are gone so the editor can be tested for real.
+  // A category's own hero (Services' sub-categories) is unaffected.
+  const heroSrc = isCategory
+    ? ((typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero)
+    : copy.hero;
   const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
   const heroBg  = typeof catHero === "object" ? catHero.bg  : undefined;
   // A separate desktop hero image, only set up for the Shop/Eat & Drink/
   // Services landing pages so far — falls back to the single `heroSrc`
   // everywhere else.
-  const heroDesktopSrc = !isCategory && (copy.heroDesktop || sec.landing.heroDesktop);
+  const heroDesktopSrc = !isCategory && copy.heroDesktop;
   // Services' desktop photo has its subject (a tradesperson up a ladder)
   // near the top of the frame — cover-cropping from dead center at wide
   // viewports (container aspect ~2:1 vs. the photo's own ~1.8:1) sliced
@@ -164,16 +169,16 @@ export default function CategoryPage() {
           instead of leaving a gap of page background above it. */}
       <section
         className="relative w-full overflow-hidden h-[70vh] min-h-[520px]"
-        style={heroBg ? { backgroundColor: heroBg } : undefined}
+        style={{ backgroundColor: heroBg ?? "#1C2E38" }}
       >
         {heroDesktopSrc ? (
           <>
-            <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full md:hidden" style={{ objectFit: heroFit, objectPosition: "center" }} />
+            <img src={heroSrc || heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full md:hidden" style={{ objectFit: heroFit, objectPosition: "center" }} />
             <img src={heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full hidden md:block" style={{ objectFit: heroFit, objectPosition: heroDesktopPosition }} />
           </>
-        ) : (
+        ) : heroSrc ? (
           <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
-        )}
+        ) : null}
         {/* Eat & Drink, Shop and Services show the hero photo with no
             darkening overlay, at the user's request — See & Do keeps the
             gradient so the white title stays readable over it. */}

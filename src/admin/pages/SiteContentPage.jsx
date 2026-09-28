@@ -46,7 +46,7 @@ function ImageField({ label, hint, value, onChange }) {
         {value
           ? <img src={value} alt="" className="w-32 h-20 rounded-xl object-cover" style={{ border: `1.5px solid ${BORDER}` }} />
           : <div className="w-32 h-20 rounded-xl flex items-center justify-center text-[10px] text-center px-2"
-              style={{ border: `1.5px dashed ${BORDER}`, color: "#9CA3AF" }}>Using the built-in picture</div>}
+              style={{ border: `1.5px dashed ${BORDER}`, color: "#9CA3AF" }}>No picture — header shows plain</div>}
         <label className="px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
           style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: "1.5px solid rgba(37,99,235,0.25)" }}>
           {busy ? "Uploading…" : value ? "Replace" : "Upload"}

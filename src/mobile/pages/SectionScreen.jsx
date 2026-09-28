@@ -120,6 +120,11 @@ export default function SectionScreen({ sectionKey }) {
   return (
     <MobileShell title={appSectionLabel(sectionKey, section.label)} onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-5 mobile-stagger">
+        {/* The header image admin sets in Site Content (mobile first, then
+            desktop). Nothing set, nothing shown. */}
+        {(copy.hero || copy.heroDesktop) && (
+          <img src={copy.hero || copy.heroDesktop} alt="" className="w-full aspect-[16/9] rounded-2xl object-cover" />
+        )}
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{copy.intro ?? section.landing?.intro}</p>
 
         <OffersLink />
