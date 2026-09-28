@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { countActiveContent } from "../api/activeContent";
 import useLiveTick from "../hooks/useLiveTick";
 import ActivePromotions from "../components/ActivePromotions";
 import FeaturedBusinessBanner from "../components/FeaturedBusinessBanner";
@@ -11,7 +12,6 @@ import { Toast, useToast } from "../components/FormKit";
 import { getBusinessListing } from "../api/businessListing";
 import { profileCompleteness } from "../api/profileCompleteness";
 import { getMonthComparison, PROFILE_TYPES, CONTENT_VIEW_TYPES } from "../api/businessAnalytics";
-import { listArticles } from "../api/businessArticles";
 import { listTickets } from "../api/businessTickets";
 import { listActivity, activityLabel, activityIcon, relativeTime } from "../api/businessActivity";
 
@@ -60,9 +60,7 @@ export default function DashboardPage() {
     listTickets(user.id).then((tickets) => {
       if (!cancelled) setOpenTickets(tickets.filter((t) => t.status !== "Resolved").length);
     });
-    listArticles(user.id).then((articles) => {
-      if (!cancelled) setLiveArticles(articles.filter((a) => a.status === "Live").length);
-    });
+    countActiveContent(user.id).then((n) => { if (!cancelled) setLiveArticles(n); }).catch(() => {});
     getBusinessListing(user.id)
       .then((listing) => { if (!cancelled) setCompleteness(profileCompleteness(listing, isPremium(user.plan))); })
       .catch(() => {});
@@ -163,7 +161,7 @@ export default function DashboardPage() {
               <StatCard label="Post & Event Views (this month)" value={viewValue(views.content)} sub={viewChange(views.content)} />
             </>
           )}
-          <StatCard label="Active Articles / Offers" value={liveArticles} />
+          <StatCard label="Active Articles, Offers & Events" value={liveArticles} />
           <StatCard label="Support Tickets (open)" value={openTickets} />
         </div>
 
