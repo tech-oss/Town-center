@@ -242,12 +242,13 @@ export const AMENITY_CATEGORIES = [
       "Salt water pool", "Computer Game console", "Refrigerator", "Fax",
       "Video games", "Kitchen", "Flat-screen TV", "Pool cover",
       "Reading light", "Plunge pool", "Bath", "Lake view",
+      "Clothes Iron", "Ironing Board", "Kettle", "Desk",
     ],
   },
   {
     // Who the stay suits, not a policy — "Pet friendly"/"Adults only" moved
     // to Property Facilities below, where a house rule belongs. Feeds the
-    // main site's "Travel group" filter on the Accommodation listing page.
+    // main site's "Travel group" filter on the Hotels and Accommodation pages.
     category: "Travel Group",
     options: ["Solo travellers", "Couples", "Family", "Groups", "Business travellers"],
   },
