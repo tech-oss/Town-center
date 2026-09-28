@@ -61,7 +61,7 @@ function Preview() {
 }
 
 // Shared with the other upgrade pages (NewsUpsell) so they read as one set.
-export function UpsellCta({ role, light }) {
+export function UpsellCta({ role, light, label = "See the Visibility Plan" }) {
   const navigate = useNavigate();
   if (role === "Content Manager") {
     return light
@@ -72,13 +72,13 @@ export function UpsellCta({ role, light }) {
     <button onClick={() => navigate("/business/upgrade")}
       className="shrink-0 px-6 py-3 rounded-xl text-sm font-semibold transition-opacity hover:opacity-90"
       style={{ backgroundColor: "#fff", color: "#1E3A8A" }}>
-      See the Visibility Plan →
+      {label} →
     </button>
   ) : (
     <button onClick={() => navigate("/business/upgrade")}
       className="px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md"
       style={{ backgroundColor: SAGE }}>
-      See the Visibility Plan →
+      {label} →
     </button>
   );
 }
@@ -98,7 +98,7 @@ export function FeatureCard({ f }) {
   );
 }
 
-export function UpsellHero({ role, title, preview, children }) {
+export function UpsellHero({ role, title, preview, ctaLabel, children }) {
   return (
     <section className="relative overflow-hidden rounded-3xl" style={{ background: "linear-gradient(160deg, #EFF6FF 0%, #F8FAFC 55%, #EEF2FF 100%)", border: "1px solid #E0E7FF" }}>
       {preview}
@@ -109,13 +109,13 @@ export function UpsellHero({ role, title, preview, children }) {
         </span>
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight max-w-2xl" style={{ color: FOREST }}>{title}</h1>
         {children}
-        <UpsellCta role={role} />
+        <UpsellCta role={role} label={ctaLabel} />
       </div>
     </section>
   );
 }
 
-export function UpsellBand({ role, title, children }) {
+export function UpsellBand({ role, title, ctaLabel, children }) {
   return (
     <section className="rounded-2xl px-6 py-8 sm:px-10 flex flex-col md:flex-row md:items-center gap-6"
       style={{ background: "linear-gradient(135deg, #13213B 0%, #1E3A8A 100%)" }}>
@@ -123,7 +123,7 @@ export function UpsellBand({ role, title, children }) {
         <h2 className="text-xl font-bold text-white">{title}</h2>
         <p className="text-sm mt-2 leading-relaxed max-w-2xl" style={{ color: "rgba(255,255,255,0.8)" }}>{children}</p>
       </div>
-      <UpsellCta role={role} light />
+      <UpsellCta role={role} light label={ctaLabel} />
     </section>
   );
 }

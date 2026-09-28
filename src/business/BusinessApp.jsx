@@ -2,6 +2,8 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import AnalyticsUpsell from "./components/AnalyticsUpsell";
 import NewsUpsell from "./components/NewsUpsell";
 import FeaturedUpsell from "./components/FeaturedUpsell";
+import EventsUpsell from "./components/EventsUpsell";
+import ReviewsUpsell from "./components/ReviewsUpsell";
 import BusinessLayout from "./components/BusinessLayout";
 import { PlanContext, PremiumFeatureGate } from "./components/FormKit";
 import { isPremium } from "../Data/plans";
@@ -99,9 +101,9 @@ function RequirePremium({ title, description, upsell: Upsell, children }) {
 
 const NEWS_GATE = { title: "News & Offers is part of the Visibility Plan", description: "Upgrade to publish news, updates and special offers on your business page.", upsell: NewsUpsell };
 const FEATURED_GATE = { title: "Featured Articles are part of the Visibility Plan", description: "Upgrade, then buy a Featured Article slot to publish a longer, editorial-style piece about your business.", upsell: FeaturedUpsell };
-const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions." };
+const EVENTS_GATE = { title: "Events are part of the Visibility Plan", description: "Upgrade to share upcoming events, activities and special occasions.", upsell: EventsUpsell };
 const PUSH_GATE = { title: "Push notifications are part of the Visibility Plan", description: "Upgrade to ask Maidenhead to send a notification about your business to everyone with notifications turned on." };
-const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page." };
+const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page.", upsell: ReviewsUpsell };
 const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention.", upsell: AnalyticsUpsell };
 
 // The one route that requires onboarding to still be outstanding — once it's
