@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import useLiveTick from "../hooks/useLiveTick";
 import ActivePromotions from "../components/ActivePromotions";
+import FeaturedBusinessBanner from "../components/FeaturedBusinessBanner";
 import PurchaseRequests from "../components/PurchaseRequests";
 import { isPremium, BILLING_OPTIONS } from "../../Data/plans";
 import { Link } from "react-router-dom";
@@ -125,6 +126,13 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* A bought Featured Business slot, with its expiry, up top */}
+        <FeaturedBusinessBanner businessId={user.id} canManage={user.role === "Owner"} />
+
+        {/* Paid homepage promotions (ad-hoc services) running or booked */}
+        {user.role === "Owner" && <PurchaseRequests businessId={user.id} onToast={setToast} />}
+        <ActivePromotions businessId={user.id} />
+
         {/* Visibility toggle */}
         <div className="bg-white rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
           <div>
@@ -158,10 +166,6 @@ export default function DashboardPage() {
           <StatCard label="Active Articles / Offers" value={liveArticles} />
           <StatCard label="Support Tickets (open)" value={openTickets} />
         </div>
-
-        {/* Paid homepage promotions (ad-hoc services) running or booked */}
-        {user.role === "Owner" && <PurchaseRequests businessId={user.id} onToast={setToast} />}
-        {user.role === "Owner" && <ActivePromotions businessId={user.id} />}
 
         {/* Profile completeness — worked out from the real listing */}
         {completeness && (
