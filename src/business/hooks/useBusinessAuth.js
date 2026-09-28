@@ -71,6 +71,16 @@ function buildSessionUser(row) {
     // or a terms acceptance, so the portal asks for them once, on first
     // sign-in after approval.
     onboardingCompletedAt: row.onboarding_completed_at ?? null,
+    // A Content Manager's own reading and acceptance of the Terms of Use and
+    // Privacy Policy — separate from the business's own terms acceptance
+    // above (business_subscriptions.terms_accepted_at, signed once by
+    // whoever set up the plan). Null until they accept it for themselves,
+    // whether they were invited or joined by requesting to.
+    personalTermsAcceptedAt: row.terms_accepted_at ?? null,
+    // Null only for an invited Content Manager who hasn't set a password
+    // yet — every other way onto the portal collects one up front. See
+    // content_manager_flow_2026_09.sql.
+    passwordSetAt: row.password_set_at ?? null,
     _isSeeded: isSeeded,
   };
 }
@@ -205,6 +215,30 @@ export async function updatePersonalDetails({ firstName, lastName, phone }) {
   return { ok: true };
 }
 
+// A Content Manager's own reading and acceptance of the terms — see
+// personalTermsAcceptedAt above and content_manager_flow_2026_09.sql's
+// accept_own_terms(). Narrow on purpose: it can only mark the caller's own
+// row, nothing else.
+export async function acceptOwnTerms() {
+  const { error } = await supabase.rpc("accept_own_terms");
+  if (error) return { ok: false, error: error.message };
+  await refresh();
+  return { ok: true };
+}
+
+// Sets the password on an invited login (business_users.password_set_at is
+// still null) and records that it's been done. auth.updateUser needs the
+// session the invite email's link already signed in — no old password to
+// confirm, there isn't one yet.
+export async function setOwnPassword(password) {
+  const { error: authError } = await supabase.auth.updateUser({ password });
+  if (authError) return { ok: false, error: authError.message };
+  const { error } = await supabase.rpc("mark_own_password_set");
+  if (error) return { ok: false, error: error.message };
+  await refresh();
+  return { ok: true };
+}
+
 // Dev-only local override for demo-switching between seeded mock users —
 // does not touch Supabase.
 export function setMockUser(user) {
@@ -247,10 +281,21 @@ export default function useBusinessAuth() {
     // approval — a claim inserts onboarding_completed_at as null. Owners who
     // registered their own business accepted the terms at signup, so their
     // row is already marked complete and they go straight to the dashboard.
-    needsOnboarding: !!user && !user.onboardingCompletedAt,
+    // A Content Manager never owes a plan (that's the business's, not
+    // theirs) — only their own terms acceptance, a separate gate below.
+    needsOnboarding: !!user && user.role !== "Content Manager" && !user.onboardingCompletedAt,
+    // Whether they were invited (and never set a password until now) or
+    // joined by requesting to (and already had one), nobody but them has
+    // ever seen the Terms of Use / Privacy Policy on their own behalf.
+    needsTermsAcceptance: !!user && user.role === "Content Manager" && !user.personalTermsAcceptedAt,
+    // Only ever true for an invited Content Manager — every other route onto
+    // the portal collects a password before an account can exist at all.
+    needsPassword: !!user && !user.passwordSetAt,
     login,
     logout,
     refresh,
+    acceptOwnTerms,
+    setOwnPassword,
     switchUser: setMockUser,
     toggleVisibility,
     updatePersonalDetails,

@@ -5,6 +5,7 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Field, Inp, Toggle, Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD, INPUT } from "../components/FormKit";
 import { usePendingRequests, useApprovedTeam, approveRequest, declineRequest } from "../hooks/useUserRegistry";
+import { inviteContentManager } from "../api/inviteContentManager";
 
 // Account settings: who you're signed in as, your details, your password,
 // your team and your account. Same layout as the admin panel's Settings —
@@ -270,7 +271,9 @@ export default function SettingsPage() {
   const [teamOverride, setTeamOverride] = useState(null);
   const team = teamOverride ?? fetchedTeam;
   const [addingMember, setAddingMember] = useState(false);
-  const [memberForm, setMemberForm] = useState({ name: "", email: "" });
+  const [memberForm, setMemberForm] = useState({ firstName: "", lastName: "", email: "" });
+  const [invitingMember, setInvitingMember] = useState(false);
+  const [inviteError, setInviteError] = useState("");
   const [transferTarget, setTransferTarget] = useState(null);
   const [confirmDeleteProfile, setConfirmDeleteProfile] = useState(false);
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
@@ -316,14 +319,20 @@ export default function SettingsPage() {
     setSavingPersonal(false);
     setToast(res.ok ? "Personal details saved." : "Something went wrong saving your details.");
   }
-  function inviteMember() {
-    if (!memberForm.name.trim() || !memberForm.email.trim()) return;
-    // TODO: not wired to Supabase — needs a password field/UX decision to call
-    // supabase.auth.signUp + an auto-approved business_users insert. Deferred.
-    setTeamOverride((prev) => [...(prev ?? team), { id: `u${Date.now()}`, ...memberForm, role: "Content Manager" }]);
-    setMemberForm({ name: "", email: "" });
+  // Inviting them is the owner's own approval — Maidenhead admin is only
+  // notified, never asked to approve it too (see admin's UsersPage). The
+  // invitee still owes their own password and their own acceptance of the
+  // terms, collected on the emailed link (supabase/functions/invite-content-manager).
+  async function inviteMember() {
+    if (!memberForm.firstName.trim() || !memberForm.lastName.trim() || !memberForm.email.trim()) return;
+    setInvitingMember(true);
+    setInviteError("");
+    const res = await inviteContentManager({ businessId: user.id, ...memberForm });
+    setInvitingMember(false);
+    if (!res.ok) { setInviteError(res.error); return; }
+    setMemberForm({ firstName: "", lastName: "", email: "" });
     setAddingMember(false);
-    setToast("Invite sent.");
+    setToast(`Invite sent to ${memberForm.email}.`);
   }
   function removeMember(id) {
     setTeamOverride((prev) => (prev ?? team).filter((m) => m.id !== id));
@@ -470,13 +479,22 @@ export default function SettingsPage() {
                 }
                 if (addingMember) {
                   return (
-                    <div className="grid sm:grid-cols-3 gap-2 mb-3 items-end">
-                      <Inp value={memberForm.name} onChange={(e) => setMemberForm((f) => ({ ...f, name: e.target.value }))} placeholder="Name" />
-                      <Inp value={memberForm.email} onChange={(e) => setMemberForm((f) => ({ ...f, email: e.target.value }))} placeholder="Email" />
-                      <div className="rounded-xl px-3 py-2.5 text-sm" style={{ border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#f8fafc" }}>Content Manager</div>
-                      <div className="flex gap-2 sm:col-span-3">
-                        <button onClick={inviteMember} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white" style={{ backgroundColor: SAGE }}>Send Invite</button>
-                        <button onClick={() => setAddingMember(false)} className="px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
+                    <div className="flex flex-col gap-2 mb-3">
+                      <div className="grid sm:grid-cols-4 gap-2 items-end">
+                        <Inp value={memberForm.firstName} onChange={(e) => setMemberForm((f) => ({ ...f, firstName: e.target.value }))} placeholder="First name" />
+                        <Inp value={memberForm.lastName} onChange={(e) => setMemberForm((f) => ({ ...f, lastName: e.target.value }))} placeholder="Last name" />
+                        <Inp value={memberForm.email} onChange={(e) => setMemberForm((f) => ({ ...f, email: e.target.value }))} placeholder="Email" />
+                        <div className="rounded-xl px-3 py-2.5 text-sm" style={{ border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#f8fafc" }}>Content Manager</div>
+                      </div>
+                      <p className="text-[11px]" style={{ color: "#9CA3AF" }}>
+                        They'll get an email to set a password and accept the Terms of Use and Privacy Policy — nothing else to approve.
+                      </p>
+                      {inviteError && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{inviteError}</p>}
+                      <div className="flex gap-2">
+                        <button onClick={inviteMember} disabled={invitingMember} className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white disabled:opacity-50" style={{ backgroundColor: SAGE }}>
+                          {invitingMember ? "Sending…" : "Send Invite"}
+                        </button>
+                        <button onClick={() => { setAddingMember(false); setInviteError(""); }} className="px-4 py-1.5 rounded-lg text-xs font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>
                       </div>
                     </div>
                   );

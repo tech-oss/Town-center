@@ -8,6 +8,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterUserPage from "./pages/RegisterUserPage";
 import ClaimBusinessPage from "./pages/ClaimBusinessPage";
 import ClaimOnboardingPage from "./pages/ClaimOnboardingPage";
+import SetPasswordPage from "./pages/SetPasswordPage";
+import AcceptTermsPage from "./pages/AcceptTermsPage";
 import DashboardPage from "./pages/DashboardPage";
 import FeaturedArticlesPage from "./pages/FeaturedArticlesPage";
 import FeaturedArticleEditorPage from "./pages/FeaturedArticleEditorPage";
@@ -46,9 +48,15 @@ function ToLogin() {
 }
 
 function RequireAuth({ children }) {
-  const { isLoggedIn, needsOnboarding, restored } = useBusinessAuth();
+  const { isLoggedIn, needsOnboarding, needsPassword, needsTermsAcceptance, restored } = useBusinessAuth();
   if (!restored) return <SessionLoading />;
   if (!isLoggedIn) return <ToLogin />;
+  // An invited Content Manager owes their own password first, then their own
+  // reading and acceptance of the terms — checked before needsOnboarding,
+  // since it no longer applies to them at all (that's the business's plan,
+  // not theirs).
+  if (needsPassword) return <Navigate to="/business/set-password" replace />;
+  if (needsTermsAcceptance) return <Navigate to="/business/accept-terms" replace />;
   // Someone who claimed a business still owes us a plan and a terms
   // acceptance. Everything behind the dashboard assumes both exist, so the
   // guard sends them there rather than the individual pages coping with a
@@ -59,9 +67,11 @@ function RequireAuth({ children }) {
 
 // Content Managers cannot see or manage billing — Owner only.
 function RequireOwner({ children }) {
-  const { isLoggedIn, user, needsOnboarding, restored } = useBusinessAuth();
+  const { isLoggedIn, user, needsOnboarding, needsPassword, needsTermsAcceptance, restored } = useBusinessAuth();
   if (!restored) return <SessionLoading />;
   if (!isLoggedIn) return <ToLogin />;
+  if (needsPassword) return <Navigate to="/business/set-password" replace />;
+  if (needsTermsAcceptance) return <Navigate to="/business/accept-terms" replace />;
   if (needsOnboarding) return <Navigate to="/business/welcome" replace />;
   if (user.role === "Content Manager") return <Navigate to="/business/dashboard" replace />;
   return children;
@@ -99,6 +109,27 @@ function RequireOnboarding({ children }) {
   return children;
 }
 
+// The two routes an invited Content Manager passes through once, in order,
+// before ever reaching the dashboard. Each renders only while its own gate
+// is the outstanding one — once done, RequireAuth carries them on to the
+// next (or the dashboard, when nothing is left).
+function RequireSetPassword({ children }) {
+  const { isLoggedIn, needsPassword, restored } = useBusinessAuth();
+  if (!restored) return <SessionLoading />;
+  if (!isLoggedIn) return <ToLogin />;
+  if (!needsPassword) return <Navigate to="/business/dashboard" replace />;
+  return children;
+}
+
+function RequireTermsAcceptance({ children }) {
+  const { isLoggedIn, needsPassword, needsTermsAcceptance, restored } = useBusinessAuth();
+  if (!restored) return <SessionLoading />;
+  if (!isLoggedIn) return <ToLogin />;
+  if (needsPassword) return <Navigate to="/business/set-password" replace />;
+  if (!needsTermsAcceptance) return <Navigate to="/business/dashboard" replace />;
+  return children;
+}
+
 export default function BusinessApp() {
   const { isLoggedIn, restored } = useBusinessAuth();
   const location = useLocation();
@@ -117,6 +148,8 @@ export default function BusinessApp() {
       <Route path="claim-business" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <ClaimBusinessPage />} />
 
       <Route path="welcome" element={<RequireOnboarding><ClaimOnboardingPage /></RequireOnboarding>} />
+      <Route path="set-password" element={<RequireSetPassword><SetPasswordPage /></RequireSetPassword>} />
+      <Route path="accept-terms" element={<RequireTermsAcceptance><AcceptTermsPage /></RequireTermsAcceptance>} />
 
       <Route path="dashboard" element={<RequireAuth><DashboardPage /></RequireAuth>} />
       <Route path="analytics" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><AnalyticsPage /></RequirePremium></RequireAuth>} />
