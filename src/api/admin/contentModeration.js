@@ -458,7 +458,7 @@ export async function deleteBusinessArticle(id, reason) {
 // admin-written articles — six of them attached to a business — could not be
 // seen, edited or hidden from anywhere in admin once written.
 
-function featureFromRow(row) {
+function featureFromRow(row, slot) {
   return {
     id: row.id,
     slug: row.slug,
@@ -476,6 +476,14 @@ function featureFromRow(row) {
     body: Array.isArray(row.body) ? row.body : [],
     submittedAt: row.submitted_at,
     rejectionReason: row.rejection_reason,
+    // On the homepage now: a live Featured Article booking. This list never
+    // fetched the placement map at all, so the toggle on the Featured
+    // Articles page always read "not on the homepage" and showed "Put on
+    // the homepage" even for one that already was — News & Offers and
+    // Events both already did this correctly.
+    homepage: !!slot,
+    homeStartsAt: slot?.startsAt ?? null,
+    homeEndsAt: slot?.endsAt ?? null,
   };
 }
 
@@ -490,9 +498,9 @@ export async function getBusinessFeatureArticles({ status, author } = {}) {
     .order("updated_at", { ascending: false });
   if (status && status !== "All") q = q.eq("status", status);
   if (author && author !== "All") q = q.eq("author", author);
-  const { data, error } = await q;
+  const [{ data, error }, live] = await Promise.all([q, getLivePlacementMap("featured_article")]);
   if (error) throw error;
-  return (data ?? []).map(featureFromRow);
+  return (data ?? []).map((r) => featureFromRow(r, live.get(String(r.id))));
 }
 
 export async function approveFeatureArticle(id) {
