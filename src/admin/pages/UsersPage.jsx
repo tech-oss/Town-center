@@ -483,22 +483,49 @@ export default function UsersPage() {
                       <td className="px-4 py-3"><StatusTag status={u.status} /></td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          {/* Driven by the row's own status, not the tab, so
-                              the actions still work under "All Users". */}
-                          {u.status === "Pending" && (
+                          {/* A Content Manager is approved by the business
+                              owner that invited or accepted them, not by
+                              Maidenhead admin — asking admin to approve it
+                              too would just be an extra step, since admin
+                              would have to go back to the owner to ask
+                              anyway. Admin still sees everything about them;
+                              Suspend/Delete stay available for oversight. */}
+                          {u.role === "Content Manager" ? (
                             <>
-                              <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
-                              <ActionBtn color="#DC2626" disabled={busy === u.id} onClick={(e) => openReject(u.id, e)}>Reject</ActionBtn>
+                              {(u.status === "Pending" || u.status === "Rejected") && (
+                                <span className="text-xs" style={{ color: MUTED }}>
+                                  {u.status === "Pending" ? "Awaiting the business owner" : "Turned down by the business owner"}
+                                </span>
+                              )}
+                              {/* Suspend/Reinstate stay admin's call — real
+                                  oversight, not the approval step this isn't. */}
+                              {u.status === "Approved" && (
+                                <ActionBtn color="#D97706" disabled={busy === u.id} onClick={(e) => action(suspendUser, u.id, e)}>Suspend</ActionBtn>
+                              )}
+                              {u.status === "Suspended" && (
+                                <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Reinstate</ActionBtn>
+                              )}
                             </>
-                          )}
-                          {u.status === "Approved" && (
-                            <ActionBtn color="#D97706" disabled={busy === u.id} onClick={(e) => action(suspendUser, u.id, e)}>Suspend</ActionBtn>
-                          )}
-                          {u.status === "Suspended" && (
-                            <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Reinstate</ActionBtn>
-                          )}
-                          {u.status === "Rejected" && (
-                            <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
+                          ) : (
+                            <>
+                              {/* Driven by the row's own status, not the tab, so
+                                  the actions still work under "All Users". */}
+                              {u.status === "Pending" && (
+                                <>
+                                  <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
+                                  <ActionBtn color="#DC2626" disabled={busy === u.id} onClick={(e) => openReject(u.id, e)}>Reject</ActionBtn>
+                                </>
+                              )}
+                              {u.status === "Approved" && (
+                                <ActionBtn color="#D97706" disabled={busy === u.id} onClick={(e) => action(suspendUser, u.id, e)}>Suspend</ActionBtn>
+                              )}
+                              {u.status === "Suspended" && (
+                                <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Reinstate</ActionBtn>
+                              )}
+                              {u.status === "Rejected" && (
+                                <ActionBtn color="#16A34A" disabled={busy === u.id} onClick={(e) => action(approveUser, u.id, e)}>Approve</ActionBtn>
+                              )}
+                            </>
                           )}
                           <ActionBtn color={BLUE} onClick={(e) => { e.stopPropagation(); navigate(`/admin/users/${u.id}`); }}>View</ActionBtn>
                           <ActionBtn color="#991B1B" onClick={(e) => { e.stopPropagation(); setDeletingUser(u); }}>Delete</ActionBtn>

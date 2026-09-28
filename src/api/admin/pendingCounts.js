@@ -36,7 +36,10 @@ async function simpleCounts() {
       count("business_reviews", (q) => q.eq("status", "Pending Approval")),
       // A business's reply to a review is moderated separately from the review.
       count("business_reviews", (q) => q.eq("reply->>status", "Pending Approval")),
-      count("business_users", (q) => q.eq("status", "pending")),
+      // Owner claims only — a Content Manager is approved by the business
+      // owner that invited or accepted them, so one sitting pending is not
+      // waiting on admin and must not nag this badge.
+      count("business_users", (q) => q.eq("status", "pending").eq("role", "Owner")),
       count("businesses", (q) => q.eq("status", "Pending")),
       // A ticket nobody has picked up yet.
       count("business_tickets", (q) => q.eq("status", "Open")),

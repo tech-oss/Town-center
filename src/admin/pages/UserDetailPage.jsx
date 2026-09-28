@@ -140,11 +140,21 @@ export default function UserDetailPage() {
         <div className="flex flex-col gap-4">
           <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: MUTED }}>Account Actions</p>
           <div className="flex gap-3 flex-wrap">
-            {(isPending || isRejected) && (
+            {/* A Content Manager is approved by the business owner who invited
+                or accepted them, not by Maidenhead admin — admin still sees
+                everything about them, but approving here too would just be an
+                extra step, since admin would have to go back to the owner to
+                ask anyway. Suspend/Reinstate stay admin's call regardless. */}
+            {user.role !== "Content Manager" && (isPending || isRejected) && (
               <ActionBtn color="#16A34A" disabled={busy} onClick={() => act(approveUser)}>Approve</ActionBtn>
             )}
-            {isPending && !showReject && (
+            {user.role !== "Content Manager" && isPending && !showReject && (
               <ActionBtn color="#DC2626" disabled={busy} onClick={() => { setShowReject(true); setRejectNote(""); }}>Reject</ActionBtn>
+            )}
+            {user.role === "Content Manager" && (isPending || isRejected) && (
+              <p className="text-sm" style={{ color: MUTED }}>
+                {isPending ? "Awaiting the business owner." : "Turned down by the business owner."}
+              </p>
             )}
             {isApproved && (
               <ActionBtn color="#D97706" disabled={busy} onClick={() => act(suspendUser)}>Suspend Account</ActionBtn>

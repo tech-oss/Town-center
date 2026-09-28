@@ -36,7 +36,10 @@ begin
       ('featured',    'select count(*) from feature_articles where author = ''business'' and status = ''Pending Approval'''),
       ('reviews',     'select count(*) from business_reviews where status = ''Pending Approval'''),
       ('replies',     'select count(*) from business_reviews where reply->>''status'' = ''Pending Approval'''),
-      ('users',       'select count(*) from business_users where status = ''pending'''),
+      -- Owner claims only — a Content Manager is approved by the business
+      -- owner that invited or accepted them, not by admin, so one sitting
+      -- pending must not nag this badge (see content_manager_flow_2026_09.sql).
+      ('users',       'select count(*) from business_users where status = ''pending'' and role = ''Owner'''),
       ('businesses',  'select count(*) from businesses where status = ''Pending'''),
       ('tickets',     'select count(*) from business_tickets where status = ''Open'''),
       ('push',        'select count(*) from business_push_requests where status = ''pending''')
