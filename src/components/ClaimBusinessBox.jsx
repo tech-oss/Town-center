@@ -12,7 +12,7 @@ import { supabase } from "../lib/supabaseClient";
 // The business portal is a separate deployment. Set VITE_BUSINESS_PORTAL_URL
 // to its permanent address once it has one.
 const PORTAL_URL = (import.meta.env.VITE_BUSINESS_PORTAL_URL
-  || "https://town-center-l4bfal4jh-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
+  || "https://town-center-kbfty5er3-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
 
 let unclaimed = null; // one lookup per page load
 function loadUnclaimed() {
@@ -53,7 +53,8 @@ function StoreIcon({ size }) {
 export default function ClaimBusinessBox({ businessId, compact = false }) {
   const show = useIsUnclaimed(businessId);
   if (!show) return null;
-  const href = `${PORTAL_URL}/business/login`;
+  // Straight to the claim form with this business already chosen.
+  const href = `${PORTAL_URL}/business/claim-business?business=${encodeURIComponent(businessId)}`;
 
   return (
     <section className={compact ? "py-5" : "py-8"}
@@ -69,12 +70,12 @@ export default function ClaimBusinessBox({ businessId, compact = false }) {
             Claim your profile to keep your information up to date and add photos, offers, events and more.
           </p>
           {compact ? (
-            <a href={href} target="_blank" rel="noopener noreferrer"
+            <a href={href} data-skip-external-confirm
               className="self-start text-sm font-semibold mt-1" style={{ color: "var(--teal, #3E8E96)" }}>
               Claim this business →
             </a>
           ) : (
-            <a href={href} target="_blank" rel="noopener noreferrer"
+            <a href={href} data-skip-external-confirm
               className="self-start mt-2 px-6 py-3 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
               style={{ backgroundColor: "var(--teal, #3E8E96)" }}>
               Claim this business →
