@@ -3,7 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import {
   getBusinessFeatureArticles, approveFeatureArticle, rejectFeatureArticle, takeDownFeatureArticle,
   setFeatureArticleStatus, getFeatureArticleById, deleteFeatureArticle, getFeatureArticles,
-  getSpotlightBusinesses, getSlotUsage,
+  getSpotlightBusinesses, getSlotUsage, setArticleHomepageFeature,
 } from "../../api/admin";
 import StoryForm from "../components/StoryForm";
 import StatusTag from "../components/StatusTag";
@@ -28,25 +28,18 @@ const AUTHORS = [
 // A business's Featured Article read the way the public page lays it out —
 // hero, title, standfirst, then each section with its own picture — so the
 // whole piece can be judged before it goes live.
-function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, onApprove, onReject, onTakeDown, onEdit, onSetStatus, onDelete }) {
-  const [mode, setMode] = useState(null);
+function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, onApprove, onReject, onTakeDown, onEdit, onSetStatus, onDelete, onToggleHome }) {
+  const [takingDown, setTakingDown] = useState(false);
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
 
-  async function confirmTakeDown() {
-    if (!reason.trim()) return;
-    setBusy(true);
-    try { await onTakeDown(reason.trim()); } finally { setBusy(false); setMode(null); setReason(""); }
-  }
-
-  // Hiding an article that belongs to a business owes that business an
-  // explanation; a town story with nobody behind it does not.
+  // Taking a business's story off the site owes it an explanation; a town
+  // story with nobody behind it does not.
   const owesReason = !!a.businessId;
-  async function confirmHide() {
+  async function confirmTakeDown() {
     if (owesReason && !reason.trim()) return;
     setBusy(true);
-    try { await onSetStatus("Hidden", reason.trim()); }
-    finally { setBusy(false); setMode(null); setReason(""); }
+    try { await onTakeDown(reason.trim()); } finally { setBusy(false); setTakingDown(false); setReason(""); }
   }
 
   return (
@@ -108,14 +101,12 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
       ) : (
         <div className="sticky bottom-4 bg-white rounded-2xl px-6 py-4 flex flex-col gap-3" style={{ ...CARD, boxShadow: "0 8px 30px rgba(16,24,40,0.12)" }}>
           <p className="text-xs font-semibold" style={{ color: MUTED }}>Moderation</p>
-          {mode ? (
+          {takingDown ? (
             <>
               <p className="text-xs" style={{ color: MUTED }}>
-                {mode === "hide"
-                  ? (owesReason
-                      ? `Why is this coming off the site? ${a.businessName} is shown this.`
-                      : "Why is this coming off the site? (optional — no business is attached)")
-                  : "Why is this being taken off the site? The business is shown this."}
+                {owesReason
+                  ? `Why is this coming off the site? ${a.businessName} is shown this.`
+                  : "Why is this coming off the site? (optional — no business is attached)"}
               </p>
               <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={3} autoFocus
                 placeholder="Explain what is wrong with this article…"
@@ -123,12 +114,12 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
                 style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
               <div className="flex gap-2 flex-wrap">
                 <button
-                  onClick={mode === "hide" ? confirmHide : confirmTakeDown}
-                  disabled={busy || ((mode === "remove" || owesReason) && !reason.trim())}
+                  onClick={confirmTakeDown}
+                  disabled={busy || (owesReason && !reason.trim())}
                   className="px-5 py-2 rounded-xl text-xs font-semibold text-white disabled:opacity-40" style={{ backgroundColor: "#D97706" }}>
-                  {busy ? "Working…" : mode === "hide" ? "Hide from the site" : "Take off the site"}
+                  {busy ? "Working…" : "Take off the site"}
                 </button>
-                <button onClick={() => { setMode(null); setReason(""); }}
+                <button onClick={() => { setTakingDown(false); setReason(""); }}
                   className="px-5 py-2 rounded-xl text-xs font-semibold" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>Cancel</button>
               </div>
             </>
@@ -139,12 +130,23 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
                 Edit article
               </button>
 
-              {/* Hiding is the reversible one: off the site and off the
-                  homepage, nothing lost. */}
+              {/* Only something actually on the site can go up there, or the
+                  homepage links to a page nobody can open — same rule as
+                  News & Offers and Events. */}
+              {a.status === "Live" && (
+                <button onClick={() => onToggleHome(!a.homepage)}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold"
+                  style={a.homepage
+                    ? { border: "1.5px solid rgba(217,119,6,0.35)", color: "#B45309" }
+                    : { border: `1.5px solid ${BORDER}`, color: NAVY }}>
+                  {a.homepage ? "Take off the homepage" : "Put on the homepage"}
+                </button>
+              )}
+
               {a.status === "Live" ? (
-                <button onClick={() => setMode("hide")}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }}>
-                  Hide from the site
+                <button onClick={() => setTakingDown(true)}
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#D97706" }}>
+                  Take off the site
                 </button>
               ) : (
                 <button onClick={() => onSetStatus("Live")}
@@ -153,16 +155,9 @@ function FeatureReview({ article: a, position, total, onBack, onPrev, onNext, on
                 </button>
               )}
 
-              {a.status === "Live" && (
-                <button onClick={() => setMode("remove")}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#D97706" }}>
-                  Take off the site
-                </button>
-              )}
-
               <button onClick={onDelete}
                 className="px-5 py-2 rounded-xl text-xs font-semibold ml-auto" style={{ border: "1.5px solid rgba(153,27,27,0.3)", color: "#991B1B" }}>
-                Delete for good
+                Delete
               </button>
             </div>
           )}
@@ -223,15 +218,27 @@ export default function FeatureArticleApprovalsPage() {
     refresh();
   }
 
-  async function handleSetStatus(a, status, reason) {
-    await setFeatureArticleStatus(a.id, status, reason);
-    flash(status === "Live"
-      ? `"${a.title}" is back on the site.`
-      : a.businessId
-        ? `"${a.title}" is hidden — off the site and the homepage. ${a.businessName} has been told why.`
-        : `"${a.title}" is hidden — it is off the site and off the homepage.`);
+  // Only ever called with "Live" now — taking one down goes through
+  // handleTakeDown instead, the same single action News & Offers and Events use.
+  async function handleSetStatus(a, status) {
+    await setFeatureArticleStatus(a.id, status);
+    flash(`"${a.title}" is back on the site.`);
     if (filter !== "All") advance();
     refresh();
+  }
+
+  // Same pathway as News & Offers and Events: a Featured Article booking is a
+  // homepage_placements row, so putting one on or taking it off is the same
+  // featureNow/unfeature call either section uses.
+  async function handleToggleHome(a, on) {
+    try {
+      const res = await setArticleHomepageFeature(a.id, on);
+      if (res.full) return flash("Every Featured Article slot is taken. Swap one out first.");
+      flash(on ? `"${a.title}" is on the homepage.` : `"${a.title}" is off the homepage.`);
+      refresh();
+    } catch (e) {
+      flash(e.message);
+    }
   }
 
   async function handleDelete(a) {
@@ -304,8 +311,9 @@ export default function FeatureArticleApprovalsPage() {
           onReject={(r) => handleReject(open, r)}
           onTakeDown={(r) => handleTakeDown(open, r)}
           onEdit={() => handleEdit(open)}
-          onSetStatus={(s, r) => handleSetStatus(open, s, r)}
+          onSetStatus={(s) => handleSetStatus(open, s)}
           onDelete={() => handleDelete(open)}
+          onToggleHome={(on) => handleToggleHome(open, on)}
         />
       </>
     );
