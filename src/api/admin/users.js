@@ -174,8 +174,15 @@ export async function registerUser(data) {
 
 export async function deleteUser(id) {
   const { data: row } = await supabase.from("business_users").select("*, businesses(name)").eq("id", id).maybeSingle();
-  const { error } = await supabase.from("business_users").delete().eq("id", id);
-  if (error) throw error;
+  // Through the Edge Function, not a plain row delete: that left the Supabase
+  // Auth login behind, so the email could never be registered again.
+  const { data: result, error } = await supabase.functions.invoke("delete-business-user", { body: { businessUserId: id } });
+  if (error) {
+    let message = error.message;
+    try { message = (await error.context?.json())?.error ?? message; } catch { /* keep generic */ }
+    throw new Error(message);
+  }
+  if (result?.error) throw new Error(result.error);
   if (row) await addLog("Deleted account", fromRow(row));
   return { ok: true };
 }

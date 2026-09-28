@@ -44,11 +44,30 @@ import LogoAnimation from './components/LogoAnimation/LogoAnimation'
 import ExternalLinkModal from './components/ExternalLinkModal'
 import useOrientationRepaint from './hooks/useOrientationRepaint'
 import useExternalLinkGuard from './hooks/useExternalLinkGuard'
+import { getLiveBusinessBySlug, liveSlug, webPathFor } from './api/liveBusinesses'
 
 // See & Do place links now use the shared event layout at /event/:slug.
 function SeeDoPlaceRedirect() {
   const { slug } = useParams()
   return <Navigate to={`/event/${slug}`} replace />
+}
+
+// /b/:slug — the business portal's "View my public page" link. The portal is
+// a separate deployment and can't know which section a business is listed
+// under, so it links here by id and this resolves the real page. A business
+// that isn't listed publicly (hidden, or not approved yet) lands on the home
+// page rather than a broken one.
+function BusinessPageRedirect() {
+  const { slug } = useParams()
+  const [to, setTo] = useState(null)
+  useEffect(() => {
+    let cancelled = false
+    getLiveBusinessBySlug(liveSlug(slug))
+      .then((item) => { if (!cancelled) setTo(item ? webPathFor(item) : '/') })
+      .catch(() => { if (!cancelled) setTo('/') })
+    return () => { cancelled = true }
+  }, [slug])
+  return to ? <Navigate to={to} replace /> : null
 }
 
 // Old /section/category/:cat URLs redirect to /section?category=cat
@@ -142,6 +161,7 @@ function PublicSite() {
           <Route path="/live/building/:slug" element={<BuildingPage />} />
           {/* <Route path="/live/property/:slug" element={<PropertyPage />} /> */}
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
+          <Route path="/b/:slug" element={<BusinessPageRedirect />} />
           <Route path="/services/place/:slug" element={<ServicesDetailPage />} />
           <Route path="/services/:group" element={<CategoryPage />} />
           <Route path="/:section" element={<CategoryPage />} />
