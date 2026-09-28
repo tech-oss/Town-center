@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import ClaimBusinessBox from "../../components/ClaimBusinessBox";
 import SmartImage from "../../components/SmartImage";
 import useViewedCategory from "../../lib/viewedCategory";
 import { useTrackView, businessView } from "../../lib/trackView";
@@ -257,6 +258,7 @@ function BusinessDetailScreen({ place, goBack }) {
             </div>
           )}
 
+          {free && <ClaimBusinessBox businessId={place.businessId} compact />}
           {more.length > 0 && (
             <div className="mt-2">
               <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>You might also like</p>

@@ -1,4 +1,5 @@
 import { useParams, useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
+import ClaimBusinessBox from "../../components/ClaimBusinessBox";
 import { useTrackView, businessView } from "../../lib/trackView";
 import { externalUrl } from "../../lib/externalUrl";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
@@ -354,6 +355,7 @@ export default function StayDetailScreen() {
             </div>
           )}
 
+          {free && <ClaimBusinessBox businessId={place.businessId} compact />}
           {(discover ?? []).length > 0 && (
             <div className="mt-2">
               <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Stay Here &amp; Discover</p>

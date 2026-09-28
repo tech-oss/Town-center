@@ -9,6 +9,7 @@ import ErrorState from "./ui/ErrorState";
 import ServicesDetailLayout from "./ServicesDetailLayout";
 import FreelancerDetailLayout from "./FreelancerDetailLayout";
 import NewsOffers from "./NewsOffers";
+import ClaimBusinessBox from "./ClaimBusinessBox";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 import useViewedCategory from "../lib/viewedCategory";
 
@@ -106,7 +107,7 @@ export default function ServicesDetailPage() {
         reviewsList={item.reviewsList}
         faq={free ? [] : item.faq}
         afterGrid={free
-          ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
+          ? <><NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={item.businessId} /></>
           : <NewsOffers item={item} />}
         relatedHeading="You might also like"
         related={related.map((it) => ({
@@ -159,7 +160,7 @@ export default function ServicesDetailPage() {
       accreditations={item.accreditations}
       faq={free ? [] : item.faq}
       afterGrid={free
-        ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
+        ? <><NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={item.businessId} /></>
         : <NewsOffers item={item} />}
       relatedHeading="You might also like"
       related={related.map((it) => ({

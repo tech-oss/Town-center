@@ -5,6 +5,7 @@ import { sections } from "../Data/pages";
 import { getBusinessBySlug, getBusinesses } from "../api";
 import useFetch from "../hooks/useFetch";
 import NewsOffers from "./NewsOffers";
+import ClaimBusinessBox from "./ClaimBusinessBox";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
@@ -106,7 +107,7 @@ export default function DetailPage() {
         name: it.name,
       }))}
       afterMap={free
-        ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
+        ? <><NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={item.businessId} /></>
         : <><BusinessReviews reviews={item.reviews} /><NewsOffers item={item} /></>}
     />
   );

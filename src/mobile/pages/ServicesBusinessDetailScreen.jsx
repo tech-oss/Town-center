@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ClaimBusinessBox from "../../components/ClaimBusinessBox";
 import useViewedCategory from "../../lib/viewedCategory";
 import useRelatedBusinesses from "../hooks/useRelatedBusinesses";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../../lib/planPresentation";
@@ -361,6 +362,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
             </div>
           )}
 
+          {free && <ClaimBusinessBox businessId={place.businessId} compact />}
           {related.length > 0 && (
             <div className="mt-2">
               <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>You might also like</p>

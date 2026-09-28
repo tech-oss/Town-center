@@ -7,6 +7,7 @@ import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout from "./PlaceDetailLayout";
 import NewsOffers from "./NewsOffers";
+import ClaimBusinessBox from "./ClaimBusinessBox";
 import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 
@@ -278,7 +279,7 @@ export default function StayDetailPage({ kind }) {
         </>
       )}
       afterMap={free
-        ? <NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} />
+        ? <><NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={item.businessId} /></>
         : <><BusinessReviews reviews={item.reviews} /><NewsOffers item={item} /></>}
     />
   );
