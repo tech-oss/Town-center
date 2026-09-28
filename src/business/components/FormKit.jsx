@@ -453,7 +453,9 @@ export function LocationFields({ lat, lng, onChange }) {
 }
 
 // ─── Repeatable list (FAQs handled separately; this is for plain text lists) ──
-export function RepeatableList({ items, onChange, placeholder = "" }) {
+// `examples` are per-row grey hints ("Maidenhead", "Windsor"…) shown in
+// empty rows — hints only, never saved as if the business had typed them.
+export function RepeatableList({ items, onChange, placeholder = "", examples = [] }) {
   function set(i, v) { onChange(items.map((it, idx) => (idx === i ? v : it))); }
   function add() { onChange([...items, ""]); }
   function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
@@ -472,7 +474,7 @@ export function RepeatableList({ items, onChange, placeholder = "" }) {
             <button type="button" onClick={() => move(i, -1)} disabled={i === 0} className="text-[10px] leading-none disabled:opacity-20" style={{ color: MUTED }}>▲</button>
             <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} className="text-[10px] leading-none disabled:opacity-20" style={{ color: MUTED }}>▼</button>
           </div>
-          <input value={it} onChange={(e) => set(i, e.target.value)} placeholder={placeholder}
+          <input value={it} onChange={(e) => set(i, e.target.value)} placeholder={examples[i] ? `e.g. ${examples[i]}` : placeholder}
             className="flex-1 rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
           <button onClick={() => remove(i)} className="text-xs font-bold shrink-0 w-6 h-6 rounded-lg" style={{ color: "#DC2626" }}>✕</button>
         </div>

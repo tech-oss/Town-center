@@ -361,8 +361,9 @@ export default function MyListingPage() {
                   <Locked field="website">
                   <Field label="Website URL"><Inp value={listing.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
                   </Locked>
-                  {/* The freelancer profile has no booking button to power. */}
-                  {listing.businessTypeDetail?.freelancerKind !== "freelancer" && (
+                  {/* Services profiles (tradespeople, professionals and
+                      freelancers) have no booking button to power. */}
+                  {user.businessType !== "services" && (
                   <Locked field="bookingUrl">
                   <Field label="Booking URL" hint="If you have a reservation system, add the URL here — it powers the &ldquo;Book a Reservation&rdquo; button on your page">
                     <Inp value={listing.bookingUrl ?? ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" />
@@ -421,7 +422,7 @@ export default function MyListingPage() {
             <>
               <EditorSection title="Services We Offer">
                 <Locked field="servicesList">
-                <RepeatableList items={listing.servicesList ?? SERVICES_LIST} onChange={(v) => set("servicesList", v)} placeholder="e.g. General Enquiries" />
+                <RepeatableList items={listing.servicesList ?? SERVICES_LIST.map(() => "")} examples={SERVICES_LIST} onChange={(v) => set("servicesList", v)} placeholder="e.g. General Enquiries" />
                 </Locked>
               </EditorSection>
               <EditorSection title="Why Choose Us">
@@ -442,7 +443,7 @@ export default function MyListingPage() {
             <>
               <EditorSection title="Areas Covered">
                 <Locked field="areasCoveredList">
-                <RepeatableList items={listing.areasCoveredList ?? AREAS_COVERED_LIST} onChange={(v) => set("areasCoveredList", v)} placeholder="e.g. Maidenhead" />
+                <RepeatableList items={listing.areasCoveredList ?? AREAS_COVERED_LIST.map(() => "")} examples={AREAS_COVERED_LIST} onChange={(v) => set("areasCoveredList", v)} placeholder="e.g. Maidenhead" />
                 </Locked>
               </EditorSection>
               {tabEditable("areas") && <SaveBar onSave={() => handleSave("areas")} saving={saving} status={status} rejectionReason={rejectionReason} />}

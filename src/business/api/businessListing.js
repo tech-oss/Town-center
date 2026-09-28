@@ -97,6 +97,11 @@ function toRow(listing) {
   return stripDataUrls(buildRow(listing)).row;
 }
 
+// A list of typed lines, without the blank rows left for filling in.
+function textList(v) {
+  return Array.isArray(v) ? v.filter((x) => typeof x === "string" && x.trim()) : v;
+}
+
 function buildRow(listing) {
   return {
     name: listing.name,
@@ -123,15 +128,15 @@ function buildRow(listing) {
     booking_url: listing.bookingUrl,
     social: listing.social,
     faqs: listing.faqs,
-    services_list: listing.servicesList,
-    areas_covered_list: listing.areasCoveredList,
+    services_list: textList(listing.servicesList),
+    areas_covered_list: textList(listing.areasCoveredList),
     amenities: listing.amenities,
     other_amenities: listing.otherAmenities,
     star_rating: listing.starRating,
     properties: listing.properties,
     approval_status: listing.approvalStatus,
     rejection_reason: listing.rejectionReason,
-    why_choose_us: listing.whyChooseUs,
+    why_choose_us: textList(listing.whyChooseUs),
     stats: listing.stats,
     availability_tag: listing.availabilityTag,
     business_type_detail: listing.businessTypeDetail,
@@ -169,6 +174,10 @@ export function isAutoPublished(tabKey) {
   return AUTO_PUBLISH_SECTIONS.has(tabKey);
 }
 
+// heroImage -> hero_image: the same rule the database's
+// listing_snapshot_column() uses, so the two always agree.
+const columnFor = (field) => field.replace(/([A-Z])/g, "_$1").toLowerCase();
+
 const sameValue = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
 // Returns { unchanged: true } without saving (or sending anything for
@@ -185,15 +194,32 @@ export async function saveBusinessListing(businessId, listing, tabKey) {
   // An auto-published section is never reviewed, so it needs no "before"
   // snapshot (nothing can revert it) and is written already Up to Date,
   // whatever state the caller passed.
+  // Only this tab's status changes; every other section keeps what the
+  // database says, not what this page last loaded.
   const approvalStatus = {
-    ...(listing.approvalStatus ?? {}),
-    ...(autoPublish ? { [tabKey]: "Up to Date" } : {}),
+    ...(current.approvalStatus ?? {}),
+    [tabKey]: autoPublish ? "Up to Date" : (listing.approvalStatus?.[tabKey] ?? "Pending Approval"),
+  };
+  const rejectionReason = {
+    ...(current.rejectionReason ?? {}),
+    [tabKey]: listing.rejectionReason?.[tabKey] ?? null,
   };
 
+  // Writes ONLY this tab's own columns. It used to write the whole page's
+  // state, so an unsaved edit on another tab (a new logo or description on
+  // Profile, say) went out with this save — and saving Opening Hours, which
+  // publishes instantly, put that edit live without admin ever seeing it.
+  const full = toRow({ ...listing, approvalStatus, rejectionReason });
   const patch = {
-    ...toRow({ ...listing, approvalStatus }),
+    approval_status: approvalStatus,
+    rejection_reason: rejectionReason,
+    updated_at: full.updated_at,
     edited_by: { ...(current.editedBy ?? {}), [tabKey]: "business" },
   };
+  for (const f of tabFields) {
+    const col = columnFor(f);
+    if (col in full) patch[col] = full[col];
+  }
 
   if (!autoPublish) {
     // The snapshot is the last APPROVED state: it is what the approval queue
