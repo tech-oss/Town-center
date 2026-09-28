@@ -227,6 +227,7 @@ export const AMENITY_CATEGORIES = [
       "Wheelchair accessible", "Electric vehicle charging station", "Bar",
       "Air conditioning", "Business center", "Playground", "Terrace",
       "BBQ facilities", "Parking", "Laundry", "Shared kitchen",
+      "Pet friendly", "Adults only",
     ],
   },
   {
@@ -242,8 +243,11 @@ export const AMENITY_CATEGORIES = [
     ],
   },
   {
+    // Who the stay suits, not a policy — "Pet friendly"/"Adults only" moved
+    // to Property Facilities below, where a house rule belongs. Feeds the
+    // main site's "Travel group" filter on the Accommodation listing page.
     category: "Travel Group",
-    options: ["Pet friendly", "Adults only"],
+    options: ["Solo travellers", "Couples", "Family", "Groups", "Business travellers"],
   },
 ];
 
@@ -251,7 +255,10 @@ export const STAR_RATINGS = [1, 2, 3, 4, 5];
 
 // ─── Accommodation — Amenities, grouped by category (multi-select, no cap).
 // Same Property/Room/Travel categories as Hotel, plus a Property Types
-// category up front to describe what kind of accommodation it is. ──────────
+// category up front to describe what kind of accommodation it is, and Meals
+// (accommodation only — a hotel's dining is covered by its own Restaurant
+// facility above). Both feed filters on the main site's Accommodation
+// listing page (StayListingPage.jsx / liveBusinesses.js). ───────────────────
 export const ACCOMMODATION_AMENITY_CATEGORIES = [
   {
     category: "Property Types",
@@ -263,6 +270,10 @@ export const ACCOMMODATION_AMENITY_CATEGORIES = [
     ],
   },
   ...AMENITY_CATEGORIES,
+  {
+    category: "Meals",
+    options: ["Self catering", "Breakfast included", "Half board", "Full board", "Restaurant on site"],
+  },
 ];
 
 export const SERVICES_LIST = ["General Enquiries", "Emergency Call-Outs", "Free Quotes"];
