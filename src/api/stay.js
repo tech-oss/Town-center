@@ -10,7 +10,15 @@ async function liveStay(kind) {
   const live = await loadLiveBusinesses();
   return live
     .filter((i) => i.section === "stay" && i.stayKind === kind)
-    .map((i) => ({ ...i, type: kind === "hotels" ? "Hotel" : "Accommodation", area: i.address }));
+    .map((i) => ({
+      ...i,
+      // Hotels don't have a sub-type; an accommodation's is whatever it
+      // ticked under Property Types (lib/amenityCategories.js), falling
+      // back to the generic label when nothing's been entered yet — same as
+      // every listing before this had, so an empty one is no worse off.
+      type: kind === "hotels" ? "Hotel" : (i.propertyType ?? "Accommodation"),
+      area: i.address,
+    }));
 }
 
 // A live listing replaces a demo one with the same slug or the same name.

@@ -103,11 +103,16 @@ const LANDING = {
 // One fixed colour per star rating, echoing CategoryPage's own
 // CATEGORY_COLORS legend so hotel cards read as part of the same system.
 const STAR_COLORS = { 5: "#c9962c", 4: "#c9962c", 3: "var(--leaf)", 2: "var(--leaf)", 1: "var(--leaf)" };
+// Keyed on the real Property Types a business actually ticks
+// (lib/amenityCategories.js) — anything not listed here still gets a colour,
+// just the shared fallback below.
 const TYPE_COLORS = {
-  "entire-apartment": "#8b5cf6",
-  "entire-cottage": "#22c55e",
-  "entire-home": "#2563eb",
-  "private-room": "#f59e0b",
+  apartments: "#8b5cf6",
+  villas: "#22c55e",
+  "vacation-homes": "#2563eb",
+  "bed-and-breakfasts": "#f59e0b",
+  "entire-homes-apartments": "#2563eb",
+  "country-houses": "#c9962c",
 };
 
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");

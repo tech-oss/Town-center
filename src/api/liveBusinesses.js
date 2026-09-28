@@ -13,6 +13,7 @@ import { supabase } from "../lib/supabaseClient";
 import { categoryLabel } from "../Data/taxonomy";
 import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
+import { facilitiesOf, roomFacilitiesOf, travelGroupOf, mealsOf, propertyTypesOf } from "../lib/amenityCategories";
 import { parseCoords } from "../lib/geo";
 import { imageUrl } from "../lib/imageUrl";
 import { formatEventDate } from "../lib/eventDates";
@@ -262,6 +263,21 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     skills: listOrUndefined(row.skills),
     portfolio: listOrUndefined(row.portfolio),
     amenities: listOrUndefined(row.amenities),
+    // The Hotels/Accommodation listing pages' Facilities, Room facilities,
+    // Meals and Travel group filters (StayListingPage.jsx) — restored from
+    // what the old `main` branch's hardcoded demo data had as separate
+    // fields. A business ticks one flat amenities list; this buckets it back
+    // into the same categories the business ticked them under
+    // (lib/amenityCategories.js, kept in sync with the business dashboard's
+    // own category labels by hand).
+    facilities: facilitiesOf(row.amenities),
+    roomFacilities: roomFacilitiesOf(row.amenities),
+    travelGroup: travelGroupOf(row.amenities),
+    meals: mealsOf(row.amenities),
+    // Accommodation's "what kind of place is this" — the first Property
+    // Types tick, if any. Drives the category chips on the Accommodation
+    // listing page; a hotel doesn't use this.
+    propertyType: propertyTypesOf(row.amenities)?.[0],
     stars: row.star_rating,
     // Hotels: shown as written, and the two options guests filter on.
     // Null/false for a free listing (the view withholds them), so the page
