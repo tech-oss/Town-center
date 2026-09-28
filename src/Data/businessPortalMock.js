@@ -28,13 +28,15 @@ export {
   labelFor,
 } from "./taxonomy";
 
+// Every day starts closed: a new business isn't shown as open on days it
+// never set.
 export const DEFAULT_HOURS = () => [
-  { day: "Monday",    open: true,  from: "09:00", to: "17:00" },
-  { day: "Tuesday",   open: true,  from: "09:00", to: "17:00" },
-  { day: "Wednesday", open: true,  from: "09:00", to: "17:00" },
-  { day: "Thursday",  open: true,  from: "09:00", to: "17:00" },
-  { day: "Friday",    open: true,  from: "09:00", to: "17:00" },
-  { day: "Saturday",  open: true,  from: "10:00", to: "16:00" },
+  { day: "Monday",    open: false, from: "09:00", to: "17:00" },
+  { day: "Tuesday",   open: false, from: "09:00", to: "17:00" },
+  { day: "Wednesday", open: false, from: "09:00", to: "17:00" },
+  { day: "Thursday",  open: false, from: "09:00", to: "17:00" },
+  { day: "Friday",    open: false, from: "09:00", to: "17:00" },
+  { day: "Saturday",  open: false, from: "10:00", to: "16:00" },
   { day: "Sunday",    open: false, from: "10:00", to: "16:00" },
 ];
 
