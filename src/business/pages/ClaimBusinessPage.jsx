@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { submitBusinessClaim, listUnclaimedBusinesses } from "../hooks/useUserRegistry";
 import { Field, Inp } from "../components/FormKit";
 
@@ -65,7 +65,11 @@ function BusinessPicker({ value, onChange }) {
 const EMPTY = { businessId: "", firstName: "", lastName: "", email: "", phone: "", password: "", confirmPassword: "" };
 
 export default function ClaimBusinessPage() {
-  const [form, setForm] = useState(EMPTY);
+  // "Claim this business" on the public site links here with ?business=<id>,
+  // so the form opens with that business already chosen. The picker only
+  // shows it if it's still unclaimed; otherwise it's a normal empty search.
+  const [params] = useSearchParams();
+  const [form, setForm] = useState(() => ({ ...EMPTY, businessId: params.get("business") ?? "" }));
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
