@@ -33,6 +33,28 @@ function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
 }
 
+const RESERVED = new Set(["example.com", "example.org", "example.net", "example.co.uk", "test.com", "test.co.uk", "yourdomain.com", "fake.com", "noemail.com"]);
+
+// Same rules as the portal's lib/emailCheck.js, checked here too because the
+// browser's check can be skipped. Returns a reason, or null if it's fine.
+async function undeliverable(email: string): Promise<string | null> {
+  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) return "Please enter a valid email address.";
+  const domain = email.split("@")[1];
+  if (RESERVED.has(domain) || [".test", ".example", ".invalid", ".localhost", ".local"].some((t) => domain.endsWith(t))) {
+    return "Please use a real email address.";
+  }
+  try {
+    const mx = await Deno.resolveDns(domain, "MX");
+    if (mx.length && mx.every((r) => r.exchange === "" || r.exchange === ".")) return `We can't deliver email to "${domain}".`;
+    if (!mx.length) await Deno.resolveDns(domain, "A");
+  } catch (e) {
+    // NotFound = no such domain / no mail server. Anything else (a DNS
+    // hiccup) lets the address through rather than blocking a real person.
+    if (e instanceof Deno.errors.NotFound) return `We can't deliver email to "${domain}". Please check the address.`;
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS_HEADERS });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -73,6 +95,11 @@ Deno.serve(async (req) => {
     target_role: "Content Manager",
   });
   if (slotTaken) return json({ error: "This business already has a Content Manager registered or awaiting approval." }, 400);
+
+  // Refuse an address that can't receive mail before Supabase emails it:
+  // bounces count against the whole project's sending.
+  const emailProblem = await undeliverable(email.trim().toLowerCase());
+  if (emailProblem) return json({ error: emailProblem }, 400);
 
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email.trim(), {
     redirectTo: redirectTo || undefined,
