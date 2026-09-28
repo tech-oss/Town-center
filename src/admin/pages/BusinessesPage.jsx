@@ -548,15 +548,22 @@ function LogoUploadModal({ biz, onSave, onCancel }) {
           )}
         </div>
 
-        <label className="w-fit px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
-          style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
-          {preview ? "Replace Image" : "Choose File"}
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-        </label>
+        <div className="flex items-center gap-3 flex-wrap">
+          <label className="w-fit px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
+            style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: `1.5px solid rgba(37,99,235,0.25)` }}>
+            {preview ? "Replace Image" : "Choose File"}
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+          </label>
+          {preview && (
+            <button type="button" onClick={() => setPreview(null)} className="text-xs font-semibold" style={{ color: "#991B1B" }}>
+              Remove
+            </button>
+          )}
+        </div>
 
         <div className="flex gap-3 pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>
-          <button onClick={() => onSave(preview)} disabled={!preview}
-            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-40" style={{ backgroundColor: BLUE }}>
+          <button onClick={() => onSave(preview ?? "")}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: BLUE }}>
             Save
           </button>
           <button onClick={onCancel} className="px-6 py-2.5 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>Cancel</button>

@@ -181,8 +181,13 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
         style={{ border: dragOver ? `2px dashed ${BLUE}` : `1.5px solid ${BORDER}`, backgroundColor: logo && src ? "#fff" : "#f8fafc" }}
       >
         {src ? (
-          <img src={src} alt={label || "preview"}
-            className={logo ? "w-full h-full object-contain p-1.5" : "w-full h-full object-cover"} />
+          <>
+            <img src={src} alt={label || "preview"}
+              className={logo ? "w-full h-full object-contain p-1.5" : "w-full h-full object-cover"} />
+            <button type="button" onClick={() => onChange("")} aria-label={`Remove ${label || "image"}`} title="Remove image"
+              className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
+              style={{ backgroundColor: "#DC2626" }}>✕</button>
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-1">
             <span className="text-2xl" style={{ color: "#9CA3AF" }}>+</span>

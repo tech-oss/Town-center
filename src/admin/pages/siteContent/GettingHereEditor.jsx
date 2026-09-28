@@ -53,6 +53,11 @@ function ImageField({ label, value, onChange }) {
           {value ? "Replace Image" : "Upload Image"}
           <input type="file" accept="image/*" className="hidden" onChange={(e) => upload(e.target.files?.[0])} />
         </label>
+        {value && (
+          <button type="button" onClick={() => onChange("")} className="text-xs font-semibold" style={{ color: "#991B1B" }}>
+            Remove
+          </button>
+        )}
       </div>
     </Field>
   );
