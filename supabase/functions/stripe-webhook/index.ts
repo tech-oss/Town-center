@@ -207,9 +207,12 @@ async function settleAddonSlots(session: any) {
     article: "article slot",
     event: "event slot",
     featured_article: "featured article slot",
+    push_notification: "push notification",
   };
   const noun = NOUN[addon] ?? "slot";
-  const description = `${quantity} extra ${noun}${quantity === 1 ? "" : "s"} (12 months)`;
+  const description = addon === "push_notification"
+    ? `${quantity} push notification${quantity === 1 ? "" : "s"} (12 months)`
+    : `${quantity} extra ${noun}${quantity === 1 ? "" : "s"} (12 months)`;
 
   const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
   if (invoiceId) {
@@ -232,6 +235,8 @@ async function settleAddonSlots(session: any) {
     title: description,
     detail: addon === "event"
       ? "Create an event now, and re-use the slot for the next one once it has finished."
+      : addon === "push_notification"
+      ? "Compose one under Push Notifications whenever you're ready — each one you send uses up one."
       : "Edit or replace the content as often as you like for 12 months.",
     actor: "system",
   });

@@ -12,7 +12,7 @@ function shortUK(iso) {
   return `${dd}.${mm}.${yy}`;
 }
 
-const NOUN = { article: "Article slot", event: "Event slot", featured_article: "Featured Article slot" };
+const NOUN = { article: "Article slot", event: "Event slot", featured_article: "Featured Article slot", push_notification: "Push notification" };
 
 // Every slot the business has bought of one kind, one line per slot, with the
 // date it was bought and the date it must be used by — so it's always clear

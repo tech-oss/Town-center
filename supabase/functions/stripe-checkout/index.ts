@@ -1,6 +1,7 @@
 // stripe-checkout — starts a Stripe Checkout session for the Visibility Plan,
 // for a homepage slot booking (kind: "placement"), or for add-on slots —
-// articles, events and featured articles (kind: "addon_slots").
+// articles, events, featured articles and push notification packs
+// (kind: "addon_slots").
 //
 // Called by the business dashboard's Subscribe and Homepage Promotions flows. The browser is sent to
 // the returned Stripe-hosted page to pay; the plan itself only changes when
@@ -167,9 +168,12 @@ Deno.serve(async (req) => {
     // Stripe confirms payment. Being on the homepage is a separate purchase.
     if (kind === "article_slots" || kind === "addon_slots") {
       const CATALOGUE: Record<string, { noun: string; packs: Record<string, number> }> = {
-        article:          { noun: "article slot",          packs: { "1": 999,  "3": 2499,  "6": 3999  } },
-        event:            { noun: "event slot",            packs: { "1": 999,  "3": 2499,  "6": 3999  } },
-        featured_article: { noun: "featured article slot", packs: { "1": 4999, "3": 11999, "6": 19999 } },
+        article:           { noun: "article slot",          packs: { "1": 999,  "3": 2499,  "6": 3999  } },
+        event:             { noun: "event slot",            packs: { "1": 999,  "3": 2499,  "6": 3999  } },
+        featured_article:  { noun: "featured article slot", packs: { "1": 4999, "3": 11999, "6": 19999 } },
+        // Consumed one at a time, not a reusable slot — but the same 12-month
+        // purchase shape (see push_notification_addon_2026_09.sql).
+        push_notification: { noun: "push notification",     packs: { "1": 1499, "3": 3499, "6": 5999, "12": 9999 } },
       };
       // kind "article_slots" is the older call shape, which only ever meant
       // articles.
@@ -179,7 +183,15 @@ Deno.serve(async (req) => {
       if (!entry || !amount) return json({ error: "Choose one of the packages offered." }, 400);
 
       const quantity = Number(pack);
-      const name = `${quantity} extra ${entry.noun}${quantity === 1 ? "" : "s"}`;
+      // "Extra" reads right for a slot on top of what's included (article
+      // slots start with 3 free) — a push credit has no included baseline to
+      // be extra to, so it's just "N push notifications".
+      const name = slotKind === "push_notification"
+        ? `${quantity} push notification${quantity === 1 ? "" : "s"}`
+        : `${quantity} extra ${entry.noun}${quantity === 1 ? "" : "s"}`;
+      const description = slotKind === "push_notification"
+        ? "Valid 12 months. Use them whenever you like — each one sent uses up one credit."
+        : "Valid 12 months. Re-usable — edit or replace the content as often as you like.";
 
       // Add-ons ride on an active Visibility Plan.
       if (sub?.plan !== "premium") {
@@ -196,6 +208,7 @@ Deno.serve(async (req) => {
       // belongs to Featured Articles, not the News & Offers tab.
       const backTo = slotKind === "event" ? "events"
         : slotKind === "featured_article" ? "featured-articles"
+        : slotKind === "push_notification" ? "push-notifications"
         : "articles";
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -208,7 +221,7 @@ Deno.serve(async (req) => {
             unit_amount: amount,
             product_data: {
               name,
-              description: "Valid 12 months. Re-usable — edit or replace the content as often as you like.",
+              description,
             },
           },
         }],

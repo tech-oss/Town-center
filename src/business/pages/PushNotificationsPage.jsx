@@ -5,13 +5,18 @@ import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from
 import { formatUKDateTime } from "../../lib/ukDateTime";
 import { getMyAttachableContent } from "../api/pushAttachments";
 import {
-  listPushRequests, requestPush, withdrawPushRequest, PUSH_STATUS,
+  listPushRequests, requestPush, withdrawPushRequest, submitPushDraft, getPushNotificationBalance, PUSH_STATUS,
 } from "../api/pushRequests";
+import AddonSlotsCard from "../components/AddonSlotsCard";
+import PurchasedSlots from "../components/PurchasedSlots";
 
 // Requesting a push notification. The composer is the same one admin uses —
 // same fields, same limits, same live preview — because what the business
-// writes here is what admin sends, verbatim, on approval. The only
-// difference is the button: a business asks, it never broadcasts.
+// writes here is what admin sends, verbatim, on approval. A business never
+// broadcasts, and each one it sends spends a paid credit (purchased below,
+// see api/addonSlots.js's push_notification kind). Only the owner can spend
+// one: a Content Manager composing here raises a draft for the owner to
+// review and submit, which is what actually spends it and sends it to admin.
 
 const CATEGORY_COLOURS = {
   News: { bg: "rgba(22,163,74,0.12)", fg: "#15803D" },
@@ -139,12 +144,21 @@ const BLANK = { title: "", body: "", url: "", web: true, mobile: true, notifType
 
 export default function PushNotificationsPage() {
   const { user } = useBusinessAuth();
+  const isOwner = user.role !== "Content Manager";
   const [form, setForm] = useState(BLANK);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [withdrawing, setWithdrawing] = useState(null);
+  const [submittingId, setSubmittingId] = useState(null);
+  const [balance, setBalance] = useState(null);
+  // Opened straight away when the owner arrives from a Content Manager's
+  // purchase request (?packages=1 — see requestDestination), same as
+  // Articles, Events and Featured Articles.
+  const [showSlots, setShowSlots] = useState(
+    () => new URLSearchParams(window.location.search).get("packages") === "1"
+  );
   const [toast, setToast] = useToast();
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
@@ -159,6 +173,25 @@ export default function PushNotificationsPage() {
   }, [user.id]);
   useEffect(load, [load]);
 
+  const loadBalance = useCallback(() => {
+    getPushNotificationBalance(user.id).then(setBalance).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user.id]);
+  useEffect(loadBalance, [loadBalance]);
+
+  // Back from Stripe: re-read the balance so a fresh pack shows immediately.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("slots") === "success") {
+      setToast("Thanks — your push notifications are ready to use.");
+      loadBalance();
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (params.get("slots") === "cancelled") {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function selectArticle(article) {
     setForm((f) => ({
       ...f,
@@ -171,16 +204,24 @@ export default function PushNotificationsPage() {
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
   const isValid = form.title.trim() && form.body.trim() && channels.length > 0;
   const pendingCount = requests.filter((r) => r.status === "pending").length;
+  const draftCount = requests.filter((r) => r.status === "draft").length;
+  const remaining = balance?.remaining ?? 0;
+  // An owner with nothing left to spend is sent to buy first, not to a
+  // confirm step that would just fail — the RPC refuses it anyway, but there
+  // is no reason to make them find that out that way.
+  const atLimit = isOwner && remaining <= 0;
 
   async function submit() {
     if (!isValid) return;
+    if (atLimit) { setConfirm(false); setShowSlots(true); return; }
     setBusy(true);
     try {
-      await requestPush(user.id, form, `${user.firstName} ${user.lastName}`);
+      await requestPush(user.id, form, `${user.firstName} ${user.lastName}`, isOwner);
       setForm(BLANK);
       setConfirm(false);
-      setToast("Sent to Maidenhead for approval.");
+      setToast(isOwner ? "Sent to Maidenhead for approval." : "Sent to the business owner to submit.");
       load();
+      if (isOwner) loadBalance();
     } catch (e) {
       setToast(e.message);
     } finally {
@@ -192,31 +233,81 @@ export default function PushNotificationsPage() {
     try {
       await withdrawPushRequest(withdrawing.id);
       setRequests((prev) => prev.filter((r) => r.id !== withdrawing.id));
-      setToast("Request withdrawn.");
+      setToast(withdrawing.status === "draft" ? "Draft discarded." : "Request withdrawn.");
     } catch (e) {
       setToast(e.message);
     }
     setWithdrawing(null);
   }
 
+  // Owner-only: spends a credit and sends a Content Manager's draft to admin.
+  async function handleSubmitDraft(r) {
+    setSubmittingId(r.id);
+    try {
+      await submitPushDraft(r.id);
+      setToast(`"${r.title}" sent to Maidenhead for approval.`);
+      load();
+      loadBalance();
+    } catch (e) {
+      setToast(e.message);
+    } finally {
+      setSubmittingId(null);
+    }
+  }
+
   const field = { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" };
+  const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
 
   return (
     <BusinessLayout>
       <Toast message={toast} />
       {withdrawing && (
-        <ConfirmModal title="Withdraw this request?" body={`"${withdrawing.title}" will be removed before Maidenhead reviews it.`}
-          confirmLabel="Withdraw" onConfirm={confirmWithdraw} onCancel={() => setWithdrawing(null)} />
+        <ConfirmModal
+          title={withdrawing.status === "draft" ? "Discard this draft?" : "Withdraw this request?"}
+          body={withdrawing.status === "draft"
+            ? `"${withdrawing.title}" will be removed. It was never sent to Maidenhead, so nothing is spent.`
+            : `"${withdrawing.title}" will be removed before Maidenhead reviews it.`}
+          confirmLabel={withdrawing.status === "draft" ? "Discard" : "Withdraw"}
+          onConfirm={confirmWithdraw} onCancel={() => setWithdrawing(null)} />
       )}
 
       <div className="flex flex-col gap-6 max-w-5xl">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Push Notifications</h1>
           <p className="text-sm mt-1" style={{ color: MUTED }}>
-            Ask Maidenhead to send a push notification to everyone with the website or app notifications turned on.
-            Maidenhead approves every notification before it goes out, so it won't send the moment you submit it.
+            Send a push notification to everyone with the website or app notifications turned on. Each one uses up a
+            purchased push notification, and Maidenhead approves every one before it goes out — so it won't send the
+            moment you submit it.{!isOwner && " You can compose one here; the business owner submits and pays for it."}
           </p>
         </div>
+
+        {/* What's been bought and what's left — the balance that actually
+            gates submitting, shown before anyone hits it. */}
+        <div className="rounded-2xl px-5 py-3.5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
+          <p className="text-sm" style={{ color: FOREST }}>
+            <strong>{remaining} of {balance?.purchased ?? 0}</strong> push notification{(balance?.purchased ?? 0) === 1 ? "" : "s"} left to use
+            {balance?.used ? ` (${balance.used} already sent or waiting on Maidenhead)` : ""}
+          </p>
+          <div className="flex items-center gap-3 flex-wrap">
+            {atLimit && (
+              <p className="text-xs" style={{ color: "#92400E" }}>
+                {isOwner ? "Nothing left — buy another pack to send more." : "The business has none left — ask the owner to buy more."}
+              </p>
+            )}
+            <button onClick={() => setShowSlots((v) => !v)} className="text-xs font-bold px-3 py-1.5 rounded-lg shrink-0"
+              style={{ border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
+              {showSlots ? "Hide packages" : "Buy push notifications"}
+            </button>
+          </div>
+        </div>
+
+        {showSlots && (
+          <AddonSlotsCard businessId={user.id} kind="push_notification" premium={premium}
+            isOwner={isOwner} requestedBy={`${user.firstName} ${user.lastName}`} onToast={setToast} />
+        )}
+
+        {/* What's been bought, and when each one runs out. */}
+        <PurchasedSlots businessId={user.id} kind="push_notification" refreshKey={balance?.purchased ?? 0} />
 
         <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
           {/* Compose */}
@@ -300,17 +391,19 @@ export default function PushNotificationsPage() {
 
             <div className="flex items-center gap-3 pt-2 border-t flex-wrap" style={{ borderColor: BORDER }}>
               {!confirm ? (
-                <button type="button" onClick={() => isValid && setConfirm(true)} disabled={!isValid}
+                <button type="button" onClick={() => isValid && (atLimit ? submit() : setConfirm(true))} disabled={!isValid}
                   className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40"
                   style={{ backgroundColor: SAGE }}>
-                  Request Notification
+                  {atLimit ? "Buy push notifications first" : isOwner ? "Request Notification" : "Send to Owner"}
                 </button>
               ) : (
                 <>
-                  <span className="text-sm font-medium" style={{ color: FOREST }}>Send this to Maidenhead for approval?</span>
+                  <span className="text-sm font-medium" style={{ color: FOREST }}>
+                    {isOwner ? "Send this to Maidenhead for approval?" : "Send this to the business owner to submit?"}
+                  </span>
                   <button type="button" onClick={submit} disabled={busy}
                     className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50" style={{ backgroundColor: SAGE }}>
-                    {busy ? "Sending…" : "Confirm Request"}
+                    {busy ? "Sending…" : "Confirm"}
                   </button>
                   <button type="button" onClick={() => setConfirm(false)}
                     className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>
@@ -334,11 +427,16 @@ export default function PushNotificationsPage() {
 
         {/* Their own requests, and what came of each */}
         <div className="bg-white rounded-2xl p-6" style={CARD}>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-4 flex-wrap">
             <h2 className="font-bold text-base" style={{ color: FOREST }}>Your Requests</h2>
             {pendingCount > 0 && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }}>
-                {pendingCount} waiting
+                {pendingCount} waiting on Maidenhead
+              </span>
+            )}
+            {isOwner && draftCount > 0 && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>
+                {draftCount} waiting on you
               </span>
             )}
           </div>
@@ -373,13 +471,22 @@ export default function PushNotificationsPage() {
                         </p>
                       )}
                     </div>
-                    {r.status === "pending" && (
-                      <button onClick={() => setWithdrawing(r)}
-                        className="text-xs font-semibold px-3 py-1.5 rounded-lg shrink-0"
-                        style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>
-                        Withdraw
-                      </button>
-                    )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {r.status === "draft" && isOwner && (
+                        <button onClick={() => handleSubmitDraft(r)} disabled={submittingId === r.id || remaining <= 0}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg disabled:opacity-40" style={{ backgroundColor: SAGE, color: "#fff" }}
+                          title={remaining <= 0 ? "Buy more push notifications first" : ""}>
+                          {submittingId === r.id ? "Sending…" : "Submit to Maidenhead"}
+                        </button>
+                      )}
+                      {(r.status === "pending" || r.status === "draft") && (
+                        <button onClick={() => setWithdrawing(r)}
+                          className="text-xs font-semibold px-3 py-1.5 rounded-lg"
+                          style={{ border: "1.5px solid rgba(185,28,28,0.3)", color: "#991B1B" }}>
+                          {r.status === "draft" ? "Discard" : "Withdraw"}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 );
               })}

@@ -149,11 +149,12 @@ export default function BillingPage() {
           onBooked={() => listPayments(user.id).then(setPayments)}
         />
 
-        {/* The re-usable add-on slots: articles, events, featured articles */}
+        {/* The add-on services: articles, events, featured articles, push notifications */}
         <div>
           <p className="text-lg font-bold" style={{ color: FOREST }}>Add On Services</p>
           <p className="text-sm mt-0.5" style={{ color: MUTED }}>
-            Extra slots for News &amp; Offer Articles, Events and Feature Articles — buy once, use whenever you like within the period.
+            Extra slots for News &amp; Offer Articles, Events and Feature Articles, and push notification packs —
+            buy once, use whenever you like within the period.
           </p>
         </div>
         {/* isOwner matters here as much as on the pages these slots are used
@@ -166,6 +167,8 @@ export default function BillingPage() {
         <AddonSlotsCard businessId={user.id} kind="event" premium={premium}
           isOwner={isOwner} requestedBy={requestedBy} onToast={setToast} />
         <AddonSlotsCard businessId={user.id} kind="featured_article" premium={premium}
+          isOwner={isOwner} requestedBy={requestedBy} onToast={setToast} />
+        <AddonSlotsCard businessId={user.id} kind="push_notification" premium={premium}
           isOwner={isOwner} requestedBy={requestedBy} onToast={setToast} />
 
         {/* Payment history */}

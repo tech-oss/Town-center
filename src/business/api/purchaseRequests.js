@@ -37,6 +37,7 @@ export function requestDestination(r) {
   if (r.kind === "event") return "/business/events?packages=1";
   if (r.kind === "featured_article") return "/business/featured-articles?packages=1";
   if (r.kind === "article") return "/business/articles?packages=1";
+  if (r.kind === "push_notification") return "/business/push-notifications?packages=1";
   return "/business/billing";
 }
 

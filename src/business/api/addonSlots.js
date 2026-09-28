@@ -70,6 +70,31 @@ export const ADDON_KINDS = {
       "Hide it whenever you choose",
     ],
   },
+  // Not a reusable slot like the three above — each one is spent the moment
+  // it actually sends. getAddonAllowance still works for the purchase side
+  // (packs bought, when they expire); how many are left to use comes from
+  // getPushNotificationBalance instead (see pushRequests.js).
+  push_notification: {
+    key: "push_notification",
+    label: "Push Notifications",
+    noun: "push notification",
+    included: 0,
+    intro: "Send a push notification straight to everyone with Maidenhead.com or The Maidenhead App notifications turned on. Every notification is approved by Maidenhead admin before it goes out.",
+    packs: [
+      { pack: 1,  price: "£14.99", label: "1 Push Notification"   },
+      { pack: 3,  price: "£34.99", label: "3 Push Notifications"  },
+      { pack: 6,  price: "£59.99", label: "6 Push Notifications"  },
+      { pack: 12, price: "£99.99", label: "12 Push Notifications" },
+    ],
+    terms: [
+      "Use them anytime within 12 months of buying",
+      "A Content Manager can compose one; only the owner can submit it and spend a credit",
+      "Every notification is reviewed by Maidenhead admin before it sends",
+      "Attach one of your own live news, offers, articles or events",
+      "Send to web, mobile, or both",
+      "If admin doesn't approve one, its credit is returned",
+    ],
+  },
 };
 
 // The line every one of these cards ends on.

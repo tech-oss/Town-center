@@ -3,6 +3,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { listTickets } from "../api/businessTickets";
 import { countOpenRequests } from "../api/purchaseRequests";
+import { countOwnerDrafts } from "../api/pushRequests";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
@@ -37,6 +38,9 @@ export default function BusinessLayout({ children }) {
   // Purchases a content manager has asked the owner for. Only the owner can
   // act on them, so only the owner is shown the count.
   const [openRequests, setOpenRequests] = useState(0);
+  // Push notifications a content manager has composed, waiting for the
+  // owner to submit (which spends a credit) or discard.
+  const [ownerDrafts, setOwnerDrafts] = useState(0);
 
   useEffect(() => {
     if (!user) return;
@@ -51,6 +55,7 @@ export default function BusinessLayout({ children }) {
     if (!user || user.role !== "Owner") return;
     let cancelled = false;
     countOpenRequests(user.id).then((n) => { if (!cancelled) setOpenRequests(n); }).catch(() => {});
+    countOwnerDrafts(user.id).then((n) => { if (!cancelled) setOwnerDrafts(n); }).catch(() => {});
     return () => { cancelled = true; };
   }, [user?.id, user?.role]);
 
@@ -129,6 +134,10 @@ export default function BusinessLayout({ children }) {
                 )}
                 {item.to === "/business/support" && openTickets > 0 && (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(255,255,255,0.2)", color: "#fff" }}>{openTickets}</span>
+                )}
+                {item.to === "/business/push-notifications" && ownerDrafts > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: SAGE, color: "#fff" }}
+                    title={`${ownerDrafts} push notification${ownerDrafts === 1 ? "" : "s"} waiting for you to submit`}>{ownerDrafts}</span>
                 )}
               </NavLink>
             );
