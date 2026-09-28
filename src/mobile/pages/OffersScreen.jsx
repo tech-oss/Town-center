@@ -14,7 +14,7 @@ const BUSINESS_TYPES = [
   { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
 ];
 
-const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
+const TYPE_ORDER = ["Featured", "Offer", "News"];
 
 // Small corner badge marking a card as an Offer — same tag glyph as the
 // bottom nav's Offers tab, so the icon language stays consistent app-wide.
@@ -64,8 +64,8 @@ function SearchInput({ value, onChange }) {
 }
 
 export default function OffersScreen() {
-  // Stories, every live news post and offer, and What's On events that have
-  // been promoted — the same list the website shows (api/offers.js).
+  // Stories and every live news post and offer (events live in See & Do and
+  // the calendar) — the same list the website shows (api/offers.js).
   const { data: feed } = useFetch(getOffersFeed, []);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState(null);

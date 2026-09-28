@@ -3,12 +3,13 @@
 //   • Featured Stories (admin long-form articles)
 //   • every live news post and offer: a business's own posts and the posts
 //     admin writes in Business News & Offers
-//   • events that have been booked into What's On
+// Events are not here: they live in See & Do and the What's On calendar.
+// Only the ones booked into a paid What's On slot used to appear, so some
+// events showed on Offers and most didn't.
 // Items currently on the homepage are marked `homepage`. Paths are the
 // website's; the app prefixes them with /mobile.
 import { getStories } from "./stories";
 import { getArticles } from "./articles";
-import { getPromotedEvents } from "./events";
 import { getStandaloneNewsOffers } from "./spotlight";
 import { getPromotedPosts } from "./promotedPosts";
 import { getLiveHomepageKeys } from "./homepageSlots";
@@ -34,12 +35,11 @@ function articleKey(a) {
 }
 
 export async function getOffersFeed() {
-  const [stories, articles, standalone, promoted, events, onHome] = await Promise.all([
+  const [stories, articles, standalone, promoted, onHome] = await Promise.all([
     getStories(),
     getArticles(),
     getStandaloneNewsOffers(),
     getPromotedPosts().catch(() => []),
-    getPromotedEvents().catch(() => []),
     getLiveHomepageKeys(),
   ]);
 
@@ -84,19 +84,6 @@ export async function getOffersFeed() {
         businessSection: a.business?.section ?? null,
         homepage: onHome.has(articleKey(a)),
       })),
-    ...events.map((e) => ({
-      key: `event:${e.slug}`,
-      slug: e.slug,
-      to: `/event/${e.slug}`,
-      image: e.image,
-      title: e.title,
-      excerpt: e.excerpt,
-      date: e.date,
-      type: "What's On",
-      businessName: null,
-      businessSection: "see-do",
-      homepage: onHome.has(`business_event:${e.id}`),
-    })),
   ].filter((it) => it.slug && once(it.key))
     // Featured articles always lead the page, then whatever is on the
     // homepage now, then the rest — in that order of precedence.

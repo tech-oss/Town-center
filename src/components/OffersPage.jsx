@@ -18,7 +18,7 @@ const BUSINESS_TYPES = [
 ];
 
 
-const TYPE_ORDER = ["Featured", "Offer", "News", "What's On"];
+const TYPE_ORDER = ["Featured", "Offer", "News"];
 
 function HomepageBadge() {
   return (
@@ -286,8 +286,8 @@ function BusinessTypeFilter({ active, onChange }) {
 export default function OffersPage() {
   // Header wording, editable in Site Content.
   const copy = useSiteSection("offers");
-  // Stories, every live news post and offer, and What's On events that have
-  // been promoted — the same list the app shows (api/offers.js).
+  // Stories and every live news post and offer (events live in See & Do and
+  // the calendar) — the same list the app shows (api/offers.js).
   const { data: feed } = useFetch(getOffersFeed, []);
   const [search, setSearch] = useState("");
   const [activeType, setActiveType] = useState(null);
