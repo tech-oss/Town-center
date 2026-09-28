@@ -1,4 +1,6 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import { useMemo } from "react";
+import { pickSome } from "../../lib/pickSome";
 import MobileShell from "../components/MobileShell";
 import useFetch from "../../hooks/useFetch";
 import { getStoryBySlug, getStories } from "../../api";
@@ -41,13 +43,14 @@ export default function StoryDetailScreen() {
   // A Featured Article that belongs to a business counts towards its analytics.
   useTrackView(featureView(story));
   const { data: stories } = useFetch(getStories, []);
+  // Three others at random, so each article suggests something different.
+  const more = useMemo(() => pickSome((stories ?? []).filter((f) => f.slug !== slug), 3), [stories, slug]);
 
   const goBack = useMobileBack("/mobile/offers");
   if (!loading && !story) return <Navigate to="/mobile/home" replace />;
   if (loading || !story) return null;
 
   const sectionImages = storySectionImages(story);
-  const more = (stories ?? []).filter((f) => f.slug !== story.slug).slice(0, 3);
   const websiteUrl = story.website ? `https://${story.website.replace(/^https?:\/\//, "")}` : null;
   const titleSplit = story.title.split(/:\s+/);
   const heroTitle = titleSplit[0];

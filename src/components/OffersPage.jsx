@@ -5,6 +5,7 @@ import { getOffersFeed } from "../api";
 import { sections } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 import { TYPE_COLORS } from "../lib/typeColors";
+import OfferTag from "./OfferTag";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
 import { card, pill } from "../utils/design";
@@ -390,6 +391,7 @@ export default function OffersPage() {
                   <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
                     <img src={it.image} alt={it.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     {it.homepage && <HomepageBadge />}
+                    {it.type === "Offer" && <OfferTag />}
                   </div>
                   <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
                     {it.type && (

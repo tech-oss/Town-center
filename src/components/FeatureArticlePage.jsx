@@ -3,7 +3,8 @@ import SmartImage from "./SmartImage";
 import { focalPosition } from "../lib/focalPoint";
 import { imageUrl } from "../lib/imageUrl";
 import { storySectionImages } from "../lib/storyImages";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { pickSome } from "../lib/pickSome";
 import { getStoryBySlug, getStories } from "../api";
 import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
@@ -68,6 +69,7 @@ export default function FeatureArticlePage() {
   // A Featured Article that belongs to a business counts towards its analytics.
   useTrackView(featureView(story));
   const { data: stories, loading: loadingList } = useFetch(getStories, []);
+  const moreStories = useMemo(() => pickSome((stories ?? []).filter((f) => f.slug !== slug), 3), [stories, slug]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -77,7 +79,9 @@ export default function FeatureArticlePage() {
   if (error) return <ErrorState minHeight="70vh" />;
   if (!story) return <Navigate to="/" replace />;
 
-  const more = stories.filter((f) => f.slug !== story.slug);
+  // Three others, chosen afresh for each article (and each visit) — the same
+  // as the app. This listed every story, ten or more cards deep.
+  const more = moreStories;
   // Website and location are optional — a story about the town itself has
   // neither, and assuming a website crashed the whole page.
   const websiteUrl = story.website ? `https://${story.website.replace(/^https?:\/\//, "")}` : null;
