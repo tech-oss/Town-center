@@ -10,10 +10,11 @@ export const heroImage = "/images/card-bridge.jpg";
 // Quick Links on Home — one row of four, matching the website's primary
 // directory sections.
 export const homeCategories = [
-  { id: "see-do", label: "See & Do", image: "/images/quick-links/see-do.jpg", to: "/mobile/see-do" },
-  { id: "eat-drink", label: "Eat & Drink", image: "/images/quick-links/eat-drink.jpg", to: "/mobile/eat-drink" },
-  { id: "shop", label: "Shop & Services", image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
-  { id: "services", label: "Services", image: "/images/quick-links/services.jpg", to: "/mobile/services" },
+  // `lines`: each label is set on two lines so the four sit evenly.
+  { id: "see-do", label: "See & Do", lines: ["See &", "Do"], image: "/images/quick-links/see-do.jpg", to: "/mobile/see-do" },
+  { id: "eat-drink", label: "Eat & Drink", lines: ["Eat &", "Drink"], image: "/images/quick-links/eat-drink.jpg", to: "/mobile/eat-drink" },
+  { id: "shop", label: "Shop & Local Services", lines: ["Shop &", "Local Services"], image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
+  { id: "services", label: "Trades & Professionals", lines: ["Trades &", "Professionals"], image: "/images/quick-links/services.jpg", to: "/mobile/services" },
 ];
 
 // ─── Explore hub ───────────────────────────────────────────────────────────────

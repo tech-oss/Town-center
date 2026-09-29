@@ -221,7 +221,9 @@ export default function HomeScreen() {
                         crisp tile, matching the tab bar's dark-teal accent. */}
                     <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 45%, rgba(12,20,24,0.35) 100%)" }} />
                   </div>
-                  <span className="text-[11px] font-bold text-center leading-tight" style={{ color: "#000000" }}>{c.label}</span>
+                  <span className="text-[11px] font-bold text-center leading-tight" style={{ color: "#000000" }} aria-label={c.label}>
+                    {c.lines ? c.lines.map((l, i) => <span key={i} className="block whitespace-nowrap">{l}</span>) : c.label}
+                  </span>
                 </Link>
               ))}
             </div>
@@ -252,10 +254,10 @@ export default function HomeScreen() {
             </span>
           </Link>
 
-          {/* ── App Offers & News ── */}
+          {/* ── In the Spotlight ── */}
           {appOffers.length > 0 && (
             <div>
-              <SectionHead eyebrow="App Offers & News" to="/mobile/offers" />
+              <SectionHead eyebrow="In the Spotlight" to="/mobile/offers" />
               <div className="flex flex-col gap-3">
                 {appOffers.map((post) => (
                   <Link key={post.id} to={`/mobile${post.href}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
