@@ -14,7 +14,7 @@ import { categoryColor } from "../../lib/categoryColors";
 
 const BUSINESS_TYPES = [
   ...Object.values(sections).map((s) => ({ key: s.key, label: appSectionLabel(s.key, s.label), color: categoryColor(s.key) })),
-  { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
+  { key: "stay", label: "Hotels & Accommodation", color: categoryColor("stay") },
 ];
 
 const TYPE_ORDER = ["Featured", "Offer", "News"];

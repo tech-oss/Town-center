@@ -9,8 +9,8 @@ export const header = {
   navItems: [
     { label: "See & Do", href: "#see-do" },
     { label: "Eat & Drink", href: "#eat-drink" },
-    { label: "Shop", href: "#shop" },
-    { label: "Services", href: "#services" },
+    { label: "Shop & Local Services", href: "#shop" },
+    { label: "Trades & Professionals", href: "#services" },
     { label: "Offers", href: "/offers" },
     { label: "Live & Stay", href: "#live" },
     { label: "Work", href: "/work" },

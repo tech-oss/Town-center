@@ -1,6 +1,6 @@
-// The app names a couple of sections differently from the website: its Shop
-// section also covers local services, so it reads "Shop & Services".
-const APP_LABELS = { shop: "Shop & Services" };
+// Where the app names a section differently from the website. Both now use
+// the site's own names (Data/pages.js), so nothing is overridden.
+const APP_LABELS = {};
 
 export function appSectionLabel(key, fallback) {
   return APP_LABELS[key] ?? fallback;

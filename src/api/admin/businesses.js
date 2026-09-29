@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { listingHasContent } from "./businessListingContent";
 import { assertNoDataUrls } from "../../lib/noDataUrls";
 import { logBusinessActivity } from "./businessActivity";
 import { getLivePlacementMap, featureNow, unfeature } from "./homepageSlots";
@@ -209,9 +210,9 @@ function fromRow(row) {
     // ── "Terms" step ──
     termsAcceptedAt: subscription.terms_accepted_at ?? null,
 
-    // "Content Pending" until the owner has written an actual description —
-    // that's Manage Business Content data, read here only for this one badge.
-    hasContent: !!(listing.description && listing.description.trim()),
+    // "Content Pending" until the profile has anything beyond its
+    // registration details — the same test as Manage Business Content.
+    hasContent: listingHasContent(listing),
   };
 }
 

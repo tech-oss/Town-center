@@ -16,7 +16,7 @@ import { card, pill } from "../utils/design";
 // everywhere else on the site.
 const BUSINESS_TYPES = [
   ...Object.values(sections).map((s) => ({ key: s.key, label: s.label, color: categoryColor(s.key) })),
-  { key: "stay", label: "Hotels & Stay", color: categoryColor("stay") },
+  { key: "stay", label: "Hotels & Accommodation", color: categoryColor("stay") },
 ];
 
 

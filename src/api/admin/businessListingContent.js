@@ -51,6 +51,20 @@ function defaultHours() {
   ];
 }
 
+
+// Whether a business has anything on its profile beyond what registration
+// asked for (name, address, phone, email). This used to mean "has a
+// description" and nothing else, so a business with a logo, header picture,
+// photos and FAQs but no description still read "No Content".
+const nonEmpty = (v) => Array.isArray(v) ? v.some((x) => x && (typeof x !== "string" || x.trim()))
+  : typeof v === "string" ? v.trim() !== "" : v != null && typeof v === "object" ? Object.keys(v).length > 0 : !!v;
+export function listingHasContent(l) {
+  if (!l) return false;
+  return ["description", "tagline", "logo", "hero_image", "gallery", "faqs", "services_list",
+    "why_choose_us", "skills", "portfolio", "amenities"].some((k) => nonEmpty(l[k]))
+    || (Array.isArray(l.hours) && l.hours.some((h) => h?.open));
+}
+
 function fromRow(row) {
   if (!row) return null;
   return {
@@ -88,7 +102,7 @@ function fromRow(row) {
     availabilityTag: row.availability_tag ?? "",
     businessTypeDetail: row.business_type_detail ?? {},
     approvalStatus: row.approval_status ?? {},
-    hasContent: !!(row.description && row.description.trim()),
+    hasContent: listingHasContent(row),
   };
 }
 
@@ -135,7 +149,7 @@ function toRow(listing) {
 export async function getBusinessesForContent() {
   const { data, error } = await supabase
     .from("businesses")
-    .select("id, name, business_listings(business_type, description)")
+    .select("id, name, business_listings(business_type, description, tagline, logo, hero_image, gallery, faqs, services_list, why_choose_us, skills, portfolio, amenities, hours)")
     .order("name");
   if (error) throw error;
   return (data ?? []).map((b) => {
@@ -144,7 +158,7 @@ export async function getBusinessesForContent() {
       id: b.id,
       name: b.name,
       section: listing?.business_type ?? null,
-      hasContent: !!(listing?.description && listing.description.trim()),
+      hasContent: listingHasContent(listing),
     };
   });
 }

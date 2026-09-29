@@ -100,7 +100,7 @@ const seeItems = [];
 export const sections = {
   shop: {
     key: "shop",
-    label: "Shop",
+    label: "Shop & Local Services",
     path: "/shop",
     landing: {
       title: "Shop",
@@ -124,7 +124,7 @@ export const sections = {
 
   services: {
     key: "services",
-    label: "Services",
+    label: "Trades & Professionals",
     path: "/services",
     landing: {
       title: "Services in Maidenhead",
