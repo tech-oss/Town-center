@@ -34,7 +34,10 @@ export function profileCompleteness(listing, premium) {
   const results = checks.map(([field, tip]) => ({ ok: filled(listing?.[field]), tip }));
   if (premium) {
     const photos = (listing?.gallery ?? []).filter(Boolean).length;
-    results.push({ ok: photos >= 3, tip: `Add ${photos ? `${3 - photos} more` : "3"} gallery photo${3 - photos === 1 ? "" : "s"}` });
+    // A Visibility Plan gallery holds 6 pictures; the profile counts as
+    // complete once all 6 are there.
+    const WANTED = 6;
+    results.push({ ok: photos >= WANTED, tip: `Add ${photos ? `${WANTED - photos} more` : WANTED} gallery photo${WANTED - photos === 1 ? "" : "s"}` });
   }
   const done = results.filter((r) => r.ok).length;
   return {
