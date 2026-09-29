@@ -29,7 +29,6 @@ import GuidesPage from './components/GuidesPage'
 import GuideDetailPage from './components/GuideDetailPage'
 import OurStoryPage from './components/OurStoryPage'
 import GettingHerePage from './components/GettingHerePage'
-import NewsIndexPage from './components/NewsIndexPage'
 import OffersPage from './components/OffersPage'
 import PressPage from './components/PressPage'
 import TradersPage from './components/TradersPage'
@@ -37,7 +36,6 @@ import FeatureArticlePage from './components/FeatureArticlePage'
 import EventPage from './components/EventPage'
 import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
-import EventsListPage from './components/EventsListPage'
 import Footer from './components/Footer'
 import ChatWidget from './components/ChatWidget'
 import LogoAnimation from './components/LogoAnimation/LogoAnimation'
@@ -125,14 +123,18 @@ function PublicSite() {
           {/* legacy alias */}
           <Route path="/press" element={<PressPage />} />
           {/* Journal */}
-          <Route path="/news" element={<NewsIndexPage />} />
+          {/* Retired: the old News & Articles index. Every story and offer is
+              on the Offers page; single articles still live at /news/:slug. */}
+          <Route path="/news" element={<Navigate to="/offers" replace />} />
           <Route path="/offers" element={<OffersPage />} />
           <Route path="/news/:articleSlug" element={<ArticlePage />} />
           {/* Featured stories */}
           <Route path="/story/:slug" element={<FeatureArticlePage />} />
           {/* What's On events */}
           <Route path="/whats-on" element={<EventsCalendarPage />} />
-          <Route path="/events" element={<EventsListPage />} />
+          {/* Retired: the old All Events list. Events live in See & Do and the
+              What's On calendar. */}
+          <Route path="/events" element={<Navigate to="/whats-on" replace />} />
           <Route path="/event/:slug" element={<EventPage />} />
           <Route path="/attraction/:slug" element={<AttractionPage />} />
           {/* Work section */}

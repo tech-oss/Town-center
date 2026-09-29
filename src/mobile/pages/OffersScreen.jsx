@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { appSectionLabel } from "../lib/sectionLabels";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import useSiteSection from "../../hooks/useSiteSection";
+import SmartImage from "../../components/SmartImage";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
 import { getOffersFeed } from "../../api";
@@ -73,12 +75,13 @@ export default function OffersScreen() {
     );
   });
 
+  const copy = useSiteSection("offers");
   return (
-    <MobileShell title="Offers & Stories" onBack backFallback="/mobile/home">
+    <MobileShell title={copy.eyebrow || "Offers & Stories"} onBack backFallback="/mobile/home">
       <div className="flex flex-col gap-4 mobile-stagger">
-        <p className="text-sm" style={{ color: "#000000" }}>
-          Every Featured Story and Spotlight Article — search and filter offers and the latest news from businesses around Maidenhead.
-        </p>
+        {/* Same header as the website — Site Content → Offers & Stories. */}
+        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" />}
+        <p className="text-sm" style={{ color: "#000000" }}>{copy.intro}</p>
 
         <SearchInput value={search} onChange={setSearch} />
 

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import useSiteSection from "../../hooks/useSiteSection";
+import SmartImage from "../../components/SmartImage";
 import { featuredHotels, featuredAccommodations } from "../../Data/featuredStay";
 
 // Same 4 properties spotlighted on the web Hotels/Accommodation listing
@@ -39,15 +41,18 @@ const OPTIONS = [
 ];
 
 export default function LiveStayPickerScreen() {
+  // The same header as the website's Live & Stay page (Site Content).
+  const copy = useSiteSection("live-stay");
   return (
     <MobileShell title="Live & Stay" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-6 mobile-stagger">
+        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" />}
         <div>
           <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
-            What are you looking for?
+            {copy.title}
           </h1>
           <p className="text-sm font-medium" style={{ color: "#000000" }}>
-            Choose a category to see local listings and filters for just that group.
+            {copy.intro}
           </p>
         </div>
 

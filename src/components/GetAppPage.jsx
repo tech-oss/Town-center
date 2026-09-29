@@ -2,17 +2,14 @@ import { Link } from "react-router-dom";
 import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
 import AppBadges from "./AppBadges";
+import SmartImage from "./SmartImage";
 
-const features = [
-  { title: "Local deals & offers", text: "Exclusive promotions from independent shops, cafés and restaurants across town." },
-  { title: "What's on", text: "Community events, markets and festivals — never miss what's happening in Maidenhead." },
-  { title: "Discover & support local", text: "Find places to visit and easy ways to back the businesses that make the town special." },
-  { title: "Town updates", text: "The latest news, openings and updates from around the town centre, all in one feed." },
-];
 
 export default function GetAppPage() {
-  // Header wording, editable in Site Content.
+  // Everything on this page is edited in Site Content → Get the App.
   const copy = useSiteSection("get-the-app");
+  const intro = Array.isArray(copy.intro) ? copy.intro.filter(Boolean) : [copy.intro].filter(Boolean);
+  const features = (copy.features ?? []).filter((f) => f?.title || f?.text);
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
   return (
@@ -36,16 +33,9 @@ export default function GetAppPage() {
               {copy.title}
             </h1>
             <div className="flex flex-col gap-4">
-              <p className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.88)" }}>
-                Make the most of everything the town has to offer, all from one convenient place.
-              </p>
-              <p className="text-base md:text-lg leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
-                Designed to help you stay connected and informed, the Maidenhead App brings together local
-                deals, special promotions, community events, and the latest town updates in a simple,
-                easy-to-use platform. Whether you're looking for places to visit, ways to support local
-                businesses, a new home or what's happening around town, the app helps you discover more of
-                Maidenhead every day.
-              </p>
+              {intro.map((p, i) => (
+                <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: i === 0 ? "rgba(255,255,255,0.88)" : "rgba(255,255,255,0.78)" }}>{p}</p>
+              ))}
             </div>
           </div>
 
@@ -56,12 +46,16 @@ export default function GetAppPage() {
               spanning both rows. */}
           <div className="flex justify-center md:justify-end md:col-start-2 md:row-start-1 md:row-span-2">
             <div className="relative w-full max-w-[560px] h-[380px] md:h-[520px]">
-              <img
-                src="/images/get-app/app-hero.jpg"
-                alt="Using the Maidenhead app on a phone"
-                className="w-full h-full"
-                style={{ objectFit: "cover", objectPosition: "62% 42%" }}
-              />
+              {copy.hero && (
+                <SmartImage
+                  src={copy.hero}
+                  alt="Using the Maidenhead app on a phone"
+                  size="hero"
+                  eager
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
           </div>
 
@@ -75,11 +69,11 @@ export default function GetAppPage() {
       <section className="px-6 md:px-12 py-16 md:py-20">
         <div className="max-w-6xl mx-auto">
           <h2 className="section-heading text-2xl md:text-4xl font-bold mb-10 leading-tight" style={{ color: "#000000" }}>
-            Everything Maidenhead, in your pocket
+            {copy.featuresHeading}
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {features.map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
+            {features.map((f, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6" style={{ boxShadow: "0 6px 28px -16px rgba(28,46,56,0.28)" }}>
                 <h3 className="font-bold text-lg mb-2" style={{ color: "#000000" }}>{f.title}</h3>
                 <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{f.text}</p>
               </div>
@@ -89,8 +83,8 @@ export default function GetAppPage() {
           {/* CTA */}
           <div className="mt-14 rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6" style={{ backgroundColor: "var(--forest)", color: "white" }}>
             <div className="flex-1">
-              <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ color: "#ffffff" }}>Download today</h2>
-              <p className="text-sm leading-relaxed" style={{ color: "#ffffff" }}>Free to download on iOS and Android.</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-2" style={{ color: "#ffffff" }}>{copy.ctaTitle}</h2>
+              {copy.ctaText && <p className="text-sm leading-relaxed" style={{ color: "#ffffff" }}>{copy.ctaText}</p>}
             </div>
             <AppBadges className="flex-col sm:flex-row" />
           </div>

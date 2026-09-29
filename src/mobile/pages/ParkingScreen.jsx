@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartImage from "../../components/SmartImage";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import { getGettingHere } from "../../api";
@@ -15,7 +16,8 @@ export default function ParkingScreen() {
   return (
     <MobileShell title="Parking" onBack backFallback="/mobile/transport" noPadding>
       <div className="flex flex-col">
-        <img src="/images/parking/mobile-hero.jpg" alt="" className="w-full h-52 object-cover" />
+        {/* The Parking section's own picture from Site Content → Getting Here. */}
+        {parking.image && <SmartImage src={parking.image} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover" />}
 
         <div className="px-5 pt-5 pb-8 flex flex-col gap-6 mobile-stagger">
           <div>

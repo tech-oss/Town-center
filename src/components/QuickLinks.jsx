@@ -1,8 +1,11 @@
 import { quickLinks } from "../Data/content";
+import useSiteSection from "../hooks/useSiteSection";
 import LazyVideo from "./LazyVideo";
 import SmartLink from "./SmartLink";
 
 export default function QuickLinks() {
+  // The opening paragraph under the header video — Site Content → Homepage.
+  const copy = useSiteSection("homepage");
   return (
     <section
       className="py-14 md:py-16 px-6 md:px-12"
@@ -21,7 +24,7 @@ export default function QuickLinks() {
             letterSpacing: "-0.01em",
           }}
         >
-          {quickLinks.intro}
+          {copy.intro}
         </p>
 
         {/* ── Header (left-aligned) ── */}

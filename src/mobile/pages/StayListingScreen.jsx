@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import useSiteSection from "../../hooks/useSiteSection";
 import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../../lib/amenityCategories";
 import ListingCard from "../../components/ListingCard";
 import { useParams, useSearchParams, Navigate } from "react-router-dom";
@@ -121,18 +122,9 @@ function PostcodeFilterSheet({ appliedLocation, onApply, onClear }) {
   );
 }
 
-const LANDING = {
-  hotels: {
-    title: "Hotels",
-    intro: "Where to stay in Maidenhead, from the heart of the town centre to riverside retreats along the Thames — with every listing linking directly to the hotel's own website for booking.",
-    heroImage: "/images/live/hotels-hero.jpg",
-  },
-  accommodation: {
-    title: "Accommodation",
-    intro: "Find your ideal stay in and around Maidenhead, from serviced apartments and self-catering cottages to welcoming homes and distinctive places to stay across the area.",
-    heroImage: "/images/live/accommodation-hero.jpg",
-  },
-};
+// Title, intro and header picture: Site Content → Hotels / Accommodation,
+// the same as the website.
+const SECTION_KEY = { hotels: "stay-hotels", accommodation: "stay-accommodation" };
 
 const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
@@ -141,7 +133,7 @@ const FILTER_TAXONOMY = { facilities: FACILITIES, roomFacilities: ROOM_FACILITIE
 export default function StayListingScreen() {
   const { kind } = useParams();
   const isHotels = kind === "hotels";
-  const landing = LANDING[kind];
+  const landing = useSiteSection(SECTION_KEY[kind]);
   const { data: hotels } = useFetch(getHotels, []);
   const { data: accommodations } = useFetch(getAccommodations, []);
   const allItems = isHotels ? hotels : accommodations;
@@ -274,11 +266,11 @@ export default function StayListingScreen() {
   const backParam = currentQuery ? `?back=${encodeURIComponent(`/mobile/live/${kind}?${currentQuery}`)}` : "";
 
   return (
-    <MobileShell title={landing.title} onBack backFallback="/mobile/live" noPadding>
+    <MobileShell title={isHotels ? "Hotels" : "Accommodation"} onBack backFallback="/mobile/live" noPadding>
       <div className="flex flex-col">
-        {landing.heroImage && (
+        {landing.hero && (
           <div className="relative h-40 -mb-1">
-            <img src={landing.heroImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={landing.hero} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.05) 0%, rgba(20,33,42,0.55) 100%)" }} />
             <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
               {landing.title}

@@ -389,8 +389,20 @@ function RegisterBusinessForm({ onSave, onCancel }) {
       <Section title="Business Logo">
         <div className="flex items-center gap-4">
           {logoPreview ? (
-            <img src={logoPreview} alt="logo preview" className="w-16 h-16 rounded-xl object-cover shrink-0"
-              style={{ border: `1.5px solid ${BORDER}` }} />
+            <div className="relative shrink-0">
+              <img src={logoPreview} alt="logo preview" className="w-16 h-16 rounded-xl object-cover"
+                style={{ border: `1.5px solid ${BORDER}` }} />
+              {/* Takes the logo back off, leaving the business with none. */}
+              <button type="button" aria-label="Remove logo" title="Remove logo"
+                onClick={() => {
+                  setLogoPreview(null);
+                  set("logo", null);
+                  set("logoName", "");
+                  if (fileRef.current) fileRef.current.value = "";
+                }}
+                className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shadow"
+                style={{ backgroundColor: "#DC2626", color: "#fff" }}>✕</button>
+            </div>
           ) : (
             <div className="w-16 h-16 rounded-xl flex items-center justify-center shrink-0"
               style={{ backgroundColor: "#f1f5f9", border: `1.5px dashed ${BORDER}` }}>

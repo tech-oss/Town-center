@@ -160,7 +160,8 @@ export const GETTING_HERE_DEFAULTS = {
   heroTitle: "Getting Here & Good to Know",
   heroIntro:
     "By rail, road, bus or bicycle, getting to and around Maidenhead is easy \u2014 with the Elizabeth Line putting central London just 25 minutes away.",
-  heroImage: "/images/getting-here.jpg",
+  // No built-in header picture — it's uploaded in Site Content.
+  heroImage: "",
   stats: travelStats,
   sections: travelSections,
   carParks,

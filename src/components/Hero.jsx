@@ -51,6 +51,12 @@ export default function Hero() {
       ? DESKTOP_MEDIA
       : MOBILE_MEDIA
   );
+  // The video admin uploaded in Site Content (desktop, and a mobile cut),
+  // falling back to the built-in files. The built-in poster only belongs to
+  // the built-in video — an uploaded one shows its own first frame.
+  const isDesktop = media === DESKTOP_MEDIA;
+  const videoSrc = isDesktop ? copy.heroVideo : (copy.heroVideoMobile || copy.heroVideo);
+  const videoPoster = videoSrc === media.src ? media.poster : undefined;
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
@@ -112,7 +118,7 @@ export default function Hero() {
       document.removeEventListener("pointerdown", onGesture, gestureOpts);
       document.removeEventListener("touchstart", onGesture, gestureOpts);
     };
-  }, [media.src]);
+  }, [videoSrc]);
 
   return (
     <section aria-label="Hero" className="hero-section relative w-full overflow-hidden" onClick={handleHeroTap}>
@@ -121,11 +127,11 @@ export default function Hero() {
           mobile, no controls. The poster paints instantly and is the fallback
           when autoplay is suppressed (reduced-motion / power-saving). */}
       <video
-        key={media.src}
+        key={videoSrc}
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
-        src={media.src}
-        poster={media.poster}
+        src={videoSrc}
+        poster={videoPoster}
         autoPlay={!prefersReducedMotion}
         loop
         muted

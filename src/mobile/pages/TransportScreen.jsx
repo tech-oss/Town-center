@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import SmartImage from "../../components/SmartImage";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import { getGettingHere } from "../../api";
@@ -32,21 +33,22 @@ export default function TransportScreen() {
   return (
     <MobileShell title="Getting Here" onBack backFallback="/mobile/explore" noPadding>
       <div className="flex flex-col">
-        {/* Hero */}
-        <div className="relative">
-          <img src="/images/getting-here.jpg" alt="" className="w-full h-52 object-cover" />
-        </div>
+        {/* Header — the same one as the website's Getting Here page (Site
+            Content → Getting Here). This screen used to have its own copy of
+            the words and picture, so edits never reached the app. */}
+        {content?.heroImage && (
+          <SmartImage src={content.heroImage} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover" />
+        )}
 
         <div className="px-5 pt-5 pb-8 flex flex-col gap-6 mobile-stagger">
           <div>
-            <p className="section-eyebrow mb-2" style={{ color: "var(--teal-deep)" }}>Plan Your Visit</p>
+            {content?.heroEyebrow && <p className="section-eyebrow mb-2" style={{ color: "var(--teal-deep)" }}>{content.heroEyebrow}</p>}
             <h1 className="text-2xl font-bold leading-tight mb-2" style={{ color: "#000000" }}>
-              Getting Here &amp; Good to Know
+              {content?.heroTitle}
             </h1>
-            <p className="text-sm leading-relaxed font-medium" style={{ color: "#000000" }}>
-              By rail, road, bus or bicycle, getting to and around Maidenhead is easy — with the
-              Elizabeth Line putting central London just 25 minutes away.
-            </p>
+            {content?.heroIntro && (
+              <p className="text-sm leading-relaxed font-medium" style={{ color: "#000000" }}>{content.heroIntro}</p>
+            )}
           </div>
 
           {/* Travel stats band */}

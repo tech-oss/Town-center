@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import useSiteSection from "../hooks/useSiteSection";
 import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../lib/amenityCategories";
 import ListingCard from "./ListingCard";
 import { Link, useSearchParams } from "react-router-dom";
@@ -85,21 +86,8 @@ function FeaturedStay({ kind, basePath }) {
   );
 }
 
-const HERO_IMAGES = {
-  hotels: "/images/live/hotels-hero.jpg",
-  accommodation: "/images/live/accommodation-hero.jpg",
-};
-
-const LANDING = {
-  hotels: {
-    title: "Hotels in Maidenhead",
-    intro: "Where to stay in Maidenhead, from the heart of the town centre to riverside retreats along the Thames — with every listing linking directly to the hotel's own website for booking.",
-  },
-  accommodation: {
-    title: "Accommodation in Maidenhead",
-    intro: "Find your ideal stay in and around Maidenhead, from serviced apartments and self-catering cottages to welcoming homes and distinctive places to stay across the area.",
-  },
-};
+// Title, intro and header picture: Site Content → Hotels / Accommodation.
+const SECTION_KEY = { hotels: "stay-hotels", accommodation: "stay-accommodation" };
 
 // One fixed colour per star rating, echoing CategoryPage's own
 // CATEGORY_COLORS legend so hotel cards read as part of the same system.
@@ -223,7 +211,7 @@ export default function StayListingPage({ kind }) {
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const landing = LANDING[kind];
+  const landing = useSiteSection(SECTION_KEY[kind]);
 
   // Filter dropdowns shown, in order, for this listing kind — each backed
   // by a field on the hotel/accommodation data (Data/stay.js).
@@ -376,8 +364,8 @@ export default function StayListingPage({ kind }) {
     <div>
       {/* ── Hero banner — same treatment as Eat & Drink's: full-bleed photo,
           no darkening overlay, header floats transparent over it. ── */}
-      <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]">
-        <img src={HERO_IMAGES[kind]} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover", objectPosition: "center" }} />
+      <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]" style={{ backgroundColor: "var(--forest)" }}>
+        {landing.hero && <img src={landing.hero} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover", objectPosition: "center" }} />}
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.15) 0%, rgba(20,33,42,0.1) 40%, rgba(20,33,42,0.72) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>

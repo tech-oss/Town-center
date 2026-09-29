@@ -6,6 +6,7 @@ import { sections } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 import { TYPE_COLORS } from "../lib/typeColors";
 import OfferTag from "./OfferTag";
+import SmartImage from "./SmartImage";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
 import { card, pill } from "../utils/design";
@@ -328,7 +329,9 @@ export default function OffersPage() {
         className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden"
         style={{ backgroundColor: "var(--forest)" }}
       >
-        <img src="/images/offers/hero.jpg" alt="" className="absolute inset-0 w-full h-full object-cover" />
+        {/* Header picture from Site Content → Offers & Stories; a plain band
+            without one. */}
+        {copy.hero && <SmartImage src={copy.hero} alt="" size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

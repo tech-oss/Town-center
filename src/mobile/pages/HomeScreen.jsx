@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import useSiteSection from "../../hooks/useSiteSection";
 import NotificationTray, { NOTIFICATIONS } from "../components/NotificationTray";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
@@ -49,6 +50,10 @@ function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
 }
 
 export default function HomeScreen() {
+  // Same header video as the website — Site Content → Homepage (the mobile
+  // cut, else the desktop one).
+  const homeCopy = useSiteSection("homepage");
+  const heroVideo = homeCopy.heroVideoMobile || homeCopy.heroVideo;
   const { data: guideList } = useFetch(getHomepageGuides, []);
   const videoRef = useRef(null);
   const { data: events } = useFetch(getHomepageEvents, []);
@@ -116,8 +121,9 @@ export default function HomeScreen() {
           <video
             ref={videoRef}
             className="absolute inset-0 w-full h-full object-cover"
-            src="/videos/hero-mobile.mp4"
-            poster="/images/hero-poster-mobile.jpg"
+            key={heroVideo}
+            src={heroVideo}
+            poster={heroVideo === "/videos/hero-mobile.mp4" ? "/images/hero-poster-mobile.jpg" : undefined}
             muted
             loop
             playsInline

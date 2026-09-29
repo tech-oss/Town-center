@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
-import { liveStory } from "../Data/live";
 import { getGuides } from "../api";
 import useFetch from "../hooks/useFetch";
 import { getBuildings } from "../api";
@@ -57,7 +56,7 @@ function StorySection({ section, index }) {
   const reversed = index % 2 === 1;
   return (
     <div
-      id={section.id}
+      id={section.id ?? undefined}
       className={`grid md:grid-cols-12 gap-8 md:gap-14 lg:gap-20 items-center scroll-mt-28 ${
         reversed ? "md:[&>*:first-child]:order-2" : ""
       }`}
@@ -76,7 +75,7 @@ function StorySection({ section, index }) {
           {section.heading}
         </h2>
         <div className="flex flex-col gap-4">
-          {section.body.map((p, i) => (
+          {(section.body ?? []).filter(Boolean).map((p, i) => (
             <p key={i} className="text-base md:text-lg leading-relaxed" style={{ color: "#000000" }}>
               {p}
             </p>
@@ -192,17 +191,28 @@ export default function LivePage() {
   const { data: buildings } = useFetch(getBuildings, []);
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const { hero, lede, sections, nicholson, pullQuote, closing } = liveStory;
-  // Header wording, editable in Site Content.
+  // The whole page is edited in Site Content → Live & Stay; the wording
+  // that used to be written into Data/live.js is its starting content.
   const copy = useSiteSection("live-stay");
+  const lede = copy.lede ?? [];
+  const sections = copy.sections ?? [];
+  const nicholson = {
+    eyebrow: copy.nicholsonEyebrow, heading: copy.nicholsonHeading, image: copy.nicholsonImage,
+    intro: copy.nicholsonIntro ?? [], planImage: copy.nicholsonPlan, outro: copy.nicholsonOutro ?? [],
+  };
+  const pullQuote = { lead: copy.pullLead, quote: copy.pullQuote, image: copy.pullImage };
+  const closing = {
+    heading: copy.closingHeading, body: copy.closingBody ?? [], kicker: copy.closingKicker,
+    cta: { label: copy.closingCtaLabel, to: copy.closingCtaLink || "/see-do" },
+  };
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
       {/* ── 1. Hero — same footprint and typography as the Explore / Guides
           / Getting Here heroes, so every editorial landing page in the site
           opens the same way. ── */}
-      <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden">
-        <img src={hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
+        {copy.hero && <img src={copy.hero} alt="" className="absolute inset-0 w-full h-full object-cover" />}
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
           {copy.eyebrow}
@@ -270,7 +280,7 @@ export default function LivePage() {
       <section className="px-6 md:px-12 py-16 md:py-24" style={{ backgroundColor: "#ffffff" }}>
         <div className="max-w-6xl mx-auto flex flex-col gap-20 md:gap-28">
           {sections.map((s, i) => (
-            <StorySection key={s.id} section={s} index={i} />
+            <StorySection key={i} section={s} index={i} />
           ))}
         </div>
       </section>

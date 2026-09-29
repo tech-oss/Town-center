@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { uploadImage } from "../../lib/uploadImage";
+import { uploadVideo } from "../../lib/uploadVideo";
 import { SITE_SECTIONS, withDefaults } from "../../Data/siteSections";
 import { GETTING_HERE_DEFAULTS } from "../../Data/adminMissingScreensMock";
 import { getSiteContent, saveSiteSection } from "../../api/admin";
@@ -72,6 +73,118 @@ function ImageField({ label, hint, value, onChange }) {
   );
 }
 
+function VideoField({ label, hint, value, onChange }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-semibold" style={{ color: MUTED }}>{label}</span>
+      <div className="flex items-center gap-4 flex-wrap">
+        {value
+          ? <video src={value} muted loop playsInline autoPlay className="w-40 h-24 rounded-xl object-cover bg-black" style={{ border: `1.5px solid ${BORDER}` }} />
+          : <div className="w-40 h-24 rounded-xl flex items-center justify-center text-[10px] text-center px-2"
+              style={{ border: `1.5px dashed ${BORDER}`, color: "#9CA3AF" }}>Using the built-in video</div>}
+        <label className="px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-opacity hover:opacity-80"
+          style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE, border: "1.5px solid rgba(37,99,235,0.25)" }}>
+          {busy ? "Uploading…" : value ? "Replace" : "Upload video"}
+          <input type="file" accept="video/mp4,video/webm,video/quicktime" className="hidden" disabled={busy} onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            setBusy(true);
+            uploadVideo(file)
+              .then((url) => onChange(url))
+              .catch((err) => alert(err.message))
+              .finally(() => setBusy(false));
+          }} />
+        </label>
+        {value && (
+          <button onClick={() => onChange("")} className="text-xs font-semibold" style={{ color: "#991B1B" }}>Remove</button>
+        )}
+      </div>
+      {hint && <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{hint}</span>}
+    </div>
+  );
+}
+
+const SMALL_BTN = "text-[11px] font-semibold px-2 py-1 rounded-lg disabled:opacity-30";
+
+// A list of paragraphs: one box each, reorderable.
+function ParagraphsField({ label, hint, value, onChange }) {
+  const list = Array.isArray(value) ? value : [];
+  const setAt = (i, v) => onChange(list.map((p, j) => (j === i ? v : p)));
+  const move = (i, d) => { const n = [...list]; [n[i], n[i + d]] = [n[i + d], n[i]]; onChange(n); };
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-semibold" style={{ color: MUTED }}>{label}</span>
+      {list.map((p, i) => (
+        <div key={i} className="flex gap-2 items-start">
+          <textarea rows={3} className="flex-1 rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={INPUT}
+            value={p} onChange={(e) => setAt(i, e.target.value)} />
+          <div className="flex flex-col gap-1">
+            <button type="button" className={SMALL_BTN} style={{ color: MUTED }} disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move up">▲</button>
+            <button type="button" className={SMALL_BTN} style={{ color: MUTED }} disabled={i === list.length - 1} onClick={() => move(i, 1)} aria-label="Move down">▼</button>
+            <button type="button" className={SMALL_BTN} style={{ color: "#991B1B" }} onClick={() => onChange(list.filter((_, j) => j !== i))} aria-label="Remove paragraph">✕</button>
+          </div>
+        </div>
+      ))}
+      <button type="button" onClick={() => onChange([...list, ""])} className="self-start text-xs font-semibold" style={{ color: BLUE }}>+ Add paragraph</button>
+      {hint && <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{hint}</span>}
+    </div>
+  );
+}
+
+// Repeating blocks (story sections, feature cards…), each with its own fields.
+function BlocksField({ field, value, onChange }) {
+  const list = Array.isArray(value) ? value : [];
+  const setAt = (i, k, v) => onChange(list.map((b, j) => (j === i ? { ...b, [k]: v } : b)));
+  const move = (i, d) => { const n = [...list]; [n[i], n[i + d]] = [n[i + d], n[i]]; onChange(n); };
+  const blank = () => Object.fromEntries(field.fields.map((f) => [f.name, f.type === "paragraphs" ? [""] : ""]));
+  return (
+    <div className="flex flex-col gap-3">
+      <span className="text-xs font-semibold" style={{ color: MUTED }}>{field.label}</span>
+      {list.map((b, i) => (
+        <div key={i} className="rounded-xl p-4 flex flex-col gap-4" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#fafbfc" }}>
+          <div className="flex items-center gap-2">
+            <span className="flex-1 text-xs font-bold" style={{ color: NAVY }}>{field.itemLabel} {i + 1}</span>
+            <button type="button" className={SMALL_BTN} style={{ color: MUTED }} disabled={i === 0} onClick={() => move(i, -1)}>▲ Up</button>
+            <button type="button" className={SMALL_BTN} style={{ color: MUTED }} disabled={i === list.length - 1} onClick={() => move(i, 1)}>▼ Down</button>
+            <button type="button" className={SMALL_BTN} style={{ color: "#991B1B" }} onClick={() => onChange(list.filter((_, j) => j !== i))}>Remove</button>
+          </div>
+          {field.fields.map((f) => (
+            <FieldControl key={f.name} field={f} value={b?.[f.name]} onChange={(v) => setAt(i, f.name, v)} />
+          ))}
+        </div>
+      ))}
+      <button type="button" onClick={() => onChange([...list, blank()])} className="self-start text-xs font-semibold" style={{ color: BLUE }}>+ Add {field.itemLabel.toLowerCase()}</button>
+      {field.hint && <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{field.hint}</span>}
+    </div>
+  );
+}
+
+// One field of any type. `placeholder` is what the page shows today for a
+// text box left empty.
+function FieldControl({ field: f, value, onChange, placeholder = "" }) {
+  if (f.type === "heading") {
+    return <p className="text-[11px] font-bold uppercase tracking-wider pt-3 -mb-1" style={{ color: BLUE, borderTop: `1px solid ${BORDER}` }}>{f.label}</p>;
+  }
+  if (f.type === "image") return <ImageField label={f.label} hint={f.hint} value={value ?? ""} onChange={onChange} />;
+  if (f.type === "video") return <VideoField label={f.label} hint={f.hint} value={value ?? ""} onChange={onChange} />;
+  if (f.type === "paragraphs") return <ParagraphsField label={f.label} hint={f.hint} value={value} onChange={onChange} />;
+  if (f.type === "blocks") return <BlocksField field={f} value={value} onChange={onChange} />;
+  return (
+    <Field label={f.label} hint={f.hint}>
+      {f.type === "textarea" ? (
+        <textarea rows={4} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={INPUT}
+          placeholder={placeholder} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      ) : (
+        <input className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT}
+          placeholder={placeholder} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      )}
+    </Field>
+  );
+}
+
+const LIST_TYPES = new Set(["paragraphs", "blocks"]);
+
 function SectionEditor({ spec, values, onChange }) {
   return (
     <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={CARD}>
@@ -84,26 +197,17 @@ function SectionEditor({ spec, values, onChange }) {
         </a>
       </div>
 
-      {spec.fields.map((f) => (
-        f.type === "image" ? (
-          <ImageField key={f.name} label={f.label} hint={f.hint}
-            value={values[f.name] ?? ""} onChange={(v) => onChange(f.name, v)} />
-        ) : (
-          <Field key={f.name} label={f.label} hint={f.hint}>
-            {/* The placeholder is what the page shows today, so an empty box
-                reads as "currently this" rather than as missing content. */}
-            {f.type === "textarea" ? (
-              <textarea rows={4} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={INPUT}
-                placeholder={spec.defaults[f.name] ?? ""}
-                value={values[f.name] ?? ""} onChange={(e) => onChange(f.name, e.target.value)} />
-            ) : (
-              <input className="rounded-xl px-3 py-2.5 text-sm outline-none" style={INPUT}
-                placeholder={spec.defaults[f.name] ?? ""}
-                value={values[f.name] ?? ""} onChange={(e) => onChange(f.name, e.target.value)} />
-            )}
-          </Field>
-        )
-      ))}
+      {spec.fields.map((f) => {
+        // Text boxes start empty with today's wording as the grey hint; lists
+        // start filled with today's paragraphs/blocks so they can be edited
+        // in place rather than retyped. Pictures never have a built-in one.
+        const saved = values[f.name];
+        const value = LIST_TYPES.has(f.type) && !(Array.isArray(saved) && saved.length) ? spec.defaults[f.name]
+          : (f.type === "image" || f.type === "video") ? (saved || spec.defaults[f.name] || "")
+          : saved;
+        const placeholder = typeof spec.defaults[f.name] === "string" && f.type !== "video" ? spec.defaults[f.name] : "";
+        return <FieldControl key={f.name} field={f} value={value} placeholder={placeholder} onChange={(v) => onChange(f.name, v)} />;
+      })}
 
       <p className="text-[11px]" style={{ color: "#9CA3AF" }}>
         Leave a box empty to go back to the wording built into the page.
@@ -192,8 +296,8 @@ export default function SiteContentPage() {
       <div>
         <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Site Content</h1>
         <p className="text-sm mt-1" style={{ color: MUTED }}>
-          The headings, intros and header images at the top of each public page. Changes show on the
-          website and the app straight away.
+          The words, pictures and videos on each public page. Changes show on the website and the
+          app straight away.
         </p>
       </div>
 
