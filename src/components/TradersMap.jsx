@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import MapBase from "./MapBase";
 import { Link, useNavigate } from "react-router-dom";
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, useMap } from "react-leaflet";
 import L from "leaflet";
 import { isValidCoords } from "../lib/geo";
 import "leaflet.markercluster";
@@ -276,8 +277,6 @@ function TraderRow({ b, isActive, distance, onSelect, onDirections }) {
           </p>
           <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.62)" }}>
             {b.category}
-            <span className="mx-1.5" style={{ color: "rgba(0,0,0,0.28)" }}>•</span>
-            <span style={{ color: "var(--leaf)", fontWeight: 600 }}>{distance}</span>
           </p>
           {(b.address || b.tagline) && (
             <p className="text-[11px] mt-1 flex items-center gap-1 truncate" style={{ color: "rgba(0,0,0,0.5)" }}>
@@ -455,12 +454,12 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
                 </h3>
                 <p className="text-xs mt-0.5 truncate" style={{ color: "rgba(0,0,0,0.6)" }}>{b.category}</p>
               </div>
-              {(address || distance) && (
+              {/* No distance here or in the list — removed at the client's
+                  request. */}
+              {address && (
                 <p className="text-[11px] mt-1.5 flex items-center gap-1.5 min-w-0" style={{ color: "rgba(0,0,0,0.55)" }}>
                   <PinIcon className="shrink-0" style={{ color: "rgba(0,0,0,0.4)" }} />
                   <span className="truncate">{address}</span>
-                  {address && <span style={{ color: "rgba(0,0,0,0.28)" }}>•</span>}
-                  <span className="shrink-0" style={{ color: "var(--leaf)", fontWeight: 600 }}>{distance}</span>
                 </p>
               )}
             </div>
@@ -743,7 +742,7 @@ export default function TradersMap() {
             attributionControl={false}
             style={{ width: "100%", height: "100%", background: "var(--sand)" }}
           >
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" maxZoom={20} />
+            <MapBase />
             <MapLayer
               brands={filtered}
               activeBrand={activeBrand}

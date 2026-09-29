@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import MapBase from "../../components/MapBase";
 import { Link } from "react-router-dom";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import { MapContainer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { isValidCoords } from "../../lib/geo";
 import MobileShell from "../components/MobileShell";
@@ -11,7 +12,6 @@ import { getMapBrands } from "../../api";
 import { MAP_CENTRE } from "../data/mobileMock";
 import { categoryColor } from "../../lib/categoryColors";
 
-const CARTO_VOYAGER = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
 // Same category filters — and the same underlying trader dataset — the
 // website's Traders map uses (components/TradersMap.jsx).
@@ -216,7 +216,7 @@ export default function MapScreen() {
             style={{ width: "100%", height: "100%" }}
             ref={mapRef}
           >
-            <TileLayer url={CARTO_VOYAGER} maxZoom={20} />
+            <MapBase />
             {pins.map((b) => (
               <Marker
                 key={b.id}

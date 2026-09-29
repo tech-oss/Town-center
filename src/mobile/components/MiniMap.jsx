@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import MapBase from "../../components/MapBase";
+import { MapContainer, Marker } from "react-leaflet";
 import L from "leaflet";
 
-const CARTO_VOYAGER = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
 const PIN_ICON = L.divIcon({
   className: "",
@@ -83,7 +83,7 @@ export default function MiniMap({ query, lat, lng, height = 180 }) {
         attributionControl={false}
         style={{ width: "100%", height: "100%" }}
       >
-        <TileLayer url={CARTO_VOYAGER} maxZoom={20} />
+        <MapBase />
         <Marker position={[pos.lat, pos.lng]} icon={PIN_ICON} />
       </MapContainer>
     </div>

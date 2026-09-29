@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import MapBase from "./MapBase";
+import { MapContainer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
-const CARTO_VOYAGER = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
 // Custom pin matching TradersMap brand colours
 const PIN_ICON = L.divIcon({
@@ -88,7 +88,7 @@ export default function LocationMap({ query, lat, lng, heading = "Location", not
             attributionControl={false}
             style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
           >
-            <TileLayer url={CARTO_VOYAGER} maxZoom={20} />
+            <MapBase />
             <Marker
               position={[pos.lat, pos.lng]}
               icon={PIN_ICON}
