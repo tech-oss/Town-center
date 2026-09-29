@@ -21,7 +21,7 @@ import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
-const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected"];
+const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected", "Unclaimed"];
 
 function exportCsv(rows) {
   const headers = ["Name", "Section", "Plan", "Status", "Contact Name", "Email", "Phone", "Address", "Submitted"];
@@ -1249,10 +1249,13 @@ export default function BusinessesPage() {
     Approved:  list.filter((b) => b.status === "Approved").length,
     Suspended: list.filter((b) => b.status === "Suspended").length,
     Rejected:  list.filter((b) => b.status === "Rejected").length,
+    Unclaimed: list.filter((b) => b.unclaimed).length,
   };
 
   const filtered = useMemo(() => {
-    let result = statusFilter === "All" ? list : list.filter((b) => b.status === statusFilter);
+    let result = statusFilter === "All" ? list
+      : statusFilter === "Unclaimed" ? list.filter((b) => b.unclaimed)
+      : list.filter((b) => b.status === statusFilter);
     const q = search.trim().toLowerCase();
     if (q) result = result.filter((b) => b.name?.toLowerCase().includes(q));
     const [col, dir] = sortVal.split("-");

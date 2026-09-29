@@ -10,6 +10,7 @@ import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout, { CalendarIcon, TicketIcon } from "./PlaceDetailLayout";
 import NewsOffers from "./NewsOffers";
+import ClaimBusinessBox from "./ClaimBusinessBox";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 
 // What's On events carry their own category system (Music, Family, Market,
@@ -170,7 +171,7 @@ export default function EventPage() {
       extraButtonLabel={!free && event.bookingUrl ? (event.paid ? "Buy Tickets" : "Book Your Place") : undefined}
       extraButtonHref={event.bookingUrl}
       afterMap={event.isBusiness && (free
-        ? <NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} />
+        ? <><NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={business.businessId} /></>
         : <NewsOffers item={business} />)}
       shareTitle={`${event.title} — Maidenhead`}
       // "More What's On", as the app's event screen calls the same list.

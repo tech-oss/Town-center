@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TICKET_CATEGORIES } from "../../Data/adminMissingScreensMock";
-import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness } from "../../api/admin";
+import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness, deleteTicket } from "../../api/admin";
 import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
 import { uploadImage } from "../../lib/uploadImage";
@@ -31,7 +31,7 @@ function Toast({ message, onDismiss }) {
 }
 
 // ─── Ticket detail / thread panel ─────────────────────────────────────────────
-function TicketDetail({ ticket, onBack, onUpdate, notify }) {
+function TicketDetail({ ticket, onBack, onUpdate, notify, onDelete }) {
   const [reply, setReply] = useState("");
   const [replyFiles, setReplyFiles] = useState([]);
   const [status, setStatus] = useState(ticket.status);
@@ -64,7 +64,10 @@ function TicketDetail({ ticket, onBack, onUpdate, notify }) {
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
-      <button onClick={onBack} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>← Inbox</button>
+      <div className="flex items-center justify-between gap-3">
+        <button onClick={onBack} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: NAVY }}>← Inbox</button>
+        <button onClick={onDelete} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(220,38,38,0.3)", color: "#991B1B" }}>Delete ticket</button>
+      </div>
 
       <div className="bg-white rounded-2xl p-6" style={CARD}>
         <div className="flex items-start justify-between gap-4 flex-wrap mb-1">
@@ -230,7 +233,7 @@ function NewMessageTab({ businesses, notify, onSent }) {
 }
 
 // ─── Inbox tab ─────────────────────────────────────────────────────────────────
-function InboxTab({ tickets, onView, onResolve }) {
+function InboxTab({ tickets, onView, onResolve, onDelete }) {
   const [statusFilter, setStatusFilter] = useState("All");
   const [search, setSearch] = useState("");
 
@@ -282,6 +285,7 @@ function InboxTab({ tickets, onView, onResolve }) {
                       {t.status !== "Resolved" && (
                         <button onClick={() => onResolve(t)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(22,163,74,0.3)", color: "#15803D" }}>Close Ticket</button>
                       )}
+                      <button onClick={() => onDelete(t)} className="px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(220,38,38,0.3)", color: "#991B1B" }}>Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -310,6 +314,20 @@ export default function SupportTicketsPage() {
   // change shows the value that was actually written rather than a local guess.
   const viewing = (tickets ?? []).find((t) => t.id === viewingId) ?? null;
 
+  async function removeTicket(t) {
+    if (!window.confirm(`Delete the ticket "${t.subject}" from ${t.businessName}? The whole conversation is removed for admin and the business, and this can't be undone.`)) return false;
+    try {
+      await deleteTicket(t.id);
+      notify(`"${t.subject}" deleted.`);
+      setViewingId(null);
+      refresh();
+      return true;
+    } catch (e) {
+      notify(`Could not delete the ticket: ${e.message}`);
+      return false;
+    }
+  }
+
   async function resolveTicket(t) {
     await setTicketStatus(t.id, "Resolved");
     notify(`"${t.subject}" closed and marked Resolved.`);
@@ -320,7 +338,7 @@ export default function SupportTicketsPage() {
     return (
       <>
         <Toast message={toast} onDismiss={() => setToast(null)} />
-        <TicketDetail ticket={viewing} onBack={() => setViewingId(null)} onUpdate={refresh} notify={notify} />
+        <TicketDetail ticket={viewing} onBack={() => setViewingId(null)} onUpdate={refresh} notify={notify} onDelete={() => removeTicket(viewing)} />
       </>
     );
   }
@@ -344,7 +362,7 @@ export default function SupportTicketsPage() {
       </div>
 
       {tab === "inbox" ? (
-        <InboxTab tickets={tickets ?? []} onView={(t) => setViewingId(t.id)} onResolve={resolveTicket} />
+        <InboxTab tickets={tickets ?? []} onView={(t) => setViewingId(t.id)} onResolve={resolveTicket} onDelete={removeTicket} />
       ) : loading ? <LoadingState /> : (
         <NewMessageTab businesses={businesses} notify={notify} onSent={refresh} />
       )}

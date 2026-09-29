@@ -180,6 +180,9 @@ function fromRow(row) {
     // listing, and whoever runs the business claims it later from the portal.
     // `hasOwner` false is the "unclaimed" state, not missing data.
     hasOwner: !!owner.email,
+    // Nobody runs it yet: no owner login, pending or approved. The same rule
+    // as the site's "Is this your business?" box (unclaimed_businesses()).
+    unclaimed: !users.some((u) => u.role === "Owner" && ["pending", "approved"].includes(u.status)),
     contactName: [owner.first_name, owner.last_name].filter(Boolean).join(" "),
     firstName: owner.first_name ?? "",
     lastName: owner.last_name ?? "",

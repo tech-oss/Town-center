@@ -68,6 +68,14 @@ export async function setTicketStatus(id, status) {
   return { ok: true };
 }
 
+// Deletes a ticket for good — its whole conversation goes with it. The
+// business no longer sees it in its Support page either.
+export async function deleteTicket(id) {
+  const { error } = await supabase.from("business_tickets").delete().eq("id", id);
+  if (error) throw error;
+  return { ok: true };
+}
+
 // Admin opening a ticket on a business's behalf (e.g. after a phone call).
 export async function createTicketForBusiness(businessId, { subject, category, message, author = "Admin" }) {
   const thread = [{ from: "admin", author, date: new Date().toISOString().slice(0, 16).replace("T", " "), body: message }];
