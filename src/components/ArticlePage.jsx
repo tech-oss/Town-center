@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import FitImage from "./FitImage";
 import { useTrackView, articleView } from "../lib/trackView";
 import { useEffect } from "react";
 import { sections } from "../Data/pages";
@@ -49,7 +50,7 @@ export default function ArticlePage() {
 
           {/* Cover image */}
           <div className="relative overflow-hidden aspect-[16/9] bg-black">
-            <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
+            <FitImage src={article.image} alt={article.title} className="w-full h-full" />
           </div>
         </div>
       </section>
@@ -101,7 +102,7 @@ export default function ArticlePage() {
             style={{ backgroundColor: "#ffffff", boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}
           >
             <div className="flex items-center gap-4 min-w-0">
-              <img src={biz.image} alt="" className="w-16 h-16 object-cover shrink-0" />
+              <FitImage src={biz.image} alt="" className="w-16 h-16 shrink-0" />
               <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-[0.02em]" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
                 <p className="text-lg leading-tight" style={{ color: "#000000" }}>{biz.name}</p>
@@ -137,7 +138,7 @@ export default function ArticlePage() {
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={a.image} alt={a.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <FitImage src={a.image} alt={a.title} className="w-full h-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
                     <span
                       className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
                       style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}

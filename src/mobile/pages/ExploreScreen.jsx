@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import FitImage from "../../components/FitImage";
 import MobileShell from "../components/MobileShell";
 import { exploreSections, exploreInfo } from "../data/mobileMock";
 import { getGuidesIndex } from "../../api";
@@ -7,7 +8,7 @@ import useFetch from "../../hooks/useFetch";
 function BigCard({ link, height = "h-36" }) {
   const inner = (
     <>
-      <img src={link.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <FitImage src={link.image} alt="" className="absolute inset-0 w-full h-full" />
       <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 30%, rgba(12,20,24,0.9) 100%)" }} />
       <div className="relative p-4">
         <p className="text-base font-bold text-white leading-tight">{link.title}</p>

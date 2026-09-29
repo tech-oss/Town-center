@@ -1,4 +1,5 @@
 import { useMemo, useRef, useEffect, useState } from "react";
+import FitImage from "../../components/FitImage";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useMobileBack from "../hooks/useMobileBack";
@@ -125,7 +126,7 @@ export default function SearchScreen() {
                     className="flex items-stretch overflow-hidden bg-white active:opacity-90"
                     style={{ borderRadius: 14, boxShadow: "0 8px 24px -12px rgba(28,46,56,0.4)" }}
                   >
-                    <img src={r.image} alt="" className="w-16 h-16 object-cover shrink-0" />
+                    <FitImage src={r.image} alt="" className="w-16 h-16 shrink-0" />
                     <div className="flex-1 min-w-0 px-3 py-2 flex flex-col justify-center">
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{r.title}</p>
                       <p className="text-[11px] mt-0.5 truncate font-medium" style={{ color: "#000000" }}>{r.subtitle}</p>

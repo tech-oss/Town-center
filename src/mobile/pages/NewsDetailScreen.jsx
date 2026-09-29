@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import FitImage from "../../components/FitImage";
 import { useTrackView, articleView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
 import MobilePhoto from "../components/MobilePhoto";
@@ -63,7 +64,7 @@ export default function NewsDetailScreen() {
 
           {biz && bizLink && (
             <Link to={bizLink} className="flex items-center gap-3 p-3 bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-              <img src={biz.image} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" />
+              <FitImage src={biz.image} alt="" className="w-14 h-14 rounded-xl shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{biz.tag}</p>
                 <p className="text-sm font-bold leading-snug" style={{ color: "#000000" }}>{biz.name}</p>
@@ -79,7 +80,7 @@ export default function NewsDetailScreen() {
               <div className="flex flex-col gap-3">
                 {more.map((a) => (
                   <Link key={a.slug} to={`/mobile/news/${a.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-                    <img src={a.image} alt="" className="w-20 h-20 object-cover shrink-0" />
+                    <FitImage src={a.image} alt="" className="w-20 h-20 shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{a.category}</span>
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{a.title}</p>

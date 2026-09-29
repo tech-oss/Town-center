@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import FitImage from "./FitImage";
 import MapBase from "./MapBase";
 import { Link, useNavigate } from "react-router-dom";
 import { MapContainer, useMap } from "react-leaflet";
@@ -533,20 +534,20 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
             <div className="grid grid-cols-4 gap-2">
               {gallery.slice(0, 3).map((src) => (
                 <div key={src} className="aspect-square rounded-lg overflow-hidden" style={{ background: "#e9f4f4" }}>
-                  <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  <FitImage src={src} alt="" className="w-full h-full" />
                 </div>
               ))}
               {gallery.length > 3 &&
                 (detailHref ? (
                   <Link to={detailHref} className="relative aspect-square rounded-lg overflow-hidden block group/g">
-                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <FitImage src={gallery[3]} alt="" className="w-full h-full" />
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white transition-opacity group-hover/g:opacity-90" style={{ background: "rgba(13,42,51,0.68)" }}>
                       +{gallery.length - 3}
                     </span>
                   </Link>
                 ) : (
                   <div className="relative aspect-square rounded-lg overflow-hidden">
-                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <FitImage src={gallery[3]} alt="" className="w-full h-full" />
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white" style={{ background: "rgba(13,42,51,0.68)" }}>
                       +{gallery.length - 3}
                     </span>

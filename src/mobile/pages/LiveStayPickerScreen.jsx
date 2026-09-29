@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import FitImage from "../../components/FitImage";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
 import SmartImage from "../../components/SmartImage";
@@ -92,7 +93,7 @@ export default function LiveStayPickerScreen() {
                   className="relative overflow-hidden rounded-2xl h-36 flex items-end active:opacity-90"
                   style={{ boxShadow: "0 10px 26px -12px rgba(28,46,56,0.5)" }}
                 >
-                  <img src={place.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                  <FitImage src={place.image} alt="" className="absolute inset-0 w-full h-full" />
                   <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 35%, rgba(12,20,24,0.88) 100%)" }} />
                   <div className="relative p-4">
                     <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--mint)", textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}>{tag}</span>

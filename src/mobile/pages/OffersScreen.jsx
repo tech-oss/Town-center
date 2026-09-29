@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import FitImage from "../../components/FitImage";
 import { appSectionLabel } from "../lib/sectionLabels";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
@@ -117,7 +118,7 @@ export default function OffersScreen() {
                 style={{ borderRadius: 14, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}
               >
                 <div className="relative aspect-square overflow-hidden">
-                  <img src={it.image} alt={it.title} loading="lazy" className="w-full h-full object-cover" />
+                  <FitImage src={it.image} alt={it.title} className="w-full h-full" />
                   {it.homepage && (
                     <span className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--forest)", color: "#fff" }}>
                       On Homepage

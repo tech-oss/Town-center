@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FitImage from "../../components/FitImage";
 import SmartImage from "../../components/SmartImage";
 import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
@@ -195,7 +196,7 @@ export default function GuideDetailScreen() {
                     className="flex items-stretch overflow-hidden bg-white active:opacity-90"
                     style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}
                   >
-                    <img src={g.cardImage} alt="" className="w-24 h-24 object-cover shrink-0" />
+                    <FitImage src={g.cardImage} alt="" className="w-24 h-24 shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{g.category}</span>
                       <p className="text-sm font-bold leading-snug line-clamp-2" style={{ color: "#000000" }}>{g.title}</p>

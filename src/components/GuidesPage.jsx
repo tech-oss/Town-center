@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "react-router-dom";
+import FitImage from "./FitImage";
 import SmartImage from "./SmartImage";
 import { useEffect, useMemo } from "react";
 import { getGuides, getGuidesIndex } from "../api";
@@ -110,7 +111,7 @@ export default function GuidesPage() {
               style={{ borderRadius: "0px", boxShadow: card.shadow }}
             >
               <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
-                <img src={g.cardImage} alt={g.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <FitImage src={g.cardImage} alt={g.title} className="w-full h-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
               </div>
               <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5 sm:p-2.5">
                 <span

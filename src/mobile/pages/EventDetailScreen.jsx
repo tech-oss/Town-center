@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import FitImage from "../../components/FitImage";
 import { externalUrl } from "../../lib/externalUrl";
 import { toSeeDoSlugs, eventCategoryLabel } from "../../lib/eventCategories";
 import { useTrackView, eventView } from "../../lib/trackView";
@@ -103,7 +104,7 @@ export default function EventDetailScreen() {
           {gallery.length > 1 && (
             <div className="grid grid-cols-2 gap-2">
               {gallery.slice(1, 5).map((src, i) => (
-                <img key={i} src={src} alt="" className="w-full aspect-square object-cover rounded-xl" />
+                <FitImage src={src} alt="" className="w-full aspect-square rounded-xl" />
               ))}
             </div>
           )}
@@ -127,7 +128,7 @@ export default function EventDetailScreen() {
               <div className="flex flex-col gap-3">
                 {more.map((e) => (
                   <Link key={e.slug} to={`/mobile/event/${e.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-                    <img src={e.image} alt="" className="w-20 h-20 object-cover shrink-0" />
+                    <FitImage src={e.image} alt="" className="w-20 h-20 shrink-0" />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: categoryColors[e.category] ?? "var(--leaf)" }}>{e.category}</span>
                       <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{e.title}</p>
