@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import useUnreadCounts, { SUPPORT_TAB } from "../hooks/useUnreadCounts";
+import { usePendingRequests } from "../hooks/useUserRegistry";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { listTickets } from "../api/businessTickets";
 import { countOpenRequests } from "../api/purchaseRequests";
@@ -43,6 +44,10 @@ export default function BusinessLayout({ children }) {
   // tab was last opened.
   const { pathname } = useLocation();
   const unread = useUnreadCounts(user, pathname);
+  // Content Manager requests waiting on the owner (they approve or decline
+  // them in Account Settings). Live, so a new request shows straight away.
+  const pendingTeamAll = usePendingRequests(user?.role === "Owner" ? user.id : null);
+  const pendingTeam = user?.role === "Owner" ? pendingTeamAll : [];
 
   const [openTickets, setOpenTickets] = useState(0);
   // Purchases a content manager has asked the owner for. Only the owner can
@@ -141,6 +146,10 @@ export default function BusinessLayout({ children }) {
                 <span className="flex-1 leading-snug">{item.label}</span>
                 {user.plan !== "premium" && PAID_ONLY.has(item.to) && (
                   <span className="text-[11px] opacity-70" title="Visibility Plan">🔒</span>
+                )}
+                {item.to === "/business/settings" && pendingTeam.length > 0 && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#EF4444", color: "#fff" }}
+                    title={`${pendingTeam.length} Content Manager request${pendingTeam.length === 1 ? "" : "s"} waiting for you`}>{pendingTeam.length}</span>
                 )}
                 {unread[item.to] > 0 && (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "#EF4444", color: "#fff" }}
