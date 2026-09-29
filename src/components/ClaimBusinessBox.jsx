@@ -14,9 +14,16 @@ import { supabase } from "../lib/supabaseClient";
 const PORTAL_URL = (import.meta.env.VITE_BUSINESS_PORTAL_URL
   || "https://town-center-kbfty5er3-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
 
-let unclaimed = null; // one lookup per page load
+// Remembered for a minute, not for the whole visit: it used to be looked up
+// once per page load, so a business admin registered while the site was open
+// never showed "Is this your business?" until a full reload — and a business
+// claimed meanwhile kept showing it.
+const FRESH_FOR_MS = 60_000;
+let unclaimed = null;
+let fetchedAt = 0;
 function loadUnclaimed() {
-  if (!unclaimed) {
+  if (!unclaimed || Date.now() - fetchedAt > FRESH_FOR_MS) {
+    fetchedAt = Date.now();
     unclaimed = supabase.rpc("unclaimed_businesses")
       .then(({ data, error }) => {
         if (error) { unclaimed = null; return new Set(); }
