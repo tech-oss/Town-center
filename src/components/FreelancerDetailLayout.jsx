@@ -345,6 +345,7 @@ export default function FreelancerDetailLayout({
                   )}
 
                   <Section heading="Client Reviews">
+                    {reviewsList.length === 0 && <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>Business will add soon</p>}
                     {reviewsList[0] && <ReviewCard {...reviewsList[0]} sourceUrl={reviewsList[0].sourceUrl || defaultReviewSourceUrl} />}
                     {reviewsList.length > 0 && (
                       <button type="button" onClick={() => goToTab("Reviews")} className="mt-4 text-sm font-semibold cursor-pointer" style={{ color: "var(--leaf)" }}>View all reviews →</button>
@@ -369,6 +370,7 @@ export default function FreelancerDetailLayout({
 
               {tab === "Reviews" && (
                 <Section heading="Client Reviews">
+                  {reviewsList.length === 0 && <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>Business will add soon</p>}
                   <div className="flex flex-col gap-4">
                     {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
                   </div>
@@ -377,6 +379,7 @@ export default function FreelancerDetailLayout({
 
               {tab === "FAQ" && (
                 <Section heading="Frequently Asked Questions">
+                  {faq.length === 0 && <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>Business will add soon</p>}
                   <div className="flex flex-col gap-5">
                     {faq.slice(0, 8).map((f, i, arr) => (
                       <div key={i} className={i < arr.length - 1 ? "pb-5 border-b" : ""} style={i < arr.length - 1 ? { borderColor: "rgba(28,46,56,0.1)" } : undefined}>
