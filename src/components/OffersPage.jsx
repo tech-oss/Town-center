@@ -249,36 +249,30 @@ function BusinessTypeFilter({ active, onChange }) {
 
       {open && (
         <div
-          className="absolute z-30 top-full mt-2 right-0 sm:right-auto sm:left-0 w-56 max-w-[calc(100vw-3rem)] bg-white rounded-2xl p-2 flex flex-col gap-0.5"
-          style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)" }}
+          role="listbox"
+          className="absolute z-30 top-full mt-2 right-0 sm:right-auto sm:left-0 w-72 max-w-[calc(100vw-2rem)] bg-white rounded-2xl p-1.5 flex flex-col gap-0.5"
+          style={{ boxShadow: "0 12px 40px -12px rgba(28,46,56,0.4)", border: "1px solid rgba(28,46,56,0.08)" }}
         >
-          <button
-            type="button"
-            onClick={() => { onChange(null); setOpen(false); }}
-            className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg hover:bg-black/5"
-            style={{ color: "#000000" }}
-          >
-            <span className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: "var(--forest)" }} />
-              All Business Types
-            </span>
-            <RadioDot active={!active} />
-          </button>
-          {BUSINESS_TYPES.map((b) => (
-            <button
-              key={b.key}
-              type="button"
-              onClick={() => { onChange(b.key); setOpen(false); }}
-              className="flex items-center justify-between gap-3 text-sm px-3 py-2.5 rounded-lg hover:bg-black/5"
-              style={{ color: "#000000" }}
-            >
-              <span className="flex items-center gap-2.5">
+          {[{ key: null, label: "All Business Types", color: "var(--forest)" }, ...BUSINESS_TYPES].map((b) => {
+            const selected = b.key === null ? !active : active === b.key;
+            return (
+              <button
+                key={b.key ?? "all"}
+                type="button"
+                role="option"
+                aria-selected={selected}
+                onClick={() => { onChange(b.key); setOpen(false); }}
+                // One line each, left-aligned: the dot, the name filling the
+                // row, the radio pinned right. Names used to wrap and centre.
+                className="w-full flex items-center gap-3 text-left text-sm px-3 py-2.5 rounded-xl transition-colors hover:bg-black/5"
+                style={{ color: "#000000", backgroundColor: selected ? "rgba(47,140,140,0.08)" : undefined, fontWeight: selected ? 600 : 400 }}
+              >
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: b.color }} />
-                {b.label}
-              </span>
-              <RadioDot active={active === b.key} />
-            </button>
-          ))}
+                <span className="flex-1 min-w-0 whitespace-nowrap overflow-hidden text-ellipsis">{b.label}</span>
+                <RadioDot active={selected} />
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
