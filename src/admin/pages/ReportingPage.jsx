@@ -227,8 +227,14 @@ export default function ReportingPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,24,40,0.08)" />
               <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6B7280" }} />
               <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} allowDecimals={false} />
+              {/* Pinned to the top of the chart and drawn above the legend
+                  on a solid card, so the list never runs over the legend. */}
               <Tooltip
-                contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}
+                position={{ y: 0 }}
+                wrapperStyle={{ zIndex: 20, outline: "none" }}
+                contentStyle={{ borderRadius: 12, border: "none", backgroundColor: "#fff", boxShadow: "0 8px 24px rgba(0,0,0,0.18)", padding: "8px 12px" }}
+                itemStyle={{ fontSize: 12, padding: "1px 0" }}
+                labelStyle={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}
                 labelFormatter={(m, items) => {
                   const rev = items?.[0]?.payload?.revenue ?? 0;
                   return `${m} · £${rev.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`;
