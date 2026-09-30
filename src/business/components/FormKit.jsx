@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { canEditField } from "../../Data/plans";
 import { supabase } from "../../lib/supabaseClient";
 import { compressImage } from "../../lib/compressImage";
-import { focalPosition, stripFocal } from "../../lib/focalPoint";
+import { focalPosition, stripFocal, cropStyle } from "../../lib/focalPoint";
 import FocalPointPicker from "./FocalPointPicker";
+import ImageFramer from "./ImageFramer";
 
 export async function uploadToStorage(file, pathPrefix) {
   // A filename straight off a phone ("Photo 12 Apr, 09.14.png") makes a
@@ -237,7 +238,7 @@ async function checkAspectRatio(file, ratio) {
 // the app both use rounded-xl; listing cards just contain-fit it), and
 // object-cover cropped the edges off any logo that wasn't square, so what a
 // business signed off here wasn't what went out.
-export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel }) {
+export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel, frames }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -304,7 +305,15 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
           Not for a logo: every place the site shows one fits it whole
           (object-contain), so nothing is ever cropped and there is nothing
           to choose. */}
-      {!logo && <FocalPointPicker value={src} onChange={onChange} />}
+      {/* `frames`: the places this picture is shown (header, card…). Each is
+          previewed at its exact shape and framed by dragging — see
+          ImageFramer. Without it, the older single focus point. */}
+      {!logo && (frames?.length
+        ? <div className="mt-3"><ImageFramer value={src} frames={frames} onChange={onChange} /></div>
+        : <FocalPointPicker value={src} onChange={onChange} />)}
+      {logo && src && (
+        <p className="text-[10px] mt-1.5" style={{ color: "#64748B" }}>Logos are always shown whole — nothing is cut off.</p>
+      )}
     </div>
   );
 }
@@ -348,7 +357,7 @@ export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix, rati
             {src ? (
               <>
                 <img src={stripFocal(src)} alt={`gallery ${i + 1}`} className="w-full h-full object-cover"
-                  style={{ objectPosition: focalPosition(src) }} />
+                  style={cropStyle(src, "gallery")} />
                 <button onClick={() => remove(i)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ backgroundColor: "#DC2626" }}>✕</button>
@@ -370,10 +379,13 @@ export function GalleryGrid({ images, onChange, max = 6, label, pathPrefix, rati
       {error && <p className="text-[11px] mt-1 font-medium" style={{ color: "#DC2626" }}>{error}</p>}
       {notice && <p className="text-[11px] mt-1 font-medium" style={{ color: "#B45309" }}>{notice}</p>}
       {focusIndex !== null && images[focusIndex] && (
-        <FocalPointPicker
-          value={images[focusIndex]}
-          onChange={(v) => onChange(images.map((img, idx) => (idx === focusIndex ? v : img)))}
-        />
+        <div className="mt-3 max-w-lg">
+          <ImageFramer
+            value={images[focusIndex]}
+            frames={["gallery"]}
+            onChange={(v) => onChange(images.map((img, idx) => (idx === focusIndex ? v : img)))}
+          />
+        </div>
       )}
     </div>
   );

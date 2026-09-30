@@ -206,7 +206,7 @@ export default function EventEditorPage() {
           </EditorSection>
 
           <EditorSection title="Hero Image" hint="The main picture at the top of your event page and on its calendar card">
-            <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />
+            <SingleImageUpload label="Hero Image" src={form.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)}  frames={["hero", "card"]} />
           </EditorSection>
 
           <EditorSection title="Image Gallery" hint="Up to 6 photos">

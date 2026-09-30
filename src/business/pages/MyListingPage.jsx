@@ -266,7 +266,7 @@ export default function MyListingPage() {
                   <SingleImageUpload label="Business Logo" src={listing.logo} logo pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" onChange={(v) => set("logo", v)} />
                   </Locked>
                   <Locked field="heroImage" message="Upgrade to Visibility to change the hero picture of your business.">
-                  <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)} />
+                  <SingleImageUpload label="Hero / Header Image" src={listing.heroImage} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" onChange={(v) => set("heroImage", v)}  frames={["hero", "card"]} />
                   </Locked>
                 </div>
                 <p className="text-[11px] mt-2" style={{ color: "#9CA3AF" }}>This image appears at the top of your public business page.</p>

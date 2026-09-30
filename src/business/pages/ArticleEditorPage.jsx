@@ -96,7 +96,7 @@ export default function ArticleEditorPage() {
           </EditorSection>
 
           <EditorSection title="Hero Image">
-            <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" />
+            <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)"  frames={["hero", "card"]} />
           </EditorSection>
 
           {/* The body used to be an 8-row box inside a max-w-3xl column, which

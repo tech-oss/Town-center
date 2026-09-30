@@ -110,7 +110,7 @@ export default function FeaturedArticleEditorPage() {
             <TextArea rows={3} value={form.standfirst} onChange={(e) => set("standfirst", e.target.value)} />
           </Field>
           <SingleImageUpload label="Hero image" src={form.heroImage} onChange={(url) => set("heroImage", url)}
-            pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)" />
+            pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)"  frames={["hero"]} />
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Category" hint="Shown as the small label above the title.">
               <Inp value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="e.g. Food & Drink" />
@@ -153,7 +153,7 @@ export default function FeaturedArticleEditorPage() {
             <TextArea rows={2} value={form.cardBody} onChange={(e) => set("cardBody", e.target.value)} placeholder="Same as the standfirst" />
           </Field>
           <SingleImageUpload label="Card image" src={form.cardImage} onChange={(url) => set("cardImage", url)}
-            pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)" />
+            pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)"  frames={["card"]} />
         </div>
 
         {error && (

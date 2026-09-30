@@ -41,37 +41,54 @@ function canvasToBlob(canvas, type, quality) {
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
 
+// Every picture is stored as WebP and under TARGET_BYTES (300KB). Quality
+// comes down first, in steps, and only if that isn't enough is the picture
+// made smaller, so detail is kept wherever the size allows.
+const TARGET_BYTES = 300 * 1024;
+const MIN_QUALITY = 0.5;
+
 // Returns a File to upload — the compressed one when that's smaller, and the
 // original otherwise.
-export async function compressImage(file, { maxEdge = MAX_EDGE, quality = QUALITY } = {}) {
+export async function compressImage(file, { maxEdge = MAX_EDGE, quality = QUALITY, targetBytes = TARGET_BYTES } = {}) {
   if (!file?.type?.startsWith("image/")) return file;
   if (KEEP_AS_IS.includes(file.type)) return file;
-  if (file.size < SKIP_UNDER_BYTES) return file;
+  // Already small WebP: nothing to gain.
+  if (file.type === "image/webp" && file.size < SKIP_UNDER_BYTES) return file;
 
   try {
     const img = await loadImage(file);
-    const scale = Math.min(1, maxEdge / Math.max(img.naturalWidth, img.naturalHeight));
-    const width = Math.round(img.naturalWidth * scale);
-    const height = Math.round(img.naturalHeight * scale);
+    let edge = Math.min(maxEdge, Math.max(img.naturalWidth, img.naturalHeight));
+    let best = null;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    // A PNG with transparency would otherwise come out with a black
-    // background once it's WebP, so it is flattened onto white first.
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, width, height);
-    ctx.drawImage(img, 0, 0, width, height);
+    for (let pass = 0; pass < 6; pass++) {
+      const scale = edge / Math.max(img.naturalWidth, img.naturalHeight);
+      const width = Math.round(img.naturalWidth * scale);
+      const height = Math.round(img.naturalHeight * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      // A PNG with transparency would otherwise come out with a black
+      // background once it's WebP, so it is flattened onto white first.
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
 
-    const blob = await canvasToBlob(canvas, "image/webp", quality);
-    // A browser that can't write WebP hands back a PNG (or nothing at all).
-    if (!blob || blob.type !== "image/webp") return file;
+      for (let q = quality; q >= MIN_QUALITY - 0.001; q -= 0.08) {
+        const blob = await canvasToBlob(canvas, "image/webp", q);
+        // A browser that can't write WebP hands back a PNG (or nothing).
+        if (!blob || blob.type !== "image/webp") return file;
+        best = blob;
+        if (blob.size <= targetBytes) break;
+      }
+      if (best.size <= targetBytes) break;
+      edge = Math.round(edge * 0.8);
+    }
+
     // Trust the result only when it actually saved something.
-    if (blob.size >= file.size) return file;
-
+    if (!best || best.size >= file.size) return file;
     const name = file.name.replace(/\.[^.]+$/, "") + ".webp";
-    return new File([blob], name, { type: "image/webp", lastModified: Date.now() });
+    return new File([best], name, { type: "image/webp", lastModified: Date.now() });
   } catch {
     return file;
   }
