@@ -167,8 +167,9 @@ export async function getBusinessListing(businessId) {
 // Sections that go live the moment they're saved, with no admin review.
 // Opening hours change often and carry no reputational risk — holding them
 // for approval meant a business couldn't correct a bank-holiday closure
-// without waiting a day. Everything else still goes through the queue.
-export const AUTO_PUBLISH_SECTIONS = new Set(["hours"]);
+// without waiting a day. Amenities (a hotel's facility checklist) are
+// likewise plain facts. Everything else still goes through the queue.
+export const AUTO_PUBLISH_SECTIONS = new Set(["hours", "amenities"]);
 
 export function isAutoPublished(tabKey) {
   return AUTO_PUBLISH_SECTIONS.has(tabKey);

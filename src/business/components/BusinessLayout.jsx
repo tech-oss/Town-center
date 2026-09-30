@@ -174,7 +174,7 @@ export default function BusinessLayout({ children }) {
         <div className="px-5 py-4 flex flex-col gap-2">
           {/* The site is a separate deployment — "/" here was this portal's own
               stale copy of it. /b/:id on the real site finds this business's page. */}
-          <a href={`${PUBLIC_SITE_URL}/b/${String(user.id).replace(/^biz_/, "")}`} target="_blank" rel="noopener noreferrer"
+          <a href={`${PUBLIC_SITE_URL}/b/${String(user.id).replace(/^biz_/, "")}`} target="_blank" rel="noopener noreferrer" data-skip-external-confirm
             className="text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: SAGE }}>
             View my public page →
           </a>
