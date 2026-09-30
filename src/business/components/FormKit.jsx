@@ -564,6 +564,9 @@ export function StatsEditor({ items, onChange }) {
 // ─── Portfolio (up to `max` items, each an image + title + optional link) ─────
 export function PortfolioEditor({ items, onChange, pathPrefix, max = 6 }) {
   const [uploadingId, setUploadingId] = useState(null);
+  // Which item's picture is being framed (ImageFramer, gallery tile shape —
+  // how portfolio pictures are shown on the site and app).
+  const [framingId, setFramingId] = useState(null);
 
   function set(i, k, v) { onChange(items.map((it, idx) => (idx === i ? { ...it, [k]: v } : it))); }
   function add() { onChange([...items, { id: `pf${Date.now()}`, title: "", link: "", image: null }]); }
@@ -587,7 +590,13 @@ export function PortfolioEditor({ items, onChange, pathPrefix, max = 6 }) {
         <div key={it.id ?? i} className="rounded-xl p-3 flex flex-col gap-2" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
           <div className="relative aspect-video rounded-lg overflow-hidden" style={{ border: `1.5px ${it.image ? "solid" : "dashed"} ${BORDER}`, backgroundColor: "#fff" }}>
             {it.image ? (
-              <img src={it.image} alt="" className="w-full h-full object-cover" />
+              <>
+                <img src={stripFocal(it.image)} alt="" className="w-full h-full object-cover" style={cropStyle(it.image, "gallery")} />
+                <button type="button" onClick={() => { set(i, "image", null); setFramingId(null); }}
+                  aria-label="Remove picture" title="Remove picture"
+                  className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+                  style={{ backgroundColor: "rgba(16,24,40,0.65)" }}>✕</button>
+              </>
             ) : (
               <label className="w-full h-full flex items-center justify-center cursor-pointer">
                 <span className="text-xl" style={{ color: "#9CA3AF" }}>{uploadingId === (it.id ?? i) ? "…" : "+"}</span>
@@ -595,6 +604,15 @@ export function PortfolioEditor({ items, onChange, pathPrefix, max = 6 }) {
               </label>
             )}
           </div>
+          {it.image && (
+            <button type="button" onClick={() => setFramingId(framingId === (it.id ?? i) ? null : (it.id ?? i))}
+              className="self-start text-xs font-semibold" style={{ color: "#2563EB" }}>
+              {framingId === (it.id ?? i) ? "Done framing" : "Frame picture"}
+            </button>
+          )}
+          {it.image && framingId === (it.id ?? i) && (
+            <ImageFramer value={it.image} frames={["gallery"]} onChange={(v) => set(i, "image", v)} />
+          )}
           <input value={it.title} onChange={(e) => set(i, "title", e.target.value)} placeholder="Title"
             className="rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
           <input value={it.link} onChange={(e) => set(i, "link", e.target.value)} placeholder="Link (optional)"
