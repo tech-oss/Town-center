@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { cropStyle } from "../../lib/focalPoint";
 import { createPortal } from "react-dom";
 
 // Full-screen photo viewer — tap a thumbnail to open, tap either half of the
@@ -41,7 +42,7 @@ export default function PhotoGallery({ images = [], title, max = 6 }) {
       <div className="grid grid-cols-2 gap-2">
         {shown.map((src, i) => (
           <button key={i} type="button" onClick={() => setIndex(i)} className="aspect-square overflow-hidden rounded-xl">
-            <img src={src} alt={`${title ?? ""} ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
+            <img src={src} alt={`${title ?? ""} ${i + 1}`} loading="lazy" className="w-full h-full object-cover" style={cropStyle(src, "gallery")} />
           </button>
         ))}
       </div>

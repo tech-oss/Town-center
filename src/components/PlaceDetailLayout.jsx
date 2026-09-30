@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { useEffect, useState } from "react";
 import LocationMap from "./LocationMap";
@@ -313,7 +314,7 @@ export default function PlaceDetailLayout({
           </div>
         )}
         <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[16/9] bg-black">
-          <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />
+          <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" style={cropStyle(heroImage, "hero")} />
         </div>
       </section>
 
@@ -568,8 +569,7 @@ export default function PlaceDetailLayout({
                     alt={`${title} ${i + 2}`}
                     size="card"
                     sizes="(min-width: 640px) 33vw, 45vw"
-                    className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110"
-                  />
+                    className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110" style={cropStyle(src, "gallery")} />
                 </button>
               ))}
             </div>
@@ -634,7 +634,7 @@ export default function PlaceDetailLayout({
                     {it.logo && !it.hasHero ? (
                       <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-3 sm:p-10 transition-transform duration-500 group-hover:scale-105" />
                     ) : (
-                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(it.image, "card")} />
                     )}
                     {/* The white pill belongs to event cards, where the
                         coloured dot carries the category. Anything else

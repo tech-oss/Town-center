@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -177,7 +178,7 @@ export default function FreelancerDetailLayout({
       return (
         <div className={`${shapeClass} relative overflow-hidden`}>
           <button type="button" onClick={() => setGalleryIndex(portfolioImageIndex[index])} className="w-full h-full cursor-pointer">
-            <img src={p.image} alt={p.title || `${title} portfolio ${index + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+            <img src={p.image} alt={p.title || `${title} portfolio ${index + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" style={cropStyle(p.image, "gallery")} />
           </button>
           {p.link && (
             <a href={p.link} target="_blank" rel="noopener noreferrer"
@@ -241,7 +242,7 @@ export default function FreelancerDetailLayout({
                 the square below — otherwise the header is that square. ── */}
             {logo && heroImage && (
               <div className="mb-6 overflow-hidden aspect-[16/9]" style={{ backgroundColor: "var(--forest)" }}>
-                <SmartImage src={heroImage} alt="" size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover" />
+                <SmartImage src={heroImage} alt="" size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover" style={cropStyle(heroImage, "hero")} />
               </div>
             )}
             {/* ── Profile header — logo, name, rating, skills ── */}
@@ -249,7 +250,7 @@ export default function FreelancerDetailLayout({
               <div className="w-full sm:w-36 h-36 shrink-0 overflow-hidden flex items-center justify-center" style={{ backgroundColor: logo ? "#fff" : "var(--forest)", boxShadow: logo ? "0 0 0 1px rgba(28,46,56,0.08)" : undefined }}>
                 {logo
                   ? <SmartImage src={logo} alt={`${title} logo`} size="card" eager sizes="144px" className="w-full h-full object-contain p-3" />
-                  : <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />}
+                  : <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" style={cropStyle(heroImage, "card")} />}
               </div>
               <div className="flex-1 min-w-0">
                 <h1 className="text-2xl md:text-3xl mb-1.5" style={{ color: "#000000" }}>{title}</h1>
@@ -493,7 +494,7 @@ export default function FreelancerDetailLayout({
               {related.map((it) => (
                 <Link key={it.slug} to={it.to} className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}>
                   <div className="relative aspect-square overflow-hidden">
-                    <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(it.image, "card")} />
                   </div>
                   <div className="flex flex-col gap-1 p-3">
                     <h3 className="font-bold text-sm leading-snug line-clamp-1" style={{ color: "#000000" }}>{it.name}</h3>

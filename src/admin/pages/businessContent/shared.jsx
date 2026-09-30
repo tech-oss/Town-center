@@ -1,4 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
+import ImageFramer from "../../../components/ImageFramer";
+import { cropStyle } from "../../../lib/focalPoint";
 import { canEditField } from "../../../Data/plans";
 import { uploadImage } from "../../../lib/uploadImage";
 import { isValidCoords } from "../../../lib/geo";
@@ -161,7 +163,10 @@ export function PlanImageNote() {
 // wrong twice over. Nothing on the site shows a logo in a circle (the
 // business page and the app both use rounded-xl), and object-cover
 // cropped the edges off any logo that was not square.
-export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video" }) {
+export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", frames }) {
+  // A 16:9 upload here is always a header, which is also the listing card
+  // picture — so both are previewed and framed (ImageFramer).
+  const shownIn = frames ?? (!logo && aspect === "aspect-[16/9]" ? ["hero", "card"] : null);
   const [dragOver, setDragOver] = useState(false);
 
   function handleFiles(files) {
@@ -183,7 +188,8 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
         {src ? (
           <>
             <img src={src} alt={label || "preview"}
-              className={logo ? "w-full h-full object-contain p-1.5" : "w-full h-full object-cover"} />
+              className={logo ? "w-full h-full object-contain p-1.5" : "w-full h-full object-cover"}
+              style={logo ? undefined : cropStyle(src, "hero")} />
             <button type="button" onClick={() => onChange("")} aria-label={`Remove ${label || "image"}`} title="Remove image"
               className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center"
               style={{ backgroundColor: "#DC2626" }}>✕</button>
@@ -200,6 +206,8 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
         {src ? "Replace Image" : "Upload Image"}
         <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFiles(e.target.files)} />
       </label>
+      {src && shownIn && <div className="mt-3"><ImageFramer value={src} frames={shownIn} onChange={onChange} /></div>}
+      {src && logo && <p className="text-[10px] mt-1.5" style={{ color: MUTED }}>Logos are always shown whole — nothing is cut off.</p>}
     </div>
   );
 }
@@ -207,6 +215,8 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
 // ─── 6-slot gallery grid (3×2) ────────────────────────────────────────────────
 // TODO: wire to Supabase storage bucket on backend integration
 export function GalleryGrid({ images, onChange, max = 6, label }) {
+  // Which picture is being framed — one cropper under the grid.
+  const [focusIndex, setFocusIndex] = useState(null);
   const slots = Array.from({ length: max }, (_, i) => images[i] ?? null);
 
   function handleFile(i, files) {
@@ -235,10 +245,13 @@ export function GalleryGrid({ images, onChange, max = 6, label }) {
             style={{ border: `1.5px ${src ? "solid" : "dashed"} ${BORDER}`, backgroundColor: "#f8fafc" }}>
             {src ? (
               <>
-                <img src={src} alt={`gallery ${i + 1}`} className="w-full h-full object-cover" />
+                <img src={src} alt={`gallery ${i + 1}`} className="w-full h-full object-cover" style={cropStyle(src, "gallery")} />
                 <button onClick={() => remove(i)}
                   className="absolute top-1 right-1 w-5 h-5 rounded-full text-[10px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ backgroundColor: "#DC2626" }}>✕</button>
+                <button type="button" onClick={() => setFocusIndex(focusIndex === i ? null : i)} title="Frame this picture"
+                  className="absolute bottom-1 right-1 px-1.5 h-5 rounded-full text-[9px] font-bold text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ backgroundColor: focusIndex === i ? BLUE : "rgba(16,24,40,0.65)" }}>crop</button>
               </>
             ) : (
               <label className="w-full h-full flex items-center justify-center cursor-pointer">
@@ -249,6 +262,12 @@ export function GalleryGrid({ images, onChange, max = 6, label }) {
           </div>
         ))}
       </div>
+      {focusIndex !== null && images[focusIndex] && (
+        <div className="mt-3 max-w-lg">
+          <ImageFramer value={images[focusIndex]} frames={["gallery"]}
+            onChange={(v) => onChange(images.map((img, idx) => (idx === focusIndex ? v : img)))} />
+        </div>
+      )}
     </div>
   );
 }

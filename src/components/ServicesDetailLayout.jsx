@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { useRef, useState } from "react";
 import LocationMap from "./LocationMap";
@@ -201,11 +202,11 @@ export default function ServicesDetailLayout({
                       nothing is cut off. It used to be squeezed into a
                       square beside the two thumbnails. */}
                   <button type="button" onClick={() => setGalleryIndex(0)} className="col-span-2 sm:col-span-3 aspect-[16/9] overflow-hidden cursor-pointer">
-                    <SmartImage src={galleryImages[0]} alt={title} size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                    <SmartImage src={galleryImages[0]} alt={title} size="hero" eager sizes="(min-width: 1024px) 800px, 100vw" className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" style={cropStyle(galleryImages[0], "hero")} />
                   </button>
                   {galleryImages.slice(1, 3).map((src, i) => (
                     <button key={i} type="button" onClick={() => setGalleryIndex(i + 1)} className="aspect-square overflow-hidden cursor-pointer">
-                      <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                      <img src={src} alt={`${title} ${i + 2}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" style={cropStyle(src, "gallery")} />
                     </button>
                   ))}
                 </div>
@@ -336,7 +337,7 @@ export default function ServicesDetailLayout({
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {galleryImages.map((src, i) => (
                       <button key={i} type="button" onClick={() => setGalleryIndex(i)} className="aspect-square overflow-hidden cursor-pointer">
-                        <img src={src} alt={`${title} ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" />
+                        <img src={src} alt={`${title} ${i + 1}`} className="w-full h-full object-cover transition-transform duration-300 hover:scale-105" style={cropStyle(src, "gallery")} />
                       </button>
                     ))}
                   </div>
@@ -489,7 +490,7 @@ export default function ServicesDetailLayout({
               {related.map((it) => (
                 <Link key={it.slug} to={it.to} className="group bg-white overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1" style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}>
                   <div className="relative aspect-square overflow-hidden">
-                    <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(it.image, "card")} />
                   </div>
                   <div className="flex flex-col gap-1 p-3">
                     <h3 className="font-bold text-sm leading-snug line-clamp-1" style={{ color: "#000000" }}>{it.name}</h3>

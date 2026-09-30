@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ImageFramer from "../../components/ImageFramer";
 import { uploadImage } from "../../lib/uploadImage";
 import { saveNewsOffer, setHomepageFeature } from "../../api/admin";
 import UKDateInput from "./UKDateInput";
@@ -385,6 +386,7 @@ export default function NewsOfferForm({ initial, onSave, onCancel, featuredItems
             )}
           </div>
         </label>
+        {form.image && <ImageFramer value={form.image} frames={["card", "hero"]} onChange={(v) => set("image", v)} />}
 
         {/* Date / validity text */}
         <label className="flex flex-col gap-1">

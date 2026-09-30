@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { cropStyle } from "../../lib/focalPoint";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
@@ -204,7 +205,7 @@ function EventImage({ src, alt }) {
   return (
     <div onClick={onImageClick} className={`spotlight-card relative w-24 h-24 shrink-0 overflow-hidden ${revealed ? "is-revealed" : ""}`}>
       <img src={src} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
-      <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+      <img src={src} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" style={cropStyle(src, "card")} />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import { blogCards } from "../Data/content";
 import useFetch from "../hooks/useFetch";
 import { getSpotlightPosts } from "../api";
@@ -46,8 +47,7 @@ function PortfolioCard({ post, offset }) {
             src={post.imageSrc}
             alt={post.imageAlt}
             loading="lazy"
-            className="spotlight-photo absolute inset-0 w-full h-full object-cover"
-          />
+            className="spotlight-photo absolute inset-0 w-full h-full object-cover" style={cropStyle(post.imageSrc, "card")} />
         </div>
       </CardLink>
 

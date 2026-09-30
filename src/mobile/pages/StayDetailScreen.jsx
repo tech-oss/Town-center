@@ -1,4 +1,5 @@
 import { useParams, useSearchParams, useNavigate, Navigate, Link } from "react-router-dom";
+import { cropStyle } from "../../lib/focalPoint";
 import SmartImage from "../../components/SmartImage";
 import ClaimBusinessBox from "../../components/ClaimBusinessBox";
 import { useTrackView, businessView } from "../../lib/trackView";
@@ -135,7 +136,7 @@ export default function StayDetailScreen() {
     <MobileShell noPadding onBack={goBack}>
       <div className="flex flex-col">
         <div className="relative">
-          <SmartImage src={place.image} alt={place.name} size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover" />
+          <SmartImage src={place.image} alt={place.name} size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover" style={cropStyle(place.image, "hero")} />
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
@@ -343,7 +344,7 @@ export default function StayDetailScreen() {
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {news.map((n) => (
                   <Link key={n.slug} to={postPath(n, { mobile: true })} className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>
-                    <img src={n.image} alt="" className="w-full h-28 object-cover" />
+                    <img src={n.image} alt="" className="w-full h-28 object-cover" style={cropStyle(n.image, "card")} />
                     <div className="p-2.5 flex flex-col gap-1">
                       <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wide w-fit" style={{ color: "var(--teal-deep)" }}>
                         <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(n.category) }} />
@@ -364,7 +365,7 @@ export default function StayDetailScreen() {
               <div className="flex flex-col gap-3">
                 {(discover ?? []).map((it) => (
                   <Link key={it.slug} to={it.mobileTo} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-                    <img src={it.image} alt="" className="w-20 h-20 object-cover shrink-0" />
+                    <img src={it.image} alt="" className="w-20 h-20 object-cover shrink-0" style={cropStyle(it.image, "card")} />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                       <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{it.tag}</span>
                       <p className="text-sm font-bold truncate" style={{ color: "#000000" }}>{it.name}</p>

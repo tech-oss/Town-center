@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import { getHomepageEvents } from "../api";
 import useFetch from "../hooks/useFetch";
 import useTapReveal from "../hooks/useTapReveal";
@@ -33,8 +34,7 @@ function EventCard({ event }) {
             src={event.image}
             alt={event.title}
             loading="lazy"
-            className="spotlight-photo absolute inset-0 w-full h-full object-cover"
-          />
+            className="spotlight-photo absolute inset-0 w-full h-full object-cover" style={cropStyle(event.image, "card")} />
         </div>
       </Link>
 

@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import { cropStyle } from "../../lib/focalPoint";
 import { useMemo } from "react";
 import { pickSome } from "../../lib/pickSome";
 import MobileShell from "../components/MobileShell";
@@ -118,7 +119,7 @@ export default function StoryDetailScreen() {
                 <div className="flex flex-col gap-3">
                   {more.map((f) => (
                     <Link key={f.slug} to={`/mobile/story/${f.slug}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
-                      <img src={f.cardImage} alt="" className="w-20 h-20 object-cover shrink-0" />
+                      <img src={f.cardImage} alt="" className="w-20 h-20 object-cover shrink-0" style={cropStyle(f.cardImage, "card")} />
                       <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
                         <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wide w-fit" style={{ color: "var(--teal-deep)" }}>
                           <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor("Featured") }} />

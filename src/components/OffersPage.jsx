@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import useSiteSection from "../hooks/useSiteSection";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getOffersFeed } from "../api";
@@ -386,7 +387,7 @@ export default function OffersPage() {
                   style={{ boxShadow: card.shadow }}
                 >
                   <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden">
-                    <img src={it.image} alt={it.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={it.image} alt={it.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(it.image, "card")} />
                     {it.homepage && <HomepageBadge />}
                     {it.type === "Offer" && <OfferTag />}
                   </div>

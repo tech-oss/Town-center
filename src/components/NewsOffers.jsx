@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import { postPath } from "../lib/postPath";
 
 // Per-business "News & Offers" — same glassmorphic look as the homepage
@@ -68,8 +69,7 @@ export default function NewsOffers({ item, placeholder }) {
                     src={post.image}
                     alt={post.title}
                     loading="lazy"
-                    className="w-full h-full md:h-44 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                  />
+                    className="w-full h-full md:h-44 object-cover transition-transform duration-500 ease-out group-hover:scale-105" style={cropStyle(post.image, "card")} />
                   <span
                     className="absolute top-2 left-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
                     style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}

@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { focalPosition } from "../lib/focalPoint";
 import { imageUrl } from "../lib/imageUrl";
@@ -28,7 +29,7 @@ function SpotlightImage({ src, alt, aspect = "aspect-[16/9]", className = "" }) 
         <img src={imageUrl(src, "card")} alt="" aria-hidden="true" loading="lazy"
           className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" style={{ objectPosition: focalPosition(src) }} />
         <SmartImage src={src} alt={alt} size="hero" sizes="(min-width: 768px) 800px, 100vw"
-          className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+          className="spotlight-photo absolute inset-0 w-full h-full object-cover" style={cropStyle(src, "card")} />
       </div>
     </div>
   );
@@ -223,7 +224,7 @@ export default function FeatureArticlePage() {
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={f.cardImage} alt={f.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img src={f.cardImage} alt={f.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(f.cardImage, "card")} />
                     <span
                       className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
                       style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}

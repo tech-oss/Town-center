@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { cropStyle } from "../lib/focalPoint";
 import MapBase from "./MapBase";
 import { Link, useNavigate } from "react-router-dom";
 import { MapContainer, useMap } from "react-leaflet";
@@ -264,8 +265,7 @@ function TraderRow({ b, isActive, distance, onSelect, onDirections }) {
             src={thumb}
             alt=""
             loading="lazy"
-            className={b.image ? "w-full h-full object-cover" : "w-9 h-9 object-contain"}
-          />
+            className={b.image ? "w-full h-full object-cover" : "w-9 h-9 object-contain"} style={cropStyle(thumb, "card")} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -432,7 +432,7 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
       <div className="flex-1 min-h-0 overflow-visible lg:overflow-y-auto lg:overscroll-contain">
         {/* Hero */}
         <div className="relative w-full aspect-[16/9] overflow-hidden" style={{ background: "#e9f4f4" }}>
-          <img src={hero} alt={b.name} className={b.image || place?.image ? "w-full h-full object-cover" : "w-full h-full object-contain p-8"} />
+          <img src={hero} alt={b.name} className={b.image || place?.image ? "w-full h-full object-cover" : "w-full h-full object-contain p-8"} style={cropStyle(hero, "hero")} />
         </div>
 
         {/* Identity — logo tucked over the hero, as in the reference */}
@@ -533,20 +533,20 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
             <div className="grid grid-cols-4 gap-2">
               {gallery.slice(0, 3).map((src) => (
                 <div key={src} className="aspect-square rounded-lg overflow-hidden" style={{ background: "#e9f4f4" }}>
-                  <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+                  <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" style={cropStyle(src, "card")} />
                 </div>
               ))}
               {gallery.length > 3 &&
                 (detailHref ? (
                   <Link to={detailHref} className="relative aspect-square rounded-lg overflow-hidden block group/g">
-                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" style={cropStyle(gallery[3], "gallery")} />
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white transition-opacity group-hover/g:opacity-90" style={{ background: "rgba(13,42,51,0.68)" }}>
                       +{gallery.length - 3}
                     </span>
                   </Link>
                 ) : (
                   <div className="relative aspect-square rounded-lg overflow-hidden">
-                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" />
+                    <img src={gallery[3]} alt="" loading="lazy" className="w-full h-full object-cover" style={cropStyle(gallery[3], "gallery")} />
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-white" style={{ background: "rgba(13,42,51,0.68)" }}>
                       +{gallery.length - 3}
                     </span>

@@ -1,7 +1,7 @@
 import { useState } from "react";
+import ImageFramer from "../../components/ImageFramer";
 import { saveBusinessArticle } from "../../api/admin";
 import { uploadImage } from "../../lib/uploadImage";
-import FocalPointPicker from "./FocalPointPicker";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 // Editing a news post or offer that a business wrote.
@@ -117,7 +117,7 @@ export default function BusinessArticleForm({ initial, onSave, onCancel }) {
             </button>
           )}
         </div>
-        <FocalPointPicker value={form.heroImage} onChange={(v) => set("heroImage", v)} />
+        <ImageFramer value={form.heroImage} frames={["hero", "card"]} onChange={(v) => set("heroImage", v)} />
       </div>
 
       <Field label="The post">

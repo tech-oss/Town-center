@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { cropStyle } from "../lib/focalPoint";
 import useSiteSection from "../hooks/useSiteSection";
 import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../lib/amenityCategories";
 import ListingCard from "./ListingCard";
@@ -28,7 +29,7 @@ function FeaturedStayCard({ item, basePath, tag, align }) {
       >
         <div className="relative w-full overflow-hidden aspect-[6/4]" style={{ backgroundColor: "#1a1a1a" }}>
           <img src={item.image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
-          <img src={item.image} alt={item.name} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
+          <img src={item.image} alt={item.name} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" style={cropStyle(item.image, "card")} />
         </div>
       </Link>
 

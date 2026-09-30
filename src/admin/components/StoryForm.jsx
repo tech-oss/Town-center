@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ImageFramer from "../../components/ImageFramer";
 import { Card, Field, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "../pages/explore/contentKit";
 import { withSectionImages } from "../../lib/storyImages";
 import { uploadImage } from "../../lib/uploadImage";
@@ -81,13 +82,13 @@ function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
 }
 
 // ─── Image upload field ───────────────────────────────────────────────────────
-function ImageField({ label, value, onChange }) {
+function ImageField({ label, value, onChange, frames }) {
   function handleUpload(file) {
     if (!file) return;
     uploadImage(file, "stories").then(onChange).catch((e) => alert(e.message));
   }
   return (
-    <label className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1">
       <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>{label}</span>
       <div className="flex items-center gap-3 flex-wrap">
         <label className="cursor-pointer px-4 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80 inline-flex items-center gap-2" style={{ backgroundColor: "rgba(16,24,40,0.07)", color: "#1E293B", border: "1.5px solid rgba(16,24,40,0.2)" }}>
@@ -101,7 +102,8 @@ function ImageField({ label, value, onChange }) {
           </div>
         )}
       </div>
-    </label>
+      {value && frames && <div className="mt-2"><ImageFramer value={value} frames={frames} onChange={onChange} /></div>}
+    </div>
   );
 }
 
@@ -271,7 +273,7 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Card summary</span>
           <textarea value={form.cardBody} onChange={(e) => set("cardBody", e.target.value)} rows={2} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />
         </label>
-        <ImageField label="Card image" value={form.cardImage} onChange={(v) => set("cardImage", v)} />
+        <ImageField label="Card image" value={form.cardImage} onChange={(v) => set("cardImage", v)} frames={["card"]} />
       </div>
 
       {/* ── Detail page ── */}
@@ -284,7 +286,7 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
             Hero title: <strong>{heroTitle || "—"}</strong>{heroSubtitle ? <> · Subtitle: <strong>{heroSubtitle}</strong></> : ""}
           </span>
         </label>
-        <ImageField label="Hero image" value={form.heroImage} onChange={(v) => set("heroImage", v)} />
+        <ImageField label="Hero image" value={form.heroImage} onChange={(v) => set("heroImage", v)} frames={["hero"]} />
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Standfirst (intro paragraph under the hero)</span>
           <textarea value={form.standfirst} onChange={(e) => set("standfirst", e.target.value)} rows={3} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />

@@ -40,14 +40,14 @@ export function focalOf(src) {
   if (typeof src !== "string") return DEFAULT;
   const hash = src.indexOf("#f=");
   if (hash === -1) return DEFAULT;
-  const [x, y] = src.slice(hash + 3).split(",");
+  // Only the first part is the focus point; per-place crops follow after ";".
+  const [x, y] = src.slice(hash + 3).split(";")[0].split(",");
   const fx = clamp(x);
   const fy = clamp(y);
   if (!Number.isFinite(fx) || !Number.isFinite(fy)) return DEFAULT;
   return { x: fx, y: fy };
 }
 
-// The URL without it — what actually gets fetched, and what is compared.
 export function stripFocal(src) {
   if (typeof src !== "string") return src;
   const hash = src.indexOf("#f=");
@@ -58,14 +58,81 @@ export function stripFocal(src) {
 // fragment at all, so the common case leaves the URL as it was.
 export function withFocal(src, { x, y }) {
   if (typeof src !== "string" || !src) return src;
-  const base = stripFocal(src);
-  const fx = clamp(x);
-  const fy = clamp(y);
-  if (fx === DEFAULT.x && fy === DEFAULT.y) return base;
-  return `${base}#f=${fx},${fy}`;
+  return build(stripFocal(src), { x: clamp(x), y: clamp(y) }, cropsOf(src));
 }
 
-// The fragment itself, for putting back on a URL that has been rewritten.
+// ── Crops for each place a picture is shown ─────────────────────────────────
+//
+// One focus point can't satisfy every shape: a business header is 16:9 on
+// its page but square on its listing card, and whatever the focus point
+// keeps in one it cuts in the other. So a picture can also carry its own
+// framing for each place — chosen by the business in the cropper, where each
+// frame is drawn at that place's exact shape with exactly the same rules the
+// page uses (cropStyle below). What they frame is what the public sees.
+//
+//   …/hero.webp#f=50,40;card=30,60,140;hero=50,45,100
+//                       place=x%,y%,zoom%
+//
+// Places (FRAMES): "hero" (header, 16:9), "card" (listing / article cards
+// and thumbnails, square — shown 4:3 on phones), "gallery" (gallery tiles,
+// square), "logo" (square).
+
+export const FRAMES = {
+  hero: { label: "Page header", aspect: 16 / 9 },
+  card: { label: "Listing card", aspect: 1 },
+  gallery: { label: "Gallery tile", aspect: 1 },
+  logo: { label: "Logo", aspect: 1 },
+};
+
+const clampZoom = (z) => Math.max(100, Math.min(400, Math.round(Number(z) || 100)));
+
+export function cropsOf(src) {
+  const out = {};
+  if (typeof src !== "string") return out;
+  const hash = src.indexOf("#f=");
+  if (hash === -1) return out;
+  for (const part of src.slice(hash + 3).split(";").slice(1)) {
+    const [name, v] = part.split("=");
+    if (!name || !v) continue;
+    const [x, y, z] = v.split(",");
+    if ([x, y].every((n) => Number.isFinite(Number(n)))) out[name] = { x: clamp(x), y: clamp(y), z: clampZoom(z) };
+  }
+  return out;
+}
+
+// The framing for one place: its own crop, else the focus point at 100%.
+export function cropOf(src, frame) {
+  const c = frame ? cropsOf(src)[frame] : null;
+  if (c) return c;
+  const { x, y } = focalOf(src);
+  return { x, y, z: 100 };
+}
+
+export function withCrop(src, frame, crop) {
+  if (typeof src !== "string" || !src) return src;
+  const crops = { ...cropsOf(src) };
+  if (crop) crops[frame] = { x: clamp(crop.x), y: clamp(crop.y), z: clampZoom(crop.z) };
+  else delete crops[frame];
+  return build(stripFocal(src), focalOf(src), crops);
+}
+
+// Style for an <img className="object-cover"> filling its box: the same
+// rules the cropper previews with, so the two always agree.
+export function cropStyle(src, frame) {
+  const { x, y, z } = cropOf(src, frame);
+  return {
+    objectPosition: `${x}% ${y}%`,
+    ...(z > 100 ? { transform: `scale(${z / 100})`, transformOrigin: `${x}% ${y}%` } : {}),
+  };
+}
+
+function build(base, focal, crops) {
+  const parts = Object.entries(crops).map(([k, c]) => `${k}=${c.x},${c.y},${c.z}`);
+  const isDefault = focal.x === DEFAULT.x && focal.y === DEFAULT.y;
+  if (isDefault && !parts.length) return base;
+  return `${base}#f=${[`${focal.x},${focal.y}`, ...parts].join(";")}`;
+}
+
 export function focalSuffix(src) {
   if (typeof src !== "string") return "";
   const hash = src.indexOf("#f=");
