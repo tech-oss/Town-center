@@ -79,6 +79,15 @@ export default function TextScreen({ sectionKey, barTitle, highlight }) {
                   className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
                   style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaButton}</Link>
               )}
+              {/* Optional second button set in Site Content, under the first. */}
+              {copy.ctaExtraLabel && copy.ctaExtraUrl && (/^https?:\/\//i.test(copy.ctaExtraUrl) || /^mailto:/i.test(copy.ctaExtraUrl) ? (
+                <a href={copy.ctaExtraUrl} className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                  style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaExtraLabel}</a>
+              ) : (
+                <Link to={`/mobile${copy.ctaExtraUrl.startsWith("/") ? copy.ctaExtraUrl : `/${copy.ctaExtraUrl}`}`}
+                  className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                  style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaExtraLabel}</Link>
+              ))}
             </div>
           )}
         </div>

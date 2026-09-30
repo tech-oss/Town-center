@@ -39,13 +39,24 @@ export default function OurStoryPage() {
                 <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">{copy.ctaTitle}</h2>
                 {copy.ctaText && <p className="text-sm leading-relaxed text-white">{copy.ctaText}</p>}
               </div>
+              <div className="shrink-0 flex flex-col items-stretch gap-3">
               {copy.ctaEmail && (
                 <a href={`mailto:${copy.ctaEmail}`}
-                  className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm transition-opacity hover:opacity-90"
+                  className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm text-center transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "var(--leaf)", color: "white" }}>
                   {copy.ctaButton || copy.ctaEmail}
                 </a>
               )}
+              {/* Optional second button set in Site Content, directly under
+                  the first. */}
+              {copy.ctaExtraLabel && copy.ctaExtraUrl && (
+                <a href={copy.ctaExtraUrl}
+                  className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm text-center transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--leaf)", color: "white" }}>
+                  {copy.ctaExtraLabel}
+                </a>
+              )}
+              </div>
             </div>
           )}
         </div>

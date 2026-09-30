@@ -262,7 +262,8 @@ export const SITE_SECTIONS = [
       text("ctaTitle", "Heading"),
       area("ctaText", "Text"),
       text("ctaButton", "Button label"),
-      text("ctaEmail", "Email address the button opens"),
+      text("ctaEmail", "Email address the button opens"),      text("ctaExtraLabel", "Extra button label", "Optional — a second button, shown under the first. Leave blank for none"),
+      text("ctaExtraUrl", "Extra button link", "A page on this site (e.g. /whats-on) or a full web address (https://…)"),
     ],
     defaults: {
       eyebrow: "About Us",
@@ -338,7 +339,8 @@ export const SITE_SECTIONS = [
       heading("Get in touch box"),
       text("ctaTitle", "Heading"),
       area("ctaText", "Text"),
-      text("ctaEmail", "Email address"),
+      text("ctaEmail", "Email address"),      text("ctaExtraLabel", "Extra button label", "Optional — a second button, shown under the first. Leave blank for none"),
+      text("ctaExtraUrl", "Extra button link", "A page on this site (e.g. /whats-on) or a full web address (https://…)"),
     ],
     defaults: {
       eyebrow: "Get Involved",
