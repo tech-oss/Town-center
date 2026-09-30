@@ -158,7 +158,7 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
   // Opening hours publish without review, so they never sit in a queue —
   // matches AUTO_PUBLISHED_SECTIONS in approvals.js.
   const reviewable = (l) =>
-    Object.entries(l.approval_status ?? {}).filter(([section]) => section !== "hours");
+    Object.entries(l.approval_status ?? {}).filter(([section]) => section !== "hours" && section !== "amenities");
 
   // A listing counts as active once every section of it is approved.
   const isActive = (l) => {

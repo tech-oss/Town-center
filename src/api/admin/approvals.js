@@ -66,7 +66,7 @@ const SECTION_FIELDS = {
 // Sections the business publishes without review — they never produce a
 // queue item, even if an older row still carries a pending state for one.
 // Mirrors AUTO_PUBLISH_SECTIONS in business-dashboard's businessListing.js.
-const AUTO_PUBLISHED_SECTIONS = new Set(["hours"]);
+const AUTO_PUBLISHED_SECTIONS = new Set(["hours", "amenities"]);
 
 const PENDING = "Pending Approval";
 const APPROVED = "Up to Date";
