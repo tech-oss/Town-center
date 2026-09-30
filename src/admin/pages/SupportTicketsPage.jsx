@@ -18,7 +18,7 @@ import LoadingState from "../components/LoadingState";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 const INPUT = { border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" };
-const STATUS_FILTERS = ["All", "Open", "In Progress", "Resolved"];
+const STATUS_FILTERS = ["All", "Open", "Resolved"];
 
 function Toast({ message, onDismiss }) {
   if (!message) return null;
@@ -136,7 +136,7 @@ function TicketDetail({ ticket, onBack, onUpdate, notify, onDelete }) {
         <p className="text-sm font-bold" style={{ color: NAVY }}>Status</p>
         <select value={status} onChange={(e) => setStatus(e.target.value)}
           className="rounded-xl px-3 py-2 text-sm outline-none" style={INPUT}>
-          <option>Open</option><option>In Progress</option><option>Resolved</option>
+          <option>Open</option><option>Resolved</option>
         </select>
         <button onClick={handleUpdateStatus}
           className="px-4 py-2 rounded-xl text-xs font-semibold transition-opacity hover:opacity-80"

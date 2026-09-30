@@ -9,7 +9,7 @@ import { supabase } from "../lib/supabaseClient";
 import { imageUrl } from "../lib/imageUrl";
 import { parseCoords } from "../lib/geo";
 import { formatEventDate } from "../lib/eventDates";
-import { loadLiveBusinesses } from "./liveBusinesses";
+import { loadLiveBusinesses, webPathFor } from "./liveBusinesses";
 import { getLivePlacements, getPromotedEventIds } from "./homepageSlots";
 
 function fromRow(r) {
@@ -90,7 +90,9 @@ async function withBusiness(events) {
       businessName: b.name,
       businessSlug: b.slug,
       businessSection: b.section,
-      businessTo: `/${b.section}/place/${b.slug}`,
+      businessStayKind: b.stayKind,
+      // Hotels live under /live/stay/…, not /<section>/place/….
+      businessTo: webPathFor(b),
     };
   };
   return Array.isArray(events) ? list.map(attach) : attach(events);

@@ -1,3 +1,4 @@
+import { webPathFor } from "../api/liveBusinesses";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { cropStyle } from "../lib/focalPoint";
 import { useTrackView, articleView } from "../lib/trackView";
@@ -29,9 +30,12 @@ export default function ArticlePage() {
   // see-do/services `sections` routing scheme, so they carry their own
   // path/label instead of looking one up in `sections`.
   const sec = sections[biz.section];
-  const bizPath = sec ? `/${biz.section}/place/${biz.slug}` : biz.detailPath;
-  const sectionPath = sec ? sec.path : biz.sectionPath;
-  const sectionLabel = sec ? sec.label : biz.sectionLabel;
+  // A hotel's page is /live/stay/<kind>/<slug>; it used to fall through to
+  // an unset detailPath, so its name in the breadcrumb linked nowhere.
+  const isStay = biz.section === "stay";
+  const bizPath = sec ? `/${biz.section}/place/${biz.slug}` : isStay ? webPathFor(biz) : biz.detailPath;
+  const sectionPath = sec ? sec.path : (biz.sectionPath ?? (isStay ? `/live/stay/${biz.stayKind ?? "hotels"}` : undefined));
+  const sectionLabel = sec ? sec.label : (biz.sectionLabel ?? (isStay ? "Hotels & Accommodation" : undefined));
 
   // Other articles from the same business
   const more = (biz.news ?? []).filter((a) => a.slug !== article.slug).slice(0, 3);

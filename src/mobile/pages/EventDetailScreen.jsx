@@ -82,7 +82,7 @@ export default function EventDetailScreen() {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M3 9l1.5-5h15L21 9" /><path d="M4 9v11h16V9" /><path d="M9 20v-6h6v6" /></svg>
                 <span className="text-sm" style={{ color: "#000000" }}>
                   Hosted by{" "}
-                  <Link to={`/mobile/place/${event.businessSlug}`} className="font-bold underline" style={{ color: "var(--teal-deep)" }}>
+                  <Link to={event.businessSection === "stay" ? `/mobile/stay/${event.businessStayKind ?? "hotels"}/${event.businessSlug}` : `/mobile/place/${event.businessSlug}`} className="font-bold underline" style={{ color: "var(--teal-deep)" }}>
                     {event.businessName}
                   </Link>
                 </span>
