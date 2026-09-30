@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import FitImage from "./FitImage";
 import { postPath } from "../lib/postPath";
 
 // Per-business "News & Offers" — same glassmorphic look as the homepage
@@ -65,7 +64,12 @@ export default function NewsOffers({ item, placeholder }) {
               >
                 {/* Image */}
                 <div className="relative shrink-0 w-28 sm:w-32 md:w-full self-stretch md:self-auto overflow-hidden">
-                  <FitImage src={post.image} alt={post.title} className="w-full h-full md:h-44" imgClassName="transition-transform duration-500 ease-out group-hover:scale-105" />
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    loading="lazy"
+                    className="w-full h-full md:h-44 object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                  />
                   <span
                     className="absolute top-2 left-2 text-[10px] md:text-[11px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
                     style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "var(--leaf)" }}

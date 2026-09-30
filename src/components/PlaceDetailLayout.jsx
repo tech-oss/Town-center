@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import FitImage from "./FitImage";
 import SmartImage from "./SmartImage";
 import { useEffect, useState } from "react";
 import LocationMap from "./LocationMap";
@@ -314,7 +313,7 @@ export default function PlaceDetailLayout({
           </div>
         )}
         <div className="relative w-[80%] sm:w-[60%] mx-auto overflow-hidden aspect-[16/9] bg-black">
-          <FitImage src={heroImage} alt={title} size="hero" sizes="(min-width: 640px) 60vw, 80vw" eager className="w-full h-full" />
+          <SmartImage src={heroImage} alt={title} size="hero" eager sizes="(min-width: 640px) 60vw, 80vw" className="w-full h-full object-cover" />
         </div>
       </section>
 
@@ -564,7 +563,13 @@ export default function PlaceDetailLayout({
                   aria-label={`Enlarge photo ${i + 2}`}
                   className="aspect-[25/24] overflow-hidden cursor-pointer"
                 >
-                  <FitImage src={src} alt={`${title} ${i + 2}`} size="card" sizes="(min-width: 640px) 33vw, 45vw" className="w-full h-full" imgClassName="transition-transform duration-300 ease-out hover:scale-110" />
+                  <SmartImage
+                    src={src}
+                    alt={`${title} ${i + 2}`}
+                    size="card"
+                    sizes="(min-width: 640px) 33vw, 45vw"
+                    className="w-full h-full object-cover transition-transform duration-300 ease-out hover:scale-110"
+                  />
                 </button>
               ))}
             </div>
@@ -629,7 +634,7 @@ export default function PlaceDetailLayout({
                     {it.logo && !it.hasHero ? (
                       <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-3 sm:p-10 transition-transform duration-500 group-hover:scale-105" />
                     ) : (
-                      <FitImage src={it.image} alt={it.name} className="w-full h-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
+                      <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     )}
                     {/* The white pill belongs to event cards, where the
                         coloured dot carries the category. Anything else

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import FitImage from "./FitImage";
 import { Link, useSearchParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
 import { buildSearchIndex, searchAll } from "../lib/searchIndex";
@@ -82,7 +81,7 @@ export default function SearchPage() {
                     <Link to={r.to} className="flex items-center gap-4 p-3 bg-white transition-shadow hover:shadow-md"
                       style={{ boxShadow: "0 2px 10px -4px rgba(13,42,51,0.2)" }}>
                       {r.image
-                        ? <FitImage src={r.image} alt="" className="w-20 h-16 shrink-0" />
+                        ? <img src={r.image} alt="" loading="lazy" className="w-20 h-16 object-cover shrink-0" />
                         : <span className="w-20 h-16 shrink-0" style={{ backgroundColor: "var(--mint)" }} />}
                       <span className="flex-1 min-w-0">
                         <span className="block text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--leaf)" }}>{r.group}</span>

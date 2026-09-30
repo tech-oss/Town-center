@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import FitImage from "./FitImage";
 import { card, pill } from "../utils/design";
 import FeaturedTag from "./FeaturedTag";
 
@@ -49,7 +48,7 @@ export default function ListingCard({
         {logoTile(it) ? (
           <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-5 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <FitImage src={it.image} alt={it.name} className="w-full h-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
+          <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         )}
       </div>
       <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5">

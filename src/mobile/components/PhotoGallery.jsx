@@ -1,5 +1,4 @@
 import { useState } from "react";
-import FitImage from "../../components/FitImage";
 import { createPortal } from "react-dom";
 
 // Full-screen photo viewer — tap a thumbnail to open, tap either half of the
@@ -42,7 +41,7 @@ export default function PhotoGallery({ images = [], title, max = 6 }) {
       <div className="grid grid-cols-2 gap-2">
         {shown.map((src, i) => (
           <button key={i} type="button" onClick={() => setIndex(i)} className="aspect-square overflow-hidden rounded-xl">
-            <FitImage src={src} alt={`${title ?? ""} ${i + 1}`} className="w-full h-full" />
+            <img src={src} alt={`${title ?? ""} ${i + 1}`} loading="lazy" className="w-full h-full object-cover" />
           </button>
         ))}
       </div>

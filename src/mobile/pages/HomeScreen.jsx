@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import FitImage from "../../components/FitImage";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
@@ -217,7 +216,7 @@ export default function HomeScreen() {
               {homeCategories.map((c) => (
                 <Link key={c.id} to={c.to} className="flex flex-col items-center gap-2 active:opacity-70">
                   <div className="relative w-full aspect-square rounded-2xl overflow-hidden">
-                    <FitImage src={c.image} alt="" className="absolute inset-0 w-full h-full" />
+                    <img src={c.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
                     {/* Bottom-weighted tint so a light photo still reads as a
                         crisp tile, matching the tab bar's dark-teal accent. */}
                     <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 45%, rgba(12,20,24,0.35) 100%)" }} />
@@ -263,7 +262,7 @@ export default function HomeScreen() {
                 {appOffers.map((post) => (
                   <Link key={post.id} to={`/mobile${post.href}`} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
                     <div className="relative w-28 h-28 shrink-0">
-                      <FitImage src={post.imageSrc} alt="" className="w-full h-full" />
+                      <img src={post.imageSrc} alt="" className="w-full h-full object-cover" />
                       {post.category?.includes("Offer") && <OfferTag />}
                     </div>
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">
@@ -290,7 +289,7 @@ export default function HomeScreen() {
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {upcomingEvents.map((e) => (
                   <Link key={e.slug} to={`/mobile/event/${e.slug}`} className="shrink-0 w-56 flex flex-col overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 10px 26px -12px rgba(28,46,56,0.45)" }}>
-                    <FitImage src={e.image} alt="" className="w-full h-36" />
+                    <img src={e.image} alt="" className="w-full h-36 object-cover" />
                     <div className="p-3 flex flex-col gap-1">
                       <span
                         className="text-[9px] font-extrabold uppercase tracking-wide w-fit px-2 py-0.5 rounded-full"
@@ -319,7 +318,7 @@ export default function HomeScreen() {
                     className="relative overflow-hidden rounded-2xl h-36 flex items-end active:opacity-90"
                     style={{ boxShadow: "0 10px 26px -12px rgba(28,46,56,0.5)" }}
                   >
-                    <FitImage src={g.cardImage} alt="" className="absolute inset-0 w-full h-full" />
+                    <img src={g.cardImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
                     <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 35%, rgba(12,20,24,0.88) 100%)" }} />
                     <div className="relative p-4">
                       <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--mint)", textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}>{g.category}</span>

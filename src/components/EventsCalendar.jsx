@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import FitImage from "./FitImage";
 import { useMemo, useState } from "react";
 import { categoryColors } from "../Data/events";
 import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs, eventCategoryLabel } from "../lib/eventCategories";
@@ -146,7 +145,7 @@ function EventCard({ e, date }) {
     >
       <div className="relative w-24 sm:w-36 shrink-0 overflow-hidden" style={{ backgroundColor: "var(--sand)" }}>
         {e.image && (
-          <FitImage src={e.image} alt="" className="absolute inset-0 w-full h-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
+          <img src={e.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         )}
       </div>
       <div className="min-w-0 flex-1 flex items-center gap-3 sm:gap-5 p-3 sm:p-4">

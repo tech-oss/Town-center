@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import FitImage from "../../components/FitImage";
 import { GUIDE_CATEGORIES } from "../../Data/guideCategories";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
@@ -48,7 +47,7 @@ export default function GuidesScreen() {
               className="relative overflow-hidden rounded-2xl h-40 flex items-end active:opacity-90"
               style={{ boxShadow: "0 12px 30px -14px rgba(28,46,56,0.6)" }}
             >
-              <FitImage src={g.cardImage} alt="" className="absolute inset-0 w-full h-full" />
+              <img src={g.cardImage} alt="" className="absolute inset-0 w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0) 30%, rgba(12,20,24,0.9) 100%)" }} />
               <div className="relative p-4">
                 <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--mint)", textShadow: "0 1px 6px rgba(0,0,0,0.65)" }}>{g.category}</span>

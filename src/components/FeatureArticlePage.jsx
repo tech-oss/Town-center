@@ -1,5 +1,4 @@
 import { useParams, Link, Navigate } from "react-router-dom";
-import FitImage from "./FitImage";
 import SmartImage from "./SmartImage";
 import { focalPosition } from "../lib/focalPoint";
 import { imageUrl } from "../lib/imageUrl";
@@ -224,7 +223,7 @@ export default function FeatureArticlePage() {
                   style={{ boxShadow: "0 6px 28px -14px rgba(28,46,56,0.28)" }}
                 >
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <FitImage src={f.cardImage} alt={f.cardHeading} className="w-full h-full" imgClassName="transition-transform duration-500 group-hover:scale-105" />
+                    <img src={f.cardImage} alt={f.cardHeading} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                     <span
                       className="absolute top-1 left-1 sm:top-3 sm:left-3 inline-flex items-center gap-1 sm:gap-1.5 text-[8px] sm:text-[11px] font-bold uppercase tracking-[0.02em] px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-full"
                       style={{ backgroundColor: "rgba(255,255,255,0.92)", color: "#000000" }}
