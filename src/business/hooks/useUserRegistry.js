@@ -186,6 +186,9 @@ export async function removeTeamMember(reqId) {
   return { ok: true };
 }
 
+// Each caller gets its own channel name: the sidebar badge and the Settings
+// page both watch pending requests, and a second subscribe to an already
+// joined channel name throws, which crashed Account Settings.
 function useBusinessUsersByStatus(businessId, status) {
   const [rows, setRows] = useState([]);
 
@@ -205,7 +208,7 @@ function useBusinessUsersByStatus(businessId, status) {
     refetch();
     if (!businessId) return;
     const channel = supabase
-      .channel(`business_users:${businessId}:${status}`)
+      .channel(`business_users:${businessId}:${status}:${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "business_users", filter: `business_id=eq.${businessId}` }, refetch)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -237,7 +240,7 @@ export function useApprovedTeam(businessId) {
     refetch();
     if (!businessId) return;
     const channel = supabase
-      .channel(`business_users_team:${businessId}`)
+      .channel(`business_users_team:${businessId}:${crypto.randomUUID()}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "business_users", filter: `business_id=eq.${businessId}` }, refetch)
       .subscribe();
     return () => { supabase.removeChannel(channel); };
