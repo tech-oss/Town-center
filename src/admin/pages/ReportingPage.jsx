@@ -137,9 +137,9 @@ export default function ReportingPage() {
 
         <span className="hidden sm:block w-px self-stretch my-1" style={{ backgroundColor: "rgba(16,24,40,0.1)" }} />
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
           <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>Tier</span>
-          <div className="flex gap-1 rounded-xl p-1" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
+          <div className="flex flex-wrap gap-1 rounded-xl p-1 min-w-0" style={{ backgroundColor: "rgba(16,24,40,0.05)" }}>
             {TIERS.map((t) => (
               <button
                 key={t}
@@ -172,16 +172,16 @@ export default function ReportingPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Revenue by tier */}
-        <Card title="Revenue by Tier" subtitle={`This month${tier !== "All" ? ` · ${tier}` : ""}`} info="Monthly recurring revenue from each plan — paying Visibility Plans earn, admin-given ones and Free earn nothing — plus what was taken this month in ad-hoc purchases (homepage slots and add-on slots).">
+        <Card title="Revenue by Tier" subtitle={`This month${tier !== "All" ? ` · ${tier}` : ""}`} info="The current month's revenue from each plan: paying Visibility Plans through Stripe, and Visibility Plans given by admin (which earn nothing), plus the current month's revenue from ad-hoc purchases (homepage slots and add-on slots). Free plans earn nothing and aren't shown.">
 
           <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={revenueByTier} barSize={32}>
+            <BarChart data={(revenueByTier ?? []).filter((r) => r.tier !== "Free")} barSize={32}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,24,40,0.08)" />
               <XAxis dataKey="tier" tick={{ fontSize: 11, fill: "#6B7280" }} />
               <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} tickFormatter={(v) => `£${v}`} />
-              <Tooltip formatter={(v) => [`£${v}`, "Revenue"]} contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }} />
+              <Tooltip formatter={(v) => [`£${v}`, "Current month revenue"]} contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }} />
               <Bar dataKey="revenue" radius={[6, 6, 0, 0]}>
-                {(revenueByTier ?? []).map((r) => <Cell key={r.tier} fill={BUCKET_COLOURS[r.tier] ?? "#2563EB"} />)}
+                {(revenueByTier ?? []).filter((r) => r.tier !== "Free").map((r) => <Cell key={r.tier} fill={BUCKET_COLOURS[r.tier] ?? "#2563EB"} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
