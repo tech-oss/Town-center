@@ -55,40 +55,40 @@ export const quickLinks = {
     "A vibrant riverside destination where historic charm meets contemporary living. Stroll along the Thames, browse independent shops and boutiques, relax in welcoming cafés and artisan coffee shops, enjoy waterside dining, and unwind in stylish bars. Family-friendly attractions and beautiful green spaces to world-renowned Michelin-starred restaurants just minutes away, there's something for every visitor to enjoy.",
   items: [
     {
-      label: "Eat & Drink",
-      href: "/eat-drink",
-      image: "/images/ql-food.jpg", // poster fallback while the video loads
-      video: "/videos/eat-drink.mp4", // 720×1280 portrait loop
-    },
-    {
-      label: "Shop",
-      href: "/shop",
-      image: "/images/ql-shop.jpg", // poster fallback while the video loads
-      video: "/videos/shops.mp4", // 720×1280 portrait loop
-    },
-    {
       label: "See & Do",
       href: "/see-do",
       image: "/images/ql-see.jpg", // poster fallback while the video loads
       video: "/videos/see-do.mp4", // 720×1280 portrait loop
     },
     {
-      label: "Green Spaces",
-      href: "/see-do?category=community",
-      image: "/images/ql-green.jpg", // poster fallback while the video loads
-      video: "/videos/boats.mp4", // 720×1280 portrait loop
+      label: "Eat & Drink",
+      href: "/eat-drink",
+      image: "/images/ql-food.jpg",
+      video: "/videos/eat-drink.mp4",
     },
     {
-      label: "Wellness",
-      href: "/see-do?category=sport-wellness",
-      image: "/images/ql-wellness.jpg", // poster fallback while the video loads
-      video: "/videos/wellness.mp4", // 720×1280 portrait loop
+      label: "Shop & Local Services",
+      href: "/shop",
+      image: "/images/ql-shop.jpg",
+      video: "/videos/shops.mp4",
     },
     {
-      label: "Getting Here",
-      href: "/getting-here",
-      image: "/images/ql-transport.jpg", // poster fallback while the video loads
-      video: "/videos/getting-here.mp4", // 720×1280 portrait loop
+      label: "Trades & Professionals",
+      href: "/services",
+      image: "/images/quick-links/trades.jpg",
+      video: "/videos/trades.mp4", // landscape; the tile crops to its centre
+    },
+    {
+      label: "Live & Stay",
+      href: "/live",
+      image: "/images/quick-links/live-stay.jpg",
+      video: "/videos/live-stay.mp4",
+    },
+    {
+      label: "Work",
+      href: "/work",
+      image: "/images/quick-links/work.jpg",
+      video: "/videos/work.mp4",
     },
   ],
 };

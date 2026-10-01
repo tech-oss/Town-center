@@ -213,7 +213,7 @@ export default function HomeScreen() {
           {/* ── Quick Links ── */}
           <div>
             <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>Quick Links</p>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {homeCategories.map((c) => (
                 <Link key={c.id} to={c.to} className="flex flex-col items-center gap-2 active:opacity-70">
                   <div className="relative w-full aspect-square rounded-2xl overflow-hidden">
