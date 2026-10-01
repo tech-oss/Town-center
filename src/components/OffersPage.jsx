@@ -21,7 +21,7 @@ const BUSINESS_TYPES = [
 ];
 
 
-const TYPE_ORDER = ["Featured", "Offer", "News"];
+const TYPE_ORDER = ["Featured", "Offer", "News", "Event"];
 
 function HomepageBadge() {
   return (

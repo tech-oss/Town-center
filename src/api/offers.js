@@ -3,9 +3,8 @@
 //   • Featured Stories (admin long-form articles)
 //   • every live news post and offer: a business's own posts and the posts
 //     admin writes in Business News & Offers
-// Events are not here: they live in See & Do and the What's On calendar.
-// Only the ones booked into a paid What's On slot used to appear, so some
-// events showed on Offers and most didn't.
+//   • every live event, tagged "Event" and filed under See & Do (one-off
+//     events whose date has passed are left out)
 // Items currently on the homepage are marked `homepage`. Paths are the
 // website's; the app prefixes them with /mobile.
 import { getStories } from "./stories";
@@ -13,6 +12,7 @@ import { getArticles } from "./articles";
 import { getStandaloneNewsOffers } from "./spotlight";
 import { getPromotedPosts } from "./promotedPosts";
 import { getLiveHomepageKeys } from "./homepageSlots";
+import { getEvents } from "./events";
 
 // A Featured Story's business type comes from its eyebrow (the section it's
 // filed under in the admin editor), so the Offers page's Business Type
@@ -35,13 +35,15 @@ function articleKey(a) {
 }
 
 export async function getOffersFeed() {
-  const [stories, articles, standalone, promoted, onHome] = await Promise.all([
+  const [stories, articles, standalone, promoted, onHome, events] = await Promise.all([
     getStories(),
     getArticles(),
     getStandaloneNewsOffers(),
     getPromotedPosts().catch(() => []),
     getLiveHomepageKeys(),
+    getEvents().catch(() => []),
   ]);
+  const todayIso = new Date().toISOString().slice(0, 10);
 
   const seen = new Set();
   const once = (key) => (seen.has(key) ? false : (seen.add(key), true));
@@ -79,10 +81,29 @@ export async function getOffersFeed() {
         title: a.title,
         excerpt: a.excerpt,
         date: a.date,
-        type: a.category,
+        // "What's On" is no longer a post type; older posts saved with it
+        // read as News, as everywhere else.
+        type: a.category === "What's On" ? "News" : a.category,
         businessName: a.business?.name ?? null,
         businessSection: a.business?.section ?? null,
         homepage: onHome.has(articleKey(a)),
+      })),
+    ...events
+      .filter((e) => e.recurrence || !e.iso || e.iso >= todayIso)
+      .map((e) => ({
+        key: `event:${e.slug}`,
+        slug: e.slug,
+        to: `/event/${e.slug}`,
+        image: e.image,
+        title: e.title,
+        excerpt: e.excerpt,
+        date: e.date,
+        type: "Event",
+        businessName: e.businessName ?? null,
+        // Every event sits under See & Do in the Business Type filter.
+        businessSection: "see-do",
+        category: (e.categories ?? []).join(" "),
+        homepage: !!e.homepage,
       })),
   ].filter((it) => it.slug && once(it.key))
     // Featured articles always lead the page, then whatever is on the

@@ -9,6 +9,7 @@ export const TYPE_COLORS = {
   Offer: "#F4D35E",
   News: "#8B5E3C",
   "What's On": "#0E9AA7",
+  Event: "#0E9AA7",
 };
 
 export const typeColor = (type) => TYPE_COLORS[type] ?? "var(--leaf)";

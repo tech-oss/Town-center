@@ -18,7 +18,7 @@ const BUSINESS_TYPES = [
   { key: "stay", label: "Hotels & Accommodation", color: categoryColor("stay") },
 ];
 
-const TYPE_ORDER = ["Featured", "Offer", "News"];
+const TYPE_ORDER = ["Featured", "Offer", "News", "Event"];
 
 
 function SearchInput({ value, onChange }) {
