@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import HeaderImage from "./HeaderImage";
 import useSiteSection from "../hooks/useSiteSection";
 import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
 import { card } from "../utils/design";
@@ -142,19 +143,14 @@ export default function CategoryPage() {
   // /services/tradespeople?category=builders), not the plain section path.
   const basePath = groupConfig ? `/services/${group}` : sec.path;
 
-  const catHero = category && sec.categoryHeroes?.[category];
-  // The landing header is whatever admin set in Site Content, or nothing —
-  // the built-in pictures are gone so the editor can be tested for real.
-  // A category's own hero (Services' sub-categories) is unaffected.
-  const heroSrc = isCategory
-    ? ((typeof catHero === "object" ? catHero.src : catHero) || sec.landing.hero)
-    : copy.hero;
-  const heroFit = typeof catHero === "object" ? catHero.fit : "cover";
-  const heroBg  = typeof catHero === "object" ? catHero.bg  : undefined;
-  // A separate desktop hero image, only set up for the Shop/Eat & Drink/
-  // Services landing pages so far — falls back to the single `heroSrc`
-  // everywhere else.
-  const heroDesktopSrc = !isCategory && copy.heroDesktop;
+  // The header is always the one admin set in Site Content, on the landing
+  // page and under every category — the built-in pictures (and the per-
+  // category ones, like Film's) are gone, so an upload shows everywhere.
+  const heroSrc = copy.hero;
+  const heroFit = "cover";
+  const heroBg = undefined;
+  // Desktop picture when one is set; the mobile one otherwise.
+  const heroDesktopSrc = copy.heroDesktop;
   // Services' desktop photo has its subject (a tradesperson up a ladder)
   // near the top of the frame — cover-cropping from dead center at wide
   // viewports (container aspect ~2:1 vs. the photo's own ~1.8:1) sliced
@@ -171,14 +167,7 @@ export default function CategoryPage() {
         className="relative w-full overflow-hidden h-[70vh] min-h-[520px]"
         style={{ backgroundColor: heroBg ?? "#1C2E38" }}
       >
-        {heroDesktopSrc ? (
-          <>
-            <img src={heroSrc || heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full md:hidden" style={{ objectFit: heroFit, objectPosition: "center" }} />
-            <img src={heroDesktopSrc} alt="" className="absolute inset-0 w-full h-full hidden md:block" style={{ objectFit: heroFit, objectPosition: heroDesktopPosition }} />
-          </>
-        ) : heroSrc ? (
-          <img src={heroSrc} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: heroFit, objectPosition: "center" }} />
-        ) : null}
+        <HeaderImage src={heroSrc} desktopSrc={heroDesktopSrc} fit={heroFit} />
         {/* Eat & Drink, Shop and Services show the hero photo with no
             darkening overlay, at the user's request — See & Do keeps the
             gradient so the white title stays readable over it. */}

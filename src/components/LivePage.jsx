@@ -1,3 +1,4 @@
+import HeaderImage from "./HeaderImage";
 import { Link } from "react-router-dom";
 import useSiteSection from "../hooks/useSiteSection";
 import { useEffect } from "react";
@@ -212,7 +213,7 @@ export default function LivePage() {
           / Getting Here heroes, so every editorial landing page in the site
           opens the same way. ── */}
       <section className="relative w-full h-[70vh] min-h-[520px] flex flex-col items-center justify-end text-center px-6 pb-12 md:pb-16 overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-        {copy.hero && <img src={copy.hero} alt="" className="absolute inset-0 w-full h-full object-cover" />}
+        <HeaderImage src={copy.hero} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>
           {copy.eyebrow}

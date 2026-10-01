@@ -1,3 +1,4 @@
+import { cropStyle } from "../../lib/focalPoint";
 import { useEffect, useMemo, useState } from "react";
 import useSiteSection from "../../hooks/useSiteSection";
 import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../../lib/amenityCategories";
@@ -270,7 +271,7 @@ export default function StayListingScreen() {
       <div className="flex flex-col">
         {landing.hero && (
           <div className="relative h-40 -mb-1">
-            <img src={landing.hero} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={landing.hero} alt="" className="absolute inset-0 w-full h-full object-cover" style={cropStyle(landing.hero, "hero")} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.05) 0%, rgba(20,33,42,0.55) 100%)" }} />
             <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
               {landing.title}

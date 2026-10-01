@@ -1,3 +1,4 @@
+import HeaderImage from "./HeaderImage";
 import { Link } from "react-router-dom";
 import { cropStyle } from "../lib/focalPoint";
 import useSiteSection from "../hooks/useSiteSection";
@@ -326,7 +327,7 @@ export default function OffersPage() {
       >
         {/* Header picture from Site Content → Offers & Stories; a plain band
             without one. */}
-        {copy.hero && <SmartImage src={copy.hero} alt="" size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />}
+        <HeaderImage src={copy.hero} />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{

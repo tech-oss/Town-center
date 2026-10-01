@@ -47,7 +47,7 @@ export default function LiveStayPickerScreen() {
   return (
     <MobileShell title="Live & Stay" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-6 mobile-stagger">
-        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" />}
+        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" style={cropStyle(copy.hero, "hero")} />}
         <div>
           <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
             {copy.title}

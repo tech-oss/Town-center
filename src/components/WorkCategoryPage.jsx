@@ -1,3 +1,4 @@
+import useSiteSection from "../hooks/useSiteSection";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useEffect } from "react";
 import { work } from "../Data/work";
@@ -8,12 +9,13 @@ export default function WorkCategoryPage() {
   const { category } = useParams();
   const cat = work.categories.find((c) => c.id === category);
   useEffect(() => { window.scrollTo(0, 0); }, [category]);
+  const copy = useSiteSection("work");
   if (!cat) return <Navigate to="/work" replace />;
 
   return (
     <div style={{ backgroundColor: "var(--sand)" }}>
       <section className="relative overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
-        <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" />
+        <img src={copy.hero} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(120deg, rgba(20,33,42,0.95), rgba(20,33,42,0.7))" }} />
         <div className="relative z-10 max-w-6xl mx-auto px-6 md:px-12 py-14 md:py-20">
           <nav className="mb-4 text-xs font-semibold tracking-[0.02em] uppercase" style={{ color: "var(--sage)" }}>

@@ -81,7 +81,7 @@ export default function OffersScreen() {
     <MobileShell title={copy.eyebrow || "Offers & Stories"} onBack backFallback="/mobile/home">
       <div className="flex flex-col gap-4 mobile-stagger">
         {/* Same header as the website — Site Content → Offers & Stories. */}
-        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" />}
+        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" style={cropStyle(copy.hero, "hero")} />}
         <p className="text-sm" style={{ color: "#000000" }}>{copy.intro}</p>
 
         <SearchInput value={search} onChange={setSearch} />

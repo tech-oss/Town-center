@@ -1,3 +1,4 @@
+import { cropStyle } from "../../lib/focalPoint";
 import { Link } from "react-router-dom";
 import MobileShell from "./MobileShell";
 import SmartImage from "../../components/SmartImage";
@@ -26,7 +27,7 @@ export default function TextScreen({ sectionKey, barTitle, highlight }) {
         <div className="relative px-6 py-14 text-center overflow-hidden" style={{ backgroundColor: "var(--forest)" }}>
           {copy.hero && (
             <>
-              <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />
+              <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" style={cropStyle(copy.hero, "hero")} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.55) 0%, rgba(20,33,42,0.8) 100%)" }} />
             </>
           )}

@@ -1,3 +1,5 @@
+import HeaderImage from "./HeaderImage";
+import useSiteSection from "../hooks/useSiteSection";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { work } from "../Data/work";
@@ -32,6 +34,8 @@ const EXPLORE_ELSEWHERE = [
 
 export default function WorkPage() {
   useEffect(() => { window.scrollTo(0, 0); }, []);
+  // Header picture and title, editable in Site Content → Work.
+  const copy = useSiteSection("work");
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
@@ -41,10 +45,10 @@ export default function WorkPage() {
           (See & Do, Shop, Live & Stay, etc.): full-bleed image, title only.
           The header floats transparently over it too. ── */}
       <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]">
-        <img src={work.hero.image} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <HeaderImage src={copy.hero} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>
-            Work In Maidenhead
+            {copy.title}
           </h1>
         </div>
       </section>

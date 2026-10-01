@@ -1,3 +1,4 @@
+import HeaderImage from "./HeaderImage";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cropStyle } from "../lib/focalPoint";
 import useSiteSection from "../hooks/useSiteSection";
@@ -366,7 +367,7 @@ export default function StayListingPage({ kind }) {
       {/* ── Hero banner — same treatment as Eat & Drink's: full-bleed photo,
           no darkening overlay, header floats transparent over it. ── */}
       <section className="relative w-full overflow-hidden h-[70vh] min-h-[520px]" style={{ backgroundColor: "var(--forest)" }}>
-        {landing.hero && <img src={landing.hero} alt="" className="absolute inset-0 w-full h-full" style={{ objectFit: "cover", objectPosition: "center" }} />}
+        <HeaderImage src={landing.hero} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.15) 0%, rgba(20,33,42,0.1) 40%, rgba(20,33,42,0.72) 100%)" }} />
         <div className="relative z-10 h-full max-w-6xl mx-auto px-6 md:px-12 flex flex-col justify-end pb-12">
           <h1 className="hero-title uppercase text-white text-4xl md:text-6xl lg:text-7xl max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>

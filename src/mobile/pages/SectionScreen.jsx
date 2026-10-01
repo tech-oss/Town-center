@@ -1,3 +1,4 @@
+import { cropStyle } from "../../lib/focalPoint";
 import { useState, useMemo } from "react";
 import { appSectionLabel } from "../lib/sectionLabels";
 import ListingCard from "../../components/ListingCard";
@@ -123,7 +124,7 @@ export default function SectionScreen({ sectionKey }) {
         {/* The header image admin sets in Site Content (mobile first, then
             desktop). Nothing set, nothing shown. */}
         {(copy.hero || copy.heroDesktop) && (
-          <img src={copy.hero || copy.heroDesktop} alt="" className="w-full aspect-[16/9] rounded-2xl object-cover" />
+          <img src={copy.hero || copy.heroDesktop} alt="" className="w-full aspect-[16/9] rounded-2xl object-cover" style={cropStyle(copy.hero || copy.heroDesktop, "hero")} />
         )}
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{copy.intro ?? section.landing?.intro}</p>
 

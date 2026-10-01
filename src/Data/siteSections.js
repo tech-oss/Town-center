@@ -369,6 +369,20 @@ export const SITE_SECTIONS = [
     },
   },
   {
+    key: "work",
+    label: "Work",
+    page: "/work",
+    blurb: "The header of the Work page on the website.",
+    fields: [
+      text("title", "Page title"),
+      image("hero", "Header image"),
+    ],
+    defaults: {
+      title: "Work In Maidenhead",
+      hero: "/images/slide-river.jpg",
+    },
+  },
+  {
     key: "get-the-app",
     label: "Get the App",
     page: "/get-the-app",
@@ -405,6 +419,23 @@ export const SITE_SECTIONS = [
     },
   },
 ];
+
+// Which places each page-header picture appears in, so the editor's cropper
+// shows (and saves) a frame for each: the website header on a computer
+// ("wide") and on a phone ("tall"), and the app's header ("hero", 16:9).
+// When a page has a separate desktop picture, the main one is only used on
+// phones and in the app.
+const HEADER_FIELDS = ["hero", "heroImage"];
+const DESKTOP_FIELDS = ["heroDesktop", "heroImageDesktop"];
+for (const section of SITE_SECTIONS) {
+  if (section.key === "get-the-app") continue; // a picture beside the text, not a header
+  const hasDesktop = section.fields.some((f) => DESKTOP_FIELDS.includes(f.name));
+  for (const f of section.fields) {
+    if (f.type !== "image") continue;
+    if (DESKTOP_FIELDS.includes(f.name)) f.frames = ["wide"];
+    else if (HEADER_FIELDS.includes(f.name)) f.frames = hasDesktop ? ["tall", "hero"] : ["wide", "tall", "hero"];
+  }
+}
 
 // The Getting Here page keeps its own editor: it is a whole page document
 // (transport, parking, tips), not a header, so it does not belong in the

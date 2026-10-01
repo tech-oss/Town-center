@@ -6,6 +6,7 @@ import { GETTING_HERE_DEFAULTS } from "../../Data/adminMissingScreensMock";
 import { getSiteContent, saveSiteSection } from "../../api/admin";
 import GettingHereEditor from "./siteContent/GettingHereEditor";
 import FocalPointPicker from "../components/FocalPointPicker";
+import ImageFramer from "../../components/ImageFramer";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 // Edits the words and pictures at the top of each public page.
@@ -38,7 +39,7 @@ function Toast({ message, error }) {
   );
 }
 
-function ImageField({ label, hint, value, onChange }) {
+function ImageField({ label, hint, frames, value, onChange }) {
   const [busy, setBusy] = useState(false);
   return (
     <div className="flex flex-col gap-1.5">
@@ -67,7 +68,11 @@ function ImageField({ label, hint, value, onChange }) {
           </button>
         )}
       </div>
-      <FocalPointPicker value={value} onChange={onChange} />
+      {/* Header pictures get the "How it will look" cropper, one frame per
+          place the picture is shown; other pictures keep the focus picker. */}
+      {frames?.length
+        ? <ImageFramer value={value} frames={frames} onChange={onChange} />
+        : <FocalPointPicker value={value} onChange={onChange} />}
       {hint && <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{hint}</span>}
     </div>
   );
@@ -166,7 +171,7 @@ function FieldControl({ field: f, value, onChange, placeholder = "" }) {
   if (f.type === "heading") {
     return <p className="text-[11px] font-bold uppercase tracking-wider pt-3 -mb-1" style={{ color: BLUE, borderTop: `1px solid ${BORDER}` }}>{f.label}</p>;
   }
-  if (f.type === "image") return <ImageField label={f.label} hint={f.hint} value={value ?? ""} onChange={onChange} />;
+  if (f.type === "image") return <ImageField label={f.label} hint={f.hint} frames={f.frames} value={value ?? ""} onChange={onChange} />;
   if (f.type === "video") return <VideoField label={f.label} hint={f.hint} value={value ?? ""} onChange={onChange} />;
   if (f.type === "paragraphs") return <ParagraphsField label={f.label} hint={f.hint} value={value} onChange={onChange} />;
   if (f.type === "blocks") return <BlocksField field={f} value={value} onChange={onChange} />;

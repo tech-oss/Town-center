@@ -1,3 +1,4 @@
+import HeaderImage from "./HeaderImage";
 import SmartImage from "./SmartImage";
 
 // The dark header band shared by Our Story, Our Traders and Work With Us.
@@ -11,7 +12,7 @@ export default function TextPageHero({ copy }) {
     >
       {copy.hero && (
         <>
-          <SmartImage src={copy.hero} alt="" size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />
+          <HeaderImage src={copy.hero} />
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.55) 0%, rgba(20,33,42,0.8) 100%)" }} />
         </>
       )}

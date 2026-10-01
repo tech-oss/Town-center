@@ -106,8 +106,6 @@ export const sections = {
       title: "Shop",
       intro:
         "From independent boutiques to high-street favourites — spanning beauty, fashion, homeware and more, you'll find everything you need across Maidenhead.",
-      hero: "/images/shop-hero.png",
-      heroDesktop: "/images/shop-hero-desktop.png",
     },
     columns: [
       {
@@ -130,8 +128,6 @@ export const sections = {
       title: "Services in Maidenhead",
       intro:
         "Trusted local tradespeople and professionals – from builders and electricians to accountants and solicitors – all on hand in Maidenhead",
-      hero: "/images/services/hero-square.jpg",
-      heroDesktop: "/images/services/hero-desktop.jpg",
     },
     columns: [
       {
@@ -181,8 +177,6 @@ export const sections = {
       title: "Eat & Drink",
       intro:
         "Experience Maidenhead in a whole new way from scenic riverside terraces and independent restaurants to cosy cafés and vibrant bars, there's a perfect spot for every occasion.",
-      hero: "/images/eat-drink/hero.jpg",
-      heroDesktop: "/images/eat-drink/hero.jpg",
     },
     columns: [
       {
@@ -205,10 +199,6 @@ export const sections = {
       title: "See & Do",
       intro:
         "With a vibrant mix of leisure, entertainment, shopping, dining and wellbeing experiences, alongside a year-round calendar of events, there's always something new to discover in Maidenhead. Explore everything the town has to offer and start planning your visit today.",
-      hero: "/images/see-do-hero.png",
-    },
-    categoryHeroes: {
-      film: { src: "/images/cinema.png", fit: "contain", bg: "#0a0a0f" },
     },
     columns: [
       {
