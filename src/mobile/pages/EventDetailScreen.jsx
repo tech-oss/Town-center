@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link } from "react-router-dom";
+import MiniMap from "../components/MiniMap";
 import { cropStyle } from "../../lib/focalPoint";
 import { externalUrl } from "../../lib/externalUrl";
 import { toSeeDoSlugs, eventCategoryLabel } from "../../lib/eventCategories";
@@ -89,6 +90,16 @@ export default function EventDetailScreen() {
               </div>
             )}
           </MobileCard>
+
+          {/* Where it is: the event's own pin or place, else its host's. */}
+          {(() => {
+            const n = (v) => (v != null && v !== "" ? Number(v) : null);
+            const place = event.location?.trim();
+            const lat = n(event.lat) ?? (place ? null : event.businessLat);
+            const lng = n(event.lng) ?? (place ? null : event.businessLng);
+            const query = place ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`) : event.businessAddress;
+            return (lat != null || query) ? <MiniMap query={query} lat={lat ?? undefined} lng={lng ?? undefined} /> : null;
+          })()}
 
           {event.standfirst && (
             <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{event.standfirst}</p>

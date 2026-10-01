@@ -91,6 +91,10 @@ async function withBusiness(events) {
       businessSlug: b.slug,
       businessSection: b.section,
       businessStayKind: b.stayKind,
+      // Where the host is, for an event that has no place of its own saved.
+      businessAddress: b.address ?? null,
+      businessLat: b.lat != null && b.lat !== "" ? Number(b.lat) : null,
+      businessLng: b.lng != null && b.lng !== "" ? Number(b.lng) : null,
       // Hotels live under /live/stay/…, not /<section>/place/….
       businessTo: webPathFor(b),
     };

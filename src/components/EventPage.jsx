@@ -10,6 +10,7 @@ import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
 import PlaceDetailLayout, { CalendarIcon, TicketIcon } from "./PlaceDetailLayout";
 import NewsOffers from "./NewsOffers";
+import BusinessReviews from "./BusinessReviews";
 import ClaimBusinessBox from "./ClaimBusinessBox";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 
@@ -23,7 +24,25 @@ import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 // Businesses carry the full contact/hours/social data used by PlaceDetailLayout;
 // real What's On events only have date/time/tickets/location.
 function asEvent(rawEvent, it) {
-  if (rawEvent) return { ...rawEvent, isBusiness: false };
+  if (rawEvent) {
+    // Where to pin the map: the event's own coordinates, else its own place,
+    // else the host business. A bare place name ("Market place") is looked up
+    // within Maidenhead, not anywhere in the world.
+    const ownLat = rawEvent.lat != null && rawEvent.lat !== "" ? Number(rawEvent.lat) : null;
+    const ownLng = rawEvent.lng != null && rawEvent.lng !== "" ? Number(rawEvent.lng) : null;
+    const place = rawEvent.location?.trim();
+    const useHost = ownLat == null && !place;
+    return {
+      ...rawEvent,
+      isBusiness: false,
+      lat: ownLat ?? (useHost ? rawEvent.businessLat : null),
+      lng: ownLng ?? (useHost ? rawEvent.businessLng : null),
+      location: place || rawEvent.businessAddress || null,
+      mapQuery: place
+        ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`)
+        : rawEvent.businessAddress || null,
+    };
+  }
   if (!it || it.section !== "see-do") return null;
   const body = it.paragraphs
     ? it.paragraphs.map((p) => ({ text: p }))
@@ -46,6 +65,8 @@ function asEvent(rawEvent, it) {
     email: it.email,
     social: it.social,
     mapQuery: it.mapQuery,
+    lat: it.lat != null && it.lat !== "" ? Number(it.lat) : null,
+    lng: it.lng != null && it.lng !== "" ? Number(it.lng) : null,
   };
 }
 
@@ -138,7 +159,12 @@ export default function EventPage() {
         { label: "See & Do", to: "/see-do" },
         { label: categoryLabel, to: `/see-do?category=${categorySlug}` },
       ]}
-      backLink={{ label: "View full calendar", to: "/whats-on" }}
+      // A See & Do business goes back to See & Do; only an event goes back to
+      // the calendar.
+      backLink={event.isBusiness ? { label: "See & Do", to: "/see-do" } : { label: "View full calendar", to: "/whats-on" }}
+      // FAQs and reviews, as on every other business page — the See & Do
+      // business page used to leave both out on the website.
+      faq={event.isBusiness && !free ? business.faq : null}
       categoryLabel={categoryLabel}
       extraBadges={otherSlugs.length ? otherSlugs.map((s) => (
         <Link key={s} to={`/see-do?category=${s}`}
@@ -164,7 +190,11 @@ export default function EventPage() {
       email={event.email}
       website={free ? null : event.website}
       social={free ? null : buildSocial(event.social)}
-      directionsQuery={free ? null : (event.mapQuery || event.location)}
+      directionsQuery={free ? null : (event.mapQuery || event.location || (event.lat != null ? event.title : null))}
+      // Saved coordinates put the pin straight on the map, with no address
+      // lookup that can fail.
+      mapLat={free ? null : event.lat}
+      mapLng={free ? null : event.lng}
       // A booking link is shown whenever the event has one. A free event can
       // still need booking — that link used to be dropped, so a "Free" event
       // published its booking URL nowhere at all.
@@ -172,7 +202,7 @@ export default function EventPage() {
       extraButtonHref={event.bookingUrl}
       afterMap={event.isBusiness && (free
         ? <><NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={business.businessId} /></>
-        : <NewsOffers item={business} />)}
+        : <><BusinessReviews reviews={business.reviews} /><NewsOffers item={business} /></>)}
       shareTitle={`${event.title} — Maidenhead`}
       // "More What's On", as the app's event screen calls the same list.
       // These are other events, and See & Do is the business section, so the

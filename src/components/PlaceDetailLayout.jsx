@@ -191,6 +191,8 @@ export default function PlaceDetailLayout({
   website,
   social,
   directionsQuery,
+  mapLat,
+  mapLng,
   shareTitle,
   relatedHeading,
   related = [],
@@ -606,6 +608,8 @@ export default function PlaceDetailLayout({
         <section className="pb-16">
           <LocationMap
             query={directionsQuery}
+            lat={mapLat || undefined}
+            lng={mapLng || undefined}
             heading={null}
             note={address}
             rounded={false}
