@@ -245,7 +245,8 @@ export default function FeatureArticleApprovalsPage() {
     if (!window.confirm(`Delete "${a.title}" for good? This cannot be undone.`)) return;
     await deleteFeatureArticle(a.id);
     flash(`"${a.title}" deleted.`);
-    advance();
+    // Back to the list, rather than opening the next article in its place.
+    setOpenId(null);
     refresh();
   }
 
