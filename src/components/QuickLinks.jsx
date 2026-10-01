@@ -83,10 +83,10 @@ export default function QuickLinks() {
 
                 {/* ── Label (bottom-left, serif) ── */}
                 <span
-                  className="absolute bottom-0 left-0 right-0 p-4 text-lg md:text-xl font-bold leading-tight text-white"
-                  // Long labels ("Trades & Professionals") shrink to fit the
-                  // tile rather than spilling past its edge.
-                  style={{ fontFamily: "var(--font-heading)", fontSize: item.label.length > 12 ? "clamp(0.85rem, 1.15vw, 1.25rem)" : undefined, overflowWrap: "anywhere" }}
+                  className="absolute bottom-0 left-0 right-0 p-4 text-base lg:text-[17px] xl:text-lg font-semibold leading-snug text-white"
+                  // One size and weight for every tile, small enough that the
+                  // longest label ("Trades & Professionals") fits on two lines.
+                  style={{ fontFamily: "var(--font-heading)", overflowWrap: "anywhere" }}
                 >
                   {item.label}
                 </span>
