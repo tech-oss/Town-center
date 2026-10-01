@@ -13,7 +13,7 @@ import { FRAMES, cropOf, cropsOf, withCrop } from "../../lib/focalPoint";
 //
 // Kept identical in the admin panel and the business portal.
 
-const PREVIEW_WIDTH = { hero: 300, card: 170, gallery: 150, logo: 120 };
+const PREVIEW_WIDTH = { hero: 300, card: 170, gallery: 150, logo: 120, wide: 340, tall: 140 };
 
 function Frame({ src, frame, onCrop, aspect, label }) {
   const spec = { ...FRAMES[frame], ...(aspect ? { aspect } : {}), ...(label ? { label } : {}) };
@@ -103,7 +103,9 @@ export default function ImageFramer({ value, frames, onChange }) {
                 <Frame key="card" src={value} frame="card" label="Listing card (computer)" onCrop={set} />,
                 <Frame key="card-phone" src={value} frame="card" aspect={4 / 3} label="Listing card (phone & app)" onCrop={set} />,
               ]
-            : [<Frame key={f} src={value} frame={f} onCrop={set} />];
+            // Beside the website's header frames, "hero" is the app's header.
+            : [<Frame key={f} src={value} frame={f} onCrop={set}
+                label={f === "hero" && (frames.includes("wide") || frames.includes("tall")) ? "App header" : undefined} />];
         })}
       </div>
     </div>

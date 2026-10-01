@@ -21,7 +21,7 @@
 
 // Wide enough for a full-bleed hero on a 2× display; far beyond any card.
 const MAX_EDGE = 1600;
-const QUALITY = 0.82;
+const QUALITY = 0.78;
 // Below this, re-encoding tends to cost more than it saves.
 const SKIP_UNDER_BYTES = 120 * 1024;
 
@@ -41,10 +41,11 @@ function canvasToBlob(canvas, type, quality) {
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
 
-// Every picture is stored as WebP and under TARGET_BYTES (300KB). Quality
+// Every picture is stored as WebP and as small as it can be without visible
+// loss: under TARGET_BYTES (200KB), whatever size it arrived at. Quality
 // comes down first, in steps, and only if that isn't enough is the picture
 // made smaller, so detail is kept wherever the size allows.
-const TARGET_BYTES = 300 * 1024;
+const TARGET_BYTES = 200 * 1024;
 const MIN_QUALITY = 0.5;
 
 // Returns a File to upload — the compressed one when that's smaller, and the

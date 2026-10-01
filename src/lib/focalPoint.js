@@ -79,6 +79,10 @@ export function withFocal(src, { x, y }) {
 
 export const FRAMES = {
   hero: { label: "Page header", aspect: 16 / 9 },
+  // A website page's full-width header band: wide on a computer, tall on a
+  // phone. The app shows the same picture as "hero" (16:9).
+  wide: { label: "Website header (computer)", aspect: 2.4 },
+  tall: { label: "Website header (phone)", aspect: 2 / 3 },
   card: { label: "Listing card", aspect: 1 },
   gallery: { label: "Gallery tile", aspect: 1 },
   logo: { label: "Logo", aspect: 1 },
