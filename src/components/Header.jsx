@@ -36,7 +36,8 @@ function withFeatured(businesses) {
 }
 
 // Routes whose hero banner the header floats transparently over.
-const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/guides", "/getting-here", "/live", "/live/stay/hotels", "/live/stay/accommodation", "/work"];
+const TRANSPARENT_HERO_PATHS = ["/", "/see-do", "/shop", "/eat-drink", "/services", "/offers", "/explore/the-future", "/guides", "/getting-here", "/live", "/live/stay/hotels", "/live/stay/accommodation", "/work",
+  "/services/tradespeople", "/services/professionals", "/services/freelancers"];
 const TRANSPARENT_HERO_PREFIXES = ["/guides/", "/work/developments/", "/live/building/"];
 
 // ─── Desktop mega-menu ───────────────────────────────────────────────────
