@@ -14,7 +14,7 @@ export const homeCategories = [
   { id: "see-do", label: "See & Do", lines: ["See &", "Do"], image: "/images/quick-links/see-do.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", label: "Eat & Drink", lines: ["Eat &", "Drink"], image: "/images/quick-links/eat-drink.jpg", to: "/mobile/eat-drink" },
   { id: "shop", label: "Shop & Local Services", lines: ["Shop &", "Local Services"], image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
-  { id: "services", label: "Trades & Professionals", lines: ["Trades &", "Professionals"], image: "/images/quick-links/trades.jpg", to: "/mobile/services" },
+  { id: "services", label: "Trades & Professionals", lines: ["Trades &", "Professionals"], image: "/images/quick-links/trades-team.webp", to: "/mobile/services" },
   { id: "live", label: "Live & Stay", lines: ["Live &", "Stay"], image: "/images/quick-links/live-stay.jpg", to: "/mobile/live" },
   { id: "work", label: "Work", lines: ["Work", "\u00a0"], image: "/images/quick-links/work-office.jpg", to: "/mobile/work" },
 ];
