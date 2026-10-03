@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
+import MobileHero from "../components/MobileHero";
+import useSiteSection from "../../hooks/useSiteSection";
 
 // Services covers three genuinely different audiences — tradespeople,
 // professionals and freelancers — each with their own category set on the
@@ -55,15 +57,21 @@ const OPTIONS = [
 ];
 
 export default function ServicesPickerScreen() {
+  // Header picture, title and intro from Site Content → Services: the same
+  // words the website's Trades & Professionals page shows under its header.
+  const copy = useSiteSection("services");
   return (
-    <MobileShell title="Services" onBack backFallback="/mobile/explore">
+    <MobileShell title="Trades & Professionals" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-6 mobile-stagger">
+        <MobileHero src={copy.hero || copy.heroDesktop} title={copy.title} />
         <div>
-          <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
-            What service are you looking for?
-          </h1>
+          {!(copy.hero || copy.heroDesktop) && (
+            <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
+              {copy.title}
+            </h1>
+          )}
           <p className="text-sm font-medium" style={{ color: "#000000" }}>
-            Choose a category to see local listings and filters for just that group.
+            {copy.intro}
           </p>
         </div>
 
