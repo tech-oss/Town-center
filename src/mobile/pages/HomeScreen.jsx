@@ -71,7 +71,10 @@ export default function HomeScreen() {
   const featuredStories = stories ?? [];
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
-  const [videoPlaying, setVideoPlaying] = useState(true);
+  // Only true once the video is actually playing. It used to start true, so
+  // when iOS blocked autoplay (Low Power Mode does) the button showed
+  // "pause" over a video that had never started.
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -83,7 +86,7 @@ export default function HomeScreen() {
     v.muted = true;
     v.defaultMuted = true;
     v.playsInline = true;
-    const play = () => v.play().catch(() => {});
+    const play = () => v.play().catch(() => setVideoPlaying(false));
     play();
     v.addEventListener("canplay", play, { once: true });
 
@@ -105,8 +108,8 @@ export default function HomeScreen() {
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
-      v.play().catch(() => {});
-      setVideoPlaying(true);
+      // A tap is a user gesture, which iOS accepts even in Low Power Mode.
+      v.play().then(() => setVideoPlaying(true)).catch(() => setVideoPlaying(false));
     } else {
       v.pause();
       setVideoPlaying(false);
@@ -121,7 +124,6 @@ export default function HomeScreen() {
         <div className="relative h-56 overflow-hidden">
           <video
             ref={videoRef}
-            className="absolute inset-0 w-full h-full object-cover"
             key={heroVideo}
             src={heroVideo}
             poster={heroVideo === "/videos/hero-mobile.mp4" ? "/images/hero-poster-mobile.jpg" : undefined}
@@ -129,13 +131,26 @@ export default function HomeScreen() {
             loop
             playsInline
             autoPlay
+            // Hide iOS's own big play button: it sits under the overlay
+            // below, so tapping it did nothing. Ours (centre) replaces it.
+            className="home-hero-video absolute inset-0 w-full h-full object-cover"
           />
+          <style>{`.home-hero-video::-webkit-media-controls-start-playback-button{display:none!important;-webkit-appearance:none}.home-hero-video::-webkit-media-controls{display:none!important}`}</style>
           <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(12,20,24,0.45) 0%, rgba(12,20,24,0.05) 40%, rgba(12,20,24,0.15) 65%, rgba(12,20,24,0.7) 100%)" }} />
 
+          {/* Autoplay blocked (iOS Low Power Mode): one large play button in
+              the middle, which starts the video on tap. */}
+          {!videoPlaying && (
+            <button type="button" onClick={toggleVideo} aria-label="Play background video"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] w-16 h-16 rounded-full flex items-center justify-center active:opacity-80"
+              style={{ backgroundColor: "rgba(0,0,0,0.45)", backdropFilter: "blur(2px)" }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+            </button>
+          )}
           {/* Plays by default; if playback stalls it pauses itself and this
               button flips to "play" so the user has something to tap
               instead of a frozen frame. Also doubles as a manual toggle. */}
-          <button
+          {videoPlaying && <button
             type="button"
             onClick={toggleVideo}
             aria-label={videoPlaying ? "Pause background video" : "Play background video"}
@@ -147,7 +162,7 @@ export default function HomeScreen() {
             ) : (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
             )}
-          </button>
+          </button>}
           <div className="absolute top-3 left-5 right-3 flex items-center justify-between">
             <img src="/logo-mark.svg" alt="" className="h-7 w-auto" />
             <div className="flex items-center gap-2">
