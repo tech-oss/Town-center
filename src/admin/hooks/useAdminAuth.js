@@ -1,3 +1,4 @@
+import { recordLogin } from "../../lib/recordLogin";
 import { useSyncExternalStore } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -40,6 +41,8 @@ async function refreshFromSession(session) {
   currentAdmin = error || !row ? null : fromRow(row);
   restored = true;
   emit();
+  // Coming back while still signed in counts as a sign-in, once a day.
+  if (currentAdmin && !signingIn) recordLogin("admin", session.user.id);
 }
 
 supabase.auth.getSession().then(({ data }) => refreshFromSession(data.session));
@@ -49,7 +52,16 @@ supabase.auth.onAuthStateChange((_event, session) => refreshFromSession(session)
 // attribute audit log entries without every caller passing it down.
 export function getCurrentAdmin() { return currentAdmin; }
 
+// Set while login() runs, so the session refresh it triggers doesn't record
+// the same sign-in a second time.
+let signingIn = false;
+
 export async function login(email, password) {
+  signingIn = true;
+  try { return await doLogin(email, password); } finally { signingIn = false; }
+}
+
+async function doLogin(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: error.message };
   await refreshFromSession(data.session);
@@ -59,8 +71,7 @@ export async function login(email, password) {
   }
   // For the Reporting page's User Activity chart. Fire and forget: a failure
   // to record must never block signing in.
-  supabase.rpc("record_login", { p_portal: "admin" })
-    .then(({ error: e }) => { if (e) console.warn("Login not recorded:", e.message); });
+  recordLogin("admin", data.session.user.id, null, { always: true });
   return { ok: true };
 }
 

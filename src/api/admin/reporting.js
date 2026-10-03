@@ -289,20 +289,62 @@ export async function getSubscriptionTrend({ range = "6m", tier = "All" } = {}) 
 // like a new listing.
 export async function getActivityTrend({ range = "6m" } = {}) {
   const { since, until } = resolveRange(range);
-  const buckets = monthBuckets(since, until);
+  const { buckets, keyOf } = activityBuckets(since, until);
   const [loginsRes, bizRes] = await Promise.all([
     supabase.from("portal_logins").select("created_at, portal").gte("created_at", since.toISOString()),
-    supabase.from("businesses").select("submitted_at"),
+    supabase.from("businesses").select("submitted_at").gte("submitted_at", since.toISOString()),
   ]);
   // No login table yet (migration not run) reads as no logins, not an error.
   const logins = loginsRes.error ? [] : (loginsRes.data ?? []);
   if (bizRes.error) throw bizRes.error;
 
-  return buckets.map(({ key, month }) => ({
-    month,
-    logins: logins.filter((l) => monthKey(l.created_at) === key).length,
-    listings: (bizRes.data ?? []).filter((b) => monthKey(b.submitted_at) === key).length,
+  const count = (rows, field) => {
+    const n = new Map();
+    for (const r of rows) {
+      const k = r[field] && keyOf(new Date(r[field]));
+      if (k) n.set(k, (n.get(k) ?? 0) + 1);
+    }
+    return n;
+  };
+  const loginsBy = count(logins, "created_at");
+  const listingsBy = count(bizRes.data ?? [], "submitted_at");
+  return buckets.map(({ key, label }) => ({
+    month: label,
+    logins: loginsBy.get(key) ?? 0,
+    listings: listingsBy.get(key) ?? 0,
   }));
+}
+
+// Points for the User Activity chart, sized to the range: one per day up to
+// two months, one per week up to about seven months, one per month beyond.
+// It used to be one point per month whatever the range, so "Last 30 days"
+// was drawn as two points — all of last month against the first few days of
+// this one — and always looked like activity had collapsed.
+function activityBuckets(since, until) {
+  const days = (until - since) / 86400000;
+  const pad = (n) => String(n).padStart(2, "0");
+  const dayKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const label = (d) => `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
+  if (days <= 62) {
+    const buckets = [];
+    for (let d = startOfDay(since); d <= until; d.setDate(d.getDate() + 1)) {
+      buckets.push({ key: dayKey(d), label: label(d) });
+    }
+    return { buckets, keyOf: (d) => dayKey(d) };
+  }
+  if (days <= 215) {
+    // Weeks starting on Monday.
+    const weekStart = (d) => { const x = startOfDay(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+    const buckets = [];
+    for (let d = weekStart(since); d <= until; d.setDate(d.getDate() + 7)) {
+      buckets.push({ key: dayKey(d), label: label(d) });
+    }
+    return { buckets, keyOf: (d) => dayKey(weekStart(d)) };
+  }
+  const buckets = monthBuckets(since, until).map(({ key, month }) => ({ key, label: month }));
+  return { buckets, keyOf: (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}` };
 }
 
 // ─── Ad-hoc purchases ──────────────────────────────────────────────────────

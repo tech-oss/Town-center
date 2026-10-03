@@ -205,12 +205,12 @@ export default function ReportingPage() {
         </Card>
 
         {/* Activity trend */}
-        <Card title="User Activity" subtitle={`Logins & new listings · ${rangeLabel}`} info="Sign-ins to the business dashboard and Maidenhead admin (blue), and new businesses registered (green), per month. Sign-ins are recorded from now on; before tracking began only each account's most recent sign-in is known.">
+        <Card title="User Activity" subtitle={`Logins & new listings · ${rangeLabel}`} info="Sign-ins by business owners, content managers and Maidenhead admin (blue), and new businesses registered (green) — per day for ranges up to two months, per week up to about seven months, and per month beyond. Every password sign-in is counted, and someone who comes back while still signed in is counted once a day.">
 
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={activityTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(16,24,40,0.08)" />
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6B7280" }} />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#6B7280" }} minTickGap={16} />
               <YAxis tick={{ fontSize: 11, fill: "#6B7280" }} allowDecimals={false} />
               <Tooltip contentStyle={{ borderRadius: 12, border: "none", boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
