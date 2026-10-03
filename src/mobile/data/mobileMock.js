@@ -16,7 +16,7 @@ export const homeCategories = [
   { id: "shop", label: "Shop & Local Services", lines: ["Shop &", "Local Services"], image: "/images/quick-links/shop.jpg", to: "/mobile/shop" },
   { id: "services", label: "Trades & Professionals", lines: ["Trades &", "Professionals"], image: "/images/quick-links/trades.jpg", to: "/mobile/services" },
   { id: "live", label: "Live & Stay", lines: ["Live &", "Stay"], image: "/images/quick-links/live-stay.jpg", to: "/mobile/live" },
-  { id: "work", label: "Work", lines: ["Work", "\u00a0"], image: "/images/quick-links/work.jpg", to: "/mobile/work" },
+  { id: "work", label: "Work", lines: ["Work", "\u00a0"], image: "/images/quick-links/work-office.jpg", to: "/mobile/work" },
 ];
 
 // ─── Explore hub ───────────────────────────────────────────────────────────────
