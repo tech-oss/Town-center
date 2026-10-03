@@ -1,3 +1,4 @@
+import { recordLogin } from "../../lib/recordLogin";
 import { useSyncExternalStore } from "react";
 import { logActivity } from "../api/businessActivity";
 import { supabase } from "../../lib/supabaseClient";
@@ -151,6 +152,8 @@ async function refreshFromSession(session) {
   currentUser = user;
   restored = true;
   emit();
+  // Coming back while still signed in counts as a sign-in, once a day.
+  if (user && !signingIn) recordLogin("business", session.user.id, row.business_id);
 }
 
 // Re-reads the signed-in user's row. Used after a write that changes
@@ -164,7 +167,16 @@ export async function refresh() {
 supabase.auth.getSession().then(({ data }) => refreshFromSession(data.session));
 supabase.auth.onAuthStateChange((_event, session) => refreshFromSession(session));
 
+// Set while login() runs, so the session refresh it triggers doesn't record
+// the same sign-in a second time.
+let signingIn = false;
+
 export async function login(email, password) {
+  signingIn = true;
+  try { return await doLogin(email, password); } finally { signingIn = false; }
+}
+
+async function doLogin(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: error.message };
 
@@ -199,8 +211,7 @@ export async function login(email, password) {
   if (!currentUser) return { ok: false, error: "No approved business account found for this login." };
   // For Maidenhead admin's User Activity chart. Fire and forget: a failure to
   // record must never block signing in.
-  supabase.rpc("record_login", { p_portal: "business", p_business_id: row.business_id })
-    .then(({ error: e }) => { if (e) console.warn("Login not recorded:", e.message); });
+  recordLogin("business", data.session.user.id, row.business_id, { always: true });
   return { ok: true };
 }
 
