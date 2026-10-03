@@ -75,8 +75,8 @@ export const quickLinks = {
     {
       label: "Trades & Professionals",
       href: "/services",
-      image: "/images/quick-links/trades.jpg",
-      video: "/videos/trades.mp4", // landscape; the tile crops to its centre
+      image: "/images/quick-links/trades-team-poster.jpg",
+      video: "/videos/trades-team.mp4", // landscape; the tile crops to its centre
     },
     {
       label: "Live & Stay",
