@@ -1,3 +1,4 @@
+import MobileHero from "../components/MobileHero";
 import { Link } from "react-router-dom";
 import { cropStyle } from "../../lib/focalPoint";
 import MobileShell from "../components/MobileShell";
@@ -47,11 +48,13 @@ export default function LiveStayPickerScreen() {
   return (
     <MobileShell title="Live & Stay" onBack backFallback="/mobile/explore">
       <div className="flex flex-col gap-6 mobile-stagger">
-        {copy.hero && <SmartImage src={copy.hero} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover rounded-2xl" style={cropStyle(copy.hero, "hero")} />}
+        <MobileHero src={copy.hero} title={copy.title} />
         <div>
-          <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
-            {copy.title}
-          </h1>
+          {!copy.hero && (
+            <h1 className="text-xl font-bold leading-snug mb-1.5" style={{ color: "#000000" }}>
+              {copy.title}
+            </h1>
+          )}
           <p className="text-sm font-medium" style={{ color: "#000000" }}>
             {copy.intro}
           </p>

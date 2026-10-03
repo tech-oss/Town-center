@@ -1,3 +1,4 @@
+import MobileHero from "../components/MobileHero";
 import { cropStyle } from "../../lib/focalPoint";
 import { useEffect, useMemo, useState } from "react";
 import useSiteSection from "../../hooks/useSiteSection";
@@ -269,15 +270,7 @@ export default function StayListingScreen() {
   return (
     <MobileShell title={isHotels ? "Hotels" : "Accommodation"} onBack backFallback="/mobile/live" noPadding>
       <div className="flex flex-col">
-        {landing.hero && (
-          <div className="relative h-40 -mb-1">
-            <img src={landing.hero} alt="" className="absolute inset-0 w-full h-full object-cover" style={cropStyle(landing.hero, "hero")} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.05) 0%, rgba(20,33,42,0.55) 100%)" }} />
-            <p className="absolute bottom-3 left-5 text-white text-lg font-bold" style={{ textShadow: "0 2px 12px rgba(0,0,0,0.5)" }}>
-              {landing.title}
-            </p>
-          </div>
-        )}
+        <MobileHero src={landing.hero} title={landing.title} flush />
 
         <div className="flex flex-col gap-4 mobile-stagger px-5 pt-5 pb-6">
         <p className="text-sm font-medium" style={{ color: "#000000" }}>{landing.intro}</p>
