@@ -25,8 +25,8 @@ export const exploreSections = [
   { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/accommodation-hero.jpg", to: "/mobile/live" },
   { id: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
   { id: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/eat-drink/hero.jpg", to: "/mobile/eat-drink" },
-  { id: "shop", title: "Shop & Services", blurb: "High street, independents & local services.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
-  { id: "services", title: "Services", blurb: "Trades, health & professionals.", image: "/images/services/hero-desktop.jpg", to: "/mobile/services" },
+  { id: "shop", title: "Shop & Local Services", blurb: "High street, independents & local services.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
+  { id: "services", title: "Trades & Professionals", blurb: "Trades, health & professionals.", image: "/images/services/hero-desktop.jpg", to: "/mobile/services" },
   { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
 
