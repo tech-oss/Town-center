@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { checkEmail } from "../../lib/emailCheck";
@@ -18,7 +19,7 @@ export function businessName(businessId) {
 // search — replaces the old static BUSINESS_DIRECTORY mock so newly
 // registered businesses actually show up.
 export async function listBusinesses() {
-  const { data, error } = await supabase.from("businesses").select("id, name").order("name");
+  const { data, error } = await fetchAll(() => supabase.from("businesses").select("id, name").order("name").order("id"));
   if (error) throw error;
   return data ?? [];
 }
@@ -34,7 +35,7 @@ export async function listBusinesses() {
 // direct query would just come back empty and the picker would show every
 // business as unclaimed. See supabase/sql/unclaimed_businesses.sql.
 export async function listUnclaimedBusinesses() {
-  const { data, error } = await supabase.rpc("unclaimed_businesses");
+  const { data, error } = await fetchAll(() => supabase.rpc("unclaimed_businesses"));
   if (error) throw error;
   return data ?? [];
 }
