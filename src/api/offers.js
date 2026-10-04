@@ -73,6 +73,10 @@ export async function getOffersFeed() {
     // listed twice on this page, once broken.
     ...[...articles, ...standalone, ...promoted]
       .filter((a) => !String(a.id ?? "").startsWith("feature-"))
+      // A business's events also sit in its news list (as "event-…" cards).
+      // Those copies open a cut-down /news/ article; the real event, with its
+      // full page, is listed from `events` below, so the copy is dropped.
+      .filter((a) => !String(a.id ?? "").startsWith("event-"))
       .map((a) => ({
         key: `news:${a.slug}`,
         slug: a.slug,

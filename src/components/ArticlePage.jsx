@@ -24,6 +24,8 @@ export default function ArticlePage() {
   if (loading) return <Loading minHeight="70vh" />;
   if (error) return <ErrorState minHeight="70vh" />;
   if (!article) return <Navigate to="/" replace />;
+  // An event reached by an old /news/ link goes to its full event page.
+  if (article.category === "Event") return <Navigate to={`/event/${article.slug}`} replace />;
 
   const biz = article.business;
   // Stay (hotels/accommodation) businesses live outside the shop/eat-drink/

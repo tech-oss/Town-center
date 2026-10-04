@@ -17,6 +17,8 @@ export default function NewsDetailScreen() {
   const goBack = useMobileBack("/mobile/offers");
   if (!loading && !article) return <Navigate to="/mobile/offers" replace />;
   if (loading || !article) return null;
+  // An event reached by an old /news/ link goes to its full event page.
+  if (article.category === "Event") return <Navigate to={`/mobile/event/${article.slug}`} replace />;
 
   const biz = article.business;
   const more = (biz?.news ?? []).filter((a) => a.slug !== article.slug).slice(0, 3);
