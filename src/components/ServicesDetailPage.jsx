@@ -86,7 +86,7 @@ export default function ServicesDetailPage() {
         hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
         description={free ? null : item.description}
         descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
-        galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
+        galleryPlaceholder={free && !item.hasHero ? FREE_PLACEHOLDERS.gallery : undefined}
         address={item.address}
         phone={item.phone}
         email={item.email}
@@ -140,7 +140,7 @@ export default function ServicesDetailPage() {
       descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
       hours={free ? null : item.hours}
       hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
-      galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
+      galleryPlaceholder={free && !item.hasHero ? FREE_PLACEHOLDERS.gallery : undefined}
       address={item.address}
       phone={item.phone}
       email={item.email}
