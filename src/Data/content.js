@@ -233,9 +233,7 @@ export const footer = {
   ],
   social: [
     { label: "Instagram", icon: "instagram", href: "https://www.instagram.com" },
-    { label: "Facebook",  icon: "facebook",  href: "https://www.facebook.com" },
-    { label: "X",         icon: "x",         href: "https://x.com" },
-    { label: "LinkedIn",  icon: "linkedin",   href: "https://www.linkedin.com" },
+    // Facebook, X and LinkedIn are off the footer for now: Instagram only.
   ],
   app: {
     heading: "Get the Maidenhead App",
