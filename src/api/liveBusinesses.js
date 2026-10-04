@@ -211,6 +211,7 @@ function mapReview(r) {
 // caption inside the frame in tall and wide crops alike.
 const DEFAULT_HEROES = {
   "eat-drink": "/images/eat-drink/default-hero.jpg#f=50,85",
+  "see-do": "/images/see-do/default-hero.webp#f=50,85",
 };
 
 function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}, events = {}) {
