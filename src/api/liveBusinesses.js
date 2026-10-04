@@ -213,6 +213,7 @@ function mapReview(r) {
 const DEFAULT_HEROES = {
   "eat-drink": "/images/eat-drink/default-hero.jpg#f=50,85",
   "see-do": "/images/see-do/default-hero.webp#f=50,85",
+  shop: "/images/shop/default-hero.jpg#f=50,85",
   // Trades, Professionals and Freelancers all list under Services.
   services: "/images/services/default-hero.jpg#f=50,85",
   freelancer: "/images/services/default-hero.jpg#f=50,85",
