@@ -776,7 +776,9 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
 // ─── Delete business modal (type-to-confirm) ──────────────────────────────────
 function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
   const [typed, setTyped] = useState("");
-  const matches = typed.trim() === biz.name;
+  // Both sides trimmed: a name saved with a trailing space ("Electrical ")
+  // could otherwise never be matched, because typing it leaves the space off.
+  const matches = typed.trim().toLowerCase() === (biz.name ?? "").trim().toLowerCase();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "rgba(16,24,40,0.5)" }}>
       <div className="bg-white rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
@@ -785,7 +787,7 @@ function DeleteBusinessModal({ biz, onConfirm, onCancel, deleting }) {
           This will permanently remove <strong>{biz.name}</strong> and all associated content. This cannot be undone.
         </p>
         <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold" style={{ color: MUTED }}>Type <strong>{biz.name}</strong> to confirm</span>
+          <span className="text-xs font-semibold" style={{ color: MUTED }}>Type <strong>{(biz.name ?? "").trim()}</strong> to confirm</span>
           <input value={typed} onChange={(e) => setTyped(e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE} />
         </label>
@@ -1204,6 +1206,10 @@ export default function BusinessesPage() {
       setBusy(null);
       setDeletingBiz(null);
       notify(`"${biz.name}" permanently deleted and recorded in Admin Logs.`);
+    }).catch((e) => {
+      // A failed delete used to do nothing at all, leaving the button stuck.
+      setBusy(null);
+      notify(`Could not delete "${biz.name}": ${e.message ?? e}`);
     });
   }
   function handleUploadLogo(id, url) {
