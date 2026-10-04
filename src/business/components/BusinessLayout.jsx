@@ -1,3 +1,4 @@
+import SessionTimeout from "../../lib/SessionTimeout";
 import { useEffect, useState } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import useUnreadCounts, { SUPPORT_TAB } from "../hooks/useUnreadCounts";
@@ -84,6 +85,8 @@ export default function BusinessLayout({ children }) {
   return (
     <div className="business-root min-h-screen flex" style={{ backgroundColor: "#F5F7FB", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
+      {/* Signs out after 15 minutes of inactivity, with a 60-second warning. */}
+      <SessionTimeout portal="business" onTimeout={handleLogout} />
 
       <aside
         className={`fixed top-0 left-0 h-screen z-30 flex flex-col transition-transform duration-300 md:z-auto md:!translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
