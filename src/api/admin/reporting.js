@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { getBusinesses as getSiteBusinesses } from "../businesses";
 import { getHotels, getAccommodations } from "../stay";
@@ -50,7 +51,7 @@ function monthBuckets(since, until) {
 const monthKey = (iso) => (iso ? String(iso).slice(0, 7) : null);
 
 async function loadSubscriptions() {
-  const { data, error } = await supabase.from("business_subscriptions").select("*");
+  const { data, error } = await fetchAll(() => supabase.from("business_subscriptions").select("*").order("business_id"));
   if (error) throw error;
   return data ?? [];
 }
@@ -95,7 +96,7 @@ async function loadPayments() {
 //   free    — everything else
 export async function loadClassifiedBusinesses() {
   const [bizRes, subs] = await Promise.all([
-    supabase.from("businesses").select("id, status, submitted_at"),
+    fetchAll(() => supabase.from("businesses").select("id, status, submitted_at").order("id")),
     loadSubscriptions(),
   ]);
   if (bizRes.error) throw bizRes.error;
@@ -130,9 +131,9 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
 
   const [subs, listingsRes, usersRes, bizRes, occRes, payments] = await Promise.all([
     loadSubscriptions(),
-    supabase.from("business_listings").select("business_id, approval_status"),
+    fetchAll(() => supabase.from("business_listings").select("business_id, approval_status").order("business_id")),
     supabase.from("business_users").select("id, status, requested_at"),
-    supabase.from("businesses").select("id, status, submitted_at"),
+    fetchAll(() => supabase.from("businesses").select("id, status, submitted_at").order("id")),
     supabase.from("business_events").select("id, status"),
     loadPayments().catch(() => []),
   ]);
@@ -292,7 +293,7 @@ export async function getActivityTrend({ range = "6m" } = {}) {
   const { buckets, keyOf } = activityBuckets(since, until);
   const [loginsRes, bizRes] = await Promise.all([
     supabase.from("portal_logins").select("created_at, portal").gte("created_at", since.toISOString()),
-    supabase.from("businesses").select("submitted_at").gte("submitted_at", since.toISOString()),
+    fetchAll(() => supabase.from("businesses").select("submitted_at, id").gte("submitted_at", since.toISOString()).order("id")),
   ]);
   // No login table yet (migration not run) reads as no logins, not an error.
   const logins = loginsRes.error ? [] : (loginsRes.data ?? []);

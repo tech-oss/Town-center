@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity } from "./businessActivity";
 
@@ -188,9 +189,9 @@ export async function getSlotContentOptions(slotType) {
       // about it — which is why businesses cannot buy this slot without the
       // Visibility Plan (promotions_need_subscription_2026_09.sql).
       const [{ data }, subs] = await Promise.all([
-        supabase.from("businesses").select("id, name, business_listings(business_type, hero_image)")
-          .eq("status", "Approved").order("name"),
-        supabase.from("business_subscriptions").select("business_id, plan"),
+        fetchAll(() => supabase.from("businesses").select("id, name, business_listings(business_type, hero_image)")
+          .eq("status", "Approved").order("name").order("id")),
+        fetchAll(() => supabase.from("business_subscriptions").select("business_id, plan").order("business_id")),
       ]);
       const premium = new Set((subs.data ?? []).filter((s) => s.plan === "premium").map((s) => s.business_id));
       return (data ?? []).map((r) => {

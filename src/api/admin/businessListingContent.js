@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { assertValidCoords } from "../../lib/geo";
 
@@ -147,10 +148,10 @@ function toRow(listing) {
 // content editor's left-hand list and header always agree with Business
 // Registrations rather than drifting from a second copy of the same facts.
 export async function getBusinessesForContent() {
-  const { data, error } = await supabase
+  const { data, error } = await fetchAll(() => supabase
     .from("businesses")
     .select("id, name, business_listings(business_type, description, tagline, logo, hero_image, gallery, faqs, services_list, why_choose_us, skills, portfolio, amenities, hours)")
-    .order("name");
+    .order("name").order("id"));
   if (error) throw error;
   return (data ?? []).map((b) => {
     const listing = Array.isArray(b.business_listings) ? b.business_listings[0] : b.business_listings;

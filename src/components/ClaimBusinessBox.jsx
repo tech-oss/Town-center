@@ -1,3 +1,4 @@
+import { fetchAll } from "../lib/fetchAll";
 import { useEffect, useState } from "react";
 
 // "Is this your business?" — shown on the profile of a business Maidenhead
@@ -24,7 +25,7 @@ let fetchedAt = 0;
 function loadUnclaimed() {
   if (!unclaimed || Date.now() - fetchedAt > FRESH_FOR_MS) {
     fetchedAt = Date.now();
-    unclaimed = supabase.rpc("unclaimed_businesses")
+    unclaimed = fetchAll(() => supabase.rpc("unclaimed_businesses"))
       .then(({ data, error }) => {
         if (error) { unclaimed = null; return new Set(); }
         return new Set((data ?? []).map((b) => b.id));

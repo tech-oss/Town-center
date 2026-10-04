@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { isPayingSubscription, isAdminGrantedSubscription } from "../../lib/subscriptionStatus";
 
@@ -75,10 +76,10 @@ async function ownersByBusiness(ids) {
 }
 
 export async function getSubscriptions({ status, tier } = {}) {
-  const { data, error } = await supabase
+  const { data, error } = await fetchAll(() => supabase
     .from("business_subscriptions")
     .select("*, businesses(name)")
-    .order("updated_at", { ascending: false });
+    .order("updated_at", { ascending: false }).order("business_id"));
   if (error) throw error;
 
   const owners = await ownersByBusiness((data ?? []).map((r) => r.business_id));

@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { listingHasContent } from "./businessListingContent";
 import { assertNoDataUrls } from "../../lib/noDataUrls";
@@ -287,9 +288,12 @@ async function loadPromotions() {
 }
 
 export async function getBusinesses({ status } = {}) {
-  let q = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false });
-  if (status && status !== "All") q = q.eq("status", status);
-  const [{ data, error }, live, promotions] = await Promise.all([q, getLivePlacementMap("featured_business"), loadPromotions()]);
+  const q = () => {
+    let b = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false }).order("id");
+    if (status && status !== "All") b = b.eq("status", status);
+    return b;
+  };
+  const [{ data, error }, live, promotions] = await Promise.all([fetchAll(q), getLivePlacementMap("featured_business"), loadPromotions()]);
   if (error) throw error;
   return (data ?? []).map((row) => withFeatured(fromRow(row), live, promotions));
 }

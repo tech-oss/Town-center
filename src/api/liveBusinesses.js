@@ -9,6 +9,7 @@
 // Free-plan listings arrive with every premium-only column already withheld
 // by the database view; `plan` travels with the item so the pages can show
 // the "coming soon" placeholders in those places.
+import { fetchAll } from "../lib/fetchAll";
 import { supabase } from "../lib/supabaseClient";
 import { categoryLabel } from "../Data/taxonomy";
 import { getLivePlacements } from "./homepageSlots";
@@ -375,7 +376,7 @@ export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
     const [profilesRes, articlesRes, reviewsRes, newsOffersRes, featuresRes, eventsRes, placements] = await Promise.all([
-      withSchemaRetry(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false })),
+      withSchemaRetry(() => fetchAll(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false }).order("business_id"))),
       withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
       // Reviews are optional: if the view isn't there yet, pages just show none.
       withSchemaRetry(() => supabase.from("public_business_reviews").select("*").order("date", { ascending: false })),

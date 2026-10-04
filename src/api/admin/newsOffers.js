@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { getLivePlacementMap, featureNow, unfeature, swapFeatured, schedulePlacement } from "./homepageSlots";
 import { fromLondonInput } from "../../lib/ukDateTime";
@@ -7,7 +8,7 @@ import { fromLondonInput } from "../../lib/ukDateTime";
 // now every registered business, so a newly approved one can be featured
 // without a code change.
 export async function getSpotlightBusinesses() {
-  const { data, error } = await supabase.from("businesses").select("id, name").order("name");
+  const { data, error } = await fetchAll(() => supabase.from("businesses").select("id, name").order("name").order("id"));
   if (error) throw error;
   return data ?? [];
 }

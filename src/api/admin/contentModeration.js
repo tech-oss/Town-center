@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { logBusinessActivity, articleContext, reviewContext } from "./businessActivity";
 import { unfeature, featureNow, getLivePlacementMap } from "./homepageSlots";
@@ -260,8 +261,8 @@ const MAX_LIVE_REVIEWS = 6;
 // reviews would wrongly show as "Live".
 async function getPubliclyEligibleBusinessIds() {
   const [{ data: bizs, error: bizErr }, { data: subs, error: subErr }] = await Promise.all([
-    supabase.from("businesses").select("id, status, visible"),
-    supabase.from("business_subscriptions").select("business_id").eq("plan", "premium"),
+    fetchAll(() => supabase.from("businesses").select("id, status, visible").order("id")),
+    fetchAll(() => supabase.from("business_subscriptions").select("business_id").eq("plan", "premium").order("business_id")),
   ]);
   if (bizErr) throw bizErr;
   if (subErr) throw subErr;
