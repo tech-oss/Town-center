@@ -1,3 +1,4 @@
+import SessionTimeout from "../../lib/SessionTimeout";
 import { useState } from "react";
 import { NavLink, Link, Outlet, useLocation } from "react-router-dom";
 import useAdminAuth from "../hooks/useAdminAuth";
@@ -126,6 +127,8 @@ export default function AdminLayout({ counts = {} }) {
   return (
     <div className="admin-root min-h-screen flex" style={{ backgroundColor: "#F5F7FB", fontFamily: "'Inter', system-ui, -apple-system, sans-serif" }}>
       {sidebarOpen && <div className="fixed inset-0 z-20 bg-black/50 md:hidden" onClick={() => setSidebarOpen(false)} />}
+      {/* Signs out after 15 minutes of inactivity, with a 60-second warning. */}
+      <SessionTimeout portal="admin" onTimeout={logout} />
 
       {/* ── Sidebar ── */}
       <aside
