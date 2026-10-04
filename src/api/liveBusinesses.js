@@ -206,6 +206,13 @@ function mapReview(r) {
   };
 }
 
+// The picture a listing shows until it has a hero of its own, by business
+// type. The focal point (#f=x,y) keeps the baked-in "Illustrative image"
+// caption inside the frame in tall and wide crops alike.
+const DEFAULT_HEROES = {
+  "eat-drink": "/images/eat-drink/default-hero.jpg#f=50,85",
+};
+
 function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}, events = {}) {
   const type = row.business_type;
   const section = SECTION_FOR_TYPE[type];
@@ -221,7 +228,8 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   // header still need an image, so fall back to the site mark.
   // Sized on the way out of Storage: the full-resolution upload is
   // never what a card or a page banner needs (see lib/imageUrl).
-  const hero = imageUrl(row.hero_image || row.logo || "/logo-mark.svg", "card");
+  const defaultHero = DEFAULT_HEROES[type];
+  const hero = imageUrl(row.hero_image || defaultHero || row.logo || "/logo-mark.svg", "card");
   const gallery = (premium ? [hero, ...(row.gallery ?? [])] : [hero])
     .filter(Boolean).map((g) => imageUrl(g, "card"));
   const address = [row.address, row.postal_code].filter(Boolean).join(", ");
@@ -250,7 +258,7 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     logo: imageUrl(row.logo, "icon"),
     // The logo stays a logo: cards and page banners use the hero whenever
     // one exists, and only fall back to the logo when it doesn't.
-    hasHero: !!row.hero_image,
+    hasHero: !!row.hero_image || !!defaultHero,
     gallery,
     tagline: row.tagline,
     description: row.description,
