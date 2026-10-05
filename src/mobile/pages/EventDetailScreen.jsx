@@ -59,6 +59,18 @@ export default function EventDetailScreen() {
         </div>
 
         <div className="px-5 pt-4 relative flex flex-col gap-4 pb-8 mobile-stagger">
+          {/* The description sits straight under the picture, as on the website. */}
+          {event.standfirst && (
+            <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{event.standfirst}</p>
+          )}
+
+          {event.body?.map((b, i) => (
+            <div key={i} className="flex flex-col gap-1.5">
+              {b.lead && <p className="text-sm font-bold" style={{ color: "#000000" }}>{b.lead}</p>}
+              <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{b.text}</p>
+            </div>
+          ))}
+
           <MobileCard className="p-4 flex flex-col gap-3">
             <div className="flex items-start gap-3">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
@@ -100,17 +112,6 @@ export default function EventDetailScreen() {
             const query = place ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`) : event.businessAddress;
             return (lat != null || query) ? <MiniMap query={query} lat={lat ?? undefined} lng={lng ?? undefined} /> : null;
           })()}
-
-          {event.standfirst && (
-            <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{event.standfirst}</p>
-          )}
-
-          {event.body?.map((b, i) => (
-            <div key={i} className="flex flex-col gap-1.5">
-              {b.lead && <p className="text-sm font-bold" style={{ color: "#000000" }}>{b.lead}</p>}
-              <p className="text-sm leading-relaxed" style={{ color: "#000000" }}>{b.text}</p>
-            </div>
-          ))}
 
           {gallery.length > 1 && (
             <div className="grid grid-cols-2 gap-2">
