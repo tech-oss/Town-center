@@ -1,3 +1,4 @@
+import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 
 // The approval queue over business listing edits.
@@ -199,16 +200,22 @@ function toItem(row, section, state, owner = {}) {
 // business_listings and business_users both hang off `businesses` but have no
 // FK to each other, so PostgREST cannot embed one in the other — the owners are
 // fetched once and joined by business_id here.
+const chunksOf = (list, n) => Array.from({ length: Math.ceil(list.length / n) }, (_, i) => list.slice(i * n, i * n + n));
+
 async function ownersByBusiness(ids) {
   if (!ids.length) return {};
-  const { data, error } = await supabase
-    .from("business_users")
-    .select("business_id, role, first_name, last_name, email")
-    .in("business_id", ids);
-  if (error) throw error;
   const map = {};
-  for (const u of data ?? []) {
-    if (!map[u.business_id] || u.role === "Owner") map[u.business_id] = u;
+  // In chunks: every id rides in the request's address, and a few hundred of
+  // them make it too long for the server to accept.
+  for (const chunk of chunksOf(ids, 100)) {
+    const { data, error } = await supabase
+      .from("business_users")
+      .select("business_id, role, first_name, last_name, email")
+      .in("business_id", chunk);
+    if (error) throw error;
+    for (const u of data ?? []) {
+      if (!map[u.business_id] || u.role === "Owner") map[u.business_id] = u;
+    }
   }
   return map;
 }
@@ -234,14 +241,35 @@ function isRealSubmission(row, section, state) {
   return (SECTION_FIELDS[section] ?? []).some(([col, camelKey]) => !sameValue(snapshot[camelKey] ?? null, row[col]));
 }
 
-export async function getApprovals({ status } = {}) {
-  const { data, error } = await supabase
+// The ids of listings that have any section someone saved, which are the only
+// ones that can appear in the queue. Reads three small columns for every
+// listing — the directory is over a thousand rows now, most of them imported
+// and never edited — so full rows are fetched only for these.
+async function listingIdsWithSubmissions() {
+  const { data, error } = await fetchAll(() => supabase
     .from("business_listings")
-    .select("*, businesses(name)")
-    .order("updated_at", { ascending: false });
+    .select("business_id, approval_status, edited_by")
+    .order("business_id"));
   if (error) throw error;
+  return (data ?? [])
+    .filter((row) => Object.keys(row.approval_status ?? {}).some((s) => !AUTO_PUBLISHED_SECTIONS.has(s) && row.edited_by?.[s]))
+    .map((row) => row.business_id);
+}
 
-  const owners = await ownersByBusiness((data ?? []).map((r) => r.business_id));
+export async function getApprovals({ status } = {}) {
+  const ids = await listingIdsWithSubmissions();
+  const data = [];
+  for (const chunk of chunksOf(ids, 100)) {
+    const { data: rows, error } = await supabase
+      .from("business_listings")
+      .select("*, businesses(name)")
+      .in("business_id", chunk);
+    if (error) throw error;
+    data.push(...(rows ?? []));
+  }
+  data.sort((a, b) => String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")));
+
+  const owners = await ownersByBusiness(data.map((r) => r.business_id));
   const items = [];
   for (const row of data ?? []) {
     // businesses.name is the source of truth for the business's current
@@ -271,9 +299,10 @@ export async function getApprovals({ status } = {}) {
 // comparison columns only for rows that actually have something pending,
 // which is normally none or a handful.
 export async function countPendingApprovals() {
-  const { data, error } = await supabase
+  const { data, error } = await fetchAll(() => supabase
     .from("business_listings")
-    .select("business_id, approval_status, edited_by");
+    .select("business_id, approval_status, edited_by")
+    .order("business_id"));
   if (error) throw error;
 
   // Which sections on which rows could count, before the field comparison.

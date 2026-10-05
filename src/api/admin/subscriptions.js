@@ -63,14 +63,18 @@ export function grantedLabel(grantedByAdmin) {
 // have no FK to each other, so owners are joined here rather than embedded.
 async function ownersByBusiness(ids) {
   if (!ids.length) return {};
-  const { data, error } = await supabase
-    .from("business_users")
-    .select("business_id, role, first_name, last_name, email")
-    .in("business_id", ids);
-  if (error) throw error;
   const map = {};
-  for (const u of data ?? []) {
-    if (!map[u.business_id] || u.role === "Owner") map[u.business_id] = u;
+  // In chunks: every id rides in the request's address, and a few hundred of
+  // them make it too long for the server to accept.
+  for (let i = 0; i < ids.length; i += 100) {
+    const { data, error } = await supabase
+      .from("business_users")
+      .select("business_id, role, first_name, last_name, email")
+      .in("business_id", ids.slice(i, i + 100));
+    if (error) throw error;
+    for (const u of data ?? []) {
+      if (!map[u.business_id] || u.role === "Owner") map[u.business_id] = u;
+    }
   }
   return map;
 }
