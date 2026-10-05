@@ -3,6 +3,9 @@ import MapBase from "../../components/MapBase";
 import { Link } from "react-router-dom";
 import { MapContainer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
+import "leaflet.markercluster";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { isValidCoords } from "../../lib/geo";
 import MobileShell from "../components/MobileShell";
 import { ListSearch } from "../components/ListSearch";
@@ -107,11 +110,70 @@ function LocateControl({ onLocate }) {
 // render body re-issued it on every re-render (e.g. the active-pin state
 // change right after selection), restarting the in-flight animation and
 // making the whole map and every pin visibly judder.
-function FlyTo({ target }) {
+// The pins, clustered the way the website's map clusters them.
+//
+// They used to be plain markers, one per business, so businesses at the very
+// same address (three share Desborough's building) sat exactly on top of each
+// other: only the top one could be seen or tapped. Clustered, a shared spot
+// shows a count, and tapping it fans the pins out so each can be chosen.
+function PinCluster({ pins, activeId, onSelect, target }) {
   const map = useMap();
+  const clusterRef = useRef(null);
+  const markersRef = useRef(new Map());
+  const selectRef = useRef(onSelect);
+  selectRef.current = onSelect;
+  const pinsKey = pins.map((b) => b.id).join(",");
+
   useEffect(() => {
-    if (target) map.flyTo([target.lat, target.lng], 17, { duration: 0.7 });
-  }, [map, target?.id, target?.lat, target?.lng]);
+    const cluster = L.markerClusterGroup({
+      maxClusterRadius: 45,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      iconCreateFunction(c) {
+        const n = c.getChildCount();
+        return L.divIcon({
+          html: `<div style="background:#1a3a42;color:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;box-shadow:0 2px 10px rgba(0,0,0,0.3);border:2px solid #fff">${n}</div>`,
+          className: "",
+          iconSize: [38, 38],
+          iconAnchor: [19, 19],
+        });
+      },
+    });
+    const markers = new Map();
+    for (const b of pins) {
+      const m = L.marker([b.lat, b.lng], { icon: makePin(b.section, false) });
+      m.on("click", () => selectRef.current(b));
+      cluster.addLayer(m);
+      markers.set(b.id, m);
+    }
+    map.addLayer(cluster);
+    clusterRef.current = cluster;
+    markersRef.current = markers;
+    return () => { map.removeLayer(cluster); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, pinsKey]);
+
+  // Highlight the chosen pin without rebuilding the whole layer.
+  const shownRef = useRef(null);
+  useEffect(() => {
+    const prev = shownRef.current;
+    if (prev && markersRef.current.get(prev.id)) markersRef.current.get(prev.id).setIcon(makePin(prev.section, false));
+    const next = activeId ? pins.find((b) => b.id === activeId) : null;
+    if (next && markersRef.current.get(next.id)) markersRef.current.get(next.id).setIcon(makePin(next.section, true));
+    shownRef.current = next;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeId, pinsKey]);
+
+  // A business picked from search: zoom until its own pin shows, fanning out
+  // a shared spot if it has to.
+  useEffect(() => {
+    if (!target) return;
+    const m = markersRef.current.get(target.id);
+    if (m && clusterRef.current) clusterRef.current.zoomToShowLayer(m);
+    else map.flyTo([target.lat, target.lng], 17, { duration: 0.7 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, target?.id]);
+
   return null;
 }
 
@@ -217,16 +279,8 @@ export default function MapScreen() {
             ref={mapRef}
           >
             <MapBase />
-            {pins.map((b) => (
-              <Marker
-                key={b.id}
-                position={[b.lat, b.lng]}
-                icon={makePin(b.section, active?.id === b.id)}
-                eventHandlers={{ click: () => setActive(b) }}
-              />
-            ))}
+            <PinCluster pins={pins} activeId={active?.id} onSelect={setActive} target={flyTarget} />
             {userPos && <Marker position={[userPos.lat, userPos.lng]} icon={userPinIcon} />}
-            <FlyTo target={flyTarget} />
             <LocateControl onLocate={setUserPos} />
           </MapContainer>
 
