@@ -35,9 +35,15 @@ export default function EventDetailScreen() {
   // website's "Find us" shows and its map pins.
   const num = (v) => (v != null && v !== "" ? Number(v) : null);
   const place = event.location?.trim();
-  const address = place || event.businessAddress || null;
-  const lat = num(event.lat) ?? (place ? null : event.businessLat);
-  const lng = num(event.lng) ?? (place ? null : event.businessLng);
+  const ownLat = num(event.lat);
+  const ownLng = num(event.lng);
+  const hasOwnPin = ownLat != null && ownLng != null;
+  // Words beside the map are only ever the address of the spot pinned: an
+  // event with its own pin shows its own place name (or none), never the
+  // host's address, which sits somewhere else.
+  const address = hasOwnPin ? (place || null) : (place || event.businessAddress || null);
+  const lat = hasOwnPin ? ownLat : (place ? null : event.businessLat);
+  const lng = hasOwnPin ? ownLng : (place ? null : event.businessLng);
   const mapQuery = place ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`) : event.businessAddress;
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(lat != null && lng != null ? `${lat},${lng}` : (mapQuery ?? ""))}`;
   const more = (events ?? []).filter((e) => e.slug !== event.slug).slice(0, 3);
@@ -116,7 +122,7 @@ export default function EventDetailScreen() {
           {(websiteUrl || address || lat != null) && (
             <div className="grid grid-cols-2 gap-3">
               {websiteUrl && (
-                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
+                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--teal-deep)", color: "#ffffff" }}>
                   {event.paid ? "Buy Tickets" : "Book Your Place"}
                 </a>
               )}

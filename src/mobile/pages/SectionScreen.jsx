@@ -3,7 +3,7 @@ import { cropStyle } from "../../lib/focalPoint";
 import { useState, useMemo } from "react";
 import { appSectionLabel } from "../lib/sectionLabels";
 import ListingCard from "../../components/ListingCard";
-import useSectionItems from "../hooks/useSectionItems";
+import { useSectionItemsState } from "../hooks/useSectionItems";
 import useFetch from "../../hooks/useFetch";
 import { getEvents } from "../../api";
 import { Link } from "react-router-dom";
@@ -59,8 +59,11 @@ export default function SectionScreen({ sectionKey }) {
   // The same wording the website's landing page shows, edited in one place
   // (Site Content) rather than kept as a second copy here.
   const copy = useSiteSection(sectionKey);
-  const sectionItems = useSectionItems(sectionKey);
-  const { data: whatsOnEvents } = useFetch(getEvents, []);
+  const { items: sectionItems, loading: loadingBusinesses } = useSectionItemsState(sectionKey);
+  const { data: whatsOnEvents, loading: loadingEvents } = useFetch(getEvents, []);
+  // Still fetching: show placeholders rather than "No results", which a
+  // first-time visitor would read as an empty section.
+  const stillLoading = loadingBusinesses || (sectionKey === "see-do" && loadingEvents);
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
 
@@ -151,7 +154,16 @@ export default function SectionScreen({ sectionKey }) {
           {items.map((it) => (
             <ListingCard key={`${it.section}-${it.slug}`} item={it} to={it.to} />
           ))}
-          {items.length === 0 && (
+          {items.length === 0 && stillLoading && Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl overflow-hidden animate-pulse" style={{ boxShadow: "0 2px 12px rgba(28,46,56,0.08)" }}>
+              <div className="aspect-[4/3]" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />
+              <div className="p-2.5 flex flex-col gap-2">
+                <div className="h-2.5 w-16 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />
+                <div className="h-3 w-3/4 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />
+              </div>
+            </div>
+          ))}
+          {items.length === 0 && !stillLoading && (
             <p className="col-span-2 text-sm text-center py-10 font-medium" style={{ color: "#000000" }}>
               No results{query ? ` for “${query}”` : ""}.
             </p>

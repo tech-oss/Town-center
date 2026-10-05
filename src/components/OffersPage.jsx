@@ -297,10 +297,9 @@ export default function OffersPage() {
 
   const items = useMemo(() => feed ?? [], [feed]);
 
-  const types = useMemo(
-    () => TYPE_ORDER.filter((t) => items.some((it) => it.type === t)),
-    [items]
-  );
+  // Every type stays in the filter bar, empty or not: the page keeps its
+  // shape before any business has posted, rather than the filters vanishing.
+  const types = TYPE_ORDER;
 
   const trimmedSearch = search.trim().toLowerCase();
   const filtered = items.filter((it) => {
@@ -376,7 +375,7 @@ export default function OffersPage() {
             <p className="text-sm py-16 text-center" style={{ color: "rgba(0,0,0,0.55)" }}>
               {trimmedSearch
                 ? `No results for "${search.trim()}" — try a different name.`
-                : "Nothing listed here just yet — check back soon."}
+                : "Businesses will update offers, news and events soon."}
             </p>
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">

@@ -31,16 +31,22 @@ function asEvent(rawEvent, it) {
     const ownLat = rawEvent.lat != null && rawEvent.lat !== "" ? Number(rawEvent.lat) : null;
     const ownLng = rawEvent.lng != null && rawEvent.lng !== "" ? Number(rawEvent.lng) : null;
     const place = rawEvent.location?.trim();
-    const useHost = ownLat == null && !place;
+    const hasOwnPin = ownLat != null && ownLng != null;
+    const useHost = !hasOwnPin && !place;
     return {
       ...rawEvent,
       isBusiness: false,
-      lat: ownLat ?? (useHost ? rawEvent.businessLat : null),
-      lng: ownLng ?? (useHost ? rawEvent.businessLng : null),
-      location: place || rawEvent.businessAddress || null,
-      mapQuery: place
-        ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`)
-        : rawEvent.businessAddress || null,
+      lat: hasOwnPin ? ownLat : (useHost ? rawEvent.businessLat : null),
+      lng: hasOwnPin ? ownLng : (useHost ? rawEvent.businessLng : null),
+      // The words shown beside the map are only ever the address of the spot
+      // pinned. An event with its own pin shows its own place name (or none) —
+      // never the host's address, which sits somewhere else.
+      location: hasOwnPin ? (place || null) : (place || rawEvent.businessAddress || null),
+      mapQuery: hasOwnPin
+        ? `${ownLat},${ownLng}`
+        : place
+          ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`)
+          : rawEvent.businessAddress || null,
     };
   }
   if (!it || it.section !== "see-do") return null;

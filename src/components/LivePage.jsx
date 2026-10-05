@@ -434,7 +434,7 @@ export default function LivePage() {
       {/* ── 10. Location map ── */}
       <section className="pb-16 md:pb-24 px-6 md:px-12">
         <div className="max-w-6xl mx-auto">
-          <LocationMap heading="Where you'll live" note="Maidenhead, Berkshire — on the Elizabeth Line, 18 minutes from London Paddington." lat={51.5236} lng={-0.7197} query="Maidenhead, Berkshire" />
+          <LocationMap heading="Where you'll live" note="Maidenhead, Berkshire — on the Elizabeth Line, 35 minutes from London Paddington." lat={51.5236} lng={-0.7197} query="Maidenhead, Berkshire" />
         </div>
       </section>
 

@@ -62,7 +62,8 @@ export default function OffersScreen() {
 
   const items = useMemo(() => (feed ?? []).map((it) => ({ ...it, to: `/mobile${it.to}` })), [feed]);
 
-  const types = useMemo(() => TYPE_ORDER.filter((t) => items.some((it) => it.type === t)), [items]);
+  // Every type stays in the filter, empty or not.
+  const types = TYPE_ORDER;
 
   const trimmedSearch = search.trim().toLowerCase();
   const filtered = items.filter((it) => {
@@ -107,7 +108,7 @@ export default function OffersScreen() {
 
         {filtered.length === 0 ? (
           <p className="text-sm text-center py-12" style={{ color: "#000000" }}>
-            {trimmedSearch ? `No results for "${search.trim()}" — try a different name.` : "Nothing listed here just yet — check back soon."}
+            {trimmedSearch ? `No results for "${search.trim()}" — try a different name.` : "Businesses will update offers, news and events soon."}
           </p>
         ) : (
           <div className="grid grid-cols-2 gap-3">

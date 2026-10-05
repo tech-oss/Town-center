@@ -12,7 +12,7 @@ const carTimes = [
 const trainTimes = [
   { dest: "Slough",             time: "6 mins" },
   { dest: "Reading",            time: "9 mins" },
-  { dest: "London Paddington",  time: "18 mins" },
+  { dest: "London Paddington",  time: "35 mins" },
   { dest: "Wokingham",          time: "35 mins" },
   { dest: "Windsor",            time: "35 mins" },
   { dest: "Heathrow",           time: "41 mins" },

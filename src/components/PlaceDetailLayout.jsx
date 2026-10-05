@@ -663,9 +663,12 @@ export default function PlaceDetailLayout({
                         {it.category ?? it.tag}
                       </span>
                     )}
-                    <h3 className="font-bold text-xs sm:text-xl leading-snug line-clamp-2" style={{ color: "#000000" }}>{it.name}</h3>
-                    {it.date && <p className="text-[9px] sm:text-xs line-clamp-1" style={{ color: "#000000" }}>{it.date}</p>}
-                    {it.address && <p className="text-[9px] sm:text-xs line-clamp-1" style={{ color: "rgba(0,0,0,0.6)" }}>{it.address}</p>}
+                    {/* line-clamp hides whatever falls below its last line, so a tight
+                        line height shaved the tails off g, j, p and y. A little
+                        more line height and bottom padding keeps them whole. */}
+                    <h3 className="font-bold text-xs sm:text-xl leading-[1.35] pb-[3px] line-clamp-2" style={{ color: "#000000" }}>{it.name}</h3>
+                    {it.date && <p className="text-[9px] sm:text-xs leading-normal pb-px line-clamp-1" style={{ color: "#000000" }}>{it.date}</p>}
+                    {it.address && <p className="text-[9px] sm:text-xs leading-normal pb-px line-clamp-1" style={{ color: "rgba(0,0,0,0.6)" }}>{it.address}</p>}
                     <span className="inline-flex items-center gap-1 text-[9px] sm:text-xs font-bold mt-0.5 sm:mt-1" style={{ color: "var(--leaf)" }}>
                       Read more
                       <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
