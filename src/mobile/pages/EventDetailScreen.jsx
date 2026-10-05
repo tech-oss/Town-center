@@ -31,7 +31,15 @@ export default function EventDetailScreen() {
   const websiteUrl = externalUrl(event.bookingUrl);
   // Every category the event is filed under.
   const categoryNames = toSeeDoSlugs(event.categories ?? event.category).map((c) => eventCategoryLabel(c));
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(event.location ?? "")}`;
+  // Where it is: the event's own place, else its host's — the same address the
+  // website's "Find us" shows and its map pins.
+  const num = (v) => (v != null && v !== "" ? Number(v) : null);
+  const place = event.location?.trim();
+  const address = place || event.businessAddress || null;
+  const lat = num(event.lat) ?? (place ? null : event.businessLat);
+  const lng = num(event.lng) ?? (place ? null : event.businessLng);
+  const mapQuery = place ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`) : event.businessAddress;
+  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(lat != null && lng != null ? `${lat},${lng}` : (mapQuery ?? ""))}`;
   const more = (events ?? []).filter((e) => e.slug !== event.slug).slice(0, 3);
 
   return (
@@ -82,10 +90,10 @@ export default function EventDetailScreen() {
                 <span className="text-sm" style={{ color: "#000000" }}>{event.tickets}</span>
               </div>
             )}
-            {event.location && (
+            {address && (
               <div className="flex items-start gap-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 mt-0.5"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
-                <span className="text-sm" style={{ color: "#000000" }}>{event.location}</span>
+                <span className="text-sm" style={{ color: "#000000" }}>{address}</span>
               </div>
             )}
             {/* Whose event this is, linking to their page — an event attached
@@ -103,15 +111,23 @@ export default function EventDetailScreen() {
             )}
           </MobileCard>
 
-          {/* Where it is: the event's own pin or place, else its host's. */}
-          {(() => {
-            const n = (v) => (v != null && v !== "" ? Number(v) : null);
-            const place = event.location?.trim();
-            const lat = n(event.lat) ?? (place ? null : event.businessLat);
-            const lng = n(event.lng) ?? (place ? null : event.businessLng);
-            const query = place ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`) : event.businessAddress;
-            return (lat != null || query) ? <MiniMap query={query} lat={lat ?? undefined} lng={lng ?? undefined} /> : null;
-          })()}
+          {/* Same order as the website: details, then Book / Directions, then
+              the photos, then the map. */}
+          {(websiteUrl || address || lat != null) && (
+            <div className="grid grid-cols-2 gap-3">
+              {websiteUrl && (
+                <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
+                  {event.paid ? "Buy Tickets" : "Book Your Place"}
+                </a>
+              )}
+              {(address || lat != null) && (
+                <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
+                  Get Directions
+                </a>
+              )}
+            </div>
+          )}
+
 
           {gallery.length > 1 && (
             <div className="grid grid-cols-2 gap-2">
@@ -121,18 +137,8 @@ export default function EventDetailScreen() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
-            {event.location && (
-              <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
-                Directions
-              </a>
-            )}
-            {websiteUrl && (
-              <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
-                {event.paid ? "Buy Tickets" : "Book Your Place"}
-              </a>
-            )}
-          </div>
+
+          {(lat != null || mapQuery) && <MiniMap query={mapQuery} lat={lat ?? undefined} lng={lng ?? undefined} />}
 
           {more.length > 0 && (
             <div className="mt-2">
