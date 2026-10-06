@@ -76,6 +76,17 @@ export default function HomeScreen() {
   // "pause" over a video that had never started.
   const [videoPlaying, setVideoPlaying] = useState(false);
 
+  // True when the person paused it themselves, so coming back to the app does
+  // not restart a video they stopped on purpose.
+  const userPausedRef = useRef(false);
+
+  // The button shows what the video is really doing, read from the video
+  // itself rather than assumed from the last event we happened to hear. iOS
+  // can stop a video when the app is switched away from without any event the
+  // page sees, which left "pause" showing over a frozen picture.
+  //
+  // Depends on `heroVideo`: the element is rebuilt when the saved video
+  // address arrives, and the listeners were only ever attached to the first.
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -86,31 +97,65 @@ export default function HomeScreen() {
     v.muted = true;
     v.defaultMuted = true;
     v.playsInline = true;
-    const play = () => v.play().catch(() => setVideoPlaying(false));
-    play();
-    v.addEventListener("canplay", play, { once: true });
 
-    // Buffering (a "waiting" event) is normal on mobile networks and the
-    // browser resumes on its own once enough is downloaded — forcing a
-    // pause here was mistaking that normal hiccup for a dead stream, which
-    // made the video stop and need a manual play every few seconds. Just
-    // keep the button's state in sync with what's actually happening.
-    v.addEventListener("error", () => setVideoPlaying(false));
-    v.addEventListener("playing", () => setVideoPlaying(true));
-    v.addEventListener("pause", () => setVideoPlaying(false));
+    const reallyPlaying = () => !v.paused && !v.ended && v.readyState >= 2;
+    const sync = () => setVideoPlaying(reallyPlaying());
+    const tryPlay = () => {
+      if (userPausedRef.current) return Promise.resolve();
+      return v.play().catch(() => {});
+    };
+
+    tryPlay().finally(sync);
+    v.addEventListener("canplay", tryPlay, { once: true });
+    const events = ["playing", "play", "pause", "ended", "emptied", "error", "abort", "stalled"];
+    events.forEach((e) => v.addEventListener(e, sync));
+
+    // Back in the app (or tab): resume unless it was paused on purpose, then
+    // show whatever actually happened.
+    const onReturn = () => {
+      if (document.visibilityState === "hidden") return;
+      tryPlay().finally(() => setTimeout(sync, 250));
+    };
+    document.addEventListener("visibilitychange", onReturn);
+    window.addEventListener("pageshow", onReturn);
+    window.addEventListener("focus", onReturn);
+
+    // A video can freeze with no event at all. If it claims to be playing but
+    // its clock has stopped for a few ticks, try to restart it, and if that
+    // fails show the play button.
+    let last = -1, stuck = 0;
+    const watchdog = setInterval(() => {
+      if (document.visibilityState === "hidden") return;
+      if (reallyPlaying()) {
+        if (v.currentTime === last) {
+          if (++stuck >= 3) { stuck = 0; tryPlay().finally(() => setTimeout(() => { if (v.currentTime === last) setVideoPlaying(false); }, 800)); }
+        } else { stuck = 0; setVideoPlaying(true); }
+        last = v.currentTime;
+      } else {
+        stuck = 0;
+        setVideoPlaying(false);
+      }
+    }, 1000);
 
     return () => {
-      v.removeEventListener("canplay", play);
+      clearInterval(watchdog);
+      v.removeEventListener("canplay", tryPlay);
+      events.forEach((e) => v.removeEventListener(e, sync));
+      document.removeEventListener("visibilitychange", onReturn);
+      window.removeEventListener("pageshow", onReturn);
+      window.removeEventListener("focus", onReturn);
     };
-  }, []);
+  }, [heroVideo]);
 
   function toggleVideo() {
     const v = videoRef.current;
     if (!v) return;
     if (v.paused) {
+      userPausedRef.current = false;
       // A tap is a user gesture, which iOS accepts even in Low Power Mode.
       v.play().then(() => setVideoPlaying(true)).catch(() => setVideoPlaying(false));
     } else {
+      userPausedRef.current = true;
       v.pause();
       setVideoPlaying(false);
     }
