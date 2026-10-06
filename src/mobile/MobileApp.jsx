@@ -43,6 +43,22 @@ export default function MobileApp() {
     }
   }, []);
 
+  // Pins the app to the screen: no sideways dragging of the page behind it,
+  // and no pinch / double-tap / keyboard zoom, which is what lets a phone pan
+  // the page left and right and slide the buttons out of view. Only inside
+  // the app — the website keeps normal zooming.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.add("app-locked");
+    const meta = document.querySelector('meta[name="viewport"]');
+    const original = meta?.getAttribute("content");
+    meta?.setAttribute("content", "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+    return () => {
+      root.classList.remove("app-locked");
+      if (meta && original) meta.setAttribute("content", original);
+    };
+  }, []);
+
   // Captures the history-length baseline every back button uses to tell a
   // real in-app navigation from a deep link / relaunch straight onto a
   // detail screen (see lib/navHistory.js).
