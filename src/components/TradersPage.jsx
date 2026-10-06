@@ -39,13 +39,20 @@ export default function TradersPage() {
                 <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">{copy.ctaTitle}</h2>
                 {copy.ctaText && <p className="text-sm leading-relaxed text-white">{copy.ctaText}</p>}
               </div>
-              {copy.ctaButton && (
-                <Link to={copy.ctaLink || "/work-with-us"}
+              {copy.ctaButton && (/^(https?:|mailto:|tel:)/i.test((copy.ctaLink || "").trim()) ? (
+                <a href={copy.ctaLink.trim()} data-skip-external-confirm
+                  {...(/^https?:/i.test(copy.ctaLink.trim()) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "var(--leaf)", color: "white" }}>
+                  {copy.ctaButton}
+                </a>
+              ) : (
+                <Link to={(copy.ctaLink || "/work-with-us").trim()}
                   className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "var(--leaf)", color: "white" }}>
                   {copy.ctaButton}
                 </Link>
-              )}
+              ))}
             </div>
           )}
         </div>

@@ -76,9 +76,18 @@ export default function TextScreen({ sectionKey, barTitle, highlight }) {
                   style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{ctaLabel}</a>
               )}
               {!ctaHref && copy.ctaButton && copy.ctaLink && (
-                <Link to={`/mobile${copy.ctaLink.startsWith("/") ? copy.ctaLink : `/${copy.ctaLink}`}`}
-                  className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
-                  style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaButton}</Link>
+                // A full web address (https://, mailto:, tel:) opens as it is;
+                // only a page on this site gets the app's /mobile prefix. It was
+                // being glued on to everything, turning a full address into a
+                // broken path.
+                /^(https?:|mailto:|tel:)/i.test(copy.ctaLink.trim())
+                  ? <a href={copy.ctaLink.trim()} data-skip-external-confirm
+                      {...(/^https?:/i.test(copy.ctaLink.trim()) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                      className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                      style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaButton}</a>
+                  : <Link to={`/mobile${copy.ctaLink.trim().startsWith("/") ? copy.ctaLink.trim() : `/${copy.ctaLink.trim()}`}`}
+                      className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                      style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaButton}</Link>
               )}
               {/* Optional second button set in Site Content, under the first. */}
               {copy.ctaExtraLabel && copy.ctaExtraUrl && (/^https?:\/\//i.test(copy.ctaExtraUrl) || /^mailto:/i.test(copy.ctaExtraUrl) ? (
