@@ -32,12 +32,28 @@ export default function SessionTimeout({ portal, onTimeout }) {
   const touch = () => { try { localStorage.setItem(key, String(Date.now())); } catch { /* storage unavailable */ } };
 
   useEffect(() => {
-    touch();
+    // Starting up counts as activity only if the last recorded activity is
+    // long gone (a fresh sign-in after a past session). A re-mount mid-session
+    // — the layout rebuilding itself — must not quietly restart the 15 minutes.
+    let stored = null;
+    try { stored = Number(localStorage.getItem(key)) || null; } catch { /* storage unavailable */ }
+    if (!stored || Date.now() - stored > (IDLE_MINUTES * 60 + WARN_SECONDS + 60) * 1000) touch();
     let lastWrite = Date.now();
     // While the prompt is up, only its button counts as a reply: moving the
     // mouse must not dismiss it.
-    function onActivity() {
+    //
+    // A mouse that has not moved does not count. Chrome re-sends a "mousemove"
+    // with the same coordinates whenever the page under a still cursor changes
+    // (the sidebar badges refresh every minute, for one), and each of those
+    // was restarting the 15 minutes — so nobody was ever signed out.
+    let lastX = null, lastY = null;
+    function onActivity(e) {
       if (warningRef.current) return;
+      if (e?.type === "mousemove") {
+        const moved = lastX === null || Math.abs(e.clientX - lastX) + Math.abs(e.clientY - lastY) >= 3;
+        lastX = e.clientX; lastY = e.clientY;
+        if (!moved) return;
+      }
       const now = Date.now();
       if (now - lastWrite > 1000) { lastWrite = now; touch(); }
     }
