@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { uploadImage } from "../../../lib/uploadImage";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../../theme";
 
@@ -96,13 +96,30 @@ export function ImageField({ label, value, onChange, hint, folder = "explore" })
 
 // A list of paragraphs, edited one per line. The public pages render each
 // entry as its own <p>, so splitting on newlines keeps that mapping obvious.
+// One paragraph per line. What is typed is kept exactly as typed while editing
+// — spaces, blank lines and all — and only the cleaned list (trimmed, no empty
+// paragraphs) goes up to the form. It used to rebuild the box from that
+// cleaned list on every keystroke, which swallowed a space typed at the end of
+// a line and a Return that made a new empty line: the two keys looked dead.
+const cleanParagraphs = (text) => text.split("\n").map((s) => s.trim()).filter(Boolean);
+
 export function Paragraphs({ label, value, onChange, rows = 5, hint = "One paragraph per line" }) {
+  const [text, setText] = useState(() => (value ?? []).join("\n"));
+  // The saved paragraphs changed from outside (the article finished loading, a
+  // different guide was opened): show them. Typing never triggers this, since
+  // what was typed already cleans to the same list.
+  useEffect(() => {
+    const incoming = value ?? [];
+    const mine = cleanParagraphs(text);
+    if (incoming.length !== mine.length || incoming.some((p, i) => p !== mine[i])) setText(incoming.join("\n"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
   return (
     <Field label={label} hint={hint}>
       <TextArea
         rows={rows}
-        value={(value ?? []).join("\n")}
-        onChange={(e) => onChange(e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}
+        value={text}
+        onChange={(e) => { setText(e.target.value); onChange(cleanParagraphs(e.target.value)); }}
       />
     </Field>
   );
