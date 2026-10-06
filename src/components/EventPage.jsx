@@ -199,6 +199,7 @@ export default function EventPage() {
       directionsQuery={free ? null : (event.mapQuery || event.location || (event.lat != null ? event.title : null))}
       // Saved coordinates put the pin straight on the map, with no address
       // lookup that can fail.
+      hideMapNote={!event.isBusiness}
       mapLat={free ? null : event.lat}
       mapLng={free ? null : event.lng}
       // A booking link is shown whenever the event has one. A free event can

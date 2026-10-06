@@ -193,6 +193,7 @@ export default function PlaceDetailLayout({
   directionsQuery,
   mapLat,
   mapLng,
+  hideMapNote = false,
   shareTitle,
   relatedHeading,
   related = [],
@@ -611,7 +612,9 @@ export default function PlaceDetailLayout({
             lat={mapLat || undefined}
             lng={mapLng || undefined}
             heading={null}
-            note={address}
+            // An event's map shows only the pin: its address text kept being
+            // the host business's, which is somewhere else.
+            note={hideMapNote ? null : address}
             rounded={false}
             widthClassName="w-[90%] sm:w-[80%]"
             aspectClassName="aspect-[8/5] sm:aspect-[16/9] md:aspect-[21/9]"

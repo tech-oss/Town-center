@@ -137,7 +137,8 @@ export default function EventDetailScreen() {
 
           {gallery.length > 1 && (
             <div className="grid grid-cols-2 gap-2">
-              {gallery.slice(1, 5).map((src, i) => (
+              {/* Up to six after the hero, the same as the website. */}
+              {gallery.slice(1, 7).map((src, i) => (
                 <img key={i} src={src} alt="" className="w-full aspect-square object-cover rounded-xl" style={cropStyle(src, "gallery")} />
               ))}
             </div>
