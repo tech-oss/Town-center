@@ -21,7 +21,9 @@ import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
-const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected", "Unclaimed"];
+// "Paying" = subscribed and paying through Stripe — not free, and not a
+// Visibility Plan admin gave away.
+const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected", "Unclaimed", "Paying"];
 
 function exportCsv(rows) {
   const headers = ["Name", "Section", "Plan", "Status", "Contact Name", "Email", "Phone", "Address", "Submitted"];
@@ -1117,7 +1119,6 @@ const SORT_OPTIONS = [
   { value: "submitted-desc", label: "Newest first" },
   { value: "submitted-asc",  label: "Oldest first" },
   { value: "section-asc",    label: "Section A → Z" },
-  { value: "plan-asc",       label: "Plan A → Z" },
 ];
 
 // ─── Main page ────────────────────────────────────────────────────────────────
@@ -1256,11 +1257,13 @@ export default function BusinessesPage() {
     Suspended: list.filter((b) => b.status === "Suspended").length,
     Rejected:  list.filter((b) => b.status === "Rejected").length,
     Unclaimed: list.filter((b) => b.unclaimed).length,
+    Paying:    list.filter((b) => b.planPaying).length,
   };
 
   const filtered = useMemo(() => {
     let result = statusFilter === "All" ? list
       : statusFilter === "Unclaimed" ? list.filter((b) => b.unclaimed)
+      : statusFilter === "Paying" ? list.filter((b) => b.planPaying)
       : list.filter((b) => b.status === statusFilter);
     const q = search.trim().toLowerCase();
     if (q) result = result.filter((b) => b.name?.toLowerCase().includes(q));
