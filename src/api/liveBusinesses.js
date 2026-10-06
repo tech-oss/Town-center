@@ -359,9 +359,12 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
 // briefly answer "Could not find the table … in the schema cache" (PGRST205)
 // while others already know it. That's transient, so retry a couple of times
 // before treating it as a real failure.
+// Retries a request that failed. It used to retry only a missing table, so a
+// request the database dropped under load (a page refresh sends a burst of
+// them) was never tried again and the whole directory came back empty.
 async function withSchemaRetry(run, attempts = 3) {
   let res = await run();
-  for (let i = 1; i < attempts && res.error?.code === "PGRST205"; i++) {
+  for (let i = 1; i < attempts && res.error; i++) {
     await new Promise((r) => setTimeout(r, 400 * i));
     res = await run();
   }
@@ -369,6 +372,9 @@ async function withSchemaRetry(run, attempts = 3) {
 }
 
 let cache = null;
+// True when the last attempt to read the directory failed, so a caller can tell
+// "nothing there" from "could not load".
+let lastLoadFailed = false;
 
 // Forget the loaded businesses so the next read fetches fresh data — used by
 // live updates when admin changes something.
@@ -401,6 +407,7 @@ export function loadLiveBusinesses() {
     // A missing view (migration not run yet) or a network failure must not
     // take the whole directory down — the site falls back to its demo data.
     if (profilesRes.error) {
+      lastLoadFailed = true;
       console.warn("Live businesses unavailable:", profilesRes.error.message);
       // Don't remember a failure: the next page asks again instead of hiding
       // every registered business until a full reload.
@@ -427,6 +434,7 @@ export function loadLiveBusinesses() {
     // A listing without a business type can't be placed in any section —
     // defaulting it somewhere would file a restaurant under Shop — so it
     // stays off the public site until its type is set.
+    lastLoadFailed = false;
     return (profilesRes.data ?? [])
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
       .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds, features, events));
@@ -456,8 +464,19 @@ export function webPathFor(item) {
 // Pins for the website's traders map and the app's Map tab: the demo traders
 // plus every registered business with coordinates, whatever its plan. A
 // registered business replaces a demo pin of the same name.
+const PINS_KEY = "map-pins-v1";
+const savePins = (pins) => { try { localStorage.setItem(PINS_KEY, JSON.stringify(pins)); } catch { /* storage full or blocked */ } };
+const savedPins = () => { try { return JSON.parse(localStorage.getItem(PINS_KEY) ?? "null"); } catch { return null; } };
+
 export async function getMapBrands() {
-  const live = await loadLiveBusinesses();
+  let live = [];
+  try { live = await loadLiveBusinesses(); } catch { lastLoadFailed = true; }
+  // A failed read must never empty the map: show the pins from the last
+  // successful load instead, and the next page load tries again.
+  if (lastLoadFailed) {
+    const saved = savedPins();
+    if (saved?.length) return saved;
+  }
   const pins = live
     .filter((i) => parseCoords(i.lat, i.lng))
     .map((i) => ({
@@ -475,6 +494,7 @@ export async function getMapBrands() {
       lat: Number(i.lat),
       lng: Number(i.lng),
     }));
+  if (pins.length) savePins(pins);
   const names = new Set(pins.map((p) => p.name.trim().toLowerCase()));
   return [...pins, ...brandGrid.brands.filter((b) => !names.has(String(b.name).trim().toLowerCase()))];
 }
