@@ -14,6 +14,13 @@ export function recordLogin(portal, authUserId, businessId = null, { always = fa
   if (!authUserId) return;
   const key = `login-recorded:${portal}:${authUserId}`;
   try {
+    // Typing a password is a fresh start for the idle timer: whatever idle time
+    // an earlier session left behind must not greet the new one with the
+    // "Session timeout" question.
+    if (always) {
+      localStorage.removeItem(`session-activity:${portal}`);
+      localStorage.removeItem(`session-warning:${portal}`);
+    }
     if (!always && localStorage.getItem(key) === today()) return;
     localStorage.setItem(key, today());
   } catch { /* storage unavailable: record anyway */ }
