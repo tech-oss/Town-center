@@ -68,7 +68,8 @@ function subCategoryEditConfig(user, listing) {
     return { key: "freelancerCategories", label: "Sub-Category", options, max: 2 };
   }
   if (user.businessType === "eat-drink") {
-    return { key: "cuisineTypes", label: "Cuisine Type", options: CUISINE_TYPES, max: 2 };
+    // Optional: a café or bar need not have a cuisine. Untick both to have none.
+    return { key: "cuisineTypes", label: "Cuisine Type (optional)", options: CUISINE_TYPES, max: 2, optional: true };
   }
   if (user.businessType === "see-do") {
     return { key: "seeDoCategories", label: "Category", options: SEE_DO_CATEGORIES, max: 2 };
@@ -240,7 +241,7 @@ export default function MyListingPage() {
                   )}
                   {subCatConfig && (
                     <Locked field="businessTypeDetail" span2>
-                    <Field label={subCatConfig.label} span2 hint="Select up to 2 — you can update this yourself">
+                    <Field label={subCatConfig.label} span2 hint={subCatConfig.optional ? "Select up to 2, or none — you can update this yourself" : "Select up to 2 — you can update this yourself"}>
                       <CheckGroup
                         options={subCatConfig.options}
                         selected={listing.businessTypeDetail?.[subCatConfig.key] ?? []}
