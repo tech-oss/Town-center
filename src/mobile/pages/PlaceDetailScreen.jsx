@@ -57,7 +57,9 @@ function BusinessDetailScreen({ place, goBack }) {
   const websiteUrl = !free ? externalUrl(place.website) : null;
   // The booking button opens the business's booking link, falling back to its
   // website — the same rule as the website's page.
-  const bookingUrl = !free ? (externalUrl(place.bookingUrl) ?? websiteUrl) : null;
+  // Only the booking link the business gave — no booking button without one.
+  // It used to fall back to the website.
+  const bookingUrl = !free ? externalUrl(place.bookingUrl) : null;
   // Admin can attach a Featured Article or an event to any business, whatever
   // plan it is on, and a paid slot can outlive a downgrade. Blanking this for
   // a Free listing hid that content while still rendering "Business will add

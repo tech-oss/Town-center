@@ -158,8 +158,9 @@ export function ActionCircle({ icon, label, to, href, onClick }) {
 }
 
 function normalizeUrl(url) {
-  if (!url) return null;
-  return url.startsWith("http") ? url : `https://${url}`;
+  const u = typeof url === "string" ? url.trim() : "";
+  if (!u) return null;
+  return u.startsWith("http") ? u : `https://${u}`;
 }
 
 // ── The one shared body used by every place/event detail page ──
@@ -257,9 +258,10 @@ export default function PlaceDetailLayout({
       href: websiteHref,
       icon: <GlobeIcon size={22} />,
     },
-    !shareInActions && extraButtonLabel && {
+    // Only with a real link of its own — never the website, never "#".
+    !shareInActions && extraButtonLabel && normalizeUrl(extraButtonHref) && {
       label: extraButtonLabel,
-      href: normalizeUrl(extraButtonHref) || websiteHref || "#",
+      href: normalizeUrl(extraButtonHref),
       icon: <TicketIcon size={22} />,
     },
     directionsQuery && {

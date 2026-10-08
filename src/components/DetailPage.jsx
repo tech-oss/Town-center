@@ -93,8 +93,10 @@ export default function DetailPage() {
       website={free || item.hideWeb ? null : item.website}
       social={free ? null : buildSocial(item)}
       directionsQuery={free ? null : mapQuery}
-      extraButtonLabel={!free && item.section === "eat-drink" ? "Booking" : undefined}
-      extraButtonHref={item.bookingUrl || item.website}
+      // A booking button only when a booking link was given. It used to show
+      // regardless and fall back to the website.
+      extraButtonLabel={!free && item.section === "eat-drink" && item.bookingUrl?.trim() ? "Booking" : undefined}
+      extraButtonHref={item.bookingUrl}
       shareTitle={`${item.name} — Maidenhead`}
       relatedHeading="You might also like"
       related={related.map((it) => ({
