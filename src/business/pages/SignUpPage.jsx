@@ -152,7 +152,8 @@ export default function SignUpPage() {
       if (!(form.businessName.trim() && form.businessType && form.businessAddress.trim())) return false;
       if (form.businessType === "freelancer" && !form.freelancerKind) return false;
       if (form.businessType === "freelancer" && form.freelancerKind && !form.freelancerCategories.length) return false;
-      if (form.businessType === "eat-drink" && !(form.cuisineTypes.length && form.venueTypes.length)) return false;
+      // Venue type is needed; cuisine is optional — a café need not have one.
+      if (form.businessType === "eat-drink" && !form.venueTypes.length) return false;
       if (form.businessType === "shop" && !form.shopCategories.length) return false;
       if (form.businessType === "see-do" && !form.seeDoCategories.length) return false;
       return true;
@@ -260,7 +261,7 @@ export default function SignUpPage() {
                   <Field label="Venue Type" required span2 hint="Select up to 2">
                     <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v)} max={2} />
                   </Field>
-                  <Field label="Cuisine Type" required span2 hint="Select up to 2">
+                  <Field label="Cuisine Type (optional)" span2 hint="Select up to 2, or none">
                     <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v)} max={2} />
                   </Field>
                 </>
