@@ -200,7 +200,9 @@ function RegisterBusinessForm({ onSave, onCancel }) {
 
   const typeValid =
     (!isFreelancer || (form.freelancerKind && form.freelancerCategories.length > 0)) &&
-    (!isEat || (form.cuisineTypes.length > 0 && form.venueTypes.length > 0)) &&
+    // Venue type is needed to file it; cuisine is optional (a café need not
+    // have one).
+    (!isEat || form.venueTypes.length > 0) &&
     (!isShop || form.shopCategories.length > 0) &&
     (!isSeeDo || form.seeDoCategories.length > 0);
 
@@ -352,7 +354,7 @@ function RegisterBusinessForm({ onSave, onCancel }) {
               <FormField label="Venue Type" required span2 hint="Select up to 2">
                 <CheckGroup options={VENUE_TYPES} selected={form.venueTypes} onChange={(v) => set("venueTypes", v.slice(0, 2))} />
               </FormField>
-              <FormField label="Cuisine Type" required span2 hint="Select up to 2">
+              <FormField label="Cuisine Type (optional)" span2 hint="Select up to 2, or none">
                 <CheckGroup options={CUISINE_TYPES} selected={form.cuisineTypes} onChange={(v) => set("cuisineTypes", v.slice(0, 2))} />
               </FormField>
             </>
