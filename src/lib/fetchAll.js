@@ -16,11 +16,13 @@
 const PAGE = 1000;
 const PARALLEL = 3;
 
-export async function fetchAll(build, pageSize = PAGE) {
+// `parallel` = pages asked for at once. 1 suits a list that is usually under
+// a page (the map pins), so no empty extra pages are requested.
+export async function fetchAll(build, pageSize = PAGE, parallel = PARALLEL) {
   const rows = [];
-  for (let from = 0; ; from += pageSize * PARALLEL) {
+  for (let from = 0; ; from += pageSize * parallel) {
     const batch = await Promise.all(
-      Array.from({ length: PARALLEL }, (_, i) => {
+      Array.from({ length: parallel }, (_, i) => {
         const start = from + i * pageSize;
         return build().range(start, start + pageSize - 1);
       })

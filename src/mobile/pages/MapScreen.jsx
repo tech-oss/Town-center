@@ -11,7 +11,7 @@ import MobileShell from "../components/MobileShell";
 import { ListSearch } from "../components/ListSearch";
 import { brandGrid } from "../../Data/content";
 import useFetch from "../../hooks/useFetch";
-import { getMapBrands } from "../../api";
+import { getMapBrands, getCachedMapBrands } from "../../api";
 import { MAP_CENTRE } from "../data/mobileMock";
 import { categoryColor } from "../../lib/categoryColors";
 
@@ -186,7 +186,10 @@ export default function MapScreen() {
   const mapRef = useRef(null);
 
   // Demo traders show immediately; registered businesses join once loaded.
-  const { data: liveBrands } = useFetch(getMapBrands, []);
+  const { data: freshBrands } = useFetch(getMapBrands, []);
+  // Last-known pins draw instantly; fresh ones replace them when they arrive.
+  const [cachedBrands] = useState(getCachedMapBrands);
+  const liveBrands = freshBrands ?? cachedBrands;
   const withCoords = useMemo(
     () => (liveBrands ?? brandGrid.brands).filter((b) => typeof b.lat === "number" && typeof b.lng === "number" && isValidCoords(b.lat, b.lng)),
     [liveBrands]

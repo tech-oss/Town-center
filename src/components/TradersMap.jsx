@@ -10,7 +10,7 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { brandGrid } from "../Data/content";
 import useFetch from "../hooks/useFetch";
-import { getMapBrands } from "../api";
+import { getMapBrands, getCachedMapBrands } from "../api";
 import { itemBySlug } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 
@@ -575,7 +575,10 @@ function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext
 export default function TradersMap() {
   const navigate = useNavigate();
   // Demo traders show immediately; registered businesses join once loaded.
-  const { data: brands } = useFetch(getMapBrands, []);
+  // Last-known pins draw instantly; fresh ones replace them when they arrive.
+  const { data: freshBrands } = useFetch(getMapBrands, []);
+  const [cachedBrands] = useState(getCachedMapBrands);
+  const brands = freshBrands ?? cachedBrands;
   const [filter, setFilter] = useState("all");
   const [userPos, setUserPos] = useState(null);
   const [activeBrand, setActiveBrand] = useState(null);

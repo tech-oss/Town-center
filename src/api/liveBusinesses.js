@@ -461,40 +461,88 @@ export function webPathFor(item) {
     : `/${item.section}/place/${item.slug}`;
 }
 
-// Pins for the website's traders map and the app's Map tab: the demo traders
-// plus every registered business with coordinates, whatever its plan. A
-// registered business replaces a demo pin of the same name.
-const PINS_KEY = "map-pins-v1";
+const PINS_KEY = "map-pins-v2";
 const savePins = (pins) => { try { localStorage.setItem(PINS_KEY, JSON.stringify(pins)); } catch { /* storage full or blocked */ } };
 const savedPins = () => { try { return JSON.parse(localStorage.getItem(PINS_KEY) ?? "null"); } catch { return null; } };
 
-export async function getMapBrands() {
-  let live = [];
-  try { live = await loadLiveBusinesses(); } catch { lastLoadFailed = true; }
-  // A failed read must never empty the map: show the pins from the last
-  // successful load instead, and the next page load tries again.
-  if (lastLoadFailed) {
-    const saved = savedPins();
-    if (saved?.length) return saved;
-  }
-  const pins = live
-    .filter((i) => parseCoords(i.lat, i.lng))
-    .map((i) => ({
-      id: `live-${i.slug}`,
-      name: i.name,
-      category: i.tag || "",
-      section: MAP_SECTION[i.section] ?? i.section,
-      // Logo only on the Visibility Plan (the public view withholds it for a
-      // Free business); the hero picture is used for the map card's banner.
-      logo: i.logo || null,
-      image: i.image,
-      to: webPathFor(i),
-      address: i.address,
-      tagline: i.tagline,
-      lat: Number(i.lat),
-      lng: Number(i.lng),
-    }));
-  if (pins.length) savePins(pins);
+// Only what a map pin needs. The map used to load the whole directory —
+// every field of every business (about 1.6 MB over three requests) plus
+// articles, reviews, offers and events it never shows — just to draw dots.
+// This is one small request, for the businesses that have a pin at all.
+const PIN_COLUMNS = "business_id, name, business_type, business_type_detail, plan, hero_image, logo, tagline, address, postal_code, lat, lng";
+
+function toPin(i) {
+  return {
+    id: `live-${i.slug}`,
+    name: i.name,
+    category: i.tag || "",
+    section: MAP_SECTION[i.section] ?? i.section,
+    // Logo only on the Visibility Plan (the public view withholds it for a
+    // Free business); the hero picture is used for the map card's banner.
+    logo: i.logo || null,
+    image: i.image,
+    to: webPathFor(i),
+    address: i.address,
+    tagline: i.tagline,
+    lat: Number(i.lat),
+    lng: Number(i.lng),
+  };
+}
+
+function withDemoPins(pins) {
   const names = new Set(pins.map((p) => p.name.trim().toLowerCase()));
   return [...pins, ...brandGrid.brands.filter((b) => !names.has(String(b.name).trim().toLowerCase()))];
+}
+
+// The pins from the last successful load, straight from this device — so a
+// refresh draws the map instantly while fresh pins load behind it.
+export function getCachedMapBrands() {
+  const saved = savedPins();
+  return saved?.length ? withDemoPins(saved) : null;
+}
+
+let pinsPromise = null;
+async function loadPins() {
+  // If the full directory is already loaded (a listing page was visited),
+  // use it rather than asking again.
+  if (cache) {
+    const live = await cache.catch(() => null);
+    if (live?.length && !lastLoadFailed) return live.filter((i) => parseCoords(i.lat, i.lng)).map(toPin);
+  }
+  const { data, error } = await withSchemaRetry(() => fetchAll(() => supabase
+    .from("public_business_profiles")
+    .select(PIN_COLUMNS)
+    .not("lat", "is", null)
+    .order("business_id"), 1000, 1));
+  if (error) throw error;
+  return (data ?? [])
+    .filter((row) => SECTION_FOR_TYPE[row.business_type])
+    .map((row) => toItem(row, {}))
+    .filter((i) => parseCoords(i.lat, i.lng))
+    .map(toPin);
+}
+
+// Pins for the website's traders map and the app's Map tab: the demo traders
+// plus every registered business with coordinates, whatever its plan. A
+// registered business replaces a demo pin of the same name.
+export async function getMapBrands() {
+  // One request in flight at a time, shared by everything that asks.
+  pinsPromise ??= loadPins().finally(() => { setTimeout(() => { pinsPromise = null; }, 30000); });
+  try {
+    const pins = await pinsPromise;
+    if (pins.length) savePins(pins);
+    return withDemoPins(pins);
+  } catch {
+    pinsPromise = null;
+    // A failed read must never empty the map: keep the last good pins.
+    const saved = savedPins();
+    return withDemoPins(saved ?? []);
+  }
+}
+
+// Start loading pins as early as possible — called when the site starts, so
+// the request runs alongside the rest of the page instead of waiting for the
+// map to scroll into view.
+export function prefetchMapBrands() {
+  getMapBrands().catch(() => {});
 }

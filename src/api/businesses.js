@@ -38,4 +38,4 @@ export async function getBusinessBySlug(slug) {
   return live.find((i) => i.slug === slug && i.section !== "stay") ?? itemBySlug[slug] ?? null;
 }
 
-export { getMapBrands } from "./liveBusinesses";
+export { getMapBrands, getCachedMapBrands, prefetchMapBrands } from "./liveBusinesses";
