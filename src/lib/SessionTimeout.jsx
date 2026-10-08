@@ -3,12 +3,15 @@ import { useEffect, useRef, useState } from "react";
 // Signs a portal user out after a stretch of inactivity.
 //
 // After IDLE_MINUTES with no mouse, keyboard, scroll or touch, a "session
-// timeout" prompt appears with a countdown. "Stay signed in" carries on; if
-// nobody answers within WARN_SECONDS, `onTimeout` signs them out.
+// timeout" prompt appears and counts down WARN_SECONDS from the moment it is
+// shown. "Stay signed in" carries on; if nobody answers in time, `onTimeout`
+// signs them out. The question is always asked first — even if the page only
+// notices after a long sleep — except past MAX_IDLE_MINUTES (an abandoned
+// computer), where there is nobody to ask and the session just ends.
 //
 // Time is judged from real clock timestamps kept in localStorage, not from a
 // timer that counts ticks, so:
-//   • a laptop that slept past the deadline signs out the moment it wakes;
+//   • a laptop that slept is checked the moment it wakes, before any touch;
 //   • activity in one browser tab keeps every other tab of the portal alive;
 //   • answering the prompt in one tab dismisses it in the others.
 //
@@ -16,10 +19,15 @@ import { useEffect, useRef, useState } from "react";
 
 const IDLE_MINUTES = 15;
 const WARN_SECONDS = 60;
+// Beyond this the computer has been left for good: end the session without asking.
+const MAX_IDLE_MINUTES = 60;
 const EVENTS = ["mousemove", "mousedown", "keydown", "scroll", "wheel", "touchstart", "click"];
 
 export default function SessionTimeout({ portal, onTimeout }) {
   const key = `session-activity:${portal}`;
+  // When the question was first put to the user, so its minute is counted from
+  // there and survives a refresh or a second tab.
+  const warnKey = `session-warning:${portal}`;
   const [secondsLeft, setSecondsLeft] = useState(null); // null = not warning
   const warning = secondsLeft !== null;
   const warningRef = useRef(false);
@@ -29,7 +37,9 @@ export default function SessionTimeout({ portal, onTimeout }) {
   const firedRef = useRef(false);
 
   const read = () => { try { return Number(localStorage.getItem(key)) || Date.now(); } catch { return Date.now(); } };
-  const touch = () => { try { localStorage.setItem(key, String(Date.now())); } catch { /* storage unavailable */ } };
+  const touch = () => { try { localStorage.setItem(key, String(Date.now())); localStorage.removeItem(warnKey); } catch { /* storage unavailable */ } };
+  const readWarnStart = () => { try { return Number(localStorage.getItem(warnKey)) || null; } catch { return null; } };
+  const setWarnStart = (t) => { try { localStorage.setItem(warnKey, String(t)); } catch { /* storage unavailable */ } };
 
   useEffect(() => {
     // Starting up counts as activity only if the last recorded activity is
@@ -37,7 +47,7 @@ export default function SessionTimeout({ portal, onTimeout }) {
     // — the layout rebuilding itself — must not quietly restart the 15 minutes.
     let stored = null;
     try { stored = Number(localStorage.getItem(key)) || null; } catch { /* storage unavailable */ }
-    if (!stored || Date.now() - stored > (IDLE_MINUTES * 60 + WARN_SECONDS + 60) * 1000) touch();
+    if (!stored || Date.now() - stored > MAX_IDLE_MINUTES * 60 * 1000) touch();
     let lastWrite = Date.now();
     // While the prompt is up, only its button counts as a reply: moving the
     // mouse must not dismiss it.
@@ -54,17 +64,29 @@ export default function SessionTimeout({ portal, onTimeout }) {
     const limit = IDLE_MINUTES * 60 * 1000;
     function evaluate() {
       if (firedRef.current) return "out";
-      const idleMs = Date.now() - read();
-      if (idleMs >= limit + WARN_SECONDS * 1000) {
+      const now = Date.now();
+      const idleMs = now - read();
+      // Left for good: nobody to ask.
+      if (idleMs >= MAX_IDLE_MINUTES * 60 * 1000) {
         firedRef.current = true;
         timeoutRef.current?.();
         return "out";
       }
       if (idleMs >= limit) {
-        setSecondsLeft(Math.max(0, Math.ceil((limit + WARN_SECONDS * 1000 - idleMs) / 1000)));
+        // Ask first. The minute to answer starts when the question is first
+        // shown (remembered, so a refresh or another tab shares it).
+        let started = readWarnStart();
+        if (!started || started < now - idleMs) { started = now; setWarnStart(started); }
+        const left = WARN_SECONDS * 1000 - (now - started);
+        if (left <= 0) {
+          firedRef.current = true;
+          timeoutRef.current?.();
+          return "out";
+        }
+        setSecondsLeft(Math.max(1, Math.ceil(left / 1000)));
         return "warning";
       }
-      setSecondsLeft((s) => (s === null ? s : null));
+      setSecondsLeft((v) => (v === null ? v : null));
       return "active";
     }
 
