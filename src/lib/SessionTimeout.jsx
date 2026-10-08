@@ -47,6 +47,27 @@ export default function SessionTimeout({ portal, onTimeout }) {
     // (the sidebar badges refresh every minute, for one), and each of those
     // was restarting the 15 minutes — so nobody was ever signed out.
     let lastX = null, lastY = null;
+
+    // Reads the clock and acts on it: sign out, show the warning, or all clear.
+    // Returns where things stand, so a touch can be judged against the real
+    // time that has passed, not against a timer that may have been asleep.
+    const limit = IDLE_MINUTES * 60 * 1000;
+    function evaluate() {
+      if (firedRef.current) return "out";
+      const idleMs = Date.now() - read();
+      if (idleMs >= limit + WARN_SECONDS * 1000) {
+        firedRef.current = true;
+        timeoutRef.current?.();
+        return "out";
+      }
+      if (idleMs >= limit) {
+        setSecondsLeft(Math.max(0, Math.ceil((limit + WARN_SECONDS * 1000 - idleMs) / 1000)));
+        return "warning";
+      }
+      setSecondsLeft((s) => (s === null ? s : null));
+      return "active";
+    }
+
     function onActivity(e) {
       if (warningRef.current) return;
       if (e?.type === "mousemove") {
@@ -54,28 +75,34 @@ export default function SessionTimeout({ portal, onTimeout }) {
         lastX = e.clientX; lastY = e.clientY;
         if (!moved) return;
       }
+      // A computer that went to sleep, or a tab the browser froze, stops this
+      // page's timers — so the 15 minutes can pass with nothing noticing. The
+      // first touch on waking used to reset the clock before anything had
+      // looked at it, and nobody was ever signed out. Check the time first:
+      // only a touch within the allowed window counts as activity.
+      if (evaluate() !== "active") return;
       const now = Date.now();
       if (now - lastWrite > 1000) { lastWrite = now; touch(); }
     }
     for (const e of EVENTS) window.addEventListener(e, onActivity, { passive: true });
 
-    const tick = setInterval(() => {
-      if (firedRef.current) return;
-      const idleMs = Date.now() - read();
-      const limit = IDLE_MINUTES * 60 * 1000;
-      if (idleMs >= limit + WARN_SECONDS * 1000) {
-        firedRef.current = true;
-        timeoutRef.current?.();
-      } else if (idleMs >= limit) {
-        setSecondsLeft(Math.max(0, Math.ceil((limit + WARN_SECONDS * 1000 - idleMs) / 1000)));
-      } else {
-        setSecondsLeft(null);
-      }
-    }, 1000);
+    // Coming back to the tab, waking the computer, regaining the network: look
+    // at the clock straight away rather than waiting for the next tick.
+    const onWake = () => { if (document.visibilityState !== "hidden") evaluate(); };
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", onWake);
+    window.addEventListener("pageshow", onWake);
+    window.addEventListener("online", onWake);
+
+    const tick = setInterval(evaluate, 1000);
 
     return () => {
       clearInterval(tick);
       for (const e of EVENTS) window.removeEventListener(e, onActivity);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", onWake);
+      window.removeEventListener("pageshow", onWake);
+      window.removeEventListener("online", onWake);
     };
   }, [key]);
 
