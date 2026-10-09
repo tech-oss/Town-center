@@ -430,6 +430,11 @@ export async function getAdhocTrend({ range = "6m" } = {}) {
 // Daily buckets between two dates, inclusive — used by the revenue and signup
 // sparklines. `range` is either a day-count (trailing from today) or
 // { type: "custom", from, to }, matching resolveRange's two shapes.
+// The calendar date of a local Date, as YYYY-MM-DD. toISOString() gives the
+// UTC date instead, which for anywhere ahead of UTC (the UK in summer) is the
+// day before at midnight — so every payment was plotted one day late.
+const localDayKey = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 function dayBuckets(range) {
   let since, until;
   if (range && typeof range === "object" && range.type === "custom") {
@@ -444,7 +449,7 @@ function dayBuckets(range) {
   const d = new Date(since.getFullYear(), since.getMonth(), since.getDate());
   const end = new Date(until.getFullYear(), until.getMonth(), until.getDate());
   while (d <= end) {
-    out.push({ key: d.toISOString().slice(0, 10), date: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}` });
+    out.push({ key: localDayKey(d), date: `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}` });
     d.setDate(d.getDate() + 1);
   }
   return out;
@@ -473,8 +478,11 @@ export async function getRevenueTrend({ days = 30 } = {}) {
     prevStart.setDate(prevStart.getDate() - days * 2);
     const prevEnd = new Date();
     prevEnd.setDate(prevEnd.getDate() - days);
-    const prevStartKey = prevStart.toISOString().slice(0, 10);
-    const prevEndKey = prevEnd.toISOString().slice(0, 10);
+    // Same window as dayBuckets: the `days` days before the first shown day.
+    prevStart.setDate(prevStart.getDate() + 1);
+    prevEnd.setDate(prevEnd.getDate() + 1);
+    const prevStartKey = localDayKey(prevStart);
+    const prevEndKey = localDayKey(prevEnd);
     const prevTotal = payments
       .filter((p) => {
         const day = paymentDay(p);

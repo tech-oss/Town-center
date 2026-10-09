@@ -135,8 +135,11 @@ function RevTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg px-3 py-2 text-sm shadow-lg" style={{ backgroundColor: NAVY, color: "#fff" }}>
-      <p className="font-semibold" style={{ fontFamily: CINZEL }}>£{payload[0].value.toLocaleString()}</p>
-      <p className="text-xs opacity-60 mt-0.5">{label}</p>
+      {/* Colours set on the text itself: the admin's paragraph colour was
+          overriding the white inherited from the box, leaving dark text on
+          the dark box. */}
+      <p className="font-semibold" style={{ fontFamily: CINZEL, color: "#ffffff" }}>£{payload[0].value.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+      <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.75)" }}>{label}</p>
     </div>
   );
 }
