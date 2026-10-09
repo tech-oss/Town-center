@@ -100,7 +100,7 @@ export default function ServicesGroupScreen() {
 
         <ListSearch value={query} onChange={setQuery} placeholder={`Search ${groupConfig.label}…`} />
 
-        <FilterPills options={filters} value={filter} onChange={setFilter} />
+        <FilterPills options={filters} value={filter} onChange={setFilter} icons />
 
         <div className="grid grid-cols-2 gap-3">
           {items.map((it) => (

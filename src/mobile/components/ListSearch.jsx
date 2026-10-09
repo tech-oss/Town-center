@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Icon, CATEGORY_ICON } from "../../components/CategoryFilterBar";
 
 // Page-level ("contextual") search box used by listing screens to narrow the
 // results already on screen. This sits alongside — not instead of — the global
@@ -26,7 +27,10 @@ export function ListSearch({ value, onChange, placeholder = "Search…" }) {
 }
 
 // Horizontal pill filter bar shared by the listing screens.
-export function FilterPills({ options, value, onChange }) {
+// `icons`: show each category's icon, the same set the website's filter bar
+// uses ("all" gets the grid). Only for business-category filters — other
+// pill rows (dates, guide topics) stay text-only.
+export function FilterPills({ options, value, onChange, icons = false }) {
   return (
     <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-5 px-5">
       {options.map((o) => {
@@ -37,11 +41,15 @@ export function FilterPills({ options, value, onChange }) {
           <button
             key={key}
             onClick={() => onChange(key)}
-            className="shrink-0 px-4 py-1.5 rounded-full text-xs whitespace-nowrap"
+            className="shrink-0 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs whitespace-nowrap"
             style={active
               ? { backgroundColor: "var(--forest)", color: "#ffffff", fontWeight: 800 }
               : { backgroundColor: "rgba(28,46,56,0.06)", color: "#000000", fontWeight: 600 }}
           >
+            {icons && (
+              <Icon name={key === "all" ? "grid" : CATEGORY_ICON[key]} className="w-3.5 h-3.5"
+                color={active ? "#ffffff" : "var(--teal-deep)"} />
+            )}
             {label}
           </button>
         );

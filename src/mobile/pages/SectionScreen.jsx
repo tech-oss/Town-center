@@ -148,7 +148,7 @@ export default function SectionScreen({ sectionKey }) {
           </Link>
         )}
 
-        <FilterPills options={filters} value={filter} onChange={setFilter} />
+        <FilterPills options={filters} value={filter} onChange={setFilter} icons />
 
         <div className="grid grid-cols-2 gap-3">
           {items.map((it) => (
