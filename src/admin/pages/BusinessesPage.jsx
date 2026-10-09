@@ -1,4 +1,5 @@
-import { useState, useRef, useMemo } from "react";
+import { formatAcceptedAt } from "../../Data/agreements";
+import { useState, useRef, useMemo, useEffect } from "react";
 import PlacementTimer from "../components/PlacementTimer";
 import { PLANS, planFor, isPremium, PREMIUM_PLAN } from "../../Data/plans";
 import { uploadImage } from "../../lib/uploadImage";
@@ -6,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness, setBusinessLogo,
-  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
+  suspendBusiness, reinstateBusiness, deleteBusiness, getBusinessAgreements, setFeatured, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import CoordsNotice from "../components/CoordsNotice";
@@ -661,6 +662,39 @@ function typeSpecificRows(biz) {
   }
 }
 
+// The four agreements and when each was accepted (registration or claim).
+// Businesses that signed up before these existed show their older single
+// terms acceptance instead.
+function AgreementsList({ businessId, fallbackAcceptedAt }) {
+  const [rows, setRows] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    getBusinessAgreements(businessId).then((r) => { if (alive) setRows(r); }).catch(() => { if (alive) setRows([]); });
+    return () => { alive = false; };
+  }, [businessId]);
+  if (rows === null) return <p className="text-xs py-1" style={{ color: MUTED }}>Loading…</p>;
+  if (!rows.some((r) => r.acceptance)) {
+    return <DetailRow label="Terms & Privacy" value={fallbackAcceptedAt ? `Agreed ${new Date(fallbackAcceptedAt).toLocaleDateString("en-GB")} (before the four agreements were introduced)` : "Not recorded"} />;
+  }
+  return (
+    <div className="flex flex-col">
+      {rows.map((r) => (
+        <div key={r.key} className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
+          <div className="min-w-0">
+            <p className="text-xs font-semibold" style={{ color: NAVY }}>{r.title}</p>
+            <p className="text-[11px]" style={{ color: r.acceptance ? "#15803D" : "#B45309" }}>
+              {r.acceptance
+                ? `Accepted ${formatAcceptedAt(r.acceptance.accepted_at)} · v${r.acceptance.version} · at ${r.acceptance.context}${r.acceptance.email ? ` · ${r.acceptance.email}` : ""}`
+                : "Not accepted"}
+            </p>
+          </div>
+          <a href={r.file} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-semibold" style={{ color: BLUE }}>PDF</a>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featuredBusy, onToggleFeatured }) {
   const navigate = useNavigate();
   // biz.plan is the display name ("Visibility Plan"), not the stored key.
@@ -759,8 +793,8 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
           {planMessage && <p className="text-xs mt-1" style={{ color: planMessage.startsWith("Could not") ? "#991B1B" : "#15803D" }}>{planMessage}</p>}
         </DetailSection>
 
-        <DetailSection title="Terms">
-          <DetailRow label="Terms & Privacy" value={biz.termsAcceptedAt ? `Agreed ${new Date(biz.termsAcceptedAt).toLocaleDateString("en-GB")}` : "Not recorded"} />
+        <DetailSection title="Agreements">
+          <AgreementsList businessId={biz.id} fallbackAcceptedAt={biz.termsAcceptedAt} />
         </DetailSection>
 
         <div className="flex gap-3 justify-between items-center pt-2 border-t" style={{ borderColor: "rgba(16,24,40,0.1)" }}>

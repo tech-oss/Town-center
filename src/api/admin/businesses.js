@@ -633,3 +633,19 @@ export async function setBusinessPlan(id, planKey) {
   await logBusinessActivity(id, { action: "subscription.changed", entityType: "subscription", entityId: id, title: plan.name });
   return { ok: true, plan: plan.name };
 }
+
+// The four agreements the business accepted at registration or claim, with
+// when each was accepted — the latest acceptance of each.
+// See supabase/sql/business_agreements_2026_10.sql.
+export async function getBusinessAgreements(businessId) {
+  const { AGREEMENTS } = await import("../../Data/agreements");
+  const { data, error } = await supabase
+    .from("business_agreement_acceptances")
+    .select("agreement_key, version, accepted_at, recorded_at, email, context")
+    .eq("business_id", businessId)
+    .order("recorded_at", { ascending: false });
+  if (error) throw error;
+  const latest = new Map();
+  for (const r of data ?? []) if (!latest.has(r.agreement_key)) latest.set(r.agreement_key, r);
+  return AGREEMENTS.map((a) => ({ ...a, acceptance: latest.get(a.key) ?? null }));
+}
