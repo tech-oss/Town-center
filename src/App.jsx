@@ -34,6 +34,7 @@ import PressPage from './components/PressPage'
 import TradersPage from './components/TradersPage'
 import FeatureArticlePage from './components/FeatureArticlePage'
 import EventPage from './components/EventPage'
+import LegalPage from './components/LegalPage'
 import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
 import Footer from './components/Footer'
@@ -165,6 +166,8 @@ function PublicSite() {
           <Route path="/live/building/:slug" element={<BuildingPage />} />
           {/* <Route path="/live/property/:slug" element={<PropertyPage />} /> */}
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
+          <Route path="/privacy" element={<LegalPage doc="privacy" />} />
+          <Route path="/terms" element={<LegalPage doc="terms" />} />
           <Route path="/b/:slug" element={<BusinessPageRedirect />} />
           <Route path="/services/place/:slug" element={<ServicesDetailPage />} />
           <Route path="/services/:group" element={<CategoryPage />} />

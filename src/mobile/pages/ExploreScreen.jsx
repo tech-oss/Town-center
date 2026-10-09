@@ -28,7 +28,7 @@ const MORE_LINKS = [
   { label: "Our Story", to: "/mobile/our-story" },
   { label: "Traders", to: "/mobile/traders" },
   { label: "Privacy Policy", to: "/mobile/privacy" },
-  { label: "Terms & Conditions", to: "/mobile/terms" },
+  { label: "Terms of Use", to: "/mobile/terms" },
 ];
 
 export default function ExploreScreen() {

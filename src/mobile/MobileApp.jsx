@@ -87,8 +87,8 @@ export default function MobileApp() {
       <Route path="our-story" element={<OurStoryScreen />} />
       <Route path="work-with-us" element={<WorkWithUsScreen />} />
       <Route path="traders" element={<TradersScreen />} />
-      <Route path="privacy" element={<LegalPlaceholderScreen title="Privacy Policy" />} />
-      <Route path="terms" element={<LegalPlaceholderScreen title="Terms & Conditions" />} />
+      <Route path="privacy" element={<LegalPlaceholderScreen doc="privacy" />} />
+      <Route path="terms" element={<LegalPlaceholderScreen doc="terms" />} />
       <Route path="guides" element={<GuidesScreen />} />
       <Route path="guides/:slug" element={<GuideDetailScreen />} />
       <Route path="offers" element={<OffersScreen />} />

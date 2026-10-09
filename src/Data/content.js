@@ -206,7 +206,7 @@ export const newsletterModal = {
   buttonLabel: "Sign Up",
   privacyNote: "We care about your data. Read our",
   privacyLinkLabel: "Privacy Policy",
-  privacyLinkHref: "#privacy",
+  privacyLinkHref: "/privacy",
   success:
     "🎉 You're successfully subscribed! Thanks for joining — keep an eye on your inbox for the latest from Maidenhead.",
 };
@@ -227,7 +227,7 @@ export const footer = {
       heading: "Legal",
       links: [
         { label: "Privacy Policy",       href: "/privacy" },
-        { label: "Terms & Conditions",   href: "/terms" },
+        { label: "Terms of Use",         href: "/terms" },
       ],
     },
   ],
