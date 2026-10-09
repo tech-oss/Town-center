@@ -13,7 +13,7 @@ import { supabase } from "../lib/supabaseClient";
 // The business portal is a separate deployment. Set VITE_BUSINESS_PORTAL_URL
 // to its permanent address once it has one.
 const PORTAL_URL = (import.meta.env.VITE_BUSINESS_PORTAL_URL
-  || "https://town-center-esoqc6xdx-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
+  || "https://town-center-9n64ehgk8-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
 
 // Remembered for a minute, not for the whole visit: it used to be looked up
 // once per page load, so a business admin registered while the site was open
