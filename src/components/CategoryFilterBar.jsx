@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 // One small, consistent line-icon per category slug so every section (See &
 // Do, Eat & Drink, Shop, Services) reads as one system. Falls back to a
 // generic tag icon for any category without a specific mapping.
-function Icon({ name, className = "", color }) {
+export function Icon({ name, className = "", color }) {
   const p = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: color || "currentColor", strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", className: `shrink-0 ${className}` };
   switch (name) {
     case "grid": return (<svg {...p}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>);
@@ -54,13 +54,51 @@ function Icon({ name, className = "", color }) {
     case "plane": return (<svg {...p}><path d="M3 13l18-8-8 18-2-8-8-2z" /></svg>);
     case "scissors": return (<svg {...p}><circle cx="6" cy="6" r="2.5" /><circle cx="6" cy="18" r="2.5" /><path d="M8 8l12 12M20 4L8 16" /></svg>);
     case "stethoscope": return (<svg {...p}><path d="M6 3v6a4 4 0 008 0V3M10 15a4 4 0 108 0v-2" /><circle cx="19" cy="19" r="2" /></svg>);
+    // ── Added so every current category has its own icon ──
+    case "music": return (<svg {...p}><path d="M9 18V5l11-2v13" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="17.5" cy="16" r="2.5" /></svg>);
+    case "masks": return (<svg {...p}><path d="M3 4c3 1.3 6 1.3 9 0v6a4.5 4.5 0 01-9 0V4z" /><path d="M5.5 8h.01M9.5 8h.01M6 11.5c.8.7 2.2.7 3 0" /><path d="M14 9c2.5 1 5 1 7.5 0v5.5a4 4 0 01-8 0" /><path d="M16.5 13h.01M19.5 13h.01M16.3 16.7c.8-.6 2.1-.6 2.9 0" /></svg>);
+    case "stall": return (<svg {...p}><path d="M3 9l1.5-5h15L21 9" /><path d="M3 9a2.25 2.25 0 004.5 0 2.25 2.25 0 004.5 0 2.25 2.25 0 004.5 0 2.25 2.25 0 004.5 0" /><path d="M5 11v9h14v-9M9 20v-5h6v5" /></svg>);
+    case "more": return (<svg {...p}><circle cx="12" cy="12" r="9" /><circle cx="8" cy="12" r=".9" fill="currentColor" /><circle cx="12" cy="12" r=".9" fill="currentColor" /><circle cx="16" cy="12" r=".9" fill="currentColor" /></svg>);
+    case "takeaway": return (<svg {...p}><path d="M4 9h16l-1.5 11h-13L4 9z" /><path d="M8 9V7a4 4 0 018 0v2" /><path d="M9 13h6" /></svg>);
+    case "cutlery": return (<svg {...p}><path d="M7 3v8M5 3v5a2 2 0 004 0V3M7 11v10" /><path d="M17 21V3c-2 1-3 3.5-3 6.5V14h3" /></svg>);
+    case "teapot": return (<svg {...p}><path d="M6 10h11v4a5 5 0 01-5 5h-1a5 5 0 01-5-5v-4z" /><path d="M17 11.5l3.5-2.5V13l-3.5 2" /><path d="M6 12.5H4.5a1.5 1.5 0 010-3H6M9.5 10V8.5a2 2 0 014 0V10M11.5 6.5V5" /></svg>);
+    case "tree": return (<svg {...p}><path d="M12 2l5 6h-3l4 5h-3l4 5H5l4-5H6l4-5H7l5-6z" /><path d="M12 18v4" /></svg>);
+    case "curry": return (<svg {...p}><path d="M3 12h18a9 6 0 01-18 0z" /><path d="M8 4c-1 1.5 1 2.5 0 4M12 3c-1 1.5 1 2.5 0 4.5M16 4c-1 1.5 1 2.5 0 4" /><path d="M7 21h10" /></svg>);
+    case "olive": return (<svg {...p}><path d="M4 20c4-1 8-5 10-10s3-6 6-7" /><ellipse cx="10" cy="7" rx="2.2" ry="3.2" transform="rotate(-35 10 7)" /><ellipse cx="17" cy="11" rx="2.2" ry="3.2" transform="rotate(35 17 11)" /><ellipse cx="9" cy="14.5" rx="1.8" ry="2.6" transform="rotate(-60 9 14.5)" /></svg>);
+    case "fish": return (<svg {...p}><path d="M3 12c3-4.5 9-6 14-2l4-3v10l-4-3c-5 4-11 2.5-14-2z" /><circle cx="8" cy="11" r=".9" fill="currentColor" /></svg>);
+    case "icecream": return (<svg {...p}><path d="M8 11l4 11 4-11" /><path d="M7 11a5 5 0 0110 0H7z" /><path d="M12 6a3 3 0 00-3-3" /></svg>);
+    case "beer": return (<svg {...p}><path d="M6 8h10v11a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" /><path d="M16 11h2a2 2 0 012 2v2a2 2 0 01-2 2h-2" /><path d="M6 8a2.5 2.5 0 012.5-3 3 3 0 015.5 0A2.5 2.5 0 0116 8" /><path d="M9.5 12v6M12.5 12v6" /></svg>);
+    case "globe": return (<svg {...p}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9z" /></svg>);
+    case "plant": return (<svg {...p}><path d="M12 20v-8" /><path d="M12 12c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5.5-6-5.5 0 3.5 2.5 5.5 6 5.5z" /><path d="M7 20h10" /></svg>);
+    case "store": return (<svg {...p}><path d="M3 9l1.5-5h15L21 9" /><path d="M3 9h18v2a3 3 0 01-6 0 3 3 0 01-6 0 3 3 0 01-6 0V9z" /><path d="M5 13v8h14v-8M10 21v-5h4v5" /></svg>);
+    case "gift": return (<svg {...p}><rect x="3" y="8" width="18" height="4" rx="1" /><path d="M5 12v9h14v-9M12 8v13" /><path d="M12 8c-1.5-3-5-4-5-1.5S10 8 12 8zM12 8c1.5-3 5-4 5-1.5S14 8 12 8z" /></svg>);
+    case "hammer": return (<svg {...p}><path d="M14 4l6 6-2.5 2.5-6-6L14 4z" /><path d="M12.5 7.5L4 16l4 4 8.5-8.5" /></svg>);
+    case "watch": return (<svg {...p}><circle cx="12" cy="12" r="5" /><path d="M12 10v2l1.5 1M9 7.5L10 3h4l1 4.5M9 16.5l1 4.5h4l1-4.5" /></svg>);
+    case "paw": return (<svg {...p}><ellipse cx="7" cy="10" rx="1.6" ry="2.2" /><ellipse cx="17" cy="10" rx="1.6" ry="2.2" /><ellipse cx="10" cy="6" rx="1.6" ry="2.2" /><ellipse cx="14" cy="6" rx="1.6" ry="2.2" /><path d="M8 17c0-2.5 2-4.5 4-4.5s4 2 4 4.5-1.8 3-4 3-4-.5-4-3z" /></svg>);
+    case "shoe": return (<svg {...p}><path d="M3 17V9l4 1 3 3 5 1.5c3 .9 6 2 6 4V19H3v-2z" /><path d="M3 15h18M10 13l1.5-1.5M12.5 13.7L14 12" /></svg>);
+    case "bike": return (<svg {...p}><circle cx="6" cy="16" r="3.5" /><circle cx="18" cy="16" r="3.5" /><path d="M6 16l4-8h5l3 8M10 8l2.5 8H6M14 5h2.5" /></svg>);
+    case "mail": return (<svg {...p}><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>);
+    case "car": return (<svg {...p}><path d="M5 11l1.8-4.5A2 2 0 018.7 5h6.6a2 2 0 011.9 1.5L19 11" /><rect x="3" y="11" width="18" height="6" rx="2" /><circle cx="7.5" cy="17.5" r="1.5" /><circle cx="16.5" cy="17.5" r="1.5" /><path d="M10 8h4" /></svg>);
+    case "truck": return (<svg {...p}><path d="M2 6h12v10H2zM14 9h4l3 3.5V16h-7" /><circle cx="6" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></svg>);
+    case "needle": return (<svg {...p}><path d="M19 3L7 15" /><path d="M17 5l1.5 1.5" /><path d="M7 15c-2 1-4 3-3.5 5 2 .5 4-1.5 5-3.5" /></svg>);
+    case "lily": return (<svg {...p}><path d="M12 21v-8" /><path d="M12 13c-1.5-3-1.5-6 0-9 1.5 3 1.5 6 0 9zM12 13c-2.5-1-5-3.5-5.5-7 3 .5 5 3 5.5 7zM12 13c2.5-1 5-3.5 5.5-7-3 .5-5 3-5.5 7z" /><path d="M9 21h6" /></svg>);
+    case "roof": return (<svg {...p}><path d="M2 12l10-8 10 8" /><path d="M5 10v10h14V10" /><path d="M8 13h8M8 16h8" /></svg>);
+    case "saw": return (<svg {...p}><path d="M3 14L14 3l3 3-4 4" /><path d="M3 14l3 3 1-1 1 1 1-1 1 1 1-1 1 1 5-5" /><path d="M17 6l3.5-1.5L22 6l-1.5 3.5L18 9" /></svg>);
+    case "radiator": return (<svg {...p}><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M7 6v12M11 6v12M15 6v12M19 6v12M5 18v2M19 18v2" /></svg>);
+    case "compass": return (<svg {...p}><circle cx="12" cy="4.5" r="1.5" /><path d="M11 6L5 21M13 6l6 15M7.5 15h9" /></svg>);
+    case "briefcase": return (<svg {...p}><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2M3 12h18" /></svg>);
+    case "pulse": return (<svg {...p}><path d="M12 20s-7-4.4-9.5-9A5 5 0 0112 6a5 5 0 019.5 5c-.4.8-.9 1.5-1.5 2.2" /><path d="M3 13h4l1.5-2.5 2 5 1.5-2.5H15" /></svg>);
+    case "code": return (<svg {...p}><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" /></svg>);
+    case "share": return (<svg {...p}><circle cx="18" cy="5" r="2.5" /><circle cx="6" cy="12" r="2.5" /><circle cx="18" cy="19" r="2.5" /><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4" /></svg>);
+    case "bed": return (<svg {...p}><path d="M3 7v12M3 15h18v4M21 15v-3a3 3 0 00-3-3h-7v6" /><circle cx="7" cy="11" r="2" /></svg>);
+    case "doorkey": return (<svg {...p}><path d="M4 21V5a2 2 0 012-2h8a2 2 0 012 2v16" /><path d="M2 21h20M13 12h.01" /><path d="M16 9h4M18 9v4" /></svg>);
     default: return (<svg {...p}><path d="M20.6 12.6L12 21.2 2.8 12A3 3 0 012 9.8V4a2 2 0 012-2h5.8a3 3 0 012.2.8l8.6 8.6a2 2 0 010 2.2z" /><circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" /></svg>);
   }
 }
 
 // Category slug → icon name. Anything not listed here falls back to the
 // generic tag icon above.
-const CATEGORY_ICON = {
+export const CATEGORY_ICON = {
   // Eat & Drink
   bars: "martini", restaurants: "cloche", cafes: "cup", "grab-go": "bag",
   "private-dining": "users", british: "flag", italian: "pizza", chinese: "bowl",
@@ -73,7 +111,7 @@ const CATEGORY_ICON = {
   hairdressing: "scissors", healthcare: "stethoscope", opticians: "glasses",
   spa: "sparkles", "travel-agents": "plane",
   // Services
-  builders: "wrench", electricians: "bolt", plumbers: "wrench",
+  builders: "hammer", electricians: "bolt", plumbers: "wrench",
   "decorators-painters": "roller", locksmiths: "key", cleaners: "sparkles",
   accountants: "calculator", solicitors: "scale", "financial-advisers": "trending",
   "estate-agents": "home", recruitment: "search", "insurance-brokers": "shield",
@@ -84,6 +122,34 @@ const CATEGORY_ICON = {
   "art-culture": "palette", community: "users", family: "users",
   "fashion-beauty": "sparkles", film: "clapper", gaming: "gamepad",
   learning: "book", "sport-wellness": "dumbbell",
+  "music-dance": "music", theatre: "masks", markets: "stall", "other-see-do": "more",
+  // Eat & Drink — current venue types and cuisines
+  takeaway: "takeaway", "other-venue": "more",
+  moroccan: "teapot", lebanese: "tree", bangladeshi: "curry", mediterranean: "olive",
+  portuguese: "fish", dessert: "icecream", pizza: "pizza", gastropub: "beer",
+  "pan-european": "globe", "other-cuisine": "cutlery",
+  // Shop & Local Services — current categories
+  "food-groceries": "cart", "fashion-clothing": "shirt", "home-garden": "plant",
+  "department-retail": "store", "gifts-lifestyle": "gift", "diy-hardware": "hammer",
+  "jewellery-watches": "watch", "books-stationery": "book", "pets-supplies": "paw",
+  footwear: "shoe", "automotive-cycles": "bike", "other-shop": "more",
+  "postal-services": "mail", "taxi-private-hire": "car", "removals-storage": "truck",
+  "locksmiths-key-cutting": "key", "alterations-repairs": "needle",
+  "funeral-services": "lily", "other-local-services": "more",
+  // Tradespeople
+  "heating-boiler": "radiator", roofers: "roof", "carpenters-joiners": "saw",
+  "landscapers-gardeners": "plant", "other-tradesperson": "more",
+  // Professionals
+  "marketing-advertising": "megaphone", "it-technology-professional": "laptop",
+  "architects-surveyors": "compass", "business-consultants": "briefcase",
+  "health-wellbeing": "pulse", "other-professional": "more",
+  // Freelancers
+  "web-digital": "code", "design-creative": "palette", "marketing-social-media": "share",
+  "photography-video": "camera", "writing-content": "feather",
+  "it-technology-freelance": "laptop", "business-services": "briefcase",
+  "tutoring-training": "cap", "admin-virtual-assistance": "check-user", "other-freelancer": "more",
+  // Hotels & Accommodation
+  hotel: "bed", hotels: "bed", accommodation: "doorkey",
 };
 
 // Width set aside for the "More" control when the categories don't all fit.
