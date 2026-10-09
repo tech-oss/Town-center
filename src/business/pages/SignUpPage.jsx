@@ -1,7 +1,9 @@
+import AgreementChecklist from "../components/AgreementChecklist";
+import { AGREEMENTS, allAgreed, formatAcceptedAt } from "../../Data/agreements";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BUSINESS_TYPES, TERMS_TEXT,
+  BUSINESS_TYPES,
   FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES,
   FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES, TRADESPERSON_CATEGORIES,
 } from "../../Data/businessPortalMock";
@@ -31,7 +33,8 @@ const EMPTY = {
   venueTypes: [],       // multi-select, max 2, for businessType "eat-drink"
   shopCategories: [],   // multi-select, max 2, for businessType "shop"
   seeDoCategories: [],  // multi-select, max 2, for businessType "see-do"
-  agreeTerms: false, agreePrivacy: false,
+  // The four agreements: which were opened, and when each was accepted.
+  agreements: { opened: {}, accepted: {} },
   confirmFinal: false,  // "I understand this can't be changed later" — Review step
 };
 
@@ -159,7 +162,7 @@ export default function SignUpPage() {
       return true;
     }
     if (step === 2) return true;
-    if (step === 3) return form.agreeTerms && form.agreePrivacy;
+    if (step === 3) return allAgreed(form.agreements.accepted);
     if (step === 4) return form.confirmFinal;
     return true;
   }
@@ -284,20 +287,8 @@ export default function SignUpPage() {
           {step === 2 && <ProfileBenefits />}
 
           {step === 3 && (
-            <div className="flex flex-col gap-4">
-              <div className="rounded-xl p-4 max-h-64 overflow-y-auto text-xs leading-relaxed whitespace-pre-line" style={{ border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#f8fafc" }}>
-                {TERMS_TEXT}
-              </div>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" checked={form.agreeTerms} onChange={(e) => set("agreeTerms", e.target.checked)} className="mt-0.5 w-4 h-4" />
-                <span className="text-sm" style={{ color: FOREST }}>I have read and agree to the Terms of Use.</span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" checked={form.agreePrivacy} onChange={(e) => set("agreePrivacy", e.target.checked)} className="mt-0.5 w-4 h-4" />
-                <span className="text-sm" style={{ color: FOREST }}>I consent to my details being used as described in the Privacy Policy.</span>
-              </label>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Your acceptance of these terms is logged with a timestamp and stored in your account for your records.</p>
-            </div>
+            <AgreementChecklist value={form.agreements}
+              onChange={(fn) => setForm((f) => ({ ...f, agreements: typeof fn === "function" ? fn(f.agreements) : fn }))} />
           )}
 
           {step === 4 && (
@@ -327,9 +318,11 @@ export default function SignUpPage() {
                 <SummaryRow label="Address" value={form.businessAddress} />
               </SummarySection>
 
-              <SummarySection title="Terms" onEdit={() => setStep(3)}>
-                <SummaryRow label="Terms of Use" value={form.agreeTerms ? "Agreed" : "Not agreed"} />
-                <SummaryRow label="Privacy Policy" value={form.agreePrivacy ? "Agreed" : "Not agreed"} />
+              <SummarySection title="Agreements" onEdit={() => setStep(3)}>
+                {AGREEMENTS.map((a) => (
+                  <SummaryRow key={a.key} label={a.title}
+                    value={form.agreements.accepted[a.key] ? `Agreed ${formatAcceptedAt(form.agreements.accepted[a.key])}` : "Not agreed"} />
+                ))}
               </SummarySection>
 
               <label className="flex items-start gap-3 cursor-pointer rounded-xl p-3 mt-2" style={{ border: "1.5px solid rgba(217,119,6,0.3)", backgroundColor: "rgba(217,119,6,0.08)" }}>

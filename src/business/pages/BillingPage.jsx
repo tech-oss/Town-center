@@ -1,3 +1,5 @@
+import { listAgreements } from "../api/agreements";
+import { formatAcceptedAt } from "../../Data/agreements";
 import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -48,6 +50,13 @@ export default function BillingPage() {
   const [opening, setOpening] = useState(false);
   const [showAcceptedTerms, setShowAcceptedTerms] = useState(false);
   const vp = useVisibilityCheckout(user.id);
+  // The four agreements and when each was accepted.
+  const [agreements, setAgreements] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    listAgreements(user.id).then((rows) => { if (alive) setAgreements(rows); });
+    return () => { alive = false; };
+  }, [user.id]);
 
   const premium = isPremium(user.plan);
   const isOwner = user.role === "Owner";
@@ -211,8 +220,27 @@ export default function BillingPage() {
         <div>
           <p className="text-lg font-bold" style={{ color: FOREST }}>Terms Acceptance Record</p>
         </div>
-        <div className="bg-white rounded-2xl p-5" style={CARD}>
-          <p className="text-sm" style={{ color: MUTED }}>{user.termsAcceptedAt ? `Terms accepted on ${fmtDateTime(user.termsAcceptedAt)}.` : "Terms accepted when your business was registered."} <button type="button" onClick={() => setShowAcceptedTerms(true)} className="font-semibold hover:underline" style={{ color: "#2563EB" }}>View accepted terms →</button></p>
+        <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
+          {(agreements ?? []).some((a) => a.acceptance) ? (
+            <>
+              <p className="text-sm" style={{ color: MUTED }}>The agreements accepted for this business, with the date and time each was accepted.</p>
+              {agreements.map((a) => (
+                <div key={a.key} className="flex items-center justify-between gap-3 flex-wrap py-2" style={{ borderTop: "1px solid rgba(16,24,40,0.06)" }}>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold" style={{ color: FOREST }}>{a.title}</p>
+                    <p className="text-[11px]" style={{ color: a.acceptance ? "#15803D" : "#B45309" }}>
+                      {a.acceptance
+                        ? `✓ Accepted ${formatAcceptedAt(a.acceptance.accepted_at)} · version ${a.acceptance.version}${a.acceptance.email ? ` · ${a.acceptance.email}` : ""}`
+                        : "Not accepted yet"}
+                    </p>
+                  </div>
+                  <a href={a.file} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF →</a>
+                </div>
+              ))}
+            </>
+          ) : (
+            <p className="text-sm" style={{ color: MUTED }}>{user.termsAcceptedAt ? `Terms accepted on ${fmtDateTime(user.termsAcceptedAt)}.` : "Terms accepted when your business was registered."} <button type="button" onClick={() => setShowAcceptedTerms(true)} className="font-semibold hover:underline" style={{ color: "#2563EB" }}>View accepted terms →</button></p>
+          )}
         </div>
       </div>
     </BusinessLayout>

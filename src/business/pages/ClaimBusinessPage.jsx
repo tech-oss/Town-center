@@ -1,3 +1,6 @@
+import AgreementChecklist from "../components/AgreementChecklist";
+import { allAgreed } from "../../Data/agreements";
+import { recordAgreements } from "../api/agreements";
 import { useState, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { submitBusinessClaim, listUnclaimedBusinesses } from "../hooks/useUserRegistry";
@@ -75,17 +78,23 @@ export default function ClaimBusinessPage() {
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
-  const isValid = form.businessId && form.firstName.trim() && form.lastName.trim() && form.email.trim()
+  // The four agreements, opened and accepted before a claim can be sent.
+  const [agreements, setAgreements] = useState({ opened: {}, accepted: {} });
+
+  const detailsValid = form.businessId && form.firstName.trim() && form.lastName.trim() && form.email.trim()
     && form.phone.trim() && form.password && form.password === form.confirmPassword;
+  const isValid = detailsValid && allAgreed(agreements.accepted);
 
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    if (!isValid) { setError("Please fill in all fields — passwords must match."); return; }
+    if (!detailsValid) { setError("Please fill in all fields — passwords must match."); return; }
+    if (!allAgreed(agreements.accepted)) { setError("Please open, read and accept all four agreements."); return; }
     setSubmitting(true);
     const res = await submitBusinessClaim(form);
+    if (res.ok) await recordAgreements(form.businessId, form.email, "claim", agreements.accepted);
     setSubmitting(false);
     if (!res.ok) { setError(res.error); return; }
     setSubmitted(true);
@@ -108,7 +117,7 @@ export default function ClaimBusinessPage() {
 
   return (
     <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-lg">
         <div className="flex flex-col items-center gap-2 mb-6">
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
           <h1 className="text-xl font-bold" style={{ color: FOREST }}>Claim Your Business</h1>
@@ -137,6 +146,11 @@ export default function ClaimBusinessPage() {
                 <span className="text-[10px]" style={{ color: "#DC2626" }}>Passwords do not match.</span>
               )}
             </Field>
+          </div>
+
+          <div className="pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
+            <p className="text-sm font-bold mb-2" style={{ color: FOREST }}>Agreements</p>
+            <AgreementChecklist value={agreements} onChange={setAgreements} />
           </div>
 
           {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}

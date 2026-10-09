@@ -1,6 +1,8 @@
-import { useState } from "react";
+import AgreementChecklist from "../components/AgreementChecklist";
+import { AGREEMENTS, allAgreed, formatAcceptedAt } from "../../Data/agreements";
+import { recordAgreements, listAgreements } from "../api/agreements";
+import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
-import { TERMS_TEXT } from "../../Data/businessPortalMock";
 import ProfileBenefits from "../components/ProfileBenefits";
 import { completeClaimOnboarding } from "../api/claimOnboarding";
 
@@ -13,7 +15,7 @@ const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)",
 // steps 1 and 2 have nothing left to ask. What a claim never collected is a
 // terms acceptance, which is what's left here alongside the profile
 // introduction. Subscribing happens later, from the dashboard.
-const STEPS = ["Your Profile", "Terms", "Review"];
+const STEPS = ["Your Profile", "Agreements", "Review"];
 
 function StepIndicator({ step }) {
   return (
@@ -61,21 +63,31 @@ export default function ClaimOnboardingPage() {
   const [step, setStep] = useState(0);
   // Everyone starts on the free listing; plans are chosen from the dashboard.
   const FREE_PLAN = "free";
-  const [agreeTerms, setAgreeTerms] = useState(false);
-  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  // The four agreements. Someone who claimed since they were introduced
+  // accepted them on the claim form; this shows those. Anyone who claimed
+  // before accepts them here.
+  const [agreements, setAgreements] = useState({ opened: {}, accepted: {} });
+  const [recorded, setRecorded] = useState(null); // null = loading
+  useEffect(() => {
+    let alive = true;
+    listAgreements(user.id).then((rows) => { if (alive) setRecorded(rows); });
+    return () => { alive = false; };
+  }, [user.id]);
+  const alreadyAgreed = !!recorded && recorded.every((a) => a.acceptance);
   const [confirmFinal, setConfirmFinal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   function validStep() {
     if (step === 0) return true;
-    if (step === 1) return agreeTerms && agreePrivacy;
+    if (step === 1) return alreadyAgreed || allAgreed(agreements.accepted);
     return confirmFinal;
   }
 
   async function handleSubmit() {
     setError("");
     setSubmitting(true);
+    if (!alreadyAgreed) await recordAgreements(user.id, user.email, "onboarding", agreements.accepted);
     const res = await completeClaimOnboarding(user.id, FREE_PLAN);
     if (!res.ok) {
       setSubmitting(false);
@@ -104,20 +116,24 @@ export default function ClaimOnboardingPage() {
           {step === 0 && <ProfileBenefits />}
 
           {step === 1 && (
-            <div className="flex flex-col gap-4">
-              <div className="rounded-xl p-4 max-h-64 overflow-y-auto text-xs leading-relaxed whitespace-pre-line" style={{ border: `1.5px solid ${BORDER}`, color: MUTED, backgroundColor: "#f8fafc" }}>
-                {TERMS_TEXT}
+            recorded === null ? (
+              <p className="text-sm" style={{ color: MUTED }}>Loading your agreements…</p>
+            ) : alreadyAgreed ? (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm" style={{ color: MUTED }}>You accepted these when you claimed the business. You can read them again any time.</p>
+                {recorded.map((a) => (
+                  <div key={a.key} className="rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap" style={{ border: "1.5px solid rgba(22,163,74,0.35)", backgroundColor: "rgba(22,163,74,0.05)" }}>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold" style={{ color: FOREST }}>{a.title}</p>
+                      <p className="text-[11px] font-semibold" style={{ color: "#15803D" }}>✓ Agreed {formatAcceptedAt(a.acceptance.accepted_at)} · version {a.acceptance.version}</p>
+                    </div>
+                    <a href={a.file} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF</a>
+                  </div>
+                ))}
               </div>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="mt-0.5 w-4 h-4" />
-                <span className="text-sm" style={{ color: FOREST }}>I have read and agree to the Terms of Use.</span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" checked={agreePrivacy} onChange={(e) => setAgreePrivacy(e.target.checked)} className="mt-0.5 w-4 h-4" />
-                <span className="text-sm" style={{ color: FOREST }}>I consent to my details being used as described in the Privacy Policy.</span>
-              </label>
-              <p className="text-[11px]" style={{ color: "#9CA3AF" }}>Your acceptance of these terms is logged with a timestamp and stored in your account for your records.</p>
-            </div>
+            ) : (
+              <AgreementChecklist value={agreements} onChange={setAgreements} />
+            )
           )}
 
           {step === 2 && (
@@ -134,9 +150,11 @@ export default function ClaimOnboardingPage() {
                 <SummaryRow label="Business Name" value={user.businessName} />
               </SummarySection>
 
-              <SummarySection title="Terms" onEdit={() => setStep(1)}>
-                <SummaryRow label="Terms of Use" value={agreeTerms ? "Agreed" : "Not agreed"} />
-                <SummaryRow label="Privacy Policy" value={agreePrivacy ? "Agreed" : "Not agreed"} />
+              <SummarySection title="Agreements" onEdit={() => setStep(1)}>
+                {AGREEMENTS.map((a) => {
+                  const at = alreadyAgreed ? recorded.find((r) => r.key === a.key)?.acceptance?.accepted_at : agreements.accepted[a.key];
+                  return <SummaryRow key={a.key} label={a.title} value={at ? `Agreed ${formatAcceptedAt(at)}` : "Not agreed"} />;
+                })}
               </SummarySection>
 
               <label className="flex items-start gap-3 cursor-pointer rounded-xl p-3 mt-2" style={{ border: "1.5px solid rgba(217,119,6,0.3)", backgroundColor: "rgba(217,119,6,0.08)" }}>

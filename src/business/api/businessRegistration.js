@@ -1,3 +1,4 @@
+import { recordAgreements } from "./agreements";
 import { supabase } from "../../lib/supabaseClient";
 import { checkEmail } from "../../lib/emailCheck";
 import { FREE_PLAN } from "../../Data/plans";
@@ -118,5 +119,7 @@ export async function registerBusiness(form) {
   });
   if (subError) return { ok: false, error: subError.message };
 
+  // Each of the four agreements, with the moment it was ticked.
+  await recordAgreements(businessId, form.email, "registration", form.agreements?.accepted);
   return { ok: true };
 }
