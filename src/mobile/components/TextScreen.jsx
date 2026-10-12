@@ -96,7 +96,7 @@ export default function TextScreen({ sectionKey, barTitle, highlight }) {
               )}
               {/* Optional second button set in Site Content, under the first. */}
               {copy.ctaExtraLabel && copy.ctaExtraUrl && (/^https?:\/\//i.test(copy.ctaExtraUrl) || /^mailto:/i.test(copy.ctaExtraUrl) ? (
-                <a href={copy.ctaExtraUrl} className={ctaButtonClass(copy.ctaExtraLabel)}
+                <a href={copy.ctaExtraUrl} data-skip-external-confirm className={ctaButtonClass(copy.ctaExtraLabel)}
                   style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaExtraLabel}</a>
               ) : (
                 <Link to={`/mobile${copy.ctaExtraUrl.startsWith("/") ? copy.ctaExtraUrl : `/${copy.ctaExtraUrl}`}`}

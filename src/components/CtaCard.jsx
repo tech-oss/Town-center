@@ -4,6 +4,8 @@
 // once a label is sentence-length the buttons move underneath at full width,
 // since a column sized to an unwrapped sentence pushed the buttons off the
 // card and squeezed the heading into a narrow strip.
+// Both buttons are set by our own team in Site Content (the claim-your-
+// profile portal, our email), so they skip the "Leaving our website" popup.
 const LONG_LABEL = 32;
 
 export default function CtaCard({ title, text, buttons, className = "" }) {
@@ -19,8 +21,8 @@ export default function CtaCard({ title, text, buttons, className = "" }) {
       {shown.length > 0 && (
         <div className={stacked ? "flex flex-col sm:flex-row sm:flex-wrap gap-3" : "flex flex-col gap-3 md:shrink-0 md:max-w-xs"}>
           {shown.map((b) => (
-            <a key={b.href + b.label} href={b.href}
-              className="px-7 py-3.5 rounded-full font-semibold text-sm leading-snug text-center transition-opacity hover:opacity-90 break-words"
+            <a key={b.href + b.label} href={b.href} data-skip-external-confirm
+              className={`px-7 py-3.5 ${b.label.length > LONG_LABEL ? "rounded-2xl" : "rounded-full"} font-semibold text-sm leading-snug text-center transition-opacity hover:opacity-90 break-words`}
               style={{ backgroundColor: "var(--leaf)", color: "white" }}>
               {b.label}
             </a>
