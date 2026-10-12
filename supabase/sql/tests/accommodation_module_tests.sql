@@ -149,5 +149,51 @@ end $T$;
 do $T$ begin delete from public.businesses where id = 'biz_test_acc_co';
   if (not exists (select 1 from public.businesses where id like 'biz_river-loft%' or id like 'biz_garden-cottage%')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T36 deleting the company removes its properties', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T36 deleting the company removes its properties (check false)', false); end if;
 exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T36 deleting the company removes its properties: ' || sqlerrm, false); end $T$;
+insert into public.businesses (id, name, status, kind) values ('biz_test_acc_co2', 'Second Lettings', 'Approved', 'accommodation_company');
+insert into public.business_users (auth_user_id, business_id, role, status, email, first_name, last_name) values ('06877bdd-c8d9-4693-9507-c79b376e4dbb', 'biz_test_acc_co2', 'Owner', 'approved', 'o2@test.example', 'B', 'O');
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"06877bdd-c8d9-4693-9507-c79b376e4dbb","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_submit_company_profile('biz_test_acc_co2', '{"name":"Second Lettings Ltd","phone":"01628 222222","logo":"https://example.com/l2.png","extra":"ignored"}'::jsonb);
+  if ((select approval_status from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = 'Pending Approval' and (select pending ? 'extra' from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = false) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T37 company submits its MANAGED BY details for review', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T37 company submits its MANAGED BY details for review (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T37 company submits its MANAGED BY details for review: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if ((select phone from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') is null) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T38 submission is not public until approved', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T38 submission is not public until approved (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T38 submission is not public until approved: ' || sqlerrm, false); end $T$;
+do $T$ begin update public.accommodation_company_profiles set phone = 'hacked' where business_id = 'biz_test_acc_co2';
+  if ((select phone from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') is null) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T39 members can''t write the profile directly', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T39 members can''t write the profile directly (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T39 members can''t write the profile directly: ' || sqlerrm, false); end $T$;
+do $T$ begin perform public.accommodation_submit_company_profile('biz_test_acc_co2', '{"phone":"1"}'::jsonb);
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T40 name is required (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%name is required%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T40 name is required', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T40 name is required: ' || sqlerrm, false); end if;
+end $T$;
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"046ebe5c-3422-4292-839d-6bc1a9e0b9cd","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_submit_company_profile('biz_test_acc_co2', '{"name":"x"}'::jsonb);
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T41 another company can''t submit it (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%Not allowed%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T41 another company can''t submit it', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T41 another company can''t submit it: ' || sqlerrm, false); end if;
+end $T$;
+do $T$ begin perform public.accommodation_review_company_profile('biz_test_acc_co2', true);
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T42 owner can''t approve their own profile (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%Only Maidenhead admin%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T42 owner can''t approve their own profile', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T42 owner can''t approve their own profile: ' || sqlerrm, false); end if;
+end $T$;
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"7f8e200f-b077-4f8c-a455-f47414e967d0","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_review_company_profile('biz_test_acc_co2', false, ' ');
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T43 reject without a reason is refused (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%reason%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T43 reject without a reason is refused', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T43 reject without a reason is refused: ' || sqlerrm, false); end if;
+end $T$;
+do $T$ begin perform public.accommodation_review_company_profile('biz_test_acc_co2', true);
+  if ((select phone from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = '01628 222222' and (select approval_status from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = 'Up to Date') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T44 admin approves: details become public', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T44 admin approves: details become public (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T44 admin approves: details become public: ' || sqlerrm, false); end $T$;
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"06877bdd-c8d9-4693-9507-c79b376e4dbb","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_submit_company_profile('biz_test_acc_co2', '{"name":"Second Lettings Ltd","phone":"999"}'::jsonb);
+  if (true) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T45 resubmit then admin rejects: reason kept, live details unchanged', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T45 resubmit then admin rejects: reason kept, live details unchanged (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T45 resubmit then admin rejects: reason kept, live details unchanged: ' || sqlerrm, false); end $T$;
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"7f8e200f-b077-4f8c-a455-f47414e967d0","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_review_company_profile('biz_test_acc_co2', false, 'Phone number looks wrong');
+  if ((select phone from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = '01628 222222' and (select rejection_reason from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = 'Phone number looks wrong') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T45b', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T45b (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T45b: ' || sqlerrm, false); end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
 select current_setting('t.r', true) as results;
 rollback;
