@@ -44,3 +44,26 @@ export async function getAccommodations() {
 export async function getAccommodationBySlug(slug) {
   return (await liveStay("accommodation")).find((i) => i.slug === slug) ?? accommodationBySlug[slug] ?? null;
 }
+
+// "You might also like" on an accommodation property: up to three of the
+// same company's other live properties, topped up with other accommodation
+// (featured first) when the company has fewer. Cards in the shape
+// PlaceDetailLayout's related grid and the app's related row draw.
+export async function getPropertyRelated(item, limit = 3) {
+  if (!item?.slug) return [];
+  const all = (await liveStay("accommodation")).filter((i) => i.slug !== item.slug);
+  const sameCompany = item.companyId ? all.filter((i) => i.companyId === item.companyId) : [];
+  const others = listingOrder(all.filter((i) => !sameCompany.includes(i)));
+  return [...listingOrder(sameCompany), ...others].slice(0, limit).map((i) => ({
+    slug: i.slug,
+    to: `/live/stay/accommodation/${i.slug}`,
+    mobileTo: `/mobile/stay/accommodation/${i.slug}`,
+    image: i.image,
+    hasHero: i.hasHero,
+    logo: i.logo,
+    name: i.name,
+    tag: sameCompany.includes(i) && i.managedBy?.name ? `Also by ${i.managedBy.name}` : i.type,
+    blurb: i.tagline ?? "",
+    address: (i.address ?? "").split(",")[0] || null,
+  }));
+}

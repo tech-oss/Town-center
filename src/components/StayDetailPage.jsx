@@ -1,7 +1,7 @@
 import { useParams, useSearchParams, Navigate } from "react-router-dom";
 import { useTrackView, businessView } from "../lib/trackView";
 import { useEffect } from "react";
-import { getHotelBySlug, getAccommodationBySlug, getStayDiscover } from "../api";
+import { getHotelBySlug, getAccommodationBySlug, getStayDiscover, getPropertyRelated } from "../api";
 import useFetch from "../hooks/useFetch";
 import Loading from "./ui/Loading";
 import ErrorState from "./ui/ErrorState";
@@ -10,6 +10,7 @@ import NewsOffers from "./NewsOffers";
 import ClaimBusinessBox from "./ClaimBusinessBox";
 import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
+import { RoomsSection, ManagedBySection } from "./AccommodationSections";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
 // category pill, same pill styling as the rest of the layout.
@@ -205,6 +206,12 @@ export default function StayDetailPage({ kind }) {
   // Built from live businesses and guides, so it can't quietly shrink to
   // one card when a hardcoded slug stops resolving (see api/stayDiscover).
   const { data: discover } = useFetch(getStayDiscover, []);
+  // An accommodation property's "You might also like": its company's other
+  // properties first (api/stay.js).
+  const { data: propertyRelated } = useFetch(
+    () => (item?.kind === "accommodation_property" ? getPropertyRelated(item) : Promise.resolve(null)),
+    [item?.slug, item?.kind],
+  );
   useTrackView(businessView(item));
 
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
@@ -215,6 +222,11 @@ export default function StayDetailPage({ kind }) {
 
   const listPath = isHotels ? "/live/stay/hotels" : "/live/stay/accommodation";
   const free = isFreeListing(item);
+  // A property of an accommodation management company. A free one is
+  // deliberately basic — name, address, map pin and the company's details —
+  // so it shows no "coming soon" placeholders and no claim box (a property
+  // always has its company behind it).
+  const isProperty = item.kind === "accommodation_property";
   const gallery = item.gallery?.length ? item.gallery : [item.image];
   const address = item.address ?? item.area;
 
@@ -249,20 +261,20 @@ export default function StayDetailPage({ kind }) {
       faq={free ? null : item.faq}
       backLink={backTo ? { to: backTo, label: "Back to results" } : undefined}
       description={description}
-      descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
-      hoursPlaceholder={free ? FREE_PLACEHOLDERS.hours : undefined}
-      galleryPlaceholder={free ? FREE_PLACEHOLDERS.gallery : undefined}
+      descriptionPlaceholder={free && !isProperty ? FREE_PLACEHOLDERS.description : undefined}
+      hoursPlaceholder={free && !isProperty ? FREE_PLACEHOLDERS.hours : undefined}
+      galleryPlaceholder={free && !isProperty ? FREE_PLACEHOLDERS.gallery : undefined}
       address={address}
       phone={item.phone}
       email={item.email}
       social={free ? null : buildSocial(item)}
       website={free ? null : item.website}
-      directionsQuery={free ? null : item.mapQuery}
+      directionsQuery={free && !isProperty ? null : item.mapQuery}
       shareInActions
       stickyBooking={!free && item.bookingUrl ? item.bookingUrl : null}
-      relatedHeading="Stay Here & Discover"
+      relatedHeading={isProperty ? "You Might Also Like" : "Stay Here & Discover"}
       relatedBackground="#ffffff"
-      related={discover ?? []}
+      related={isProperty ? (propertyRelated ?? []) : (discover ?? [])}
       afterGallery={!free && (
         <>
         <CheckInSection
@@ -276,9 +288,12 @@ export default function StayDetailPage({ kind }) {
           amenities={item.amenities}
           heading={isHotels ? "Amenities" : "What This Place Offers"}
         />
+        {isProperty && <RoomsSection rooms={item.rooms} />}
         </>
       )}
-      afterMap={free
+      afterMap={isProperty
+        ? <>{!free && <BusinessReviews reviews={item.reviews} />}<ManagedBySection company={item.managedBy} /><NewsOffers item={item} /></>
+        : free
         ? <><NewsOffers item={item} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={item.businessId} /></>
         : <><BusinessReviews reviews={item.reviews} /><NewsOffers item={item} /></>}
     />

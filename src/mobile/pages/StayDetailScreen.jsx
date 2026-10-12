@@ -13,7 +13,7 @@ import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
 import useFetch from "../../hooks/useFetch";
-import { getHotelBySlug, getAccommodationBySlug, getStayDiscover } from "../../api";
+import { getHotelBySlug, getAccommodationBySlug, getStayDiscover, getPropertyRelated } from "../../api";
 import { typeColor } from "../lib/typeColors";
 import useMobileBack from "../hooks/useMobileBack";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
@@ -77,6 +77,59 @@ function AmenityIcon({ name }) {
   }
 }
 
+// An accommodation property's room types (paid properties only).
+function MobileRooms({ rooms }) {
+  const list = (rooms ?? []).filter((r) => r?.name?.trim());
+  if (!list.length) return null;
+  return (
+    <div>
+      <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Rooms</p>
+      <div className="flex flex-col gap-2.5">
+        {list.map((r, i) => {
+          const facts = [r.sleeps ? `Sleeps ${r.sleeps}` : null, r.beds?.trim() || null].filter(Boolean);
+          return (
+            <MobileCard key={`${r.name}-${i}`} className="p-3.5 flex flex-col gap-1.5">
+              <p className="text-sm font-bold" style={{ color: "#000000" }}>{r.name}</p>
+              {facts.length > 0 && <p className="text-xs font-semibold" style={{ color: "var(--leaf)" }}>{facts.join(" · ")}</p>}
+              {r.description?.trim() && <p className="text-xs leading-snug" style={{ color: "#000000" }}>{r.description}</p>}
+              {r.amenities?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-0.5">
+                  {r.amenities.map((a) => (
+                    <span key={a} className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--mint)", color: "#000000" }}>{a}</span>
+                  ))}
+                </div>
+              )}
+            </MobileCard>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// The company that manages an accommodation property.
+function MobileManagedBy({ company }) {
+  if (!company?.name) return null;
+  const website = externalUrl(company.website);
+  return (
+    <div>
+      <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Managed By</p>
+      <MobileCard className="p-4 flex gap-3.5 items-start">
+        {company.logo && <img src={company.logo} alt="" className="w-14 h-14 rounded-xl object-contain shrink-0" style={{ border: "1px solid rgba(0,0,0,0.08)" }} />}
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <p className="text-sm font-bold" style={{ color: "#000000" }}>{company.name}</p>
+          {company.address && <p className="text-xs" style={{ color: "#000000" }}>{company.address}</p>}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold mt-0.5">
+            {company.phone && <a href={`tel:${company.phone.replace(/[^\d+]/g, "")}`} style={{ color: "var(--leaf)" }}>{company.phone}</a>}
+            {company.email && <a href={`mailto:${company.email}`} className="break-all" style={{ color: "var(--leaf)" }}>{company.email}</a>}
+            {website && <a href={website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--leaf)" }}>Website</a>}
+          </div>
+        </div>
+      </MobileCard>
+    </div>
+  );
+}
+
 export default function StayDetailScreen() {
   const { kind, slug } = useParams();
   const isHotel = kind === "hotels";
@@ -87,6 +140,12 @@ export default function StayDetailScreen() {
   );
   // Live businesses and guides, not hardcoded slugs (see api/stayDiscover).
   const { data: discover } = useFetch(getStayDiscover, []);
+  // An accommodation property's "You might also like": its company's other
+  // properties first (api/stay.js).
+  const { data: propertyRelated } = useFetch(
+    () => (place?.kind === "accommodation_property" ? getPropertyRelated(place) : Promise.resolve(null)),
+    [place?.slug, place?.kind],
+  );
   useTrackView(businessView(place));
 
   const [searchParams] = useSearchParams();
@@ -105,6 +164,10 @@ export default function StayDetailScreen() {
     : `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
   // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
   const free = isFreeListing(place);
+  // A property of an accommodation management company: a free one is
+  // deliberately basic (name, address, map pin, the company's details), so
+  // no "coming soon" cards and no claim box — it always has its company.
+  const isProperty = place.kind === "accommodation_property";
   const websiteUrl = !free ? externalUrl(place.website) : null;
   // The booking button is the business's booking link, and only that: no
   // link, no button. Falling back to the website sent guests to the wrong
@@ -118,6 +181,7 @@ export default function StayDetailScreen() {
   // offers soon" above the gap. The placeholder below now gives way as soon
   // as there is something real to show.
   const news = place.news ?? [];
+  const related = (isProperty ? propertyRelated : discover) ?? [];
 
   async function handleShare() {
     const url = `${window.location.origin}/live/stay/${kind}/${place.slug}`;
@@ -173,7 +237,7 @@ export default function StayDetailScreen() {
             </p>
           )}
 
-          {free && (
+          {free && !isProperty && (
             <p className="text-sm leading-relaxed italic" style={{ color: "rgba(0,0,0,0.55)" }}>{FREE_PLACEHOLDERS.description}</p>
           )}
           {!free && place.description && place.description.split("\n\n").map((para, i) => (
@@ -199,7 +263,7 @@ export default function StayDetailScreen() {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              {!free && (
+              {(!free || isProperty) && (
                 <ActionButton
                   href={mapsUrl}
                   label="Get Directions"
@@ -240,10 +304,10 @@ export default function StayDetailScreen() {
             )}
           </MobileCard>
 
-          {free && <ComingSoonCard heading="Opening Hours" text={FREE_PLACEHOLDERS.hours} />}
+          {free && !isProperty && <ComingSoonCard heading="Opening Hours" text={FREE_PLACEHOLDERS.hours} />}
 
           {free
-            ? <ComingSoonCard heading="Photos" text={FREE_PLACEHOLDERS.gallery} />
+            ? (!isProperty && <ComingSoonCard heading="Photos" text={FREE_PLACEHOLDERS.gallery} />)
             : <PhotoGallery images={gallery} title={place.name} />}
 
           {!free && (place.checkIn || place.checkOut || place.earlyCheckin || place.lateCheckout || place.availabilityInfo) && (
@@ -314,14 +378,16 @@ export default function StayDetailScreen() {
             </div>
           )}
 
-          {!free && (
+          {!free && isProperty && <MobileRooms rooms={place.rooms} />}
+
+          {(!free || isProperty) && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
               <MiniMap query={place.mapQuery || place.address || place.area} lat={place.lat} lng={place.lng} />
             </div>
           )}
 
-          {free && news.length === 0 && (
+          {free && !isProperty && news.length === 0 && (
             <div
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
               style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
@@ -334,6 +400,8 @@ export default function StayDetailScreen() {
           {!free && <MobileFaqs faq={place.faq} />}
 
           {!free && <MobileReviews reviews={place.reviews} />}
+
+          {isProperty && <MobileManagedBy company={place.managedBy} />}
 
           {news.length > 0 && (
             <div
@@ -358,12 +426,12 @@ export default function StayDetailScreen() {
             </div>
           )}
 
-          {free && <ClaimBusinessBox businessId={place.businessId} compact />}
-          {(discover ?? []).length > 0 && (
+          {free && !isProperty && <ClaimBusinessBox businessId={place.businessId} compact />}
+          {related.length > 0 && (
             <div className="mt-2">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>Stay Here &amp; Discover</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{isProperty ? "You Might Also Like" : <>Stay Here &amp; Discover</>}</p>
               <div className="flex flex-col gap-3">
-                {(discover ?? []).map((it) => (
+                {related.map((it) => (
                   <Link key={it.slug} to={it.mobileTo} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
                     <img src={it.image} alt="" className="w-20 h-20 object-cover shrink-0" style={cropStyle(it.image, "card")} />
                     <div className="flex-1 min-w-0 p-3 flex flex-col justify-center">

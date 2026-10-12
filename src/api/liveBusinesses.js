@@ -14,7 +14,7 @@ import { supabase } from "../lib/supabaseClient";
 import { categoryLabel } from "../Data/taxonomy";
 import { getLivePlacements } from "./homepageSlots";
 import { brandGrid } from "../Data/content";
-import { facilitiesOf, roomFacilitiesOf, travelGroupOf, mealsOf, propertyTypesOf } from "../lib/amenityCategories";
+import { facilitiesOf, roomFacilitiesOf, travelGroupOf, mealsOf, propertyTypesOf, PROPERTY_TYPES } from "../lib/amenityCategories";
 import { parseCoords } from "../lib/geo";
 import { imageUrl } from "../lib/imageUrl";
 import { formatEventDate } from "../lib/eventDates";
@@ -29,6 +29,9 @@ const SECTION_FOR_TYPE = {
   services: "services",
   freelancer: "services",
   hotel: "stay",
+  // An accommodation management company's properties (the company itself
+  // never reaches the public view, which leaves companies out).
+  accommodation: "stay",
 };
 
 // The first category the business chose is its primary one; all of them are
@@ -217,10 +220,31 @@ const DEFAULT_HEROES = {
   // Trades, Professionals and Freelancers all list under Services.
   services: "/images/services/default-hero.jpg#f=50,85",
   freelancer: "/images/services/default-hero.jpg#f=50,85",
+  // A Free accommodation property has no header picture of its own.
+  accommodation: "/images/live/accommodation-hero.jpg#f=50,50",
 };
 
-function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}, events = {}) {
+// A company's public details, for the MANAGED BY section of each of its
+// properties (public_accommodation_companies).
+function mapCompany(c) {
+  if (!c) return null;
+  return {
+    id: c.business_id,
+    name: c.name,
+    logo: imageUrl(c.logo, "icon"),
+    address: [c.address, c.postal_code].filter(Boolean).join(", "),
+    phone: c.phone,
+    email: c.email,
+    website: c.website,
+    social: c.social ?? {},
+  };
+}
+
+function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new Set(), features = {}, events = {}, companies = {}) {
   const type = row.business_type;
+  // An accommodation property: its own page, pin and reviews, managed by a
+  // company whose articles, offers and events appear on each of its pages.
+  const isProperty = row.kind === "accommodation_property";
   const section = SECTION_FOR_TYPE[type];
   // Old category slugs (graphic-designers, web-developers, …) are translated
   // to the current ones, so a business registered before a rename still
@@ -278,7 +302,9 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     // Impossible coordinates are dropped here so no map ever receives them.
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
-    mapQuery: premium && coords ? `${coords.lat},${coords.lng}` : (premium ? address : null),
+    // A Free accommodation property still shows its map pin and directions —
+    // its location is part of the basic listing.
+    mapQuery: (premium || isProperty) && coords ? `${coords.lat},${coords.lng}` : (premium ? address : null),
     // Layout props default to [] only when undefined, never when null, so an
     // empty column must arrive as undefined or the page throws on .slice().
     faq: listOrUndefined((row.faqs ?? [])
@@ -293,7 +319,10 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     // A freelancer's Working With Me box, exactly as they filled it in — no
     // example wording, so an unfilled line simply isn't shown.
     workingWithMe: workingWithMeOf(row.working_with_me),
-    amenities: listOrUndefined(row.amenities),
+    // What the page lists as amenities. A Property Types tick (Apartments,
+    // Cottages…) is what the place IS — shown as its category label — so it
+    // isn't listed again as an amenity. Filters below read the full list.
+    amenities: listOrUndefined((row.amenities ?? []).filter((a) => !PROPERTY_TYPES.includes(a))),
     // The Hotels/Accommodation listing pages' Facilities, Room facilities,
     // Meals and Travel group filters (StayListingPage.jsx) — restored from
     // what the old `main` branch's hardcoded demo data had as separate
@@ -322,7 +351,12 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     earlyCheckin: !!row.early_checkin,
     lateCheckout: !!row.late_checkout,
     // Hotels vs accommodation, for the Live & Stay section.
-    stayKind: row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
+    stayKind: type === "accommodation" || row.business_type_detail?.hotelKind === "accommodation" ? "accommodation" : "hotels",
+    kind: row.kind ?? "standard",
+    companyId: isProperty ? row.parent_id : null,
+    // Room / accommodation information (paid properties; withheld otherwise).
+    rooms: listOrUndefined(row.rooms),
+    managedBy: isProperty ? mapCompany(companies[row.parent_id]) : null,
     // Tradespeople / Professionals / Freelancers — for a Services business,
     // taken from the kind it chose at signup, else worked out from its
     // category. The app's Services groups and the website's group pages both
@@ -336,12 +370,16 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   // business holds a paid Featured Business booking. Writing the article list
   // over it gave every business an empty array, which counts as true — so
   // every listing on the site wore a Featured tag and sorted to the top.
-  item.featuredArticles = (features[row.business_id] ?? []).map((f) => mapFeature(f, item));
+  // A property also carries what its company published: articles are
+  // written once at company level and appear on every property page.
+  const owners = isProperty ? [row.business_id, row.parent_id] : [row.business_id];
+  const of = (map) => owners.flatMap((id) => map[id] ?? []);
+  item.featuredArticles = of(features).map((f) => mapFeature(f, item));
   item.news = [
     ...item.featuredArticles,
-    ...(events[row.business_id] ?? []).map((e) => mapEvent(e, item)),
-    ...(articles[row.business_id] ?? []).map((a) => mapArticle(a, item)),
-    ...(newsOffers[row.business_id] ?? []).map((n) => mapNewsOffer(n, item)),
+    ...of(events).map((e) => mapEvent(e, item)),
+    ...of(articles).map((a) => mapArticle(a, item)),
+    ...of(newsOffers).map((n) => mapNewsOffer(n, item)),
   ];
   // Only approved reviews of Visibility Plan businesses reach the view, and
   // a profile shows at most six of them at a time (newest first) on both the
@@ -385,7 +423,7 @@ export function invalidateLiveBusinesses() {
 export function loadLiveBusinesses() {
   if (cache) return cache;
   cache = (async () => {
-    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, featuresRes, eventsRes, placements] = await Promise.all([
+    const [profilesRes, articlesRes, reviewsRes, newsOffersRes, featuresRes, eventsRes, placements, companiesRes] = await Promise.all([
       withSchemaRetry(() => fetchAll(() => supabase.from("public_business_profiles").select("*").order("updated_at", { ascending: false }).order("business_id"))),
       withSchemaRetry(() => supabase.from("public_business_articles").select("*").order("date", { ascending: false })),
       // Reviews are optional: if the view isn't there yet, pages just show none.
@@ -403,6 +441,9 @@ export function loadLiveBusinesses() {
       // Live events show as cards on their business's page too.
       supabase.from("business_events").select("*").eq("status", "Live").order("event_date", { ascending: true }),
       getLivePlacements(),
+      // Accommodation companies' MANAGED BY details. Optional: without them
+      // a property page simply has no Managed by section.
+      supabase.from("public_accommodation_companies").select("*"),
     ]);
     // A missing view (migration not run yet) or a network failure must not
     // take the whole directory down — the site falls back to its demo data.
@@ -431,6 +472,7 @@ export function loadLiveBusinesses() {
     // The business a slot shows. For a standard business that's itself; an
     // accommodation company's slot shows the property it chose (the company
     // paid, the property is featured).
+    const companies = Object.fromEntries((companiesRes?.data ?? []).map((c) => [c.business_id, c]));
     const featuredIds = new Set(placements.featured_business.map((p) => p.content_id ?? p.business_id));
     const reviews = {};
     for (const rv of reviewsRes.data ?? []) (reviews[rv.business_id] ??= []).push(rv);
@@ -440,7 +482,7 @@ export function loadLiveBusinesses() {
     lastLoadFailed = false;
     return (profilesRes.data ?? [])
       .filter((row) => SECTION_FOR_TYPE[row.business_type])
-      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds, features, events));
+      .map((row) => toItem(row, articles, reviews, newsOffers, featuredIds, features, events, companies));
   })();
   // A thrown error (e.g. offline) likewise retries on the next page.
   const pending = cache;

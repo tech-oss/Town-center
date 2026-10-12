@@ -279,5 +279,24 @@ do $T$ begin
   if ((select coalesce(content_id, 'none') || '/' || status from public.homepage_placements where business_id = 'biz_test_acc_co3') = 'none/awaiting_content') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T62 no live property: featured slot waits for a choice', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T62 no live property: featured slot waits for a choice (check false)', false); end if;
 exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T62 no live property: featured slot waits for a choice: ' || sqlerrm, false); end $T$;
 reset role; select set_config('request.jwt.claims', '', false);
+insert into public.businesses (id, name, status, kind) values ('biz_test_acc_co5', 'Fifth Lettings', 'Approved', 'accommodation_company');
+insert into public.business_subscriptions (business_id, plan, plan_status, monthly_fee, site_tier_key) values ('biz_test_acc_co5', 'premium', 'Active', 49, 'acc-5');
+insert into public.businesses (id, name, status, kind, parent_id, property_state) values ('biz_test_acc_co5_p', 'Reviewed Flat', 'Approved', 'accommodation_property', 'biz_test_acc_co5', 'live');
+insert into public.business_listings (business_id, name, business_type) values ('biz_test_acc_co5_p', 'Reviewed Flat', 'accommodation');
+insert into public.business_reviews (business_id, reviewer, rating, date, text, status) values ('biz_test_acc_co5_p', 'Guest', 5, current_date, 'Lovely stay', 'Visible');
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"7f8e200f-b077-4f8c-a455-f47414e967d0","role":"authenticated"}', false);
+update public.business_reviews set status = 'Visible' where business_id = 'biz_test_acc_co5_p';
+reset role; select set_config('request.jwt.claims', '', false);
+do $T$ begin 
+  if (exists (select 1 from public.public_business_reviews where business_id = 'biz_test_acc_co5_p')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T63 a live paid property''s review is public', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T63 a live paid property''s review is public (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T63 a live paid property''s review is public: ' || sqlerrm, false); end $T$;
+update public.businesses set property_state = 'hidden' where id = 'biz_test_acc_co5_p';
+do $T$ begin 
+  if (not exists (select 1 from public.public_business_reviews where business_id = 'biz_test_acc_co5_p')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T64 hidden property: review not public', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T64 hidden property: review not public (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T64 hidden property: review not public: ' || sqlerrm, false); end $T$;
+update public.businesses set property_state = 'live' where id = 'biz_test_acc_co5_p'; update public.business_subscriptions set plan = 'free' where business_id = 'biz_test_acc_co5';
+do $T$ begin 
+  if (not exists (select 1 from public.public_business_reviews where business_id = 'biz_test_acc_co5_p')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T65 free company: property reviews not public', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T65 free company: property reviews not public (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T65 free company: property reviews not public: ' || sqlerrm, false); end $T$;
 select current_setting('t.r', true) as results;
 rollback;
