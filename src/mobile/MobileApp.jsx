@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import useViewportRepair from "./hooks/useViewportRepair";
 import { Routes, Route, Navigate } from "react-router-dom";
 import SplashScreen from "./pages/SplashScreen";
 import HomeScreen from "./pages/HomeScreen";
@@ -58,6 +59,10 @@ export default function MobileApp() {
       if (meta && original) meta.setAttribute("content", original);
     };
   }, []);
+
+  // Re-measures the screen whenever the app is shown again, so closing an
+  // agreement PDF never leaves a gap under the tab bar.
+  useViewportRepair();
 
   // Captures the history-length baseline every back button uses to tell a
   // real in-app navigation from a deep link / relaunch straight onto a

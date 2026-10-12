@@ -398,6 +398,9 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
 .mobile-root {
   position: fixed;
   inset: 0;
+  /* Measured screen height (see mobile/hooks/useViewportRepair.js): iPhone can
+     leave a fixed frame short after a full-screen PDF viewer closes. */
+  height: var(--app-height, auto);
   overflow: hidden;
   background-color: #ffffff;
   font-family: var(--font-body);
