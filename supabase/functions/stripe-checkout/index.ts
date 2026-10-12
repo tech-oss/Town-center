@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     // Only the approved Owner of an approved business can pay for it.
     const { data: member } = await admin
       .from("business_users")
-      .select("role, status, businesses(name, status)")
+      .select("role, status, businesses(name, status, kind)")
       .eq("business_id", businessId)
       .eq("auth_user_id", user.id)
       .maybeSingle();
@@ -232,6 +232,13 @@ Deno.serve(async (req) => {
         cancel_url: `${base}/business/${backTo}?slots=cancelled`,
       });
       return json({ url: session.url });
+    }
+
+    // An accommodation company buys an accommodation plan (5–30 properties)
+    // through accommodation-billing, never the Visibility Plan.
+    // deno-lint-ignore no-explicit-any
+    if ((member as any).businesses?.kind === "accommodation_company") {
+      return json({ error: "Accommodation companies choose an accommodation plan instead." }, 409);
     }
 
     // Monthly or annual Visibility Plan. Only these two Stripe prices can be

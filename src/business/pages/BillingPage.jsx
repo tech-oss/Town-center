@@ -5,6 +5,9 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { isPremium } from "../../Data/plans";
+import { isAccommodationCompany } from "../../Data/accommodation";
+import AccommodationPlanSummary from "../components/AccommodationPlanSummary";
+import FeaturedPropertyPicker from "../components/FeaturedPropertyPicker";
 import { TERMS_TEXT } from "../../Data/businessPortalMock";
 import {
   PAGE_TYPE_CSS, TermsDialog, useVisibilityCheckout, VisibilityPlanCard, VisibilityFeatures, ClosingBand,
@@ -59,6 +62,7 @@ export default function BillingPage() {
   }, [user.id]);
 
   const premium = isPremium(user.plan);
+  const company = isAccommodationCompany(user);
   const isOwner = user.role === "Owner";
   const requestedBy = `${user.firstName} ${user.lastName}`;
   const cancelled = !premium && (!!user.cancelled || user.planStatus === "Cancelled");
@@ -98,6 +102,14 @@ export default function BillingPage() {
           <p className="text-sm mt-1" style={{ color: MUTED }}>Manage your plan, homepage promotions and payment history.</p>
         </div>
 
+        {/* An accommodation company has its own plans (5–30 properties). */}
+        {company ? (
+          <>
+            <AccommodationPlanSummary user={user} onManageBilling={manageBilling} opening={opening} />
+            <FeaturedPropertyPicker companyId={user.id} onToast={setToast} />
+          </>
+        ) : (
+        <>
         {/* Current plan summary */}
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={CARD}>
           <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -146,6 +158,8 @@ export default function BillingPage() {
             <VisibilityFeatures />
             <ClosingBand checkout={vp} />
           </>
+        )}
+        </>
         )}
 
         {/* Paid homepage slots (the ad-hoc add-ons) */}

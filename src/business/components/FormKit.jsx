@@ -729,7 +729,7 @@ export function Locked({ field, span2, message, children }) {
 // A whole feature that needs Premium (News & Offers, Events) — shown in place
 // of the page for a Free business.
 export function PremiumFeatureGate({ title, description }) {
-  const { role } = useContext(PlanContext);
+  const { role, planName = "Visibility Plan" } = useContext(PlanContext);
   const navigate = useNavigate();
   const canSubscribe = role !== "Content Manager";
   return (
@@ -742,10 +742,10 @@ export function PremiumFeatureGate({ title, description }) {
       {canSubscribe ? (
         <button onClick={() => navigate("/business/upgrade")}
           className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
-          See the Visibility Plan
+          See the {planName}
         </button>
       ) : (
-        <p className="text-xs font-semibold" style={{ color: "#92400E" }}>Ask your business owner to upgrade to the Visibility Plan.</p>
+        <p className="text-xs font-semibold" style={{ color: "#92400E" }}>Ask your business owner to upgrade to the {planName}.</p>
       )}
     </div>
   );

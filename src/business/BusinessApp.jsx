@@ -94,6 +94,17 @@ function RequireOwner({ children }) {
 function RequirePremium({ title, description, upsell: Upsell, children }) {
   const { user } = useBusinessAuth();
   if (isPremium(user?.plan)) return children;
+  // An accommodation company upgrades to one of its own plans, not the
+  // Visibility Plan the standard sales pages describe.
+  if (isAccommodationCompany(user)) {
+    return (
+      <BusinessLayout>
+        <PlanContext.Provider value={{ plan: user?.plan, role: user?.role, planName: "accommodation plans" }}>
+          <PremiumFeatureGate title={title.replace("the Visibility Plan", "the paid accommodation plans")} description={description} />
+        </PlanContext.Provider>
+      </BusinessLayout>
+    );
+  }
   // A feature with its own sales page shows that instead of the generic lock.
   if (Upsell) return <BusinessLayout><Upsell role={user?.role} /></BusinessLayout>;
   return (

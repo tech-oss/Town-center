@@ -95,14 +95,26 @@ async function applySubscription(sub: Stripe.Subscription) {
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
 
   const { data: before } = await admin
-    .from("business_subscriptions").select("plan").eq("business_id", businessId).maybeSingle();
+    .from("business_subscriptions").select("plan, site_tier_key").eq("business_id", businessId).maybeSingle();
+
+  // An accommodation company's plan is one of its tiers (5 / 10 / 15 / 20 /
+  // 30 properties), read from the Stripe price it's paying — the price
+  // carries the tier in its metadata (accommodation-billing creates them).
+  // Free (or lapsed) is the free tier.
+  const { data: biz } = await admin.from("businesses").select("kind").eq("id", businessId).maybeSingle();
+  const company = biz?.kind === "accommodation_company";
+  let tier: string | null = null;
+  if (company) {
+    tier = premium ? await tierForPrice(price, sub) : "acc-free";
+  }
 
   const planStatus = premium && sub.cancel_at_period_end ? "Cancelling" : (STATUS_LABEL[sub.status] ?? sub.status);
 
   const { error } = await admin.from("business_subscriptions").upsert({
     business_id: businessId,
     plan: premium ? "premium" : "free",
-    upgrade_plan_key: premium ? "premium" : "free",
+    upgrade_plan_key: company ? tier : premium ? "premium" : "free",
+    ...(company ? { site_tier_key: tier } : {}),
     monthly_fee: premium ? monthlyFee : 0,
     billing_interval: premium ? interval : null,
     price_amount: premium ? amount : null,
@@ -121,9 +133,33 @@ async function applySubscription(sub: Stripe.Subscription) {
   if (error) throw error;
 
   const newPlan = premium ? "premium" : "free";
-  if (before?.plan !== newPlan) {
+  if (company) {
+    if (before?.plan !== newPlan || before?.site_tier_key !== tier) {
+      const { data: t } = await admin.from("accommodation_plan_tiers").select("name").eq("key", tier).maybeSingle();
+      await logActivity(businessId, "subscription.changed", t?.name ?? (premium ? "Accommodation plan" : "Free"));
+    }
+    // Apply the property limit: if the plan now allows fewer properties than
+    // are using a slot, the ones the company chose stay live and the rest
+    // become inactive (kept, not deleted). Clears a scheduled change once
+    // it has taken effect.
+    const { error: capError } = await admin.rpc("accommodation_after_plan_change", { p_company: businessId });
+    if (capError) throw capError;
+  } else if (before?.plan !== newPlan) {
     await logActivity(businessId, "subscription.changed", premium ? "Visibility Plan" : "Free");
   }
+}
+
+// The accommodation tier a Stripe price sells.
+// deno-lint-ignore no-explicit-any
+async function tierForPrice(price: any, sub: any): Promise<string> {
+  const fromPrice = price?.metadata?.accommodation_tier;
+  if (fromPrice) return fromPrice;
+  if (price?.id) {
+    const { data } = await admin.from("accommodation_plan_tiers").select("key")
+      .or(`stripe_price_monthly.eq.${price.id},stripe_price_yearly.eq.${price.id}`).maybeSingle();
+    if (data?.key) return data.key;
+  }
+  return sub?.metadata?.accommodation_tier ?? "acc-5";
 }
 
 function money(amountMinor: number, currency: string) {
