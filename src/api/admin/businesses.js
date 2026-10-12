@@ -151,6 +151,9 @@ function fromRow(row) {
     // Older listings recorded a display category ("Live & Stay"); newer ones a
     // business_type slug ("shop"). Prefer the slug the admin selects still use.
     section: listing.business_type ?? listing.category ?? "",
+    // "accommodation_company" / "accommodation_property" for the
+    // accommodation module; "standard" for every other business.
+    kind: row.kind ?? "standard",
     // The real signup form never writes the legacy `subcategory` column at
     // all — Shop and See & Do category picks live inside business_type_detail
     // alongside every other type-specific field, same as freelancerKind etc.

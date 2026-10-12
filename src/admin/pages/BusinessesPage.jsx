@@ -53,7 +53,10 @@ function Toast({ message, onDismiss }) {
 // Uses the same BUSINESS_TYPES taxonomy the real signup form offers, so a
 // section shows the exact label the business itself picked rather than
 // admin's own older/divergent section list.
-function sectionLabel(val) {
+function sectionLabel(val, kind) {
+  // The accommodation module's two kinds share the "accommodation" type.
+  if (kind === "accommodation_company") return "Accommodation company";
+  if (kind === "accommodation_property") return "Accommodation property";
   return labelFor(BUSINESS_TYPES, val);
 }
 
@@ -744,7 +747,7 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
 
         <DetailSection title="Business Details">
           <DetailRow label="Business Name" value={biz.name} />
-          <DetailRow label="Business Type" value={labelFor(BUSINESS_TYPES, biz.section)} />
+          <DetailRow label="Business Type" value={sectionLabel(biz.section, biz.kind)} />
           {typeSpecificRows(biz)}
           <DetailRow label="Website" value={biz.website} />
           <DetailRow label="Business Email" value={biz.businessEmail} />
@@ -886,7 +889,7 @@ function InfoField({ label, value, mono }) {
 
 function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull, onPlanChanged }) {
   const navigate = useNavigate();
-  const secLabel = sectionLabel(biz.section);
+  const secLabel = sectionLabel(biz.section, biz.kind);
   const chips = categoryChips(biz);
 
   const isActive   = pendingAction?.id === biz.id;

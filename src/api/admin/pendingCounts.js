@@ -59,7 +59,9 @@ export async function getAdminPendingCounts() {
   const n = (k) => Number(c[k]) || 0;
 
   return {
-    approvals,
+    // Listing edits, plus new accommodation properties and company profiles
+    // waiting in the same queue.
+    approvals: approvals + n("properties") + n("company_profiles"),
     slots: n("slots"),
     events: n("events") + n("occurrences"),
     articles: n("articles"),

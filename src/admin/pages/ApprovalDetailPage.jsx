@@ -5,6 +5,7 @@ import { getApprovalById, approveItem, rejectItem } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import LoadingState from "../components/LoadingState";
 import EmptyState from "../components/EmptyState";
+import PropertyReviewDetail from "../components/PropertyReviewDetail";
 
 // ─── Sub-renderers per submission type ───────────────────────────────────────
 
@@ -143,6 +144,17 @@ function ListingEditDetail({ detail }) {
         <ChangesTable changes={detail.changes} />
       </Section>
     </>
+  );
+}
+
+// An accommodation company's MANAGED BY details: the submission against
+// what's live now (or, once decided, simply what's live).
+function CompanyProfileDetail({ detail, pending }) {
+  return (
+    <Section title={pending ? "Submitted company details" : "Company details"}>
+      <p className="text-xs -mt-1" style={{ color: "#9CA3AF" }}>Shown as "Managed by" on every one of this company's property pages.</p>
+      <ChangesTable changes={detail.changes} />
+    </Section>
   );
 }
 
@@ -294,6 +306,8 @@ const TYPE_ICON = {
   "New Listing": "＋",
   "Offer / Promotion": "🏷",
   "Property Import": "⚡",
+  "New Property": "🏘",
+  "Company Profile": "🏢",
 };
 
 export default function ApprovalDetailPage() {
@@ -304,6 +318,7 @@ export default function ApprovalDetailPage() {
   const [rejecting, setRejecting] = useState(false);
   const [reason, setReason] = useState("");
   const [message, setMessage] = useState(null);
+  const [actionError, setActionError] = useState("");
 
   if (loading) return <LoadingState />;
   if (!item) return <EmptyState title="Submission not found" message="This approval item may have been removed." />;
@@ -311,21 +326,25 @@ export default function ApprovalDetailPage() {
   const status = localStatus ?? item.status;
   const isPending = status === "Pending";
 
+  // A decision can be refused (it was already made in another tab, say), so
+  // the reason is shown rather than the button silently doing nothing.
   function handleApprove() {
+    setActionError("");
     approveItem(id).then(() => {
       setLocalStatus("Approved");
-      setMessage("Approved — the submission is now live.");
+      setMessage(item.type === "New Property" ? "Approved — the property is now live." : "Approved — the submission is now live.");
       setRejecting(false);
-    });
+    }).catch((e) => setActionError(e.message ?? String(e)));
   }
 
   function handleReject() {
     if (!reason.trim()) return;
+    setActionError("");
     rejectItem(id, reason).then(() => {
       setLocalStatus("Rejected");
       setMessage(`Rejected — reason recorded: "${reason}"`);
       setRejecting(false);
-    });
+    }).catch((e) => setActionError(e.message ?? String(e)));
   }
 
   return (
@@ -369,6 +388,12 @@ export default function ApprovalDetailPage() {
         {message && (
           <div className="px-4 py-3 rounded-xl text-sm font-medium" style={{ backgroundColor: status === "Approved" ? "rgba(16,24,40,0.1)" : "rgba(185,28,28,0.07)", color: status === "Approved" ? "#1E293B" : "#991B1B" }}>
             {message}
+          </div>
+        )}
+
+        {actionError && (
+          <div role="alert" className="px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "rgba(185,28,28,0.07)", color: "#991B1B" }}>
+            Couldn't save that decision: {actionError}
           </div>
         )}
 
@@ -434,6 +459,8 @@ export default function ApprovalDetailPage() {
         {(item.type === "New Listing") && <NewListingDetail detail={item.detail} />}
         {(item.type === "Offer / Promotion") && <OfferDetail detail={item.detail} />}
         {(item.type === "Property Import") && <PropertyImportDetail detail={item.detail} />}
+        {(item.type === "New Property") && <PropertyReviewDetail detail={item.detail} />}
+        {(item.type === "Company Profile") && <CompanyProfileDetail detail={item.detail} pending={isPending} />}
       </div>
 
       {/* Bottom action repeat for long pages */}

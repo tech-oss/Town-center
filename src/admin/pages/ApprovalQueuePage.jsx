@@ -75,6 +75,8 @@ export default function ApprovalQueuePage() {
       await approveItem(item.id);
       setLocalStates((s) => ({ ...s, [item.id]: { status: "Approved" } }));
       refetch();
+    } catch (e) {
+      setNotice(`Couldn't approve ${item.business}: ${e.message}`);
     } finally {
       setBusy(null);
     }
@@ -86,6 +88,8 @@ export default function ApprovalQueuePage() {
       await rejectItem(item.id, reason);
       setLocalStates((s) => ({ ...s, [item.id]: { status: "Rejected", rejectionReason: reason } }));
       refetch();
+    } catch (e) {
+      setNotice(`Couldn't reject ${item.business}: ${e.message}`);
     } finally {
       setBusy(null);
     }

@@ -1,5 +1,9 @@
 import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
+import {
+  isAccommodationItemId, getAccommodationApprovals, getAccommodationApprovalById,
+  approveAccommodationItem, rejectAccommodationItem, deleteAccommodationItems,
+} from "./accommodationApprovals";
 
 // The approval queue over business listing edits.
 //
@@ -36,6 +40,7 @@ const SECTION_LABELS = {
   skills: "Skills",
   workingwithme: "Working With Me",
   amenities: "Amenities",
+  rooms: "Rooms",
 };
 
 // [db column, camelCase field (matches pending_snapshot's keys), display
@@ -54,7 +59,7 @@ const SECTION_FIELDS = {
   hours: [["hours", "hours", "Opening Hours"], ["availability_info", "availabilityInfo", "Availability Info"], ["check_in_time", "checkInTime", "Check-in Times"], ["check_out_time", "checkOutTime", "Check-out Times"], ["early_checkin", "earlyCheckin", "Early Check-in Offered"], ["late_checkout", "lateCheckout", "Late Check-out Offered"]],
   gallery: [["gallery", "gallery", "Gallery Images", "gallery"]],
   location: [["address", "address", "Address"], ["postal_code", "postalCode", "Postcode"], ["lat", "lat", "Latitude"], ["lng", "lng", "Longitude"]],
-  contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"], ["availability_tag", "availabilityTag", "Availability Tag"]],
+  contact: [["phone", "phone", "Phone"], ["email", "email", "Email"], ["website", "website", "Website"], ["booking_url", "bookingUrl", "Booking URL"], ["social", "social", "Social Links"], ["availability_tag", "availabilityTag", "Availability Tag"], ["contact_source", "contactSource", "Contact details shown"]],
   faqs: [["faqs", "faqs", "FAQs"]],
   portfolio: [["portfolio", "portfolio", "Portfolio", "portfolio"], ["skills", "skills", "Skills"]],
   services: [["services_list", "servicesList", "Services"], ["areas_covered_list", "areasCoveredList", "Areas Covered"], ["why_choose_us", "whyChooseUs", "Why Choose Us"], ["stats", "stats", "Stats"]],
@@ -62,6 +67,10 @@ const SECTION_FIELDS = {
   skills: [["skills", "skills", "Skills"]],
   workingwithme: [["working_with_me", "workingWithMe", "Working With Me"]],
   amenities: [["amenities", "amenities", "Amenities"], ["other_amenities", "otherAmenities", "Other Amenities"], ["star_rating", "starRating", "Star Rating"]],
+  // An accommodation property's room types (name, sleeps, beds, description,
+  // room amenities). A save that only ticks room amenities is published
+  // without review by the portal; anything else lands here.
+  rooms: [["rooms", "rooms", "Rooms"]],
 };
 
 // Sections the business publishes without review — they never produce a
@@ -84,7 +93,7 @@ function parseId(id) {
 // Writes a value out in full so admin can read exactly what the business
 // entered — FAQs as Q/A pairs, social links as "Instagram: url", opening hours
 // day by day — rather than a count like "2 fields".
-const LABELS = { availability: "Availability", works: "Works", responseTime: "Response time", experience: "Experience", instagram: "Instagram", facebook: "Facebook", x: "X / Twitter", twitter: "X / Twitter", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
+const LABELS = { name: "Name", sleeps: "Sleeps", beds: "Beds", description: "Description", amenities: "Amenities", availability: "Availability", works: "Works", responseTime: "Response time", experience: "Experience", instagram: "Instagram", facebook: "Facebook", x: "X / Twitter", twitter: "X / Twitter", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
 
 function describeEntry(item) {
   if (item == null) return "";
@@ -99,7 +108,8 @@ function describeEntry(item) {
   if (item.label != null && item.value != null) return `${item.label}: ${item.value}`;
   return Object.entries(item)
     .filter(([k, v]) => k !== "id" && v != null && v !== "")
-    .map(([k, v]) => `${LABELS[k] ?? k}: ${typeof v === "object" ? JSON.stringify(v) : v}`)
+    .filter(([, v]) => !(Array.isArray(v) && !v.length))
+    .map(([k, v]) => `${LABELS[k] ?? k}: ${Array.isArray(v) ? v.join(", ") : typeof v === "object" ? JSON.stringify(v) : v}`)
     .join(" · ");
 }
 
@@ -262,28 +272,57 @@ export async function getApprovals({ status } = {}) {
   for (const chunk of chunksOf(ids, 100)) {
     const { data: rows, error } = await supabase
       .from("business_listings")
-      .select("*, businesses(name)")
+      .select("*, businesses(name, kind, property_state, parent_id)")
       .in("business_id", chunk);
     if (error) throw error;
     data.push(...(rows ?? []));
   }
   data.sort((a, b) => String(b.updated_at ?? "").localeCompare(String(a.updated_at ?? "")));
 
-  const owners = await ownersByBusiness(data.map((r) => r.business_id));
+  // An accommodation property that has never been live is reviewed as a
+  // whole ("New Property", from accommodationApprovals.js); its sections are
+  // saved straight onto it meanwhile and aren't edits to review one by one.
+  const reviewable = (data ?? []).filter((r) => !isUnreviewedProperty(r.businesses));
+  // Owners and company names belong to a property's company.
+  const companyOf = (r) => r.businesses?.parent_id ?? r.business_id;
+  const owners = await ownersByBusiness([...new Set(reviewable.map(companyOf))]);
+  const companyNames = await namesOfCompanies(reviewable);
   const items = [];
-  for (const row of data ?? []) {
+  for (const row of reviewable) {
     // businesses.name is the source of truth for the business's current
     // name — business_listings.name can itself be mid-edit/pending, which
     // would otherwise make the queue's own "business" column show a name
     // that hasn't been approved yet.
-    const named = { ...row, name: row.businesses?.name ?? row.name };
+    const named = { ...row, name: withCompany(row.businesses?.name ?? row.name, row.businesses, companyNames) };
     for (const [section, state] of Object.entries(row.approval_status ?? {})) {
       if (AUTO_PUBLISHED_SECTIONS.has(section)) continue;
       if (!isRealSubmission(row, section, state)) continue;
-      items.push(toItem(named, section, state, owners[row.business_id]));
+      items.push(toItem(named, section, state, owners[companyOf(row)]));
     }
   }
-  return status ? items.filter((i) => i.status === status) : items;
+  // New properties and company profiles join the same queue. If they can't
+  // be loaded (a migration not run yet), the listing edits still show.
+  const accommodation = await getAccommodationApprovals().catch(() => []);
+  const all = [...items, ...accommodation];
+  return status ? all.filter((i) => i.status === status) : all;
+}
+
+const NEVER_LIVE = new Set(["draft", "pending", "rejected", "archived"]);
+function isUnreviewedProperty(business) {
+  return business?.kind === "accommodation_property" && NEVER_LIVE.has(business.property_state);
+}
+
+// "River Loft · Thames Lettings" for a property, so admin can tell whose it is.
+async function namesOfCompanies(rows) {
+  const ids = [...new Set(rows.map((r) => r.businesses?.parent_id).filter(Boolean))];
+  if (!ids.length) return {};
+  const { data, error } = await supabase.from("businesses").select("id, name").in("id", ids);
+  if (error) throw error;
+  return Object.fromEntries((data ?? []).map((b) => [b.id, b.name]));
+}
+function withCompany(name, business, companyNames) {
+  const company = business?.parent_id && companyNames[business.parent_id];
+  return company ? `${name} · ${company}` : name;
 }
 
 // How many listing edits are waiting — for the sidebar badge, which wants a
@@ -344,19 +383,21 @@ export async function countPendingApprovals() {
 }
 
 export async function getApprovalById(id) {
+  if (isAccommodationItemId(id)) return getAccommodationApprovalById(id);
   const { businessId, section } = parseId(id);
   const { data, error } = await supabase
     .from("business_listings")
-    .select("*, businesses(name)")
+    .select("*, businesses(name, kind, property_state, parent_id)")
     .eq("business_id", businessId)
     .maybeSingle();
   if (error) throw error;
   if (!data) return null;
   const state = data.approval_status?.[section];
   if (!state || AUTO_PUBLISHED_SECTIONS.has(section)) return null;
-  const owners = await ownersByBusiness([businessId]);
-  const named = { ...data, name: data.businesses?.name ?? data.name };
-  return toItem(named, section, state, owners[businessId]);
+  const companyId = data.businesses?.parent_id ?? businessId;
+  const owners = await ownersByBusiness([companyId]);
+  const named = { ...data, name: withCompany(data.businesses?.name ?? data.name, data.businesses, await namesOfCompanies([data])) };
+  return toItem(named, section, state, owners[companyId]);
 }
 
 // Approval clears the section's snapshot (no longer needed — the live
@@ -419,11 +460,13 @@ async function rejectSection(businessId, section, reason) {
 }
 
 export function approveItem(id) {
+  if (isAccommodationItemId(id)) return approveAccommodationItem(id);
   const { businessId, section } = parseId(id);
   return approveSection(businessId, section);
 }
 
 export function rejectItem(id, reason) {
+  if (isAccommodationItemId(id)) return rejectAccommodationItem(id, reason);
   const { businessId, section } = parseId(id);
   return rejectSection(businessId, section, reason);
 }
@@ -431,6 +474,7 @@ export function rejectItem(id, reason) {
 // There is no queue row to delete — an item exists only while its section sits
 // in a non-default state, so "dismissing" one marks the section up to date.
 export function deleteItem(id) {
+  if (isAccommodationItemId(id)) return deleteAccommodationItems([id]);
   return approveItem(id);
 }
 
@@ -439,7 +483,9 @@ export function deleteItem(id) {
 // still waiting for a decision are skipped: approve or reject those first,
 // otherwise a business's unreviewed change would just silently stay live.
 // Returns { deleted: [ids], skipped: [ids] }.
-export async function deleteItems(ids) {
+export async function deleteItems(allIds) {
+  const accommodation = await deleteAccommodationItems(allIds.filter(isAccommodationItemId));
+  const ids = allIds.filter((id) => !isAccommodationItemId(id));
   const bySection = new Map();
   for (const id of ids) {
     const { businessId, section } = parseId(id);
@@ -476,5 +522,5 @@ export async function deleteItems(ids) {
       .eq("business_id", businessId);
     if (error) throw error;
   }
-  return { deleted, skipped };
+  return { deleted: [...deleted, ...accommodation.deleted], skipped: [...skipped, ...accommodation.skipped] };
 }

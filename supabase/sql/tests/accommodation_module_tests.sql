@@ -195,5 +195,24 @@ do $T$ begin perform public.accommodation_review_company_profile('biz_test_acc_c
   if ((select phone from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = '01628 222222' and (select rejection_reason from public.accommodation_company_profiles where business_id = 'biz_test_acc_co2') = 'Phone number looks wrong') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T45b', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T45b (check false)', false); end if;
 exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T45b: ' || sqlerrm, false); end $T$;
 reset role; select set_config('request.jwt.claims', '', false);
+insert into public.business_subscriptions (business_id, plan, plan_status, monthly_fee, site_tier_key) values ('biz_test_acc_co2', 'free', 'Active', 0, 'acc-free');
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"06877bdd-c8d9-4693-9507-c79b376e4dbb","role":"authenticated"}', false);
+do $T$ begin perform set_config('t.q1', public.accommodation_create_property('biz_test_acc_co2', 'Weir View'), false); update public.business_listings set address = '3 Weir Lane' where business_id = current_setting('t.q1'); perform public.accommodation_submit_property(current_setting('t.q1'));
+  if ((select property_state from public.businesses where id = current_setting('t.q1')) = 'pending') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T46 second company submits a property', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T46 second company submits a property (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T46 second company submits a property: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if ((select count(*) from public.approval_actions) = 0) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T47 owners can''t read the approval history', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T47 owners can''t read the approval history (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T47 owners can''t read the approval history: ' || sqlerrm, false); end $T$;
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"7f8e200f-b077-4f8c-a455-f47414e967d0","role":"authenticated"}', false);
+do $T$ begin 
+  if ((public.admin_pending_counts() ->> 'properties')::int >= 1) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T48 badge counts the pending property', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T48 badge counts the pending property (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T48 badge counts the pending property: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if (exists (select 1 from public.approval_actions where entity_type = 'company_profile' and business_id = 'biz_test_acc_co2')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T49 admin reads the approval history', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T49 admin reads the approval history (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T49 admin reads the approval history: ' || sqlerrm, false); end $T$;
+do $T$ begin delete from public.approval_actions where entity_type = 'company_profile' and business_id = 'biz_test_acc_co2';
+  if (not exists (select 1 from public.approval_actions where entity_type = 'company_profile' and business_id = 'biz_test_acc_co2')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T50 admin clears a history entry', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T50 admin clears a history entry (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T50 admin clears a history entry: ' || sqlerrm, false); end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
 select current_setting('t.r', true) as results;
 rollback;
