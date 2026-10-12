@@ -138,7 +138,7 @@ export const workplaceBuildings = [
     tagline: "Designed differently — a sustainable timber office for forward-thinking businesses",
     location: "King Street, Maidenhead SL6 1DY",
     lat: 51.5231, lng: -0.7194,
-    status: "Ready Q4 2026",
+    status: "Ready Q1 2027",
     website: "https://www.trehus.work",
     email: "stuart.chambers@savills.com",
     phone: "07870 999 339",
@@ -153,13 +153,13 @@ export const workplaceBuildings = [
     longDescription: [
       "Trehus is designed differently. Built around an engineered timber structure rather than conventional concrete, it dramatically reduces the embodied carbon of the building — offering forward-thinking businesses a genuinely sustainable home that reflects their values. Designed by award-winning Waugh Thistleton Architects, Trehus pairs striking architecture with the low energy usage and ESG credentials that modern occupiers and their people increasingly demand.",
       "Offering 61,677 sq ft of workspace to let, Trehus is built for the way people work today: flexible floorplates, generous co-working areas, dedicated event space, a landscaped roof terrace and a ground-level café all foster collaboration and wellbeing. A new public garden square brings greenery and calm right to the door, while 53 bicycle spaces with showers make active, sustainable commuting effortless.",
-      "Part of the wider One Maidenhead regeneration, Trehus sits in the heart of the town with direct Elizabeth Line and South Western Railway connections placing London, Reading and the wider region within easy reach. Trehus is ready for occupation in Q4 2026.",
+      "Part of the wider One Maidenhead regeneration, Trehus sits in the heart of the town with direct Elizabeth Line and South Western Railway connections placing London, Reading and the wider region within easy reach. Trehus is ready for occupation in Q1 2027.",
     ],
     quickStats: [
       { icon: "🌲", label: "Building",    value: "Timber-structured" },
       { icon: "📐", label: "Space to let", value: "61,677 sq ft" },
       { icon: "📍", label: "Location",    value: "One Maidenhead, SL6" },
-      { icon: "🔜", label: "Ready",       value: "Q4 2026" },
+      { icon: "🔜", label: "Ready",       value: "Q1 2027" },
     ],
     amenities: [
       { icon: "🌲", text: "Low-carbon timber structure" },
