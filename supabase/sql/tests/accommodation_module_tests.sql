@@ -214,5 +214,70 @@ do $T$ begin delete from public.approval_actions where entity_type = 'company_pr
   if (not exists (select 1 from public.approval_actions where entity_type = 'company_profile' and business_id = 'biz_test_acc_co2')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T50 admin clears a history entry', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T50 admin clears a history entry (check false)', false); end if;
 exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T50 admin clears a history entry: ' || sqlerrm, false); end $T$;
 reset role; select set_config('request.jwt.claims', '', false);
+insert into public.businesses (id, name, status, kind) values ('biz_test_acc_co3', 'Third Lettings', 'Approved', 'accommodation_company');
+insert into public.business_subscriptions (business_id, plan, plan_status, monthly_fee, site_tier_key) values ('biz_test_acc_co3', 'premium', 'Active', 89, 'acc-10');
+insert into public.business_users (auth_user_id, business_id, role, status, email, first_name, last_name) values ('046ebe5c-3422-4292-839d-6bc1a9e0b9cd', 'biz_test_acc_co3', 'Owner', 'approved', 'o3@test.example', 'A', 'O');
+insert into public.businesses (id, name, status, kind, parent_id, property_state, submitted_at) values ('biz_test_acc_co3_p0', 'Alpha House', 'Approved', 'accommodation_property', 'biz_test_acc_co3', 'live', now() - interval '10 days');
+insert into public.business_listings (business_id, name, business_type, address) values ('biz_test_acc_co3_p0', 'Alpha House', 'accommodation', '0 Test Road');
+insert into public.businesses (id, name, status, kind, parent_id, property_state, submitted_at) values ('biz_test_acc_co3_p1', 'Beta House', 'Approved', 'accommodation_property', 'biz_test_acc_co3', 'live', now() - interval '9 days');
+insert into public.business_listings (business_id, name, business_type, address) values ('biz_test_acc_co3_p1', 'Beta House', 'accommodation', '1 Test Road');
+insert into public.businesses (id, name, status, kind, parent_id, property_state, submitted_at) values ('biz_test_acc_co3_p2', 'Gamma House', 'Approved', 'accommodation_property', 'biz_test_acc_co3', 'live', now() - interval '8 days');
+insert into public.business_listings (business_id, name, business_type, address) values ('biz_test_acc_co3_p2', 'Gamma House', 'accommodation', '2 Test Road');
+do $T$ begin 
+  if (public.addon_slot_allowance('biz_test_acc_co3', 'article') = 6) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T51 articles follow the tier: 10 properties → 6', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T51 articles follow the tier: 10 properties → 6 (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T51 articles follow the tier: 10 properties → 6: ' || sqlerrm, false); end $T$;
+insert into public.businesses (id, name, status) values ('biz_test_std', 'Standard Cafe', 'Approved'); insert into public.business_subscriptions (business_id, plan, plan_status, monthly_fee) values ('biz_test_std', 'premium', 'Active', 29.99);
+do $T$ begin 
+  if (public.addon_slot_allowance('biz_test_std', 'article') = 3) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T52 a standard paying business still gets 3', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T52 a standard paying business still gets 3 (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T52 a standard paying business still gets 3: ' || sqlerrm, false); end $T$;
+insert into public.homepage_placements (slot_type, lane, starts_at, ends_at, status, source, business_id, content_kind, content_id) values ('featured_business', 9, '2031-01-01', '2031-01-08', 'pending_approval', 'purchase', 'biz_test_acc_co3', 'business', 'biz_test_acc_co3');
+do $T$ begin 
+  if ((select content_id from public.homepage_placements where business_id = 'biz_test_acc_co3' and slot_type = 'featured_business') = 'biz_test_acc_co3_p0') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T53 company''s featured slot shows its oldest live property', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T53 company''s featured slot shows its oldest live property (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T53 company''s featured slot shows its oldest live property: ' || sqlerrm, false); end $T$;
+update public.homepage_placements set status = 'approved' where business_id = 'biz_test_acc_co3';
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"046ebe5c-3422-4292-839d-6bc1a9e0b9cd","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_assign_featured_property((select id from public.homepage_placements where business_id = 'biz_test_acc_co3'), 'biz_test_acc_co3_p2');
+  if ((select content_id || '/' || status from public.homepage_placements where business_id = 'biz_test_acc_co3') = 'biz_test_acc_co3_p2/approved') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T54 company switches the slot to another live property; stays approved', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T54 company switches the slot to another live property; stays approved (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T54 company switches the slot to another live property; stays approved: ' || sqlerrm, false); end $T$;
+do $T$ begin perform public.accommodation_assign_featured_property((select id from public.homepage_placements where business_id = 'biz_test_acc_co3'), current_setting('t.q1'));
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T55 can''t assign another company''s property (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%live properties%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T55 can''t assign another company''s property', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T55 can''t assign another company''s property: ' || sqlerrm, false); end if;
+end $T$;
+do $T$ begin perform public.accommodation_after_plan_change('biz_test_acc_co3');
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T56 owner can''t run the plan-change handler (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%Not allowed%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T56 owner can''t run the plan-change handler', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T56 owner can''t run the plan-change handler: ' || sqlerrm, false); end if;
+end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
+insert into public.accommodation_plan_changes (business_id, change, target_tier, keep) values ('biz_test_acc_co3', 'cancel', 'acc-free', array['biz_test_acc_co3_p1']);
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"046ebe5c-3422-4292-839d-6bc1a9e0b9cd","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_set_plan_change_keep('biz_test_acc_co3', array['biz_test_acc_co3_p0', 'biz_test_acc_co3_p1']);
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T57 keep list can''t exceed the new plan (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%allows 1%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T57 keep list can''t exceed the new plan', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T57 keep list can''t exceed the new plan: ' || sqlerrm, false); end if;
+end $T$;
+do $T$ begin perform public.accommodation_set_plan_change_keep('biz_test_acc_co3', array['biz_test_acc_co3_p2']);
+  if ((select keep from public.accommodation_plan_changes where business_id = 'biz_test_acc_co3') = array['biz_test_acc_co3_p2']) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T58 owner changes which property stays', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T58 owner changes which property stays (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T58 owner changes which property stays: ' || sqlerrm, false); end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
+update public.business_subscriptions set plan = 'free', site_tier_key = 'acc-free' where business_id = 'biz_test_acc_co3';
+select set_config('request.jwt.claims', '{"role":"service_role"}', false);
+do $T$ begin perform public.accommodation_after_plan_change('biz_test_acc_co3');
+  if ((select string_agg(id || '=' || property_state, ',' order by id) from public.businesses where parent_id = 'biz_test_acc_co3') = 'biz_test_acc_co3_p0=inactive,biz_test_acc_co3_p1=inactive,biz_test_acc_co3_p2=live' and not exists (select 1 from public.accommodation_plan_changes where business_id = 'biz_test_acc_co3')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T59 cancellation takes effect: chosen property stays, others inactive, change cleared', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T59 cancellation takes effect: chosen property stays, others inactive, change cleared (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T59 cancellation takes effect: chosen property stays, others inactive, change cleared: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if (public.addon_slot_allowance('biz_test_acc_co3', 'article') = 0) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T60 free company gets no included articles', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T60 free company gets no included articles (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T60 free company gets no included articles: ' || sqlerrm, false); end $T$;
+update public.business_subscriptions set plan = 'premium', site_tier_key = 'acc-5' where business_id = 'biz_test_acc_co3'; update public.businesses set property_state = 'live' where parent_id = 'biz_test_acc_co3';
+update public.business_subscriptions set plan = 'free', site_tier_key = 'acc-free' where business_id = 'biz_test_acc_co3';
+do $T$ begin perform public.accommodation_after_plan_change('biz_test_acc_co3');
+  if ((select string_agg(id || '=' || property_state, ',' order by id) from public.businesses where parent_id = 'biz_test_acc_co3') = 'biz_test_acc_co3_p0=live,biz_test_acc_co3_p1=inactive,biz_test_acc_co3_p2=inactive') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T61 with no choice made, the longest-standing live property stays', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T61 with no choice made, the longest-standing live property stays (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T61 with no choice made, the longest-standing live property stays: ' || sqlerrm, false); end $T$;
+update public.businesses set property_state = 'inactive' where parent_id = 'biz_test_acc_co3'; update public.homepage_placements set content_kind = 'business', content_id = 'biz_test_acc_co3', status = 'pending_approval' where business_id = 'biz_test_acc_co3';
+do $T$ begin 
+  if ((select coalesce(content_id, 'none') || '/' || status from public.homepage_placements where business_id = 'biz_test_acc_co3') = 'none/awaiting_content') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T62 no live property: featured slot waits for a choice', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T62 no live property: featured slot waits for a choice (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T62 no live property: featured slot waits for a choice: ' || sqlerrm, false); end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
 select current_setting('t.r', true) as results;
 rollback;

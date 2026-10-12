@@ -428,7 +428,10 @@ export function loadLiveBusinesses() {
     for (const e of eventsRes?.data ?? []) {
       if (e.business_id) (events[e.business_id] ??= []).push(e);
     }
-    const featuredIds = new Set(placements.featured_business.map((p) => p.business_id ?? p.content_id));
+    // The business a slot shows. For a standard business that's itself; an
+    // accommodation company's slot shows the property it chose (the company
+    // paid, the property is featured).
+    const featuredIds = new Set(placements.featured_business.map((p) => p.content_id ?? p.business_id));
     const reviews = {};
     for (const rv of reviewsRes.data ?? []) (reviews[rv.business_id] ??= []).push(rv);
     // A listing without a business type can't be placed in any section —
