@@ -10,6 +10,11 @@ import useSiteSection from "../../hooks/useSiteSection";
 // page does.
 //
 // `highlight` picks out the paragraph shown in italics (the disclaimer).
+// A sentence-length label set in Site Content wraps onto several lines; a
+// full pill then turns into a blob, so long labels get softer corners.
+const ctaButtonClass = (label) =>
+  `self-start px-5 py-3 text-sm font-bold leading-snug active:opacity-85 ${String(label ?? "").length > 32 ? "rounded-2xl" : "rounded-full"}`;
+
 export default function TextScreen({ sectionKey, barTitle, highlight }) {
   const copy = useSiteSection(sectionKey);
   const paragraphs = [
@@ -72,7 +77,7 @@ export default function TextScreen({ sectionKey, barTitle, highlight }) {
               <h2 className="text-lg font-bold text-white">{copy.ctaTitle}</h2>
               {copy.ctaText && <p className="text-sm leading-relaxed text-white" style={{ opacity: 0.9 }}>{copy.ctaText}</p>}
               {ctaHref && ctaLabel && (
-                <a href={ctaHref} className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                <a href={ctaHref} className={ctaButtonClass(ctaLabel)}
                   style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{ctaLabel}</a>
               )}
               {!ctaHref && copy.ctaButton && copy.ctaLink && (
@@ -83,19 +88,19 @@ export default function TextScreen({ sectionKey, barTitle, highlight }) {
                 /^(https?:|mailto:|tel:)/i.test(copy.ctaLink.trim())
                   ? <a href={copy.ctaLink.trim()} data-skip-external-confirm
                       {...(/^https?:/i.test(copy.ctaLink.trim()) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                      className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                      className={ctaButtonClass(copy.ctaButton)}
                       style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaButton}</a>
                   : <Link to={`/mobile${copy.ctaLink.trim().startsWith("/") ? copy.ctaLink.trim() : `/${copy.ctaLink.trim()}`}`}
-                      className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                      className={ctaButtonClass(copy.ctaButton)}
                       style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaButton}</Link>
               )}
               {/* Optional second button set in Site Content, under the first. */}
               {copy.ctaExtraLabel && copy.ctaExtraUrl && (/^https?:\/\//i.test(copy.ctaExtraUrl) || /^mailto:/i.test(copy.ctaExtraUrl) ? (
-                <a href={copy.ctaExtraUrl} className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                <a href={copy.ctaExtraUrl} className={ctaButtonClass(copy.ctaExtraLabel)}
                   style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaExtraLabel}</a>
               ) : (
                 <Link to={`/mobile${copy.ctaExtraUrl.startsWith("/") ? copy.ctaExtraUrl : `/${copy.ctaExtraUrl}`}`}
-                  className="self-start px-5 py-3 rounded-full text-sm font-bold active:opacity-85"
+                  className={ctaButtonClass(copy.ctaExtraLabel)}
                   style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>{copy.ctaExtraLabel}</Link>
               ))}
             </div>

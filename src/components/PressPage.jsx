@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect } from "react";
 import useSiteSection from "../hooks/useSiteSection";
 import TextPageHero from "./TextPageHero";
+import CtaCard from "./CtaCard";
 
 // Everything on this page is edited in Site Content → Work With Us.
 export default function PressPage() {
@@ -51,31 +52,12 @@ export default function PressPage() {
           )}
 
           {copy.ctaTitle && (
-            <div className="rounded-3xl p-8 md:p-10 flex flex-col sm:flex-row items-start sm:items-center gap-6"
-              style={{ backgroundColor: "var(--forest)", color: "white" }}>
-              <div className="flex-1">
-                <h2 className="text-xl md:text-2xl font-bold mb-2 text-white">{copy.ctaTitle}</h2>
-                {copy.ctaText && <p className="text-sm leading-relaxed text-white">{copy.ctaText}</p>}
-              </div>
-              <div className="shrink-0 flex flex-col items-stretch gap-3">
-              {copy.ctaEmail && (
-                <a href={`mailto:${copy.ctaEmail}`}
-                  className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm text-center transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: "var(--leaf)", color: "white" }}>
-                  {copy.ctaEmail}
-                </a>
-              )}
-              {/* Optional second button set in Site Content, directly under
-                  the first. */}
-              {copy.ctaExtraLabel && copy.ctaExtraUrl && (
-                <a href={copy.ctaExtraUrl}
-                  className="shrink-0 px-7 py-3.5 rounded-full font-semibold text-sm text-center transition-opacity hover:opacity-90"
-                  style={{ backgroundColor: "var(--leaf)", color: "white" }}>
-                  {copy.ctaExtraLabel}
-                </a>
-              )}
-              </div>
-            </div>
+            <CtaCard className="" title={copy.ctaTitle} text={copy.ctaText}
+              buttons={[
+                { label: copy.ctaEmail && (copy.ctaEmail), href: copy.ctaEmail && `mailto:${copy.ctaEmail}` },
+                // Optional second button set in Site Content.
+                { label: copy.ctaExtraLabel, href: copy.ctaExtraUrl },
+              ]} />
           )}
         </div>
       </section>
