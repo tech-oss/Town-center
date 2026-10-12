@@ -47,6 +47,10 @@ export async function registerBusiness(form) {
 
   const businessId = newBusinessId(form.businessName);
   const isHotel = form.businessType === "hotel";
+  // An accommodation management company: its own account, which then adds
+  // properties. It never appears on the public site itself (the database's
+  // public view leaves companies out). See Data/accommodation.js.
+  const isAccommodation = form.businessType === "accommodation";
   // "Freelancer & Trader" (Tradesperson/Professional/Freelancer) is the
   // Services category — stored as "services" so MyListingPage's
   // businessType === "services" checks show the Services content editor
@@ -55,7 +59,7 @@ export async function registerBusiness(form) {
 
   const { error: businessError } = await supabase
     .from("businesses")
-    .insert({ id: businessId, name: form.businessName });
+    .insert({ id: businessId, name: form.businessName, ...(isAccommodation ? { kind: "accommodation_company" } : {}) });
   if (businessError) return { ok: false, error: readableBusinessNameError(businessError, form.businessName) };
 
   // Pending until admin approves the registration — the owner's first sign-in
@@ -85,7 +89,7 @@ export async function registerBusiness(form) {
     business_id: businessId,
     name: form.businessName,
     business_type: listingBusinessType,
-    business_type_detail: {
+    business_type_detail: isAccommodation ? { accommodationRole: "company" } : {
       freelancerKind: form.freelancerKind || null,
       freelancerCategories: form.freelancerKind ? form.freelancerCategories : [],
       hotelKind: isHotel ? form.hotelKind : null,
@@ -113,7 +117,8 @@ export async function registerBusiness(form) {
     renewal_date: renewalDate,
     monthly_fee: freePlan.price,
     is_multi_site: false,
-    site_tier_key: null,
+    // The company's tier decides how many properties it may have live.
+    site_tier_key: isAccommodation ? "acc-free" : null,
     upgrade_plan_key: "basic",
     terms_accepted_at: new Date().toISOString(),
   });

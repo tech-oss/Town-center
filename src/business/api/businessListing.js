@@ -49,6 +49,10 @@ function fromRow(row) {
     workingWithMe: row.working_with_me,
     skills: row.skills,
     portfolio: row.portfolio,
+    // Accommodation properties: room / accommodation information, and
+    // whether the property shows its company's contact details or its own.
+    rooms: row.rooms ?? [],
+    contactSource: row.contact_source ?? "company",
     pendingSnapshot: row.pending_snapshot ?? {},
     editedBy: row.edited_by ?? {},
   };
@@ -64,7 +68,7 @@ const SECTION_FIELDS = {
   hours: ["hours", "availabilityInfo", "checkInTime", "checkOutTime", "earlyCheckin", "lateCheckout"],
   gallery: ["gallery"],
   location: ["address", "postalCode", "lat", "lng"],
-  contact: ["phone", "email", "website", "bookingUrl", "social", "availabilityTag"],
+  contact: ["phone", "email", "website", "bookingUrl", "social", "availabilityTag", "contactSource"],
   faqs: ["faqs"],
   portfolio: ["portfolio", "skills"],
   services: ["servicesList", "areasCoveredList", "whyChooseUs", "stats"],
@@ -72,6 +76,7 @@ const SECTION_FIELDS = {
   skills: ["skills"],
   workingwithme: ["workingWithMe"],
   amenities: ["amenities", "otherAmenities", "starRating"],
+  rooms: ["rooms"],
 };
 
 // Reader-friendly names for the section a save belongs to, used in the
@@ -89,6 +94,7 @@ const SECTION_LABELS = {
   skills: "Skills",
   workingwithme: "Working with me",
   amenities: "Amenities",
+  rooms: "Rooms",
 };
 
 function toRow(listing) {
@@ -143,6 +149,8 @@ function buildRow(listing) {
     working_with_me: listing.workingWithMe,
     skills: listing.skills,
     portfolio: listing.portfolio,
+    rooms: listing.rooms ?? [],
+    contact_source: listing.contactSource === "own" ? "own" : "company",
     updated_at: new Date().toISOString(),
   };
 }
@@ -181,11 +189,26 @@ const columnFor = (field) => field.replace(/([A-Z])/g, "_$1").toLowerCase();
 
 const sameValue = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
+// Room amenities are toggles, which go live without review; a room's name,
+// beds or description are not. A rooms save publishes straight away only
+// when the amenity ticks are all that changed.
+function onlyRoomAmenitiesChanged(before = [], after = []) {
+  if (before.length !== after.length) return false;
+  const strip = (r) => ({ ...r, amenities: undefined });
+  return before.every((r, i) => sameValue(strip(r), strip(after[i])));
+}
+
 // Returns { unchanged: true } without saving (or sending anything for
 // approval) when none of the tab's own fields differ from what's live.
-export async function saveBusinessListing(businessId, listing, tabKey) {
+//
+// `direct`: an accommodation property that has never been live (draft,
+// pending or rejected) is approved as a whole, so its sections are written
+// as they are — no per-section review, no snapshot. Once it has been live,
+// edits go through the normal per-section approval below.
+export async function saveBusinessListing(businessId, listing, tabKey, { direct = false } = {}) {
   const current = await getBusinessListing(businessId);
-  const autoPublish = isAutoPublished(tabKey);
+  const autoPublish = direct || isAutoPublished(tabKey)
+    || (tabKey === "rooms" && onlyRoomAmenitiesChanged(current.rooms, listing.rooms));
 
   const tabFields = SECTION_FIELDS[tabKey] ?? [];
   if (tabFields.length && tabFields.every((f) => sameValue(current[f], listing[f]))) {
@@ -249,5 +272,7 @@ export async function saveBusinessListing(businessId, listing, tabKey) {
     action: autoPublish ? "listing.updated" : "listing.submitted",
     entityType: "listing", entityId: businessId,
     title: SECTION_LABELS[tabKey] ?? tabKey,
-  });  return { unchanged: false };
+  });
+  // `live`: whether this save is already on the public page (no review).
+  return { unchanged: false, live: autoPublish };
 }

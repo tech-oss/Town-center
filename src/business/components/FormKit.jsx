@@ -664,23 +664,28 @@ export function Stars({ rating, size = 14 }) {
 // edited; every other field is still shown, but disabled, and clicking it
 // takes an Owner to the Subscribe flow. A Content Manager can't subscribe, so
 // they're told to ask the owner instead.
+//
+// A page can supply its own rules: `canEdit(field)` (an accommodation
+// property unlocks a different set of fields on the Free plan) and
+// `planName` (what the lock says to upgrade to). Without them, the
+// Visibility Plan rules apply, as for every standard business.
 export const PlanContext = createContext({ plan: "premium", role: "Owner" });
 
-function SubscribeBadge({ canSubscribe }) {
+function SubscribeBadge({ canSubscribe, planName }) {
   return (
     <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full whitespace-nowrap"
       style={{ backgroundColor: "rgba(217,119,6,0.14)", color: "#92400E" }}>
-      🔒 {canSubscribe ? "Upgrade" : "Visibility Plan"}
+      🔒 {canSubscribe ? "Upgrade" : planName}
     </span>
   );
 }
 
 export function Locked({ field, span2, message, children }) {
-  const { plan, role } = useContext(PlanContext);
+  const { plan, role, canEdit, planName = "Visibility Plan" } = useContext(PlanContext);
   const navigate = useNavigate();
-  if (canEditField(plan, field)) return children;
+  if (canEdit ? canEdit(field) : canEditField(plan, field)) return children;
   const canSubscribe = role !== "Content Manager";
-  const hint = canSubscribe ? "Upgrade to the Visibility Plan to unlock this" : "Ask the business owner to upgrade to unlock this";
+  const hint = canSubscribe ? `Upgrade to the ${planName} to unlock this` : "Ask the business owner to upgrade to unlock this";
   // A field with its own explanation shows it under the field, always visible.
   if (message) {
     return (
@@ -690,7 +695,7 @@ export function Locked({ field, span2, message, children }) {
           <button type="button" onClick={() => canSubscribe && navigate("/business/upgrade")}
             className={`absolute inset-0 w-full h-full rounded-xl flex items-start justify-end p-1 ${canSubscribe ? "cursor-pointer" : "cursor-not-allowed"}`}
             aria-label={message} title={message}>
-            <SubscribeBadge canSubscribe={canSubscribe} />
+            <SubscribeBadge canSubscribe={canSubscribe} planName={planName} />
           </button>
         </div>
         <p className="text-xs font-semibold max-w-xs" style={{ color: "#92400E" }}>
@@ -711,7 +716,7 @@ export function Locked({ field, span2, message, children }) {
         aria-label={hint}
         title={hint}
       >
-        <SubscribeBadge canSubscribe={canSubscribe} />
+        <SubscribeBadge canSubscribe={canSubscribe} planName={planName} />
       </button>
       <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 -bottom-7 z-10 hidden group-hover:block text-[11px] font-semibold px-2.5 py-1 rounded-lg text-white whitespace-nowrap"
         style={{ backgroundColor: FOREST }}>
@@ -747,7 +752,7 @@ export function PremiumFeatureGate({ title, description }) {
 }
 
 // Tab-level notice at the top of an editor on the Free plan.
-export function FreePlanNotice() {
+export function FreePlanNotice({ children }) {
   const { role } = useContext(PlanContext);
   const navigate = useNavigate();
   const canSubscribe = role !== "Content Manager";
@@ -756,7 +761,7 @@ export function FreePlanNotice() {
       style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.3)", color: "#92400E" }}>
       <span className="font-bold">You're on the Free plan.</span>
       <span className="flex-1 min-w-[220px] text-xs">
-        You can edit your business name, address, telephone, email and map pin. Your hero picture and everything marked 🔒 unlock with the Visibility Plan.
+        {children ?? "You can edit your business name, address, telephone, email and map pin. Your hero picture and everything marked 🔒 unlock with the Visibility Plan."}
       </span>
       {canSubscribe && (
         <button onClick={() => navigate("/business/upgrade")}

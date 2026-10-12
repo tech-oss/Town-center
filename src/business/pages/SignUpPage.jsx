@@ -3,8 +3,7 @@ import { AGREEMENTS, allAgreed, formatAcceptedAt } from "../../Data/agreements";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  BUSINESS_TYPES,
-  FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES,
+  FREELANCER_KINDS, CUISINE_TYPES, VENUE_TYPES, SHOP_CATEGORIES, SEE_DO_CATEGORIES,
   FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES, TRADESPERSON_CATEGORIES,
 } from "../../Data/businessPortalMock";
 
@@ -16,6 +15,8 @@ const FREELANCER_KIND_CATEGORIES = {
 import { Field, Inp, Select, TextArea } from "../components/FormKit";
 import { registerBusiness } from "../api/businessRegistration";
 import ProfileBenefits from "../components/ProfileBenefits";
+import AccommodationBenefits from "../components/AccommodationBenefits";
+import { REGISTRATION_TYPES, REGISTRATION_NOTICE } from "../../Data/accommodation";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const MUTED = "#64748B", BORDER = "rgba(16,24,40,0.14)";
@@ -28,7 +29,7 @@ const EMPTY = {
   businessName: "", businessType: "", website: "", businessEmail: "", businessPhone: "", businessAddress: "",
   freelancerKind: "",   // Tradesperson | Professional | Freelancer — for businessType "freelancer"
   freelancerCategories: [], // multi-select, max 2, sub-category for the chosen freelancerKind
-  hotelKind: "hotel",   // "hotel" | "accommodation" — sub-choice for businessType "hotel"
+  hotelKind: "hotel",   // a Hotel registers as "hotel"; accommodation is its own type (management company)
   cuisineTypes: [],     // multi-select, max 2, for businessType "eat-drink"
   venueTypes: [],       // multi-select, max 2, for businessType "eat-drink"
   shopCategories: [],   // multi-select, max 2, for businessType "shop"
@@ -140,14 +141,42 @@ function CheckGroup({ options, selected, onChange, grouped, max }) {
   );
 }
 
+// Explains the company/property structure the moment Accommodation is
+// chosen, before any company details are typed in.
+function AccommodationNotice({ onAccept, onCancel }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: "rgba(15,23,42,0.55)" }}
+      role="dialog" aria-modal="true" aria-labelledby="accommodation-notice-title">
+      <div className="bg-white rounded-2xl p-6 sm:p-7 max-w-lg w-full flex flex-col gap-4" style={CARD}>
+        <h2 id="accommodation-notice-title" className="text-lg font-bold" style={{ color: FOREST }}>Registering an accommodation company</h2>
+        <p className="text-sm leading-relaxed" style={{ color: "#334155" }}>{REGISTRATION_NOTICE}</p>
+        <div className="flex gap-3 justify-end flex-wrap">
+          <button type="button" onClick={onCancel} className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ color: MUTED, border: "1.5px solid #D1D5DB" }}>
+            Choose a different type
+          </button>
+          <button type="button" onClick={onAccept} autoFocus className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: SAGE }}>
+            I understand
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SignUpPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(EMPTY);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showAccommodationNotice, setShowAccommodationNotice] = useState(false);
+  const isAccommodation = form.businessType === "accommodation";
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
+  function chooseType(value) {
+    set("businessType", value);
+    if (value === "accommodation") setShowAccommodationNotice(true);
+  }
 
   function validStep() {
     if (step === 0) return form.firstName.trim() && form.lastName.trim() && form.email.trim() && form.phone.trim() && form.password && form.password === form.confirmPassword;
@@ -193,6 +222,10 @@ export default function SignUpPage() {
 
   return (
     <div className="business-root min-h-screen flex items-center justify-center p-6" style={{ backgroundColor: "#F5F7FB" }}>
+      {showAccommodationNotice && (
+        <AccommodationNotice onAccept={() => setShowAccommodationNotice(false)}
+          onCancel={() => { setShowAccommodationNotice(false); set("businessType", ""); }} />
+      )}
       <div className="max-w-2xl w-full">
         <div className="flex flex-col items-center gap-2 mb-6">
           <img src="/logo-mark.svg" alt="Maidenhead" style={{ width: 48, height: 48, objectFit: "contain" }} />
@@ -220,17 +253,18 @@ export default function SignUpPage() {
 
           {step === 1 && (
             <div className="grid sm:grid-cols-2 gap-4">
-              <Field label="Business Name" required span2><Inp value={form.businessName} onChange={(e) => set("businessName", e.target.value)} /></Field>
+              <Field label={isAccommodation ? "Management Company / Agency Name" : "Business Name"} required span2><Inp value={form.businessName} onChange={(e) => set("businessName", e.target.value)} /></Field>
               <Field label="Business Type" required>
-                <Select value={form.businessType} onChange={(e) => set("businessType", e.target.value)}>
+                <Select value={form.businessType} onChange={(e) => chooseType(e.target.value)}>
                   <option value="">Select a type…</option>
-                  {BUSINESS_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  {REGISTRATION_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </Select>
               </Field>
-              <Field label="Business Website URL"><Inp value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
-              <Field label="Business Email" hint="This will be shown publicly on your business profile."><Inp value={form.businessEmail} onChange={(e) => set("businessEmail", e.target.value)} /></Field>
-              <Field label="Business Phone" hint="This will be shown publicly on your business profile."><Inp value={form.businessPhone} onChange={(e) => set("businessPhone", e.target.value)} /></Field>
-              <Field label="Business Address" required span2 hint="This will be shown publicly on your business profile.">
+              <Field label={isAccommodation ? "Company Website URL" : "Business Website URL"}><Inp value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
+              <Field label={isAccommodation ? "Company Email" : "Business Email"} hint={isAccommodation ? "Not shown publicly. You choose the public contact details later." : "This will be shown publicly on your business profile."}><Inp value={form.businessEmail} onChange={(e) => set("businessEmail", e.target.value)} /></Field>
+              <Field label={isAccommodation ? "Company Phone" : "Business Phone"} hint={isAccommodation ? "Not shown publicly. You choose the public contact details later." : "This will be shown publicly on your business profile."}><Inp value={form.businessPhone} onChange={(e) => set("businessPhone", e.target.value)} /></Field>
+              <Field label={isAccommodation ? "Company Address" : "Business Address"} required span2
+                hint={isAccommodation ? "Your company's own address. It isn't shown as an accommodation listing or map pin." : "This will be shown publicly on your business profile."}>
                 {form.businessType === "freelancer" && (
                   <p className="text-[11px] -mt-1 mb-1" style={{ color: MUTED }}>
                     If working remotely please type Remote Working in this field
@@ -251,12 +285,6 @@ export default function SignUpPage() {
                     </Field>
                   )}
                 </>
-              )}
-
-              {form.businessType === "hotel" && (
-                <Field label="Are you listing a hotel or an accommodation property?" required span2>
-                  <RadioGroup options={HOTEL_KINDS} value={form.hotelKind} onChange={(v) => set("hotelKind", v)} />
-                </Field>
               )}
 
               {form.businessType === "eat-drink" && (
@@ -284,7 +312,7 @@ export default function SignUpPage() {
             </div>
           )}
 
-          {step === 2 && <ProfileBenefits />}
+          {step === 2 && (isAccommodation ? <AccommodationBenefits /> : <ProfileBenefits />)}
 
           {step === 3 && (
             <AgreementChecklist value={form.agreements}
@@ -304,10 +332,9 @@ export default function SignUpPage() {
 
               <SummarySection title="Business Details" onEdit={() => setStep(1)}>
                 <SummaryRow label="Business Name" value={form.businessName} />
-                <SummaryRow label="Business Type" value={labelFor(BUSINESS_TYPES, form.businessType)} />
+                <SummaryRow label="Business Type" value={labelFor(REGISTRATION_TYPES, form.businessType)} />
                 {form.businessType === "freelancer" && <SummaryRow label="Which best describes you" value={labelFor(FREELANCER_KINDS, form.freelancerKind)} />}
                 {form.businessType === "freelancer" && form.freelancerKind && <SummaryRow label="Category" value={form.freelancerCategories.map((v) => labelFor(FREELANCER_KIND_CATEGORIES[form.freelancerKind], v)).join(", ")} />}
-                {form.businessType === "hotel" && <SummaryRow label="Hotel or Accommodation" value={labelFor(HOTEL_KINDS, form.hotelKind)} />}
                 {form.businessType === "eat-drink" && <SummaryRow label="Venue Type" value={form.venueTypes.map((v) => labelFor(VENUE_TYPES, v)).join(", ")} />}
                 {form.businessType === "eat-drink" && <SummaryRow label="Cuisine Type" value={form.cuisineTypes.map((v) => labelFor(CUISINE_TYPES, v)).join(", ")} />}
                 {form.businessType === "shop" && <SummaryRow label="Shop Category" value={form.shopCategories.map((v) => labelFor(SHOP_CATEGORIES, v)).join(", ")} />}

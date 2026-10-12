@@ -14,6 +14,8 @@ import { profileCompleteness } from "../api/profileCompleteness";
 import { getMonthComparison, PROFILE_TYPES, CONTENT_VIEW_TYPES } from "../api/businessAnalytics";
 import { listTickets } from "../api/businessTickets";
 import { listActivity, activityLabel, activityIcon, relativeTime } from "../api/businessActivity";
+import AccommodationOverview from "../components/AccommodationOverview";
+import { isAccommodationCompany } from "../../Data/accommodation";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -45,6 +47,8 @@ function viewChange(m) {
 
 export default function DashboardPage() {
   const { user, toggleVisibility } = useBusinessAuth();
+  // An accommodation company has properties rather than a listing of its own.
+  const company = isAccommodationCompany(user);
   const [toast, setToast] = useToast();
 
   const [activity, setActivity] = useState([]);
@@ -61,15 +65,17 @@ export default function DashboardPage() {
       if (!cancelled) setOpenTickets(tickets.filter((t) => t.status !== "Resolved").length);
     });
     countActiveContent(user.id).then((n) => { if (!cancelled) setLiveArticles(n); }).catch(() => {});
-    getBusinessListing(user.id)
-      .then((listing) => { if (!cancelled) setCompleteness(profileCompleteness(listing, isPremium(user.plan))); })
-      .catch(() => {});
+    if (!company) {
+      getBusinessListing(user.id)
+        .then((listing) => { if (!cancelled) setCompleteness(profileCompleteness(listing, isPremium(user.plan))); })
+        .catch(() => {});
+    }
     listActivity(user.id, 10)
       .then((rows) => { if (!cancelled) { setActivity(rows); setActivityError(""); } })
       .catch((e) => { if (!cancelled) setActivityError(`Couldn't load your recent activity: ${e.message}`); })
       .finally(() => { if (!cancelled) setActivityLoading(false); });
     return () => { cancelled = true; };
-  }, [user.id, user.plan]);
+  }, [user.id, user.plan, company]);
 
   // The view counts refresh on their own, so a visit shows up here without
   // reloading the dashboard.
@@ -90,9 +96,11 @@ export default function DashboardPage() {
       setToast("Couldn't update your profile's visibility. Please try again.");
       return;
     }
-    setToast(goingLive
-      ? "Your business profile is now live on the public site."
-      : "Your business profile is now hidden from the public site.");
+    setToast(company
+      ? (goingLive ? "Your live properties are showing on the public site again." : "All your properties are now hidden from the public site.")
+      : goingLive
+        ? "Your business profile is now live on the public site."
+        : "Your business profile is now hidden from the public site.");
   }
 
   // "free" is what registration and claim onboarding now write for everyone.
@@ -104,12 +112,14 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-6 max-w-5xl">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: FOREST }}>Welcome back, {user.businessName}.</h1>
-          <p className="text-sm mt-1" style={{ color: MUTED }}>Here's how your listing is performing.</p>
+          <p className="text-sm mt-1" style={{ color: MUTED }}>{company ? "Here's an overview of your properties." : "Here's how your listing is performing."}</p>
         </div>
 
         {/* Subscription banner */}
         <div className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap" style={{ background: `linear-gradient(135deg, ${FOREST} 0%, #245C63 60%, ${SAGE} 100%)` }}>
-          {isFreePlan ? (
+          {company && isFreePlan ? (
+            <p className="text-sm text-white">You're on the <strong>Free plan</strong>: one basic property with its name, address, map pin and your company details. Upgrade for full property profiles and more properties.</p>
+          ) : isFreePlan ? (
             <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Upgrade to the <strong>Visibility Plan</strong> — just {BILLING_OPTIONS.year.perDay} a day — to add your logo, photos, opening hours, description, website, social links, news &amp; offers and analytics.</p>
           ) : (
             <p className="text-sm text-white">Your <strong className="capitalize">{String(user.plan ?? "").replace(/-/g, " ")}</strong> plan renews on <strong>{user.renewalDate ? new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}</strong>.</p>
@@ -118,11 +128,13 @@ export default function DashboardPage() {
             <span className="text-xs" style={{ color: "rgba(255,255,255,0.7)" }}>Managed by the business owner</span>
           ) : (
             <div className="flex gap-2">
-              <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>{isFreePlan ? "See the Visibility Plan" : "Manage plan"}</Link>
+              <Link to="/business/upgrade" className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style={{ backgroundColor: SAGE }}>{company ? "See accommodation plans" : isFreePlan ? "See the Visibility Plan" : "Manage plan"}</Link>
               <Link to="/business/billing" className="text-xs font-semibold px-3 py-1.5 rounded-lg" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>Manage Billing</Link>
             </div>
           )}
         </div>
+
+        {company && <AccommodationOverview companyId={user.id} />}
 
         {/* A bought Featured Business slot, with its expiry, up top */}
         <FeaturedBusinessBanner businessId={user.id} canManage={user.role === "Owner"} />
@@ -134,8 +146,14 @@ export default function DashboardPage() {
         {/* Visibility toggle */}
         <div className="bg-white rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
           <div>
-            <p className="text-sm font-bold" style={{ color: FOREST }}>Your business profile is currently {user.visible ? "Live" : "Hidden"}</p>
-            <p className="text-xs mt-0.5" style={{ color: MUTED }}>{user.visible ? "Visible to everyone on the public site." : "Hidden from the public site until you switch it back on."}</p>
+            <p className="text-sm font-bold" style={{ color: FOREST }}>
+              {company ? `All your properties are ${user.visible ? "switched on" : "hidden"}` : `Your business profile is currently ${user.visible ? "Live" : "Hidden"}`}
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: MUTED }}>
+              {company
+                ? (user.visible ? "Your live properties are visible on the public site. Switch this off to hide them all at once." : "None of your properties appear on the public site until you switch this back on.")
+                : user.visible ? "Visible to everyone on the public site." : "Hidden from the public site until you switch it back on."}
+            </p>
           </div>
           <button onClick={handleToggle}
             className="w-14 h-7 rounded-full transition-colors flex items-center px-1 shrink-0"
@@ -152,7 +170,7 @@ export default function DashboardPage() {
               <span className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" style={{ backgroundColor: "rgba(217,119,6,0.12)" }}>🔒</span>
               <span>
                 <span className="block text-sm font-bold" style={{ color: FOREST }}>Page and article views</span>
-                <span className="block text-xs mt-0.5" style={{ color: MUTED }}>Upgrade to the Visibility Plan to see how many people view your page and articles.</span>
+                <span className="block text-xs mt-0.5" style={{ color: MUTED }}>{company ? "Upgrade your plan to see how many people view your properties and articles." : "Upgrade to the Visibility Plan to see how many people view your page and articles."}</span>
               </span>
             </Link>
           ) : (
@@ -187,7 +205,7 @@ export default function DashboardPage() {
 
         {/* Quick actions */}
         <div className="flex gap-3 flex-wrap">
-          <Link to="/business/listing" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>Edit My Listing</Link>
+          <Link to={company ? "/business/properties" : "/business/listing"} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>{company ? "My Properties" : "Edit My Listing"}</Link>
           <Link to="/business/articles/new" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>Create News/Offer</Link>
           <a href="/" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>View Public Page</a>
           <Link to="/business/support" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>Contact Support</Link>

@@ -24,6 +24,21 @@ export async function logActivity(businessId, { action, entityType, entityId, ti
 // Wording for each action. `title` is the item's own name, quoted by the
 // caller's template so an entry reads as a sentence.
 const LABELS = {
+  // Accommodation properties and the company profile (written by the
+  // database functions in accommodation_module_2026_10.sql).
+  "property.created": (t) => `${t} — property added as a draft`,
+  "property.submitted": (t) => `${t} — sent for approval`,
+  "property.approved": (t) => `${t} — approved and live`,
+  "property.rejected": (t) => `${t} — not approved`,
+  "property.hidden": (t) => `${t} — hidden`,
+  "property.unhidden": (t) => `${t} — showing again`,
+  "property.reactivated": (t) => `${t} — reactivated`,
+  "property.replaced": (t) => `${t} — replaced`,
+  "property.deleted": (t) => `${t} — deleted`,
+  "properties.capacity": (t) => `${t} — plan change applied`,
+  "company_profile.submitted": () => "Company profile sent for approval",
+  "company_profile.approved": () => "Company profile approved",
+  "company_profile.rejected": () => "Company profile changes not approved",
   "listing.updated": (t) => `You updated your listing${t ? ` — ${t}` : ""}`,
   "listing.submitted": (t) => `Listing changes submitted for approval${t ? ` — ${t}` : ""}`,
   "listing.approved": (t) => `Admin approved your listing changes${t ? ` — ${t}` : ""}`,
@@ -66,6 +81,7 @@ const LABELS = {
 
 // Icon per entity, so the feed scans without reading every line.
 const ICONS = {
+  property: "🏘️",
   listing: "🏬",
   article: "📰",
   event: "📅",

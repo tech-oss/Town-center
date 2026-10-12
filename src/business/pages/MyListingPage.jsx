@@ -5,16 +5,17 @@ import BusinessLayout from "../components/BusinessLayout";
 import {
   Field, Inp, TextArea, CheckGroup, EditorSection, SaveBar, ApprovalBadge,
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
-  RepeatableList, FaqListEditor, StatsEditor, PortfolioEditor, Toggle, Toast, useToast,
+  RepeatableList, FaqListEditor, StatsEditor, PortfolioEditor, Toast, useToast,
   CARD, BORDER, MUTED, FOREST, SAGE,
   PlanContext, Locked, FreePlanNotice,
 } from "../components/FormKit";
 import { isPremium } from "../../Data/plans";
 import ReviewsList from "../components/ReviewsList";
+import { CheckInEditor, AmenitiesEditor } from "../components/StayEditors";
 import { getBusinessListing, saveBusinessListing, isAutoPublished } from "../api/businessListing";
 import { listReviews, addReview, updateReview, deleteReview } from "../api/businessReviews";
 import {
-  AMENITY_CATEGORIES, ACCOMMODATION_AMENITY_CATEGORIES, STAR_RATINGS, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
+  AMENITY_CATEGORIES, ACCOMMODATION_AMENITY_CATEGORIES, SERVICES_LIST, AREAS_COVERED_LIST, DEFAULT_HOURS,
   BUSINESS_TYPES, FREELANCER_KINDS, HOTEL_KINDS, CUISINE_TYPES, VENUE_TYPES,
   SHOP_CATEGORIES, SEE_DO_CATEGORIES, FREELANCER_CATEGORIES, PROFESSIONAL_CATEGORIES,
   TRADESPERSON_CATEGORIES,
@@ -281,39 +282,7 @@ export default function MyListingPage() {
               <EditorSection title={user.businessType === "hotel" ? "Availability & Check-in" : "Opening Hours"}>
                 <Locked field="hours">
                   {user.businessType === "hotel" ? (
-                    <>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <Field label="Check-in times">
-                          <Inp value={listing.checkInTime ?? ""} maxLength={60}
-                            onChange={(e) => set("checkInTime", e.target.value)}
-                            placeholder="e.g. From 3pm" />
-                        </Field>
-                        <Field label="Check-out times">
-                          <Inp value={listing.checkOutTime ?? ""} maxLength={60}
-                            onChange={(e) => set("checkOutTime", e.target.value)}
-                            placeholder="e.g. By 11am" />
-                        </Field>
-                      </div>
-                      <p className="text-[11px] mt-2" style={{ color: MUTED }}>
-                        Shown on your page exactly as you write them. Leave either blank and nothing appears in its place.
-                      </p>
-
-                      <div className="mt-4 grid sm:grid-cols-2 gap-2">
-                        <Toggle checked={!!listing.earlyCheckin} label="We offer early check-in"
-                          onChange={(v) => set("earlyCheckin", v)} />
-                        <Toggle checked={!!listing.lateCheckout} label="We offer late check-out"
-                          onChange={(v) => set("lateCheckout", v)} />
-                      </div>
-                      <p className="text-[11px] mt-2" style={{ color: MUTED }}>
-                        Guests filter Live &amp; Stay by these, so only tick them if you can usually say yes.
-                      </p>
-
-                      <div className="mt-5">
-                        <Field label="Anything else about arriving">
-                          <TextArea rows={3} value={listing.availabilityInfo ?? ""} onChange={(e) => set("availabilityInfo", e.target.value)} placeholder="e.g. 24-hour reception. Late arrivals by arrangement." />
-                        </Field>
-                      </div>
-                    </>
+                    <CheckInEditor listing={listing} set={set} />
                   ) : (
                     <HoursEditor hours={listing.hours ?? DEFAULT_HOURS()} onChange={(v) => set("hours", v)} />
                   )}
@@ -492,34 +461,8 @@ export default function MyListingPage() {
           {tab === "amenities" && (
             <>
               <Locked field="amenities">
-              <EditorSection title="Star Rating">
-                <div className="flex gap-2">
-                  {STAR_RATINGS.map((n) => {
-                    const selected = listing.starRating === n;
-                    return (
-                      <button key={n} type="button" onClick={() => set("starRating", selected ? null : n)}
-                        className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                        style={selected ? { border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.1)", color: "#2563EB" } : { border: `1.5px solid ${BORDER}`, color: FOREST, backgroundColor: "#fff" }}>
-                        {n} {n === 1 ? "Star" : "Stars"}
-                      </button>
-                    );
-                  })}
-                </div>
-              </EditorSection>
-
-              {(listing.businessTypeDetail?.hotelKind === "accommodation" ? ACCOMMODATION_AMENITY_CATEGORIES : AMENITY_CATEGORIES).map((cat) => (
-                <EditorSection key={cat.category} title={cat.category}>
-                  <div className="grid sm:grid-cols-2 gap-2">
-                    {cat.options.map((a) => {
-                      const checked = (listing.amenities ?? []).includes(a);
-                      return (
-                        <Toggle key={a} checked={checked} label={a}
-                          onChange={(v) => set("amenities", v ? [...(listing.amenities ?? []), a] : (listing.amenities ?? []).filter((x) => x !== a))} />
-                      );
-                    })}
-                  </div>
-                </EditorSection>
-              ))}
+              <AmenitiesEditor listing={listing} set={set}
+                categories={listing.businessTypeDetail?.hotelKind === "accommodation" ? ACCOMMODATION_AMENITY_CATEGORIES : AMENITY_CATEGORIES} />
               </Locked>
 
               {tabEditable("amenities") && <SaveBar onSave={() => handleSave("amenities")} saving={saving} status={status} rejectionReason={rejectionReason} />}

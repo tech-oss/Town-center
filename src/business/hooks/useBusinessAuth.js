@@ -68,6 +68,10 @@ function buildSessionUser(row) {
     // mock base with a TODO admitting no column existed, so toggling it did
     // nothing beyond the current page load.
     visible: row.businesses?.visible ?? base.visible ?? true,
+    // "accommodation_company" for an accommodation management company, which
+    // manages properties instead of having a listing of its own (see
+    // Data/accommodation.js). Every other business is "standard".
+    kind: row.businesses?.kind ?? "standard",
     // Null for someone who claimed a business: a claim never collected a plan
     // or a terms acceptance, so the portal asks for them once, on first
     // sign-in after approval.
@@ -122,7 +126,7 @@ async function applySubscription(user) {
 async function fetchOwnRow(authUserId) {
   const { data, error } = await supabase
     .from("business_users")
-    .select("*, businesses(status, visible, name)")
+    .select("*, businesses(status, visible, name, kind)")
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   return error ? null : data;

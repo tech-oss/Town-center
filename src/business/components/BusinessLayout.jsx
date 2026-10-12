@@ -7,6 +7,7 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import { listTickets } from "../api/businessTickets";
 import { countOpenRequests } from "../api/purchaseRequests";
 import { countOwnerDrafts } from "../api/pushRequests";
+import { isAccommodationCompany, tierLabel } from "../../Data/accommodation";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
@@ -32,11 +33,27 @@ const NAV = [
   { to: "/business/settings",  label: "Account Settings", icon: "⚙️" },
 ];
 
+// An accommodation management company's menu, in the agreed order. There's
+// no Reviews item: reviews belong to each property and are managed from it.
+const COMPANY_NAV = [
+  { to: "/business/dashboard", label: "Dashboard", icon: "🏠" },
+  { to: "/business/properties", label: "My Properties", icon: "🏘️" },
+  { to: "/business/analytics", label: "Analytics", icon: "📊" },
+  { to: "/business/articles",  label: "News & Offers", icon: "📰" },
+  { to: "/business/featured-articles", label: "Feature Articles", icon: "✨" },
+  { to: "/business/events",    label: "Request Event", icon: "📅" },
+  { to: "/business/push-notifications", label: "Push Notifications", icon: "🔔" },
+  { to: "/business/billing",   label: "Subscriptions", icon: "💳" },
+  { to: "/business/support",   label: "Support", icon: "🎫" },
+  { to: "/business/settings",  label: "Account Settings", icon: "⚙️" },
+];
+
 // Pages that open a Visibility Plan prompt instead on the Free plan.
 const PAID_ONLY = new Set(["/business/analytics", "/business/articles", "/business/featured-articles", "/business/events", "/business/reviews"]);
 
 export default function BusinessLayout({ children }) {
   const { user, logout } = useBusinessAuth();
+  const company = isAccommodationCompany(user);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -104,7 +121,7 @@ export default function BusinessLayout({ children }) {
 
         <div className="px-5 py-4" style={{ borderBottom: `1px solid ${DIVIDER}` }}>
           <p className="text-sm font-bold truncate" style={{ color: "#fff" }}>{user.businessName}</p>
-          <p className="text-xs mt-0.5" style={{ color: TEXT_DIM }}>{user.plan === "premium" ? "Visibility Plan" : "Free plan"}</p>
+          <p className="text-xs mt-0.5" style={{ color: TEXT_DIM }}>{company ? tierLabel(user) : user.plan === "premium" ? "Visibility Plan" : "Free plan"}</p>
           {user.role === "Content Manager" && (
             <span className="inline-block mt-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>
               Content Manager
@@ -122,10 +139,10 @@ export default function BusinessLayout({ children }) {
                 border: "1px solid rgba(147,197,253,0.35)",
               })}>
               <span className="shrink-0 w-4 text-center">⭐</span>
-              <span className="flex-1 leading-snug">Upgrade to Visibility Plan</span>
+              <span className="flex-1 leading-snug">{company ? "Upgrade your plan" : "Upgrade to Visibility Plan"}</span>
             </NavLink>
           )}
-          {NAV.map((item) => {
+          {(company ? COMPANY_NAV : NAV).map((item) => {
             const isBillingLocked = item.to === "/business/billing" && user.role === "Content Manager";
             if (isBillingLocked) {
               return (

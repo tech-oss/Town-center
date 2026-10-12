@@ -34,6 +34,11 @@ import ReviewsPage from "./pages/ReviewsPage";
 import PushNotificationsPage from "./pages/PushNotificationsPage";
 import SupportPage from "./pages/SupportPage";
 import SettingsPage from "./pages/SettingsPage";
+import MyPropertiesPage from "./pages/MyPropertiesPage";
+import PropertyEditorPage from "./pages/PropertyEditorPage";
+import CompanyProfilePage from "./pages/CompanyProfilePage";
+import AccommodationPlansPage from "./pages/AccommodationPlansPage";
+import { isAccommodationCompany } from "../Data/accommodation";
 
 // Shown while the saved session is being restored on a fresh page load.
 function SessionLoading() {
@@ -107,6 +112,16 @@ const PUSH_GATE = { title: "Push notifications are part of the Visibility Plan",
 const REVIEWS_GATE = { title: "Reviews are part of the Visibility Plan", description: "Upgrade to show approved customer reviews on your business page.", upsell: ReviewsUpsell };
 const ANALYTICS_GATE = { title: "Business analytics is part of the Visibility Plan", description: "Upgrade to see your page views and article views, so you can understand what's getting attention.", upsell: AnalyticsUpsell };
 
+// An accommodation management company manages properties instead of having
+// a listing of its own, and has its own plans. Routes that only make sense
+// for one kind of account send the other kind to its equivalent.
+function ByKind({ company, standard }) {
+  const { user } = useBusinessAuth();
+  return isAccommodationCompany(user) ? company : standard;
+}
+const TO_PROPERTIES = <Navigate to="/business/properties" replace />;
+const TO_LISTING = <Navigate to="/business/listing" replace />;
+
 // The one route that requires onboarding to still be outstanding — once it's
 // done, landing here again would just show a form with nothing left to save.
 function RequireOnboarding({ children }) {
@@ -163,7 +178,10 @@ export default function BusinessApp() {
       <Route path="analytics" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><AnalyticsPage /></RequirePremium></RequireAuth>} />
       <Route path="analytics/content/:id" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><ContentAnalyticsDetailPage /></RequirePremium></RequireAuth>} />
       <Route path="analytics/report" element={<RequireAuth><RequirePremium {...ANALYTICS_GATE}><AnalyticsReportPage /></RequirePremium></RequireAuth>} />
-      <Route path="listing" element={<RequireAuth><MyListingPage /></RequireAuth>} />
+      <Route path="listing" element={<RequireAuth><ByKind company={TO_PROPERTIES} standard={<MyListingPage />} /></RequireAuth>} />
+      <Route path="properties" element={<RequireAuth><ByKind company={<MyPropertiesPage />} standard={TO_LISTING} /></RequireAuth>} />
+      <Route path="properties/:id" element={<RequireAuth><ByKind company={<PropertyEditorPage />} standard={TO_LISTING} /></RequireAuth>} />
+      <Route path="company" element={<RequireAuth><ByKind company={<CompanyProfilePage />} standard={TO_LISTING} /></RequireAuth>} />
       <Route path="articles" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticlesPage /></RequirePremium></RequireAuth>} />
       <Route path="articles/new" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
       <Route path="articles/:id/edit" element={<RequireAuth><RequirePremium {...NEWS_GATE}><ArticleEditorPage /></RequirePremium></RequireAuth>} />
@@ -175,9 +193,10 @@ export default function BusinessApp() {
       <Route path="events/:id/edit" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventEditorPage /></RequirePremium></RequireAuth>} />
       <Route path="events/:id/dates" element={<RequireAuth><RequirePremium {...EVENTS_GATE}><EventOccurrencesPage /></RequirePremium></RequireAuth>} />
       <Route path="billing" element={<RequireOwner><BillingPage /></RequireOwner>} />
-      <Route path="upgrade" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
-      <Route path="subscription" element={<RequireOwner><UpgradeFlowPage /></RequireOwner>} />
-      <Route path="reviews" element={<RequireAuth><RequirePremium {...REVIEWS_GATE}><ReviewsPage /></RequirePremium></RequireAuth>} />
+      <Route path="upgrade" element={<RequireOwner><ByKind company={<AccommodationPlansPage />} standard={<UpgradeFlowPage />} /></RequireOwner>} />
+      <Route path="subscription" element={<RequireOwner><ByKind company={<AccommodationPlansPage />} standard={<UpgradeFlowPage />} /></RequireOwner>} />
+      {/* A company's reviews belong to each property, managed in its editor. */}
+      <Route path="reviews" element={<RequireAuth><ByKind company={TO_PROPERTIES} standard={<RequirePremium {...REVIEWS_GATE}><ReviewsPage /></RequirePremium>} /></RequireAuth>} />
       <Route path="push-notifications" element={<RequireAuth><RequirePremium {...PUSH_GATE}><PushNotificationsPage /></RequirePremium></RequireAuth>} />
       <Route path="support" element={<RequireAuth><SupportPage /></RequireAuth>} />
       <Route path="settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
