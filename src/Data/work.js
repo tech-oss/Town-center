@@ -99,7 +99,6 @@ export const workplaceBuildings = [
       "https://www.getliving.com/wp-content/uploads/2024/07/one-maidenhead-lobby-1000x800-1.jpg",
       "https://www.getliving.com/wp-content/uploads/2024/07/one-maidenhead-resident-lounges-1000x800-1.jpg",
       "https://www.getliving.com/wp-content/uploads/2024/07/one-maidenhead-gym-1000x800-1.jpg",
-      "https://www.getliving.com/wp-content/uploads/2024/03/one_maidenhead_waterways_bridge_1400x1400-1.jpeg",
     ],
     description: "One Maidenhead is a landmark mixed-use development at the heart of Maidenhead's regenerated town centre, delivering 36,000 sq ft of contemporary retail and commercial space alongside 429 new homes.",
     longDescription: [
@@ -148,7 +147,6 @@ export const workplaceBuildings = [
     gallery: [
       "https://www.trehus.work/images/home-blocks/Trehus_1000_04.webp",
       "https://www.trehus.work/images/home-blocks/Trehus_1000_01.webp",
-      "https://www.trehus.work/images/home-blocks/Trehus_1000_03.webp",
       "https://www.trehus.work/images/home-blocks/Trehus_1000_02.webp",
     ],
     description: "Trehus is a sustainably-designed timber office building offering 61,677 sq ft of future-proof workspace within the One Maidenhead development. Designed by award-winning Waugh Thistleton Architects, it lets businesses reflect their values through low-energy, ESG-aligned space.",
