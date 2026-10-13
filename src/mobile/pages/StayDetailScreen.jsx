@@ -429,7 +429,7 @@ export default function StayDetailScreen() {
           {free && !isProperty && <ClaimBusinessBox businessId={place.businessId} compact />}
           {related.length > 0 && (
             <div className="mt-2">
-              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{isProperty ? "You Might Also Like" : <>Stay Here &amp; Discover</>}</p>
+              <p className="section-eyebrow mb-3" style={{ color: "var(--leaf)" }}>{isProperty ? "You might also like" : <>Stay Here &amp; Discover</>}</p>
               <div className="flex flex-col gap-3">
                 {related.map((it) => (
                   <Link key={it.slug} to={it.mobileTo} className="flex items-stretch overflow-hidden bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>

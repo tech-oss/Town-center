@@ -323,5 +323,41 @@ exception when others then
   if sqlerrm ilike '%Not authorised%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T69 another company can''t read these analytics', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T69 another company can''t read these analytics: ' || sqlerrm, false); end if;
 end $T$;
 reset role; select set_config('request.jwt.claims', '', false);
+insert into public.business_users (auth_user_id, business_id, role, status, email, first_name, last_name) values ('06877bdd-c8d9-4693-9507-c79b376e4dbb', 'biz_test_acc_co6', 'Content Manager', 'approved', 'cm6@test.example', 'C', 'M');
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"06877bdd-c8d9-4693-9507-c79b376e4dbb","role":"authenticated"}', false);
+do $T$ begin perform set_config('t.cmp', public.accommodation_create_property('biz_test_acc_co6', 'CM Flat'), false);
+  if ((select parent_id from public.businesses where id = current_setting('t.cmp')) = 'biz_test_acc_co6') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T70 Content Manager adds a property', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T70 Content Manager adds a property (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T70 Content Manager adds a property: ' || sqlerrm, false); end $T$;
+do $T$ begin update public.business_listings set address = '9 CM Road' where business_id = current_setting('t.cmp');
+  if ((select address from public.business_listings where business_id = current_setting('t.cmp')) = '9 CM Road') then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T71 Content Manager edits a property''s listing', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T71 Content Manager edits a property''s listing (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T71 Content Manager edits a property''s listing: ' || sqlerrm, false); end $T$;
+do $T$ begin perform public.accommodation_submit_company_profile('biz_test_acc_co6', '{"name":"Sixth Lettings"}'::jsonb);
+  if (true) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T72 Content Manager submits the company profile', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T72 Content Manager submits the company profile (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T72 Content Manager submits the company profile: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if ((select count(*) from public.analytics_daily_views('biz_test_acc_co6', array['profile'], null, current_date - 1, current_date + 1)) >= 0) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T73 Content Manager reads company-wide analytics', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T73 Content Manager reads company-wide analytics (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T73 Content Manager reads company-wide analytics: ' || sqlerrm, false); end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
+insert into public.accommodation_plan_changes (business_id, change, target_tier, keep) values ('biz_test_acc_co6', 'cancel', 'acc-free', array['biz_test_acc_co6_a']);
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"06877bdd-c8d9-4693-9507-c79b376e4dbb","role":"authenticated"}', false);
+do $T$ begin perform public.accommodation_set_plan_change_keep('biz_test_acc_co6', array['biz_test_acc_co6_b']);
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T74 Content Manager can''t change which properties stay (billing is the owner''s) (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%Only the business owner%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T74 Content Manager can''t change which properties stay (billing is the owner''s)', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T74 Content Manager can''t change which properties stay (billing is the owner''s): ' || sqlerrm, false); end if;
+end $T$;
+do $T$ begin perform public.accommodation_after_plan_change('biz_test_acc_co6');
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T75 Content Manager can''t apply plan changes (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%Not allowed%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T75 Content Manager can''t apply plan changes', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T75 Content Manager can''t apply plan changes: ' || sqlerrm, false); end if;
+end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
+do $T$ begin delete from public.businesses where id = 'biz_test_acc_co6';
+  if (not exists (select 1 from public.businesses where parent_id = 'biz_test_acc_co6' or id like 'biz_test_acc_co6%')
+   and not exists (select 1 from public.business_listings where business_id like 'biz_test_acc_co6%')
+   and not exists (select 1 from public.business_users where business_id = 'biz_test_acc_co6')
+   and not exists (select 1 from public.accommodation_company_profiles where business_id = 'biz_test_acc_co6')
+   and not exists (select 1 from public.accommodation_plan_changes where business_id = 'biz_test_acc_co6')
+   and not exists (select 1 from public.analytics_events where business_id like 'biz_test_acc_co6%')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T76 deleting a company removes everything it owned', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T76 deleting a company removes everything it owned (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T76 deleting a company removes everything it owned: ' || sqlerrm, false); end $T$;
 select current_setting('t.r', true) as results;
 rollback;

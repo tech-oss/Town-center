@@ -272,7 +272,7 @@ export default function StayDetailPage({ kind }) {
       directionsQuery={free && !isProperty ? null : item.mapQuery}
       shareInActions
       stickyBooking={!free && item.bookingUrl ? item.bookingUrl : null}
-      relatedHeading={isProperty ? "You Might Also Like" : "Stay Here & Discover"}
+      relatedHeading={isProperty ? "You might also like" : "Stay Here & Discover"}
       relatedBackground="#ffffff"
       related={isProperty ? (propertyRelated ?? []) : (discover ?? [])}
       afterGallery={!free && (
