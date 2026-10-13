@@ -5,6 +5,9 @@ import { SITE_SECTIONS, withDefaults } from "../../Data/siteSections";
 import { GETTING_HERE_DEFAULTS } from "../../Data/adminMissingScreensMock";
 import { getSiteContent, saveSiteSection } from "../../api/admin";
 import GettingHereEditor from "./siteContent/GettingHereEditor";
+import LegalEditor from "./siteContent/LegalEditor";
+import { LEGAL } from "../../Data/legal";
+import { cleanLegalHtml } from "../../lib/legalHtml";
 import FocalPointPicker from "../components/FocalPointPicker";
 import ImageFramer from "../../components/ImageFramer";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
@@ -225,6 +228,10 @@ function SectionEditor({ spec, values, onChange }) {
 // own editor and its own tab at the end of the list.
 const GETTING_HERE_KEY = "getting-here";
 
+// The Privacy Policy and Terms of Use are whole free-form documents, each in
+// its own tab after Getting Here (LegalEditor).
+const LEGAL_DOCS = Object.entries(LEGAL).map(([doc, d]) => ({ doc, key: d.key, label: d.title }));
+
 export default function SiteContentPage() {
   const [saved, setSaved] = useState({});
   const [edited, setEdited] = useState({});
@@ -256,6 +263,7 @@ export default function SiteContentPage() {
 
   const spec = SITE_SECTIONS.find((s) => s.key === activeKey);
   const isGettingHere = activeKey === GETTING_HERE_KEY;
+  const legal = LEGAL_DOCS.find((d) => d.key === activeKey);
 
   // What the boxes show: what admin has saved, plus anything typed since.
   const values = { ...(saved[activeKey] ?? {}), ...(edited[activeKey] ?? {}) };
@@ -276,6 +284,11 @@ export default function SiteContentPage() {
         const { key, label, kind, ...content } = gettingHere;
         await saveSiteSection({ key: GETTING_HERE_KEY, label: "Getting Here", kind: "getting-here", ...content });
         setSaved((prev) => ({ ...prev, [GETTING_HERE_KEY]: content }));
+      } else if (legal) {
+        // Cleaned to what the page shows; empty means the original document.
+        const content = { title: (values.title ?? "").trim(), html: cleanLegalHtml(values.html ?? "") };
+        await saveSiteSection({ key: legal.key, label: legal.label, kind: "legal", ...content, updatedAt: new Date().toISOString() });
+        setSaved((prev) => ({ ...prev, [legal.key]: content }));
       } else {
         // Blank boxes are stored as blank, which the site reads as "use the
         // page's own wording" (Data/siteSections.js).
@@ -283,7 +296,7 @@ export default function SiteContentPage() {
         setSaved((prev) => ({ ...prev, [spec.key]: values }));
       }
       setEdited((prev) => ({ ...prev, [activeKey]: {} }));
-      setToast({ msg: `${isGettingHere ? "Getting Here" : spec.label} saved — it is live on the site now.` });
+      setToast({ msg: `${isGettingHere ? "Getting Here" : (legal ?? spec).label} saved — it is live on the site now.` });
     } catch (e) {
       setToast({ msg: `Could not save: ${e.message}`, error: true });
     }
@@ -293,7 +306,7 @@ export default function SiteContentPage() {
 
   if (loading) return <p className="text-sm" style={{ color: MUTED }}>Loading site content…</p>;
 
-  const tabs = [...SITE_SECTIONS, { key: GETTING_HERE_KEY, label: "Getting Here" }];
+  const tabs = [...SITE_SECTIONS, { key: GETTING_HERE_KEY, label: "Getting Here" }, ...LEGAL_DOCS];
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
@@ -330,6 +343,8 @@ export default function SiteContentPage() {
         <div className="flex-1 min-w-0 flex flex-col gap-5">
           {isGettingHere ? (
             <GettingHereEditor section={gettingHere} onChange={setGettingHereField} />
+          ) : legal ? (
+            <LegalEditor key={legal.key} doc={legal.doc} values={values} onChange={set} />
           ) : (
             <SectionEditor spec={spec} values={values} onChange={set} />
           )}

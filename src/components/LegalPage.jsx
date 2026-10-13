@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { LEGAL } from "../Data/legal";
 import LegalDocument from "./LegalDocument";
+import useLegalDocument from "../hooks/useLegalDocument";
 
-// /privacy and /terms — the footer has always linked to them, but neither
-// existed. `doc` is "privacy" or "terms".
+// /privacy and /terms. `doc` is "privacy" or "terms"; the text is the version
+// admin edits in Site Content (hooks/useLegalDocument).
 export default function LegalPage({ doc }) {
-  const { title, html } = LEGAL[doc];
+  const { title, html, loading } = useLegalDocument(doc);
   useEffect(() => {
     window.scrollTo(0, 0);
     const previous = document.title;
@@ -29,9 +29,21 @@ export default function LegalPage({ doc }) {
       </section>
       <section className="px-6 md:px-12 py-10 md:py-14">
         <div className="max-w-3xl mx-auto">
-          <LegalDocument html={html} />
+          {loading ? <LegalLoading /> : <LegalDocument html={html} />}
         </div>
       </section>
+    </div>
+  );
+}
+
+// Grey lines while the page's text loads, so the previous version never
+// flashes up before the current one.
+export function LegalLoading() {
+  return (
+    <div className="flex flex-col gap-3 animate-pulse" aria-label="Loading">
+      {[60, 100, 92, 96, 70, 100, 88].map((w, i) => (
+        <div key={i} className="h-3.5 rounded bg-black/[0.07]" style={{ width: `${w}%`, marginTop: i === 4 ? 16 : 0 }} />
+      ))}
     </div>
   );
 }

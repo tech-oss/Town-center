@@ -1,11 +1,13 @@
 import MobileShell from "../components/MobileShell";
 import LegalDocument from "../../components/LegalDocument";
-import { LEGAL } from "../../Data/legal";
+import { LegalLoading } from "../../components/LegalPage";
+import useLegalDocument from "../../hooks/useLegalDocument";
 
 // The app's Privacy Policy and Terms of Use screens — the same documents the
-// website shows at /privacy and /terms. `doc` is "privacy" or "terms".
+// website shows at /privacy and /terms, as edited in Site Content.
+// `doc` is "privacy" or "terms".
 export default function LegalPlaceholderScreen({ doc }) {
-  const { title, html } = LEGAL[doc];
+  const { title, html, loading } = useLegalDocument(doc);
   return (
     <MobileShell title={title} onBack backFallback="/mobile/explore" noPadding>
       <div className="flex flex-col">
@@ -19,7 +21,7 @@ export default function LegalPlaceholderScreen({ doc }) {
           <p className="relative text-xs mt-2" style={{ color: "rgba(255,255,255,0.8)" }}>Maidenhead.com and The Maidenhead App</p>
         </div>
         <div className="px-5 pt-4 pb-10">
-          <LegalDocument html={html} compact />
+          {loading ? <LegalLoading /> : <LegalDocument html={html} compact />}
         </div>
       </div>
     </MobileShell>
