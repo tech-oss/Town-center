@@ -94,9 +94,11 @@ async function loadPayments() {
 //   paying  — Visibility Plan billed through Stripe
 //   granted — Visibility Plan admin gave it, nothing billed (not revenue)
 //   free    — everything else
+// Accommodation properties are left out of every business count here: a
+// property isn't a business that registered — its company is (and pays).
 export async function loadClassifiedBusinesses() {
   const [bizRes, subs] = await Promise.all([
-    fetchAll(() => supabase.from("businesses").select("id, status, submitted_at").order("id")),
+    fetchAll(() => supabase.from("businesses").select("id, status, submitted_at").neq("kind", "accommodation_property").order("id")),
     loadSubscriptions(),
   ]);
   if (bizRes.error) throw bizRes.error;
@@ -133,7 +135,7 @@ export async function getReportingSummary({ range = "6m", tier = "All" } = {}) {
     loadSubscriptions(),
     fetchAll(() => supabase.from("business_listings").select("business_id, approval_status").order("business_id")),
     supabase.from("business_users").select("id, status, requested_at"),
-    fetchAll(() => supabase.from("businesses").select("id, status, submitted_at").order("id")),
+    fetchAll(() => supabase.from("businesses").select("id, status, submitted_at").neq("kind", "accommodation_property").order("id")),
     supabase.from("business_events").select("id, status"),
     loadPayments().catch(() => []),
   ]);
@@ -293,7 +295,7 @@ export async function getActivityTrend({ range = "6m" } = {}) {
   const { buckets, keyOf } = activityBuckets(since, until);
   const [loginsRes, bizRes] = await Promise.all([
     supabase.from("portal_logins").select("created_at, portal").gte("created_at", since.toISOString()),
-    fetchAll(() => supabase.from("businesses").select("submitted_at, id").gte("submitted_at", since.toISOString()).order("id")),
+    fetchAll(() => supabase.from("businesses").select("submitted_at, id").neq("kind", "accommodation_property").gte("submitted_at", since.toISOString()).order("id")),
   ]);
   // No login table yet (migration not run) reads as no logins, not an error.
   const logins = loginsRes.error ? [] : (loginsRes.data ?? []);

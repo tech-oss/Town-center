@@ -199,7 +199,12 @@ function fromRow(row) {
 
     // ── "Plan" step ──
     // Plans are stored lowercase ("standard"); the admin UI title-cases them.
-    plan: subscription.plan === "premium" ? "Visibility Plan" : (titleCase(subscription.plan) || "Free"),
+    // An accommodation company's plan is its tier ("10 Properties").
+    plan: row.kind === "accommodation_company"
+      ? (subscription.plan === "premium" ? (ACC_TIER_LABELS[subscription.site_tier_key] ?? "Accommodation plan") : "Free")
+      : subscription.plan === "premium" ? "Visibility Plan" : (titleCase(subscription.plan) || "Free"),
+    parentId: row.parent_id ?? null,
+    propertyState: row.property_state ?? null,
     // A Visibility Plan admin gave the business, with nothing billed through
     // Stripe. This used to read true for EVERY Visibility Plan: the query
     // never loaded stripe_subscription_id, so a paying business looked
@@ -228,7 +233,7 @@ const SELECT = `
   business_listings(*),
   business_users(role, first_name, last_name, email, phone, status),
   business_subscriptions(plan, terms_accepted_at, stripe_subscription_id, cancelled, plan_status,
-    billing_interval, price_amount, monthly_fee, renewal_date, cancel_at_period_end, granted_by_admin),
+    billing_interval, price_amount, monthly_fee, renewal_date, cancel_at_period_end, granted_by_admin, site_tier_key),
   business_addon_slots(kind, quantity, expires_at)
 `;
 
@@ -290,15 +295,53 @@ async function loadPromotions() {
   return byBusiness;
 }
 
+const ACC_TIER_LABELS = { "acc-5": "5 Properties", "acc-10": "10 Properties", "acc-15": "15 Properties", "acc-20": "20 Properties", "acc-30": "30 Properties" };
+
+// Every accommodation property, grouped under its company. A property is not
+// a business that registered: the Businesses list shows it beneath its
+// company rather than as a row of its own, and it counts toward nothing.
+async function propertiesByCompany(companyIds = null) {
+  const q = () => {
+    let b = supabase.from("businesses").select("id, name, parent_id, property_state, submitted_at")
+      .eq("kind", "accommodation_property").neq("property_state", "archived").order("submitted_at").order("id");
+    if (companyIds) b = b.in("parent_id", companyIds);
+    return b;
+  };
+  const { data, error } = await fetchAll(q);
+  if (error) throw error;
+  const map = new Map();
+  for (const p of data ?? []) {
+    const list = map.get(p.parent_id) ?? [];
+    list.push({ id: p.id, name: p.name, state: p.property_state, slug: p.id.replace(/^biz_/, "") });
+    map.set(p.parent_id, list);
+  }
+  return map;
+}
+
+function withProperties(biz, byCompany) {
+  if (biz.kind !== "accommodation_company") return biz;
+  const properties = byCompany.get(biz.id) ?? [];
+  return {
+    ...biz,
+    properties,
+    propertyCount: properties.length,
+    liveProperties: properties.filter((p) => p.state === "live").length,
+  };
+}
+
 export async function getBusinesses({ status } = {}) {
   const q = () => {
     let b = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false }).order("id");
     if (status && status !== "All") b = b.eq("status", status);
     return b;
   };
-  const [{ data, error }, live, promotions] = await Promise.all([fetchAll(q), getLivePlacementMap("featured_business"), loadPromotions()]);
+  const [{ data, error }, live, promotions, byCompany] = await Promise.all([
+    fetchAll(q), getLivePlacementMap("featured_business"), loadPromotions(), propertiesByCompany(),
+  ]);
   if (error) throw error;
-  return (data ?? []).map((row) => withFeatured(fromRow(row), live, promotions));
+  return (data ?? [])
+    .filter((row) => row.kind !== "accommodation_property")
+    .map((row) => withProperties(withFeatured(fromRow(row), live, promotions), byCompany));
 }
 
 export async function getBusinessById(id) {
@@ -308,7 +351,9 @@ export async function getBusinessById(id) {
     loadPromotions(),
   ]);
   if (error) throw error;
-  return data ? withFeatured(fromRow(data), live, promotions) : null;
+  if (!data) return null;
+  const biz = withFeatured(fromRow(data), live, promotions);
+  return biz.kind === "accommodation_company" ? withProperties(biz, await propertiesByCompany([biz.id])) : biz;
 }
 
 // ─── Mutations ────────────────────────────────────────────────────────────────

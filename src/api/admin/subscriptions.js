@@ -14,8 +14,15 @@ function label(plan) {
   return PLAN_LABELS[String(plan).toLowerCase()] ?? plan;
 }
 
+// An accommodation company's plan is its tier: Free or 5 / 10 / 15 / 20 / 30
+// properties (accommodation_plan_tiers).
+const ACC_TIER_NAMES = { "acc-free": "Free", "acc-5": "5 Properties", "acc-10": "10 Properties", "acc-15": "15 Properties", "acc-20": "20 Properties", "acc-30": "30 Properties" };
+export const ACCOMMODATION_TIERS = Object.entries(ACC_TIER_NAMES).map(([key, name]) => ({ key, name }));
+
 function fromRow(row, owner) {
-  const tier = label(row.plan);
+  const company = row.businesses?.kind === "accommodation_company";
+  const tierKey = company ? (row.plan === "premium" ? row.site_tier_key : "acc-free") : null;
+  const tier = company ? `Accommodation · ${ACC_TIER_NAMES[tierKey] ?? "Free"}` : label(row.plan);
   const history = [];
   if (row.terms_accepted_at) {
     history.push({
@@ -44,6 +51,9 @@ function fromRow(row, owner) {
       : row.plan_status === "Trial" ? "Trial" : "Free",
     paying: isPayingSubscription(row),
     isMultiSite: row.is_multi_site,
+    accommodationCompany: company,
+    accommodationTier: tierKey,
+    stripePaying: !!row.stripe_subscription_id,
     upgradePlanKey: row.upgrade_plan_key,
     // 'trial' | 'full' | null — set only by grantTrial/grantFullAccess below,
     // so a comp account admin granted can be told apart from a real paid one.
@@ -82,7 +92,7 @@ async function ownersByBusiness(ids) {
 export async function getSubscriptions({ status, tier } = {}) {
   const { data, error } = await fetchAll(() => supabase
     .from("business_subscriptions")
-    .select("*, businesses(name)")
+    .select("*, businesses(name, kind)")
     .order("updated_at", { ascending: false }).order("business_id"));
   if (error) throw error;
 
@@ -96,7 +106,7 @@ export async function getSubscriptions({ status, tier } = {}) {
 export async function getSubscriptionById(id) {
   const { data, error } = await supabase
     .from("business_subscriptions")
-    .select("*, businesses(name)")
+    .select("*, businesses(name, kind)")
     .eq("business_id", id)
     .maybeSingle();
   if (error) throw error;
@@ -136,6 +146,36 @@ export async function grantFullAccess(id) {
     .eq("business_id", id);
   if (error) throw error;
   return { ok: true };
+}
+
+// Admin sets an accommodation company's plan at no charge (a comp account):
+// Free, or a tier. The property limit applies straight away — if the new
+// plan allows fewer properties than are using a slot, the longest-standing
+// live ones stay and the rest become inactive (accommodation_after_plan_change).
+// A company paying through Stripe is changed there instead: the webhook would
+// put its paid plan back on the next billing event.
+export async function grantAccommodationTier(id, tierKey) {
+  if (!ACC_TIER_NAMES[tierKey]) throw new Error("Choose one of the accommodation plans.");
+  const paid = tierKey !== "acc-free";
+  const now = new Date().toISOString();
+  const { error } = await supabase
+    .from("business_subscriptions")
+    .update({
+      plan: paid ? "premium" : "free",
+      site_tier_key: tierKey,
+      upgrade_plan_key: tierKey,
+      plan_status: "Active",
+      monthly_fee: 0,
+      cancelled: false,
+      granted_by_admin: paid ? "full" : null,
+      granted_at: paid ? now : null,
+      updated_at: now,
+    })
+    .eq("business_id", id);
+  if (error) throw error;
+  const { data: changed, error: capError } = await supabase.rpc("accommodation_after_plan_change", { p_company: id });
+  if (capError) throw capError;
+  return { ok: true, inactivated: changed ?? 0 };
 }
 
 export async function resolveDispute(id) {

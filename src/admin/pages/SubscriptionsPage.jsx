@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess, grantedLabel } from "../../api/admin";
+import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess, grantedLabel, grantAccommodationTier, ACCOMMODATION_TIERS } from "../../api/admin";
 import {
   TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS,
   SUBSCRIPTION_BILLING_HISTORY, resolveTierFeatures,
@@ -67,6 +67,56 @@ function ManageSubscriptionMenu({ onUpgrade, onDowngrade, onCancel }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// An accommodation company's plan, set by admin at no charge. Applies the
+// property limit straight away (api/admin/subscriptions.js).
+function AccommodationPlanOverride({ sub, onDone }) {
+  const [tier, setTier] = useState(sub.accommodationTier ?? "acc-free");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState("");
+  async function apply() {
+    setBusy(true);
+    setResult("");
+    try {
+      const { inactivated } = await grantAccommodationTier(sub.id, tier);
+      const name = ACCOMMODATION_TIERS.find((t) => t.key === tier)?.name;
+      setResult(`Plan set to ${name} at no charge.${inactivated ? ` ${inactivated} ${inactivated === 1 ? "property was" : "properties were"} switched to inactive to fit the plan.` : ""}`);
+      onDone?.();
+    } catch (e) {
+      setResult(`Couldn't change the plan: ${e.message}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="bg-white rounded-2xl p-6 flex flex-col gap-4" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
+      <div>
+        <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Accommodation plan</h2>
+        <p className="text-xs mt-1" style={{ color: "#6B7280" }}>
+          Set this company's plan at no charge. If the new plan allows fewer properties than are live, the longest-standing ones stay and the rest become inactive (kept, not deleted).
+        </p>
+      </div>
+      {sub.stripePaying && (
+        <p className="text-xs px-3 py-2 rounded-lg" style={{ backgroundColor: "rgba(217,119,6,0.08)", color: "#92400E" }}>
+          This company pays through Stripe. Change its plan in Stripe (or ask the owner to) — a change here would be undone at its next billing event.
+        </p>
+      )}
+      <div className="flex items-end gap-3 flex-wrap">
+        <label className="flex flex-col gap-1">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Plan</span>
+          <select value={tier} onChange={(e) => setTier(e.target.value)} disabled={busy}
+            className="rounded-xl px-3 py-2 text-sm outline-none" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B", backgroundColor: "#fff" }}>
+            {ACCOMMODATION_TIERS.map((t) => <option key={t.key} value={t.key}>{t.name}</option>)}
+          </select>
+        </label>
+        <button onClick={apply} disabled={busy || sub.stripePaying} className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40" style={{ backgroundColor: "#2563EB" }}>
+          {busy ? "Applying…" : "Apply at no charge"}
+        </button>
+      </div>
+      {result && <p role="status" className="text-sm" style={{ color: result.startsWith("Couldn't") ? "#991B1B" : "#1E293B" }}>{result}</p>}
     </div>
   );
 }
@@ -256,7 +306,10 @@ export function SubscriptionDetailPage() {
         )}
       </div>
 
+      {sub.accommodationCompany && <AccommodationPlanOverride sub={sub} />}
+
       {/* Manual override */}
+      {!sub.accommodationCompany && (
       <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
         <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Manual Override</h2>
 
@@ -280,6 +333,7 @@ export function SubscriptionDetailPage() {
           </button>
         </div>
       </div>
+      )}
 
       {/* Renewal — meaningless for a full-access grant, since there's no
           renewal to remind anyone about. */}

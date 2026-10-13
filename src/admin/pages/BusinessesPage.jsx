@@ -53,6 +53,8 @@ function Toast({ message, onDismiss }) {
 // Uses the same BUSINESS_TYPES taxonomy the real signup form offers, so a
 // section shows the exact label the business itself picked rather than
 // admin's own older/divergent section list.
+const PROPERTY_STATE_LABELS = { draft: "Draft", pending: "Pending approval", live: "Live", rejected: "Rejected", hidden: "Hidden", inactive: "Inactive" };
+
 function sectionLabel(val, kind) {
   // The accommodation module's two kinds share the "accommodation" type.
   if (kind === "accommodation_company") return "Accommodation company";
@@ -756,6 +758,34 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
           <DetailRow label="Featured" value={biz.featured ? "Yes" : null} />
         </DetailSection>
 
+        {biz.kind === "accommodation_company" && (
+          <DetailSection title={`Properties (${biz.propertyCount ?? 0})`}>
+            {!biz.properties?.length ? (
+              <p className="text-xs py-1" style={{ color: MUTED }}>No properties added yet. The company adds them from My Properties in the business portal.</p>
+            ) : (
+              <div className="flex flex-col">
+                {biz.properties.map((p) => (
+                  <div key={p.id} className="flex items-center justify-between gap-3 py-2" style={{ borderTop: `1px solid ${BORDER}` }}>
+                    <span className="text-sm font-medium truncate" style={{ color: NAVY }}>{p.name}</span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full"
+                        style={{ backgroundColor: p.state === "live" ? "rgba(16,185,129,0.12)" : p.state === "pending" ? "rgba(217,119,6,0.12)" : "rgba(100,116,139,0.12)", color: p.state === "live" ? "#047857" : p.state === "pending" ? "#B45309" : "#475569" }}>
+                        {PROPERTY_STATE_LABELS[p.state] ?? p.state}
+                      </span>
+                      {p.state === "live" && (
+                        <a href={`/live/stay/accommodation/${p.slug}`} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>View</a>
+                      )}
+                      {p.state === "pending" && (
+                        <a href={`/admin/approvals/property::${p.id}`} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Review</a>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </DetailSection>
+        )}
+
         <DetailSection title="Location (for Map)">
           <DetailRow label="Coordinates" value={biz.lat && biz.lng ? `${biz.lat}, ${biz.lng}` : null} />
         </DetailSection>
@@ -780,6 +810,19 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
           </div>
         </DetailSection>
 
+        {/* An accommodation company's plan is a tier (Free, 5–30 properties),
+            set on its subscription page — the Visibility Plan switch below
+            would put it on the wrong plan. */}
+        {biz.kind === "accommodation_company" ? (
+          <DetailSection title="Subscription Plan">
+            <div className="flex items-center justify-between gap-3 flex-wrap py-1">
+              <span className="text-sm font-semibold" style={{ color: NAVY }}>{biz.plan}</span>
+              <a href={`/admin/subscriptions/${biz.id}`} className="px-4 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: BLUE }}>
+                Change accommodation plan →
+              </a>
+            </div>
+          </DetailSection>
+        ) : (
         <DetailSection title="Subscription Plan">
           <div className="flex items-center gap-2 flex-wrap py-1">
             <select value={planKey} onChange={(e) => { setPlanKey(e.target.value); setPlanMessage(""); }}
@@ -795,6 +838,7 @@ function BusinessDetailModal({ biz, onClose, onPlanChanged, featuredFull, featur
           </div>
           {planMessage && <p className="text-xs mt-1" style={{ color: planMessage.startsWith("Could not") ? "#991B1B" : "#15803D" }}>{planMessage}</p>}
         </DetailSection>
+        )}
 
         <DetailSection title="Agreements">
           <AgreementsList businessId={biz.id} fallbackAcceptedAt={biz.termsAcceptedAt} />
@@ -981,6 +1025,11 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
             <div className="flex flex-wrap gap-1.5">
               {secLabel && (
                 <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: NAVY, color: "#fff" }}>{secLabel}</span>
+              )}
+              {biz.kind === "accommodation_company" && (
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg" style={{ backgroundColor: "rgba(16,185,129,0.1)", color: "#047857" }}>
+                  {biz.propertyCount ?? 0} {biz.propertyCount === 1 ? "property" : "properties"} · {biz.liveProperties ?? 0} live
+                </span>
               )}
               {chips.map((l) => (
                 <span key={l} className="text-[11px] font-medium px-2.5 py-1 rounded-lg"

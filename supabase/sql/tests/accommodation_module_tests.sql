@@ -298,5 +298,30 @@ update public.businesses set property_state = 'live' where id = 'biz_test_acc_co
 do $T$ begin 
   if (not exists (select 1 from public.public_business_reviews where business_id = 'biz_test_acc_co5_p')) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T65 free company: property reviews not public', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T65 free company: property reviews not public (check false)', false); end if;
 exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T65 free company: property reviews not public: ' || sqlerrm, false); end $T$;
+insert into public.businesses (id, name, status, kind) values ('biz_test_acc_co6', 'Sixth Lettings', 'Approved', 'accommodation_company');
+insert into public.business_users (auth_user_id, business_id, role, status, email, first_name, last_name) values ('046ebe5c-3422-4292-839d-6bc1a9e0b9cd', 'biz_test_acc_co6', 'Owner', 'approved', 'o6@test.example', 'A', 'O');
+insert into public.business_subscriptions (business_id, plan, plan_status, monthly_fee, site_tier_key) values ('biz_test_acc_co6', 'premium', 'Active', 49, 'acc-5');
+insert into public.businesses (id, name, status, kind, parent_id, property_state) values ('biz_test_acc_co6_a', 'Prop A', 'Approved', 'accommodation_property', 'biz_test_acc_co6', 'live'), ('biz_test_acc_co6_b', 'Prop B', 'Approved', 'accommodation_property', 'biz_test_acc_co6', 'live');
+insert into public.analytics_events (business_id, content_type, content_id, event_type, source) values
+  ('biz_test_acc_co6_a', 'profile', 'biz_test_acc_co6_a', 'view', 'web'), ('biz_test_acc_co6_a', 'profile', 'biz_test_acc_co6_a', 'view', 'app'),
+  ('biz_test_acc_co6_b', 'profile', 'biz_test_acc_co6_b', 'view', 'web'),
+  ('biz_test_acc_co6_a', 'news', 'n1', 'view', 'web');
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"046ebe5c-3422-4292-839d-6bc1a9e0b9cd","role":"authenticated"}', false);
+do $T$ begin 
+  if ((select sum(view_count) from public.analytics_daily_views('biz_test_acc_co6', array['profile'], null, current_date - 1, current_date + 1)) = 3) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T66 company-wide profile views add up its properties', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T66 company-wide profile views add up its properties (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T66 company-wide profile views add up its properties: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if ((select sum(view_count) from public.analytics_daily_views('biz_test_acc_co6_a', array['profile'], null, current_date - 1, current_date + 1)) = 2) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T67 one property''s views on their own', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T67 one property''s views on their own (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T67 one property''s views on their own: ' || sqlerrm, false); end $T$;
+do $T$ begin 
+  if ((select count(*) from public.analytics_content_breakdown('biz_test_acc_co6', current_date - 1, current_date + 1)) = 1) then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T68 company-wide content breakdown includes property content', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T68 company-wide content breakdown includes property content (check false)', false); end if;
+exception when others then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T68 company-wide content breakdown includes property content: ' || sqlerrm, false); end $T$;
+set role authenticated; select set_config('request.jwt.claims', '{"sub":"06877bdd-c8d9-4693-9507-c79b376e4dbb","role":"authenticated"}', false);
+do $T$ begin perform * from public.analytics_daily_views('biz_test_acc_co6_a', array['profile'], null, current_date - 1, current_date + 1);
+  perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T69 another company can''t read these analytics (no error raised)', false);
+exception when others then
+  if sqlerrm ilike '%Not authorised%' then perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'PASS T69 another company can''t read these analytics', false); else perform set_config('t.r', coalesce(current_setting('t.r', true),'') || E'\n' || 'FAIL T69 another company can''t read these analytics: ' || sqlerrm, false); end if;
+end $T$;
+reset role; select set_config('request.jwt.claims', '', false);
 select current_setting('t.r', true) as results;
 rollback;
