@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
+import useAnalyticsScope from "../hooks/useAnalyticsScope";
 import AnalyticsChart from "../components/AnalyticsChart";
 import { FOREST, SAGE, MUTED, BORDER } from "../components/FormKit";
 import { resolveRange } from "../api/analyticsRanges";
@@ -33,6 +34,7 @@ function ReportSection({ title, total, series }) {
 
 export default function AnalyticsReportPage() {
   const { user } = useBusinessAuth();
+  const { scopeId, scopeName, company } = useAnalyticsScope();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const range = rangeFromSearchParams(searchParams);
@@ -48,10 +50,10 @@ export default function AnalyticsReportPage() {
     let cancelled = false;
     setLoading(true);
     Promise.all([
-      getProfileViewsSeries(user.id, range),
-      getContentViewsSeries(user.id, range),
-      getContentBreakdown(user.id, range),
-      getAllContentSeries(user.id, range),
+      getProfileViewsSeries(scopeId, range),
+      getContentViewsSeries(scopeId, range),
+      getContentBreakdown(scopeId, range),
+      getAllContentSeries(scopeId, range),
     ]).then(([p, c, b, cs]) => {
       if (cancelled) return;
       setProfile(p);
@@ -64,7 +66,7 @@ export default function AnalyticsReportPage() {
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id, JSON.stringify(range)]);
+  }, [scopeId, JSON.stringify(range)]);
 
   const generatedAt = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
@@ -98,7 +100,7 @@ export default function AnalyticsReportPage() {
               <img src="/logo-mark.svg" alt="" style={{ width: 36, height: 36, objectFit: "contain" }} />
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest" style={{ color: SAGE }}>Maidenhead Business</p>
-                <p className="text-lg font-bold" style={{ color: FOREST }}>{user.businessName}</p>
+                <p className="text-lg font-bold" style={{ color: FOREST }}>{user.businessName}{company ? ` — ${scopeName}` : ""}</p>
               </div>
             </div>
             <div className="text-right">
@@ -144,7 +146,7 @@ export default function AnalyticsReportPage() {
               ))}
 
               <footer className="mt-10 pt-4 text-[10px] text-center" style={{ borderTop: `1px solid ${BORDER}`, color: MUTED }}>
-                Maidenhead Business Dashboard · {user.businessName} · Report for {rangeLabel} · Generated {generatedAt}
+                Maidenhead Business Dashboard · {user.businessName}{company ? ` (${scopeName})` : ""} · Report for {rangeLabel} · Generated {generatedAt}
               </footer>
             </>
           )}

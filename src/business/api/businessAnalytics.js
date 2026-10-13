@@ -58,11 +58,14 @@ export function getContentViewsSeries(businessId, range) {
 }
 
 // The post or event itself (title and type), from whichever table holds it.
-async function getContentItem(businessId, contentId) {
+// Not filtered by owner: an accommodation company's article is viewed on its
+// properties' pages, so it belongs to the company while its views count
+// under a property. Row security already limits what can be read.
+async function getContentItem(contentId) {
   const [a, n, e] = await Promise.all([
-    supabase.from("business_articles").select("title, type").eq("id", contentId).eq("business_id", businessId).maybeSingle(),
-    supabase.from("news_offers").select("title, type").eq("id", contentId).eq("business_id", businessId).maybeSingle(),
-    supabase.from("business_events").select("title").eq("id", contentId).eq("business_id", businessId).maybeSingle(),
+    supabase.from("business_articles").select("title, type").eq("id", contentId).maybeSingle(),
+    supabase.from("news_offers").select("title, type").eq("id", contentId).maybeSingle(),
+    supabase.from("business_events").select("title").eq("id", contentId).maybeSingle(),
   ]);
   if (a.data) return { title: a.data.title, type: a.data.type ?? "News" };
   if (n.data) return { title: n.data.title, type: n.data.type === "offer" ? "Offer" : "News" };
@@ -74,7 +77,7 @@ async function getContentItem(businessId, contentId) {
 export async function getContentSeries(businessId, contentId, range) {
   const [result, item] = await Promise.all([
     dailyViews(businessId, range, CONTENT_TYPES, contentId),
-    getContentItem(businessId, contentId).catch(() => null),
+    getContentItem(contentId).catch(() => null),
   ]);
   return { ...result, item };
 }

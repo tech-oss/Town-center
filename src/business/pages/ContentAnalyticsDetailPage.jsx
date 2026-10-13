@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import useBusinessAuth from "../hooks/useBusinessAuth";
+import useAnalyticsScope from "../hooks/useAnalyticsScope";
 import BusinessLayout from "../components/BusinessLayout";
 import AnalyticsChart from "../components/AnalyticsChart";
 import RangeSelector from "../components/RangeSelector";
@@ -9,7 +9,7 @@ import { DEFAULT_RANGE, resolveRange } from "../api/analyticsRanges";
 import { getContentSeries } from "../api/businessAnalytics";
 
 export default function ContentAnalyticsDetailPage() {
-  const { user } = useBusinessAuth();
+  const { scopeId, scopeQuery } = useAnalyticsScope();
   const navigate = useNavigate();
   const { id } = useParams();
   const [range, setRange] = useState(DEFAULT_RANGE);
@@ -19,21 +19,21 @@ export default function ContentAnalyticsDetailPage() {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    getContentSeries(user.id, id, range).then((res) => {
+    getContentSeries(scopeId, id, range).then((res) => {
       if (!cancelled) { setData(res); setLoading(false); }
     }).catch(() => {
       if (!cancelled) { setData({ total: 0, series: [], item: null }); setLoading(false); }
     });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user.id, id, JSON.stringify(range)]);
+  }, [scopeId, id, JSON.stringify(range)]);
 
   const { label: rangeLabel } = resolveRange(range);
 
   return (
     <BusinessLayout>
       <div className="flex flex-col gap-6 max-w-5xl">
-        <button onClick={() => navigate("/business/analytics")} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← Analytics</button>
+        <button onClick={() => navigate(`/business/analytics${scopeQuery ? `?${scopeQuery}` : ""}`)} className="text-sm font-medium w-fit transition-opacity hover:opacity-70" style={{ color: FOREST }}>← Analytics</button>
 
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
