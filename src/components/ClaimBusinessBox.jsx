@@ -11,9 +11,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 
 // The business portal is a separate deployment. Set VITE_BUSINESS_PORTAL_URL
-// to its permanent address once it has one.
+// to its permanent address once it has one; until then this branch address
+// always serves the newest portal deploy.
 const PORTAL_URL = (import.meta.env.VITE_BUSINESS_PORTAL_URL
-  || "https://town-center-gzpg6kxx5-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
+  || "https://town-center-git-business-d-3e69dd-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
 
 // Remembered for a minute, not for the whole visit: it used to be looked up
 // once per page load, so a business admin registered while the site was open
