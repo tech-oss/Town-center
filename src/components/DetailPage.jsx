@@ -67,7 +67,7 @@ export default function DetailPage() {
     ? null
     : item.paragraphs
     ? item.paragraphs
-    : [item.tagline, item.description, item.description2].filter(Boolean);
+    : [item.description, item.description2].filter(Boolean);
 
   return (
     <PlaceDetailLayout
@@ -82,6 +82,7 @@ export default function DetailPage() {
       heroImage={heroImage}
       faq={free ? null : item.faq}
       extraImages={extraImages}
+      subtitle={free ? null : item.tagline}
       description={description}
       descriptionPlaceholder={free ? FREE_PLACEHOLDERS.description : undefined}
       hours={free ? null : item.hours}

@@ -230,12 +230,10 @@ export default function StayDetailPage({ kind }) {
   const gallery = item.gallery?.length ? item.gallery : [item.image];
   const address = item.address ?? item.area;
 
-  // Tagline renders above the hero (PlaceDetailLayout's first description
-  // paragraph); guest/host details (accommodation only) and the full
-  // description render below it, same as any listing with multiple
-  // description paragraphs.
+  // The tagline renders under the title (PlaceDetailLayout's subtitle);
+  // guest/host details (accommodation only) and the full description render
+  // below the hero.
   const description = free ? null : [
-    item.tagline,
     ...(!isHotels && item.guests ? [`${item.guests} guests · ${item.bedrooms} bedroom${item.bedrooms !== 1 ? "s" : ""} · ${item.host}`] : []),
     ...(item.description ? item.description.split("\n\n") : []),
   ].filter(Boolean);
@@ -260,6 +258,7 @@ export default function StayDetailPage({ kind }) {
       extraImages={free ? [] : gallery.slice(1)}
       faq={free ? null : item.faq}
       backLink={backTo ? { to: backTo, label: "Back to results" } : undefined}
+      subtitle={free ? null : item.tagline}
       description={description}
       descriptionPlaceholder={free && !isProperty ? FREE_PLACEHOLDERS.description : undefined}
       hoursPlaceholder={free && !isProperty ? FREE_PLACEHOLDERS.hours : undefined}

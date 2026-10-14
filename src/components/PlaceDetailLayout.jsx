@@ -276,17 +276,15 @@ export default function PlaceDetailLayout({
     },
   ].filter(Boolean);
 
-  // Tagline shown under the title above the hero: the first description
-  // paragraph, so nothing needs to be authored twice. The remaining
-  // paragraphs (if any) still render in their usual place below the hero.
-  // An explicit subtitle (events) takes that spot instead, and then the whole
-  // description renders below the hero.
-  const firstParagraphText = subtitle || (Array.isArray(description)
-    ? (typeof description[0] === "string" ? description[0] : description[0]?.text)
-    : description);
+  // The line under the title is the subtitle alone: a business's tagline, or
+  // an event's short line. It used to fall back to the first paragraph of the
+  // description, so a business with no tagline — and every See & Do business,
+  // whose page passed none — showed its whole description there in capitals.
+  // The description always renders in full below the hero.
+  const firstParagraphText = subtitle?.trim() || null;
   const remainingDescription = Array.isArray(description)
-    ? (subtitle ? description : description.slice(1))
-    : (subtitle && description ? [description] : null);
+    ? description
+    : (description ? [description] : null);
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>

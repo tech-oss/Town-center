@@ -1209,6 +1209,9 @@ const SORT_OPTIONS = [
   { value: "section-asc",    label: "Section A → Z" },
 ];
 
+// Business cards drawn per page (see BusinessesPage).
+const PAGE_SIZE = 50;
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function BusinessesPage() {
   const navigate = useNavigate();
@@ -1364,6 +1367,14 @@ export default function BusinessesPage() {
     return result;
   }, [list, statusFilter, search, sortVal]);
 
+  // Draw a page of cards at a time: all ~1,700 at once (each with its logo
+  // and buttons) made the page slow to open. Search, filters and sorting
+  // still cover every business; a new filter starts from the first page.
+  const viewKey = `${statusFilter}|${search}|${sortVal}`;
+  const [shown, setShown] = useState({ key: viewKey, count: PAGE_SIZE });
+  if (shown.key !== viewKey) setShown({ key: viewKey, count: PAGE_SIZE });
+  const visible = filtered.slice(0, shown.count);
+
   if (loading) return <LoadingState />;
 
   return (
@@ -1471,7 +1482,7 @@ export default function BusinessesPage() {
           icon="🏢" />
       ) : (
         <div className="flex flex-col gap-3">
-          {filtered.map((biz) => (
+          {visible.map((biz) => (
             <BusinessRow
               key={biz.id}
               biz={biz}
@@ -1492,6 +1503,18 @@ export default function BusinessesPage() {
               featuredFull={isFeaturedFull(biz)}
             />
           ))}
+          {filtered.length > visible.length && (
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <span className="text-xs" style={{ color: MUTED }}>
+                Showing {visible.length} of {filtered.length}
+              </span>
+              <button onClick={() => setShown({ key: viewKey, count: shown.count + PAGE_SIZE })}
+                className="px-4 py-2 rounded-xl text-sm font-semibold"
+                style={{ backgroundColor: "#fff", color: BLUE, border: `1.5px solid ${BORDER}` }}>
+                Show {Math.min(PAGE_SIZE, filtered.length - visible.length)} more
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

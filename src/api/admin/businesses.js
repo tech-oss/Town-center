@@ -224,7 +224,7 @@ function fromRow(row) {
 
     // "Content Pending" until the profile has anything beyond its
     // registration details — the same test as Manage Business Content.
-    hasContent: listingHasContent(listing),
+    hasContent: listing.has_content ?? listingHasContent(listing),
   };
 }
 
@@ -236,6 +236,16 @@ const SELECT = `
     billing_interval, price_amount, monthly_fee, renewal_date, cancel_at_period_end, granted_by_admin, site_tier_key),
   business_addon_slots(kind, quantity, expires_at)
 `;
+
+// The Business Registrations list: only the listing columns fromRow shows,
+// plus has_content worked out in the database
+// (business_registrations_speed_2026_10.sql). Reading business_listings(*)
+// here downloaded every description, gallery and FAQ — about 2 MB — and made
+// the page slow to open.
+const LIST_SELECT = SELECT.replace(
+  "business_listings(*)",
+  "business_listings(business_type, category, business_type_detail, website, email, phone, address, lat, lng, logo, has_content)",
+);
 
 // `featured` means a live Featured Business booking (see ./homepageSlots).
 // `promotions` is every paid homepage booking that hasn't finished — running,
@@ -331,7 +341,10 @@ function withProperties(biz, byCompany) {
 
 export async function getBusinesses({ status } = {}) {
   const q = () => {
-    let b = supabase.from("businesses").select(SELECT).order("submitted_at", { ascending: false }).order("id");
+    // Properties are listed under their company (propertiesByCompany), not
+    // as rows of their own.
+    let b = supabase.from("businesses").select(LIST_SELECT).neq("kind", "accommodation_property")
+      .order("submitted_at", { ascending: false }).order("id");
     if (status && status !== "All") b = b.eq("status", status);
     return b;
   };
@@ -340,7 +353,6 @@ export async function getBusinesses({ status } = {}) {
   ]);
   if (error) throw error;
   return (data ?? [])
-    .filter((row) => row.kind !== "accommodation_property")
     .map((row) => withProperties(withFeatured(fromRow(row), live, promotions), byCompany));
 }
 

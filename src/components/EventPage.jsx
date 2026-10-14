@@ -64,7 +64,9 @@ function asEvent(rawEvent, it) {
     website: it.website,
     image: it.image,
     gallery: it.gallery?.length ? it.gallery : [it.image],
-    standfirst: it.description,
+    // The tagline goes under the title; the description below the hero once
+    // (it was also passed as the standfirst, so it showed twice).
+    subtitle: it.tagline,
     body,
     hours: it.hours,
     phone: it.phone,
@@ -182,7 +184,7 @@ export default function EventPage() {
       )) : undefined}
       categoryColor={dot}
       title={event.title}
-      subtitle={event.subtitle}
+      subtitle={free ? null : event.subtitle}
       heroImage={gallery[0]}
       extraImages={free ? [] : gallery.slice(1)}
       metaRows={metaRows}
