@@ -8,16 +8,13 @@ import { listTickets } from "../api/businessTickets";
 import { countOpenRequests } from "../api/purchaseRequests";
 import { countOwnerDrafts } from "../api/pushRequests";
 import { isAccommodationCompany, tierLabel } from "../../Data/accommodation";
+import { PUBLIC_SITE_URL } from "../../lib/publicSite";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
 const TEXT_ON  = "rgba(255,255,255,0.75)";
 const TEXT_DIM = "rgba(255,255,255,0.45)";
 const DIVIDER  = "rgba(255,255,255,0.10)";
-// The public Maidenhead site (the admin-panel branch's deployment). Override
-// with VITE_PUBLIC_SITE_URL once the site has its production domain.
-const PUBLIC_SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_URL
-  || "https://town-center-git-admin-panel-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/$/, "");
 
 const NAV = [
   { to: "/business/dashboard", label: "Dashboard", icon: "🏠" },

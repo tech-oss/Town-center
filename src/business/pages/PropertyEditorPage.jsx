@@ -23,8 +23,9 @@ import { getProperty, submitProperty, readableError } from "../api/accommodation
 // (draft, pending, rejected) is approved as a whole, so its sections save
 // straight onto it and nothing goes public until admin approves the
 // property. Once it has been live, each section's changes are reviewed like
-// any other listing edit — except the toggles (check-in options, property
-// amenities, room amenities), which go live straight away.
+// any other listing edit — except a save that only flips toggles (early
+// check-in, late check-out, amenity and room-amenity ticks), which goes live
+// straight away (saveBusinessListing's `property` option).
 
 const TABS = [
   { key: "profile",   label: "Profile" },
@@ -115,7 +116,7 @@ export default function PropertyEditorPage() {
   async function handleSave(tabKey) {
     setSaving(true);
     try {
-      const { unchanged, live } = await saveBusinessListing(id, listing, tabKey, { direct });
+      const { unchanged, live } = await saveBusinessListing(id, listing, tabKey, { direct, property: true });
       if (unchanged) { setToast("Nothing has changed in this section."); return; }
       const fresh = await getBusinessListing(id);
       setListing(fresh);
@@ -192,7 +193,7 @@ export default function PropertyEditorPage() {
         <div className="rounded-xl px-4 py-3 text-sm font-medium" style={{ backgroundColor: "rgba(37,99,235,0.07)", border: "1.5px solid rgba(37,99,235,0.2)", color: "#2563EB" }}>
           {direct
             ? "Save each section as you go. Nothing is public until you submit the property and Maidenhead admin approves it."
-            : "Changes you save are reviewed by Maidenhead admin before going live. Check-in options, amenities and room amenities go live as soon as you save them."}
+            : "Changes you save are reviewed by Maidenhead admin before going live. Only on/off ticks — early check-in, late check-out, amenities and room amenities — go live as soon as you save them."}
         </div>
 
         {!premium && (

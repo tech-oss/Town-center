@@ -9,6 +9,7 @@ import {
 } from "../api/pushRequests";
 import AddonSlotsCard from "../components/AddonSlotsCard";
 import PurchasedSlots from "../components/PurchasedSlots";
+import { publicSiteLink } from "../../lib/publicSite";
 
 // Requesting a push notification. The composer is the same one admin uses —
 // same fields, same limits, same live preview — because what the business
@@ -457,6 +458,21 @@ export default function PushNotificationsPage() {
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: s.bg, color: s.fg }}>{s.label}</span>
                       </div>
                       <p className="text-xs mt-0.5 line-clamp-2" style={{ color: MUTED }}>{r.body}</p>
+                      {/* The offer or news post sent with it, so the business can
+                          see which one each notification promoted. */}
+                      {r.attachedArticle && (
+                        <a href={publicSiteLink(r.attachedArticle.link)} target="_blank" rel="noopener noreferrer" data-skip-external-confirm
+                          className="mt-2 flex items-center gap-2.5 rounded-xl p-1.5 pr-3 max-w-md hover:opacity-80 transition-opacity"
+                          style={{ backgroundColor: "#f8fafc", border: `1px solid ${BORDER}` }}>
+                          {r.attachedArticle.thumbnail
+                            ? <img src={r.attachedArticle.thumbnail} alt="" className="w-12 h-9 rounded-lg object-cover shrink-0" />
+                            : <span className="w-12 h-9 rounded-lg shrink-0" style={{ backgroundColor: "rgba(16,24,40,0.06)" }} />}
+                          <span className="min-w-0">
+                            <span className="block text-[10px] font-bold uppercase tracking-wide" style={{ color: MUTED }}>Attached post</span>
+                            <span className="block text-xs font-semibold truncate" style={{ color: FOREST }}>{r.attachedArticle.title || "Untitled post"}</span>
+                          </span>
+                        </a>
+                      )}
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         {r.channels.map((c) => (
                           <span key={c} className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(16,24,40,0.1)", color: FOREST }}>{c}</span>

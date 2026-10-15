@@ -190,12 +190,30 @@ const columnFor = (field) => field.replace(/([A-Z])/g, "_$1").toLowerCase();
 const sameValue = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 
 // Room amenities are toggles, which go live without review; a room's name,
-// beds or description are not. A rooms save publishes straight away only
-// when the amenity ticks are all that changed.
+// beds or description are not.
 function onlyRoomAmenitiesChanged(before = [], after = []) {
   if (before.length !== after.length) return false;
   const strip = (r) => ({ ...r, amenities: undefined });
   return before.every((r, i) => sameValue(strip(r), strip(after[i])));
+}
+
+// An accommodation property's on/off toggles — the only things on a live
+// property that go live without admin approval. Everything else, including
+// the check-in and check-out times, "other amenities" and the star rating,
+// is reviewed like any other section.
+const PROPERTY_TOGGLES = {
+  hours: ["earlyCheckin", "lateCheckout"],
+  amenities: ["amenities"],
+};
+
+// The fields of `tabKey` a property save changes, when they are all toggles;
+// null when anything else changed (or nothing did).
+function propertyToggleChanges(tabKey, current, listing) {
+  const changed = (SECTION_FIELDS[tabKey] ?? []).filter((f) => !sameValue(current[f], listing[f]));
+  if (!changed.length) return null;
+  if (tabKey === "rooms") return onlyRoomAmenitiesChanged(current.rooms, listing.rooms) ? changed : null;
+  const toggles = PROPERTY_TOGGLES[tabKey] ?? [];
+  return changed.every((f) => toggles.includes(f)) ? changed : null;
 }
 
 // Returns { unchanged: true } without saving (or sending anything for
@@ -205,15 +223,28 @@ function onlyRoomAmenitiesChanged(before = [], after = []) {
 // pending or rejected) is approved as a whole, so its sections are written
 // as they are — no per-section review, no snapshot. Once it has been live,
 // edits go through the normal per-section approval below.
-export async function saveBusinessListing(businessId, listing, tabKey, { direct = false } = {}) {
+//
+// `property`: a live accommodation property. Only a save that changes
+// nothing but its toggles (PROPERTY_TOGGLES, room amenities) goes live
+// straight away; any other change to any section — Check-in and Amenities
+// included — waits for admin, unlike a standard business's hours/amenities.
+export async function saveBusinessListing(businessId, listing, tabKey, { direct = false, property = false } = {}) {
   const current = await getBusinessListing(businessId);
-  const autoPublish = direct || isAutoPublished(tabKey)
-    || (tabKey === "rooms" && onlyRoomAmenitiesChanged(current.rooms, listing.rooms));
 
   const tabFields = SECTION_FIELDS[tabKey] ?? [];
   if (tabFields.length && tabFields.every((f) => sameValue(current[f], listing[f]))) {
     return { unchanged: true };
   }
+
+  if (property && !direct) {
+    // Toggles while the section is already waiting on admin wait with it, so
+    // a live toggle save can never publish the pending edit alongside it.
+    const toggles = current.approvalStatus?.[tabKey] === "Pending Approval"
+      ? null : propertyToggleChanges(tabKey, current, listing);
+    if (toggles) return saveToggles(businessId, listing, tabKey, toggles);
+  }
+
+  const autoPublish = direct || (!property && isAutoPublished(tabKey));
 
   // An auto-published section is never reviewed, so it needs no "before"
   // snapshot (nothing can revert it) and is written already Up to Date,
@@ -275,4 +306,21 @@ export async function saveBusinessListing(businessId, listing, tabKey, { direct 
   });
   // `live`: whether this save is already on the public page (no review).
   return { unchanged: false, live: autoPublish };
+}
+
+// A property's toggles, live at once. Only those columns are written: the
+// section's approval state, snapshot and reviewer marks are left as they
+// were, so the change never shows in the approval queue or its history.
+async function saveToggles(businessId, listing, tabKey, fields) {
+  const full = toRow(listing);
+  const patch = { updated_at: full.updated_at };
+  for (const f of fields) patch[columnFor(f)] = full[columnFor(f)];
+  const { error } = await supabase.from("business_listings").update(patch).eq("business_id", businessId);
+  if (error) throw error;
+  await logActivity(businessId, {
+    action: "listing.updated",
+    entityType: "listing", entityId: businessId,
+    title: SECTION_LABELS[tabKey] ?? tabKey,
+  });
+  return { unchanged: false, live: true };
 }
