@@ -230,7 +230,14 @@ async function contentTitles(rows) {
     })),
     load("feature_article", "feature_articles", "id, title, card_heading, card_image", (r) => ({ title: r.card_heading || r.title, image: r.card_image })),
     load("business_event", "business_events", "id, title, hero_image", (r) => ({ title: r.title, image: r.hero_image })),
-    load("business", "businesses", "id, name", (r) => ({ title: r.name, image: null })),
+    // A Featured Business shows the business itself: its header picture, or
+    // failing that its logo or first photo. It used to load no picture at
+    // all, so every business slot read "No content yet".
+    load("business", "businesses", "id, name, business_listings(hero_image, logo, gallery)", (r) => {
+      const l = Array.isArray(r.business_listings) ? r.business_listings[0] : r.business_listings;
+      const photo = Array.isArray(l?.gallery) ? l.gallery.find((g) => typeof g === "string" && g) : null;
+      return { title: r.name, image: l?.hero_image || l?.logo || photo || null };
+    }),
   ]);
   return titles;
 }

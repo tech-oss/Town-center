@@ -60,6 +60,7 @@ function asEvent(rawEvent, it) {
     slug: it.slug,
     category: it.tag || "What's On",
     title: it.name,
+    logo: it.logo,
     location: it.address,
     website: it.website,
     image: it.image,
@@ -191,6 +192,10 @@ export default function EventPage() {
       )) : undefined}
       categoryColor={dot}
       title={event.title}
+      // The business logo beside its name, as on Eat & Drink and Shop pages
+      // and the app (this page never passed it, so See & Do showed none).
+      // A free listing has no logo: the public view withholds it.
+      logo={event.isBusiness && !free ? event.logo : null}
       subtitle={free ? null : event.subtitle}
       heroImage={gallery[0]}
       extraImages={free ? [] : gallery.slice(1)}

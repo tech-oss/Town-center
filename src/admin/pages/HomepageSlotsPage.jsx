@@ -386,7 +386,7 @@ function PlacementRow({ placement: p, onEdit, onEnd, onCancel, onApprove, onReje
       style={{ ...CARD, border: p.live ? "1.5px solid rgba(22,163,74,0.4)" : CARD.border, opacity: ended ? 0.7 : 1 }}>
       {p.contentImage
         ? <img src={p.contentImage} alt="" className="w-20 h-16 rounded-xl object-cover shrink-0 hidden sm:block" />
-        : <span className="w-20 h-16 rounded-xl shrink-0 hidden sm:flex items-center justify-center text-[10px] font-semibold text-center px-1" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: MUTED }}>No content yet</span>}
+        : <span className="w-20 h-16 rounded-xl shrink-0 hidden sm:flex items-center justify-center text-[10px] font-semibold text-center px-1" style={{ backgroundColor: "rgba(16,24,40,0.05)", color: MUTED }}>{p.contentKind === "business" ? "No picture yet" : "No content yet"}</span>}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-1">
           <span className="text-sm font-bold truncate" style={{ color: NAVY }}>
