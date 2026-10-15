@@ -253,7 +253,11 @@ export async function saveBusinessListing(businessId, listing, tabKey, { direct 
   // database says, not what this page last loaded.
   const approvalStatus = {
     ...(current.approvalStatus ?? {}),
-    [tabKey]: autoPublish ? "Up to Date" : (listing.approvalStatus?.[tabKey] ?? "Pending Approval"),
+    // A reviewed save is always Pending Approval, whatever the page holds.
+    // This used to keep the caller's state when it had one, and the property
+    // editor passes the listing as loaded — "Up to Date" — so its edits were
+    // saved with their snapshot but never queued, and went straight live.
+    [tabKey]: autoPublish ? "Up to Date" : "Pending Approval",
   };
   const rejectionReason = {
     ...(current.rejectionReason ?? {}),
