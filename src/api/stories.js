@@ -108,7 +108,7 @@ export async function getHomepageStories() {
       slug: a.slug,
       homepage: true,
       to: `/news/${a.slug}`,
-      eyebrow: a.business?.name ?? a.category,
+      eyebrow: a.byName ?? a.business?.name ?? a.category,
       cardHeading: a.title,
       cardBody: a.excerpt,
       cardImage: imageUrl(a.image, "card"),

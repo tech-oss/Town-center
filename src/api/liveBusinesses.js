@@ -372,14 +372,23 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   // every listing on the site wore a Featured tag and sorted to the top.
   // A property also carries what its company published: articles are
   // written once at company level and appear on every property page.
+  //
+  // Each post keeps the property as its `business` (its link, picture and
+  // "More from" list stay on the page the visitor came from), and the
+  // company's own posts carry `byName`, the company's name: they say "At
+  // <company>", not "At <property>", on the article and on Offers cards.
   const owners = isProperty ? [row.business_id, row.parent_id] : [row.business_id];
-  const of = (map) => owners.flatMap((id) => map[id] ?? []);
-  item.featuredArticles = of(features).map((f) => mapFeature(f, item));
+  const companyName = isProperty ? item.managedBy?.name ?? null : null;
+  const of = (map, mapper) => owners.flatMap((id) => (map[id] ?? []).map((x) => {
+    const post = mapper(x, item);
+    return id === row.parent_id && companyName ? { ...post, byName: companyName } : post;
+  }));
+  item.featuredArticles = of(features, mapFeature);
   item.news = [
     ...item.featuredArticles,
-    ...of(events).map((e) => mapEvent(e, item)),
-    ...of(articles).map((a) => mapArticle(a, item)),
-    ...of(newsOffers).map((n) => mapNewsOffer(n, item)),
+    ...of(events, mapEvent),
+    ...of(articles, mapArticle),
+    ...of(newsOffers, mapNewsOffer),
   ];
   // Only approved reviews of Visibility Plan businesses reach the view, and
   // a profile shows at most six of them at a time (newest first) on both the

@@ -163,6 +163,9 @@ function normalizeUrl(url) {
   return u.startsWith("http") ? u : `https://${u}`;
 }
 
+// The most photos the gallery grid shows (accommodation: header + 12).
+const MAX_GALLERY_PHOTOS = 12;
+
 // ── The one shared body used by every place/event detail page ──
 // (See & Do events, Eat & Drink businesses, Shop businesses, Services
 // businesses) so all four read as one consistent design:
@@ -230,7 +233,10 @@ export default function PlaceDetailLayout({
   const [copied, setCopied] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [showStickyBooking, setShowStickyBooking] = useState(false);
-  const galleryImages = extraImages.slice(0, 6);
+  // Every photo the business uploaded, up to the 12 an accommodation
+  // property (or admin) can add. Capped at 6 before, so half of a property's
+  // photos never showed.
+  const galleryImages = extraImages.slice(0, MAX_GALLERY_PHOTOS);
 
   // Sticky "Make a booking" button — floats in once the page's own booking
   // button (in the info card) has scrolled out of view, so it's always

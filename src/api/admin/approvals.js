@@ -76,7 +76,14 @@ const SECTION_FIELDS = {
 // Sections the business publishes without review — they never produce a
 // queue item, even if an older row still carries a pending state for one.
 // Mirrors AUTO_PUBLISH_SECTIONS in business-dashboard's businessListing.js.
+//
+// Not for an accommodation property: only its on/off toggles (early check-in,
+// late check-out, the amenity ticks, room amenities) skip review, and a save
+// that is only toggles leaves the section's approval state alone. Any other
+// change to its Check-in or Amenities section waits here like the rest.
 const AUTO_PUBLISHED_SECTIONS = new Set(["hours", "amenities"]);
+const isAutoPublished = (section, kind) =>
+  AUTO_PUBLISHED_SECTIONS.has(section) && kind !== "accommodation_property";
 
 const PENDING = "Pending Approval";
 const APPROVED = "Up to Date";
@@ -258,11 +265,11 @@ function isRealSubmission(row, section, state) {
 async function listingIdsWithSubmissions() {
   const { data, error } = await fetchAll(() => supabase
     .from("business_listings")
-    .select("business_id, approval_status, edited_by")
+    .select("business_id, approval_status, edited_by, businesses(kind)")
     .order("business_id"));
   if (error) throw error;
   return (data ?? [])
-    .filter((row) => Object.keys(row.approval_status ?? {}).some((s) => !AUTO_PUBLISHED_SECTIONS.has(s) && row.edited_by?.[s]))
+    .filter((row) => Object.keys(row.approval_status ?? {}).some((s) => !isAutoPublished(s, row.businesses?.kind) && row.edited_by?.[s]))
     .map((row) => row.business_id);
 }
 
@@ -295,7 +302,7 @@ export async function getApprovals({ status } = {}) {
     // that hasn't been approved yet.
     const named = { ...row, name: withCompany(row.businesses?.name ?? row.name, row.businesses, companyNames) };
     for (const [section, state] of Object.entries(row.approval_status ?? {})) {
-      if (AUTO_PUBLISHED_SECTIONS.has(section)) continue;
+      if (isAutoPublished(section, row.businesses?.kind)) continue;
       if (!isRealSubmission(row, section, state)) continue;
       items.push(toItem(named, section, state, owners[companyOf(row)]));
     }
@@ -340,7 +347,7 @@ function withCompany(name, business, companyNames) {
 export async function countPendingApprovals() {
   const { data, error } = await fetchAll(() => supabase
     .from("business_listings")
-    .select("business_id, approval_status, edited_by")
+    .select("business_id, approval_status, edited_by, businesses(kind)")
     .order("business_id"));
   if (error) throw error;
 
@@ -349,7 +356,7 @@ export async function countPendingApprovals() {
   for (const row of data ?? []) {
     for (const [section, state] of Object.entries(row.approval_status ?? {})) {
       if (state !== PENDING) continue;
-      if (AUTO_PUBLISHED_SECTIONS.has(section)) continue;
+      if (isAutoPublished(section, row.businesses?.kind)) continue;
       if (!row.edited_by?.[section]) continue;
       candidates.push({ businessId: row.business_id, section, editor: row.edited_by[section] });
     }
@@ -393,7 +400,7 @@ export async function getApprovalById(id) {
   if (error) throw error;
   if (!data) return null;
   const state = data.approval_status?.[section];
-  if (!state || AUTO_PUBLISHED_SECTIONS.has(section)) return null;
+  if (!state || isAutoPublished(section, data.businesses?.kind)) return null;
   const companyId = data.businesses?.parent_id ?? businessId;
   const owners = await ownersByBusiness([companyId]);
   const named = { ...data, name: withCompany(data.businesses?.name ?? data.name, data.businesses, await namesOfCompanies([data])) };

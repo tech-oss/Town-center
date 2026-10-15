@@ -31,7 +31,9 @@ function Lightbox({ images, index, onClose, onStep }) {
 // Extra-photos grid (2 per row) shown on every business/stay detail screen,
 // matching the website's photo grid — tapping any photo opens it full screen
 // with the rest of the set swipeable via tap zones either side.
-export default function PhotoGallery({ images = [], title, max = 6 }) {
+// Up to 12 photos — the most a business (an accommodation property, or admin
+// for any listing) can upload; it stopped at 6 before.
+export default function PhotoGallery({ images = [], title, max = 12 }) {
   const [index, setIndex] = useState(null);
   const shown = images.slice(0, max);
   if (shown.length === 0) return null;

@@ -51,7 +51,9 @@ export default function ArticlePage() {
             {article.title}
           </h1>
           <p className="text-sm mb-6" style={{ color: "#000000" }}>
-            At <Link to={bizPath} className="font-semibold underline-offset-2 hover:underline" style={{ color: "var(--leaf)" }}>{biz.name}</Link> · {biz.tag}
+            {/* An accommodation company's post names the company (byName),
+                not the property it was opened from. */}
+            At <Link to={bizPath} className="font-semibold underline-offset-2 hover:underline" style={{ color: "var(--leaf)" }}>{article.byName ?? biz.name}</Link>{biz.tag ? ` · ${biz.tag}` : ""}
           </p>
 
           {/* Cover image */}

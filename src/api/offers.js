@@ -88,7 +88,9 @@ export async function getOffersFeed() {
         // "What's On" is no longer a post type; older posts saved with it
         // read as News, as everywhere else.
         type: a.category === "What's On" ? "News" : a.category,
-        businessName: a.business?.name ?? null,
+        // An accommodation company's post is "at" the company (byName),
+        // whichever of its properties it came through.
+        businessName: a.byName ?? a.business?.name ?? null,
         businessSection: a.business?.section ?? null,
         homepage: onHome.has(articleKey(a)),
       })),

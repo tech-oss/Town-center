@@ -61,7 +61,7 @@ export async function getSpotlightPosts() {
       id: a.id,
       slug: a.slug,
       homepage: true,
-      category: [a.business?.name, a.category].filter(Boolean).join(" · "),
+      category: [a.byName ?? a.business?.name, a.category].filter(Boolean).join(" · "),
       title: a.title,
       excerpt: a.excerpt,
       imageSrc: imageUrl(a.image, "card") || "/logo-mark.svg",

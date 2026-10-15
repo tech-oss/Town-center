@@ -51,7 +51,8 @@ export default function NewsDetailScreen() {
               <h1 className="text-xl font-bold leading-snug" style={{ color: "#000000" }}>{article.title}</h1>
               {biz && (
                 <p className="text-sm mt-1.5" style={{ color: "#000000" }}>
-                  At {bizLink ? <Link to={bizLink} className="font-semibold" style={{ color: "var(--leaf)" }}>{biz.name}</Link> : biz.name} · {biz.tag}
+                  {/* A company's post names the company (byName), not the property. */}
+                  At {bizLink ? <Link to={bizLink} className="font-semibold" style={{ color: "var(--leaf)" }}>{article.byName ?? biz.name}</Link> : (article.byName ?? biz.name)}{biz.tag ? ` · ${biz.tag}` : ""}
                 </p>
               )}
             </div>

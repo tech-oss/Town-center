@@ -122,6 +122,15 @@ h1, h2, h3, h4, h5, h6, .font-serif-display {
   text-wrap: balance;   /* avoid orphan words on multi-line headings */
 }
 
+/* A heading cut to a line or two (line-clamp / truncate) hides whatever falls
+   outside its line boxes, and at 1.12 Switzer's tails (g, j, p, q, y) do:
+   its letters need 1.25. Those headings drop the 1.12 above and take their
+   own leading class instead (leading-snug, leading-tight…), or the font's
+   normal spacing if they have none. Unclamped headings are unchanged. */
+:is(h1, h2, h3, h4, h5, h6):is([class*="line-clamp-"], .truncate) {
+  line-height: revert-layer;
+}
+
 /* Large headings step down to the light display weight; small headings step
    up to medium — the restrained 300–500 range the whole hierarchy lives in. */
 .text-3xl, .text-4xl, .text-5xl, .text-6xl, .text-7xl, .text-8xl {

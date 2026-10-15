@@ -353,7 +353,7 @@ function ActionButton({ icon, label, onClick, href, active }) {
   const inner = (
     <>
       {icon}
-      <span className="text-[11px] font-medium leading-none truncate w-full text-center">{label}</span>
+      <span className="text-[11px] font-medium leading-tight truncate w-full text-center">{label}</span>
     </>
   );
   if (href) {
