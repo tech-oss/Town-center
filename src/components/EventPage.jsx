@@ -1,4 +1,4 @@
-import { useParams, useSearchParams, Link, Navigate } from "react-router-dom";
+import { useParams, useSearchParams, Link, Navigate, useLocation } from "react-router-dom";
 import { useTrackView, businessView, eventView } from "../lib/trackView";
 import { useEffect, useState } from "react";
 import { categoryColors } from "../Data/events";
@@ -105,8 +105,10 @@ export default function EventPage() {
   const { data: rawEvent, loading: loadingEvent, error } = useFetch(() => getEventBySlug(slug), [slug]);
   const { data: business, loading: loadingBusiness } = useFetch(() => getBusinessBySlug(slug), [slug]);
   const { data: allEvents, loading: loadingList } = useFetch(getEvents, []);
+  // Opened from one of its company's property pages: counts for that property.
+  const via = useLocation().state?.viaBusinessId;
   // A What's On event counts as the event; a See & Do business as its page.
-  useTrackView(rawEvent ? eventView(rawEvent) : businessView(business));
+  useTrackView(rawEvent ? eventView(rawEvent, via) : businessView(business));
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -148,9 +150,14 @@ export default function EventPage() {
       text: (
         <>
           Hosted by{" "}
-          <Link to={event.businessTo} className="font-bold underline underline-offset-2 hover:opacity-75" style={{ color: "var(--teal-deep)" }}>
-            {event.businessName}
-          </Link>
+          {/* An accommodation company has no page to link to. */}
+          {event.businessTo ? (
+            <Link to={event.businessTo} className="font-bold underline underline-offset-2 hover:opacity-75" style={{ color: "var(--teal-deep)" }}>
+              {event.businessName}
+            </Link>
+          ) : (
+            <span className="font-bold" style={{ color: "var(--teal-deep)" }}>{event.businessName}</span>
+          )}
         </>
       ),
     },

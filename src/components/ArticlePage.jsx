@@ -1,5 +1,5 @@
 import { webPathFor } from "../api/liveBusinesses";
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link, Navigate, useLocation } from "react-router-dom";
 import { cropStyle } from "../lib/focalPoint";
 import { useTrackView, articleView } from "../lib/trackView";
 import { useEffect } from "react";
@@ -15,7 +15,7 @@ import { postPath } from "../lib/postPath";
 export default function ArticlePage() {
   const { articleSlug } = useParams();
   const { data: article, loading, error } = useFetch(() => getArticleBySlug(articleSlug), [articleSlug]);
-  useTrackView(articleView(article));
+  useTrackView(articleView(article, useLocation().state?.viaBusinessId));
 
   useEffect(() => {
     window.scrollTo(0, 0);

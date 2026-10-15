@@ -51,6 +51,9 @@ export default function NewsOffers({ item, placeholder }) {
               <Link
                 key={post.id}
                 to={postPath(post)}
+                // A company's post on one of its property pages: its view
+                // counts for this property (lib/trackView.js).
+                state={post.ownerId && post.ownerId !== item.businessId ? { viaBusinessId: item.businessId } : undefined}
                 className="group relative flex flex-row md:flex-col overflow-hidden p-3 gap-3 md:gap-0
                            transition-all duration-300 ease-out hover:-translate-y-1"
                 style={{

@@ -1,4 +1,4 @@
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useLocation } from "react-router-dom";
 import { cropStyle } from "../../lib/focalPoint";
 import { useMemo } from "react";
 import { pickSome } from "../../lib/pickSome";
@@ -42,7 +42,7 @@ export default function StoryDetailScreen() {
   const { slug } = useParams();
   const { data: story, loading } = useFetch(() => getStoryBySlug(slug), [slug]);
   // A Featured Article that belongs to a business counts towards its analytics.
-  useTrackView(featureView(story));
+  useTrackView(featureView(story, useLocation().state?.viaBusinessId));
   const { data: stories } = useFetch(getStories, []);
   // Three others at random, so each article suggests something different.
   const more = useMemo(() => pickSome((stories ?? []).filter((f) => f.slug !== slug), 3), [stories, slug]);

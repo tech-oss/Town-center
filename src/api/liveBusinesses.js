@@ -379,8 +379,11 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
   // <company>", not "At <property>", on the article and on Offers cards.
   const owners = isProperty ? [row.business_id, row.parent_id] : [row.business_id];
   const companyName = isProperty ? item.managedBy?.name ?? null : null;
+  // `ownerId` is the business the post belongs to (the company, for its
+  // posts), which is who its views count for unless it was opened from one
+  // of the company's property pages (lib/trackView.js).
   const of = (map, mapper) => owners.flatMap((id) => (map[id] ?? []).map((x) => {
-    const post = mapper(x, item);
+    const post = { ...mapper(x, item), ownerId: id };
     return id === row.parent_id && companyName ? { ...post, byName: companyName } : post;
   }));
   item.featuredArticles = of(features, mapFeature);

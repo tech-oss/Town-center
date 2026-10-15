@@ -1,4 +1,4 @@
-import { useParams, Link, Navigate } from "react-router-dom";
+import { useParams, Link, Navigate, useLocation } from "react-router-dom";
 import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { focalPosition } from "../lib/focalPoint";
@@ -68,7 +68,7 @@ export default function FeatureArticlePage() {
   const { slug } = useParams();
   const { data: story, loading, error } = useFetch(() => getStoryBySlug(slug), [slug]);
   // A Featured Article that belongs to a business counts towards its analytics.
-  useTrackView(featureView(story));
+  useTrackView(featureView(story, useLocation().state?.viaBusinessId));
   const { data: stories, loading: loadingList } = useFetch(getStories, []);
   const moreStories = useMemo(() => pickSome((stories ?? []).filter((f) => f.slug !== slug), 3), [stories, slug]);
 

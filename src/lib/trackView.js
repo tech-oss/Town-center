@@ -33,9 +33,17 @@ export function businessView(item) {
   return item?.live && item.businessId ? { businessId: item.businessId, type: "profile", id: item.businessId } : null;
 }
 
+// `via`: the accommodation property whose page the post was opened from
+// (router state `viaBusinessId`, set by the property page's links). A
+// company's posts appear on every one of its property pages; a view from one
+// counts for that property — record_view accepts a property for its
+// company's content — and the company-wide figures add the properties up.
+// Opened anywhere else, a post counts for the business that owns it.
+
 // What to record for a news / offer post of a business.
-export function articleView(article) {
-  const businessId = article?.business?.businessId;
+export function articleView(article, via = null) {
+  if (!article) return null;
+  const businessId = via || article.ownerId || article.business?.businessId;
   if (!businessId) return null;
   const raw = String(article.id ?? "");
   const id = article.newsOfferId
@@ -46,15 +54,15 @@ export function articleView(article) {
 }
 
 // What to record for an event run by a business.
-export function eventView(event) {
-  return event?.businessId && event.id ? { businessId: event.businessId, type: "event", id: String(event.id) } : null;
+export function eventView(event, via = null) {
+  return event?.businessId && event.id ? { businessId: via || event.businessId, type: "event", id: String(event.id) } : null;
 }
 
 // A Featured Article that belongs to a business — either one the business
 // wrote against a slot it bought, or an admin story attached to it.
-export function featureView(story) {
+export function featureView(story, via = null) {
   return story?.businessId && story.id
-    ? { businessId: story.businessId, type: "featured", id: String(story.id) }
+    ? { businessId: via || story.businessId, type: "featured", id: String(story.id) }
     : null;
 }
 

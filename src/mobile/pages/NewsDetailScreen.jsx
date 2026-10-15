@@ -1,4 +1,4 @@
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, Link, useLocation } from "react-router-dom";
 import { cropStyle } from "../../lib/focalPoint";
 import { useTrackView, articleView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
@@ -12,7 +12,7 @@ import ShareButton from "../components/ShareButton";
 export default function NewsDetailScreen() {
   const { slug } = useParams();
   const { data: article, loading } = useFetch(() => getArticleBySlug(slug), [slug]);
-  useTrackView(articleView(article));
+  useTrackView(articleView(article, useLocation().state?.viaBusinessId));
 
   const goBack = useMobileBack("/mobile/offers");
   if (!loading && !article) return <Navigate to="/mobile/offers" replace />;

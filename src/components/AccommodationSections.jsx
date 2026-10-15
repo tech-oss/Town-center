@@ -1,6 +1,8 @@
 // Sections only an accommodation property's page has: its rooms, and the
 // MANAGED BY panel naming the company that runs it. Styled to match the
 // stay page's other sections (Availability & Check-in, amenities).
+import SocialIcon from "./SocialIcon";
+import { SOCIAL_NAMES } from "../lib/socialNames";
 
 // A website typed without its scheme still opens (same rule as
 // PlaceDetailLayout's links).
@@ -53,8 +55,6 @@ export function RoomsSection({ rooms }) {
   );
 }
 
-const SOCIAL_LABELS = { instagram: "Instagram", facebook: "Facebook", x: "X", twitter: "X", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube" };
-
 // The company that manages the property: its logo, name, address and public
 // contact details. Shown on free and paid properties alike.
 export function ManagedBySection({ company }) {
@@ -81,10 +81,13 @@ export function ManagedBySection({ company }) {
             </div>
             {socials.length > 0 && (
               <div className="flex flex-wrap gap-2">
+                {/* Each network's logo, not its name. */}
                 {socials.map(([k, url]) => (
                   <a key={k} href={normalizeUrl(url)} target="_blank" rel="noopener noreferrer"
-                    className="text-xs font-semibold px-3 py-1.5 rounded-full" style={{ border: "1.5px solid rgba(28,46,56,0.15)", color: "#000000" }}>
-                    {SOCIAL_LABELS[k] ?? k}
+                    aria-label={`${company.name} on ${SOCIAL_NAMES[k] ?? k}`} title={SOCIAL_NAMES[k] ?? k}
+                    className="w-10 h-10 rounded-full flex items-center justify-center transition-opacity hover:opacity-80"
+                    style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
+                    <SocialIcon name={k} />
                   </a>
                 ))}
               </div>

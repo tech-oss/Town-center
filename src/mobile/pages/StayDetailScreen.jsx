@@ -21,6 +21,8 @@ import { OffersLink } from "../components/ListSearch";
 import MobileReviews from "../components/MobileReviews";
 import MobileFaqs from "../components/MobileFaqs";
 import { postPath } from "../../lib/postPath";
+import SocialIcon from "../../components/SocialIcon";
+import { SOCIAL_NAMES } from "../../lib/socialNames";
 
 const SOCIAL_ICONS = {
   instagram: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="#fff" stroke="none" /></svg>,
@@ -111,6 +113,7 @@ function MobileRooms({ rooms }) {
 function MobileManagedBy({ company }) {
   if (!company?.name) return null;
   const website = externalUrl(company.website);
+  const socials = Object.entries(company.social ?? {}).filter(([, url]) => externalUrl(url));
   return (
     <div>
       <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Managed By</p>
@@ -124,6 +127,19 @@ function MobileManagedBy({ company }) {
             {company.email && <a href={`mailto:${company.email}`} className="break-all" style={{ color: "var(--leaf)" }}>{company.email}</a>}
             {website && <a href={website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--leaf)" }}>Website</a>}
           </div>
+          {/* The company's social links, as each network's logo. */}
+          {socials.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {socials.map(([k, url]) => (
+                <a key={k} href={externalUrl(url)} target="_blank" rel="noopener noreferrer"
+                  aria-label={`${company.name} on ${SOCIAL_NAMES[k] ?? k}`}
+                  className="w-9 h-9 rounded-full flex items-center justify-center active:opacity-70"
+                  style={{ backgroundColor: "var(--leaf)", color: "#ffffff" }}>
+                  <SocialIcon name={k} size={16} />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </MobileCard>
     </div>
@@ -411,7 +427,10 @@ export default function StayDetailScreen() {
               <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {news.map((n) => (
-                  <Link key={n.slug} to={postPath(n, { mobile: true })} className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>
+                  <Link key={n.slug} to={postPath(n, { mobile: true })}
+                    // A company's post here counts for this property (lib/trackView.js).
+                    state={n.ownerId && n.ownerId !== place.businessId ? { viaBusinessId: place.businessId } : undefined}
+                    className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>
                     <img src={n.image} alt="" className="w-full h-28 object-cover" style={cropStyle(n.image, "card")} />
                     <div className="p-2.5 flex flex-col gap-1">
                       <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wide w-fit" style={{ color: "var(--teal-deep)" }}>

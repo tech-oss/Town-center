@@ -82,7 +82,28 @@ async function withBusiness(events) {
   if (!list.some((e) => e?.businessId)) return events;
   const live = await loadLiveBusinesses().catch(() => []);
   const byId = new Map(live.map((b) => [b.businessId, b]));
+  // An accommodation management company has no page of its own, so it isn't
+  // in the live list; its details come from any of its properties' Managed
+  // By. Its events say "Hosted by <company>", without a link.
+  const companies = new Map();
+  for (const b of live) {
+    if (b.companyId && b.managedBy?.name && !companies.has(b.companyId)) companies.set(b.companyId, b.managedBy);
+  }
   const attach = (e) => {
+    const company = e?.businessId && !byId.has(e.businessId) ? companies.get(e.businessId) : null;
+    if (company) {
+      return {
+        ...e,
+        businessName: company.name,
+        businessSlug: null,
+        businessSection: null,
+        businessStayKind: null,
+        businessAddress: company.address || null,
+        businessLat: null,
+        businessLng: null,
+        businessTo: null,
+      };
+    }
     const b = e?.businessId ? byId.get(e.businessId) : null;
     if (!b) return e;
     return {
