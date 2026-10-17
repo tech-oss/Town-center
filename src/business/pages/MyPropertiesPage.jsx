@@ -10,6 +10,7 @@ import {
 } from "../api/accommodation";
 import { PROPERTY_STATES, STATE_ORDER, tierLabel } from "../../Data/accommodation";
 import StateChip from "../components/PropertyStateChip";
+import { publicBusinessUrl } from "../../lib/publicSite";
 
 // My Properties — every property the accommodation company manages, its
 // status, and what can be done with it next. Every action goes through a
@@ -120,6 +121,9 @@ function PropertyCard({ p, onAction, busy }) {
           </Link>
           {(p.state === "draft" || p.state === "rejected") && (
             <button type="button" disabled={busy} onClick={() => onAction("submit", p)} className={btn} style={primary}>Submit for approval</button>
+          )}
+          {p.state === "live" && (
+            <a href={publicBusinessUrl(p.id)} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className={btn} style={outline}>View on site</a>
           )}
           {p.state === "live" && <button type="button" disabled={busy} onClick={() => onAction("hide", p)} className={btn} style={outline}>Hide</button>}
           {p.state === "hidden" && <button type="button" disabled={busy} onClick={() => onAction("unhide", p)} className={btn} style={primary}>Show again</button>}

@@ -16,6 +16,7 @@ import { listTickets } from "../api/businessTickets";
 import { listActivity, activityLabel, activityIcon, relativeTime } from "../api/businessActivity";
 import AccommodationOverview from "../components/AccommodationOverview";
 import { isAccommodationCompany } from "../../Data/accommodation";
+import PublicPageLink from "../components/PublicPageLink";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -207,7 +208,8 @@ export default function DashboardPage() {
         <div className="flex gap-3 flex-wrap">
           <Link to={company ? "/business/properties" : "/business/listing"} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>{company ? "My Properties" : "Edit My Listing"}</Link>
           <Link to="/business/articles/new" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>Create News/Offer</Link>
-          <a href="/" target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>View Public Page</a>
+          {/* Was href="/": this portal's own home page, never the business's. */}
+          <PublicPageLink label="View Public Page" className="inline-block px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }} />
           <Link to="/business/support" className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-opacity hover:opacity-80" style={{ color: FOREST, border: `1.5px solid ${BORDER}` }}>Contact Support</Link>
         </div>
 

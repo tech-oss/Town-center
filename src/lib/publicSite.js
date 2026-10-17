@@ -9,3 +9,10 @@ export function publicSiteLink(path) {
   if (!path) return null;
   return /^https?:\/\//i.test(path) ? path : `${PUBLIC_SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
+
+// A business's (or an accommodation property's) own page on the public site.
+// /b/:slug there finds the page under whichever section it's listed; a
+// business that isn't publicly listed lands on the home page.
+export function publicBusinessUrl(businessId) {
+  return `${PUBLIC_SITE_URL}/b/${String(businessId).replace(/^biz_/, "")}`;
+}

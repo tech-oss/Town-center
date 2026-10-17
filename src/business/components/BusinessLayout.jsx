@@ -8,7 +8,7 @@ import { listTickets } from "../api/businessTickets";
 import { countOpenRequests } from "../api/purchaseRequests";
 import { countOwnerDrafts } from "../api/pushRequests";
 import { isAccommodationCompany, tierLabel } from "../../Data/accommodation";
-import { PUBLIC_SITE_URL } from "../../lib/publicSite";
+import PublicPageLink from "./PublicPageLink";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
 const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
@@ -189,12 +189,10 @@ export default function BusinessLayout({ children }) {
         <div style={{ height: 1, backgroundColor: DIVIDER, margin: "0 20px" }} />
 
         <div className="px-5 py-4 flex flex-col gap-2">
-          {/* The site is a separate deployment — "/" here was this portal's own
-              stale copy of it. /b/:id on the real site finds this business's page. */}
-          <a href={`${PUBLIC_SITE_URL}/b/${String(user.id).replace(/^biz_/, "")}`} target="_blank" rel="noopener noreferrer" data-skip-external-confirm
-            className="text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: SAGE }}>
-            View my public page →
-          </a>
+          {/* The business's page on the public site — for an accommodation
+              company, its live properties (PublicPageLink). */}
+          <PublicPageLink label="View my public page →" menuClassName="bottom-full mb-2 left-0"
+            className="text-xs font-semibold transition-opacity hover:opacity-80" style={{ color: SAGE }} />
           <button onClick={handleLogout} className="text-left text-xs transition-opacity hover:opacity-80" style={{ color: TEXT_DIM }}>Log out</button>
         </div>
       </aside>
