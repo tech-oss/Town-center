@@ -28,6 +28,7 @@ import SupportTicketsPage from "./pages/SupportTicketsPage";
 import NeighbourhoodGuidesPage from "./pages/NeighbourhoodGuidesPage";
 import NeighbourhoodGuideEditorPage from "./pages/NeighbourhoodGuideEditorPage";
 import SiteContentPage from "./pages/SiteContentPage";
+import LegalDocumentsPage from "./pages/LegalDocumentsPage";
 import useFetch from "../hooks/useFetch";
 import { getAdminPendingCounts } from "../api/admin";
 import { useLocation } from "react-router-dom";
@@ -90,6 +91,7 @@ export default function AdminApp() {
         <Route path="neighbourhood-guides/new" element={<NeighbourhoodGuideEditorPage />} />
         <Route path="neighbourhood-guides/:id/edit" element={<NeighbourhoodGuideEditorPage />} />
         <Route path="site-content" element={<SiteContentPage />} />
+        <Route path="legal-documents" element={<LegalDocumentsPage />} />
       </Route>
     </Routes>
   );

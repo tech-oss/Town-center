@@ -1,4 +1,4 @@
-import { formatAcceptedAt } from "../../Data/agreements";
+import { getBusinessLegalAcceptances, getBusinessesRequiringAcceptance, formatAcceptedAt } from "../../api/admin/legalDocuments";
 import { useState, useRef, useMemo, useEffect } from "react";
 import PlacementTimer from "../components/PlacementTimer";
 import { PLANS, planFor, isPremium, PREMIUM_PLAN } from "../../Data/plans";
@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness, setBusinessLogo,
-  suspendBusiness, reinstateBusiness, deleteBusiness, getBusinessAgreements, setFeatured, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
+  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import CoordsNotice from "../components/CoordsNotice";
@@ -667,35 +667,51 @@ function typeSpecificRows(biz) {
   }
 }
 
-// The four agreements and when each was accepted (registration or claim).
-// Businesses that signed up before these existed show their older single
-// terms acceptance instead.
+// The legal documents (Admin → Legal Documents): for each current document,
+// whether this business accepted that exact version, then every acceptance it
+// has ever made. Businesses that signed up before any of this existed show
+// their older single terms acceptance instead.
 function AgreementsList({ businessId, fallbackAcceptedAt }) {
-  const [rows, setRows] = useState(null);
+  const [data, setData] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
   useEffect(() => {
     let alive = true;
-    getBusinessAgreements(businessId).then((r) => { if (alive) setRows(r); }).catch(() => { if (alive) setRows([]); });
+    getBusinessLegalAcceptances(businessId)
+      .then((r) => { if (alive) setData(r); })
+      .catch(() => { if (alive) setData({ current: [], history: [] }); });
     return () => { alive = false; };
   }, [businessId]);
-  if (rows === null) return <p className="text-xs py-1" style={{ color: MUTED }}>Loading…</p>;
-  if (!rows.some((r) => r.acceptance)) {
-    return <DetailRow label="Terms & Privacy" value={fallbackAcceptedAt ? `Agreed ${new Date(fallbackAcceptedAt).toLocaleDateString("en-GB")} (before the four agreements were introduced)` : "Not recorded"} />;
+  if (data === null) return <p className="text-xs py-1" style={{ color: MUTED }}>Loading…</p>;
+  if (!data.history.length && fallbackAcceptedAt) {
+    return <DetailRow label="Terms & Privacy" value={`Agreed ${new Date(fallbackAcceptedAt).toLocaleDateString("en-GB")} (before the current legal documents were introduced)`} />;
   }
   return (
     <div className="flex flex-col">
-      {rows.map((r) => (
+      {data.current.map((r) => (
         <div key={r.key} className="flex items-start justify-between gap-3 py-2" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <div className="min-w-0">
-            <p className="text-xs font-semibold" style={{ color: NAVY }}>{r.title}</p>
+            <p className="text-xs font-semibold" style={{ color: NAVY }}>{r.name} <span className="font-normal" style={{ color: MUTED }}>· current version {r.version}</span></p>
             <p className="text-[11px]" style={{ color: r.acceptance ? "#15803D" : "#B45309" }}>
               {r.acceptance
-                ? `Accepted ${formatAcceptedAt(r.acceptance.accepted_at)} · v${r.acceptance.version} · at ${r.acceptance.context}${r.acceptance.email ? ` · ${r.acceptance.email}` : ""}`
-                : "Not accepted"}
+                ? `Accepted ${formatAcceptedAt(r.acceptance.accepted_at)} · at ${r.acceptance.context}${r.acceptance.email ? ` · ${r.acceptance.email}` : ""}`
+                : "Updated Terms Require Acceptance — asked to accept when they next open the dashboard"}
             </p>
           </div>
-          <a href={r.file} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-semibold" style={{ color: BLUE }}>PDF</a>
+          <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-semibold" style={{ color: BLUE }}>PDF</a>
         </div>
       ))}
+      {data.history.length > 0 && (
+        <div className="pt-2">
+          <button type="button" onClick={() => setShowHistory((v) => !v)} className="text-[11px] font-semibold" style={{ color: BLUE }}>
+            {showHistory ? "Hide" : "Show"} all acceptances ({data.history.length})
+          </button>
+          {showHistory && data.history.map((h, i) => (
+            <p key={i} className="text-[11px] py-1" style={{ color: MUTED }}>
+              {h.agreement_title} · v{h.version} · {formatAcceptedAt(h.accepted_at)} · at {h.context}{h.email ? ` · ${h.email}` : ""}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -931,7 +947,7 @@ function InfoField({ label, value, mono }) {
   );
 }
 
-function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull, onPlanChanged }) {
+function BusinessRow({ biz, termsOutstanding, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull, onPlanChanged }) {
   const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section, biz.kind);
   const chips = categoryChips(biz);
@@ -1004,6 +1020,11 @@ function BusinessRow({ biz, pendingAction, actionNote, onActionNote, onApprove, 
               {!biz.hasContent && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                   style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Content Pending</span>
+              )}
+              {/* A current legal document it hasn't accepted (Legal Documents). */}
+              {termsOutstanding?.length > 0 && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" title={`Still to accept: ${termsOutstanding.join(", ")}`}
+                  style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#991B1B" }}>Updated Terms Require Acceptance</span>
               )}
               {biz.featured && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>★ Featured</span>
@@ -1216,6 +1237,8 @@ const PAGE_SIZE = 50;
 export default function BusinessesPage() {
   const navigate = useNavigate();
   const { data: fetched, loading } = useFetch(getBusinesses, []);
+  // Business id → documents it still has to accept.
+  const { data: termsOutstanding } = useFetch(getBusinessesRequiringAcceptance, []);
   const [local, setLocal]       = useState(null);
   const [statusFilter, setStatusFilter] = useState("All");
   const [showForm, setShowForm] = useState(false);
@@ -1486,6 +1509,7 @@ export default function BusinessesPage() {
             <BusinessRow
               key={biz.id}
               biz={biz}
+              termsOutstanding={termsOutstanding?.get(biz.id)}
               onPlanChanged={(id, plan) => patch(id, { plan })}
               pendingAction={pendingAction}
               actionNote={actionNote}
