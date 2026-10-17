@@ -1,6 +1,5 @@
 import AgreementChecklist from "../components/AgreementChecklist";
-import { AGREEMENTS, allAgreed, formatAcceptedAt } from "../../Data/agreements";
-import { recordAgreements, listAgreements } from "../api/agreements";
+import { recordAgreements, listAgreements, allAgreed, formatAcceptedAt } from "../api/agreements";
 import { useEffect, useState } from "react";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import ProfileBenefits from "../components/ProfileBenefits";
@@ -63,9 +62,9 @@ export default function ClaimOnboardingPage() {
   const [step, setStep] = useState(0);
   // Everyone starts on the free listing; plans are chosen from the dashboard.
   const FREE_PLAN = "free";
-  // The four agreements. Someone who claimed since they were introduced
-  // accepted them on the claim form; this shows those. Anyone who claimed
-  // before accepts them here.
+  // The legal documents (current versions). Someone who claimed recently
+  // accepted them on the claim form; this shows those. Anything not yet
+  // accepted — or a newer version — is accepted here.
   const [agreements, setAgreements] = useState({ opened: {}, accepted: {} });
   const [recorded, setRecorded] = useState(null); // null = loading
   useEffect(() => {
@@ -73,14 +72,15 @@ export default function ClaimOnboardingPage() {
     listAgreements(user.id).then((rows) => { if (alive) setRecorded(rows); });
     return () => { alive = false; };
   }, [user.id]);
-  const alreadyAgreed = !!recorded && recorded.every((a) => a.acceptance);
+  const alreadyAgreed = !!recorded && recorded.length > 0 && recorded.every((a) => a.acceptance);
+  const toAccept = recorded ? recorded.filter((a) => !a.acceptance) : null;
   const [confirmFinal, setConfirmFinal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   function validStep() {
     if (step === 0) return true;
-    if (step === 1) return alreadyAgreed || allAgreed(agreements.accepted);
+    if (step === 1) return alreadyAgreed || allAgreed(toAccept, agreements.accepted);
     return confirmFinal;
   }
 
@@ -122,17 +122,17 @@ export default function ClaimOnboardingPage() {
               <div className="flex flex-col gap-3">
                 <p className="text-sm" style={{ color: MUTED }}>You accepted these when you claimed the business. You can read them again any time.</p>
                 {recorded.map((a) => (
-                  <div key={a.key} className="rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap" style={{ border: "1.5px solid rgba(22,163,74,0.35)", backgroundColor: "rgba(22,163,74,0.05)" }}>
+                  <div key={a.versionId} className="rounded-xl p-4 flex items-center justify-between gap-3 flex-wrap" style={{ border: "1.5px solid rgba(22,163,74,0.35)", backgroundColor: "rgba(22,163,74,0.05)" }}>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold" style={{ color: FOREST }}>{a.title}</p>
+                      <p className="text-sm font-semibold" style={{ color: FOREST }}>{a.name}</p>
                       <p className="text-[11px] font-semibold" style={{ color: "#15803D" }}>✓ Agreed {formatAcceptedAt(a.acceptance.accepted_at)} · version {a.acceptance.version}</p>
                     </div>
-                    <a href={a.file} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF</a>
+                    <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF</a>
                   </div>
                 ))}
               </div>
             ) : (
-              <AgreementChecklist value={agreements} onChange={setAgreements} />
+              <AgreementChecklist documents={toAccept} value={agreements} onChange={setAgreements} />
             )
           )}
 
@@ -151,9 +151,9 @@ export default function ClaimOnboardingPage() {
               </SummarySection>
 
               <SummarySection title="Agreements" onEdit={() => setStep(1)}>
-                {AGREEMENTS.map((a) => {
-                  const at = alreadyAgreed ? recorded.find((r) => r.key === a.key)?.acceptance?.accepted_at : agreements.accepted[a.key];
-                  return <SummaryRow key={a.key} label={a.title} value={at ? `Agreed ${formatAcceptedAt(at)}` : "Not agreed"} />;
+                {(recorded ?? []).map((a) => {
+                  const at = a.acceptance?.accepted_at ?? agreements.accepted[a.versionId];
+                  return <SummaryRow key={a.versionId} label={`${a.name} (v${a.version})`} value={at ? `Agreed ${formatAcceptedAt(at)}` : "Not agreed"} />;
                 })}
               </SummarySection>
 

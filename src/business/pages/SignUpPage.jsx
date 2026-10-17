@@ -1,5 +1,7 @@
 import AgreementChecklist from "../components/AgreementChecklist";
-import { AGREEMENTS, allAgreed, formatAcceptedAt } from "../../Data/agreements";
+import PrivacyPolicyBox from "../components/PrivacyPolicyBox";
+import { allAgreed, formatAcceptedAt } from "../api/agreements";
+import useLegalDocuments from "../hooks/useLegalDocuments";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -34,7 +36,8 @@ const EMPTY = {
   venueTypes: [],       // multi-select, max 2, for businessType "eat-drink"
   shopCategories: [],   // multi-select, max 2, for businessType "shop"
   seeDoCategories: [],  // multi-select, max 2, for businessType "see-do"
-  // The four agreements: which were opened, and when each was accepted.
+  // The legal documents (current versions, from admin's Legal Documents):
+  // which were viewed, and when each was agreed to — keyed by version.
   agreements: { opened: {}, accepted: {} },
   confirmFinal: false,  // "I understand this can't be changed later" — Review step
 };
@@ -166,6 +169,7 @@ function AccommodationNotice({ onAccept, onCancel }) {
 export default function SignUpPage() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState(EMPTY);
+  const { documents } = useLegalDocuments();
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -191,7 +195,8 @@ export default function SignUpPage() {
       return true;
     }
     if (step === 2) return true;
-    if (step === 3) return allAgreed(form.agreements.accepted);
+    // Continue stays disabled until every current document is agreed to.
+    if (step === 3) return allAgreed(documents, form.agreements.accepted);
     if (step === 4) return form.confirmFinal;
     return true;
   }
@@ -315,8 +320,11 @@ export default function SignUpPage() {
           {step === 2 && (isAccommodation ? <AccommodationBenefits /> : <ProfileBenefits />)}
 
           {step === 3 && (
-            <AgreementChecklist value={form.agreements}
-              onChange={(fn) => setForm((f) => ({ ...f, agreements: typeof fn === "function" ? fn(f.agreements) : fn }))} />
+            <div className="flex flex-col gap-6">
+              <AgreementChecklist documents={documents} value={form.agreements}
+                onChange={(fn) => setForm((f) => ({ ...f, agreements: typeof fn === "function" ? fn(f.agreements) : fn }))} />
+              <PrivacyPolicyBox />
+            </div>
           )}
 
           {step === 4 && (
@@ -346,9 +354,9 @@ export default function SignUpPage() {
               </SummarySection>
 
               <SummarySection title="Agreements" onEdit={() => setStep(3)}>
-                {AGREEMENTS.map((a) => (
-                  <SummaryRow key={a.key} label={a.title}
-                    value={form.agreements.accepted[a.key] ? `Agreed ${formatAcceptedAt(form.agreements.accepted[a.key])}` : "Not agreed"} />
+                {(documents ?? []).map((d) => (
+                  <SummaryRow key={d.versionId} label={`${d.name} (v${d.version})`}
+                    value={form.agreements.accepted[d.versionId] ? `Agreed ${formatAcceptedAt(form.agreements.accepted[d.versionId])}` : "Not agreed"} />
                 ))}
               </SummarySection>
 

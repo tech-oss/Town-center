@@ -1,6 +1,7 @@
 import AgreementChecklist from "../components/AgreementChecklist";
-import { allAgreed } from "../../Data/agreements";
-import { recordAgreements } from "../api/agreements";
+import PrivacyPolicyBox from "../components/PrivacyPolicyBox";
+import { allAgreed, recordAgreements } from "../api/agreements";
+import useLegalDocuments from "../hooks/useLegalDocuments";
 import { useState, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { submitBusinessClaim, listUnclaimedBusinesses } from "../hooks/useUserRegistry";
@@ -80,10 +81,11 @@ export default function ClaimBusinessPage() {
 
   // The four agreements, opened and accepted before a claim can be sent.
   const [agreements, setAgreements] = useState({ opened: {}, accepted: {} });
+  const { documents } = useLegalDocuments();
 
   const detailsValid = form.businessId && form.firstName.trim() && form.lastName.trim() && form.email.trim()
     && form.phone.trim() && form.password && form.password === form.confirmPassword;
-  const isValid = detailsValid && allAgreed(agreements.accepted);
+  const isValid = detailsValid && allAgreed(documents, agreements.accepted);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -91,7 +93,7 @@ export default function ClaimBusinessPage() {
     e.preventDefault();
     setError("");
     if (!detailsValid) { setError("Please fill in all fields — passwords must match."); return; }
-    if (!allAgreed(agreements.accepted)) { setError("Please open, read and accept all four agreements."); return; }
+    if (!allAgreed(documents, agreements.accepted)) { setError("Please view, read and agree to each document."); return; }
     setSubmitting(true);
     const res = await submitBusinessClaim(form);
     if (res.ok) await recordAgreements(form.businessId, form.email, "claim", agreements.accepted);
@@ -150,7 +152,8 @@ export default function ClaimBusinessPage() {
 
           <div className="pt-2" style={{ borderTop: `1px solid ${BORDER}` }}>
             <p className="text-sm font-bold mb-2" style={{ color: FOREST }}>Agreements</p>
-            <AgreementChecklist value={agreements} onChange={setAgreements} />
+            <AgreementChecklist documents={documents} value={agreements} onChange={setAgreements} />
+            <div className="mt-5"><PrivacyPolicyBox /></div>
           </div>
 
           {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}

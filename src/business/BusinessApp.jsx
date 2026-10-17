@@ -16,6 +16,8 @@ import ClaimBusinessPage from "./pages/ClaimBusinessPage";
 import ClaimOnboardingPage from "./pages/ClaimOnboardingPage";
 import SetPasswordPage from "./pages/SetPasswordPage";
 import AcceptTermsPage from "./pages/AcceptTermsPage";
+import UpdatedTermsPage from "./pages/UpdatedTermsPage";
+import useOutstandingDocuments from "./hooks/useOutstandingDocuments";
 import DashboardPage from "./pages/DashboardPage";
 import FeaturedArticlesPage from "./pages/FeaturedArticlesPage";
 import FeaturedArticleEditorPage from "./pages/FeaturedArticleEditorPage";
@@ -58,6 +60,17 @@ function ToLogin() {
   return <Navigate to="/business/login" replace state={{ from: location }} />;
 }
 
+// Current legal documents the business hasn't accepted (a new version admin
+// published, or one it never accepted) — checked after onboarding, and shown
+// instead of the page until every one is accepted.
+function OutstandingTermsGate({ children }) {
+  const { user } = useBusinessAuth();
+  const outstanding = useOutstandingDocuments(user?.id);
+  if (outstanding.status === "loading") return <SessionLoading />;
+  if (outstanding.documents.length) return <UpdatedTermsPage documents={outstanding.documents} />;
+  return children;
+}
+
 function RequireAuth({ children }) {
   const { isLoggedIn, needsOnboarding, needsPassword, needsTermsAcceptance, restored } = useBusinessAuth();
   if (!restored) return <SessionLoading />;
@@ -73,7 +86,7 @@ function RequireAuth({ children }) {
   // guard sends them there rather than the individual pages coping with a
   // half-set-up account.
   if (needsOnboarding) return <Navigate to="/business/welcome" replace />;
-  return children;
+  return <OutstandingTermsGate>{children}</OutstandingTermsGate>;
 }
 
 // Content Managers cannot see or manage billing — Owner only.
@@ -85,7 +98,7 @@ function RequireOwner({ children }) {
   if (needsTermsAcceptance) return <Navigate to="/business/accept-terms" replace />;
   if (needsOnboarding) return <Navigate to="/business/welcome" replace />;
   if (user.role === "Content Manager") return <Navigate to="/business/dashboard" replace />;
-  return children;
+  return <OutstandingTermsGate>{children}</OutstandingTermsGate>;
 }
 
 // News & Offers, Events and Analytics are Visibility Plan features. A Free business reaching
