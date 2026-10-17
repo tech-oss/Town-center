@@ -2,6 +2,7 @@ import { supabase } from "../../lib/supabaseClient";
 import { getLivePlacementMap, featureNow, unfeature, swapFeatured } from "./homepageSlots";
 import { assertValidCoords } from "../../lib/geo";
 import { logBusinessActivity, eventContext, occurrenceContext } from "./businessActivity";
+import { expandRecurrence } from "../../lib/eventRecurrence";
 
 // Moderation of business-submitted events, and of individual dates within a
 // recurring series.
@@ -209,43 +210,83 @@ function eventToRow(item) {
   };
 }
 
+// The repeat rule, as the business portal saves it (business-dashboard's
+// businessEvents.js): a recurring event's first date is its start date.
+function recurrenceToRow(item) {
+  const on = !!item.isRecurring;
+  return {
+    is_recurring: on,
+    recurrence_type: on ? (item.recurrenceType || "weekly") : null,
+    recurrence_days: on ? (item.recurrenceDays ?? []) : [],
+    recurrence_ordinals: on ? (item.recurrenceOrdinals ?? []) : [],
+    recurrence_start_date: on ? (item.eventDate || null) : null,
+    recurrence_end_date: on ? (item.recurrenceEndDate || null) : null,
+  };
+}
+
+// How far ahead a recurring series gets its dated rows — the same horizon
+// the business portal uses.
+const GENERATE_MONTHS_AHEAD = 6;
+
+// Adds any missing dated rows (business_event_occurrences) for a recurring
+// series, as the business portal does when a business saves one, so a series
+// admin creates can have single dates edited or cancelled in the portal like
+// any other. Only inserts dates that have no row yet — never touches one
+// already edited or cancelled.
+async function generateOccurrences(row) {
+  if (!row.is_recurring || !row.recurrence_type) return;
+  const startDate = row.recurrence_start_date || row.event_date;
+  if (!startDate) return;
+  const today = new Date();
+  const horizon = new Date(today.getFullYear(), today.getMonth() + GENERATE_MONTHS_AHEAD, today.getDate());
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const dates = expandRecurrence({
+    type: row.recurrence_type,
+    days: row.recurrence_days ?? [],
+    ordinals: row.recurrence_ordinals ?? [],
+    startDate,
+    endDate: row.recurrence_end_date,
+  }, { from: startDate, to: ymd(horizon) });
+  if (!dates.length) return;
+
+  const { data: existing, error: readError } = await supabase
+    .from("business_event_occurrences").select("occurrence_date").eq("event_id", row.id);
+  if (readError) throw readError;
+  const have = new Set((existing ?? []).map((r) => r.occurrence_date));
+  const rows = dates.filter((d) => !have.has(d)).map((d) => ({
+    event_id: row.id,
+    occurrence_date: d,
+    occurrence_time: row.event_time ?? null,
+    status: "Scheduled",
+    review_status: "Approved",
+  }));
+  if (!rows.length) return;
+  const { error } = await supabase.from("business_event_occurrences").insert(rows);
+  if (error) throw error;
+}
+
 export async function saveBusinessEvent(item) {
   assertValidCoords(item.lat, item.lng);
   // An existing event keeps whoever wrote it. The save is an upsert, so a
   // column left out is written back as its default — omitting the author on
   // an edit silently turned admin's own free event into the business's, and
   // the slot limit then refused to save it at all.
-  //
-  // The recurrence is the same trap, and there is no admin UI for it at all:
-  // this editor has no "repeats every Sunday" field, so every column below
-  // would go back to its default and a business's recurring event would
-  // quietly become a one-off the first time admin opened and saved it. Read
-  // back and carry them through untouched.
   let author = item.author;
-  let recurrence = null;
-  if (item.id) {
+  if (item.id && !author) {
     const { data: current } = await supabase
-      .from("business_events")
-      .select("author, is_recurring, recurrence_type, recurrence_days, recurrence_ordinals, recurrence_start_date, recurrence_end_date")
-      .eq("id", item.id).maybeSingle();
-    if (!author) author = current?.author ?? "business";
-    if (current) {
-      recurrence = {
-        is_recurring: current.is_recurring ?? false,
-        recurrence_type: current.recurrence_type ?? null,
-        recurrence_days: current.recurrence_days ?? [],
-        recurrence_ordinals: current.recurrence_ordinals ?? [],
-        recurrence_start_date: current.recurrence_start_date ?? null,
-        recurrence_end_date: current.recurrence_end_date ?? null,
-      };
-    }
+      .from("business_events").select("author").eq("id", item.id).maybeSingle();
+    author = current?.author ?? "business";
   }
+  // The repeat rule now comes from the editor's Repeats section (it had none,
+  // so admin could not make a recurring event, and saving a business's
+  // recurring event had to read the old rule back to keep it).
   const { data, error } = await supabase
     .from("business_events")
-    .upsert({ ...eventToRow({ ...item, author }), ...(recurrence ?? {}) })
+    .upsert({ ...eventToRow({ ...item, author }), ...recurrenceToRow(item) })
     .select("*, businesses(name)")
     .single();
   if (error) throw error;
+  await generateOccurrences(data);
   return eventFromRow(data);
 }
 

@@ -3,10 +3,11 @@ import useFetch from "../../hooks/useFetch";
 import { saveBusinessEvent, getSpotlightBusinesses } from "../../api/admin";
 import { EVENT_CATEGORY_OPTIONS, toSeeDoSlugs } from "../../lib/eventCategories";
 import {
-  Field, Inp, TextArea, EditorSection, SaveBar,
+  Field, Inp, TextArea, EditorSection, SaveBar, Toggle,
   SingleImageUpload, GalleryGrid, SocialFields, LocationFields, CARD,
 } from "./businessContent/shared";
-import { NAVY, MUTED, BORDER } from "../theme";
+import { NAVY, MUTED, BORDER, BLUE } from "../theme";
+import { WEEKDAYS, ORDINAL_OPTIONS, describeRecurrence } from "../../lib/eventRecurrence";
 import UKDateInput from "../components/UKDateInput";
 
 // Admin-authored event pages. Deliberately the same shape as the See & Do
@@ -40,7 +41,85 @@ const BLANK = {
   lat: null,
   lng: null,
   status: "Live",
+  isRecurring: false,
+  recurrenceType: "weekly",
+  recurrenceDays: [],
+  recurrenceOrdinals: [1],
+  recurrenceEndDate: "",
 };
+
+const chip = (on) => (on
+  ? { border: `1.5px solid ${BLUE}`, backgroundColor: "rgba(37,99,235,0.07)" }
+  : { border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" });
+
+// Repeat settings — the same choices a business has when it adds an event
+// (business-dashboard's EventEditorPage): weekly, every two weeks, or a
+// weekday each month (1st, 2nd, 3rd, 4th or last), with an optional end date.
+function RecurrenceFields({ form, set }) {
+  const days = form.recurrenceDays ?? [];
+  const ordinals = form.recurrenceOrdinals ?? [];
+  const isMonthly = form.recurrenceType === "monthly_by_weekday";
+  const preview = describeRecurrence({ type: form.recurrenceType || "weekly", days, ordinals });
+  function toggleDay(day) {
+    if (isMonthly) { set("recurrenceDays", [day]); return; }
+    set("recurrenceDays", days.includes(day) ? days.filter((d) => d !== day) : [...days, day]);
+  }
+  function toggleOrdinal(v) {
+    set("recurrenceOrdinals", ordinals.includes(v) ? ordinals.filter((o) => o !== v) : [...ordinals, v]);
+  }
+  return (
+    <div className="flex flex-col gap-4 mt-4 p-4 rounded-xl" style={{ backgroundColor: "#f8fafc", border: `1.5px solid ${BORDER}` }}>
+      <Field label="Repeats">
+        <select value={form.recurrenceType || "weekly"}
+          onChange={(e) => {
+            set("recurrenceType", e.target.value);
+            // Monthly repeats on one weekday.
+            if (e.target.value === "monthly_by_weekday" && days.length > 1) set("recurrenceDays", days.slice(0, 1));
+          }}
+          className="rounded-xl px-3 py-2.5 text-sm outline-none w-full"
+          style={{ border: `1.5px solid ${BORDER}`, color: NAVY, backgroundColor: "#fff" }}>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Every 2 weeks</option>
+          <option value="monthly_by_weekday">Monthly, on a specific weekday</option>
+        </select>
+      </Field>
+
+      {isMonthly && (
+        <div>
+          <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Which week(s) of the month</p>
+          <div className="flex flex-wrap gap-2">
+            {ORDINAL_OPTIONS.map((o) => (
+              <label key={o.value} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer" style={chip(ordinals.includes(o.value))}>
+                <input type="checkbox" checked={ordinals.includes(o.value)} onChange={() => toggleOrdinal(o.value)} className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium" style={{ color: NAVY }}>{o.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div>
+        <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>{isMonthly ? "Weekday" : "Day(s) of the week"}</p>
+        <div className="flex flex-wrap gap-2">
+          {WEEKDAYS.map((day) => (
+            <label key={day} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer" style={chip(days.includes(day))}>
+              <input type={isMonthly ? "radio" : "checkbox"} name="recurrence-day" checked={days.includes(day)} onChange={() => toggleDay(day)} className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium" style={{ color: NAVY }}>{day}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <Field label="Ends" hint="Leave blank for no end date">
+        <UKDateInput value={form.recurrenceEndDate ?? ""} min={form.eventDate || undefined} onChange={(e) => set("recurrenceEndDate", e.target.value)} />
+      </Field>
+
+      {preview && days.length > 0 && (
+        <p className="text-xs font-semibold" style={{ color: BLUE }}>Repeats: {preview}{form.recurrenceEndDate ? `, until ${form.recurrenceEndDate.split("-").reverse().join("/")}` : ""}</p>
+      )}
+    </div>
+  );
+}
 
 export default function EventEditor({ initial, onSaved, onCancel }) {
   // Older events carry the original What's On labels (Music, Market…);
@@ -63,6 +142,12 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
 
   async function handleSave() {
     if (!form.title.trim()) { setError("A title is required."); return; }
+    if (form.isRecurring) {
+      if (!form.eventDate) { setError("Choose the first date of the repeating event."); return; }
+      if (!(form.recurrenceDays ?? []).length) { setError("Choose the day(s) the event repeats on."); return; }
+      if (form.recurrenceType === "monthly_by_weekday" && !(form.recurrenceOrdinals ?? []).length) { setError("Choose which week(s) of the month it repeats."); return; }
+      if (form.recurrenceEndDate && form.recurrenceEndDate < form.eventDate) { setError("The end date is before the first date."); return; }
+    }
     setSaving(true);
     setError("");
     try {
@@ -128,10 +213,10 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
-            <Field label="Date">
+            <Field label={form.isRecurring ? "First date" : "Date"}>
               <UKDateInput value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} />
             </Field>
-            <Field label="Date label" hint="Overrides the date above — use for recurring events, e.g. “2nd Sunday of each month”">
+            <Field label="Date label" hint="Optional wording shown instead of the date, e.g. “Every Sunday morning”">
               <Inp value={form.dateLabel ?? ""} onChange={(e) => set("dateLabel", e.target.value)} />
             </Field>
             <Field label="Time" hint="Free text, e.g. “12pm – 5pm”">
@@ -151,6 +236,13 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
             <Field label="Ticket / entry details" span2 hint="Printed on the event page beside the ticket icon, e.g. “Free entry, no booking needed” or “£12 — book online”. Leave blank to show the entry type instead.">
               <Inp value={form.tickets ?? ""} onChange={(e) => set("tickets", e.target.value)} />
             </Field>
+          </div>
+
+          {/* A repeating event shows on every date it runs in the calendar,
+              on the website and in the app. */}
+          <div className="mt-5">
+            <Toggle checked={!!form.isRecurring} onChange={(v) => set("isRecurring", v)} label="This is a repeating event" />
+            {form.isRecurring && <RecurrenceFields form={form} set={set} />}
           </div>
 
           <div className="flex flex-wrap gap-8 mt-4">
