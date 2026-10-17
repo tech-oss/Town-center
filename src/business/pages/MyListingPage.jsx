@@ -335,7 +335,7 @@ export default function MyListingPage() {
                       freelancers) have no booking button to power. */}
                   {user.businessType !== "services" && (
                   <Locked field="bookingUrl">
-                  <Field label="Booking URL" hint="If you have a reservation system, add the URL here — it powers the &ldquo;Book a Reservation&rdquo; button on your page">
+                  <Field label="Booking URL" hint="If you have a reservation system, add the URL here — it powers the &ldquo;Book Now&rdquo; button on your page">
                     <Inp value={listing.bookingUrl ?? ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" />
                   </Field>
                   </Locked>
