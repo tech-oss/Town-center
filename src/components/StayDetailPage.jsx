@@ -270,6 +270,9 @@ export default function StayDetailPage({ kind }) {
       website={free ? null : item.website}
       directionsQuery={free && !isProperty ? null : item.mapQuery}
       shareInActions
+      // In the info card's button row, and floating once that is scrolled past.
+      extraButtonLabel={!free && item.bookingUrl?.trim() ? "Book Now" : undefined}
+      extraButtonHref={item.bookingUrl}
       stickyBooking={!free && item.bookingUrl ? item.bookingUrl : null}
       relatedHeading={isProperty ? "You might also like" : "Stay Here & Discover"}
       relatedBackground="#ffffff"

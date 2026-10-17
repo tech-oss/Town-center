@@ -265,7 +265,10 @@ export default function PlaceDetailLayout({
       icon: <GlobeIcon size={22} />,
     },
     // Only with a real link of its own — never the website, never "#".
-    !shareInActions && extraButtonLabel && normalizeUrl(extraButtonHref) && {
+    // Stay pages too (their rail also carries Share): they used to rely on
+    // the floating button alone, which only appears after scrolling, so the
+    // booking link looked missing.
+    extraButtonLabel && normalizeUrl(extraButtonHref) && {
       label: extraButtonLabel,
       href: normalizeUrl(extraButtonHref),
       icon: <TicketIcon size={22} />,
@@ -509,7 +512,7 @@ export default function PlaceDetailLayout({
                   card — neither belongs here anymore since they aren't
                   actions specific to this listing. */}
               <div className="flex-1 min-w-0 px-6 py-7 md:px-8 flex items-center">
-                <div className="w-full grid grid-cols-3 gap-y-6 lg:flex lg:flex-nowrap lg:items-start lg:justify-center lg:gap-x-6">
+                <div className={`w-full grid ${actions.length > 3 ? "grid-cols-4" : "grid-cols-3"} gap-y-6 lg:flex lg:flex-nowrap lg:items-start lg:justify-center lg:gap-x-6`}>
                   {actions.map((a) => {
                     const inner = (
                       <>

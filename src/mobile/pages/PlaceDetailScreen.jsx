@@ -157,6 +157,13 @@ function BusinessDetailScreen({ place, goBack }) {
           )}
 
           <MobileCard className="p-4 flex flex-col gap-4">
+            {/* Any business with a booking link — it was Eat & Drink only,
+                and only as the floating button after scrolling. */}
+            {bookingUrl && (
+              <a href={bookingUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold" style={{ backgroundColor: "var(--leaf)", color: "#fff" }}>
+                <TicketIcon /> Make a Booking
+              </a>
+            )}
             <div className="grid grid-cols-3 gap-2">
               {websiteUrl && (
                 <ActionButton
@@ -284,7 +291,7 @@ function BusinessDetailScreen({ place, goBack }) {
 
       {/* Sticky booking CTA — shown only for listings whose subscription
           enables it, matching the website's gate (DetailPage.jsx). */}
-      {place.section === "eat-drink" && bookingUrl && (
+      {bookingUrl && (
         <StickyCta label="Make a Booking" href={bookingUrl} icon={<TicketIcon />} />
       )}
     </MobileShell>

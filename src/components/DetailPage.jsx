@@ -96,7 +96,9 @@ export default function DetailPage() {
       directionsQuery={free ? null : mapQuery}
       // A booking button only when a booking link was given. It used to show
       // regardless and fall back to the website.
-      extraButtonLabel={!free && item.section === "eat-drink" && item.bookingUrl?.trim() ? "Booking" : undefined}
+      // Any business with a booking link (Eat & Drink, Shop, See & Do) — it
+      // used to be Eat & Drink only, so the others' links never showed.
+      extraButtonLabel={!free && item.bookingUrl?.trim() ? "Book Now" : undefined}
       extraButtonHref={item.bookingUrl}
       shareTitle={`${item.name} — Maidenhead`}
       relatedHeading="You might also like"

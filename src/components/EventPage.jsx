@@ -61,6 +61,9 @@ function asEvent(rawEvent, it) {
     category: it.tag || "What's On",
     title: it.name,
     logo: it.logo,
+    // A See & Do business's booking link (classes, sessions, courts). It was
+    // left out here, so no See & Do business page showed one.
+    bookingUrl: it.bookingUrl,
     location: it.address,
     website: it.website,
     image: it.image,
@@ -219,7 +222,7 @@ export default function EventPage() {
       // A booking link is shown whenever the event has one. A free event can
       // still need booking — that link used to be dropped, so a "Free" event
       // published its booking URL nowhere at all.
-      extraButtonLabel={!free && event.bookingUrl ? (event.paid ? "Buy Tickets" : "Book Your Place") : undefined}
+      extraButtonLabel={!free && event.bookingUrl ? (event.isBusiness ? "Book Now" : event.paid ? "Buy Tickets" : "Book Your Place") : undefined}
       extraButtonHref={event.bookingUrl}
       afterMap={event.isBusiness && (free
         ? <><NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={business.businessId} /></>
