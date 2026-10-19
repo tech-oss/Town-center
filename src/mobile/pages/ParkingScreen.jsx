@@ -3,6 +3,10 @@ import SmartImage from "../../components/SmartImage";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
 import { getGettingHere } from "../../api";
+import { exploreInfo } from "../data/mobileMock";
+
+// The same picture as the Parking tile on the app's Explore page.
+const PARKING_IMAGE = exploreInfo.find((i) => i.id === "parking")?.image;
 import useFetch from "../../hooks/useFetch";
 
 export default function ParkingScreen() {
@@ -16,8 +20,10 @@ export default function ParkingScreen() {
   return (
     <MobileShell title="Parking" onBack backFallback="/mobile/transport" noPadding>
       <div className="flex flex-col">
-        {/* The Parking section's own picture from Site Content → Getting Here. */}
-        {parking.image && <SmartImage src={parking.image} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover" />}
+        {/* The Parking tile's picture from the Explore page, so the page and
+            the tile that leads to it match (the website's Getting Here page
+            keeps the Parking picture set in Site Content). */}
+        <SmartImage src={PARKING_IMAGE || parking.image} alt="" size="card" eager sizes="100vw" className="w-full aspect-[16/9] object-cover" />
 
         <div className="px-5 pt-5 pb-8 flex flex-col gap-6 mobile-stagger">
           <div>

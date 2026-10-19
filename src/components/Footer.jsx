@@ -173,7 +173,7 @@ export default function Footer() {
 
         {/* ── Bottom bar ── */}
         <div className="border-t pt-6" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
-          <p className="text-xs text-white">{footer.legal}</p>
+          <p className="text-xs text-white">{footer.legal.replace("{year}", String(new Date().getFullYear()))}</p>
         </div>
       </div>
     </footer>

@@ -239,5 +239,7 @@ export const footer = {
     heading: "Get the Maidenhead App",
     body: "Your guide to everything in Maidenhead.",
   },
-  legal: "© 2025 Maidenhead. All rights reserved.",
+  // The year is filled in when the page is shown (Footer.jsx), so it never
+  // goes out of date.
+  legal: "© {year} The Maidenhead Partnership Group. All rights reserved.",
 };
