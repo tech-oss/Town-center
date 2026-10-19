@@ -49,7 +49,7 @@ export default function UpdatedTermsPage({ documents }) {
           <p className="text-sm max-w-lg" style={{ color: MUTED }}>
             {anyUpdate
               ? `We have updated our ${listNames(names)}. Please review the new version${documents.length > 1 ? "s" : ""} and confirm that you agree before continuing.`
-              : `Before you continue to the dashboard, please review and agree to our ${listNames(names)}.`}
+              : `Before you continue to the dashboard, please review the following terms that we have updated: ${listNames(names)}.`}
           </p>
         </div>
 

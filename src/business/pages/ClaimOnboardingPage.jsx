@@ -127,7 +127,7 @@ export default function ClaimOnboardingPage() {
                       <p className="text-sm font-semibold" style={{ color: FOREST }}>{a.name}</p>
                       <p className="text-[11px] font-semibold" style={{ color: "#15803D" }}>✓ Agreed {formatAcceptedAt(a.acceptance.accepted_at)} · version {a.acceptance.version}</p>
                     </div>
-                    <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF</a>
+                    <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF</a>
                   </div>
                 ))}
               </div>

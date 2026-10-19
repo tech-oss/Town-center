@@ -3,7 +3,9 @@ import { createPortal } from "react-dom";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B";
 
-// A legal document's PDF in a popup: read it, print it, close it.
+// A legal document's PDF in a popup: read it, print it, close it. Its links
+// skip the "Leaving our website" check — a PDF admin uploads lives in file
+// storage on another web address, but it is our own document.
 //   doc: { name, version, effectiveDate (label), fileUrl } — null to close.
 export default function PdfViewerModal({ doc, onClose }) {
   const frame = useRef(null);
@@ -46,7 +48,7 @@ export default function PdfViewerModal({ doc, onClose }) {
             className="px-3 py-2 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(37,99,235,0.3)", color: SAGE }}>
             Print
           </button>
-          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"
+          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm
             className="hidden sm:inline-block px-3 py-2 rounded-lg text-xs font-semibold" style={{ border: "1.5px solid rgba(16,24,40,0.15)", color: FOREST }}>
             Open in new tab
           </a>
@@ -57,7 +59,7 @@ export default function PdfViewerModal({ doc, onClose }) {
         </div>
         <iframe ref={frame} title={doc.name} src={doc.fileUrl} className="flex-1 w-full" style={{ border: 0, backgroundColor: "#f1f5f9" }} />
         {/* Phones often show only the first page of a PDF in a frame. */}
-        <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"
+        <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm
           className="sm:hidden text-center text-xs font-semibold py-2.5" style={{ color: SAGE, borderTop: "1px solid rgba(16,24,40,0.1)" }}>
           Open the full document
         </a>

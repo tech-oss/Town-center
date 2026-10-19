@@ -218,7 +218,7 @@ export default function BillingPage() {
                   <td className="px-3 py-2.5"><span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: p.status === "Paid" ? "rgba(37,99,235,0.16)" : "rgba(220,38,38,0.1)", color: p.status === "Paid" ? "#2563EB" : "#991B1B" }}>{p.status}</span></td>
                   <td className="px-3 py-2.5">
                     {p.invoice_pdf || p.invoice_url ? (
-                      <a href={p.invoice_pdf || p.invoice_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>
+                      <a href={p.invoice_pdf || p.invoice_url} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-xs font-semibold" style={{ color: "#2563EB" }}>
                         {p.invoice_pdf ? "Download PDF" : "View invoice"}
                       </a>
                     ) : <span className="text-xs" style={{ color: "#9CA3AF" }}>—</span>}
@@ -247,7 +247,7 @@ export default function BillingPage() {
                         : "Not accepted yet"}
                     </p>
                   </div>
-                  <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF →</a>
+                  <a href={a.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="shrink-0 text-xs font-semibold" style={{ color: "#2563EB" }}>Open PDF →</a>
                 </div>
               ))}
             </>
