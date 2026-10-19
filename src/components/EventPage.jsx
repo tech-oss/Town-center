@@ -224,6 +224,10 @@ export default function EventPage() {
       // published its booking URL nowhere at all.
       extraButtonLabel={!free && event.bookingUrl ? (event.isBusiness ? "Book Now" : event.paid ? "Buy Tickets" : "Book Your Place") : undefined}
       extraButtonHref={event.bookingUrl}
+      // And floating once the page is scrolled, as in the app — See & Do
+      // business pages and events had only the button in the info card.
+      stickyBooking={!free && event.bookingUrl ? event.bookingUrl : null}
+      stickyBookingLabel={event.isBusiness ? "Make a Booking" : event.paid ? "Buy Tickets" : "Book Your Place"}
       afterMap={event.isBusiness && (free
         ? <><NewsOffers item={business} placeholder={FREE_PLACEHOLDERS.news} /><ClaimBusinessBox businessId={business.businessId} /></>
         : <><BusinessReviews reviews={business.reviews} /><NewsOffers item={business} /></>)}

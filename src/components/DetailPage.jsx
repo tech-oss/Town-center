@@ -100,6 +100,8 @@ export default function DetailPage() {
       // used to be Eat & Drink only, so the others' links never showed.
       extraButtonLabel={!free && item.bookingUrl?.trim() ? "Book Now" : undefined}
       extraButtonHref={item.bookingUrl}
+      // Floating once the page is scrolled, as in the app.
+      stickyBooking={!free && item.bookingUrl?.trim() ? item.bookingUrl : null}
       shareTitle={`${item.name} — Maidenhead`}
       relatedHeading="You might also like"
       related={related.map((it) => ({

@@ -228,6 +228,8 @@ export default function PlaceDetailLayout({
   // shows only when there is one, and goes exactly there — it used to show
   // for any hotel with a website and open the website.
   stickyBooking = null,
+  // Its wording — "Book Your Place" / "Buy Tickets" on an event, as in the app.
+  stickyBookingLabel = "Make a Booking",
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -775,7 +777,7 @@ export default function PlaceDetailLayout({
             pointerEvents: showStickyBooking ? "auto" : "none",
           }}
         >
-          <TicketIcon size={18} /> Make a Booking
+          <TicketIcon size={18} /> {stickyBookingLabel}
         </a>
       )}
     </div>
