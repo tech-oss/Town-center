@@ -29,6 +29,8 @@ export default function AnalyticsPage() {
   const { user } = useBusinessAuth();
   // An accommodation company: all properties, or one of them.
   const { company, properties, scopeId, setScope, scopeQuery } = useAnalyticsScope();
+  // An accommodation company looking at one of its properties.
+  const singleProperty = company && scopeId !== user.id;
   const navigate = useNavigate();
   const [range, setRange] = useState(DEFAULT_RANGE);
   const [loading, setLoading] = useState(true);
@@ -124,6 +126,16 @@ export default function AnalyticsPage() {
               </EditorSection>
             </div>
 
+            {/* One property: page views only. A company's news, offers and
+                events belong to the whole company — every property page
+                shows them — so their views are only shown company-wide
+                (All properties), where the figures mean what they say. */}
+            {singleProperty ? (
+              <div className="rounded-2xl p-5 text-sm" style={{ border: `1.5px dashed ${BORDER}`, color: MUTED }}>
+                Views of your news, offers and events are for the whole company. Choose <strong style={{ color: FOREST }}>All properties</strong> above to see them.
+              </div>
+            ) : (
+            <>
             <div className="bg-white rounded-2xl p-6" style={CARD}>
               <EditorSection title="News, Offers & Events" hint="Combined views of your news and offer posts and your events.">
                 <StatHeader total={content.total} web={content.web} app={content.app} rangeLabel={rangeLabel} />
@@ -158,6 +170,8 @@ export default function AnalyticsPage() {
                 )}
               </EditorSection>
             </div>
+            </>
+            )}
           </>
         )}
       </div>

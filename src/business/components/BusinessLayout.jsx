@@ -40,7 +40,7 @@ const COMPANY_NAV = [
   { to: "/business/featured-articles", label: "Feature Articles", icon: "✨" },
   { to: "/business/events",    label: "Request Event", icon: "📅" },
   { to: "/business/push-notifications", label: "Push Notifications", icon: "🔔" },
-  { to: "/business/billing",   label: "Subscriptions", icon: "💳" },
+  { to: "/business/billing",   label: "Subscriptions & Accepted Terms", icon: "💳" },
   { to: "/business/support",   label: "Support", icon: "🎫" },
   { to: "/business/settings",  label: "Account Settings", icon: "⚙️" },
 ];

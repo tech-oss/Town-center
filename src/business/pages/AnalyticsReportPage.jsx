@@ -35,6 +35,7 @@ function ReportSection({ title, total, series }) {
 export default function AnalyticsReportPage() {
   const { user } = useBusinessAuth();
   const { scopeId, scopeName, company } = useAnalyticsScope();
+  const singleProperty = company && scopeName !== "All properties";
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const range = rangeFromSearchParams(searchParams);
@@ -115,6 +116,9 @@ export default function AnalyticsReportPage() {
           ) : (
             <>
               <ReportSection title="Profile views" total={profile.total} series={profile.series} />
+              {/* One property's report: page views only — the company's
+                  posts and events are reported company-wide (AnalyticsPage). */}
+              {!singleProperty && (<>
               <ReportSection title="Articles, News & Offers" total={content.total} series={content.series} />
 
               <section className="mb-8 break-inside-avoid">
@@ -144,6 +148,7 @@ export default function AnalyticsReportPage() {
               {contentSeries.map((c) => (
                 <ReportSection key={c.id} title={`${c.title} (${c.type})`} total={c.total} series={c.series} />
               ))}
+              </>)}
 
               <footer className="mt-10 pt-4 text-[10px] text-center" style={{ borderTop: `1px solid ${BORDER}`, color: MUTED }}>
                 Maidenhead Business Dashboard · {user.businessName}{company ? ` (${scopeName})` : ""} · Report for {rangeLabel} · Generated {generatedAt}
