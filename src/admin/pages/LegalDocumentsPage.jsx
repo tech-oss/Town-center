@@ -190,7 +190,7 @@ function DocumentCard({ doc, reload, notify }) {
           )}
         </div>
         <div className="flex gap-2 flex-wrap">
-          {doc.current && <a href={doc.current.fileUrl} target="_blank" rel="noopener noreferrer" className={BTN} style={outline}>View PDF</a>}
+          {doc.current && <a href={doc.current.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className={BTN} style={outline}>View PDF</a>}
           {doc.current && doc.requiresAcceptance && (
             <button type="button" className={BTN} style={outline} onClick={() => setShowReport((s) => !s)}>
               {showReport ? "Hide acceptances" : "Who has accepted"}
@@ -225,7 +225,7 @@ function DocumentCard({ doc, reload, notify }) {
                     <td className="px-3 py-2.5" style={{ color: MUTED }}>{formatAcceptedAt(v.createdAt)}</td>
                     <td className="px-3 py-2.5" style={{ color: MUTED }}>{v.acceptances} business{v.acceptances === 1 ? "" : "es"}</td>
                     <td className="px-3 py-2.5 text-right whitespace-nowrap">
-                      <a href={v.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold mr-4" style={{ color: BLUE }}>View PDF</a>
+                      <a href={v.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-xs font-semibold mr-4" style={{ color: BLUE }}>View PDF</a>
                       <button type="button" disabled={busy === v.id} onClick={() => makeCurrent(v)} className="text-xs font-semibold" style={{ color: NAVY }}>
                         {busy === v.id ? "Saving…" : "Make current"}
                       </button>

@@ -697,7 +697,7 @@ function AgreementsList({ businessId, fallbackAcceptedAt }) {
                 : "Updated Terms Require Acceptance — asked to accept when they next open the dashboard"}
             </p>
           </div>
-          <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-[11px] font-semibold" style={{ color: BLUE }}>PDF</a>
+          <a href={r.fileUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="shrink-0 text-[11px] font-semibold" style={{ color: BLUE }}>PDF</a>
         </div>
       ))}
       {data.history.length > 0 && (
