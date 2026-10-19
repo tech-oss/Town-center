@@ -199,7 +199,7 @@ export async function getSlotContentOptions(slotType) {
         const onPlan = premium.has(r.id);
         return {
           kind, id: r.id, title: r.name,
-          detail: [l?.business_type, onPlan ? null : "Free listing — its page is mostly hidden"].filter(Boolean).join(" · "),
+          detail: [l?.business_type, onPlan ? null : "Free plan — needs the Visibility Plan to be featured"].filter(Boolean).join(" · "),
           businessId: r.id, image: l?.hero_image, premium: onPlan,
         };
       });
@@ -233,12 +233,22 @@ async function contentTitles(rows) {
     // A Featured Business shows the business itself: its header picture, or
     // failing that its logo or first photo. It used to load no picture at
     // all, so every business slot read "No content yet".
-    load("business", "businesses", "id, name, business_listings(hero_image, logo, gallery)", (r) => {
+    load("business", "businesses", "id, name, parent_id, business_listings(hero_image, logo, gallery)", (r) => {
       const l = Array.isArray(r.business_listings) ? r.business_listings[0] : r.business_listings;
       const photo = Array.isArray(l?.gallery) ? l.gallery.find((g) => typeof g === "string" && g) : null;
-      return { title: r.name, image: l?.hero_image || l?.logo || photo || null };
+      return { title: r.name, image: l?.hero_image || l?.logo || photo || null, planOwner: r.parent_id ?? r.id };
     }),
   ]);
+
+  // Whether each featured business is on the Visibility Plan (an
+  // accommodation property: its company's plan). The site only features
+  // subscribers (liveBusinesses.js), so a Free one's slot shows nowhere.
+  const owners = [...new Set([...titles.values()].map((t) => t.planOwner).filter(Boolean))];
+  if (owners.length) {
+    const { data } = await supabase.from("business_subscriptions").select("business_id, plan").in("business_id", owners);
+    const premium = new Set((data ?? []).filter((r) => r.plan === "premium").map((r) => r.business_id));
+    for (const t of titles.values()) if (t.planOwner) t.onPlan = premium.has(t.planOwner);
+  }
   return titles;
 }
 
@@ -279,8 +289,11 @@ function placementFromRow(r, titles, businesses) {
     holdExpiresAt: r.hold_expires_at,
     createdAt: r.created_at,
     phase,
+    // A Featured Business on the Free plan: booked, but the site doesn't
+    // feature Free listings, so it shows nowhere until it subscribes.
+    freePlan: r.content_kind === "business" && content?.onPlan === false,
     // On the homepage right now.
-    live: phase === "live" && r.status === "approved" && !!r.content_id,
+    live: phase === "live" && r.status === "approved" && !!r.content_id && !(r.content_kind === "business" && content?.onPlan === false),
   };
 }
 

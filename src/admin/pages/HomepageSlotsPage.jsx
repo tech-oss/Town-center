@@ -155,10 +155,13 @@ function PlacementDialog({ slotType, packages, placement, onClose, onSaved }) {
             {filtered.map((o) => {
               const key = `${o.kind}:${o.id}`;
               const active = key === contentKey;
+              // The site only features businesses on the Visibility Plan.
+              const blocked = o.kind === "business" && o.premium === false;
               return (
-                <button key={key} type="button" onClick={() => setContentKey(key)}
-                  className="flex items-center gap-3 rounded-lg p-2 text-left"
-                  style={{ backgroundColor: active ? "rgba(37,99,235,0.08)" : "transparent", border: `1.5px solid ${active ? BLUE : "transparent"}` }}>
+                <button key={key} type="button" onClick={() => setContentKey(key)} disabled={blocked}
+                  title={blocked ? "Free listings aren't featured on the site — put the business on the Visibility Plan first." : undefined}
+                  className="flex items-center gap-3 rounded-lg p-2 text-left disabled:cursor-not-allowed"
+                  style={{ opacity: blocked ? 0.5 : 1, backgroundColor: active ? "rgba(37,99,235,0.08)" : "transparent", border: `1.5px solid ${active ? BLUE : "transparent"}` }}>
                   {o.image
                     ? <img src={o.image} alt="" className="w-10 h-8 rounded object-cover shrink-0" />
                     : <span className="w-10 h-8 rounded shrink-0" style={{ backgroundColor: "rgba(16,24,40,0.06)" }} />}
@@ -393,6 +396,10 @@ function PlacementRow({ placement: p, onEdit, onEnd, onCancel, onApprove, onReje
             {p.contentTitle ?? (p.status === "awaiting_content" ? "Waiting for the business to choose" : "No content chosen")}
           </span>
           {p.live && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }}>● Live on home page</span>}
+          {p.freePlan && !ended && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" title="The site only features businesses on the Visibility Plan. Put this business on the plan (Subscriptions) and it shows straight away."
+              style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Not shown — Free plan</span>
+          )}
           <StatusChip status={p.status} />
         </div>
         <p className="text-xs" style={{ color: MUTED }}>
