@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
+import ArticleKeepChooser from "../components/ArticleKeepChooser";
 import {
   listArticles, listAdminPosts, setArticleStatus, deleteArticle, swapLiveArticle,
   LIVE_ARTICLE_LIMIT,
@@ -133,6 +134,8 @@ export default function ArticlesPage() {
   const [toast, setToast] = useToast();
   const [deleting, setDeleting] = useState(null);
   const [swapFor, setSwapFor] = useState(null);
+  // Choosing which articles stay live when more are live than the plan allows.
+  const [trimming, setTrimming] = useState(false);
   const [slots, setSlots] = useState(null);
   const [buying, setBuying] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -211,6 +214,25 @@ export default function ArticlesPage() {
   const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
   const atLiveLimit = liveArticles.length >= allowance;
 
+  // More live than the plan now allows (after a move to a smaller plan, or
+  // extra slots running out): the chosen ones stay, the rest are hidden.
+  const overLimit = liveArticles.length > allowance;
+  async function handleTrim(keep) {
+    setBusy(true);
+    try {
+      for (const a of liveArticles.filter((x) => !keep.includes(x.id))) {
+        await setArticleStatus(a.id, "Hidden");
+        patch(a.id, { status: "Hidden" });
+      }
+      setTrimming(false);
+      setToast("Done — the others are hidden, not deleted. Put them live again whenever there's room.");
+    } catch (e) {
+      setToast(e.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function patch(id, changes) {
     setArticles((prev) => prev.map((x) => (x.id === id ? { ...x, ...changes } : x)));
   }
@@ -286,6 +308,13 @@ export default function ArticlesPage() {
           onSwap={handleSwap} onCancel={() => setSwapFor(null)} />
       )}
 
+      {trimming && overLimit && (
+        <ArticleKeepChooser title="Which articles stay live" limit={allowance} busy={busy}
+          articles={liveArticles.map((a) => ({ id: a.id, title: a.title, type: a.type }))}
+          intro={`Your plan allows ${allowance} live ${allowance === 1 ? "article" : "articles"}. Choose which stay live; the others are hidden — kept, not deleted — and can be put live again when there's room.`}
+          confirmLabel="Keep these live" onCancel={() => setTrimming(false)} onConfirm={handleTrim} />
+      )}
+
       <div className="flex flex-col gap-6 max-w-5xl">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -303,6 +332,23 @@ export default function ArticlesPage() {
             + Create New Article
           </button>
         </div>
+
+        {!loading && overLimit && (
+          <div role="alert" className="rounded-2xl px-5 py-4 flex items-center justify-between gap-4 flex-wrap"
+            style={{ backgroundColor: "rgba(217,119,6,0.08)", border: "1.5px solid rgba(217,119,6,0.35)" }}>
+            <p className="text-sm" style={{ color: "#92400E" }}>
+              <strong>{liveArticles.length} articles are live, but your plan allows {allowance}.</strong> Choose which stay live — the others will be hidden, not deleted.
+            </p>
+            {user.role === "Owner" ? (
+              <button type="button" onClick={() => setTrimming(true)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: SAGE }}>
+                Choose which stay live
+              </button>
+            ) : (
+              <p className="text-xs" style={{ color: "#92400E" }}>Ask the business owner to choose.</p>
+            )}
+          </div>
+        )}
 
         {/* Live allowance — the number that actually constrains them, shown
             before they hit it rather than only in the refusal. */}

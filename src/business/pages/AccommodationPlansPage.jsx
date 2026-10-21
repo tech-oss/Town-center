@@ -3,11 +3,13 @@ import { Link, useSearchParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import KeepChooser from "../components/KeepChooser";
+import ArticleKeepChooser from "../components/ArticleKeepChooser";
+import { listArticles } from "../api/businessArticles";
 import { CARD, BORDER, MUTED, FOREST, SAGE, Toast, useToast } from "../components/FormKit";
 import { listTiers, getSlotUsage, listProperties } from "../api/accommodation";
 import {
   startAccommodationCheckout, changeAccommodationPlan, cancelAccommodationPlan, undoAccommodationChange,
-  getPlanChange, setPlanChangeKeep, waitForSubscription,
+  getPlanChange, setPlanChangeKeep, waitForSubscription, getTargetArticleAllowance, setPlanChangeArticles,
 } from "../api/accommodationBilling";
 
 // Accommodation plans: Free (1 property) and 5 / 10 / 15 / 20 / 30
@@ -46,10 +48,17 @@ function Confirm({ title, children, confirmLabel, busy, onConfirm, onCancel }) {
 }
 
 async function fetchPage(companyId) {
-  const [tiers, usage, change, props] = await Promise.all([
+  const [tiers, usage, change, props, articles] = await Promise.all([
     listTiers(), getSlotUsage(companyId), getPlanChange(companyId), listProperties(companyId),
+    listArticles(companyId).catch(() => []),
   ]);
-  return { tiers, usage, change, using: props.filter((p) => USING_SLOT.has(p.state)) };
+  // How many articles may stay live after a scheduled change.
+  const articleLimit = change ? await getTargetArticleAllowance(companyId, change).catch(() => null) : null;
+  return {
+    tiers, usage, change, articleLimit,
+    using: props.filter((p) => USING_SLOT.has(p.state)),
+    liveArticles: articles.filter((a) => a.status === "Live"),
+  };
 }
 
 export default function AccommodationPlansPage() {
@@ -59,7 +68,10 @@ export default function AccommodationPlansPage() {
   const [error, setError] = useState("");
   const [interval, setBillingInterval] = useState(user.billingInterval === "year" ? "year" : "month");
   const [busy, setBusy] = useState(false);
-  const [dialog, setDialog] = useState(null); // { type: "upgrade" | "downgrade" | "cancel" | "keep", tier }
+  const [dialog, setDialog] = useState(null); // { type: "upgrade" | "downgrade" | "cancel" | "keep" | "articles", tier }
+  // Just scheduled a downgrade or cancellation: ask which articles stay, if
+  // more are live than the new plan allows.
+  const [askArticles, setAskArticles] = useState(false);
   // Back from Stripe Checkout (?checkout=success|cancelled).
   const [outcome] = useState(() => params.get("checkout"));
   const [notice, setNotice] = useState(() => (
@@ -93,7 +105,12 @@ export default function AccommodationPlansPage() {
   if (error) return <BusinessLayout><p className="text-sm" style={{ color: "#991B1B" }}>Couldn't load plans: {error}</p></BusinessLayout>;
   if (!data) return <BusinessLayout><p className="text-sm" style={{ color: MUTED }}>Loading plans…</p></BusinessLayout>;
 
-  const { tiers, usage, change, using } = data;
+  const { tiers, usage, change, using, liveArticles, articleLimit } = data;
+  // More articles live than the scheduled plan allows: the owner chooses
+  // which stay; the rest are hidden when the change happens.
+  const articlesOver = !!change && articleLimit != null && liveArticles.length > articleLimit;
+  const articleTitle = (id) => liveArticles.find((a) => a.id === id)?.title ?? "an article";
+  const showArticleChooser = articlesOver && (dialog?.type === "articles" || (askArticles && !dialog));
   const paid = user.plan === "premium" && !!user.stripeSubscriptionId;
   const currentKey = paid ? user.siteTierKey : "acc-free";
   const current = tiers.find((t) => t.key === currentKey) ?? tiers.find((t) => t.key === "acc-free");
@@ -136,11 +153,11 @@ export default function AccommodationPlansPage() {
   const downgrade = (tier, keep) => act(
     () => changeAccommodationPlan(user.id, tier.key, interval, keep),
     (r) => `${tier.name} (${interval === "year" ? "yearly" : "monthly"}) starts on ${fmtDate(r.effectiveAt ? new Date(r.effectiveAt * 1000).toISOString() : null)}. You keep your current plan until then.`,
-  );
+  ).then(() => setAskArticles(true));
   const cancel = (keep) => act(
     () => cancelAccommodationPlan(user.id, keep),
     (r) => `Your plan ends on ${fmtDate(r.effectiveAt ? new Date(r.effectiveAt * 1000).toISOString() : null)}. Then you're on Free with one basic property.`,
-  );
+  ).then(() => setAskArticles(true));
 
   return (
     <BusinessLayout>
@@ -190,11 +207,25 @@ export default function AccommodationPlansPage() {
                 {change.keep.length > 0 && <> — keeping {change.keep.map(nameOf).join(", ")} live</>}.
                 {" "}Anything else using a slot then becomes inactive. Its details are kept, and you can reactivate it after upgrading.
               </p>
+              {articlesOver && (
+                <p className="text-sm" style={{ color: "#92400E" }}>
+                  <strong>Articles:</strong> the new plan allows {articleLimit} live {articleLimit === 1 ? "article" : "articles"} and you have {liveArticles.length}.{" "}
+                  {change.keepArticles
+                    ? <>Keeping {change.keepArticles.map(articleTitle).join(", ") || "none"} live; the others will be hidden (not deleted).</>
+                    : <>Choose which stay live — otherwise the most recently updated stay and the others are hidden (not deleted).</>}
+                </p>
+              )}
               <div className="flex gap-2 flex-wrap">
                 {using.length > (tiers.find((t) => t.key === change.targetTier)?.max_properties ?? 1) && (
                   <button type="button" onClick={() => setDialog({ type: "keep", tier: tiers.find((t) => t.key === change.targetTier) })}
                     className="text-xs font-semibold px-3 py-2 rounded-lg" style={{ color: FOREST, border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
                     Change which properties stay
+                  </button>
+                )}
+                {articlesOver && (
+                  <button type="button" onClick={() => setDialog({ type: "articles" })}
+                    className="text-xs font-semibold px-3 py-2 rounded-lg" style={{ color: FOREST, border: `1.5px solid ${BORDER}`, backgroundColor: "#fff" }}>
+                    {change.keepArticles ? "Change which articles stay" : "Choose which articles stay"}
                   </button>
                 )}
                 <button type="button" disabled={busy} onClick={() => act(() => undoAccommodationChange(user.id), "Done — you're staying on your current plan.")}
@@ -291,6 +322,13 @@ export default function AccommodationPlansPage() {
           intro={`From ${fmtDate(change?.effectiveAt)} your plan allows ${dialog.tier.max_properties} ${dialog.tier.max_properties === 1 ? "property" : "properties"}. Choose which stay live.`}
           confirmLabel="Save" onCancel={() => setDialog(null)}
           onConfirm={(keep) => act(() => setPlanChangeKeep(user.id, keep), "Saved — those properties will stay live.")} />
+      )}
+      {showArticleChooser && (
+        <ArticleKeepChooser title="Which articles stay live" limit={articleLimit} articles={liveArticles.map((a) => ({ id: a.id, title: a.title, type: a.type }))}
+          initial={change.keepArticles} busy={busy}
+          intro={`From ${fmtDate(change.effectiveAt)} your plan allows ${articleLimit} live ${articleLimit === 1 ? "article" : "articles"}. Choose which stay live; the others are hidden then — kept, not deleted — and can be put live again when there's room.`}
+          confirmLabel="Save" onCancel={() => { setDialog(null); setAskArticles(false); }}
+          onConfirm={(ids) => act(() => setPlanChangeArticles(user.id, ids), "Saved — those articles will stay live.").then(() => setAskArticles(false))} />
       )}
     </BusinessLayout>
   );

@@ -52,8 +52,27 @@ export async function getPlanChange(companyId) {
     targetTier: data.target_tier,
     targetInterval: data.target_interval,
     keep: data.keep ?? [],
+    // The live articles chosen to stay (null until chosen).
+    keepArticles: data.keep_articles ?? null,
     effectiveAt: data.effective_at,
   } : null;
+}
+
+// The live articles a scheduled change will allow: the new plan's included
+// articles plus extras bought (none on Free).
+export async function getTargetArticleAllowance(companyId, change) {
+  if (!change) return null;
+  const { data, error } = await supabase.rpc("accommodation_target_article_allowance", {
+    p_company: companyId, p_tier: change.targetTier, p_change: change.change,
+  });
+  if (error) throw error;
+  return data ?? 0;
+}
+
+// The owner's choice of which live articles stay live after the change.
+export async function setPlanChangeArticles(companyId, articleIds) {
+  const { error } = await supabase.rpc("accommodation_set_plan_change_articles", { p_company: companyId, p_articles: articleIds });
+  if (error) throw error;
 }
 
 export async function setPlanChangeKeep(companyId, keep) {
