@@ -7,7 +7,7 @@ const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16
 
 const STEPS = [
   ["Your company is approved", "Maidenhead admin checks your management company or agency registration."],
-  ["Choose a plan", "Start free with one property, or choose a plan for 5, 10, 15, 20 or 30 properties."],
+  ["Choose a plan", "Once approved, you start on Free with one property. Upgrade any time from Subscriptions to a plan for 5, 10, 15, 20 or 30 properties."],
   ["Add your properties", "Each property gets its own page, map pin, photos, reviews and statistics."],
   ["Each property is approved", "Every property is checked by Maidenhead admin before it appears publicly."],
 ];
@@ -52,13 +52,18 @@ export default function AccommodationBenefits() {
         ))}
       </ol>
 
+      {/* For comparison only — nothing is chosen at registration. Both
+          cards look the same so neither reads as a selected option. */}
+      <p className="text-sm -mb-2" style={{ color: FOREST }}>
+        <strong>No need to choose a plan now.</strong> <span style={{ color: MUTED }}>Every company starts on Free once approved; you can upgrade from your dashboard whenever you're ready.</span>
+      </p>
       <div className="grid sm:grid-cols-2 gap-3">
         <div className="rounded-xl p-4" style={{ border: `1.5px solid ${BORDER}` }}>
           <p className="text-sm font-bold" style={{ color: FOREST }}>Free</p>
           <p className="text-[11px] mb-2" style={{ color: MUTED }}>A basic listing to get started</p>
           <ul className="flex flex-col gap-1.5">{FREE.map((f) => <Check key={f}>{f}</Check>)}</ul>
         </div>
-        <div className="rounded-xl p-4" style={{ border: `1.5px solid ${SAGE}`, backgroundColor: "rgba(37,99,235,0.04)" }}>
+        <div className="rounded-xl p-4" style={{ border: `1.5px solid ${BORDER}` }}>
           <p className="text-sm font-bold" style={{ color: FOREST }}>Paid plans</p>
           <p className="text-[11px] mb-2" style={{ color: MUTED }}>The full property profile, for more properties</p>
           <ul className="flex flex-col gap-1.5">{PAID.map((f) => <Check key={f}>{f}</Check>)}</ul>
