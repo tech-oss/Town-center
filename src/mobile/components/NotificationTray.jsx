@@ -9,6 +9,18 @@ import { typeColor } from "../lib/typeColors";
 // Every entry points at content that actually exists in the app.
 export const NOTIFICATIONS = [
   {
+    // Padel's live event (business_events), opened by its id.
+    id: "padel-friday-night-lights",
+    business: "Padel",
+    category: "What's On",
+    title: "Friday Night Lights – Ibiza Closing Party",
+    body: "Our brand-new monthly Club Social: social Padel with a new partner every round, then food, drinks, live music and the Members Jackpot at 20:30.",
+    when: "1h ago",
+    image: "https://vnnmzppjswiazzrnkjtq.supabase.co/storage/v1/object/public/business-media/biz_padel-crrvg/1792076990023-padel-ibiza.webp",
+    to: "/mobile/event/ff5beaed-14e5-460f-8b7a-5815d6f5a000",
+    unread: true,
+  },
+  {
     id: "cocoba-end-of-season-sale",
     business: "COCOBA",
     category: "Offer",
