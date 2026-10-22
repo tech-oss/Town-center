@@ -26,3 +26,4 @@ dist-ssr
 
 # Android TWA tooling (Phase 3 demo) — not part of the web app
 android-twa/
+.env*
