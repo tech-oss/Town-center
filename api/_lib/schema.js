@@ -146,6 +146,8 @@ const EAT_TYPE = { restaurants: "Restaurant", "private-dining": "Restaurant", ba
 const SEE_DO_TYPE = { "sport-wellness": "SportsActivityLocation", film: "MovieTheater", gaming: "EntertainmentBusiness", "music-dance": "EntertainmentBusiness", theatre: "EntertainmentBusiness", "art-culture": "EntertainmentBusiness", family: "EntertainmentBusiness" };
 const TRADE_TYPE = { plumbers: "Plumber", electricians: "Electrician", roofers: "RoofingContractor", locksmiths: "Locksmith", "decorators-painters": "HousePainter", "heating-boiler": "HVACBusiness", builders: "GeneralContractor", "carpenters-joiners": "GeneralContractor", "landscapers-gardeners": "HomeAndConstructionBusiness", cleaners: "HousekeepingService" };
 
+const FOOD = /^(FoodEstablishment|Restaurant|FastFoodRestaurant|CafeOrCoffeeShop|BarOrPub|Bakery)$/;
+
 function businessType(row) {
   const d = row.business_type_detail ?? {};
   const first = (k) => (Array.isArray(d[k]) ? d[k] : []).map(String);
@@ -189,8 +191,13 @@ export function businessSchema(row, { url, parent } = {}) {
     geo: geo(row.lat, row.lng),
     openingHoursSpecification: lodging ? [] : openingHours(row.hours),
     sameAs,
-    acceptsReservations: httpUrl(row.booking_url) || null,
-    servesCuisine: /Restaurant|Food|Cafe|Bar|Bakery/.test(type)
+    // "Accepts reservations" is a restaurant field; any other business's
+    // booking link is a Reserve action.
+    acceptsReservations: FOOD.test(type) ? httpUrl(row.booking_url) || null : null,
+    potentialAction: httpUrl(row.booking_url)
+      ? { "@type": "ReserveAction", target: { "@type": "EntryPoint", urlTemplate: httpUrl(row.booking_url) } }
+      : null,
+    servesCuisine: FOOD.test(type)
       ? (Array.isArray(d.cuisineTypes) ? d.cuisineTypes : []).map((c) => CUISINE_LABEL[c]).filter(Boolean)
       : [],
     amenityFeature: lodging && Array.isArray(row.amenities)
