@@ -108,7 +108,7 @@ const today = () => new Date().toISOString();
 // How many of `kind` this business may have on the platform at once, and the
 // packs behind it.
 export async function getAddonAllowance(businessId, kind) {
-  const [{ data: allowance }, { data: packs }, { data: sub }] = await Promise.all([
+  const [{ data: allowance }, { data: sub }, { data: packs }] = await Promise.all([
     supabase.rpc("addon_slot_allowance", { p_business_id: businessId, p_kind: kind }),
     supabase.from("business_subscriptions").select("plan").eq("business_id", businessId).maybeSingle(),
     supabase
