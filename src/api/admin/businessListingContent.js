@@ -96,6 +96,10 @@ function fromRow(row) {
     servicesList: row.services_list ?? [],
     areasCoveredList: row.areas_covered_list ?? [],
     amenities: row.amenities ?? [],
+    // Accommodation properties only: rooms, and whether the page shows the
+    // company's contact details or the property's own.
+    rooms: row.rooms ?? [],
+    contactSource: row.contact_source ?? null,
     otherAmenities: row.other_amenities ?? "",
     starRating: row.star_rating ?? null,
     whyChooseUs: row.why_choose_us ?? [],
@@ -134,6 +138,8 @@ function toRow(listing) {
     services_list: listing.servicesList,
     areas_covered_list: listing.areasCoveredList,
     amenities: listing.amenities,
+    rooms: listing.rooms ?? [],
+    ...(listing.contactSource ? { contact_source: listing.contactSource === "own" ? "own" : "company" } : {}),
     other_amenities: listing.otherAmenities || null,
     star_rating: listing.starRating,
     why_choose_us: listing.whyChooseUs,
@@ -150,7 +156,7 @@ function toRow(listing) {
 export async function getBusinessesForContent() {
   const { data, error } = await fetchAll(() => supabase
     .from("businesses")
-    .select("id, name, business_listings(business_type, description, tagline, logo, hero_image, gallery, faqs, services_list, why_choose_us, skills, portfolio, amenities, hours)")
+    .select("id, name, kind, parent_id, business_listings(business_type, description, tagline, logo, hero_image, gallery, faqs, services_list, why_choose_us, skills, portfolio, amenities, hours)")
     .order("name").order("id"));
   if (error) throw error;
   return (data ?? []).map((b) => {
@@ -159,15 +165,20 @@ export async function getBusinessesForContent() {
       id: b.id,
       name: b.name,
       section: listing?.business_type ?? null,
+      // "accommodation_company" / "accommodation_property" / "standard".
+      kind: b.kind ?? "standard",
+      parentId: b.parent_id ?? null,
       hasContent: listingHasContent(listing),
     };
   });
 }
 
-export async function getBusinessListingContent(businessId) {
+// `planFrom`: whose plan decides the locks — an accommodation property has
+// no plan of its own and goes by its company's.
+export async function getBusinessListingContent(businessId, { planFrom } = {}) {
   const [{ data, error }, { data: sub }] = await Promise.all([
     supabase.from("business_listings").select("*").eq("business_id", businessId).maybeSingle(),
-    supabase.from("business_subscriptions").select("plan").eq("business_id", businessId).maybeSingle(),
+    supabase.from("business_subscriptions").select("plan").eq("business_id", planFrom ?? businessId).maybeSingle(),
   ]);
   if (error) throw error;
   // The plan decides which fields the editors unlock; it isn't part of the
@@ -179,7 +190,9 @@ export async function saveBusinessListingContent(businessId, listing) {
   assertValidCoords(listing.lat, listing.lng);
   const editedBy = {};
   const approvalStatus = {};
-  for (const section of ALL_SECTIONS) {
+  // Every section the listing already tracks (a property also has rooms and
+  // amenities) as well as the usual ones: admin's save publishes them all.
+  for (const section of new Set([...ALL_SECTIONS, ...Object.keys(listing.approvalStatus ?? {})])) {
     editedBy[section] = "admin";
     approvalStatus[section] = "Up to Date";
   }
@@ -192,6 +205,8 @@ export async function saveBusinessListingContent(businessId, listing) {
         ...toRow(listing),
         edited_by: editedBy,
         approval_status: approvalStatus,
+        // Nothing is waiting any more, so no "as last approved" copy either.
+        pending_snapshot: {},
         updated_at: new Date().toISOString(),
       },
       { onConflict: "business_id" },

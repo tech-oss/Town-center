@@ -11,18 +11,21 @@ import { PlanContext } from "./businessContent/shared";
 import { isPremium } from "../../Data/plans";
 import TypeBEditor from "./businessContent/TypeBEditor";
 import TypeCEditor from "./businessContent/TypeCEditor";
+import AccommodationCompanyEditor from "./businessContent/AccommodationCompanyEditor";
+import PropertyEditor from "./businessContent/PropertyEditor";
 
 // Admin's "Business Type" values (see src/Data/taxonomy.js) grouped the same
 // way the left-hand list has always been grouped. "services" and "hotel" get
 // their own editor shape below; "live" was a section on the old mock dataset
 // that has no equivalent business type any more.
-const SECTION_ORDER = ["see-do", "eat-drink", "shop", "services", "hotel"];
+const SECTION_ORDER = ["see-do", "eat-drink", "shop", "services", "hotel", "accommodation"];
 const SECTION_LABELS = {
   "see-do": "See & Do",
   "eat-drink": "Eat & Drink",
   shop: "Shop",
   services: "Services",
   hotel: "Hotel & Accommodation",
+  accommodation: "Accommodation companies",
 };
 
 function NoContentBadge() {
@@ -40,6 +43,9 @@ export default function BusinessContentPage() {
 
   const [businesses, setBusinesses] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
+  // An accommodation company's property open for editing (properties are
+  // reached through their company, not listed on their own).
+  const [propertyId, setPropertyId] = useState(null);
   const [listing, setListing] = useState(null);
   const [loadingListing, setLoadingListing] = useState(false);
   const [query, setQuery] = useState("");
@@ -54,26 +60,32 @@ export default function BusinessContentPage() {
   // link — pre-select the business the URL's businessId param points to.
   useEffect(() => {
     const businessId = searchParams.get("businessId");
-    if (businessId) setSelectedId(businessId);
+    if (businessId) { setSelectedId(businessId); setPropertyId(null); }
     // Only re-run when the URL itself changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams.get("businessId")]);
 
+  const selectedKind = (businesses ?? []).find((b) => b.id === selectedId)?.kind;
   useEffect(() => {
-    if (!selectedId) { setListing(null); return; }
+    if (!selectedId || selectedKind === "accommodation_company") { setListing(null); return; }
     let cancelled = false;
     setLoadingListing(true);
     getBusinessListingContent(selectedId).then((data) => {
       if (!cancelled) { setListing(data); setLoadingListing(false); }
     });
     return () => { cancelled = true; };
-  }, [selectedId]);
+  }, [selectedId, selectedKind]);
 
   const selectedBusiness = (businesses ?? []).find((b) => b.id === selectedId) ?? null;
 
   const grouped = useMemo(() => {
     const q = query.trim().toLowerCase();
-    const filtered = (businesses ?? []).filter((b) => !q || b.name.toLowerCase().includes(q));
+    // Companies are listed under Accommodation whatever their listing says;
+    // their properties are opened from the company.
+    const filtered = (businesses ?? [])
+      .filter((b) => b.kind !== "accommodation_property")
+      .map((b) => (b.kind === "accommodation_company" ? { ...b, section: "accommodation" } : b))
+      .filter((b) => !q || b.name.toLowerCase().includes(q));
     const groups = SECTION_ORDER.map((section) => ({
       section,
       label: SECTION_LABELS[section],
@@ -126,7 +138,7 @@ export default function BusinessContentPage() {
             <div key={g.section} className="mb-1">
               <p className="px-4 pt-3 pb-1 text-[10px] font-bold uppercase tracking-wide" style={{ color: "#9CA3AF" }}>{g.label}</p>
               {g.items.map((b) => (
-                <button key={b.id} onClick={() => setSelectedId(b.id)}
+                <button key={b.id} onClick={() => { setSelectedId(b.id); setPropertyId(null); }}
                   title={!b.hasContent ? "This business has no content yet. Click to start adding." : undefined}
                   className="w-full text-left px-4 py-2.5 flex items-center gap-2.5 transition-colors"
                   style={{ backgroundColor: selectedId === b.id ? "rgba(37,99,235,0.08)" : "transparent" }}>
@@ -150,6 +162,21 @@ export default function BusinessContentPage() {
               <p className="text-4xl mb-2">🗂️</p>
               <p className="text-sm font-medium" style={{ color: MUTED }}>Select a business to edit</p>
             </div>
+          </div>
+        ) : selectedBusiness?.kind === "accommodation_company" ? (
+          <div className="max-w-3xl pb-10">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
+              <button onClick={() => { setSelectedId(null); setPropertyId(null); }} className="text-sm font-medium transition-opacity hover:opacity-70" style={{ color: NAVY }}>← All Businesses</button>
+              <span className="text-sm" style={{ color: MUTED }}>/</span>
+              <h1 className="text-lg font-bold" style={{ color: NAVY }}>{selectedBusiness.name}</h1>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>Accommodation company</span>
+            </div>
+            <p className="text-xs mb-6" style={{ color: "#9CA3AF" }}>
+              The company's own details and its properties. Everything you save here is published straight away.
+            </p>
+            {propertyId
+              ? <PropertyEditor key={propertyId} propertyId={propertyId} onBack={() => setPropertyId(null)} onToast={setToast} />
+              : <AccommodationCompanyEditor key={selectedId} companyId={selectedId} onOpenProperty={setPropertyId} onToast={setToast} />}
           </div>
         ) : loadingListing || !listing ? (
           <p className="text-sm py-10 text-center" style={{ color: MUTED }}>Loading content…</p>
