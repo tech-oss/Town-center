@@ -24,6 +24,7 @@ function fromRow(row) {
     // A paid plan Maidenhead admin gave at no charge: premium with nothing
     // billed through Stripe.
     complimentary: row.plan === "premium" && !row.stripe_subscription_id,
+    grantedByAdmin: row.granted_by_admin ?? null,
   };
 }
 

@@ -82,6 +82,10 @@ export default function AccommodationPlansPage() {
   const [toast, setToast] = useToast();
 
   const load = useCallback(() => fetchPage(user.id).then(setData).catch((e) => setError(e.message)), [user.id]);
+  // The plan as it is now, not as it was at sign-in: Maidenhead admin may
+  // have given a complimentary plan (or changed it) since.
+  useEffect(() => { refresh(); }, [refresh]);
+
   useEffect(() => {
     let cancelled = false;
     fetchPage(user.id).then((d) => { if (!cancelled) setData(d); }).catch((e) => { if (!cancelled) setError(e.message); });

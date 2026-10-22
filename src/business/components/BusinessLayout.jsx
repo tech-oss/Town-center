@@ -118,7 +118,7 @@ export default function BusinessLayout({ children }) {
 
         <div className="px-5 py-4" style={{ borderBottom: `1px solid ${DIVIDER}` }}>
           <p className="text-sm font-bold truncate" style={{ color: "#fff" }}>{user.businessName}</p>
-          <p className="text-xs mt-0.5" style={{ color: TEXT_DIM }}>{company ? tierLabel(user) : user.plan === "premium" ? "Visibility Plan" : "Free plan"}</p>
+          <p className="text-xs mt-0.5" style={{ color: TEXT_DIM }}>{company ? `${tierLabel(user)}${user.complimentary ? " · Complimentary" : ""}` : user.plan === "premium" ? "Visibility Plan" : "Free plan"}</p>
           {user.role === "Content Manager" && (
             <span className="inline-block mt-1.5 text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ backgroundColor: "rgba(255,255,255,0.15)", color: "#fff" }}>
               Content Manager

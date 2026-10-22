@@ -171,6 +171,18 @@ export async function refresh() {
 supabase.auth.getSession().then(({ data }) => refreshFromSession(data.session));
 supabase.auth.onAuthStateChange((_event, session) => refreshFromSession(session));
 
+// Coming back to the tab re-reads the plan, so a change Maidenhead admin made
+// meanwhile (a complimentary plan, say) shows without signing in again. At
+// most once a minute.
+let lastFocusRefresh = 0;
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible" || Date.now() - lastFocusRefresh < 60000) return;
+    lastFocusRefresh = Date.now();
+    refresh();
+  });
+}
+
 // Set while login() runs, so the session refresh it triggers doesn't record
 // the same sign-in a second time.
 let signingIn = false;
