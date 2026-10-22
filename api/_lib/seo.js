@@ -14,6 +14,9 @@ import {
   SEE_DO_CATEGORIES, SHOP_CATEGORIES, VENUE_TYPES, CUISINE_TYPES,
   FREELANCER_CATEGORIES, TRADESPERSON_CATEGORIES, PROFESSIONAL_CATEGORIES,
 } from "../../src/Data/taxonomy.js";
+import {
+  organization, website, breadcrumbs, businessSchema, faqSchema, eventSchemas, articleSchema, jsonLd,
+} from "./schema.js";
 
 const env = (k) => globalThis.process?.env?.[k];
 
@@ -104,6 +107,22 @@ const LABEL_FOR = Object.fromEntries([
 const SECTION_NOUN = {
   "eat-drink": "Eat & Drink", shop: "Shop", "see-do": "Things to do", services: "Local services",
 };
+// The site's own names for its sections, for breadcrumbs.
+const SECTION_CRUMB = {
+  "eat-drink": { name: "Eat & Drink", path: "/eat-drink" },
+  shop: { name: "Shop", path: "/shop" },
+  "see-do": { name: "See & Do", path: "/see-do" },
+  services: { name: "Services", path: "/services" },
+};
+function businessCrumbs(row) {
+  const section = SECTION_FOR_TYPE[row.business_type];
+  if (section === "stay") {
+    return stayKind(row) === "accommodation"
+      ? [{ name: "Live & Stay", path: "/live" }, { name: "Holiday lets", path: "/live/stay/accommodation" }]
+      : [{ name: "Live & Stay", path: "/live" }, { name: "Hotels", path: "/live/stay/hotels" }];
+  }
+  return SECTION_CRUMB[section] ? [SECTION_CRUMB[section]] : [];
+}
 
 const liveSlug = (id) => String(id).replace(/^biz_/, "");
 const businessId = (slug) => (String(slug).startsWith("biz_") ? slug : `biz_${slug}`);
@@ -134,7 +153,36 @@ function businessLabel(row) {
   return SECTION_NOUN[section] ?? null;
 }
 
-const BUSINESS_COLUMNS = "business_id,name,business_type,business_type_detail,kind,plan,tagline,description,hero_image,address,postal_code,updated_at";
+const BUSINESS_COLUMNS = [
+  "business_id,name,business_type,business_type_detail,kind,parent_id,plan,tagline,description,hero_image,gallery,logo",
+  "address,postal_code,lat,lng,phone,email,website,booking_url,social,hours,faqs",
+  "amenities,rooms,star_rating,check_in_time,check_out_time,updated_at",
+].join(",");
+const HOST_COLUMNS = "business_id,name,business_type,business_type_detail,kind,address,postal_code,lat,lng";
+
+// A business's page address for linking: its page on the site, or for an
+// accommodation company (which has no page of its own) its own website.
+const businessUrl = (row) => {
+  if (!row) return null;
+  if (row.company) {
+    const w = String(row.website ?? "").trim();
+    return w ? (/^https?:\/\//i.test(w) ? w.replace(/^https?/i, (x) => x.toLowerCase()) : `https://${w}`) : null;
+  }
+  const p = businessPath(row);
+  return p ? `${SITE_URL}${p}` : null;
+};
+// The business behind an event or article, or the company managing a
+// property. Never fails the page: without it the details are just shorter.
+async function hostBusiness(id) {
+  if (!id) return null;
+  try {
+    return await one(`public_business_profiles?business_id=eq.${enc(id)}&select=${HOST_COLUMNS}&limit=1`)
+      ?? (await one(`public_accommodation_companies?business_id=eq.${enc(id)}&select=business_id,name,address,postal_code,website&limit=1`)
+        .then((c) => (c ? { ...c, company: true } : null)));
+  } catch {
+    return null;
+  }
+}
 
 async function businessMeta(slug, origin) {
   const row = await one(`public_business_profiles?business_id=eq.${enc(businessId(slug))}&select=${BUSINESS_COLUMNS}&limit=1`);
@@ -144,6 +192,8 @@ async function businessMeta(slug, origin) {
   const label = businessLabel(row);
   const where = [row.address, row.postal_code].filter(Boolean).join(", ");
   const about = row.tagline || row.description;
+  const url = `${SITE_URL}${path}`;
+  const parent = row.parent_id ? await hostBusiness(row.parent_id) : null;
   return {
     path,
     title: titleOf(row.name, label ? `${label} in Maidenhead` : "Maidenhead"),
@@ -153,6 +203,11 @@ async function businessMeta(slug, origin) {
     image: absImage(row.hero_image, origin),
     type: "business.business",
     body: { h1: row.name, lead: row.tagline, text: row.description, extra: where },
+    crumbs: [...businessCrumbs(row), { name: row.name }],
+    schema: [
+      businessSchema(row, { url, parent: parent ? { name: parent.name, url: businessUrl(parent) } : null }),
+      faqSchema(row.faqs, url),
+    ],
   };
 }
 
@@ -163,23 +218,29 @@ const longDate = (d) => (d ? new Date(`${String(d).slice(0, 10)}T12:00:00Z`).toL
 
 async function eventMeta(slug, origin) {
   const by = UUID.test(slug) ? `or=(slug.eq.${enc(slug)},id.eq.${enc(slug)})` : `slug=eq.${enc(slug)}`;
-  const e = await one(`business_events?${by}&status=eq.Live&select=id,slug,title,subtitle,excerpt,description,hero_image,event_date,date_label,event_time,location&limit=1`);
+  const e = await one(`business_events?${by}&status=eq.Live&select=id,slug,business_id,title,subtitle,excerpt,description,hero_image,gallery,event_date,date_label,event_time,location,lat,lng,entry_type,tickets,booking_url,website,is_recurring,recurrence_type,recurrence_days,recurrence_ordinals,recurrence_start_date,recurrence_end_date&limit=1`);
   if (!e) return null;
   const when = e.date_label || longDate(e.event_date);
+  const path = `/event/${e.slug || e.id}`;
+  const host = await hostBusiness(e.business_id);
   return {
-    path: `/event/${e.slug || e.id}`,
+    path,
     title: titleOf(e.title, when ? `${when}` : "Event in Maidenhead"),
     description: clip([e.subtitle || e.excerpt || e.description, when, e.event_time, e.location].filter(Boolean).join(" · ")),
     image: absImage(e.hero_image, origin),
     type: "website",
     body: { h1: e.title, lead: [when, e.event_time, e.location].filter(Boolean).join(" · "), text: e.description || e.excerpt },
+    crumbs: [{ name: "What's On", path: "/whats-on" }, { name: e.title }],
+    schema: eventSchemas(e, { url: `${SITE_URL}${path}`, host, hostUrl: businessUrl(host), image: absImage(e.hero_image, origin), siteUrl: SITE_URL }),
   };
 }
 
 async function newsMeta(slug, origin) {
   if (slug.startsWith("live-") && UUID.test(slug.slice(5))) {
-    const a = await one(`public_business_articles?id=eq.${enc(slug.slice(5))}&select=id,title,body,hero_image,thumbnail,type,date&limit=1`);
+    const a = await one(`public_business_articles?id=eq.${enc(slug.slice(5))}&select=id,business_id,title,body,hero_image,thumbnail,type,date,start_date&limit=1`);
     if (a) {
+      const host = await hostBusiness(a.business_id);
+      const image = absImage(a.hero_image || a.thumbnail, origin);
       return {
         path: `/news/${slug}`,
         title: titleOf(a.title, a.type === "Offer" ? "Offer in Maidenhead" : "News"),
@@ -187,12 +248,18 @@ async function newsMeta(slug, origin) {
         image: absImage(a.hero_image || a.thumbnail, origin),
         type: "article",
         body: { h1: a.title, text: a.body },
+        crumbs: [{ name: "Offers & News", path: "/offers" }, { name: a.title }],
+        schema: [articleSchema({
+          type: "NewsArticle", url: `${SITE_URL}/news/${slug}`, headline: a.title, description: a.body, images: [image],
+          published: a.date || a.start_date, author: host ? { name: host.name, url: businessUrl(host) } : null, siteUrl: SITE_URL,
+        })],
       };
     }
   }
-  const n = await one(`news_offers?slug=eq.${enc(slug)}&status=eq.Published&select=slug,title,excerpt,body,image,type&limit=1`)
-    ?? await one(`public_promoted_posts?slug=eq.${enc(slug)}&select=slug,title,excerpt,body,image,type&limit=1`);
+  const n = await one(`news_offers?slug=eq.${enc(slug)}&status=eq.Published&select=slug,title,excerpt,body,image,type,business_id,business_name,start_date,created_at,updated_at&limit=1`)
+    ?? await one(`public_promoted_posts?slug=eq.${enc(slug)}&select=*&limit=1`);
   if (!n) return null;
+  const host = n.business_id ? await hostBusiness(n.business_id) : null;
   return {
     path: `/news/${n.slug}`,
     title: titleOf(n.title, n.type === "offer" ? "Offer in Maidenhead" : "News"),
@@ -200,12 +267,19 @@ async function newsMeta(slug, origin) {
     image: absImage(n.image, origin),
     type: "article",
     body: { h1: n.title, lead: n.excerpt, text: n.body },
+    crumbs: [{ name: "Offers & News", path: "/offers" }, { name: n.title }],
+    schema: [articleSchema({
+      type: "NewsArticle", url: `${SITE_URL}/news/${n.slug}`, headline: n.title, description: n.excerpt || n.body,
+      images: [absImage(n.image, origin)], published: n.created_at || n.start_date, modified: n.updated_at,
+      author: host ? { name: host.name, url: businessUrl(host) } : n.business_name ? { name: n.business_name } : null, siteUrl: SITE_URL,
+    })],
   };
 }
 
 async function storyMeta(slug, origin) {
-  const f = await one(`feature_articles?slug=eq.${enc(slug)}&status=eq.Live&select=slug,title,card_heading,standfirst,card_body,body,hero_image,card_image&limit=1`);
+  const f = await one(`feature_articles?slug=eq.${enc(slug)}&status=eq.Live&select=slug,title,card_heading,standfirst,card_body,body,hero_image,card_image,business_id,author,created_at,updated_at&limit=1`);
   if (!f) return null;
+  const host = f.business_id ? await hostBusiness(f.business_id) : null;
   return {
     path: `/story/${f.slug}`,
     title: titleOf(f.title || f.card_heading, "Featured"),
@@ -213,11 +287,17 @@ async function storyMeta(slug, origin) {
     image: absImage(f.hero_image || f.card_image, origin),
     type: "article",
     body: { h1: f.title || f.card_heading, lead: f.standfirst, text: f.body },
+    crumbs: [{ name: f.title || f.card_heading }],
+    schema: [articleSchema({
+      url: `${SITE_URL}/story/${f.slug}`, headline: f.title || f.card_heading, description: f.standfirst || f.card_body,
+      images: [absImage(f.hero_image || f.card_image, origin)], published: f.created_at, modified: f.updated_at,
+      author: host ? { name: host.name, url: businessUrl(host) } : null, siteUrl: SITE_URL,
+    })],
   };
 }
 
 async function guideMeta(slug, origin) {
-  const g = await one(`neighbourhood_guides?slug=eq.${enc(slug)}&status=eq.Published&select=slug,title,area,body,hero_image,thumbnail&limit=1`);
+  const g = await one(`neighbourhood_guides?slug=eq.${enc(slug)}&status=eq.Published&select=slug,title,area,body,hero_image,thumbnail,created_at,updated_at&limit=1`);
   if (!g) return null;
   return {
     path: `/guides/${g.slug}`,
@@ -226,6 +306,11 @@ async function guideMeta(slug, origin) {
     image: absImage(g.hero_image || g.thumbnail, origin),
     type: "article",
     body: { h1: g.title, text: g.body },
+    crumbs: [{ name: "Guides", path: "/guides" }, { name: g.title }],
+    schema: [articleSchema({
+      url: `${SITE_URL}/guides/${g.slug}`, headline: g.title, description: g.body,
+      images: [absImage(g.hero_image || g.thumbnail, origin)], published: g.created_at, modified: g.updated_at, siteUrl: SITE_URL,
+    })],
   };
 }
 
@@ -265,6 +350,16 @@ const REDIRECTS = {
 // Addresses that are kept out of search engines (and out of the sitemap).
 const PRIVATE = [/^\/admin(\/|$)/, /^\/business(\/|$)/, /^\/mobile(\/|$)/, /^\/search(\/|$)/, /^\/logo-animation$/, /^\/live\/enquire$/];
 
+// Breadcrumbs for a fixed page: any parent pages that exist, then the page.
+const CRUMB_NAME = { "/live": "Live & Stay", "/live/stay/hotels": "Hotels", "/live/stay/accommodation": "Holiday lets" };
+function staticCrumbs(path, name) {
+  if (path === "/") return null;
+  const parts = path.split("/").filter(Boolean);
+  const parents = parts.slice(0, -1).map((_, i) => `/${parts.slice(0, i + 1).join("/")}`)
+    .filter((p) => STATIC_PAGES[p]).map((p) => ({ name: CRUMB_NAME[p] ?? STATIC_PAGES[p].title.split(" | ")[0], path: p }));
+  return [...parents, { name: CRUMB_NAME[path] ?? name }];
+}
+
 // ── Resolving an address ───────────────────────────────────────────────────
 
 // Returns what the page response should carry:
@@ -280,7 +375,10 @@ export async function resolvePage(rawPath, origin) {
   if (REDIRECTS[path]) return { status: 301, redirect: REDIRECTS[path] };
 
   const fixed = STATIC_PAGES[path];
-  if (fixed) return withCanonical({ path, title: fixed.title, description: fixed.description, body: { h1: fixed.title.split(" | ")[0], text: fixed.description } });
+  if (fixed) {
+    const h1 = fixed.title.split(" | ")[0];
+    return withCanonical({ path, title: fixed.title, description: fixed.description, body: { h1, text: fixed.description }, crumbs: staticCrumbs(path, h1) });
+  }
 
   let m;
   // Old and alternative addresses → the business's own page, permanently.
@@ -331,6 +429,19 @@ function bodyHtml(body) {
   return `<main data-seo-snapshot>${body.h1 ? `<h1>${escapeHtml(String(body.h1).trim())}</h1>` : ""}${p(body.lead, 300)}${p(body.text)}${p(body.extra, 200)}</main>`;
 }
 
+// Structured data for indexable pages: the site itself on the home page,
+// the page's own subject (business, event, article…) and its breadcrumbs.
+function structuredData(meta) {
+  if (meta.noindex || !meta.canonical || meta.status !== 200) return "";
+  const home = meta.canonical === `${SITE_URL}/`;
+  return jsonLd([
+    home ? website(SITE_URL) : null,
+    organization(SITE_URL),
+    ...(meta.schema ?? []),
+    breadcrumbs(SITE_URL, meta.crumbs),
+  ]);
+}
+
 // Puts the page's details into the app's HTML: title, description,
 // canonical, robots, Open Graph and Twitter tags in the head, and the page's
 // main words inside #root (React replaces them as soon as the app starts).
@@ -352,6 +463,7 @@ export function renderPage(template, meta, { indexable, origin, url }) {
     `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`,
     `<meta name="twitter:image" content="${escapeHtml(meta.image || `${origin}${DEFAULT_IMAGE}`)}" />`,
+    structuredData(meta),
   ].filter(Boolean).join("\n    ");
 
   let html = template
