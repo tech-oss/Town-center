@@ -21,6 +21,9 @@ function fromRow(row) {
     cancelAtPeriodEnd: !!row.cancel_at_period_end,
     billingInterval: row.billing_interval,
     priceAmount: row.price_amount,
+    // A paid plan Maidenhead admin gave at no charge: premium with nothing
+    // billed through Stripe.
+    complimentary: row.plan === "premium" && !row.stripe_subscription_id,
   };
 }
 

@@ -108,8 +108,9 @@ const today = () => new Date().toISOString();
 // How many of `kind` this business may have on the platform at once, and the
 // packs behind it.
 export async function getAddonAllowance(businessId, kind) {
-  const [{ data: allowance }, { data: packs }] = await Promise.all([
+  const [{ data: allowance }, { data: packs }, { data: sub }] = await Promise.all([
     supabase.rpc("addon_slot_allowance", { p_business_id: businessId, p_kind: kind }),
+    supabase.from("business_subscriptions").select("plan").eq("business_id", businessId).maybeSingle(),
     supabase
       .from("business_addon_slots")
       .select("*")
@@ -119,14 +120,19 @@ export async function getAddonAllowance(businessId, kind) {
       .order("expires_at", { ascending: true }),
   ]);
   const rows = packs ?? [];
-  const included = ADDON_KINDS[kind]?.included ?? 0;
+  const extra = rows.reduce((n, r) => n + r.quantity, 0);
+  // What the plan itself includes: the allowance less the extras bought
+  // (which only count on a paid plan). An accommodation company's plan
+  // includes its tier's number (3, 6 or 9) — not the standard 3.
+  const counted = sub?.plan === "premium" ? extra : 0;
+  const included = allowance != null ? Math.max(0, allowance - counted) : (ADDON_KINDS[kind]?.included ?? 0);
   return {
     kind,
     // Falls back to what's included if the migration hasn't run yet, so the
     // page still works rather than showing no allowance at all.
     allowance: allowance ?? included,
     included,
-    extra: rows.reduce((n, r) => n + r.quantity, 0),
+    extra,
     packs: rows.map((r) => ({
       id: r.id,
       quantity: r.quantity,

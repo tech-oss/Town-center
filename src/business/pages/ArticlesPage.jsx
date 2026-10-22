@@ -9,6 +9,8 @@ import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { Toast, useToast, ConfirmModal, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import ArticleKeepChooser from "../components/ArticleKeepChooser";
+import { isAccommodationCompany } from "../../Data/accommodation";
+import { listTiers } from "../api/accommodation";
 import {
   listArticles, listAdminPosts, setArticleStatus, deleteArticle, swapLiveArticle,
   LIVE_ARTICLE_LIMIT,
@@ -137,6 +139,7 @@ export default function ArticlesPage() {
   // Choosing which articles stay live when more are live than the plan allows.
   const [trimming, setTrimming] = useState(false);
   const [slots, setSlots] = useState(null);
+  const [tiers, setTiers] = useState([]);
   const [buying, setBuying] = useState(false);
   const [busy, setBusy] = useState(false);
   // Opened straight away when the owner arrives from a Content Manager's
@@ -164,7 +167,10 @@ export default function ArticlesPage() {
     getAddonAllowance(user.id, "article")
       .then((s) => { if (!cancelled) setSlots(s); })
       .catch(() => { /* the included 3 still apply */ });
+    // An accommodation company's plan names (for "included in your … plan").
+    if (isAccommodationCompany(user)) listTiers().then((t) => { if (!cancelled) setTiers(t); }).catch(() => {});
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user.id]);
 
   // Back from Stripe: re-read the allowance so the new slots show immediately.
@@ -209,6 +215,11 @@ export default function ArticlesPage() {
   }
 
   const liveArticles = articles.filter((a) => a.status === "Live");
+  // What the plan includes — an accommodation company's tier (3, 6 or 9),
+  // so an upgrade or downgrade shows here straight away.
+  const includedArticles = slots?.included ?? ADDON_KINDS.article.included;
+  const company = isAccommodationCompany(user);
+  const planName = company ? tiers.find((t) => t.key === user.siteTierKey)?.name : null;
   // 3 included, plus any extra slots the owner has bought.
   const allowance = slots?.allowance ?? LIVE_ARTICLE_LIMIT;
   const premium = user.plan ? String(user.plan).toLowerCase() === "premium" : true;
@@ -320,7 +331,7 @@ export default function ArticlesPage() {
           <div>
             <h1 className="text-2xl font-bold" style={{ color: FOREST }}>News &amp; Offer Articles</h1>
             <p className="text-sm mt-1" style={{ color: MUTED }}>
-              Manage your News and Offer articles from here. {ADDON_KINDS.article.included} are included in your subscription.
+              Manage your News and Offer articles from here. {includedArticles} {includedArticles === 1 ? "is" : "are"} included in your {company ? `${planName ?? "accommodation"} plan` : "subscription"}.
               You can purchase more any time you need. Edit / Hide / Delete as needed and all will show on your
               business homepage and the News &amp; Offers main page across the website and app. Promote your
               articles for prime visibility on the homepage of the website and app by upgrading.
@@ -355,7 +366,7 @@ export default function ArticlesPage() {
         {!loading && articles.length > 0 && (
           <div className="rounded-2xl px-5 py-3.5 flex items-center justify-between gap-4 flex-wrap" style={CARD}>
             <p className="text-sm" style={{ color: FOREST }}>
-              <strong>{liveArticles.length} of {allowance}</strong> live article{liveArticles.length === 1 ? "" : "s"} in use{slots?.extra ? ` (${ADDON_KINDS.article.included} included + ${slots.extra} purchased)` : ""}
+              <strong>{liveArticles.length} of {allowance}</strong> live article{liveArticles.length === 1 ? "" : "s"} in use{slots?.extra ? ` (${includedArticles} included + ${slots.extra} purchased)` : ""}
             </p>
             <div className="flex items-center gap-3 flex-wrap">
               {atLiveLimit && (

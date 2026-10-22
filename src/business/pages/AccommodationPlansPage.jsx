@@ -93,7 +93,9 @@ export default function AccommodationPlansPage() {
     if (!outcome) return;
     setParams({}, { replace: true });
     if (outcome !== "success") return;
-    waitForSubscription(user.id, (s) => s.plan === "premium").then(async (sub) => {
+    // A Stripe subscription, not just "premium": a company on a complimentary
+    // plan is premium already.
+    waitForSubscription(user.id, (s) => s.plan === "premium" && !!s.stripeSubscriptionId).then(async (sub) => {
       await refresh();
       await load();
       setNotice(sub
@@ -112,7 +114,11 @@ export default function AccommodationPlansPage() {
   const articleTitle = (id) => liveArticles.find((a) => a.id === id)?.title ?? "an article";
   const showArticleChooser = articlesOver && (dialog?.type === "articles" || (askArticles && !dialog));
   const paid = user.plan === "premium" && !!user.stripeSubscriptionId;
-  const currentKey = paid ? user.siteTierKey : "acc-free";
+  // A plan Maidenhead admin gave free of charge: it's the current plan, and
+  // the company can still pay for one with more properties (a new Stripe
+  // subscription through Checkout), but not for one it already has.
+  const complimentary = user.plan === "premium" && !user.stripeSubscriptionId;
+  const currentKey = paid || complimentary ? user.siteTierKey : "acc-free";
   const current = tiers.find((t) => t.key === currentKey) ?? tiers.find((t) => t.key === "acc-free");
   const currentInterval = user.billingInterval === "year" ? "year" : "month";
   const tierName = (key) => tiers.find((t) => t.key === key)?.name ?? key;
@@ -137,6 +143,7 @@ export default function AccommodationPlansPage() {
     const free = tier.key === "acc-free";
     if (!paid) {
       if (free) return;
+      if (complimentary && tier.max_properties <= (current?.max_properties ?? 1)) return;
       return act(() => startAccommodationCheckout(user.id, tier.key, interval));
     }
     if (free) {
@@ -186,6 +193,11 @@ export default function AccommodationPlansPage() {
               <p className="text-lg font-bold" style={{ color: FOREST }}>
                 {current?.name ?? "Free"}{paid && <span className="text-sm font-semibold" style={{ color: MUTED }}> · {currentInterval === "year" ? "yearly" : "monthly"}</span>}
               </p>
+              {complimentary && (
+                <p className="text-xs font-semibold mt-0.5" style={{ color: "#047857" }}>
+                  Complimentary — given by Maidenhead, no charge. Choose a plan with more properties below to pay for it instead.
+                </p>
+              )}
               <p className="text-xs mt-0.5" style={{ color: MUTED }}>
                 {usage.used} of {usage.limit} property {usage.limit === 1 ? "slot" : "slots"} used
                 {paid && user.renewalDate && !change && ` · renews ${fmtDate(user.renewalDate)}`}
@@ -251,14 +263,19 @@ export default function AccommodationPlansPage() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {tiers.map((t) => {
             const free = t.key === "acc-free";
-            const isCurrent = t.key === currentKey && (free || interval === currentInterval);
+            const isCurrent = t.key === currentKey && (free || complimentary || interval === currentInterval);
             const more = t.max_properties > (current?.max_properties ?? 1);
-            const label = isCurrent ? "Your current plan"
+            // Already covered by the complimentary plan (or Free, which only
+            // Maidenhead can move them to).
+            const included = complimentary && !isCurrent && !more;
+            const label = isCurrent ? (complimentary ? "Your complimentary plan" : "Your current plan")
+              : included ? (free ? "Ask Maidenhead to change" : "Included in your plan")
+              : complimentary ? "Upgrade and pay"
               : !paid ? (free ? "Your current plan" : "Choose this plan")
               : free ? "Switch to Free"
               : more ? "Upgrade now"
               : "Switch at renewal";
-            const disabled = isCurrent || (!paid && free) || busy || !!change && t.key === change.targetTier;
+            const disabled = isCurrent || included || (!paid && free) || busy || !!change && t.key === change.targetTier;
             return (
               <div key={t.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={{ ...CARD, border: isCurrent ? `2px solid ${SAGE}` : CARD.border }}>
                 <p className="text-base font-bold" style={{ color: FOREST }}>{t.name}</p>

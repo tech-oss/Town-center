@@ -41,8 +41,10 @@ export default function FeaturedPropertyPicker({ companyId, onToast }) {
   return (
     <div className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={CARD}>
       <div>
-        <p className="text-sm font-bold" style={{ color: FOREST }}>Featured Business — which property it shows</p>
-        <p className="text-xs mt-0.5" style={{ color: MUTED }}>Your slot promotes one of your live properties. You can switch to another while it runs.</p>
+        <p className="text-sm font-bold" style={{ color: FOREST }}>Featured Business — choose which property it shows</p>
+        <p className="text-xs mt-0.5" style={{ color: MUTED }}>
+          Your slot promotes one of your live properties — the one you choose here. Nothing is shown until you choose, and you can switch to another while it runs.
+        </p>
       </div>
       {slots.map((slot) => {
         const showing = live.find((p) => p.id === slot.propertyId);

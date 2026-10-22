@@ -222,6 +222,13 @@ Deno.serve(async (req) => {
     // ── Checkout: Free → paid ──
     if (action === "checkout") {
       if (active && !sub?.cancel_at_period_end) return json({ error: "You already have a paid plan — change it instead." }, 409);
+      // A complimentary plan from Maidenhead: paying only makes sense for a
+      // plan with more properties than it already has.
+      const complimentary = sub?.plan === "premium" && !sub?.stripe_subscription_id
+        ? tierByKey.get(sub?.site_tier_key ?? "") : null;
+      if (complimentary && target.max_properties <= complimentary.max_properties) {
+        return json({ error: `Your complimentary ${complimentary.name} plan already includes this.` }, 409);
+      }
       let customerId = sub?.stripe_customer_id;
       if (!customerId) {
         const customer = await stripe("POST", "customers", {

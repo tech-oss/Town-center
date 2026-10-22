@@ -100,8 +100,9 @@ export async function listFeaturedSlots(companyId) {
     .select("id, status, content_id, starts_at, ends_at")
     .eq("business_id", companyId)
     .eq("slot_type", "featured_business")
-    .not("paid_at", "is", null)
-    .neq("status", "cancelled")
+    // Bought or given by Maidenhead admin (which has no payment) — anything
+    // but a checkout still in progress or a booking that's gone.
+    .not("status", "in", "(held,cancelled,bumped)")
     .gt("ends_at", new Date().toISOString())
     .order("starts_at");
   if (error) throw error;

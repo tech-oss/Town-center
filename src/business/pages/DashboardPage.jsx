@@ -15,8 +15,9 @@ import { getMonthComparison, PROFILE_TYPES, CONTENT_VIEW_TYPES } from "../api/bu
 import { listTickets } from "../api/businessTickets";
 import { listActivity, activityLabel, activityIcon, relativeTime } from "../api/businessActivity";
 import AccommodationOverview from "../components/AccommodationOverview";
-import { isAccommodationCompany } from "../../Data/accommodation";
+import { isAccommodationCompany, tierLabel } from "../../Data/accommodation";
 import PublicPageLink from "../components/PublicPageLink";
+import FeaturedPropertyPicker from "../components/FeaturedPropertyPicker";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -122,6 +123,14 @@ export default function DashboardPage() {
             <p className="text-sm text-white">You're on the <strong>Free plan</strong>: one basic property with its name, address, map pin and your company details. Upgrade for full property profiles and more properties.</p>
           ) : isFreePlan ? (
             <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Upgrade to the <strong>Visibility Plan</strong> — just {BILLING_OPTIONS.year.perDay} a day — to add your logo, photos, opening hours, description, website, social links, news &amp; offers and analytics.</p>
+          ) : company ? (
+            // The company's tier, and whether Maidenhead gave it free of charge.
+            <p className="text-sm text-white">
+              You're on the <strong>{tierLabel(user)}</strong>
+              {user.complimentary
+                ? <> — <strong>complimentary</strong>, given by Maidenhead at no charge.</>
+                : <>, renewing on <strong>{user.renewalDate ? new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}</strong>.</>}
+            </p>
           ) : (
             <p className="text-sm text-white">Your <strong className="capitalize">{String(user.plan ?? "").replace(/-/g, " ")}</strong> plan renews on <strong>{user.renewalDate ? new Date(user.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "—"}</strong>.</p>
           )}
@@ -135,6 +144,10 @@ export default function DashboardPage() {
           )}
         </div>
 
+        {/* A Featured Business slot waits for the company to choose which
+            property it shows — so the choice is on the dashboard, not only
+            under Subscriptions. Nothing renders without a slot. */}
+        {company && user.role === "Owner" && <FeaturedPropertyPicker companyId={user.id} onToast={setToast} />}
         {company && <AccommodationOverview companyId={user.id} />}
 
         {/* A bought Featured Business slot, with its expiry, up top */}

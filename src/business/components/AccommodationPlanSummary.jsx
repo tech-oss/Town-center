@@ -23,6 +23,8 @@ export default function AccommodationPlanSummary({ user, onManageBilling, openin
   }, [user.id]);
 
   const paid = user.plan === "premium";
+  // Given by Maidenhead admin, with nothing billed through Stripe.
+  const complimentary = paid && !!user.complimentary;
   const tierName = (key) => info?.tiers.find((t) => t.key === key)?.name;
   const name = paid ? tierName(user.siteTierKey) ?? "Accommodation plan" : "Free";
   const failing = /Failed|Past Due/.test(user.planStatus ?? "");
@@ -34,6 +36,7 @@ export default function AccommodationPlanSummary({ user, onManageBilling, openin
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Current Plan</p>
           <p className="text-xl font-bold" style={{ color: FOREST }}>{name}</p>
+          {complimentary && <p className="text-xs font-semibold mt-0.5" style={{ color: "#047857" }}>Complimentary — given by Maidenhead, no charge</p>}
           {info?.usage && <p className="text-xs mt-0.5" style={{ color: MUTED }}>{info.usage.used} of {info.usage.limit} property {info.usage.limit === 1 ? "slot" : "slots"} used</p>}
         </div>
         <span className="text-xs font-bold px-3 py-1 rounded-full"
@@ -42,7 +45,12 @@ export default function AccommodationPlanSummary({ user, onManageBilling, openin
         </span>
       </div>
 
-      {paid && (
+      {complimentary && (
+        <p className="text-sm" style={{ color: MUTED }}>
+          Maidenhead has given you this plan free of charge. You can still choose a plan with more properties and pay for it from <Link to="/business/upgrade" className="font-semibold underline">Accommodation plans</Link>.
+        </p>
+      )}
+      {paid && !complimentary && (
         <div className="grid sm:grid-cols-3 gap-4">
           <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>{change ? "Changes on" : "Renewal Date"}</p><p className="text-sm font-medium" style={{ color: FOREST }}>{fmtDate(change?.effectiveAt ?? user.renewalDate)}</p></div>
           <div><p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "#9CA3AF" }}>Billing</p><p className="text-sm font-medium" style={{ color: FOREST }}>£{Number(user.priceAmount ?? 0).toFixed(2)} / {user.billingInterval === "year" ? "year" : "month"}</p></div>

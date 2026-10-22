@@ -95,7 +95,22 @@ async function applySubscription(sub: Stripe.Subscription) {
   const customer = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
 
   const { data: before } = await admin
-    .from("business_subscriptions").select("plan, site_tier_key").eq("business_id", businessId).maybeSingle();
+    .from("business_subscriptions").select("plan, site_tier_key, stripe_subscription_id, granted_by_admin")
+    .eq("business_id", businessId).maybeSingle();
+
+  // A first payment still being confirmed (card authentication, or Checkout
+  // retrying the card) is not a plan yet — and not the end of the one the
+  // business already has. Treating "incomplete" as lapsed made an
+  // accommodation company upgrading from a complimentary plan drop to Free
+  // for a few seconds, and the property limit hid all but one property.
+  if (sub.status === "incomplete") return;
+  // An old or abandoned subscription ending says nothing about the business's
+  // current plan: another Stripe subscription, or one admin gave.
+  if (!premium) {
+    const other = before?.stripe_subscription_id && before.stripe_subscription_id !== sub.id;
+    const complimentary = !before?.stripe_subscription_id && before?.plan === "premium" && !!before?.granted_by_admin;
+    if (other || complimentary) return;
+  }
 
   // An accommodation company's plan is one of its tiers (5 / 10 / 15 / 20 /
   // 30 properties), read from the Stripe price it's paying — the price
@@ -200,11 +215,16 @@ async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed")
   }, { onConflict: "stripe_invoice_id" });
   if (error) throw error;
 
-  if (status === "Failed") {
+  // The first invoice of a new subscription "fails" while the card is still
+  // being confirmed at checkout; that isn't a failed renewal of the plan the
+  // business has now, so it doesn't flag it.
+  if (status === "Failed" && invoice.billing_reason !== "subscription_create") {
+    const { data: biz } = await admin.from("businesses").select("kind").eq("id", businessId).maybeSingle();
+    const planName = biz?.kind === "accommodation_company" ? "Accommodation plan" : "Visibility Plan";
     await admin.from("business_subscriptions")
       .update({ plan_status: "Payment Failed", updated_at: new Date().toISOString() })
       .eq("business_id", businessId);
-    await logActivity(businessId, "subscription.payment_failed", "Visibility Plan", "Your latest Visibility Plan payment didn't go through.");
+    await logActivity(businessId, "subscription.payment_failed", planName, `Your latest ${planName} payment didn't go through.`);
   }
 }
 
