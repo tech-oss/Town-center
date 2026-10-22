@@ -396,6 +396,10 @@ function PlacementRow({ placement: p, onEdit, onEnd, onCancel, onApprove, onReje
             {p.contentTitle ?? (p.status === "awaiting_content" ? "Waiting for the business to choose" : "No content chosen")}
           </span>
           {p.live && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" style={{ backgroundColor: "rgba(220,38,38,0.15)", color: "#B91C1C" }}>● Live on home page</span>}
+          {p.slotType === "featured_business" && !p.contentId && !ended && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" title="The accommodation company chooses which of its properties this slot shows, in its business portal. Nothing shows until it does."
+              style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "#1D4ED8" }}>Waiting for the company to choose a property</span>
+          )}
           {p.freePlan && !ended && (
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide" title="The site only features businesses on the Visibility Plan. Put this business on the plan (Subscriptions) and it shows straight away."
               style={{ backgroundColor: "rgba(217,119,6,0.15)", color: "#92400E" }}>Not shown — Free plan</span>

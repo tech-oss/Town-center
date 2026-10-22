@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import MapBase from "./MapBase";
 import { MapContainer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
+import { geocodePlace } from "../lib/geocode";
 
 
 // Custom pin matching TradersMap brand colours
@@ -16,31 +17,8 @@ const PIN_ICON = L.divIcon({
   popupAnchor: [0, -40],
 });
 
-// In-memory cache so repeated renders don't re-geocode and avoid Nominatim rate limits
-const geocodeCache = new Map();
-
-async function geocodeOnce(query) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
-  const res = await fetch(url, { headers: { "Accept-Language": "en" } });
-  const data = await res.json();
-  return data.length > 0 ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
-}
-
-// Some real addresses (farms, private lanes, building names) aren't indexed
-// as a full string in Nominatim and return zero results even though the
-// street/postcode alone resolves fine. Rather than showing "Map unavailable"
-// for those, progressively drop the leading comma-separated segment (the
-// most specific part, e.g. a farm/building name) and retry.
-async function geocode(query) {
-  if (geocodeCache.has(query)) return geocodeCache.get(query);
-  const segments = query.split(",").map((s) => s.trim());
-  let result = null;
-  for (let i = 0; i < segments.length && !result; i++) {
-    result = await geocodeOnce(segments.slice(i).join(", "));
-  }
-  geocodeCache.set(query, result);
-  return result;
-}
+// Postcode first, then the address text (lib/geocode.js).
+const geocode = geocodePlace;
 
 export default function LocationMap({ query, lat, lng, heading = "Location", note, rounded = true, width = "100%", widthClassName, aspectClassName = "aspect-[16/9] md:aspect-[21/9]" }) {
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);

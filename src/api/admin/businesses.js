@@ -417,9 +417,14 @@ export async function registerBusiness(data) {
     if (clash) throw readableConstraintError({ code: "23505" }, name);
   }
 
+  // An accommodation management company (or agency): the same as the
+  // business portal's signup makes — its own kind, with its own plans
+  // (Free, 5–30 properties), adding properties from the portal.
+  const company = data.section === "accommodation";
   const businessRow = {
     id,
     name,
+    ...(company && !data.id ? { kind: "accommodation_company" } : {}),
     // A business admin registers directly is pre-vetted by admin themselves
     // entering the data — it doesn't need to sit in its own Pending queue the
     // way a self-signup does. The owner login (below) is created already
@@ -442,7 +447,7 @@ export async function registerBusiness(data) {
       business_type: data.section || null,
       // Every type-specific pick from the signup form's Business Details step —
       // same shape the real self-serve registration writes, not a subset.
-      business_type_detail: {
+      business_type_detail: company ? { accommodationRole: "company" } : {
         freelancerKind: data.freelancerKind || null,
         freelancerCategories: data.freelancerKind ? (data.freelancerCategories ?? []) : [],
         hotelKind: data.section === "hotel" ? data.hotelKind : null,
@@ -468,19 +473,22 @@ export async function registerBusiness(data) {
     const featuredNow = (await getLivePlacementMap("featured_business")).has(id);
     if (!!data.featured !== featuredNow) await setFeatured(id, !!data.featured);
 
-    // Every business gets a plan — Free unless admin chose Premium.
-    const plan = planFor(data.planKey);
+    // Every business gets a plan — Free unless admin chose a paid one, which
+    // admin gives away: nothing is billed, so it's recorded at £0 and flagged,
+    // keeping revenue figures honest. An accommodation company's plan is one
+    // of its tiers (acc-free, acc-5 … acc-30).
+    const tier = company ? (/^acc-(free|\d+)$/.test(data.planKey ?? "") ? data.planKey : "acc-free") : null;
+    const plan = company ? { key: tier === "acc-free" ? "free" : "premium" } : planFor(data.planKey);
     const { error: subError } = await supabase.from("business_subscriptions").upsert({
       business_id: id,
       plan: plan.key,
       plan_status: "Active",
-      // Admin choosing the Visibility Plan gives it away: nothing is billed,
-      // so it's recorded at £0 and flagged, keeping revenue figures honest.
       monthly_fee: 0,
       granted_by_admin: plan.key === "premium" ? "full" : null,
       granted_at: plan.key === "premium" ? new Date().toISOString() : null,
-      renewal_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-      upgrade_plan_key: plan.key,
+      renewal_date: company ? null : new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+      ...(company ? { site_tier_key: tier } : {}),
+      upgrade_plan_key: company ? tier : plan.key,
       // Admin registering on the business's behalf stands in for their
       // agreeing to the Terms of Use / Privacy Policy at signup.
       terms_accepted_at: new Date().toISOString(),

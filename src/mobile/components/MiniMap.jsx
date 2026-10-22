@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import MapBase from "../../components/MapBase";
 import { MapContainer, Marker } from "react-leaflet";
 import L from "leaflet";
+import { geocodePlace } from "../../lib/geocode";
 
 
 const PIN_ICON = L.divIcon({
@@ -14,29 +15,10 @@ const PIN_ICON = L.divIcon({
   iconAnchor: [14, 38],
 });
 
-// Same Nominatim geocoding + in-memory cache as the website's LocationMap —
-// any address/mapQuery string resolves to a pin without needing lat/lng
-// stored on every business. Progressively drops the leading (most specific)
-// comma segment on a miss, since farm/building names often aren't indexed.
-const geocodeCache = new Map();
-
-async function geocodeOnce(query) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
-  const res = await fetch(url, { headers: { "Accept-Language": "en" } });
-  const data = await res.json();
-  return data.length > 0 ? { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) } : null;
-}
-
-async function geocode(query) {
-  if (geocodeCache.has(query)) return geocodeCache.get(query);
-  const segments = query.split(",").map((s) => s.trim());
-  let result = null;
-  for (let i = 0; i < segments.length && !result; i++) {
-    result = await geocodeOnce(segments.slice(i).join(", "));
-  }
-  geocodeCache.set(query, result);
-  return result;
-}
+// The same lookup as the website's LocationMap — any address/mapQuery string
+// resolves to a pin without needing lat/lng stored on every business: the
+// postcode first, then the address text (lib/geocode.js).
+const geocode = geocodePlace;
 
 // Small embedded map for detail screens — every Eat & Drink/Shop/Services/
 // Stay business has an address but not necessarily stored coordinates, so

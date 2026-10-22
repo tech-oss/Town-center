@@ -2,6 +2,7 @@ import { getBusinessLegalAcceptances, getBusinessesRequiringAcceptance, formatAc
 import { useState, useRef, useMemo, useEffect } from "react";
 import PlacementTimer from "../components/PlacementTimer";
 import { PLANS, planFor, isPremium, PREMIUM_PLAN } from "../../Data/plans";
+import { ACCOMMODATION_TIERS } from "../../api/admin/subscriptions";
 import { uploadImage } from "../../lib/uploadImage";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
@@ -162,6 +163,15 @@ const EMPTY_FORM = {
   featured: false,
 };
 
+// The types admin can register — the same choices as the business portal's
+// signup: a Hotel is a single business; an accommodation management company
+// (or agency) is its own kind, which then adds properties. The shared
+// BUSINESS_TYPES list (also the Offers filters) has no company option.
+const REGISTER_TYPES = [
+  ...BUSINESS_TYPES.map((t) => (t.value === "hotel" ? { ...t, label: "Hotel" } : t)),
+  { value: "accommodation", label: "Accommodation (management company or agency)" },
+];
+
 // Registering a business never features it. Featuring is a 30-day promotion
 // that takes one of only 10 slots for that business type — and one people pay
 // for — so it is always its own deliberate action on the business card, never
@@ -195,11 +205,13 @@ function RegisterBusinessForm({ onSave, onCancel }) {
       ...f, section: val,
       freelancerKind: "", freelancerCategories: [], hotelKind: "hotel",
       cuisineTypes: [], venueTypes: [], shopCategories: [], seeDoCategories: [],
+      // An accommodation company's plans are its own (Free, 5–30 properties).
+      planKey: val === "accommodation" ? "acc-free" : "free",
     }));
   }
 
   const isFreelancer = form.section === "freelancer";
-  const isHotel = form.section === "hotel";
+  const isAccommodation = form.section === "accommodation";
   const isEat = form.section === "eat-drink";
   const isShop = form.section === "shop";
   const isSeeDo = form.section === "see-do";
@@ -314,7 +326,7 @@ function RegisterBusinessForm({ onSave, onCancel }) {
             <select value={form.section} onChange={(e) => handleSectionChange(e.target.value)}
               className="rounded-xl px-3 py-2.5 text-sm outline-none" style={FIELD_STYLE}>
               <option value="">— Select a type —</option>
-              {BUSINESS_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+              {REGISTER_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </FormField>
 
@@ -349,10 +361,11 @@ function RegisterBusinessForm({ onSave, onCancel }) {
             </>
           )}
 
-          {isHotel && (
-            <FormField label="Hotel or accommodation?" required span2>
-              <RadioGroup options={HOTEL_KINDS} value={form.hotelKind} onChange={(v) => set("hotelKind", v)} />
-            </FormField>
+          {isAccommodation && (
+            <p className="sm:col-span-2 text-xs rounded-xl px-3 py-2.5" style={{ backgroundColor: "rgba(37,99,235,0.06)", color: NAVY }}>
+              An accommodation company has no listing of its own: it adds its properties in the business portal, and appears on each
+              property page as <strong>Managed by</strong>. The address and contact details here are the company's.
+            </p>
           )}
 
           {isEat && (
@@ -433,17 +446,23 @@ function RegisterBusinessForm({ onSave, onCancel }) {
       </Section>
 
       {/* ── Plan ── */}
-      <Section title="Subscription Plan" note="Free lists the name, address, phone and email, with a stock hero picture you upload. Choosing the Visibility Plan here gives it to the business for free: it's recorded as not paying and isn't counted as revenue.">
+      <Section title="Subscription Plan" note={isAccommodation
+        ? "Free: one basic property. A 5, 10, 15, 20 or 30 properties plan chosen here is given to the company free of charge (complimentary): it's recorded as not paying and isn't counted as revenue. The company can still pay for a bigger plan itself."
+        : "Free lists the name, address, phone and email, with a stock hero picture you upload. Choosing the Visibility Plan here gives it to the business for free: it's recorded as not paying and isn't counted as revenue."}>
         <FormField label="Plan" required>
           <select value={form.planKey} onChange={(e) => set("planKey", e.target.value)}
             className="rounded-xl px-3 py-2.5 text-sm outline-none w-full sm:w-72" style={FIELD_STYLE}>
-            {PLANS.map((p) => (
-              <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : "given by admin, not paying"}</option>
-            ))}
+            {isAccommodation
+              ? ACCOMMODATION_TIERS.map((t) => (
+                <option key={t.key} value={t.key}>{t.name} — {t.key === "acc-free" ? "Free" : "complimentary, not paying"}</option>
+              ))
+              : PLANS.map((p) => (
+                <option key={p.key} value={p.key}>{p.name} — {p.price === 0 ? "Free" : "given by admin, not paying"}</option>
+              ))}
           </select>
         </FormField>
         <ul className="mt-2 grid sm:grid-cols-2 gap-x-6 gap-y-1">
-          {planFor(form.planKey).features.map((f) => (
+          {(isAccommodation ? [] : planFor(form.planKey).features).map((f) => (
             <li key={f} className="text-xs flex items-start gap-1.5" style={{ color: MUTED }}>
               <span style={{ color: BLUE }}>✓</span>{f}
             </li>

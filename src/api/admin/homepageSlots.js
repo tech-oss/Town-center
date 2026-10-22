@@ -189,8 +189,10 @@ export async function getSlotContentOptions(slotType) {
       // about it — which is why businesses cannot buy this slot without the
       // Visibility Plan (promotions_need_subscription_2026_09.sql).
       const [{ data }, subs] = await Promise.all([
-        fetchAll(() => supabase.from("businesses").select("id, name, business_listings(business_type, hero_image)")
-          .eq("status", "Approved").order("name").order("id")),
+        // A property isn't offered on its own: its company is, and the
+        // company chooses which property the slot shows (business portal).
+        fetchAll(() => supabase.from("businesses").select("id, name, kind, business_listings(business_type, hero_image)")
+          .eq("status", "Approved").neq("kind", "accommodation_property").order("name").order("id")),
         fetchAll(() => supabase.from("business_subscriptions").select("business_id, plan").order("business_id")),
       ]);
       const premium = new Set((subs.data ?? []).filter((s) => s.plan === "premium").map((s) => s.business_id));
@@ -199,7 +201,10 @@ export async function getSlotContentOptions(slotType) {
         const onPlan = premium.has(r.id);
         return {
           kind, id: r.id, title: r.name,
-          detail: [l?.business_type, onPlan ? null : "Free plan — needs the Visibility Plan to be featured"].filter(Boolean).join(" · "),
+          detail: [
+            r.kind === "accommodation_company" ? "Accommodation company — they choose which property to show" : l?.business_type,
+            onPlan ? null : r.kind === "accommodation_company" ? "Free plan — needs a paid accommodation plan" : "Free plan — needs the Visibility Plan to be featured",
+          ].filter(Boolean).join(" · "),
           businessId: r.id, image: l?.hero_image, premium: onPlan,
         };
       });
