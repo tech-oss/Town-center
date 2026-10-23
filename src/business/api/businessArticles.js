@@ -29,6 +29,7 @@ function fromRow(row) {
     thumbnail: row.thumbnail,
     heroImage: row.hero_image,
     body: row.body,
+    website: row.website ?? "",
     rejectionReason: row.rejection_reason,
   };
 }
@@ -69,6 +70,8 @@ export async function createArticle(businessId, form) {
       thumbnail: form.heroImage,
       hero_image: form.heroImage,
       body: form.body,
+      // Optional: a "Visit website" button on the article.
+      website: form.website?.trim().slice(0, 500) || null,
     })
     .select()
     .single();
@@ -92,6 +95,8 @@ export async function updateArticle(id, form) {
       thumbnail: form.heroImage,
       hero_image: form.heroImage,
       body: form.body,
+      // Optional: a "Visit website" button on the article.
+      website: form.website?.trim().slice(0, 500) || null,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);

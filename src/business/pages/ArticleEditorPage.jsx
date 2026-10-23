@@ -12,7 +12,7 @@ function wordCount(text) {
   return t ? t.split(/\s+/).length : 0;
 }
 
-const EMPTY = { title: "", type: "News", heroImage: null, body: "", startDate: "", endDate: "", status: "Draft" };
+const EMPTY = { title: "", type: "News", heroImage: null, body: "", website: "", startDate: "", endDate: "", status: "Draft" };
 
 export default function ArticleEditorPage() {
   const navigate = useNavigate();
@@ -92,6 +92,9 @@ export default function ArticleEditorPage() {
               </Field>
               <Field label="Start Date" hint="Optional"><UKDateInput value={form.startDate ?? ""} onChange={(e) => set("startDate", e.target.value)} /></Field>
               <Field label="End Date" hint="Leave blank for no expiry"><UKDateInput value={form.endDate ?? ""} min={form.startDate || undefined} onChange={(e) => set("endDate", e.target.value)} /></Field>
+              <Field label="Website URL" span2 hint="Optional — adds a Visit website button to the article">
+                <Inp value={form.website ?? ""} onChange={(e) => set("website", e.target.value)} placeholder="https://…" />
+              </Field>
             </div>
           </EditorSection>
 
