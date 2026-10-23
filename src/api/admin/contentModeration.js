@@ -67,7 +67,7 @@ export async function getAllNewsOffers({ status, source } = {}) {
   if (adm.error) throw adm.error;
 
   const rows = [
-    ...(biz.data ?? []).map((r) => ({ ...articleFromRow(r), source: "business" })),
+    ...(biz.data ?? []).map((r) => ({ ...articleFromRow(r), website: r.website ?? null, source: "business" })),
     ...(adm.data ?? []).map((r) => ({
       id: r.id,
       slug: r.slug,
@@ -85,6 +85,7 @@ export async function getAllNewsOffers({ status, source } = {}) {
       thumbnail: r.image,
       body: r.body,
       excerpt: r.excerpt,
+      website: r.website ?? null,
       rejectionReason: null,
       source: "admin",
     })),

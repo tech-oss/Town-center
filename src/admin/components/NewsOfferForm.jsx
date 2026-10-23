@@ -191,6 +191,7 @@ export default function NewsOfferForm({ initial, onSave, onCancel, featuredItems
     image: "",
     date: "",
     displayDates: "",
+    website: "",
     startDate: "",
     endDate: "",
     status: "Published",
@@ -335,6 +336,21 @@ export default function NewsOfferForm({ initial, onSave, onCancel, featuredItems
             Free text readers see on the post — the offer's own dates, whatever the business wants to say.
             Leave blank to show no dates. This is separate from the go-live schedule below, which only tells
             the system when to put the post on the site and is never shown to the public.
+          </span>
+        </label>
+
+        {/* Optional link, like events, guides and feature articles have. */}
+        <label className="flex flex-col gap-1 sm:col-span-2">
+          <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Website URL (optional)</span>
+          <input
+            value={form.website ?? ""}
+            onChange={(e) => set("website", e.target.value)}
+            placeholder="https://…"
+            className="rounded-xl px-3 py-2.5 text-sm outline-none"
+            style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }}
+          />
+          <span className="text-[11px]" style={{ color: "#6B7280" }}>
+            Adds a "Visit website" button to the post. Leave blank for none.
           </span>
         </label>
 

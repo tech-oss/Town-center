@@ -101,6 +101,13 @@ const longDate = (iso) => new Date(iso).toLocaleDateString("en-GB", { day: "nume
 // instructions to the system about when the post is live on the site and are
 // deliberately NOT shown — a post scheduled to run 20/10–14/11 used to tell
 // readers the offer itself ran on those dates.
+// A website someone typed ("example.com", "https://…") as a link, or null.
+export function webLink(url) {
+  const s = String(url ?? "").trim();
+  if (!s) return null;
+  return /^https?:\/\//i.test(s) ? s : `https://${s.replace(/^\/+/, "")}`;
+}
+
 function articleDates(a) {
   return a.display_dates?.trim() || "";
 }
@@ -136,6 +143,7 @@ function mapArticle(a, business) {
     excerpt: String(a.body ?? "").split(/\n\s*\n/)[0]?.slice(0, 180) ?? "",
     image: imageUrl(a.hero_image || a.thumbnail, "card") || business.image,
     body: String(a.body ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
+    website: webLink(a.website),
     business,
   };
 }
@@ -157,6 +165,7 @@ function mapNewsOffer(n, business) {
     excerpt: n.excerpt ?? "",
     image: imageUrl(n.image, "card") || business.image,
     body: String(n.body ?? n.excerpt ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
+    website: webLink(n.website),
     business,
   };
 }

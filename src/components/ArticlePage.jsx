@@ -104,6 +104,19 @@ export default function ArticlePage() {
             ))}
           </article>
 
+          {/* The article's own link, when the business added one. */}
+          {article.website && (
+            <div className="mt-10 flex justify-center">
+              <a href={article.website} target="_blank" rel="noopener noreferrer"
+                className="px-7 py-3.5 rounded-full font-semibold text-sm text-white transition-colors"
+                style={{ backgroundColor: "var(--leaf)" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--sage)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "var(--leaf)")}>
+                Visit website →
+              </a>
+            </div>
+          )}
+
           {/* Back-to-business CTA */}
           <div
             className="mt-10 overflow-hidden p-7 flex flex-col sm:flex-row sm:items-center gap-5 sm:justify-between"

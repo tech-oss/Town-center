@@ -32,6 +32,7 @@ function fromRow(r, slot) {
     image: r.image,
     date: r.date_label,
     displayDates: r.display_dates ?? r.date_label ?? "",
+    website: r.website ?? "",
     startDate: r.start_date,
     endDate: r.end_date,
     status: r.status,
@@ -83,6 +84,8 @@ export async function saveNewsOffer(item) {
     // What readers see. Kept apart from start_date/end_date, which only tell
     // the system when the post is live.
     display_dates: item.displayDates?.trim() || null,
+    // Optional: a "Visit website" button on the post.
+    website: item.website?.trim().slice(0, 500) || null,
     start_date: item.startDate || null,
     end_date: item.endDate || null,
     status: item.status ?? "Draft",

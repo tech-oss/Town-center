@@ -65,6 +65,14 @@ export default function NewsDetailScreen() {
             ))}
           </div>
 
+          {article.website && (
+            <a href={article.website} target="_blank" rel="noopener noreferrer"
+              className="block text-center px-6 py-3 rounded-full font-semibold text-sm text-white active:opacity-90"
+              style={{ backgroundColor: "var(--leaf)" }}>
+              Visit website
+            </a>
+          )}
+
           {biz && bizLink && (
             <Link to={bizLink} className="flex items-center gap-3 p-3 bg-white active:opacity-90" style={{ borderRadius: 16, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}>
               <img src={biz.image} alt="" className="w-14 h-14 rounded-xl object-cover shrink-0" style={cropStyle(biz.image, "card")} />

@@ -86,6 +86,13 @@ function ArticleReview({ article: a, position, total, onBack, onPrev, onNext, on
             <Paragraphs text={a.body} />
           </div>
 
+          {a.website && (
+            <p className="text-sm" style={{ color: NAVY }}>
+              <span className="text-[11px] font-semibold uppercase tracking-wide mr-2" style={{ color: "#9CA3AF" }}>Website</span>
+              <a href={/^https?:\/\//i.test(a.website) ? a.website : `https://${a.website}`} target="_blank" rel="noopener noreferrer" className="underline break-all">{a.website}</a>
+            </p>
+          )}
+
           {a.thumbnail && a.thumbnail !== a.heroImage && (
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide mb-2" style={{ color: "#9CA3AF" }}>Card thumbnail</p>
