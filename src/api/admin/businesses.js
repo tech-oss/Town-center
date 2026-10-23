@@ -14,6 +14,12 @@ import {
   SHOP_CATEGORIES, SERVICES_CATEGORIES, SERVICES_GROUPS,
 } from "../../Data/taxonomy";
 
+// A UK postcode inside an address ("164 King Street, London, W6 0QU" → "W6 0QU").
+function postcodeIn(address) {
+  const m = String(address ?? "").match(/\b([A-Z]{1,2}\d[A-Z\d]?)\s*(\d[A-Z]{2})\b/i);
+  return m ? `${m[1]} ${m[2]}`.toUpperCase() : null;
+}
+
 // ─── Category taxonomy ────────────────────────────────────────────────────────
 // Re-exported from the canonical taxonomy (src/Data/taxonomy.js) rather than
 // redeclared here. These names are the shapes admin's own screens already
@@ -495,6 +501,32 @@ export async function registerBusiness(data) {
     }, { onConflict: "business_id" });
     if (subError) throw subError;
 
+    // An accommodation company's public details — the MANAGED BY box on each
+    // of its property pages — come from its company profile, not from the
+    // registration. Admin typed these in, so they're published as they are
+    // (a company signing itself up sends them for approval instead). Only
+    // when there's no profile yet: after that it's edited in Business Content.
+    if (company) {
+      const { data: existing } = await supabase.from("accommodation_company_profiles")
+        .select("business_id").eq("business_id", id).maybeSingle();
+      if (!existing) {
+        const { error: profileError } = await supabase.from("accommodation_company_profiles").insert({
+          business_id: id,
+          name,
+          logo: data.logo || null,
+          address: data.address || null,
+          postal_code: postcodeIn(data.address),
+          phone: data.businessPhone || null,
+          email: data.businessEmail || null,
+          website: data.website || null,
+          social: {},
+          approval_status: "Up to Date",
+          updated_at: new Date().toISOString(),
+        });
+        if (profileError) throw profileError;
+      }
+    }
+
     // The owner's login is optional — skipping it leaves the business
     // unclaimed, which is a valid end state, not an incomplete one.
     //
@@ -527,6 +559,7 @@ export async function registerBusiness(data) {
     // business must never delete it because one field failed to save.
     if (!data.id) {
       await supabase.from("business_subscriptions").delete().eq("business_id", id);
+      if (company) await supabase.from("accommodation_company_profiles").delete().eq("business_id", id);
       await supabase.from("business_listings").delete().eq("business_id", id);
       await supabase.from("businesses").delete().eq("id", id);
     }

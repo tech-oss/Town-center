@@ -232,7 +232,9 @@ function mapCompany(c) {
     id: c.business_id,
     name: c.name,
     logo: imageUrl(c.logo, "icon"),
-    address: [c.address, c.postal_code].filter(Boolean).join(", "),
+    // The postcode only when the address doesn't already end with it.
+    address: [c.address, c.postal_code && !String(c.address ?? "").toUpperCase().replace(/\s/g, "").includes(String(c.postal_code).toUpperCase().replace(/\s/g, "")) ? c.postal_code : null]
+      .filter(Boolean).join(", "),
     phone: c.phone,
     email: c.email,
     website: c.website,
