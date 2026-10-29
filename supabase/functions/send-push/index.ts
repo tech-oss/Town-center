@@ -28,7 +28,7 @@ webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 const APNS_KEY_ID = Deno.env.get("APNS_KEY_ID");
 const APNS_TEAM_ID = Deno.env.get("APNS_TEAM_ID") ?? "8J8BUZX9GS";
 const APNS_PRIVATE_KEY = Deno.env.get("APNS_PRIVATE_KEY")?.replace(/\\n/g, "\n");
-const APNS_BUNDLE_ID = Deno.env.get("APNS_BUNDLE_ID") ?? "com.maidenhead.app";
+const APNS_BUNDLE_ID = Deno.env.get("APNS_BUNDLE_ID") ?? "com.maidenheadapp.maidenheadapp";
 
 // Apple accepts the same signed token for up to an hour.
 let apnsJwt: { token: string; at: number } | null = null;
