@@ -382,7 +382,8 @@ function pushFromRow(r) {
     id: r.id, title: r.title, body: r.body, url: r.url,
     audience: r.audience,
     channels: r.channels ?? [],
-    notifType: r.notif_type,
+    // Stored as "rich"; the page calls it "attach".
+    notifType: r.notif_type === "rich" ? "attach" : r.notif_type,
     attachedArticle: r.article_id
       ? { id: r.article_id, title: r.article_title, thumbnail: r.article_image, link: r.article_link }
       : null,
@@ -411,7 +412,7 @@ export async function sendPush(form) {
     url: form.url || null,
     audience: form.audience ?? "all",
     channels,
-    notif_type: form.notifType ?? "simple",
+    notif_type: form.notifType === "attach" ? "rich" : "simple",
     article_id: article?.id ?? null,
     article_title: article?.title ?? null,
     article_image: article?.thumbnail ?? null,
