@@ -19,6 +19,8 @@ export default function NewsDetailScreen() {
   if (loading || !article) return null;
   // An event reached by an old /news/ link goes to its full event page.
   if (article.category === "Event") return <Navigate to={`/mobile/event/${article.slug}`} replace />;
+  // A featured story lives at /story/…, its full editorial page.
+  if (article.to && !article.to.startsWith("/news/")) return <Navigate to={`/mobile${article.to}`} replace />;
 
   const biz = article.business;
   const more = (biz?.news ?? []).filter((a) => a.slug !== article.slug).slice(0, 3);

@@ -18,7 +18,8 @@ export async function getAttachableContent() {
     category: a.category === "Offer" ? "Offer" : "News",
     businessName: b.name,
     thumbnail: a.image,
-    link: `/news/${a.slug}`,
+    // Featured stories and events have their own page (/story/…, /event/…).
+    link: a.to ?? `/news/${a.slug}`,
   })));
 
   const featured = stories.map((s) => ({

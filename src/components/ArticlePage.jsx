@@ -26,6 +26,8 @@ export default function ArticlePage() {
   if (!article) return <Navigate to="/" replace />;
   // An event reached by an old /news/ link goes to its full event page.
   if (article.category === "Event") return <Navigate to={`/event/${article.slug}`} replace />;
+  // A featured story lives at /story/…, its full editorial page.
+  if (article.to && !article.to.startsWith("/news/")) return <Navigate to={article.to} replace />;
 
   const biz = article.business;
   // Stay (hotels/accommodation) businesses live outside the shop/eat-drink/
