@@ -82,9 +82,13 @@ export async function approvePushRequest(request) {
 
   let delivery = null;
   try {
-    const { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
+    // Tried twice: the push service can fail on its first start after a quiet spell.
+    let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
       body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all" },
     });
+    if (fnError) ({ data: result, error: fnError } = await supabase.functions.invoke("send-push", {
+      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all" },
+    }));
     delivery = fnError ? { error: fnError.message } : result;
   } catch (e) {
     delivery = { error: e.message };

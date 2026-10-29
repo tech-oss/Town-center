@@ -3,7 +3,8 @@ import { cropStyle } from "../../lib/focalPoint";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
-import NotificationTray, { NOTIFICATIONS } from "../components/NotificationTray";
+import NotificationTray from "../components/NotificationTray";
+import { getPushFeed, markPushFeedSeen } from "../lib/pushFeed";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getHomepageEvents, getHomepageStories, getSpotlightPosts } from "../../api";
@@ -70,7 +71,15 @@ export default function HomeScreen() {
   const featuredGuides = guideList ?? [];
   const featuredStories = stories ?? [];
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const unreadCount = NOTIFICATIONS.filter((n) => n.unread).length;
+  // What admin has sent to phones. Fetched again whenever the bell is
+  // opened, so a notification that just arrived is in the list.
+  const [pushFeed, setPushFeed] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    getPushFeed().then((f) => { if (!cancelled) setPushFeed(f); }).catch(() => { if (!cancelled) setPushFeed([]); });
+    return () => { cancelled = true; };
+  }, [notificationsOpen]);
+  const unreadCount = notificationsOpen ? 0 : (pushFeed ?? []).filter((n) => n.unread).length;
   // Only true once the video is actually playing. It used to start true, so
   // when iOS blocked autoplay (Low Power Mode does) the button showed
   // "pause" over a video that had never started.
@@ -445,7 +454,8 @@ export default function HomeScreen() {
         </div>
       </div>
 
-      <NotificationTray open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+      <NotificationTray open={notificationsOpen} items={pushFeed} loading={pushFeed === null}
+        onClose={() => { markPushFeedSeen(); setNotificationsOpen(false); }} />
     </MobileShell>
   );
 }

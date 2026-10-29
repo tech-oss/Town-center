@@ -3,67 +3,6 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { typeColor } from "../lib/typeColors";
 
-// Sample push notifications shown behind the home screen's bell. Static for
-// now — the shape (image, business, category, copy, when, where it links)
-// mirrors a real News & Offers article so a live feed can drop straight in.
-// Every entry points at content that actually exists in the app.
-export const NOTIFICATIONS = [
-  {
-    // Padel's live event (business_events), opened by its id.
-    id: "padel-friday-night-lights",
-    business: "Padel",
-    category: "What's On",
-    title: "Friday Night Lights – Ibiza Closing Party",
-    body: "Our brand-new monthly Club Social: social Padel with a new partner every round, then food, drinks, live music and the Members Jackpot at 20:30.",
-    when: "1h ago",
-    image: "https://vnnmzppjswiazzrnkjtq.supabase.co/storage/v1/object/public/business-media/biz_padel-crrvg/1792076990023-padel-ibiza.webp",
-    to: "/mobile/event/ff5beaed-14e5-460f-8b7a-5815d6f5a000",
-    unread: true,
-  },
-  {
-    id: "cocoba-end-of-season-sale",
-    business: "COCOBA",
-    category: "Offer",
-    title: "Exclusive end of season delights at Cocoba",
-    body: "Handcrafted chocolates, gift boxes and seasonal treats at reduced prices. Get while stocks last!",
-    when: "2h ago",
-    image: "/images/cocoba/truffles.jpg",
-    to: "/mobile/news/cocoba-end-of-season-sale",
-    unread: true,
-  },
-  {
-    id: "coppa-champagne-tasting",
-    business: "Coppa Club",
-    category: "Offer",
-    title: "Champagne & Sparkling Tasting Evening",
-    body: "Explore Champagne alongside a curated selection of sparkling wines, with light bites throughout. Booking recommended.",
-    when: "5h ago",
-    image: "/images/coppa/champagne.jpg",
-    to: "/mobile/news/coppa-champagne-tasting",
-    unread: true,
-  },
-  {
-    id: "coppa-cocktail-masterclass",
-    business: "Coppa Club",
-    category: "What's On",
-    title: "Shake, Stir & Sip: Cocktail Masterclass",
-    body: "Learn to mix Coppa Club's signature serves with the in-house bartenders. Places are limited.",
-    when: "Yesterday",
-    image: "/images/coppa/cocktail.jpg",
-    to: "/mobile/news/coppa-cocktail-masterclass",
-  },
-  {
-    id: "jetts-maidenhead",
-    business: "Jetts Maidenhead",
-    category: "Featured",
-    title: "24/7 Fitness in the Heart of Town",
-    body: "A new 24-hour gym has opened at One Maidenhead — train whenever you want, on your own terms.",
-    when: "2 days ago",
-    image: "/images/jetts/entrance.webp",
-    to: "/mobile/story/jetts-maidenhead",
-  },
-];
-
 function TagIcon() {
   return (
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
@@ -76,7 +15,8 @@ function TagIcon() {
 // Drops down under the header like a phone's notification shade. Rendered
 // through a portal so it sits above the tab bar and the hero video rather
 // than being clipped by the scrolling column.
-export default function NotificationTray({ open, onClose }) {
+// `items` are the notifications admin has sent (lib/pushFeed.js).
+export default function NotificationTray({ open, onClose, items, loading }) {
   const navigate = useNavigate();
 
   // Close on Escape, and don't let the page scroll behind the tray.
@@ -90,9 +30,11 @@ export default function NotificationTray({ open, onClose }) {
   if (!open) return null;
 
   const openItem = (item) => {
+    if (!item.to) return;
     onClose();
     navigate(item.to);
   };
+  const list = items ?? [];
 
   return createPortal(
     <div
@@ -128,7 +70,7 @@ export default function NotificationTray({ open, onClose }) {
         {/* Scrolls internally so a growing feed never pushes the tray past
             the viewport or under the tab bar. */}
         <div className="flex flex-col overflow-y-auto overscroll-contain" style={{ maxHeight: "calc(100vh - 260px)" }}>
-          {NOTIFICATIONS.map((n, i) => (
+          {list.map((n, i) => (
             <button
               key={n.id}
               type="button"
@@ -139,8 +81,11 @@ export default function NotificationTray({ open, onClose }) {
                 backgroundColor: n.unread ? "rgba(47,164,164,0.06)" : undefined,
               }}
             >
-              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
-                <img src={n.image} alt="" className="w-full h-full object-cover" />
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center"
+                style={n.image ? undefined : { backgroundColor: "var(--forest)" }}>
+                {n.image
+                  ? <img src={n.image} alt="" className="w-full h-full object-cover" />
+                  : <img src="/logo-mark.svg" alt="" className="w-9 h-auto" />}
                 {/* Tag badge marks offers only — same rule the listing cards use. */}
                 {n.category === "Offer" && (
                   <span
@@ -155,7 +100,7 @@ export default function NotificationTray({ open, onClose }) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="text-[10px] font-extrabold uppercase tracking-wide truncate" style={{ color: typeColor(n.category) }}>
-                    {n.business} · {n.category}
+                    {n.category ? `${n.business} · ${n.category}` : n.business}
                   </span>
                   {n.unread && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(n.category) }} />}
                 </div>
@@ -163,10 +108,10 @@ export default function NotificationTray({ open, onClose }) {
                 <p className="text-xs leading-snug mt-1" style={{ color: "#000000" }}>{n.body}</p>
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span className="text-[10px] font-medium" style={{ color: "#000000" }}>{n.when}</span>
-                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>
+                  {n.to && <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>
                     Read more
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                  </span>
+                  </span>}
                 </div>
               </div>
             </button>
@@ -174,7 +119,7 @@ export default function NotificationTray({ open, onClose }) {
         </div>
 
         <p className="text-center text-[11px] font-medium py-3" style={{ color: "#000000", borderTop: "1px solid rgba(28,46,56,0.09)" }}>
-          You're all caught up.
+          {loading && list.length === 0 ? "Loading…" : list.length === 0 ? "No notifications yet." : "You're all caught up."}
         </p>
       </div>
     </div>,

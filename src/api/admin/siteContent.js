@@ -422,9 +422,13 @@ export async function sendPush(form) {
 
   let delivery = null;
   try {
-    const { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
+    // Tried twice: the push service can fail on its first start after a quiet spell.
+    let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
       body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all" },
     });
+    if (fnError) ({ data: result, error: fnError } = await supabase.functions.invoke("send-push", {
+      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all" },
+    }));
     delivery = fnError ? { error: fnError.message } : result;
   } catch (e) {
     delivery = { error: e.message };
