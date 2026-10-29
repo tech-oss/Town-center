@@ -5,6 +5,13 @@ import './index.css'
 import 'leaflet/dist/leaflet.css'
 import App from './App.jsx'
 import { prefetchMapBrands } from './api/liveBusinesses'
+import { Capacitor } from '@capacitor/core'
+
+// The App Store app is only the /mobile app: it opens there, whatever
+// address the app's web view starts on.
+if (Capacitor.isNativePlatform() && !window.location.pathname.startsWith('/mobile')) {
+  window.history.replaceState(null, '', '/mobile')
+}
 
 // The map pins load from the very start, alongside the page itself, rather
 // than once the map has rendered — on the public site and the app only.

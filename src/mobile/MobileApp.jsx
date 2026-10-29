@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import useViewportRepair from "./hooks/useViewportRepair";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import SplashScreen from "./pages/SplashScreen";
 import HomeScreen from "./pages/HomeScreen";
 import WhatsOnScreen from "./pages/WhatsOnScreen";
@@ -33,13 +34,23 @@ import TradersScreen from "./pages/TradersScreen";
 import LegalPlaceholderScreen from "./pages/LegalPlaceholderScreen";
 import { markMobileAppMounted } from "./lib/navHistory";
 import { enableLiveUpdates } from "../lib/liveUpdates";
+import { refreshNativePush, onNativePushOpened } from "./lib/pushSubscribe";
 
 export default function MobileApp() {
   // Content admin publishes appears in the open app without a restart.
   useEffect(() => enableLiveUpdates(), []);
-  // Service worker scoped to /mobile/ only — never touches the rest of the site.
+  const navigate = useNavigate();
+  // In the App Store app: keep the push token current, and open the screen
+  // a notification links to when it's tapped.
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
+    refreshNativePush();
+    return onNativePushOpened((path) => navigate(path));
+  }, [navigate]);
+
+  // Service worker scoped to /mobile/ only — never touches the rest of the
+  // site. Not in the App Store app, which ships its files inside the app.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform() && "serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js", { scope: "/mobile/" }).catch(() => {});
     }
   }, []);

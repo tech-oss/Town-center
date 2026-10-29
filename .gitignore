@@ -27,3 +27,6 @@ dist-ssr
 # Android TWA tooling (Phase 3 demo) — not part of the web app
 android-twa/
 .env*
+
+# iPhone app web build (copied into ios/App/App/public by cap sync)
+dist-ios

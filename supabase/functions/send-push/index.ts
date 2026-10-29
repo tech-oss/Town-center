@@ -14,12 +14,62 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import webpush from "npm:web-push@3";
+import { SignJWT, importPKCS8 } from "npm:jose@5";
 
 const VAPID_PUBLIC = Deno.env.get("VAPID_PUBLIC_KEY")!;
 const VAPID_PRIVATE = Deno.env.get("VAPID_PRIVATE_KEY")!;
 const VAPID_SUBJECT = Deno.env.get("VAPID_SUBJECT") ?? "mailto:hello@maidenheadtowncentre.co.uk";
 
 webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
+
+// iPhone app (APNs). Set with `supabase secrets set` from the .p8 key made at
+// developer.apple.com → Keys. Until they're set, iPhones are skipped and only
+// Web Push is sent.
+const APNS_KEY_ID = Deno.env.get("APNS_KEY_ID");
+const APNS_TEAM_ID = Deno.env.get("APNS_TEAM_ID") ?? "8J8BUZX9GS";
+const APNS_PRIVATE_KEY = Deno.env.get("APNS_PRIVATE_KEY")?.replace(/\\n/g, "\n");
+const APNS_BUNDLE_ID = Deno.env.get("APNS_BUNDLE_ID") ?? "com.maidenhead.app";
+
+// Apple accepts the same signed token for up to an hour.
+let apnsJwt: { token: string; at: number } | null = null;
+async function apnsToken() {
+  if (apnsJwt && Date.now() - apnsJwt.at < 40 * 60 * 1000) return apnsJwt.token;
+  const key = await importPKCS8(APNS_PRIVATE_KEY!, "ES256");
+  const token = await new SignJWT({})
+    .setProtectedHeader({ alg: "ES256", kid: APNS_KEY_ID! })
+    .setIssuer(APNS_TEAM_ID)
+    .setIssuedAt()
+    .sign(key);
+  apnsJwt = { token, at: Date.now() };
+  return token;
+}
+
+class Gone extends Error {}
+
+// App Store and TestFlight installs use Apple's production service; a
+// build run from Xcode uses the sandbox, so a token production rejects is
+// tried there once.
+async function sendApns(deviceToken: string, title: string, body: string | undefined, url: string | undefined) {
+  const payload = JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default" }, url });
+  for (const host of ["api.push.apple.com", "api.sandbox.push.apple.com"]) {
+    const res = await fetch(`https://${host}/3/device/${deviceToken}`, {
+      method: "POST",
+      headers: {
+        authorization: `bearer ${await apnsToken()}`,
+        "apns-topic": APNS_BUNDLE_ID,
+        "apns-push-type": "alert",
+        "apns-priority": "10",
+        "content-type": "application/json",
+      },
+      body: payload,
+    });
+    if (res.ok) return;
+    const reason = (await res.json().catch(() => ({})))?.reason ?? String(res.status);
+    if (reason === "BadDeviceToken" && host === "api.push.apple.com") continue;
+    if (res.status === 410 || reason === "Unregistered" || reason === "BadDeviceToken") throw new Gone(reason);
+    throw new Error(reason);
+  }
+}
 
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -65,9 +115,17 @@ Deno.serve(async (req) => {
 
   const payload = JSON.stringify({ title, body, url });
 
+  const apnsReady = !!(APNS_KEY_ID && APNS_PRIVATE_KEY);
+  const targets = (subs ?? []).filter((sub) => (sub.platform ?? "web") !== "ios" || apnsReady);
+
   const results = await Promise.allSettled(
-    (subs ?? []).map((sub) =>
-      webpush.sendNotification(
+    targets.map((sub) => sub.platform === "ios"
+      ? sendApns(sub.endpoint.replace(/^apns:/, ""), title, body, url).catch(async (err) => {
+        // The app was deleted or the token is no longer valid.
+        if (err instanceof Gone) await supabase.from("push_subscriptions").delete().eq("id", sub.id);
+        throw err;
+      })
+      : webpush.sendNotification(
         { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
         payload,
       ).catch(async (err) => {
@@ -82,7 +140,7 @@ Deno.serve(async (req) => {
   );
 
   const sent = results.filter((r) => r.status === "fulfilled").length;
-  return new Response(JSON.stringify({ sent, total: subs?.length ?? 0 }), {
+  return new Response(JSON.stringify({ sent, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length }), {
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
 });

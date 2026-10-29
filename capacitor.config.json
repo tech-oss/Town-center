@@ -1,0 +1,22 @@
+{
+  "appId": "com.maidenhead.app",
+  "appName": "Maidenhead",
+  "webDir": "dist-ios",
+  "backgroundColor": "#1C2E38",
+  "ios": {
+    "contentInset": "never",
+    "scheme": "Maidenhead",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#1C2E38",
+      "showSpinner": false
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
+  }
+}

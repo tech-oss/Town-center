@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
-import { pushSupported, pushPermission, subscribeToPush } from "../lib/pushSubscribe";
+import { Capacitor } from "@capacitor/core";
+import { pushSupported, pushPermission, nativePushPermission, subscribeToPush } from "../lib/pushSubscribe";
 
 // `to` → navigates in-app. `soon: true` → demo placeholder (no web redirect).
 const ITEMS = [
@@ -19,6 +20,10 @@ const ITEMS = [
   { label: "Settings", icon: "settings", soon: true },
   { label: "About", icon: "info", to: "/mobile/about" },
 ];
+
+// The App Store app leaves out the placeholders (and "Get the App" — it is
+// the app). Apple turns away apps that show unfinished features.
+const VISIBLE_ITEMS = Capacitor.isNativePlatform() ? ITEMS.filter((i) => !i.soon) : ITEMS;
 
 function Icon({ name }) {
   const p = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "var(--forest)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };
@@ -40,7 +45,11 @@ export default function MoreScreen() {
   const [toast, setToast] = useState(null);
   const [pushGranted, setPushGranted] = useState(pushPermission() === "granted");
 
-  useEffect(() => { setPushGranted(pushPermission() === "granted"); }, []);
+  useEffect(() => {
+    let cancelled = false;
+    nativePushPermission().then((p) => { if (!cancelled) setPushGranted(p === "granted"); });
+    return () => { cancelled = true; };
+  }, []);
 
   function flash(msg) { setToast(msg); setTimeout(() => setToast(null), 2200); }
 
@@ -63,12 +72,12 @@ export default function MoreScreen() {
         <h1 className="section-heading text-2xl font-bold" style={{ color: "#000000" }}>More</h1>
 
         <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 8px 24px -8px rgba(0,0,0,0.35)" }}>
-          {ITEMS.map((item, i) => (
+          {VISIBLE_ITEMS.map((item, i) => (
             <button
               key={item.label}
               onClick={() => handle(item)}
               className="w-full flex items-center gap-3 px-4 py-3.5 active:bg-black/[0.03]"
-              style={i < ITEMS.length - 1 ? { borderBottom: "1px solid rgba(0,0,0,0.06)" } : undefined}
+              style={i < VISIBLE_ITEMS.length - 1 ? { borderBottom: "1px solid rgba(0,0,0,0.06)" } : undefined}
             >
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(28,46,56,0.045)" }}>
                 <Icon name={item.icon} />
