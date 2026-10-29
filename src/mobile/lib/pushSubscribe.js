@@ -66,7 +66,10 @@ export function onNativePushOpened(go) {
     let path = "/mobile/home";
     try {
       const u = new URL(url, window.location.origin);
+      // Admin links use the website's addresses (/news/…); the app has the
+      // same pages under /mobile.
       if (u.pathname.startsWith("/mobile")) path = u.pathname + u.search;
+      else if (u.pathname !== "/") path = `/mobile${u.pathname}${u.search}`;
     } catch { /* no link: open the home screen */ }
     go(path);
   });

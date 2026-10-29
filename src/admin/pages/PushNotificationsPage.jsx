@@ -62,6 +62,7 @@ function ComposeTab() {
   const history = fetchedHistory ?? [];
   const [toast, setToast] = useState(null);
   const [confirm, setConfirm] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
@@ -82,8 +83,18 @@ function ComposeTab() {
   }
 
   async function handleSend() {
-    if (!isValid) return;
-    const result = await sendPush(form);
+    if (!isValid || sending) return;
+    setSending(true);
+    let result;
+    try {
+      result = await sendPush(form);
+    } catch (e) {
+      // Kept on screen so it can be fixed and sent again.
+      notify(`Not sent: ${e?.message || "something went wrong"}. Try signing out and in again.`);
+      return;
+    } finally {
+      setSending(false);
+    }
     setNonce((n) => n + 1);
     setForm({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
     setConfirm(false);
@@ -198,8 +209,8 @@ function ComposeTab() {
             ) : (
               <>
                 <span className="text-sm font-medium" style={{ color: "#1E293B" }}>Send to everyone subscribed?</span>
-                <button type="button" onClick={handleSend} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ backgroundColor: "#2563EB" }}>Confirm Send</button>
-                <button type="button" onClick={() => setConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>Cancel</button>
+                <button type="button" onClick={handleSend} disabled={sending} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60" style={{ backgroundColor: "#2563EB" }}>{sending ? "Sending…" : "Confirm Send"}</button>
+                <button type="button" disabled={sending} onClick={() => setConfirm(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold" style={{ color: "#6B7280", border: "1.5px solid #D1D5DB" }}>Cancel</button>
               </>
             )}
           </div>
