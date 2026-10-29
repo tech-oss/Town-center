@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { linkTarget } from "./appLinks";
 
 // The notifications admin has sent to phones (public_push_feed view), shaped
 // for the bell list on the home screen. "Unread" means sent since the list
@@ -25,18 +26,16 @@ function timeAgo(iso) {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 }
 
-// Admin links use the website's addresses (/news/…); the app has the same
-// pages under /mobile. A full web address outside the site isn't opened.
-function appPath(url) {
-  if (!url) return null;
-  try {
-    const u = new URL(url, window.location.origin);
-    if (u.origin !== window.location.origin && /^https?:/.test(url)) return null;
-    if (u.pathname.startsWith("/mobile")) return u.pathname + u.search;
-    return u.pathname === "/" ? null : `/mobile${u.pathname}${u.search}`;
-  } catch {
-    return null;
-  }
+// Notifications cleared from the list on this phone.
+const CLEARED_KEY = "mh_push_feed_cleared";
+function clearedIds() {
+  try { return new Set(JSON.parse(localStorage.getItem(CLEARED_KEY) || "[]")); } catch { return new Set(); }
+}
+export function clearPushFeedItems(ids) {
+  const all = clearedIds();
+  ids.forEach((id) => all.add(id));
+  // Only the newest few hundred are kept; older ones have left the feed anyway.
+  try { localStorage.setItem(CLEARED_KEY, JSON.stringify([...all].slice(-300))); } catch { /* shows again */ }
 }
 
 export async function getPushFeed() {
@@ -45,7 +44,8 @@ export async function getPushFeed() {
   const seen = lastSeen();
   // Before the list has ever been opened, only the last three days count as new.
   const since = seen || Date.now() - 3 * 24 * 60 * 60 * 1000;
-  return (data ?? []).map((r) => ({
+  const cleared = clearedIds();
+  return (data ?? []).filter((r) => !cleared.has(r.id)).map((r) => ({
     id: r.id,
     business: "Maidenhead Town Centre",
     category: r.notif_type === "rich" ? "News & Offers" : null,
@@ -53,7 +53,7 @@ export async function getPushFeed() {
     body: r.body ?? "",
     when: timeAgo(r.sent_at),
     image: r.article_image || null,
-    to: appPath(r.url),
+    link: linkTarget(r.url),
     unread: new Date(r.sent_at).getTime() > since,
   }));
 }

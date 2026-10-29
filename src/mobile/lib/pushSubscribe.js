@@ -1,5 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications } from "@capacitor/push-notifications";
+import { App } from "@capacitor/app";
+import { linkTarget } from "./appLinks";
 import { supabase } from "../../lib/supabaseClient";
 
 // Web Push subscription capture. The actual sending lives in the send-push
@@ -37,9 +39,33 @@ function registerNative() {
   });
 }
 
+// This phone's own entry, remembered so it can be marked as caught up (the
+// number on the app icon) and replaced when iOS issues a new token.
+const ENDPOINT_KEY = "mh_push_endpoint";
+function savedEndpoint() {
+  try { return localStorage.getItem(ENDPOINT_KEY); } catch { return null; }
+}
+
 async function saveNativeToken(token) {
-  const { error } = await supabase.from("push_subscriptions").insert({ endpoint: `apns:${token}`, platform: "ios" });
+  const endpoint = `apns:${token}`;
+  const previous = savedEndpoint();
+  const { error } = await supabase.from("push_subscriptions").insert({ endpoint, platform: "ios", seen_at: new Date().toISOString() });
   if (error && !error.message.includes("duplicate")) throw error;
+  if (previous && previous !== endpoint) await supabase.from("push_subscriptions").delete().eq("endpoint", previous);
+  try { localStorage.setItem(ENDPOINT_KEY, endpoint); } catch { /* replaced next launch */ }
+}
+
+// The app being opened clears the number on its icon (SceneDelegate.swift),
+// so the push service is told this phone has seen everything so far and the
+// next notification's number starts again from 1.
+export async function markNativePushSeen() {
+  if (!native) return;
+  const endpoint = savedEndpoint();
+  if (!endpoint) return;
+  try { await supabase.rpc("push_mark_seen", { p_endpoint: endpoint }); } catch { /* recounted next send */ }
+}
+if (native) {
+  App.addListener("appStateChange", ({ isActive }) => { if (isActive) markNativePushSeen(); });
 }
 
 let nativePermission = "default";
@@ -56,22 +82,17 @@ export async function refreshNativePush() {
   if (p.receive !== "granted") return;
   nativePermission = "granted";
   try { await saveNativeToken(await registerNative()); } catch { /* tried again next launch */ }
+  markNativePushSeen();
 }
 
 // Opens the screen a notification links to when it's tapped.
 export function onNativePushOpened(go) {
   if (!native) return () => {};
   const handle = PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
-    const url = action.notification?.data?.url;
-    let path = "/mobile/home";
-    try {
-      const u = new URL(url, window.location.origin);
-      // Admin links use the website's addresses (/news/…); the app has the
-      // same pages under /mobile.
-      if (u.pathname.startsWith("/mobile")) path = u.pathname + u.search;
-      else if (u.pathname !== "/") path = `/mobile${u.pathname}${u.search}`;
-    } catch { /* no link: open the home screen */ }
-    go(path);
+    // Tapped from outside the app: open its link, or the home screen.
+    const target = linkTarget(action.notification?.data?.url);
+    if (target?.external) { window.open(target.external, "_blank", "noopener"); go("/mobile/home"); }
+    else go(target?.path ?? "/mobile/home");
   });
   return () => { handle.then((h) => h.remove()); };
 }

@@ -30,18 +30,33 @@ const APNS_TEAM_ID = Deno.env.get("APNS_TEAM_ID") ?? "8J8BUZX9GS";
 const APNS_PRIVATE_KEY = Deno.env.get("APNS_PRIVATE_KEY")?.replace(/\\n/g, "\n");
 const APNS_BUNDLE_ID = Deno.env.get("APNS_BUNDLE_ID") ?? "com.maidenheadapp.maidenheadapp";
 
-// Apple accepts the same signed token for up to an hour.
-let apnsJwt: { token: string; at: number } | null = null;
-async function apnsToken() {
-  if (apnsJwt && Date.now() - apnsJwt.at < 40 * 60 * 1000) return apnsJwt.token;
+// Apple accepts one signed token for up to an hour but refuses a new one
+// more often than every 20 minutes. It's kept in apns_provider_token so every
+// start of this function (and every device in one send) uses the same token
+// until it's 50 minutes old.
+let apnsJwt: Promise<string> | null = null;
+let apnsJwtAt = 0;
+async function loadOrMakeApnsToken(): Promise<string> {
+  const { data } = await supabase.from("apns_provider_token").select("token, issued_at").eq("id", 1).maybeSingle();
+  if (data && Date.now() - new Date(data.issued_at).getTime() < 50 * 60 * 1000) {
+    apnsJwtAt = new Date(data.issued_at).getTime();
+    return data.token;
+  }
   const key = await importPKCS8(APNS_PRIVATE_KEY!, "ES256");
   const token = await new SignJWT({})
     .setProtectedHeader({ alg: "ES256", kid: APNS_KEY_ID! })
     .setIssuer(APNS_TEAM_ID)
     .setIssuedAt()
     .sign(key);
-  apnsJwt = { token, at: Date.now() };
+  apnsJwtAt = Date.now();
+  await supabase.from("apns_provider_token").upsert({ id: 1, token, issued_at: new Date(apnsJwtAt).toISOString() });
   return token;
+}
+function apnsToken() {
+  if (!apnsJwt || Date.now() - apnsJwtAt > 50 * 60 * 1000) {
+    apnsJwt = loadOrMakeApnsToken().catch((e) => { apnsJwt = null; throw e; });
+  }
+  return apnsJwt;
 }
 
 class Gone extends Error {}
@@ -49,8 +64,8 @@ class Gone extends Error {}
 // App Store and TestFlight installs use Apple's production service; a
 // build run from Xcode uses the sandbox, so a token production rejects is
 // tried there once.
-async function sendApns(deviceToken: string, title: string, body: string | undefined, url: string | undefined) {
-  const payload = JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default" }, url });
+async function sendApns(deviceToken: string, title: string, body: string | undefined, url: string | undefined, badge: number) {
+  const payload = JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default", badge }, url });
   for (const host of ["api.push.apple.com", "api.sandbox.push.apple.com"]) {
     const res = await fetch(`https://${host}/3/device/${deviceToken}`, {
       method: "POST",
@@ -118,9 +133,20 @@ Deno.serve(async (req) => {
   const apnsReady = !!(APNS_KEY_ID && APNS_PRIVATE_KEY);
   const targets = (subs ?? []).filter((sub) => (sub.platform ?? "web") !== "ios" || apnsReady);
 
+  // The number on each iPhone's app icon: notifications sent to phones since
+  // that device last opened the app's notification list (this one included).
+  const { data: recent } = await supabase.from("push_notifications").select("sent_at")
+    .contains("channels", ["Mobile"]).in("audience", ["all", "users"])
+    .gte("sent_at", new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString());
+  const sentTimes = (recent ?? []).map((r) => new Date(r.sent_at).getTime());
+  const badgeFor = (sub: { seen_at?: string | null; created_at?: string }) => {
+    const since = new Date(sub.seen_at ?? sub.created_at ?? 0).getTime();
+    return Math.max(1, sentTimes.filter((t) => t > since).length);
+  };
+
   const results = await Promise.allSettled(
     targets.map((sub) => sub.platform === "ios"
-      ? sendApns(sub.endpoint.replace(/^apns:/, ""), title, body, url).catch(async (err) => {
+      ? sendApns(sub.endpoint.replace(/^apns:/, ""), title, body, url, badgeFor(sub)).catch(async (err) => {
         // The app was deleted or the token is no longer valid.
         if (err instanceof Gone) await supabase.from("push_subscriptions").delete().eq("id", sub.id);
         throw err;
@@ -140,7 +166,13 @@ Deno.serve(async (req) => {
   );
 
   const sent = results.filter((r) => r.status === "fulfilled").length;
-  return new Response(JSON.stringify({ sent, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length }), {
+  // Per device, without its address: what Apple / the browser push service said.
+  const outcomes = results.map((r, i) => ({
+    platform: targets[i].platform ?? "web",
+    ok: r.status === "fulfilled",
+    reason: r.status === "rejected" ? String((r.reason as Error)?.message ?? r.reason).slice(0, 120) : undefined,
+  }));
+  return new Response(JSON.stringify({ sent, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length, outcomes }), {
     headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
   });
 });

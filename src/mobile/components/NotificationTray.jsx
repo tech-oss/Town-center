@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { typeColor } from "../lib/typeColors";
+import { openLink } from "../lib/appLinks";
 
 function TagIcon() {
   return (
@@ -16,7 +17,7 @@ function TagIcon() {
 // through a portal so it sits above the tab bar and the hero video rather
 // than being clipped by the scrolling column.
 // `items` are the notifications admin has sent (lib/pushFeed.js).
-export default function NotificationTray({ open, onClose, items, loading }) {
+export default function NotificationTray({ open, onClose, items, loading, onClear }) {
   const navigate = useNavigate();
 
   // Close on Escape, and don't let the page scroll behind the tray.
@@ -30,9 +31,9 @@ export default function NotificationTray({ open, onClose, items, loading }) {
   if (!open) return null;
 
   const openItem = (item) => {
-    if (!item.to) return;
+    if (!item.link) return;
     onClose();
-    navigate(item.to);
+    openLink(item.link, navigate);
   };
   const list = items ?? [];
 
@@ -57,6 +58,13 @@ export default function NotificationTray({ open, onClose, items, loading }) {
             <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           <h2 className="flex-1 text-sm font-bold text-white">Notifications</h2>
+          {list.length > 0 && (
+            <button type="button" onClick={() => onClear(list.map((n) => n.id))}
+              className="px-2.5 h-7 rounded-full text-[11px] font-semibold text-white active:opacity-70"
+              style={{ backgroundColor: "rgba(255,255,255,0.16)" }}>
+              Clear all
+            </button>
+          )}
           <button
             onClick={onClose}
             aria-label="Close notifications"
@@ -71,15 +79,15 @@ export default function NotificationTray({ open, onClose, items, loading }) {
             the viewport or under the tab bar. */}
         <div className="flex flex-col overflow-y-auto overscroll-contain" style={{ maxHeight: "calc(100vh - 260px)" }}>
           {list.map((n, i) => (
-            <button
-              key={n.id}
-              type="button"
-              onClick={() => openItem(n)}
-              className="flex items-start gap-3 text-left px-4 py-3.5 active:bg-black/[0.04]"
+            <div key={n.id} className="relative"
               style={{
                 borderTop: i > 0 ? "1px solid rgba(28,46,56,0.09)" : undefined,
                 backgroundColor: n.unread ? "rgba(47,164,164,0.06)" : undefined,
-              }}
+              }}>
+            <button
+              type="button"
+              onClick={() => openItem(n)}
+              className="w-full flex items-start gap-3 text-left pl-4 pr-10 py-3.5 active:bg-black/[0.04]"
             >
               <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0 flex items-center justify-center"
                 style={n.image ? undefined : { backgroundColor: "var(--forest)" }}>
@@ -108,13 +116,18 @@ export default function NotificationTray({ open, onClose, items, loading }) {
                 <p className="text-xs leading-snug mt-1" style={{ color: "#000000" }}>{n.body}</p>
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span className="text-[10px] font-medium" style={{ color: "#000000" }}>{n.when}</span>
-                  {n.to && <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>
-                    Read more
+                  {n.link && <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>
+                    {n.link?.external ? "Open website" : "Read more"}
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                   </span>}
                 </div>
               </div>
             </button>
+            <button type="button" onClick={() => onClear([n.id])} aria-label="Clear this notification"
+              className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center active:bg-black/[0.06]">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="rgba(28,46,56,0.55)" strokeWidth="3" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+            </div>
           ))}
         </div>
 

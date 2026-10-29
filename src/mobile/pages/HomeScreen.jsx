@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
 import NotificationTray from "../components/NotificationTray";
-import { getPushFeed, markPushFeedSeen } from "../lib/pushFeed";
+import { getPushFeed, markPushFeedSeen, clearPushFeedItems } from "../lib/pushFeed";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getHomepageEvents, getHomepageStories, getSpotlightPosts } from "../../api";
@@ -455,6 +455,7 @@ export default function HomeScreen() {
       </div>
 
       <NotificationTray open={notificationsOpen} items={pushFeed} loading={pushFeed === null}
+        onClear={(ids) => { clearPushFeedItems(ids); setPushFeed((f) => (f ?? []).filter((n) => !ids.includes(n.id))); }}
         onClose={() => { markPushFeedSeen(); setNotificationsOpen(false); }} />
     </MobileShell>
   );

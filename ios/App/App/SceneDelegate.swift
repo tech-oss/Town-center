@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import UserNotifications
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -20,5 +21,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
+    }
+
+    // Opening the app clears the number on its icon. Asks for no permission:
+    // without notification permission there's no number to clear.
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        if #available(iOS 16.0, *) {
+            UNUserNotificationCenter.current().setBadgeCount(0) { _ in }
+        } else {
+            UIApplication.shared.applicationIconBadgeNumber = 0
+        }
     }
 }
