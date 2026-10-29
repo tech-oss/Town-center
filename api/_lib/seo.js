@@ -399,7 +399,10 @@ export async function resolvePage(rawPath, origin) {
   }
   if ((m = path.match(/^\/news\/([^/]+)$/))) {
     const n = await newsMeta(decodeURIComponent(m[1]), origin);
-    return n ? withCanonical(n) : notFound();
+    if (n) return withCanonical(n);
+    // A featured story linked as news (old notification links): its own page.
+    const s = await storyMeta(decodeURIComponent(m[1]), origin);
+    return s ? { status: 301, redirect: s.path } : notFound();
   }
   if ((m = path.match(/^\/story\/([^/]+)$/))) {
     const s = await storyMeta(decodeURIComponent(m[1]), origin);
