@@ -1,6 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useViewportRepair from "./hooks/useViewportRepair";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import PermissionsWelcome from "./components/PermissionsWelcome";
+import { shouldShowPermissionsWelcome } from "./lib/permissionsWelcome";
 import { Capacitor } from "@capacitor/core";
 import SplashScreen from "./pages/SplashScreen";
 import HomeScreen from "./pages/HomeScreen";
@@ -40,6 +42,11 @@ export default function MobileApp() {
   // Content admin publishes appears in the open app without a restart.
   useEffect(() => enableLiveUpdates(), []);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // First launch of the App Store app: ask for location and notifications
+  // once the splash screen has finished.
+  const [welcome, setWelcome] = useState(shouldShowPermissionsWelcome);
+  const onSplash = pathname === "/mobile" || pathname === "/mobile/";
   // In the App Store app: keep the push token current, and open the screen
   // a notification links to when it's tapped.
   useEffect(() => {
@@ -83,6 +90,8 @@ export default function MobileApp() {
   }, []);
 
   return (
+    <>
+    {welcome && !onSplash && <PermissionsWelcome onClose={() => setWelcome(false)} />}
     <Routes>
       <Route index element={<SplashScreen />} />
       <Route path="home" element={<HomeScreen />} />
@@ -119,5 +128,6 @@ export default function MobileApp() {
       <Route path="explore/the-future" element={<FutureScreen />} />
       <Route path="*" element={<Navigate to="/mobile" replace />} />
     </Routes>
+    </>
   );
 }
