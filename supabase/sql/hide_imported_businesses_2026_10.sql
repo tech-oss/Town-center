@@ -1,7 +1,6 @@
--- Imported business profiles (the spreadsheet import of 4 Oct 2026) start
--- hidden: Maidenhead admin checks each one and makes it live from Business
--- Registrations ("Make live"). Left live: any the business has claimed (an
--- owner login) or that is on a paid or complimentary plan.
+-- Every business profile starts hidden: Maidenhead admin checks each one and
+-- makes it live from Business Registrations ("Make live"). Asked for on
+-- 30 Oct 2026: everything on the platform hidden until it has been checked.
 --
 -- The hidden ids are kept in imported_businesses_hidden so this can be
 -- undone:  update businesses set visible = true
@@ -14,10 +13,7 @@ alter table public.imported_businesses_hidden enable row level security;
 
 insert into public.imported_businesses_hidden (business_id)
 select b.id from public.businesses b
-where b.submitted_at >= '2026-10-04' and b.submitted_at < '2026-10-05'
-  and b.status = 'Approved' and coalesce(b.visible, true)
-  and not exists (select 1 from public.business_users u where u.business_id = b.id)
-  and coalesce((select s.plan from public.business_subscriptions s where s.business_id = b.id), 'free') = 'free'
+where coalesce(b.visible, true)
 on conflict do nothing;
 
 update public.businesses set visible = false
