@@ -10,7 +10,7 @@ const SPLASH = "ios/App/App/Assets.xcassets/Splash.imageset";
 // The mark sits at about x 290–790, y 300–580 in the 1024px logo.
 const mark = await sharp(SRC).extract({ left: 290, top: 300, width: 500, height: 280 }).toBuffer();
 await sharp({ create: { width: 1024, height: 1024, channels: 3, background: BG } })
-  .composite([{ input: await sharp(mark).resize({ width: 680 }).toBuffer(), gravity: "center" }])
+  .composite([{ input: await sharp(mark).resize({ width: 880 }).toBuffer(), gravity: "center" }])
   .flatten({ background: BG })
   .png()
   .toFile(ICON);

@@ -47,7 +47,7 @@ export async function getPushFeed() {
   const cleared = clearedIds();
   return (data ?? []).filter((r) => !cleared.has(r.id)).map((r) => ({
     id: r.id,
-    business: "Maidenhead Town Centre",
+    business: "Maidenhead",
     category: r.notif_type === "rich" ? "News & Offers" : null,
     title: r.title,
     body: r.body ?? "",

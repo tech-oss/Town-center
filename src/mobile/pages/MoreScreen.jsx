@@ -90,7 +90,7 @@ export default function MoreScreen() {
           ))}
         </div>
 
-        <p className="text-center text-[11px]" style={{ color: "#000000" }}>Maidenhead Town Centre · Demo v1</p>
+        <p className="text-center text-[11px]" style={{ color: "#000000" }}>Maidenhead</p>
       </div>
 
       {toast && (

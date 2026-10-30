@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness, setBusinessLogo,
-  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
+  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, setBusinessVisible, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import CoordsNotice from "../components/CoordsNotice";
@@ -25,7 +25,9 @@ import { BLUE, BORDER, CARD, FIELD_STYLE, MUTED, NAVY } from "../theme";
 
 // "Paying" = subscribed and paying through Stripe — not free, and not a
 // Visibility Plan admin gave away.
-const STATUS_FILTERS = ["All", "Pending", "Approved", "Suspended", "Rejected", "Unclaimed", "Paying"];
+// "Hidden" = approved but not shown on the website or app yet (imported
+// profiles waiting to be checked).
+const STATUS_FILTERS = ["All", "Pending", "Approved", "Hidden", "Suspended", "Rejected", "Unclaimed", "Paying"];
 
 function exportCsv(rows) {
   const headers = ["Name", "Section", "Plan", "Status", "Contact Name", "Email", "Phone", "Address", "Submitted"];
@@ -966,7 +968,7 @@ function InfoField({ label, value, mono }) {
   );
 }
 
-function BusinessRow({ biz, termsOutstanding, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull, onPlanChanged }) {
+function BusinessRow({ biz, onToggleVisible, termsOutstanding, pendingAction, actionNote, onActionNote, onApprove, onOpenReject, onOpenSuspend, onSubmitAction, onCancelAction, onDelete, onUploadLogo, busy, onAddContent, onToggleFeatured, featuredFull, onPlanChanged }) {
   const navigate = useNavigate();
   const secLabel = sectionLabel(biz.section, biz.kind);
   const chips = categoryChips(biz);
@@ -1021,6 +1023,13 @@ function BusinessRow({ biz, termsOutstanding, pendingAction, actionNote, onActio
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-base font-bold" style={{ color: NAVY }}>{biz.name}</span>
               <StatusTag status={biz.status} />
+              {biz.hidden && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                  title="Not shown on the website or app until it's made live"
+                  style={{ backgroundColor: "rgba(71,85,105,0.12)", color: "#334155" }}>
+                  Hidden
+                </span>
+              )}
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
                 style={{ backgroundColor: "rgba(37,99,235,0.08)", color: BLUE }}>
                 {biz.plan}{biz.planBilling ? ` · ${biz.planBilling}` : ""}
@@ -1164,6 +1173,11 @@ function BusinessRow({ biz, termsOutstanding, pendingAction, actionNote, onActio
             <BizBtn color="#DC2626" disabled={isBusy} onClick={() => onOpenReject(biz)}>Reject</BizBtn>
           </>
         )}
+        {biz.status === "Approved" && (biz.hidden ? (
+          <BizBtn color="#16A34A" disabled={isBusy} onClick={() => onToggleVisible(biz)}>● Make live</BizBtn>
+        ) : (
+          <BizBtn color="#475569" disabled={isBusy} onClick={() => onToggleVisible(biz)}>Hide</BizBtn>
+        ))}
         {biz.status === "Approved" && (
           <BizBtn color="#D97706" disabled={isBusy} onClick={() => onOpenSuspend(biz)}>Suspend</BizBtn>
         )}
@@ -1355,6 +1369,19 @@ export default function BusinessesPage() {
       .catch((e) => notify(`Could not save the logo: ${e.message}`));
   }
 
+  function handleToggleVisible(biz) {
+    const live = biz.hidden;
+    if (!live && !window.confirm(`Hide "${biz.name}" from the website and app?`)) return;
+    setBusy(biz.id);
+    setBusinessVisible(biz.id, live)
+      .then(() => {
+        patch(biz.id, { hidden: !live });
+        notify(live ? `"${biz.name}" is now live on the website and app.` : `"${biz.name}" is hidden.`);
+      })
+      .catch((e) => notify(e.message ?? "Could not change whether it's shown."))
+      .finally(() => setBusy(null));
+  }
+
   function handleToggleFeatured(biz) {
     const next = !biz.featured;
     // Featuring gives away a 30-day promotion that businesses pay £40 for,
@@ -1391,12 +1418,14 @@ export default function BusinessesPage() {
     Rejected:  list.filter((b) => b.status === "Rejected").length,
     Unclaimed: list.filter((b) => b.unclaimed).length,
     Paying:    list.filter((b) => b.planPaying).length,
+    Hidden:    list.filter((b) => b.hidden).length,
   };
 
   const filtered = useMemo(() => {
     let result = statusFilter === "All" ? list
       : statusFilter === "Unclaimed" ? list.filter((b) => b.unclaimed)
       : statusFilter === "Paying" ? list.filter((b) => b.planPaying)
+      : statusFilter === "Hidden" ? list.filter((b) => b.hidden)
       : list.filter((b) => b.status === statusFilter);
     const q = search.trim().toLowerCase();
     if (q) result = result.filter((b) => b.name?.toLowerCase().includes(q));
@@ -1543,6 +1572,7 @@ export default function BusinessesPage() {
               busy={busy}
               onAddContent={handleAddContent}
               onToggleFeatured={handleToggleFeatured}
+              onToggleVisible={handleToggleVisible}
               featuredFull={isFeaturedFull(biz)}
             />
           ))}

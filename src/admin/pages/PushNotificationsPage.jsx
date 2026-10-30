@@ -43,7 +43,7 @@ function PushPreview({ title, body, channel, image }) {
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-bold" style={{ color: "#1E293B" }}>Maidenhead Town Centre</span>
+              <span className="text-xs font-bold" style={{ color: "#1E293B" }}>Maidenhead</span>
               <span className="text-[10px]" style={{ color: "#9CA3AF" }}>now</span>
             </div>
             <p className="text-sm font-semibold mt-0.5 truncate" style={{ color: "#1E293B" }}>{title || "Notification title"}</p>

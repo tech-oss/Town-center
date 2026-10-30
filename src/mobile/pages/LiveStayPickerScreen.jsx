@@ -23,7 +23,7 @@ const OPTIONS = [
   {
     key: "hotels",
     label: "Hotels",
-    description: "Budget chains to riverside hotels, star-rated",
+    description: "Central, Riverside and Country Hotels, all star-rated.",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 18v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6" /><path d="M3 18v3M21 18v3" /><path d="M3 12V7a1 1 0 0 1 1-1h5v6" />

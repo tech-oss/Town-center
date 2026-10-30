@@ -152,6 +152,9 @@ function fromRow(row) {
     rejectionNote: row.status === "Rejected" ? row.admin_note : "",
     suspendNote: row.status === "Suspended" ? row.admin_note : "",
     featured: !!row.featured,
+    // Hidden from the website and app (businesses.visible = false) — the
+    // imported profiles start like this until admin has checked them.
+    hidden: row.visible === false,
 
     // ── "Business Details" step ──
     // Older listings recorded a display category ("Live & Stay"); newer ones a
@@ -573,6 +576,19 @@ export async function registerBusiness(data) {
 // registration — the cap means it's a rota, not a one-time property, so it has
 // to be toggleable from the list. The limit is enforced by a trigger; this
 // just makes the refusal readable.
+// Shows or hides a business on the website and app. Hidden profiles keep
+// everything; only the public views leave them out.
+export async function setBusinessVisible(id, visible) {
+  const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
+  const { error } = await supabase.from("businesses").update({ visible }).eq("id", id);
+  if (error) throw error;
+  addLog(
+    visible ? "Business Made Live" : "Business Hidden",
+    { id, name: biz?.name ?? id },
+    visible ? "Profile checked and shown on the website and app." : "Profile hidden from the website and app.",
+  );
+}
+
 export async function setFeatured(id, featured) {
   const { data: biz } = await supabase.from("businesses").select("name").eq("id", id).maybeSingle();
 
