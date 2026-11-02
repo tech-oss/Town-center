@@ -7,10 +7,13 @@ const BG = { r: 0x1c, g: 0x2e, b: 0x38 };
 const ICON = "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png";
 const SPLASH = "ios/App/App/Assets.xcassets/Splash.imageset";
 
-// The mark sits at about x 290–790, y 300–580 in the 1024px logo.
-const mark = await sharp(SRC).extract({ left: 290, top: 300, width: 500, height: 280 }).toBuffer();
+// The mark sits at about x 290–790, y 300–580 in the 1024px logo. It's
+// trimmed to its exact edges before centring, so the space around it is
+// equal left/right and top/bottom.
+const cut = await sharp(SRC).extract({ left: 290, top: 300, width: 500, height: 280 }).toBuffer();
+const mark = await sharp(cut).trim({ background: BG, threshold: 30 }).toBuffer();
 await sharp({ create: { width: 1024, height: 1024, channels: 3, background: BG } })
-  .composite([{ input: await sharp(mark).resize({ width: 880 }).toBuffer(), gravity: "center" }])
+  .composite([{ input: await sharp(mark).resize({ width: 836 }).toBuffer(), gravity: "center" }])
   .flatten({ background: BG })
   .png()
   .toFile(ICON);
