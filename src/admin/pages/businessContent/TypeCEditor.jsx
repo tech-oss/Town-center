@@ -91,9 +91,9 @@ export default function TypeCEditor({ form, set, onSave, saving }) {
           </Locked>
         </EditorSection>
 
-        <EditorSection title="Photo Gallery" hint="Up to 6 images.">
+        <EditorSection title="Photo Gallery" hint="Up to 12 images.">
           <Locked field="gallery">
-          <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} />
+          <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={12} />
           </Locked>
         </EditorSection>
 

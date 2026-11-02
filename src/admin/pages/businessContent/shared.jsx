@@ -212,7 +212,7 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
   );
 }
 
-// ─── 6-slot gallery grid (3×2) ────────────────────────────────────────────────
+// ─── Gallery grid (3 across; 6 slots, or as many as `max`) ─────────────────────
 // TODO: wire to Supabase storage bucket on backend integration
 export function GalleryGrid({ images, onChange, max = 6, label }) {
   // Which picture is being framed — one cropper under the grid.

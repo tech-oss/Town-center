@@ -61,6 +61,57 @@ export const VISIBILITY_FEATURES = [
   { icon: "spotlight",    title: "Access to homepage featuring of your business", detail: "The prime visibility on both website and app for your business." },
 ];
 
+// Hotels and accommodation (business type "hotel") have their own Visibility
+// Plan: a higher price, and 12 photos plus check-in, facilities and room
+// details. Accommodation companies are separate — they choose an
+// accommodation plan (AccommodationPlansPage).
+export const isHotelType = (businessType) => businessType === "hotel";
+
+export const HOTEL_BILLING_OPTIONS = {
+  year: {
+    key: "year",
+    price: 399,
+    label: "/ year",
+    perDay: "£1.09",
+    saving: 80, // vs 12 × £39.99 (£479.88), rounded down
+    stripePriceSecret: "STRIPE_PRICE_HOTEL_YEARLY",
+  },
+  month: {
+    key: "month",
+    price: 39.99,
+    label: "/ month",
+    perDay: "£1.40",
+    perDayText: "Less than £1.40 a day",
+    saving: 0,
+    stripePriceSecret: "STRIPE_PRICE_HOTEL_MONTHLY",
+  },
+};
+
+export const HOTEL_FEATURES = [
+  { icon: "logo",         title: "Your business logo",                  detail: "Make your business instantly recognisable." },
+  { icon: "photos",       title: "Up to 12 photos",                     detail: "Show customers what makes your business special." },
+  { icon: "hours",        title: "Check in and check out hours",        detail: "Help customers know when you're open and options for early check in or late check out." },
+  { icon: "facilities",   title: "Hotel facilities & amenities",        detail: "Allow customers to search and find your hotel's special facilities." },
+  { icon: "rooms",        title: "Room and accommodation information",  detail: "Add what your rooms provide to allow customers to really find what they need." },
+  { icon: "headline",     title: "Headline title",                      detail: "Create a strong headline to grab attention." },
+  { icon: "description",  title: "Full business description",           detail: "Tell your story on your own dedicated page." },
+  { icon: "social",       title: "Social media links",                  detail: "Connect customers to your social channels." },
+  { icon: "website",      title: "Your website link",                   detail: "Send customers straight to your website." },
+  { icon: "booking",      title: "Direct booking link",                 detail: "You will not be paying any third party commission for bookings." },
+  { icon: "articles",     title: "Up to 3 articles to publish",         detail: "Publish news, offers and updates." },
+  { icon: "analytics",    title: "Business analytics",                  detail: "See your page views and article views, so you can understand what's getting attention." },
+  { icon: "reviews",      title: "Customer reviews",                    detail: "Add verified customer reviews to your profile page to enhance trust in your business." },
+  { icon: "moreArticles", title: "Access to more articles",             detail: "Get access to publish more articles across the platform." },
+  { icon: "events",       title: "Access to events",                    detail: "Publish events that your business may have on the calendar pages." },
+  { icon: "push",         title: "Access to in app push notifications", detail: "Let everyone know instantly of important business announcements direct to their devices." },
+  { icon: "spotlight",    title: "Access to homepage featuring of your business", detail: "The prime visibility on both website and app for your business." },
+];
+
+// The prices, features and photo limit for a business's type.
+export const billingOptionsFor = (businessType) => (isHotelType(businessType) ? HOTEL_BILLING_OPTIONS : BILLING_OPTIONS);
+export const visibilityFeaturesFor = (businessType) => (isHotelType(businessType) ? HOTEL_FEATURES : VISIBILITY_FEATURES);
+export const galleryMaxFor = (businessType) => (isHotelType(businessType) ? 12 : 6);
+
 export const PREMIUM_PLAN = {
   key: "premium",
   name: "Visibility Plan",
