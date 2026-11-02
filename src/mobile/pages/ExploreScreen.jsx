@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 import { openCookieSettings } from "../../lib/cookieConsent";
 import MobileShell from "../components/MobileShell";
 import { exploreSections, exploreInfo } from "../data/mobileMock";
@@ -30,8 +31,12 @@ const MORE_LINKS = [
   { label: "Traders", to: "/mobile/traders" },
   { label: "Privacy Policy", to: "/mobile/privacy" },
   { label: "Terms of Use", to: "/mobile/terms" },
-  { label: "Cookie Policy", to: "/mobile/cookies" },
-  { label: "Cookie Settings", action: openCookieSettings },
+  // The mobile website needs these; the App Store app stores nothing optional
+  // by default, so it leaves them out (Privacy Policy is the one Apple asks for).
+  ...(Capacitor.isNativePlatform() ? [] : [
+    { label: "Cookie Policy", to: "/mobile/cookies" },
+    { label: "Cookie Settings", action: openCookieSettings },
+  ]),
 ];
 
 // A page link, or a button for an action (Cookie Settings).

@@ -2,6 +2,7 @@
 // own cookies. It loads when the visitor has allowed "features from other
 // providers", or when they tap Show map for this one map.
 import { useState } from "react";
+import { Capacitor } from "@capacitor/core";
 import { openCookieSettings, useCookieConsent } from "../lib/cookieConsent";
 
 export default function ConsentFrame({ title, src, className = "w-full h-full border-0", provider = "OpenStreetMap" }) {
@@ -21,10 +22,13 @@ export default function ConsentFrame({ title, src, className = "w-full h-full bo
           className="px-4 py-2 rounded-xl text-xs font-semibold text-white" style={{ backgroundColor: "#1C2E38" }}>
           Show map
         </button>
-        <button type="button" onClick={openCookieSettings}
-          className="px-4 py-2 rounded-xl text-xs font-semibold" style={{ backgroundColor: "rgba(28,46,56,0.08)", color: "#1C2E38" }}>
-          Cookie settings
-        </button>
+        {/* The App Store app has no cookie settings; Show map is the choice. */}
+        {!Capacitor.isNativePlatform() && (
+          <button type="button" onClick={openCookieSettings}
+            className="px-4 py-2 rounded-xl text-xs font-semibold" style={{ backgroundColor: "rgba(28,46,56,0.08)", color: "#1C2E38" }}>
+            Cookie settings
+          </button>
+        )}
       </div>
     </div>
   );
