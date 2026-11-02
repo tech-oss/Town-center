@@ -28,6 +28,7 @@ function fromRow(row) {
     endDate: row.end_date ?? "",
     thumbnail: row.thumbnail,
     heroImage: row.hero_image,
+    heroImageCredit: row.hero_image_credit ?? "",
     body: row.body,
     website: row.website ?? "",
     rejectionReason: row.rejection_reason,
@@ -69,6 +70,7 @@ export async function createArticle(businessId, form) {
       end_date: form.endDate || null,
       thumbnail: form.heroImage,
       hero_image: form.heroImage,
+      hero_image_credit: form.heroImage ? (form.heroImageCredit?.trim() || null) : null,
       body: form.body,
       // Optional: a "Visit website" button on the article.
       website: form.website?.trim().slice(0, 500) || null,
@@ -94,6 +96,7 @@ export async function updateArticle(id, form) {
       end_date: form.endDate || null,
       thumbnail: form.heroImage,
       hero_image: form.heroImage,
+      hero_image_credit: form.heroImage ? (form.heroImageCredit?.trim() || null) : null,
       body: form.body,
       // Optional: a "Visit website" button on the article.
       website: form.website?.trim().slice(0, 500) || null,

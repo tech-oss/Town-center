@@ -25,11 +25,12 @@ function fromRow(r) {
     // The article itself.
     title: r.title ?? "",
     heroImage: r.hero_image ?? "",
+    heroImageCredit: r.hero_image_credit ?? "",
     standfirst: r.standfirst ?? "",
     category: r.category ?? "",
     location: r.location ?? "",
     website: r.website ?? "",
-    // [{ heading, text, image }] — a section of the article, each able to
+    // [{ heading, text, image, imageCredit }] — a section of the article, each able to
     // carry its own picture.
     body: Array.isArray(r.body) ? r.body : [],
     updatedAt: r.updated_at,
@@ -46,6 +47,7 @@ function toRow(businessId, form) {
     card_image: form.cardImage || form.heroImage || null,
     title: form.title,
     hero_image: form.heroImage || null,
+    hero_image_credit: form.heroImage ? (form.heroImageCredit?.trim() || null) : null,
     standfirst: form.standfirst || null,
     category: form.category || null,
     location: form.location || null,

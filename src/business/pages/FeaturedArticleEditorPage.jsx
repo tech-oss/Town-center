@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
-  Field, Inp, TextArea, SingleImageUpload, IMAGE_HINTS, Toast, useToast,
+  Field, Inp, TextArea, SingleImageUpload, IMAGE_HINTS, ImageCreditField, Toast, useToast,
   CARD, FOREST, SAGE, MUTED, BORDER,
 } from "../components/FormKit";
 import { getFeatureArticle, saveFeatureArticle } from "../api/businessFeatureArticles";
@@ -35,6 +35,7 @@ function Section({ index, section, onChange, onRemove, canRemove, pathPrefix }) 
       </Field>
       <SingleImageUpload label="Picture for this section (optional)" src={section.image}
         onChange={(url) => set("image", url)} pathPrefix={pathPrefix} aspect="aspect-[4/3]" ratio={4 / 3} ratioLabel="4:3 (Landscape)" hint={IMAGE_HINTS.photo} />
+      {section.image && <ImageCreditField value={section.imageCredit} onChange={(v) => set("imageCredit", v)} />}
     </div>
   );
 }
@@ -111,6 +112,7 @@ export default function FeaturedArticleEditorPage() {
           </Field>
           <SingleImageUpload label="Hero image" src={form.heroImage} onChange={(url) => set("heroImage", url)}
             pathPrefix={pathPrefix} aspect="aspect-video" ratio={16 / 9} ratioLabel="16:9 (Landscape)" hint={IMAGE_HINTS.cover} frames={["hero"]} />
+          {form.heroImage && <ImageCreditField value={form.heroImageCredit} onChange={(v) => set("heroImageCredit", v)} />}
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Category" hint="Shown as the small label above the title.">
               <Inp value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="e.g. Food & Drink" />

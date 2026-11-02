@@ -246,6 +246,15 @@ export const IMAGE_HINTS = {
   card: "At least 1200×900 px. Cropped to fit the card, so keep the main subject in the centre.",
 };
 
+// Optional credit shown under a picture on the site ("Photo: Jane Smith").
+export function ImageCreditField({ value, onChange }) {
+  return (
+    <Field label="Image credit (optional)" hint="Shown in small text under the picture. Leave blank to show nothing.">
+      <Inp value={value ?? ""} onChange={(e) => onChange(e.target.value)} placeholder="e.g. Photo: Jane Smith" maxLength={150} />
+    </Field>
+  );
+}
+
 export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel, frames, hint }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
