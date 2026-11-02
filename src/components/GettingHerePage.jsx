@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import ConsentFrame from "../components/ConsentFrame";
 import { Link, useLocation } from "react-router-dom";
 import { getGettingHere } from "../api";
 import useFetch from "../hooks/useFetch";
@@ -112,10 +113,9 @@ export default function GettingHerePage() {
                   <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                     {/* Free, no-API-key interactive public-transport map (OpenStreetMap / ÖPNVKarte)
                         showing Maidenhead's rail and bus routes — pan & zoom enabled. */}
-                    <iframe
+                    <ConsentFrame
                       title="Maidenhead train & bus routes — interactive map"
                       src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7820%2C51.4880%2C-0.6560%2C51.5520&layer=transportmap&marker=51.5217%2C-0.7177"
-                      loading="lazy"
                       className="w-full h-full border-0"
                     />
                   </div>
@@ -134,10 +134,9 @@ export default function GettingHerePage() {
                   <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                     {/* Free, no-API-key interactive road map (OpenStreetMap) centred on
                         Maidenhead town centre — pan & zoom enabled. */}
-                    <iframe
+                    <ConsentFrame
                       title="Maidenhead town centre — interactive location map"
                       src="https://www.openstreetmap.org/export/embed.html?bbox=-0.8000%2C51.4820%2C-0.6400%2C51.5600&layer=mapnik&marker=51.5217%2C-0.7177"
-                      loading="lazy"
                       className="w-full h-full border-0"
                     />
                   </div>
@@ -163,10 +162,9 @@ export default function GettingHerePage() {
                     {/* Free, no-API-key interactive map (OpenStreetMap) zoomed to the
                         town-centre car-park area; the chips below open turn-by-turn
                         directions to each car park from the visitor's location. */}
-                    <iframe
+                    <ConsentFrame
                       title="Maidenhead town-centre car parks — interactive map"
                       src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7320%2C51.5140%2C-0.7060%2C51.5290&layer=mapnik&marker=51.5208%2C-0.7200"
-                      loading="lazy"
                       className="w-full h-full border-0"
                     />
                   </div>
@@ -201,10 +199,9 @@ export default function GettingHerePage() {
                   <div className="rounded-3xl overflow-hidden aspect-[4/3] bg-white shadow-[0_24px_60px_-28px_rgba(28,46,56,0.5)]">
                     {/* Free, no-API-key interactive cycle map (OpenStreetMap / OpenCycleMap)
                         showing cycle routes and paths around Maidenhead — pan & zoom enabled. */}
-                    <iframe
+                    <ConsentFrame
                       title="Maidenhead cycle routes — interactive map"
                       src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7820%2C51.4880%2C-0.6560%2C51.5520&layer=cyclemap&marker=51.5217%2C-0.7177"
-                      loading="lazy"
                       className="w-full h-full border-0"
                     />
                   </div>

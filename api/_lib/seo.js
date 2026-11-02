@@ -337,6 +337,7 @@ export const STATIC_PAGES = {
   "/work-with-us": { title: titleOf("List Your Business on Maidenhead.com"), description: "Put your business in front of people looking for things to do, eat, shop and stay in Maidenhead.", priority: 0.5 },
   "/privacy": { title: titleOf("Privacy Policy"), description: "How Maidenhead.com and the Maidenhead app handle personal information.", priority: 0.2 },
   "/terms": { title: titleOf("Terms of Use"), description: "The terms of use for Maidenhead.com and the Maidenhead app.", priority: 0.2 },
+  "/cookies": { title: titleOf("Cookie Policy"), description: "How Maidenhead.com and the Maidenhead app use cookies, and how to change your choices.", priority: 0.2 },
 };
 
 // Addresses the app itself redirects (App.jsx), answered with a real 301.

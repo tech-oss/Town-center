@@ -8,8 +8,12 @@
 // restores the original.
 import privacyHtml from "./privacy.html?raw";
 import termsHtml from "./terms.html?raw";
+import cookiesHtml from "./cookies.html?raw";
 
 export const LEGAL = {
   privacy: { key: "legal-privacy", title: "Privacy Policy", html: privacyHtml, path: "/privacy" },
   terms: { key: "legal-terms", title: "Terms of Use", html: termsHtml, path: "/terms" },
+  // Drafted for the site (cookies and storage it actually uses); not from the
+  // client's documents, so the [INSERT …] details need filling in by admin.
+  cookies: { key: "legal-cookies", title: "Cookie Policy", html: cookiesHtml, path: "/cookies" },
 };

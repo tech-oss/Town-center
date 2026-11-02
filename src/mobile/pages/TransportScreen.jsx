@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ConsentFrame from "../../components/ConsentFrame";
 import SmartImage from "../../components/SmartImage";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -87,10 +88,9 @@ export default function TransportScreen() {
 
               {MAPS[sec.id] && (
                 <div className="rounded-2xl overflow-hidden bg-white" style={{ height: 200, boxShadow: "0 10px 30px -14px rgba(28,46,56,0.5)" }}>
-                  <iframe
+                  <ConsentFrame
                     title={`${MAPS[sec.id].title} — interactive map`}
                     src={MAPS[sec.id].src}
-                    loading="lazy"
                     className="w-full h-full border-0"
                   />
                 </div>

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { supabase } from "./supabaseClient";
+import { ANALYTICS_STORAGE_KEY, hasConsent } from "./cookieConsent";
 
 // Records a view of a business page, post or event for the business's
 // analytics (supabase/sql/analytics_every_view_2026_09.sql → record_view).
@@ -9,9 +10,12 @@ import { supabase } from "./supabaseClient";
 // but it no longer suppresses a view. Fire and forget: a failed recording
 // never affects the page.
 
-const SESSION_KEY = "mh_view_session";
+const SESSION_KEY = ANALYTICS_STORAGE_KEY;
 
+// Kept on the device only with analytics consent (Cookie Policy); otherwise a
+// token for this page load, so nothing is stored.
 function sessionId() {
+  if (!hasConsent("analytics")) return (window.__mhViewSession ??= crypto.randomUUID());
   try {
     let id = localStorage.getItem(SESSION_KEY);
     if (!id) {

@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { openCookieSettings } from "../lib/cookieConsent";
 import { Link } from "react-router-dom";
 import { footer, header } from "../Data/content";
 import AppBadges from "./AppBadges";
@@ -31,9 +32,10 @@ function SocialIcon({ icon }) {
 }
 
 // ── Nav link (internal or external) ──────────────────────────────────────────
-function NavLink({ href, children }) {
+function NavLink({ href, action, children }) {
   const isInternal = href?.startsWith("/");
   const cls = "text-sm text-white transition-opacity duration-150 hover:opacity-70" ;
+  if (action === "cookie-settings") return <button type="button" onClick={openCookieSettings} className={`${cls} text-left`}>{children}</button>;
   return isInternal
     ? <Link to={href} className={cls}>{children}</Link>
     : <a href={href} className={cls}>{children}</a>;
@@ -61,7 +63,7 @@ function AccordionSection({ heading, links }) {
       {open && (
         <ul className="pb-4 flex flex-col gap-3">
           {links.map((l) => (
-            <li key={l.label}><NavLink href={l.href}>{l.label}</NavLink></li>
+            <li key={l.label}><NavLink href={l.href} action={l.action}>{l.label}</NavLink></li>
           ))}
         </ul>
       )}
@@ -127,7 +129,7 @@ export default function Footer() {
               <p className="section-eyebrow text-white">{col.heading}</p>
               <ul className="flex flex-col gap-2.5">
                 {col.links.map((l) => (
-                  <li key={l.label}><NavLink href={l.href}>{l.label}</NavLink></li>
+                  <li key={l.label}><NavLink href={l.href} action={l.action}>{l.label}</NavLink></li>
                 ))}
               </ul>
             </div>

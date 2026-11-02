@@ -5,7 +5,7 @@ import useLegalDocument from "../../hooks/useLegalDocument";
 
 // The app's Privacy Policy and Terms of Use screens — the same documents the
 // website shows at /privacy and /terms, as edited in Site Content.
-// `doc` is "privacy" or "terms".
+// `doc` is "privacy", "terms" or "cookies".
 export default function LegalPlaceholderScreen({ doc }) {
   const { title, html, loading } = useLegalDocument(doc);
   return (

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { openCookieSettings } from "../../lib/cookieConsent";
 import MobileShell from "../components/MobileShell";
 import { exploreSections, exploreInfo } from "../data/mobileMock";
 import { getGuidesIndex } from "../../api";
@@ -29,7 +30,16 @@ const MORE_LINKS = [
   { label: "Traders", to: "/mobile/traders" },
   { label: "Privacy Policy", to: "/mobile/privacy" },
   { label: "Terms of Use", to: "/mobile/terms" },
+  { label: "Cookie Policy", to: "/mobile/cookies" },
+  { label: "Cookie Settings", action: openCookieSettings },
 ];
+
+// A page link, or a button for an action (Cookie Settings).
+function MoreLink({ link, children, ...rest }) {
+  return link.to
+    ? <Link to={link.to} {...rest}>{children}</Link>
+    : <button type="button" onClick={link.action} {...rest}>{children}</button>;
+}
 
 export default function ExploreScreen() {
   const { data: guidesIndex } = useFetch(getGuidesIndex, []);
@@ -64,15 +74,15 @@ export default function ExploreScreen() {
           <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>About &amp; Legal</p>
           <div className="bg-white rounded-2xl overflow-hidden" style={{ boxShadow: "0 10px 26px -14px rgba(28,46,56,0.5)" }}>
             {MORE_LINKS.map((m, i) => (
-              <Link
-                key={m.to}
-                to={m.to}
-                className="flex items-center gap-3 px-4 py-3.5 active:bg-black/[0.03]"
+              <MoreLink
+                key={m.label}
+                link={m}
+                className="w-full text-left flex items-center gap-3 px-4 py-3.5 active:bg-black/[0.03]"
                 style={i < MORE_LINKS.length - 1 ? { borderBottom: "1px solid rgba(28,46,56,0.1)" } : undefined}
               >
                 <span className="flex-1 text-sm font-bold" style={{ color: "#000000" }}>{m.label}</span>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-              </Link>
+              </MoreLink>
             ))}
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import ConsentFrame from "../../components/ConsentFrame";
 import SmartImage from "../../components/SmartImage";
 import MobileShell from "../components/MobileShell";
 import MobileCard from "../components/MobileCard";
@@ -60,10 +61,9 @@ export default function ParkingScreen() {
 
           {/* Car-park map */}
           <div className="rounded-2xl overflow-hidden bg-white" style={{ height: 220, boxShadow: "0 10px 30px -14px rgba(28,46,56,0.5)" }}>
-            <iframe
+            <ConsentFrame
               title="Maidenhead town-centre car parks — interactive map"
               src="https://www.openstreetmap.org/export/embed.html?bbox=-0.7320%2C51.5140%2C-0.7060%2C51.5290&layer=mapnik&marker=51.5208%2C-0.7200"
-              loading="lazy"
               className="w-full h-full border-0"
             />
           </div>

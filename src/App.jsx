@@ -39,6 +39,7 @@ import GetAppPage from './components/GetAppPage'
 import EventsCalendarPage from './components/EventsCalendarPage'
 import Footer from './components/Footer'
 import ChatWidget from './components/ChatWidget'
+import CookieBanner from './components/CookieBanner'
 import LogoAnimation from './components/LogoAnimation/LogoAnimation'
 import ExternalLinkModal from './components/ExternalLinkModal'
 import useOrientationRepaint from './hooks/useOrientationRepaint'
@@ -168,6 +169,7 @@ function PublicSite() {
           <Route path="/see-do/place/:slug" element={<SeeDoPlaceRedirect />} />
           <Route path="/privacy" element={<LegalPage doc="privacy" />} />
           <Route path="/terms" element={<LegalPage doc="terms" />} />
+          <Route path="/cookies" element={<LegalPage doc="cookies" />} />
           <Route path="/b/:slug" element={<BusinessPageRedirect />} />
           <Route path="/services/place/:slug" element={<ServicesDetailPage />} />
           <Route path="/services/:group" element={<CategoryPage />} />
@@ -177,6 +179,7 @@ function PublicSite() {
         </Routes>
       </main>
       <Footer />
+      <CookieBanner />
     </>
   )
 }

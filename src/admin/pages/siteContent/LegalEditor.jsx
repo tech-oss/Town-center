@@ -5,7 +5,7 @@ import { legalDocumentClass } from "../../../lib/legalHtml";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../../theme";
 
 // Site Content → Privacy Policy / Terms of Use: the whole page as one free
-// document. `doc` is "privacy" or "terms"; `values` is { title, html } as
+// document. `doc` is "privacy", "terms" or "cookies"; `values` is { title, html } as
 // saved plus anything typed since. An empty html means "the original
 // document" (Data/legal), which is also what the editor starts from.
 export default function LegalEditor({ doc, values, onChange }) {

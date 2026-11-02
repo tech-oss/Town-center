@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import LegalDocument from "./LegalDocument";
 import useLegalDocument from "../hooks/useLegalDocument";
 
-// /privacy and /terms. `doc` is "privacy" or "terms"; the text is the version
+// /privacy, /terms and /cookies. `doc` is "privacy", "terms" or "cookies"; the text is the version
 // admin edits in Site Content (hooks/useLegalDocument).
 export default function LegalPage({ doc }) {
   const { title, html, loading } = useLegalDocument(doc);

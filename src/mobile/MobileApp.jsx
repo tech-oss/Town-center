@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import useViewportRepair from "./hooks/useViewportRepair";
 import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import PermissionsWelcome from "./components/PermissionsWelcome";
+import CookieBanner from "../components/CookieBanner";
 import { shouldShowPermissionsWelcome } from "./lib/permissionsWelcome";
 import { Capacitor } from "@capacitor/core";
 import SplashScreen from "./pages/SplashScreen";
@@ -92,6 +93,7 @@ export default function MobileApp() {
   return (
     <>
     {welcome && !onSplash && <PermissionsWelcome onClose={() => setWelcome(false)} />}
+    {!onSplash && <CookieBanner policyPath="/mobile/cookies" />}
     <Routes>
       <Route index element={<SplashScreen />} />
       <Route path="home" element={<HomeScreen />} />
@@ -114,6 +116,7 @@ export default function MobileApp() {
       <Route path="traders" element={<TradersScreen />} />
       <Route path="privacy" element={<LegalPlaceholderScreen doc="privacy" />} />
       <Route path="terms" element={<LegalPlaceholderScreen doc="terms" />} />
+      <Route path="cookies" element={<LegalPlaceholderScreen doc="cookies" />} />
       <Route path="guides" element={<GuidesScreen />} />
       <Route path="guides/:slug" element={<GuideDetailScreen />} />
       <Route path="offers" element={<OffersScreen />} />

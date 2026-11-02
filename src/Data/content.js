@@ -228,6 +228,8 @@ export const footer = {
       links: [
         { label: "Privacy Policy",       href: "/privacy" },
         { label: "Terms of Use",         href: "/terms" },
+        { label: "Cookie Policy",        href: "/cookies" },
+        { label: "Cookie Settings",      action: "cookie-settings" },
       ],
     },
   ],
