@@ -123,6 +123,7 @@ export async function getSpotlightArticleBySlug(slug) {
     title: n.title,
     excerpt: n.excerpt ?? "",
     image: imageUrl(n.image, "card") || business.image || "/logo-mark.svg",
+    imageCredit: n.image ? (n.image_credit ?? "") : "",
     body: String(n.body ?? n.excerpt ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean),
     business,
   };

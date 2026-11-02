@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ImageCredit from "../../components/ImageCredit";
 import SmartImage from "../../components/SmartImage";
 import { useParams, Navigate, Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
@@ -16,6 +17,7 @@ function PlaceSection({ s }) {
   return (
     <div className="flex flex-col overflow-hidden bg-white" style={{ borderRadius: 18, boxShadow: "0 12px 30px -16px rgba(28,46,56,0.35)" }}>
       <MobilePhoto src={s.image} alt={s.title} aspect="aspect-[4/3]" />
+      <ImageCredit text={s.imageCredit} className="px-4" />
       <div className="p-4 flex flex-col gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5" style={{ color: "var(--leaf)" }}>
@@ -82,6 +84,7 @@ export default function GuideDetailScreen() {
         <div className="relative">
           <MobilePhoto src={guide.heroImage} aspect="aspect-[4/3]" />
         </div>
+        <ImageCredit text={guide.heroImageCredit} className="px-5" />
 
         <div className="px-5 pt-2 flex flex-col gap-6 pb-10 mobile-stagger">
           <div className="flex items-start justify-between gap-3">

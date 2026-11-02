@@ -21,6 +21,7 @@ function fromRow(r) {
     cardImage: imageUrl(r.card_image, "card"),
     title: r.title,
     heroImage: imageUrl(r.hero_image, "hero"),
+    heroImageCredit: r.hero_image_credit ?? "",
     standfirst: r.standfirst,
     location: r.location,
     website: r.website,

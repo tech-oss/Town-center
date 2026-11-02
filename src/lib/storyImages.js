@@ -15,7 +15,7 @@ export function storySectionImages(story) {
     let n = 0;
     body.forEach((b, i) => {
       if (b?.image) {
-        out[i] = { src: b.image, side: n % 2 === 0 ? "right" : "left" };
+        out[i] = { src: b.image, credit: b.imageCredit ?? "", side: n % 2 === 0 ? "right" : "left" };
         n += 1;
       }
     });

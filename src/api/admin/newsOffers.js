@@ -30,6 +30,7 @@ function fromRow(r, slot) {
     excerpt: r.excerpt,
     body: r.body,
     image: r.image,
+    imageCredit: r.image_credit ?? "",
     date: r.date_label,
     displayDates: r.display_dates ?? r.date_label ?? "",
     website: r.website ?? "",
@@ -80,6 +81,7 @@ export async function saveNewsOffer(item) {
     excerpt: item.excerpt ?? null,
     body: item.body ?? null,
     image: item.image ?? null,
+    image_credit: item.image ? (item.imageCredit?.trim() || null) : null,
     date_label: item.date ?? null,
     // What readers see. Kept apart from start_date/end_date, which only tell
     // the system when the post is live.

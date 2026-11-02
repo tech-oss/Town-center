@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link, useLocation } from "react-router-dom";
+import ImageCredit from "../../components/ImageCredit";
 import { cropStyle } from "../../lib/focalPoint";
 import { useMemo } from "react";
 import { pickSome } from "../../lib/pickSome";
@@ -63,6 +64,7 @@ export default function StoryDetailScreen() {
         <div className="relative">
           <MobilePhoto src={story.heroImage} alt={story.title} aspect="aspect-[16/9]" />
         </div>
+        <ImageCredit text={story.heroImageCredit} className="px-5" />
 
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
             <div className="flex items-start justify-between gap-3">
@@ -91,7 +93,10 @@ export default function StoryDetailScreen() {
               {story.body?.map((block, i) => (
                 <div key={i} className="flex flex-col gap-3">
                   {sectionImages[i] && (
-                    <MobilePhoto src={sectionImages[i].src} alt={block.heading || story.title} aspect="aspect-[4/3]" rounded="rounded-2xl" />
+                    <div>
+                      <MobilePhoto src={sectionImages[i].src} alt={block.heading || story.title} aspect="aspect-[4/3]" rounded="rounded-2xl" />
+                      <ImageCredit text={sectionImages[i].credit} />
+                    </div>
                   )}
                   <BlockText block={block} />
                 </div>

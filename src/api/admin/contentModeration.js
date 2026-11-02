@@ -22,6 +22,7 @@ function articleFromRow(row) {
     startDate: row.start_date,
     endDate: row.end_date,
     heroImage: row.hero_image,
+    heroImageCredit: row.hero_image_credit ?? "",
     thumbnail: row.thumbnail,
     body: row.body,
     rejectionReason: row.rejection_reason,
@@ -155,6 +156,7 @@ export async function saveBusinessArticle(item) {
       start_date: item.startDate || null,
       end_date: item.endDate || null,
       hero_image: item.heroImage || null,
+      hero_image_credit: item.heroImage ? (item.heroImageCredit?.trim() || null) : null,
       thumbnail: item.heroImage || null,
       body: item.body,
     })

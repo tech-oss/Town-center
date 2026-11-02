@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate, useLocation } from "react-router-dom";
+import ImageCredit from "./ImageCredit";
 import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { focalPosition } from "../lib/focalPoint";
@@ -116,6 +117,7 @@ export default function FeatureArticlePage() {
 
           {/* Cover image */}
           <SpotlightImage src={story.heroImage} alt={story.title} aspect="aspect-[16/9]" className="mt-4" />
+          <ImageCredit text={story.heroImageCredit} />
         </div>
       </section>
 
@@ -170,6 +172,7 @@ export default function FeatureArticlePage() {
                   <div key={i} className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div className={imageRight ? "md:order-2" : ""}>
                       <SpotlightImage src={img.src} alt={block.heading || story.title} aspect="h-72 md:h-full md:min-h-[24rem]" />
+                      <ImageCredit text={img.credit} />
                     </div>
                     <BlockText block={block} />
                   </div>

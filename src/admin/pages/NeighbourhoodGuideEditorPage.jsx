@@ -4,7 +4,7 @@ import { getGuideById, saveGuide } from "../../api/admin";
 import LoadingState from "../components/LoadingState";
 import Toast from "../components/Toast";
 import { BLUE, BORDER, MUTED, NAVY } from "../theme";
-import { Card, Field, IMAGE_HINTS, ImageField, Inp, Paragraphs, RepeatList, TextArea } from "./explore/contentKit";
+import { Card, Field, IMAGE_HINTS, ImageCreditField, ImageField, Inp, Paragraphs, RepeatList, TextArea } from "./explore/contentKit";
 // The categories the guides listing shows and the app and site filter on. A
 // guide saved with anything else would sit in a category of its own.
 import { GUIDE_CATEGORY_LABELS as GUIDE_CATEGORIES } from "../../Data/guideCategories";
@@ -135,7 +135,10 @@ export default function NeighbourhoodGuideEditorPage() {
           <TextArea rows={3} value={c.summary ?? ""} onChange={(e) => setContent("summary", e.target.value)} />
         </Field>
         <div className="grid sm:grid-cols-2 gap-4">
-          <ImageField label="Hero image" value={form.heroImage} onChange={(v) => set("heroImage", v)} hint={IMAGE_HINTS.photo} />
+          <div className="flex flex-col gap-3">
+            <ImageField label="Hero image" value={form.heroImage} onChange={(v) => set("heroImage", v)} hint={IMAGE_HINTS.photo} />
+            <ImageCreditField value={c.heroImageCredit} onChange={(v) => setContent("heroImageCredit", v)} />
+          </div>
           <ImageField label="Card image" value={form.thumbnail} onChange={(v) => set("thumbnail", v)} hint={`Used in the guides grid and related-guide cards. ${IMAGE_HINTS.wideCard}`} />
         </div>
         <Field label="Status" hint="Only Published guides appear on the site">
@@ -196,6 +199,7 @@ export default function NeighbourhoodGuideEditorPage() {
                 </div>
               </div>
               <ImageField label="Image" value={s.image} onChange={(v) => update({ image: v })} hint={IMAGE_HINTS.photo} />
+              <ImageCreditField value={s.imageCredit} onChange={(v) => update({ imageCredit: v })} />
             </>
           )}
         />

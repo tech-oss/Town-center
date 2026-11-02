@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ImageFramer from "../../components/ImageFramer";
-import { Card, Field, IMAGE_HINTS, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "../pages/explore/contentKit";
+import { Card, Field, IMAGE_HINTS, ImageCreditField, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "../pages/explore/contentKit";
 import { withSectionImages } from "../../lib/storyImages";
 import { uploadImage } from "../../lib/uploadImage";
 import { saveFeatureArticle, setArticleHomepageFeature } from "../../api/admin";
@@ -144,6 +144,7 @@ function SectionsEditor({ blocks, onChange }) {
             <Lines label="Bullet points" hint="Optional — one per line" value={b.bullets} onChange={(v) => update({ bullets: v })} rows={3} />
             <Lines label="Paragraphs after the bullets" hint="Optional — one per line" value={b.parasAfter} onChange={(v) => update({ parasAfter: v })} rows={2} />
             <SectionImageField label="Picture for this section" hint={`Optional — shown beside this section. ${IMAGE_HINTS.photo}`} value={b.image ?? ""} onChange={(v) => update({ image: v ?? "" })} folder="stories" />
+            {b.image && <ImageCreditField value={b.imageCredit} onChange={(v) => update({ imageCredit: v })} />}
           </>
         )}
       />
@@ -205,6 +206,7 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
       ...(cleanLines(b.bullets).length ? { bullets: cleanLines(b.bullets) } : {}),
       ...(cleanLines(b.parasAfter).length ? { parasAfter: cleanLines(b.parasAfter) } : {}),
       ...(b.image ? { image: b.image } : {}),
+      ...(b.image && b.imageCredit?.trim() ? { imageCredit: b.imageCredit.trim() } : {}),
     }));
     (async () => {
       if (swapOutId) await setArticleHomepageFeature(swapOutId, false);
@@ -288,6 +290,7 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
           </span>
         </label>
         <ImageField label="Hero image" value={form.heroImage} onChange={(v) => set("heroImage", v)} frames={["hero"]} hint={IMAGE_HINTS.cover} />
+        <ImageCreditField value={form.heroImageCredit} onChange={(v) => set("heroImageCredit", v)} />
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Standfirst (intro paragraph under the hero)</span>
           <textarea value={form.standfirst} onChange={(e) => set("standfirst", e.target.value)} rows={3} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={{ border: "1.5px solid rgba(16,24,40,0.2)", color: "#1E293B" }} />

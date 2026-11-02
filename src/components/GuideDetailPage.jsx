@@ -1,4 +1,5 @@
 import { Link, useParams, Navigate } from "react-router-dom";
+import ImageCredit from "./ImageCredit";
 import SmartImage from "./SmartImage";
 import { useEffect, useState } from "react";
 import { getGuideBySlug, getGuides } from "../api";
@@ -59,6 +60,7 @@ function PlaceSection({ s, index }) {
           <img src={s.image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
           <img src={s.image} alt={s.title} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
         </div>
+        <ImageCredit text={s.imageCredit} />
       </div>
       <div>
         <p className="section-eyebrow mb-3 flex items-center gap-2" style={{ color: "var(--leaf)" }}>
@@ -103,6 +105,7 @@ export default function GuideDetailPage() {
         style={{ minHeight: "max(70vh, 520px)", paddingTop: "calc(var(--header-height, 96px) + 2rem)" }}
       >
         <SmartImage src={guide.heroImage} size="hero" eager sizes="100vw" className="absolute inset-0 w-full h-full object-cover" />
+        <ImageCredit text={guide.heroImageCredit} variant="overlay" />
         <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(20,33,42,0.45) 0%, rgba(20,33,42,0.55) 50%, rgba(20,33,42,0.9) 100%)" }} />
         <span className="section-eyebrow relative mb-3" style={{ color: "var(--sage)" }}>{guide.category}</span>
         <h1 className="hero-title relative uppercase text-3xl md:text-5xl lg:text-6xl leading-tight mb-4 text-white max-w-3xl" style={{ textShadow: "0 2px 24px rgba(0,0,0,0.4)" }}>

@@ -64,6 +64,15 @@ export const IMAGE_HINTS = {
   wideCard: "Landscape 16:9, at least 1600×900 px. Cropped into a wide tile, so keep the main subject in the centre.",
 };
 
+// Optional credit shown under a picture on the site ("Photo: Jane Smith").
+export function ImageCreditField({ value, onChange }) {
+  return (
+    <Field label="Image credit (optional)" hint="Shown in small text under the picture. Leave blank to show nothing.">
+      <Inp value={value ?? ""} onChange={(e) => onChange(e.target.value)} placeholder="e.g. Photo: Jane Smith" maxLength={150} />
+    </Field>
+  );
+}
+
 export function ImageField({ label, value, onChange, hint, folder = "explore" }) {
   const [busy, setBusy] = useState(false);
   function upload(file) {

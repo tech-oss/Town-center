@@ -1,4 +1,5 @@
 import { webPathFor } from "../api/liveBusinesses";
+import ImageCredit from "./ImageCredit";
 import { useParams, Link, Navigate, useLocation } from "react-router-dom";
 import { cropStyle } from "../lib/focalPoint";
 import { useTrackView, articleView } from "../lib/trackView";
@@ -62,6 +63,7 @@ export default function ArticlePage() {
           <div className="relative overflow-hidden aspect-[16/9] bg-black">
             <img src={article.image} alt={article.title} className="w-full h-full object-cover" style={cropStyle(article.image, "hero")} />
           </div>
+          <ImageCredit text={article.imageCredit} />
         </div>
       </section>
 

@@ -1,4 +1,5 @@
 import { useParams, Navigate, Link, useLocation } from "react-router-dom";
+import ImageCredit from "../../components/ImageCredit";
 import { cropStyle } from "../../lib/focalPoint";
 import { useTrackView, articleView } from "../../lib/trackView";
 import MobileShell from "../components/MobileShell";
@@ -34,6 +35,7 @@ export default function NewsDetailScreen() {
         <div className="relative">
           <MobilePhoto src={article.image} alt={article.title} aspect="aspect-[16/9]" />
         </div>
+        <ImageCredit text={article.imageCredit} className="px-5" />
 
         <div className="px-5 pt-4 relative flex flex-col gap-5 pb-8 mobile-stagger">
           <div className="flex items-start justify-between gap-3">

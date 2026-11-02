@@ -2,7 +2,7 @@ import { useState } from "react";
 import ImageFramer from "../../components/ImageFramer";
 import { saveBusinessArticle } from "../../api/admin";
 import { uploadImage } from "../../lib/uploadImage";
-import { IMAGE_HINTS } from "../pages/explore/contentKit";
+import { IMAGE_HINTS, ImageCreditField } from "../pages/explore/contentKit";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 // Editing a news post or offer that a business wrote.
@@ -121,6 +121,7 @@ export default function BusinessArticleForm({ initial, onSave, onCancel }) {
         <span className="text-[10px]" style={{ color: "#9CA3AF" }}>{IMAGE_HINTS.cover}</span>
         <ImageFramer value={form.heroImage} frames={["hero", "card"]} onChange={(v) => set("heroImage", v)} />
       </div>
+      {form.heroImage && <ImageCreditField value={form.heroImageCredit} onChange={(v) => set("heroImageCredit", v)} />}
 
       <Field label="The post">
         <textarea rows={10} className="rounded-xl px-3 py-2.5 text-sm outline-none resize-y" style={INPUT}
