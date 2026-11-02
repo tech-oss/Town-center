@@ -383,7 +383,7 @@ export default function StayDetailScreen() {
               </p>
               <div className="flex flex-col gap-2.5">
                 {place.amenities.map((a) => {
-                  const { icon, blurb } = amenityMeta(a);
+                  const { icon } = amenityMeta(a);
                   return (
                     <MobileCard key={a} className="p-3.5 flex items-center gap-3.5">
                       <span className="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--mint)" }}>
@@ -391,7 +391,6 @@ export default function StayDetailScreen() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold" style={{ color: "#000000" }}>{a}</p>
-                        <p className="text-xs mt-0.5 leading-snug" style={{ color: "#000000" }}>{blurb}</p>
                       </div>
                       <span className="w-6 h-6 rounded-full border flex items-center justify-center shrink-0 text-xs" style={{ borderColor: "var(--leaf)", color: "var(--leaf)" }}>✓</span>
                     </MobileCard>

@@ -149,7 +149,7 @@ function CheckInSection({ checkIn, checkOut, earlyCheckin, lateCheckout, note })
   );
 }
 
-// Feature-card amenities section — icon, title, one-line blurb and a
+// Feature-card amenities section — icon, title and a
 // checkmark per amenity, matching the reference design exactly. Rendered via
 // PlaceDetailLayout's afterGallery slot, directly below the photo grid.
 function AmenitiesSection({ amenities, heading }) {
@@ -164,7 +164,7 @@ function AmenitiesSection({ amenities, heading }) {
         </p>
         <div className="grid sm:grid-cols-2 gap-5">
           {amenities.map((a) => {
-            const { icon, blurb } = amenityMeta(a);
+            const { icon } = amenityMeta(a);
             return (
               <div
                 key={a}
@@ -178,8 +178,7 @@ function AmenitiesSection({ amenities, heading }) {
                   <AmenityIcon name={icon} />
                 </span>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-base mb-1" style={{ color: "#000000" }}>{a}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(0,0,0,0.65)" }}>{blurb}</p>
+                  <h3 className="font-bold text-base" style={{ color: "#000000" }}>{a}</h3>
                 </div>
                 <span
                   className="w-8 h-8 rounded-full border flex items-center justify-center shrink-0"
