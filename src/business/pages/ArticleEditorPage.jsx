@@ -3,7 +3,7 @@ import UKDateInput from "../components/UKDateInput";
 import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
-import { Field, Inp, TextArea, Select, SingleImageUpload, EditorSection, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
+import { Field, Inp, TextArea, Select, SingleImageUpload, IMAGE_HINTS, EditorSection, Toast, useToast, FOREST, SAGE, MUTED, BORDER, CARD } from "../components/FormKit";
 import { getArticle, createArticle, updateArticle, getArticleAllowance } from "../api/businessArticles";
 import { Link } from "react-router-dom";
 
@@ -99,7 +99,7 @@ export default function ArticleEditorPage() {
           </EditorSection>
 
           <EditorSection title="Hero Image">
-            <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)"  frames={["hero", "card"]} />
+            <SingleImageUpload src={form.heroImage} onChange={(v) => set("heroImage", v)} aspect="aspect-[16/9]" pathPrefix={user.id} ratio={16 / 9} ratioLabel="16:9 (Landscape)" hint={IMAGE_HINTS.cover} frames={["hero", "card"]} />
           </EditorSection>
 
           {/* The body used to be an 8-row box inside a max-w-3xl column, which

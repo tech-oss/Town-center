@@ -238,7 +238,15 @@ async function checkAspectRatio(file, ratio) {
 // the app both use rounded-xl; listing cards just contain-fit it), and
 // object-cover cropped the edges off any logo that wasn't square, so what a
 // business signed off here wasn't what went out.
-export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel, frames }) {
+// Size and framing guidance shown under an upload box (`hint`). Pages show the
+// whole picture (spare space is a blurred copy of it); cards crop it to fill.
+export const IMAGE_HINTS = {
+  cover: "At least 1600×900 px. The whole picture is shown. Avoid portrait photos.",
+  photo: "At least 1600×1200 px. The whole picture is shown. Avoid portrait photos.",
+  card: "At least 1200×900 px. Cropped to fit the card, so keep the main subject in the centre.",
+};
+
+export function SingleImageUpload({ src, onChange, label, logo = false, aspect = "aspect-video", pathPrefix, ratio, ratioLabel, frames, hint }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -297,6 +305,7 @@ export function SingleImageUpload({ src, onChange, label, logo = false, aspect =
         <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={(e) => handleFiles(e.target.files)} />
       </label>
       {ratioLabel && <p className="text-[10px] mt-1.5" style={{ color: "#9CA3AF" }}>Best aspect ratio: {ratioLabel}</p>}
+      {hint && <p className="text-[10px] mt-0.5" style={{ color: "#9CA3AF" }}>{hint}</p>}
       {error && <p className="text-[11px] mt-1 font-medium" style={{ color: "#DC2626" }}>{error}</p>}
       {notice && <p className="text-[11px] mt-1 font-medium" style={{ color: "#B45309" }}>{notice}</p>}
       {/* Whatever ratio the picture arrives at, it still gets cropped to

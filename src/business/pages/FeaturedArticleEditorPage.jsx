@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
-  Field, Inp, TextArea, SingleImageUpload, Toast, useToast,
+  Field, Inp, TextArea, SingleImageUpload, IMAGE_HINTS, Toast, useToast,
   CARD, FOREST, SAGE, MUTED, BORDER,
 } from "../components/FormKit";
 import { getFeatureArticle, saveFeatureArticle } from "../api/businessFeatureArticles";
@@ -34,7 +34,7 @@ function Section({ index, section, onChange, onRemove, canRemove, pathPrefix }) 
           placeholder="Leave a blank line between paragraphs." />
       </Field>
       <SingleImageUpload label="Picture for this section (optional)" src={section.image}
-        onChange={(url) => set("image", url)} pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)" />
+        onChange={(url) => set("image", url)} pathPrefix={pathPrefix} aspect="aspect-[4/3]" ratio={4 / 3} ratioLabel="4:3 (Landscape)" hint={IMAGE_HINTS.photo} />
     </div>
   );
 }
@@ -110,7 +110,7 @@ export default function FeaturedArticleEditorPage() {
             <TextArea rows={3} value={form.standfirst} onChange={(e) => set("standfirst", e.target.value)} />
           </Field>
           <SingleImageUpload label="Hero image" src={form.heroImage} onChange={(url) => set("heroImage", url)}
-            pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)"  frames={["hero"]} />
+            pathPrefix={pathPrefix} aspect="aspect-video" ratio={16 / 9} ratioLabel="16:9 (Landscape)" hint={IMAGE_HINTS.cover} frames={["hero"]} />
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Category" hint="Shown as the small label above the title.">
               <Inp value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="e.g. Food & Drink" />
@@ -153,7 +153,7 @@ export default function FeaturedArticleEditorPage() {
             <TextArea rows={2} value={form.cardBody} onChange={(e) => set("cardBody", e.target.value)} placeholder="Same as the standfirst" />
           </Field>
           <SingleImageUpload label="Card image" src={form.cardImage} onChange={(url) => set("cardImage", url)}
-            pathPrefix={pathPrefix} aspect="aspect-video" ratioLabel="16:9 (Landscape)"  frames={["card"]} />
+            pathPrefix={pathPrefix} aspect="aspect-[4/3]" ratio={4 / 3} ratioLabel="4:3 (Landscape)" hint={IMAGE_HINTS.card} frames={["card"]} />
         </div>
 
         {error && (
