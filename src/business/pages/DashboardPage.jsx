@@ -4,7 +4,7 @@ import useLiveTick from "../hooks/useLiveTick";
 import ActivePromotions from "../components/ActivePromotions";
 import FeaturedBusinessBanner from "../components/FeaturedBusinessBanner";
 import PurchaseRequests from "../components/PurchaseRequests";
-import { isPremium, BILLING_OPTIONS } from "../../Data/plans";
+import { isPremium, billingOptionsFor } from "../../Data/plans";
 import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
@@ -122,7 +122,7 @@ export default function DashboardPage() {
           {company && isFreePlan ? (
             <p className="text-sm text-white">You're on the <strong>Free plan</strong>: one basic property with its name, address, map pin and your company details. Upgrade for full property profiles and more properties.</p>
           ) : isFreePlan ? (
-            <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Upgrade to the <strong>Visibility Plan</strong> — just {BILLING_OPTIONS.year.perDay} a day — to add your logo, photos, opening hours, description, website, social links, news &amp; offers and analytics.</p>
+            <p className="text-sm text-white">You're on the <strong>Free plan</strong>. Upgrade to the <strong>Visibility Plan</strong> — just {billingOptionsFor(user.businessType).year.perDay} a day — to add your logo, photos, opening hours, description, website, social links, news &amp; offers and analytics.</p>
           ) : company ? (
             // The company's tier, and whether Maidenhead gave it free of charge.
             <p className="text-sm text-white">

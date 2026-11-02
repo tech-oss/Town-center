@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { SAGE, MUTED, BORDER } from "./FormKit";
-import { PREMIUM_PLAN, BILLING_OPTIONS, VISIBILITY_FEATURES, formatPrice } from "../../Data/plans";
+import { PREMIUM_PLAN, billingOptionsFor, visibilityFeaturesFor, formatPrice } from "../../Data/plans";
 import { startPremiumCheckout } from "../api/stripeBilling";
 
 // The Visibility Plan's sales sections, shared by the subscription page
 // (UpgradeFlowPage) and Subscriptions & Billing, so both say the same thing and
-// both send the business straight to Stripe Checkout.
+// both send the business straight to Stripe Checkout. Hotels see their own
+// prices and features (Data/plans → billingOptionsFor / visibilityFeaturesFor).
 
 export const INK = "#0F172A";
 
@@ -49,6 +50,8 @@ const PATHS = {
   moreArticles: <><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" /><path d="M14 3v5h5M9 12h6M9 16h6" /><circle cx="18.5" cy="18.5" r="3.2" /><path d="M18.5 17.3v3.4M16.8 19h3.4" /></>,
   events: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" /><circle cx="9.5" cy="15" r="1.2" /><circle cx="14.5" cy="15" r="1.2" /></>,
   push: <><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.7 21a2 2 0 01-3.4 0" /></>,
+  facilities: <><path d="M3 18h18M5 18a7 7 0 0114 0" /><path d="M12 8v3M10.5 8h3" /></>,
+  rooms: <><path d="M3 18V7M3 13h18v5M21 18v-3a3 3 0 00-3-3h-7v1" /><circle cx="7" cy="10.5" r="1.8" /></>,
   spotlight: <><path d="M3 11l14-7v16L3 13z" /><path d="M7 13v4a2 2 0 002 2h1" /><path d="M17 8a3 3 0 010 6" /></>,
 };
 
@@ -95,7 +98,7 @@ export function BillingOption({ option, selected, onSelect }) {
           <span className="text-sm font-medium" style={{ color: MUTED }}>{option.label}</span>
         </span>
         <span className="block text-sm mt-0.5" style={{ color: selected ? SAGE : MUTED, fontWeight: selected ? 600 : 400 }}>
-          Just {option.perDay} a day
+          {option.perDayText ?? `Just ${option.perDay} a day`}
         </span>
       </span>
       {isYear && option.saving > 0 && (
@@ -133,7 +136,7 @@ export function TermsDialog({ onClose }) {
 }
 
 // ─── Checkout state shared by every upgrade button on a page ────────────────
-export function useVisibilityCheckout(businessId) {
+export function useVisibilityCheckout(businessId, businessType) {
   const [billing, setBilling] = useState("year");
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState("");
@@ -151,7 +154,7 @@ export function useVisibilityCheckout(businessId) {
     }
   }
 
-  return { billing, setBilling, starting, error, showTerms, setShowTerms, upgrade };
+  return { billing, setBilling, starting, error, showTerms, setShowTerms, upgrade, options: billingOptionsFor(businessType) };
 }
 
 export function CtaButton({ checkout, className = "", full = false }) {
@@ -172,14 +175,14 @@ export function CtaButton({ checkout, className = "", full = false }) {
 export function BillingChoice({ checkout, className = "" }) {
   return (
     <div role="radiogroup" aria-label="Billing" className={`grid sm:grid-cols-2 gap-3 sm:gap-4 ${className}`}>
-      <BillingOption option={BILLING_OPTIONS.year} selected={checkout.billing === "year"} onSelect={checkout.setBilling} />
-      <BillingOption option={BILLING_OPTIONS.month} selected={checkout.billing === "month"} onSelect={checkout.setBilling} />
+      <BillingOption option={checkout.options.year} selected={checkout.billing === "year"} onSelect={checkout.setBilling} />
+      <BillingOption option={checkout.options.month} selected={checkout.billing === "month"} onSelect={checkout.setBilling} />
     </div>
   );
 }
 
 function CheckoutSmallPrint({ checkout }) {
-  const chosen = BILLING_OPTIONS[checkout.billing];
+  const chosen = checkout.options[checkout.billing];
   return (
     <>
       {checkout.error && (
@@ -229,7 +232,8 @@ export function VisibilityPlanCard({ checkout }) {
 }
 
 // ─── What's included ─────────────────────────────────────────────────────────
-export function VisibilityFeatures({ included = false }) {
+export function VisibilityFeatures({ included = false, businessType }) {
+  const features = visibilityFeaturesFor(businessType);
   return (
     <section aria-labelledby="features-title" className="rounded-3xl p-5 sm:p-8 bg-white" style={{ border: `1px solid ${BORDER}` }}>
       <h2 id="features-title" className="text-xl sm:text-2xl" style={{ color: INK, fontWeight: 700 }}>
@@ -239,8 +243,8 @@ export function VisibilityFeatures({ included = false }) {
         {(() => {
           // Split evenly rather than a fixed 5/5, so the two columns stay
           // balanced as features are added or removed.
-          const half = Math.ceil(VISIBILITY_FEATURES.length / 2);
-          return [VISIBILITY_FEATURES.slice(0, half), VISIBILITY_FEATURES.slice(half)];
+          const half = Math.ceil(features.length / 2);
+          return [features.slice(0, half), features.slice(half)];
         })().map((column, ci) => (
           <ul key={ci} className={ci === 0 ? "md:pr-10 md:border-r" : "md:pl-10"} style={{ borderColor: BORDER }}>
             {column.map((f) => (
@@ -292,7 +296,7 @@ export function ClosingBand({ checkout }) {
         <div className="flex-1 min-w-[220px]">
           <p className="vp-strong text-lg" style={{ color: INK }}>A small investment in your local visibility</p>
           <p className="text-sm mt-0.5" style={{ color: MUTED }}>
-            Upgrade to the Visibility Plan today — from {BILLING_OPTIONS.year.perDay} a day — and take your business profile to the next level.
+            Upgrade to the Visibility Plan today — from {checkout.options.year.perDay} a day — and take your business profile to the next level.
           </p>
         </div>
         <CtaButton checkout={checkout} className="w-full sm:w-auto" />

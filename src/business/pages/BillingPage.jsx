@@ -51,7 +51,7 @@ export default function BillingPage() {
   const [payments, setPayments] = useState([]);
   const [opening, setOpening] = useState(false);
   const [showAcceptedTerms, setShowAcceptedTerms] = useState(false);
-  const vp = useVisibilityCheckout(user.id);
+  const vp = useVisibilityCheckout(user.id, user.businessType);
   // The current legal documents and this business's acceptance of each.
   const [agreements, setAgreements] = useState(null);
   useEffect(() => {
@@ -150,11 +150,11 @@ export default function BillingPage() {
         {/* The Visibility Plan — same sections as the subscription page, and
             the upgrade buttons go straight to Stripe Checkout. */}
         {premium ? (
-          <VisibilityFeatures included />
+          <VisibilityFeatures included businessType={user.businessType} />
         ) : (
           <>
             <VisibilityPlanCard checkout={vp} />
-            <VisibilityFeatures />
+            <VisibilityFeatures businessType={user.businessType} />
             <ClosingBand checkout={vp} />
           </>
         )}

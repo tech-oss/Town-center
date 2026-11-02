@@ -9,7 +9,7 @@ import {
   CARD, BORDER, MUTED, FOREST, SAGE,
   PlanContext, Locked, FreePlanNotice,
 } from "../components/FormKit";
-import { isPremium } from "../../Data/plans";
+import { isPremium, galleryMaxFor } from "../../Data/plans";
 import ReviewsList from "../components/ReviewsList";
 import { CheckInEditor, AmenitiesEditor } from "../components/StayEditors";
 import { getBusinessListing, saveBusinessListing, isAutoPublished } from "../api/businessListing";
@@ -294,9 +294,9 @@ export default function MyListingPage() {
 
           {tab === "gallery" && (
             <>
-              <EditorSection title={user.businessType === "hotel" ? "Photos" : "Gallery"} hint="These images appear in the gallery on your public page.">
+              <EditorSection title={user.businessType === "hotel" ? "Photos" : "Gallery"} hint={`Up to ${galleryMaxFor(user.businessType)} pictures. These appear in the gallery on your public page.`}>
                 <Locked field="gallery">
-                  <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
+                  <GalleryGrid images={listing.gallery ?? []} onChange={(v) => set("gallery", v)} max={galleryMaxFor(user.businessType)} pathPrefix={user.id} ratio={1} ratioLabel="1:1 (Square)" />
                 </Locked>
               </EditorSection>
               {tabEditable("gallery") && <SaveBar onSave={() => handleSave("gallery")} saving={saving} status={status} rejectionReason={rejectionReason} />}

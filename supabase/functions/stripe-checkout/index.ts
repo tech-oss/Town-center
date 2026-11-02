@@ -12,6 +12,9 @@
 // Secrets: STRIPE_SECRET_KEY, SITE_URL,
 //          STRIPE_PRICE_VISIBILITY_MONTHLY (£29.99/month),
 //          STRIPE_PRICE_VISIBILITY_YEARLY (£329/year)
+//          optional STRIPE_PRICE_HOTEL_MONTHLY (£39.99/month) and
+//          STRIPE_PRICE_HOTEL_YEARLY (£399/year) — without them the hotel
+//          prices are found in Stripe by lookup key, and made the first time
 //          (optional ALLOWED_ORIGIN_REGEX)
 
 import Stripe from "https://esm.sh/stripe@14.25.0?target=deno";
@@ -37,6 +40,41 @@ const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY
 const ORIGIN_RE = new RegExp(
   Deno.env.get("ALLOWED_ORIGIN_REGEX") ?? "^(https://town-center-[a-z0-9-]+\\.vercel\\.app|http://localhost:\\d+)$",
 );
+// Hotels and accommodation (business type "hotel") pay more for the
+// Visibility Plan (Data/plans.js → HOTEL_BILLING_OPTIONS). Their Stripe
+// prices come from the secrets when set; otherwise they're found by lookup
+// key, and created — under one "Visibility Plan — Hotels & Accommodation"
+// product — the first time a hotel subscribes.
+const HOTEL_PRICES = {
+  month: { pence: 3999, key: "visibility_hotel_monthly", secret: "STRIPE_PRICE_HOTEL_MONTHLY" },
+  year: { pence: 39900, key: "visibility_hotel_yearly", secret: "STRIPE_PRICE_HOTEL_YEARLY" },
+} as const;
+
+async function hotelPriceId(interval: "month" | "year") {
+  const spec = HOTEL_PRICES[interval];
+  const fromSecret = Deno.env.get(spec.secret);
+  if (fromSecret) return fromSecret;
+  const { data: existing } = await stripe.prices.list({
+    lookup_keys: [HOTEL_PRICES.month.key, HOTEL_PRICES.year.key], active: true, limit: 10,
+  });
+  const match = existing.find((p: Stripe.Price) => p.lookup_key === spec.key && p.unit_amount === spec.pence && p.currency === "gbp");
+  if (match) return match.id;
+  const sibling = existing.find((p: Stripe.Price) => p.lookup_key !== spec.key);
+  const product = typeof sibling?.product === "string" ? sibling.product : sibling?.product?.id;
+  const price = await stripe.prices.create({
+    currency: "gbp",
+    unit_amount: spec.pence,
+    recurring: { interval },
+    lookup_key: spec.key,
+    transfer_lookup_key: true,
+    metadata: { plan: "premium", audience: "hotel" },
+    ...(product
+      ? { product }
+      : { product_data: { name: "Visibility Plan — Hotels & Accommodation", metadata: { plan: "premium" } } }),
+  });
+  return price.id;
+}
+
 function returnBase(req: Request) {
   const origin = req.headers.get("origin") ?? "";
   return ORIGIN_RE.test(origin) ? origin : Deno.env.get("SITE_URL")!;
@@ -60,7 +98,7 @@ Deno.serve(async (req) => {
     // Only the approved Owner of an approved business can pay for it.
     const { data: member } = await admin
       .from("business_users")
-      .select("role, status, businesses(name, status, kind)")
+      .select("role, status, businesses(name, status, kind, business_type)")
       .eq("business_id", businessId)
       .eq("auth_user_id", user.id)
       .maybeSingle();
@@ -243,9 +281,13 @@ Deno.serve(async (req) => {
 
     // Monthly or annual Visibility Plan. Only these two Stripe prices can be
     // bought — the price is chosen here, never supplied by the browser.
-    const priceId = interval === "year"
-      ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
-      : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM"));
+    // deno-lint-ignore no-explicit-any
+    const hotel = (member as any).businesses?.business_type === "hotel";
+    const priceId = hotel
+      ? await hotelPriceId(interval === "year" ? "year" : "month")
+      : interval === "year"
+        ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
+        : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM"));
     if (!priceId) {
       console.error("Missing Stripe price secret for interval", interval);
       return json({ error: "This billing option isn't available yet." }, 503);

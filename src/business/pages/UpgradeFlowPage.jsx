@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import { FOREST, SAGE, MUTED, BORDER } from "../components/FormKit";
-import { BILLING_OPTIONS, isPremium, formatPrice } from "../../Data/plans";
+import { billingOptionsFor, isPremium, formatPrice } from "../../Data/plans";
 import { openBillingPortal, waitForPremium } from "../api/stripeBilling";
 import {
   INK, PAGE_TYPE_CSS, TINT, RING, Icon, TermsDialog,
@@ -38,8 +38,9 @@ function Confirming({ timedOut, onRetry }) {
   );
 }
 
-function Welcome({ subscription }) {
+function Welcome({ subscription, businessType }) {
   const navigate = useNavigate();
+  const options = billingOptionsFor(businessType);
   const yearly = subscription?.billingInterval === "year";
   return (
     <div className="max-w-xl mx-auto flex flex-col items-center text-center gap-5 py-14">
@@ -49,7 +50,7 @@ function Welcome({ subscription }) {
       <div>
         <h1 className="text-2xl sm:text-3xl tracking-tight" style={{ color: INK, fontWeight: 800 }}>You're on the Visibility Plan</h1>
         <p className="text-sm mt-2" style={{ color: MUTED }}>
-          {yearly ? `${formatPrice(BILLING_OPTIONS.year.price)} a year` : `${formatPrice(BILLING_OPTIONS.month.price)} a month`}
+          {yearly ? `${formatPrice(options.year.price)} a year` : `${formatPrice(options.month.price)} a month`}
           {subscription?.renewalDate ? ` · renews ${new Date(subscription.renewalDate).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}` : ""}
         </p>
       </div>
@@ -70,7 +71,7 @@ export default function UpgradeFlowPage() {
   const { user, switchUser } = useBusinessAuth();
   const checkout = params.get("checkout");
 
-  const vp = useVisibilityCheckout(user.id);
+  const vp = useVisibilityCheckout(user.id, user.businessType);
   const [opening, setOpening] = useState(false);
   const [error, setError] = useState("");
   const [confirming, setConfirming] = useState(checkout === "success");
@@ -110,7 +111,7 @@ export default function UpgradeFlowPage() {
   }
 
   if (confirming) return <BusinessLayout><Confirming timedOut={timedOut} onRetry={confirmPayment} /></BusinessLayout>;
-  if (welcome) return <BusinessLayout><Welcome subscription={welcome} /></BusinessLayout>;
+  if (welcome) return <BusinessLayout><Welcome subscription={welcome} businessType={user.businessType} /></BusinessLayout>;
 
   return (
     <BusinessLayout>
@@ -167,7 +168,7 @@ export default function UpgradeFlowPage() {
           <p role="alert" className="text-sm px-4 py-2.5 rounded-xl" style={{ backgroundColor: "#FEF2F2", color: "#991B1B" }}>{error}</p>
         )}
 
-        <VisibilityFeatures included={premium} />
+        <VisibilityFeatures included={premium} businessType={user.businessType} />
 
         <WhyUpgrade />
 
