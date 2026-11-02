@@ -8,12 +8,18 @@ const ICON = "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png"
 const SPLASH = "ios/App/App/Assets.xcassets/Splash.imageset";
 
 // The mark sits at about x 290–790, y 300–580 in the 1024px logo. It's
-// trimmed to its exact edges before centring, so the space around it is
-// equal left/right and top/bottom.
+// trimmed to its exact edges, so the space above and below it is equal.
 const cut = await sharp(SRC).extract({ left: 290, top: 300, width: 500, height: 280 }).toBuffer();
 const mark = await sharp(cut).trim({ background: BG, threshold: 30 }).toBuffer();
+// Centred on the M itself (its two upright strokes), not its outer edges:
+// the tail sweeping out to the right made an edge-centred M sit to the left.
+// The uprights span 0.6%–88.3% of the trimmed mark's width.
+const MARK_WIDTH = 794;
+const sized = await sharp(mark).resize({ width: MARK_WIDTH }).toBuffer();
+const { height: markHeight } = await sharp(sized).metadata();
+const M_CENTRE = (0.006 + 0.883) / 2;
 await sharp({ create: { width: 1024, height: 1024, channels: 3, background: BG } })
-  .composite([{ input: await sharp(mark).resize({ width: 836 }).toBuffer(), gravity: "center" }])
+  .composite([{ input: sized, left: Math.round(512 - M_CENTRE * MARK_WIDTH), top: Math.round((1024 - markHeight) / 2) }])
   .flatten({ background: BG })
   .png()
   .toFile(ICON);
