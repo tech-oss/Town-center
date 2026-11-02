@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ImageFramer from "../../components/ImageFramer";
 import { uploadImage } from "../../lib/uploadImage";
+import { IMAGE_HINTS } from "../pages/explore/contentKit";
 import { saveNewsOffer, setHomepageFeature } from "../../api/admin";
 import UKDateInput from "./UKDateInput";
 import { formatUK } from "../../lib/ukDate";
@@ -397,9 +398,7 @@ export default function NewsOfferForm({ initial, onSave, onCancel, featuredItems
                 </button>
               </div>
             )}
-            {!form.image && (
-              <span className="text-xs" style={{ color: "#9CA3AF" }}>PNG or JPG, recommended 800×500px</span>
-            )}
+            <span className="text-xs w-full" style={{ color: "#9CA3AF" }}>PNG or JPG. {IMAGE_HINTS.cover}</span>
           </div>
         </label>
         {form.image && <ImageFramer value={form.image} frames={["card", "hero"]} onChange={(v) => set("image", v)} />}

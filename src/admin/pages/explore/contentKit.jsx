@@ -54,6 +54,16 @@ export function Card({ title, hint, children, action }) {
   );
 }
 
+// The shape each picture is shown in on the app and website, shown under
+// its upload box. Pages show the whole picture (any spare space is a blurred
+// copy of it); cards crop it to fill.
+export const IMAGE_HINTS = {
+  cover: "Landscape 16:9, at least 1600×900 px. The whole picture is shown. Avoid portrait photos.",
+  photo: "Landscape 4:3, at least 1600×1200 px. The whole picture is shown. Avoid portrait photos.",
+  card: "Landscape 4:3, at least 1200×900 px. Cropped to fit the card, so keep the main subject in the centre.",
+  wideCard: "Landscape 16:9, at least 1600×900 px. Cropped into a wide tile, so keep the main subject in the centre.",
+};
+
 export function ImageField({ label, value, onChange, hint, folder = "explore" }) {
   const [busy, setBusy] = useState(false);
   function upload(file) {
