@@ -21,13 +21,13 @@ export const homeCategories = [
 
 // ─── Explore hub ───────────────────────────────────────────────────────────────
 export const exploreSections = [
-  { id: "offers", title: "Offers", blurb: "The latest news & offers.", image: "/images/offers/hero.jpg", to: "/mobile/offers" },
-  { id: "live", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/accommodation-hero.jpg", to: "/mobile/live" },
-  { id: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
-  { id: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/eat-drink/hero.jpg", to: "/mobile/eat-drink" },
-  { id: "shop", title: "Shop & Local Services", blurb: "High street, independents & local services.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
-  { id: "services", title: "Trades & Professionals", blurb: "Trades, health & professionals.", image: "/images/services/hero-desktop.jpg", to: "/mobile/services" },
-  { id: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
+  { id: "offers", siteKey: "offers", title: "Offers", blurb: "The latest news & offers.", image: "/images/offers/hero.jpg", to: "/mobile/offers" },
+  { id: "live", siteKey: "live-stay", title: "Live & Stay", blurb: "Hotels & places to stay.", image: "/images/live/accommodation-hero.jpg", to: "/mobile/live" },
+  { id: "see-do", siteKey: "see-do", title: "See & Do", blurb: "Attractions & green spaces.", image: "/images/attractions/boulters-lock.jpg", to: "/mobile/see-do" },
+  { id: "eat-drink", siteKey: "eat-drink", title: "Eat & Drink", blurb: "Restaurants, cafés & bars.", image: "/images/eat-drink/hero.jpg", to: "/mobile/eat-drink" },
+  { id: "shop", siteKey: "shop", title: "Shop & Local Services", blurb: "High street, independents & local services.", image: "/images/explore/market.jpg", to: "/mobile/shop" },
+  { id: "services", siteKey: "services", title: "Trades & Professionals", blurb: "Trades, health & professionals.", image: "/images/services/hero-desktop.jpg", to: "/mobile/services" },
+  { id: "work", siteKey: "work", title: "Work", blurb: "Jobs & business — coming soon.", image: "/images/slide-river.jpg", to: "/mobile/work" },
 ];
 
 // Practical information — the two things visitors actually need before they

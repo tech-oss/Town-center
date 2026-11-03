@@ -5,6 +5,7 @@ import MobileShell from "../components/MobileShell";
 import { exploreSections, exploreInfo } from "../data/mobileMock";
 import { getGuidesIndex } from "../../api";
 import useFetch from "../../hooks/useFetch";
+import useSiteSection from "../../hooks/useSiteSection";
 
 function BigCard({ link, height = "h-36" }) {
   const inner = (
@@ -22,6 +23,16 @@ function BigCard({ link, height = "h-36" }) {
   return link.to
     ? <Link to={link.to} className={className} style={style}>{inner}</Link>
     : <a href={link.href} className={className} style={style}>{inner}</a>;
+}
+
+// A section's card shows the header picture admin sets for that section in
+// Site Content (mobile first, then desktop), the same one its listing page
+// opens with. The built-in picture is only used when admin hasn't set one.
+function SectionCard({ link }) {
+  const copy = useSiteSection(link.siteKey);
+  const pick = (v) => (typeof v === "string" && v.trim() ? v : null);
+  const image = pick(copy.hero) || pick(copy.heroDesktop) || link.image;
+  return <BigCard link={{ ...link, image }} />;
 }
 
 // Secondary destinations that no longer have their own bottom-nav tab.
@@ -64,7 +75,7 @@ export default function ExploreScreen() {
         <div>
           <p className="section-eyebrow mb-3" style={{ color: "var(--teal-deep)" }}>All Sections</p>
           <div className="flex flex-col gap-4">
-            {exploreSections.map((l) => <BigCard key={l.id} link={l} />)}
+            {exploreSections.map((l) => <SectionCard key={l.id} link={l} />)}
           </div>
         </div>
 
