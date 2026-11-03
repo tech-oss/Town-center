@@ -403,6 +403,13 @@ export async function getPushHistory() {
 // project owner runs the one-time CLI steps in that file's header comment —
 // until then this call 404s, which is swallowed so the history always records
 // correctly regardless of whether delivery is live yet.
+// Opening the Push page gets the iPhone sign-in token ready with Apple in the
+// background, so a notification sent a minute later goes straight out to
+// every phone (a brand-new token is refused by Apple for about a minute).
+export function warmPushService() {
+  supabase.functions.invoke("send-push", { body: { warm: true } }).catch(() => {});
+}
+
 export async function sendPush(form) {
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
   const article = form.attachedArticle;
@@ -424,10 +431,10 @@ export async function sendPush(form) {
   try {
     // Tried twice: the push service can fail on its first start after a quiet spell.
     let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all" },
+      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all", notificationId: data.id },
     });
     if (fnError) ({ data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all" },
+      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all", notificationId: data.id },
     }));
     delivery = fnError ? { error: fnError.message } : result;
   } catch (e) {

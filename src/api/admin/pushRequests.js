@@ -84,10 +84,10 @@ export async function approvePushRequest(request) {
   try {
     // Tried twice: the push service can fail on its first start after a quiet spell.
     let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all" },
+      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all", notificationId: sent.id },
     });
     if (fnError) ({ data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all" },
+      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all", notificationId: sent.id },
     }));
     delivery = fnError ? { error: fnError.message } : result;
   } catch (e) {

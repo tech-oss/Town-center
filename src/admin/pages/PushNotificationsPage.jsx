@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import useFetch from "../../hooks/useFetch";
 import {
-  getPushHistory, sendPush,
+  getPushHistory, sendPush, warmPushService,
   getPushRequests, approvePushRequest, rejectPushRequest, countPendingPushRequests,
   getPushNotificationStats,
 } from "../../api/admin";
@@ -488,6 +488,7 @@ export default function PushNotificationsPage() {
     countPendingPushRequests().then(setPending).catch(() => {});
   }, []);
   useEffect(loadCount, [loadCount]);
+  useEffect(() => { warmPushService(); }, []);
 
   function notify(msg) {
     setToast(msg);
