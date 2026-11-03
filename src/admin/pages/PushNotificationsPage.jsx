@@ -102,6 +102,8 @@ function ComposeTab() {
     // comment) — until then this reports as recorded-only rather than sent.
     if (result.delivery?.error) {
       notify(`Recorded — delivery isn't live yet (${result.delivery.error}).`);
+    } else if (result.delivery?.queued) {
+      notify(`Sending to ${result.delivery.total} subscribed device(s) — it goes out within a minute or two.`);
     } else if (result.delivery) {
       notify(`Sent to ${result.delivery.sent}/${result.delivery.total} subscribed device(s).`);
     } else {
@@ -293,6 +295,8 @@ function RequestsTab({ notify, onCountChange }) {
       const { delivery } = await approvePushRequest(r);
       if (delivery?.error) {
         notify(`Approved and recorded — delivery isn't live yet (${delivery.error}).`);
+      } else if (delivery?.queued) {
+        notify(`Approved — sending to ${delivery.total} subscribed device(s) within a minute or two.`);
       } else if (delivery) {
         notify(`Approved — sent to ${delivery.sent}/${delivery.total} subscribed device(s).`);
       } else {

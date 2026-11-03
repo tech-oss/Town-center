@@ -85,6 +85,7 @@ function refreshApnsToken() {
 // for real, it's tried against a made-up device address (nothing is
 // delivered anywhere) until Apple accepts it several times in a row.
 const PROBE_DEVICE = "0".repeat(64);
+const probeLog: string[] = [];
 async function tokenAccepted(): Promise<boolean> {
   try {
     const res = await fetch(`https://api.push.apple.com/3/device/${PROBE_DEVICE}`, {
@@ -100,9 +101,11 @@ async function tokenAccepted(): Promise<boolean> {
       signal: AbortSignal.timeout(8000),
     });
     const reason = (await res.json().catch(() => ({})))?.reason;
+    probeLog.push(`${res.status} ${reason ?? ""}`);
     // The made-up address is refused (BadDeviceToken) once the token itself is fine.
     return res.status === 400 && reason === "BadDeviceToken";
-  } catch {
+  } catch (e) {
+    probeLog.push(`error ${String((e as Error)?.message ?? e).slice(0, 60)}`);
     return false;
   }
 }
@@ -216,6 +219,13 @@ const CORS_HEADERS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } });
 
+// Keeps working after the reply has gone back (Supabase's EdgeRuntime).
+declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void } | undefined;
+function runAfterReply(p: Promise<unknown>) {
+  const safe = p.catch((e) => console.error("send-push background:", e));
+  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(safe);
+}
+
 // A signed-in, active Maidenhead admin (is_admin()).
 async function callerIsAdmin(req: Request) {
   const authHeader = req.headers.get("Authorization") ?? "";
@@ -253,8 +263,10 @@ Deno.serve(async (req) => {
   if (warmOnly) {
     if (!apnsReady) return json({ warm: false, reason: "APNs not set up" });
     await loadOrMakeApnsToken(false, 35).then((t) => { apnsJwt = Promise.resolve(t); });
-    const ok = await warmApnsToken(90000);
-    return json({ warm: ok, tokenAgeSec: Math.round((Date.now() - apnsJwtAt) / 1000) });
+    if (input.probe === true) { probeLog.length = 0; for (let i = 0; i < 3; i++) await tokenAccepted(); return json({ probes: probeLog }); }
+    const ageSec = Math.round((Date.now() - apnsJwtAt) / 1000);
+    if (ageSec < 180) runAfterReply(warmApnsToken(75000));
+    return json({ warm: true, tokenAgeSec: ageSec });
   }
 
   const { title, body, url, audience = "all", notificationId = null } = input;
@@ -291,49 +303,65 @@ Deno.serve(async (req) => {
     return Math.max(1, sentTimes.filter((t) => t > since).length);
   };
 
-  if (targets.some((sub) => sub.platform === "ios")) {
-    await apnsToken().catch(() => {});
-    await warmApnsToken(90000);
+  const hasIos = targets.some((sub) => sub.platform === "ios");
+  if (hasIos) await apnsToken().catch(() => {});
+
+  const deliver = async () => {
+    if (hasIos) await warmApnsToken(75000);
+
+    const webPayload = JSON.stringify({ title, body, url });
+    const results = await mapLimited(targets, 5, (sub) => sub.platform === "ios"
+      ? sendApns(
+        sub.endpoint.replace(/^apns:/, ""),
+        check
+          ? JSON.stringify({ aps: { "content-available": 1 } })
+          : JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default", badge: badgeFor(sub) }, url }),
+        check,
+      )
+      : sendWeb(sub, webPayload));
+
+    // Addresses that no longer reach the app are removed.
+    const goneIds = targets.filter((_, i) => results[i].gone).map((s) => s.id);
+    if (goneIds.length) await supabase.from("push_subscriptions").delete().in("id", goneIds);
+
+    await supabase.from("push_delivery_log").insert(targets.map((sub, i) => ({
+      kind: check ? "check" : "send",
+      notification_id: check ? null : notificationId,
+      subscription_id: sub.id,
+      platform: sub.platform ?? "web",
+      device: String(sub.endpoint).slice(-8),
+      registered_at: sub.created_at,
+      ok: results[i].ok,
+      status: results[i].status ?? null,
+      reason: results[i].reason ?? null,
+      host: results[i].host ?? null,
+      attempts: results[i].attempts,
+    })));
+
+    const sent = results.filter((r) => r.ok).length;
+    // Per device, without its address: what Apple / the browser push service said.
+    const outcomes = results.map((r, i) => ({
+      platform: targets[i].platform ?? "web",
+      ok: r.ok,
+      reason: r.reason,
+      removed: r.gone || undefined,
+    }));
+    // The admin's list of sent notifications shows how many devices it reached.
+    if (!check && notificationId) {
+      await supabase.from("push_notifications").update({ reach: sent }).eq("id", notificationId);
+    }
+    return { sent, outcomes, removed: goneIds.length };
+  };
+
+  // A token made in the last 3 minutes needs up to a minute to settle with
+  // Apple, longer than the admin panel should wait: reply now and send in
+  // the background (reach is filled in when it's done).
+  if (hasIos && Date.now() - apnsJwtAt < 3 * 60 * 1000) {
+    runAfterReply(deliver());
+    return json({ queued: true, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length });
   }
-
-  const webPayload = JSON.stringify({ title, body, url });
-  const results = await mapLimited(targets, 5, (sub) => sub.platform === "ios"
-    ? sendApns(
-      sub.endpoint.replace(/^apns:/, ""),
-      check
-        ? JSON.stringify({ aps: { "content-available": 1 } })
-        : JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default", badge: badgeFor(sub) }, url }),
-      check,
-    )
-    : sendWeb(sub, webPayload));
-
-  // Addresses that no longer reach the app are removed.
-  const goneIds = targets.filter((_, i) => results[i].gone).map((s) => s.id);
-  if (goneIds.length) await supabase.from("push_subscriptions").delete().in("id", goneIds);
-
-  await supabase.from("push_delivery_log").insert(targets.map((sub, i) => ({
-    kind: check ? "check" : "send",
-    notification_id: check ? null : notificationId,
-    subscription_id: sub.id,
-    platform: sub.platform ?? "web",
-    device: String(sub.endpoint).slice(-8),
-    registered_at: sub.created_at,
-    ok: results[i].ok,
-    status: results[i].status ?? null,
-    reason: results[i].reason ?? null,
-    host: results[i].host ?? null,
-    attempts: results[i].attempts,
-  })));
-
-  const sent = results.filter((r) => r.ok).length;
-  // Per device, without its address: what Apple / the browser push service said.
-  const outcomes = results.map((r, i) => ({
-    platform: targets[i].platform ?? "web",
-    ok: r.ok,
-    reason: r.reason,
-    removed: r.gone || undefined,
-  }));
-  return json({ sent, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length, removed: goneIds.length, outcomes });
+  const { sent, outcomes, removed } = await deliver();
+  return json({ sent, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length, removed, outcomes });
 });
 
 // Deploy: supabase functions deploy send-push --project-ref vnnmzppjswiazzrnkjtq
