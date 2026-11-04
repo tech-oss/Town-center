@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ensureAdminSession, SIGNED_OUT_MESSAGE } from "../hooks/useAdminAuth";
 import ImageFramer from "../../components/ImageFramer";
 import { Card, Field, IMAGE_HINTS, ImageCreditField, ImageField as SectionImageField, Inp, RepeatList, TextArea } from "../pages/explore/contentKit";
 import { withSectionImages } from "../../lib/storyImages";
@@ -85,7 +86,10 @@ function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
 function ImageField({ label, value, onChange, frames, hint }) {
   function handleUpload(file) {
     if (!file) return;
-    uploadImage(file, "stories").then(onChange).catch((e) => alert(e.message));
+    ensureAdminSession().then((ok) => {
+      if (!ok) { alert(SIGNED_OUT_MESSAGE); return; }
+      return uploadImage(file, "stories").then(onChange);
+    }).catch((e) => alert(e.message));
   }
   return (
     <div className="flex flex-col gap-1">
@@ -164,6 +168,37 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
   // beside, so the editor shows exactly where each picture goes.
   const [form, setForm] = useState(() => (initial ? { ...initial, body: withSectionImages(initial) } : blank));
   const [saving, setSaving] = useState(false);
+
+  // A copy of the article as it's typed, kept in this browser until it's
+  // saved, so a lost sign-in or a closed tab never loses the work.
+  const draftKey = `mh_admin_story_draft:${initial?.id ?? "new"}`;
+  const [draft, setDraft] = useState(() => {
+    try {
+      const d = JSON.parse(localStorage.getItem(draftKey) ?? "null");
+      return d?.form && JSON.stringify(d.form) !== JSON.stringify(form) ? d : null;
+    } catch { return null; }
+  });
+  // Only once something has been changed.
+  const opened = useRef(JSON.stringify(form));
+  useEffect(() => {
+    if (JSON.stringify(form) === opened.current) return;
+    const t = setTimeout(() => {
+      try { localStorage.setItem(draftKey, JSON.stringify({ form, savedAt: Date.now() })); } catch { /* storage full or blocked */ }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [form, draftKey]);
+  function clearDraft() {
+    try { localStorage.removeItem(draftKey); } catch { /* blocked */ }
+  }
+  function restoreDraft() {
+    setForm(draft.form);
+    setDraft(null);
+  }
+  function discardDraft() {
+    clearDraft();
+    setDraft(null);
+  }
+
   const [swapOutId, setSwapOutId] = useState(null);
   const [showSwapPicker, setShowSwapPicker] = useState(false);
 
@@ -209,10 +244,12 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
       ...(b.image && b.imageCredit?.trim() ? { imageCredit: b.imageCredit.trim() } : {}),
     }));
     (async () => {
+      if (!(await ensureAdminSession())) throw new Error(SIGNED_OUT_MESSAGE);
       if (swapOutId) await setArticleHomepageFeature(swapOutId, false);
       return saveFeatureArticle({ ...form, body, gallery: [] });
     })().then((saved) => {
       setSaving(false);
+      clearDraft();
       onSave(saved, swapOutId);
     }).catch((e) => {
       setSaving(false);
@@ -229,6 +266,16 @@ export default function StoryForm({ initial, onSave, onCancel, featuredItems = [
       <h3 className="font-bold text-base" style={{ color: "#1E293B" }}>
         {initial?.id ? "Edit Featured Story" : "Add Featured Story"}
       </h3>
+
+      {draft && (
+        <div className="rounded-xl px-4 py-3 flex flex-wrap items-center gap-3 text-sm" style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1E3A8A" }}>
+          <span className="flex-1 min-w-[200px]">
+            You have unsaved changes to this article from {new Date(draft.savedAt).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}.
+          </span>
+          <button type="button" onClick={restoreDraft} className="px-3 py-1.5 rounded-lg font-semibold text-white" style={{ backgroundColor: "#2563EB" }}>Restore</button>
+          <button type="button" onClick={discardDraft} className="px-3 py-1.5 rounded-lg font-semibold" style={{ backgroundColor: "#fff", border: "1px solid #BFDBFE" }}>Discard</button>
+        </div>
+      )}
 
       {/* ── Homepage card ── */}
       <div className="flex flex-col gap-4">

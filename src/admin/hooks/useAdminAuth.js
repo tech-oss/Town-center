@@ -66,7 +66,7 @@ async function doLogin(email, password) {
   if (error) return { ok: false, error: error.message };
   await refreshFromSession(data.session);
   if (!currentAdmin) {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
     return { ok: false, error: "This account does not have admin access." };
   }
   // For the Reporting page's User Activity chart. Fire and forget: a failure
@@ -75,9 +75,33 @@ async function doLogin(email, password) {
   return { ok: true };
 }
 
+// Signs out this browser only. supabase-js's default ("global") ended the
+// admin account's sign-in on every device, so signing out on a phone left
+// an editor open on a laptop unable to save ("violates row-level security").
+// Settings has its own "Sign out everywhere" for when that's wanted.
 export async function logout() {
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({ scope: "local" });
 }
+
+// Before a save or an upload: is this browser still signed in as an admin?
+// Tries to renew an expired sign-in first. False means saving would be
+// refused, so the editor can say so (and keep the work) instead.
+export async function ensureAdminSession() {
+  const { data } = await supabase.auth.getSession();
+  let session = data?.session;
+  const expiresSoon = session && (session.expires_at ?? 0) * 1000 < Date.now() + 60_000;
+  if (!session || expiresSoon) {
+    const { data: renewed } = await supabase.auth.refreshSession();
+    session = renewed?.session ?? null;
+  }
+  if (!session) return false;
+  const { data: ok } = await supabase.rpc("is_admin");
+  return ok === true;
+}
+
+export const SIGNED_OUT_MESSAGE =
+  "You've been signed out of admin (for example, by signing out on another device), so this can't be saved yet. " +
+  "Your work is kept on this computer: sign in again and open the article — you'll be offered your draft back.";
 
 export default function useAdminAuth() {
   const admin = useSyncExternalStore(subscribe, getSnapshot);
