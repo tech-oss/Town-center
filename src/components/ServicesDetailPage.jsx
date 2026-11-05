@@ -133,6 +133,7 @@ export default function ServicesDetailPage() {
       ]}
       categoryLabel={viewed.label}
       title={item.name}
+      tagline={free ? null : item.tagline}
       heroImage={heroImage}
       logo={free ? null : item.logo}
       extraImages={free ? [] : extraImages}

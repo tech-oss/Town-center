@@ -3,6 +3,7 @@ import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { useRef, useState } from "react";
 import LocationMap from "./LocationMap";
+import FaqAccordion from "./FaqAccordion";
 import {
   PinIcon,
   PhoneIcon,
@@ -65,6 +66,8 @@ export default function ServicesDetailLayout({
   breadcrumbs,
   categoryLabel,
   title,
+  // The business's one-line tagline, shown under its name.
+  tagline,
   heroImage,
   // The business logo for the square beside the name. The header picture
   // filled it before, so the page showed that picture twice.
@@ -166,6 +169,9 @@ export default function ServicesDetailLayout({
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <h1 className="text-2xl md:text-3xl" style={{ color: "#000000" }}>{title}</h1>
                 </div>
+                {tagline && (
+                  <p className="text-sm md:text-base font-semibold mb-1.5" style={{ color: "var(--leaf)" }}>{tagline}</p>
+                )}
                 <div className="flex flex-wrap items-center gap-2 mb-3 text-sm" style={{ color: "#000000" }}>
                   <span>{categoryLabel}</span>
                 </div>
@@ -359,14 +365,7 @@ export default function ServicesDetailLayout({
 
               {tab === "FAQ" && (
                 <Section heading="Frequently Asked Questions">
-                  <div className="flex flex-col gap-5">
-                    {faq.slice(0, 8).map((f, i, arr) => (
-                      <div key={i} className={i < arr.length - 1 ? "pb-5 border-b" : ""} style={i < arr.length - 1 ? { borderColor: "rgba(28,46,56,0.1)" } : undefined}>
-                        <div className="font-semibold text-sm mb-1.5" style={{ color: "#000000" }}>{f.q}</div>
-                        <div className="text-sm leading-relaxed" style={{ color: "#000000" }}>{f.a}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <FaqAccordion faq={faq.slice(0, 8)} />
                 </Section>
               )}
             </div>

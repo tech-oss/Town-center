@@ -126,7 +126,7 @@ function ComposeTab() {
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Notification Type</span>
             <div className="flex gap-3 flex-wrap">
-              {[["simple", "Simple text"], ["attach", "Attach article/offer"]].map(([key, label]) => (
+              {[["simple", "Simple text"], ["attach", "Attach article/offer/event"]].map(([key, label]) => (
                 <button key={key} type="button"
                   onClick={() => { set("notifType", key); if (key === "simple") handleSelectArticle(null); }}
                   className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all"
@@ -143,7 +143,7 @@ function ComposeTab() {
 
           {form.notifType === "attach" && (
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Article / Offer</span>
+              <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Article / Offer / Event</span>
               <ArticleTypeahead selected={form.attachedArticle} onSelect={handleSelectArticle} />
             </label>
           )}

@@ -230,7 +230,7 @@ function BusinessDetailScreen({ place, goBack }) {
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
               style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
             >
-              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News, Offers &amp; Events</p>
               <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
             </div>
           )}
@@ -244,7 +244,7 @@ function BusinessDetailScreen({ place, goBack }) {
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-4"
               style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
             >
-              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News, Offers &amp; Events</p>
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {news.map((n) => (
                   <Link

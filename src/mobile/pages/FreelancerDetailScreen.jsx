@@ -283,13 +283,6 @@ export default function FreelancerDetailScreen({ place, goBack }) {
             <MobileCard id="reviews" className="p-4 flex flex-col scroll-mt-16">
               <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--leaf)" }}>Client Reviews</p>
               {reviewsList.map((r, i) => <ReviewCard key={i} {...r} sourceUrl={r.sourceUrl || defaultReviewSourceUrl} />)}
-              <a
-                href="#reviews"
-                className="text-sm font-bold mt-3"
-                style={{ color: "var(--leaf)" }}
-              >
-                View all reviews →
-              </a>
             </MobileCard>
           )}
 
@@ -307,7 +300,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-2"
               style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
             >
-              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News, Offers &amp; Events</p>
               <p className="text-sm italic text-white/80">{FREE_PLACEHOLDERS.news}</p>
             </div>
           )}
@@ -317,7 +310,7 @@ export default function FreelancerDetailScreen({ place, goBack }) {
               className="-mx-5 mt-2 px-5 py-6 flex flex-col gap-4"
               style={{ background: "linear-gradient(135deg, #16252E 0%, #245C63 50%, #2F8C8C 100%)" }}
             >
-              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News &amp; Offers</p>
+              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--mint)" }}>News, Offers &amp; Events</p>
               <div className="flex gap-3 overflow-x-auto scrollbar-none -mx-5 px-5">
                 {news.map((n) => (
                   <Link key={n.slug} to={postPath(n, { mobile: true })} className="shrink-0 w-48 overflow-hidden flex flex-col" style={{ borderRadius: 14, backgroundColor: "rgba(240,250,250,0.9)" }}>

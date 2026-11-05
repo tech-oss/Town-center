@@ -56,15 +56,22 @@ function recurrenceDates(e, from, to) {
 // Expands events (including recurring ones) into concrete dated occurrences
 // within the given range, sorted chronologically — a bounded range
 // enumerates day-by-day; an open-ended range (no range applied, or a "from"
-// date with no "to" date) is capped to a six-month lookahead so recurring
-// events still surface without scanning forever.
+// date with no "to" date) is capped to a twelve-month lookahead so recurring
+// events still surface without scanning forever. Six months used to stop the
+// list in early May, so next year's events never appeared under "All".
+const LOOKAHEAD_DAYS = 366;
+// How many dates the list shows at a time; "Show more events" adds the next
+// lot. A hard cap of 50 used to end the list in December, because weekly
+// events fill it up, so nothing from the next year was ever reachable.
+const PAGE_SIZE = 50;
+
 function generateOccurrences(events, range) {
   const start = range?.start ?? startOfDay(new Date());
   const cappedEnd =
     range?.end ??
     (() => {
       const d = new Date(start);
-      d.setDate(d.getDate() + 180);
+      d.setDate(d.getDate() + LOOKAHEAD_DAYS);
       return d;
     })();
   const spanDays = Math.round((cappedEnd - start) / 86400000);
@@ -189,7 +196,12 @@ export default function EventsCalendar() {
     [allEvents, categoryFilter]
   );
 
-  const eventsList = useMemo(() => generateOccurrences(categoryFilteredEvents, dateRange).slice(0, 50), [categoryFilteredEvents, dateRange]);
+  const allOccurrences = useMemo(() => generateOccurrences(categoryFilteredEvents, dateRange), [categoryFilteredEvents, dateRange]);
+  // Back to one page whenever the filters change.
+  const filterKey = `${quickFilter}|${rangeStart}|${rangeEnd}|${[...categoryFilter].join(",")}`;
+  const [shown, setShown] = useState({ key: filterKey, count: PAGE_SIZE });
+  const shownCount = shown.key === filterKey ? shown.count : PAGE_SIZE;
+  const eventsList = allOccurrences.slice(0, shownCount);
 
   const onQuickFilter = (key) => {
     setQuickFilter(key);
@@ -347,6 +359,18 @@ export default function EventsCalendar() {
           <EventCard key={`${e.slug}-${toIso(date)}`} e={e} date={date} />
         ))}
       </div>
+      {allOccurrences.length > eventsList.length && (
+        <div className="flex justify-center mt-6">
+          <button
+            type="button"
+            onClick={() => setShown({ key: filterKey, count: shownCount + PAGE_SIZE })}
+            className="text-sm font-semibold px-6 py-3 rounded-full text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "var(--leaf)" }}
+          >
+            Show more events
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import FaqAccordion from "./FaqAccordion";
 import { cropStyle } from "../lib/focalPoint";
 import SmartImage from "./SmartImage";
 import { useEffect, useRef, useState } from "react";
@@ -381,14 +382,7 @@ export default function FreelancerDetailLayout({
               {tab === "FAQ" && (
                 <Section heading="Frequently Asked Questions">
                   {faq.length === 0 && <p className="text-sm italic" style={{ color: "rgba(0,0,0,0.55)" }}>Business will add soon</p>}
-                  <div className="flex flex-col gap-5">
-                    {faq.slice(0, 8).map((f, i, arr) => (
-                      <div key={i} className={i < arr.length - 1 ? "pb-5 border-b" : ""} style={i < arr.length - 1 ? { borderColor: "rgba(28,46,56,0.1)" } : undefined}>
-                        <div className="font-semibold text-sm mb-1.5" style={{ color: "#000000" }}>{f.q}</div>
-                        <div className="text-sm leading-relaxed" style={{ color: "#000000" }}>{f.a}</div>
-                      </div>
-                    ))}
-                  </div>
+                  <FaqAccordion faq={faq.slice(0, 8)} />
                 </Section>
               )}
             </div>

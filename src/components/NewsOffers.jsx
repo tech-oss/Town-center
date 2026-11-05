@@ -30,7 +30,7 @@ export default function NewsOffers({ item, placeholder }) {
             <p className="section-eyebrow mb-3" style={{ color: "var(--mint)" }}>
               {item.name}
             </p>
-            <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">News &amp; Offers</h2>
+            <h2 className="hero-title uppercase text-3xl md:text-5xl text-white">News, Offers &amp; Events</h2>
           </div>
           {!showPlaceholder && (
             <span className="text-sm font-semibold self-start sm:self-auto text-white/70">

@@ -1,12 +1,19 @@
-// Type B — Services businesses.
+// Type B — Services businesses. A freelancer (Services → Freelancer) gets
+// the sections their public profile shows — Working With Me, Skills and
+// Portfolio — in place of a tradesperson's stats, services list, reasons
+// and areas, the same split the business portal makes.
+import { FaqListEditor } from "./StayEditors";
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
   SingleImageUpload, PlanImageNote, GalleryGrid, HoursEditor, SocialFields, LocationFields,
-  RepeatableList, StatTilesEditor,
+  RepeatableList, StatTilesEditor, PortfolioEditor,
   CARD, BORDER, Locked,
 } from "./shared";
 
 export default function TypeBEditor({ form, set, onSave, saving }) {
+  const isFreelancer = form.businessTypeDetail?.freelancerKind === "freelancer";
+  const wwm = form.workingWithMe ?? {};
+  const setWwm = (k, v) => set("workingWithMe", { ...wwm, [k]: v });
   return (
     <div className="flex flex-col gap-6">
       <div className="bg-white rounded-2xl p-6 flex flex-col gap-8" style={CARD}>
@@ -74,6 +81,7 @@ export default function TypeBEditor({ form, set, onSave, saving }) {
           </Locked>
         </EditorSection>
 
+        {!isFreelancer && (<>
         <EditorSection title="Photo Strip" hint="Up to 6 images, displayed as a horizontal strip on the public page.">
           <Locked field="gallery">
           <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} />
@@ -101,6 +109,39 @@ export default function TypeBEditor({ form, set, onSave, saving }) {
         <EditorSection title="Areas Covered" hint="Populates the Areas Covered tab.">
           <Locked field="areasCoveredList">
           <RepeatableList items={form.areasCoveredList ?? []} onChange={(v) => set("areasCoveredList", v)} placeholder="e.g. Maidenhead" />
+          </Locked>
+        </EditorSection>
+
+        </>)}
+
+        {isFreelancer && (<>
+        <EditorSection title="Working With Me" hint="The Working With Me box on the freelancer's profile.">
+          <Locked field="workingWithMe">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label="Availability" hint="e.g. Accepting new projects"><Inp value={wwm.availability ?? ""} onChange={(e) => setWwm("availability", e.target.value)} /></Field>
+            <Field label="Works" hint="e.g. Remote & on-site"><Inp value={wwm.works ?? ""} onChange={(e) => setWwm("works", e.target.value)} /></Field>
+            <Field label="Response Time" hint="e.g. Usually within 24 hours"><Inp value={wwm.responseTime ?? ""} onChange={(e) => setWwm("responseTime", e.target.value)} /></Field>
+            <Field label="Experience" hint="e.g. 10+"><Inp value={wwm.experience ?? ""} onChange={(e) => setWwm("experience", e.target.value)} /></Field>
+          </div>
+          </Locked>
+        </EditorSection>
+
+        <EditorSection title="Skills">
+          <Locked field="skills">
+          <RepeatableList items={form.skills ?? []} onChange={(v) => set("skills", v)} placeholder="e.g. Logo Design" />
+          </Locked>
+        </EditorSection>
+
+        <EditorSection title="Portfolio" hint="Up to 6 items">
+          <Locked field="portfolio">
+          <PortfolioEditor items={form.portfolio ?? []} onChange={(v) => set("portfolio", v)} max={6} />
+          </Locked>
+        </EditorSection>
+        </>)}
+
+        <EditorSection title="FAQs" hint="Questions and answers on the profile's FAQ tab.">
+          <Locked field="faqs">
+          <FaqListEditor items={form.faqs ?? []} onChange={(v) => set("faqs", v)} />
           </Locked>
         </EditorSection>
 

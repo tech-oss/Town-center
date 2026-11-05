@@ -483,3 +483,75 @@ export function StatTilesEditor({ stats, onChange }) {
     </div>
   );
 }
+
+// ─── Portfolio (a freelancer's work: picture + title + optional link) ────────
+// The same items the business portal's Portfolio tab saves, so admin and the
+// business edit one list.
+export function PortfolioEditor({ items, onChange, max = 6 }) {
+  const [uploadingId, setUploadingId] = useState(null);
+  const [framingId, setFramingId] = useState(null);
+
+  function set(i, k, v) { onChange(items.map((it, idx) => (idx === i ? { ...it, [k]: v } : it))); }
+  function add() { onChange([...items, { id: `pf${Date.now()}`, title: "", link: "", image: null }]); }
+  function remove(i) { onChange(items.filter((_, idx) => idx !== i)); }
+
+  function handleImage(i, files) {
+    const file = files?.[0];
+    if (!file) return;
+    const key = items[i].id ?? i;
+    setUploadingId(key);
+    uploadImage(file, "listings")
+      .then((url) => set(i, "image", url))
+      .catch((e) => alert(e.message))
+      .finally(() => setUploadingId(null));
+  }
+
+  return (
+    <div className="grid sm:grid-cols-2 gap-4 max-w-2xl">
+      {items.map((it, i) => {
+        const key = it.id ?? i;
+        return (
+          <div key={key} className="rounded-xl p-3 flex flex-col gap-2" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
+            <div className="relative aspect-video rounded-lg overflow-hidden" style={{ border: `1.5px ${it.image ? "solid" : "dashed"} ${BORDER}`, backgroundColor: "#fff" }}>
+              {it.image ? (
+                <>
+                  <img src={it.image} alt="" className="w-full h-full object-cover" style={cropStyle(it.image, "gallery")} />
+                  <button type="button" onClick={() => { set(i, "image", null); setFramingId(null); }}
+                    aria-label="Remove picture" title="Remove picture"
+                    className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold text-white"
+                    style={{ backgroundColor: "rgba(16,24,40,0.65)" }}>✕</button>
+                </>
+              ) : (
+                <label className="w-full h-full flex items-center justify-center cursor-pointer">
+                  <span className="text-xl" style={{ color: "#9CA3AF" }}>{uploadingId === key ? "…" : "+"}</span>
+                  <input type="file" accept="image/*" className="hidden" disabled={uploadingId === key} onChange={(e) => handleImage(i, e.target.files)} />
+                </label>
+              )}
+            </div>
+            {it.image && (
+              <button type="button" onClick={() => setFramingId(framingId === key ? null : key)}
+                className="self-start text-xs font-semibold" style={{ color: BLUE }}>
+                {framingId === key ? "Done framing" : "Frame picture"}
+              </button>
+            )}
+            {it.image && framingId === key && (
+              <ImageFramer value={it.image} frames={["gallery"]} onChange={(v) => set(i, "image", v)} />
+            )}
+            <input value={it.title ?? ""} onChange={(e) => set(i, "title", e.target.value)} placeholder="Title"
+              className="rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+            <input value={it.link ?? ""} onChange={(e) => set(i, "link", e.target.value)} placeholder="Link (optional)"
+              className="rounded-lg px-3 py-2 text-xs outline-none" style={INPUT} />
+            <button onClick={() => remove(i)} type="button" className="self-start text-xs font-bold" style={{ color: "#DC2626" }}>Remove</button>
+          </div>
+        );
+      })}
+      {items.length < max && (
+        <button onClick={add} type="button"
+          className="rounded-xl flex items-center justify-center text-sm font-semibold aspect-video transition-opacity hover:opacity-70"
+          style={{ border: `1.5px dashed ${BORDER}`, color: BLUE }}>
+          + Add Portfolio Item
+        </button>
+      )}
+    </div>
+  );
+}

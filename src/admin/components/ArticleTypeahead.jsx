@@ -6,6 +6,7 @@ import { BLUE, BORDER, MUTED, NAVY } from "../theme";
 const CATEGORY_COLOURS = {
   News: { bg: "rgba(22,163,74,0.12)", fg: "#15803D" },
   Offer: { bg: "rgba(37,99,235,0.1)", fg: "#1D4ED8" },
+  Event: { bg: "rgba(219,39,119,0.12)", fg: "#BE185D" },
   Guide: { bg: "rgba(139,92,246,0.14)", fg: "#6D28D9" },
   "Featured Story": { bg: "rgba(232,163,61,0.16)", fg: "#92400E" },
 };
@@ -16,7 +17,7 @@ function CategoryBadge({ category }) {
 
 // Searchable article/offer picker for attaching rich content to a push
 // notification. `onSelect` receives the full article object (or null on clear).
-export default function ArticleTypeahead({ selected, onSelect, placeholder = "Search for an article or offer..." }) {
+export default function ArticleTypeahead({ selected, onSelect, placeholder = "Search for an article, offer or event..." }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const rootRef = useRef(null);
@@ -68,7 +69,7 @@ export default function ArticleTypeahead({ selected, onSelect, placeholder = "Se
         <div className="absolute z-20 mt-1 w-full rounded-xl overflow-hidden bg-white max-h-64 overflow-y-auto"
           style={{ border: `1.5px solid ${BORDER}`, boxShadow: "0 8px 24px rgba(16,24,40,0.12)" }}>
           {matches.length === 0 ? (
-            <p className="px-3 py-2.5 text-xs" style={{ color: MUTED }}>{loading ? "Loading articles…" : "No articles found."}</p>
+            <p className="px-3 py-2.5 text-xs" style={{ color: MUTED }}>{loading ? "Loading…" : "Nothing found."}</p>
           ) : (
             matches.map((a) => (
               <button key={a.id} type="button" onClick={() => pick(a)}

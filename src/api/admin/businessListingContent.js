@@ -27,6 +27,7 @@ const SECTION_FIELDS = {
   contact: ["phone", "email", "website", "bookingUrl", "social"],
   faqs: ["faqs"],
   portfolio: ["portfolio", "skills"],
+  workingwithme: ["workingWithMe"],
   services: ["servicesList", "areasCoveredList", "whyChooseUs", "stats"],
 };
 
@@ -104,6 +105,10 @@ function fromRow(row) {
     starRating: row.star_rating ?? null,
     whyChooseUs: row.why_choose_us ?? [],
     stats: row.stats ?? [],
+    // Freelancers only.
+    skills: row.skills ?? [],
+    portfolio: row.portfolio ?? [],
+    workingWithMe: row.working_with_me ?? {},
     availabilityTag: row.availability_tag ?? "",
     businessTypeDetail: row.business_type_detail ?? {},
     approvalStatus: row.approval_status ?? {},
@@ -144,6 +149,9 @@ function toRow(listing) {
     star_rating: listing.starRating,
     why_choose_us: listing.whyChooseUs,
     stats: listing.stats,
+    skills: listing.skills ?? [],
+    portfolio: listing.portfolio ?? [],
+    working_with_me: listing.workingWithMe ?? {},
     availability_tag: listing.availabilityTag || null,
     business_type_detail: listing.businessTypeDetail,
   };
@@ -164,7 +172,9 @@ export async function getBusinessesForContent() {
     return {
       id: b.id,
       name: b.name,
-      section: listing?.business_type ?? null,
+      // Admin's Register Business form saves Services as "freelancer" (the
+      // portal's value); it is the same Services editor either way.
+      section: listing?.business_type === "freelancer" ? "services" : (listing?.business_type ?? null),
       // "accommodation_company" / "accommodation_property" / "standard".
       kind: b.kind ?? "standard",
       parentId: b.parent_id ?? null,
@@ -186,15 +196,60 @@ export async function getBusinessListingContent(businessId, { planFrom } = {}) {
   return { ...(fromRow(data) ?? fromRow({})), plan: sub?.plan ?? "free" };
 }
 
+// The columns behind each approval section, for telling which ones an admin
+// save actually changed. Mirrors SECTION_FIELDS in ./approvals.js.
+const SECTION_COLUMNS = {
+  profile: ["name", "tagline", "description", "logo", "hero_image", "business_type_detail"],
+  hours: ["hours", "availability_info", "check_in_time", "check_out_time", "early_checkin", "late_checkout"],
+  gallery: ["gallery"],
+  location: ["address", "postal_code", "lat", "lng"],
+  contact: ["phone", "email", "website", "booking_url", "social", "availability_tag", "contact_source"],
+  faqs: ["faqs"],
+  portfolio: ["portfolio", "skills"],
+  services: ["services_list", "areas_covered_list", "why_choose_us", "stats"],
+  areas: ["areas_covered_list"],
+  skills: ["skills"],
+  workingwithme: ["working_with_me"],
+  amenities: ["amenities", "other_amenities", "star_rating"],
+  rooms: ["rooms"],
+};
+
+// Empty is empty ("", null, [] and {} alike), and a coordinate read back as
+// "51.44" is the same as 51.44 typed into the form.
+function isEmptyValue(v) {
+  return v == null || v === "" || (Array.isArray(v) && v.length === 0)
+    || (typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
+}
+function sameValue(a, b) {
+  if (isEmptyValue(a) && isEmptyValue(b)) return true;
+  if ((typeof a === "number" || typeof b === "number") && Number(a) === Number(b)) return true;
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export async function saveBusinessListingContent(businessId, listing) {
   assertValidCoords(listing.lat, listing.lng);
-  const editedBy = {};
-  const approvalStatus = {};
-  // Every section the listing already tracks (a property also has rooms and
-  // amenities) as well as the usual ones: admin's save publishes them all.
+
+  const { data: current, error: readError } = await supabase
+    .from("business_listings").select("*").eq("business_id", businessId).maybeSingle();
+  if (readError) throw readError;
+
+  const after = toRow(listing);
+  const before = toRow(fromRow(current ?? {}));
+  const changed = (section) =>
+    (SECTION_COLUMNS[section] ?? []).some((col) => col in after && !sameValue(before[col], after[col]));
+
+  // Only the sections this save changed are marked as admin's edit and
+  // published. Marking every section made the approval list read "Gallery
+  // updated", "FAQs updated" and so on when admin had only added a header
+  // picture. Sections left alone keep whatever state they were in.
+  const editedBy = { ...(current?.edited_by ?? {}) };
+  const approvalStatus = { ...(current?.approval_status ?? {}) };
+  const pendingSnapshot = { ...(current?.pending_snapshot ?? {}) };
   for (const section of new Set([...ALL_SECTIONS, ...Object.keys(listing.approvalStatus ?? {})])) {
+    if (!changed(section)) continue;
     editedBy[section] = "admin";
     approvalStatus[section] = "Up to Date";
+    delete pendingSnapshot[section];
   }
 
   const { error } = await supabase
@@ -202,11 +257,10 @@ export async function saveBusinessListingContent(businessId, listing) {
     .upsert(
       {
         business_id: businessId,
-        ...toRow(listing),
+        ...after,
         edited_by: editedBy,
         approval_status: approvalStatus,
-        // Nothing is waiting any more, so no "as last approved" copy either.
-        pending_snapshot: {},
+        pending_snapshot: pendingSnapshot,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "business_id" },

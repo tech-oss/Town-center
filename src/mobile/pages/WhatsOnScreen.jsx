@@ -56,9 +56,15 @@ function recurrenceDates(e, from, to) {
   return expandRecurrence(e.recurrence, { from: toIso(from), to: toIso(to) });
 }
 
+// Twelve months ahead, a page of dates at a time — the same as the website.
+// Six months and a hard 40 used to end the list in December, so next year's
+// events never showed under "All".
+const LOOKAHEAD_DAYS = 366;
+const PAGE_SIZE = 40;
+
 function generateOccurrences(events, range) {
   const start = range?.start ?? startOfDay(new Date());
-  const end = range?.end ?? (() => { const d = new Date(start); d.setDate(d.getDate() + 180); return d; })();
+  const end = range?.end ?? (() => { const d = new Date(start); d.setDate(d.getDate() + LOOKAHEAD_DAYS); return d; })();
   const spanDays = Math.round((end - start) / 86400000);
   const results = [];
   for (const e of events) {
@@ -222,7 +228,11 @@ export default function WhatsOnScreen() {
     () => (events ?? []).filter((e) => categoryFilter.size === 0 || toSeeDoSlugs(e.categories ?? e.category).some((c) => categoryFilter.has(c))),
     [events, categoryFilter]
   );
-  const listed = useMemo(() => generateOccurrences(categoryFiltered, dateRange).slice(0, 40), [categoryFiltered, dateRange]);
+  const allOccurrences = useMemo(() => generateOccurrences(categoryFiltered, dateRange), [categoryFiltered, dateRange]);
+  const filterKey = `${quickFilter}|${rangeStart}|${rangeEnd}|${[...categoryFilter].join(",")}`;
+  const [shown, setShown] = useState({ key: filterKey, count: PAGE_SIZE });
+  const shownCount = shown.key === filterKey ? shown.count : PAGE_SIZE;
+  const listed = allOccurrences.slice(0, shownCount);
 
   const onQuickFilter = (key) => {
     setQuickFilter(key);
@@ -321,6 +331,16 @@ export default function WhatsOnScreen() {
             ))
           )}
         </div>
+        {allOccurrences.length > listed.length && (
+          <button
+            type="button"
+            onClick={() => setShown({ key: filterKey, count: shownCount + PAGE_SIZE })}
+            className="self-center text-sm font-bold px-6 py-3 rounded-full text-white active:opacity-90"
+            style={{ backgroundColor: "var(--leaf)" }}
+          >
+            Show more events
+          </button>
+        )}
       </div>
     </MobileShell>
   );
