@@ -1,8 +1,9 @@
 import useLiveTick from "./hooks/useLiveTick";
+import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLayout from "./components/AdminLayout";
 import AdminLoginPage from "./pages/AdminLoginPage";
-import useAdminAuth from "./hooks/useAdminAuth";
+import useAdminAuth, { wasSignedOutOnPurpose } from "./hooks/useAdminAuth";
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
 import UserDetailPage from "./pages/UserDetailPage";
@@ -48,10 +49,18 @@ export default function AdminApp() {
 
   // Hold rendering until the initial Supabase getSession() resolves, otherwise
   // a signed-in admin flashes the login screen on every page load.
+  // Signed in at some point on this page load: if the sign-in then ends
+  // (expired, or signed out elsewhere), the page stays with the login box
+  // over it, so nothing being written is lost.
+  const [wasIn, setWasIn] = useState(false);
+  if (isLoggedIn && !wasIn) setWasIn(true);
+
   if (!restored) return null;
-  if (!isLoggedIn) return <AdminLoginPage />;
+  if (!isLoggedIn && (!wasIn || wasSignedOutOnPurpose())) return <AdminLoginPage />;
 
   return (
+    <>
+    {!isLoggedIn && <AdminLoginPage overlay />}
     <Routes>
       <Route element={<AdminLayout counts={counts ?? {}} />}>
         <Route index element={<DashboardPage />} />
@@ -94,5 +103,6 @@ export default function AdminApp() {
         <Route path="legal-documents" element={<LegalDocumentsPage />} />
       </Route>
     </Routes>
+    </>
   );
 }

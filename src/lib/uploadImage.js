@@ -1,5 +1,6 @@
 import { supabase } from "./supabaseClient";
 import { compressImage } from "./compressImage";
+import { ensureAdminSession, SIGNED_OUT_MESSAGE } from "../admin/hooks/useAdminAuth";
 
 // Uploads an admin-picked image to the `media` bucket and returns its public
 // URL, which is what the content columns store.
@@ -30,6 +31,9 @@ export async function uploadImage(file, folder = "uploads") {
   // was the bulk of this project's CDN bandwidth.
   const upload = await compressImage(file);
   if (upload.size > MAX_BYTES) throw new Error("That picture couldn't be made small enough to upload. Try saving it as a JPG first.");
+
+  // Uploading needs an admin sign-in; say so plainly if it has gone.
+  if (!(await ensureAdminSession())) throw new Error(SIGNED_OUT_MESSAGE);
 
   const name = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extensionFor(upload)}`;
   const path = `${folder}/${name}`;

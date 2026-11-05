@@ -62,6 +62,7 @@ export async function login(email, password) {
 }
 
 async function doLogin(email, password) {
+  signedOutOnPurpose = false;
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) return { ok: false, error: error.message };
   await refreshFromSession(data.session);
@@ -80,6 +81,7 @@ async function doLogin(email, password) {
 // an editor open on a laptop unable to save ("violates row-level security").
 // Settings has its own "Sign out everywhere" for when that's wanted.
 export async function logout() {
+  signedOutOnPurpose = true;
   await supabase.auth.signOut({ scope: "local" });
 }
 
@@ -100,8 +102,13 @@ export async function ensureAdminSession() {
 }
 
 export const SIGNED_OUT_MESSAGE =
-  "You've been signed out of admin (for example, by signing out on another device), so this can't be saved yet. " +
-  "Your work is kept on this computer: sign in again and open the article — you'll be offered your draft back.";
+  "You've been signed out of admin, so this couldn't be saved. Sign in again in the box on screen — " +
+  "everything you've typed stays on the page — then try again.";
+
+// Set when someone presses Sign out, so the full login page shows rather
+// than the "signed out while working" box over the page.
+let signedOutOnPurpose = false;
+export function wasSignedOutOnPurpose() { return signedOutOnPurpose; }
 
 export default function useAdminAuth() {
   const admin = useSyncExternalStore(subscribe, getSnapshot);

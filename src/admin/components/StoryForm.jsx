@@ -86,10 +86,7 @@ function SwapPickerModal({ candidates, onPick, onCancel, title, description }) {
 function ImageField({ label, value, onChange, frames, hint }) {
   function handleUpload(file) {
     if (!file) return;
-    ensureAdminSession().then((ok) => {
-      if (!ok) { alert(SIGNED_OUT_MESSAGE); return; }
-      return uploadImage(file, "stories").then(onChange);
-    }).catch((e) => alert(e.message));
+    uploadImage(file, "stories").then(onChange).catch((e) => alert(e.message));
   }
   return (
     <div className="flex flex-col gap-1">

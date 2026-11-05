@@ -9,6 +9,7 @@ import {
 import { NAVY, MUTED, BORDER, BLUE } from "../theme";
 import { WEEKDAYS, ORDINAL_OPTIONS, describeRecurrence } from "../../lib/eventRecurrence";
 import UKDateInput from "../components/UKDateInput";
+import { ensureAdminSession, SIGNED_OUT_MESSAGE } from "../hooks/useAdminAuth";
 
 // Admin-authored event pages. Deliberately the same shape as the See & Do
 // business content editor (TypeAEditor) — profile, find us, gallery, location
@@ -151,6 +152,7 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
     setSaving(true);
     setError("");
     try {
+      if (!(await ensureAdminSession())) throw new Error(SIGNED_OUT_MESSAGE);
       const saved = await saveBusinessEvent(form);
       onSaved(saved, !initial?.id);
     } catch (e) {
