@@ -30,6 +30,7 @@ import NeighbourhoodGuidesPage from "./pages/NeighbourhoodGuidesPage";
 import NeighbourhoodGuideEditorPage from "./pages/NeighbourhoodGuideEditorPage";
 import SiteContentPage from "./pages/SiteContentPage";
 import LegalDocumentsPage from "./pages/LegalDocumentsPage";
+import StripeProductsPage from "./pages/StripeProductsPage";
 import useFetch from "../hooks/useFetch";
 import { getAdminPendingCounts } from "../api/admin";
 import { useLocation } from "react-router-dom";
@@ -81,6 +82,7 @@ export default function AdminApp() {
         <Route path="featured-article-approvals" element={<FeatureArticleApprovalsPage />} />
         <Route path="review-moderation" element={<ReviewModerationPage />} />
         <Route path="subscriptions" element={<SubscriptionsPage />} />
+        <Route path="stripe-products" element={<StripeProductsPage />} />
         <Route path="subscriptions/:id" element={<SubscriptionDetailPage />} />
         <Route path="subscriptions/:id/documents" element={<SubscriptionDocumentsPage />} />
         <Route path="homepage-slots" element={<HomepageSlotsPage />} />

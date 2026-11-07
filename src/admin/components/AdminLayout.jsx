@@ -53,6 +53,7 @@ const NAV = [
     ],
   },
   { to: "/admin/subscriptions",      label: "Subscriptions",         icon: I.subscriptions },
+  { to: "/admin/stripe-products",    label: "Stripe Products",       icon: I.subscriptions },
   { to: "/admin/reporting",          label: "Reporting",             icon: I.reporting },
   { to: "/admin/business-analytics", label: "Business Analytics",    icon: I.reporting },
   { to: "/admin/push-notifications", label: "Push Notifications",    icon: I.notifications, badge: "push" },
