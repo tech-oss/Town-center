@@ -8,6 +8,9 @@
 // Stripe confirms payment to stripe-webhook, never from this function or the
 // browser.
 //
+// Prices: the stripe_catalogue table (admin → Stripe Products), falling back
+// to the secrets below for the Visibility Plan.
+//
 // Deploy:  supabase functions deploy stripe-checkout
 // Secrets: STRIPE_SECRET_KEY, SITE_URL,
 //          STRIPE_PRICE_VISIBILITY_MONTHLY (£29.99/month),
@@ -73,6 +76,39 @@ async function hotelPriceId(interval: "month" | "year") {
       : { product_data: { name: "Visibility Plan — Hotels & Accommodation", metadata: { plan: "premium" } } }),
   });
   return price.id;
+}
+
+// Everything sold at a fixed price is a product in Stripe, listed in
+// stripe_catalogue (admin → Stripe Products creates them). Checkout sells
+// that product, so Stripe's reports, receipts and tax settings name what was
+// bought. Before, add-on packs were one-off amounts with no product behind
+// them at all.
+// deno-lint-ignore no-explicit-any
+type CatalogueRow = any;
+async function catalogueRow(key: string): Promise<CatalogueRow | null> {
+  const { data } = await admin.from("stripe_catalogue").select("*").eq("key", key).eq("active", true).maybeSingle();
+  return data ?? null;
+}
+
+// The Stripe price for a catalogue row: its stored price while that is still
+// right, otherwise the price carrying its lookup key. Null when neither
+// exists yet — the caller then falls back rather than refusing the sale.
+async function catalogueStripePrice(row: CatalogueRow): Promise<string | null> {
+  // deno-lint-ignore no-explicit-any
+  const right = (p: any) => !!p && p.active && p.currency === "gbp" && p.unit_amount === row.amount_pence
+    && (p.recurring?.interval ?? null) === (row.billing_interval ?? null);
+  if (row.stripe_price_id) {
+    const stored = await stripe.prices.retrieve(row.stripe_price_id).catch(() => null);
+    if (right(stored)) return stored!.id;
+  }
+  const { data } = await stripe.prices.list({ lookup_keys: [row.lookup_key], active: true, limit: 1 });
+  const found = data?.[0];
+  if (!right(found)) return null;
+  await admin.from("stripe_catalogue").update({
+    stripe_price_id: found.id,
+    stripe_product_id: typeof found.product === "string" ? found.product : found.product?.id,
+  }).eq("key", row.key);
+  return found.id;
 }
 
 function returnBase(req: Request) {
@@ -220,8 +256,12 @@ Deno.serve(async (req) => {
       // articles.
       const slotKind = kind === "article_slots" ? "article" : String(addon ?? "");
       const entry = CATALOGUE[slotKind];
-      const amount = entry?.packs[String(pack)];
-      if (!entry || !amount) return json({ error: "Choose one of the packages offered." }, 400);
+      if (!entry || !entry.packs[String(pack)]) return json({ error: "Choose one of the packages offered." }, 400);
+      // The catalogue's amount and Stripe product; the list above is only the
+      // fallback for before the catalogue exists.
+      const row = await catalogueRow(`addon_${slotKind}_${Number(pack)}`);
+      const amount: number = row?.amount_pence ?? entry.packs[String(pack)];
+      const catalogPrice = row ? await catalogueStripePrice(row) : null;
 
       const quantity = Number(pack);
       // "Extra" reads right for a slot on top of what's included (article
@@ -255,17 +295,19 @@ Deno.serve(async (req) => {
         mode: "payment",
         customer: customerId,
         client_reference_id: businessId,
-        line_items: [{
-          quantity: 1,
-          price_data: {
-            currency: "gbp",
-            unit_amount: amount,
-            product_data: {
-              name,
-              description,
-            },
-          },
-        }],
+        line_items: [catalogPrice
+          ? { quantity: 1, price: catalogPrice }
+          : {
+              quantity: 1,
+              price_data: {
+                currency: "gbp",
+                unit_amount: amount,
+                product_data: {
+                  name: row?.product_name ?? name,
+                  description: row?.description ?? description,
+                },
+              },
+            }],
         metadata,
         payment_intent_data: { metadata },
         invoice_creation: { enabled: true, invoice_data: { metadata } },
@@ -288,11 +330,15 @@ Deno.serve(async (req) => {
     const { data: listing } = await admin
       .from("business_listings").select("business_type").eq("business_id", businessId).maybeSingle();
     const hotel = listing?.business_type === "hotel";
-    const priceId = hotel
-      ? await hotelPriceId(interval === "year" ? "year" : "month")
-      : interval === "year"
+    const yearly = interval === "year";
+    // The catalogue's product first; then the older ways of finding the
+    // same price, so nothing stops selling before the catalogue is synced.
+    const planRow = await catalogueRow(`visibility_${hotel ? "hotel_" : ""}${yearly ? "yearly" : "monthly"}`);
+    const priceId = (planRow ? await catalogueStripePrice(planRow) : null) ?? (hotel
+      ? await hotelPriceId(yearly ? "year" : "month")
+      : yearly
         ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
-        : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM"));
+        : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM")));
     if (!priceId) {
       console.error("Missing Stripe price secret for interval", interval);
       return json({ error: "This billing option isn't available yet." }, 503);
