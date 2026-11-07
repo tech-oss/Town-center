@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { getStripeCatalogueStatus, syncStripeCatalogue } from "../../api/admin/stripeCatalogue";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
-const GROUP_ORDER = ["Visibility Plan", "Add-on packs", "Accommodation plans", "Homepage packages"];
+const GROUP_ORDER = ["Visibility Plan", "Hotel Packages", "Add-on packs", "Accommodation plans", "Homepage packages"];
 const GROUP_NOTES = {
-  "Visibility Plan": "The business subscription — standard, and hotels & accommodation.",
+  "Visibility Plan": "The business subscription.",
+  "Hotel Packages": "The business subscription for hotels and accommodation — one product, monthly and yearly.",
   "Add-on packs": "Extra article, event, Featured Article and push notification slots, valid 12 months.",
   "Accommodation plans": "Accommodation management companies' plans, monthly and yearly.",
   "Homepage packages": "Homepage featuring. Prices are set on the Home Page Featured page.",
@@ -14,6 +15,7 @@ const STATUS = {
   ok: { label: "In Stripe", bg: "rgba(22,163,74,0.12)", fg: "#15803D" },
   missing: { label: "Missing", bg: "rgba(220,38,38,0.1)", fg: "#991B1B" },
   price_differs: { label: "Price differs", bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
+  split: { label: "On a separate product", bg: "rgba(217,119,6,0.14)", fg: "#92400E" },
 };
 
 const money = (pence) => `£${(pence / 100).toFixed(2).replace(/\.00$/, "")}`;
@@ -72,7 +74,7 @@ export default function StripeProductsPage() {
         <button type="button" onClick={handleSync} disabled={syncing || !data}
           className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
           style={{ backgroundColor: BLUE }}>
-          {syncing ? "Creating in Stripe…" : outstanding ? `Create ${outstanding} missing in Stripe` : "Check again and fix"}
+          {syncing ? "Creating in Stripe…" : outstanding ? `Fix ${outstanding} in Stripe` : "Check again and fix"}
         </button>
       </div>
 

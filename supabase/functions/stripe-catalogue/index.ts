@@ -111,7 +111,9 @@ type Item = {
   name: string;
   amountPence: number;
   interval: string | null;
-  status: "ok" | "missing" | "price_differs";
+  // "split": right price, but on a different product from the rest of its
+  // product_key (sync moves it across).
+  status: "ok" | "missing" | "price_differs" | "split";
   stripeProductId: string | null;
   stripePriceId: string | null;
   livemode: boolean | null;
@@ -120,8 +122,31 @@ type Item = {
 
 // ── stripe_catalogue rows ───────────────────────────────────────────────────
 // deno-lint-ignore no-explicit-any
+const groupOf = (row: any) => row.product_key === "visibility_hotel" ? "Hotel Packages"
+  : row.product_key.startsWith("visibility") ? "Visibility Plan" : "Add-on packs";
+
+// Sends the product's name and description to Stripe, only when they were
+// changed here since last sent — a name edited in Stripe is otherwise kept.
+// deno-lint-ignore no-explicit-any
+async function pushName(row: any, productId: string) {
+  if (row.product_name === row.product_name_pushed) return;
+  await stripe("POST", `products/${productId}`, {
+    name: row.product_name,
+    ...(row.description ? { description: row.description } : {}),
+  });
+  await admin.from("stripe_catalogue").update({ product_name_pushed: row.product_name }).eq("product_key", row.product_key);
+  row.product_name_pushed = row.product_name;
+}
+
+// A product left with nothing on sale is archived, so Stripe's list shows
+// only what can be bought. Its old prices stay for what was already paid.
+async function archiveIfEmpty(productId: string) {
+  const left = await stripe("GET", "prices", { product: productId, active: "true", limit: 1 });
+  if (!left.data?.length) await stripe("POST", `products/${productId}`, { active: "false" }).catch(() => {});
+}
+// deno-lint-ignore no-explicit-any
 async function catalogueItem(row: any, sync: boolean, siblings: Map<string, string>): Promise<Item> {
-  const group = row.product_key.startsWith("visibility") ? "Visibility Plan" : "Add-on packs";
+  const group = groupOf(row);
   const base = { group, key: row.key, name: row.product_name, amountPence: row.amount_pence, interval: row.billing_interval };
 
   // What it was sold at before: the stored price, the old secret (standard
@@ -135,17 +160,23 @@ async function catalogueItem(row: any, sync: boolean, siblings: Map<string, stri
     price = [legacy, byLookup].find((p) => matches(p, row.amount_pence, row.billing_interval)) ?? price ?? byLookup ?? legacy;
   }
   const ok = matches(price, row.amount_pence, row.billing_interval);
+  // Every price of a product_key belongs on one product: the first one found.
+  const target = siblings.get(row.product_key) ?? null;
+  const split = ok && !!target && productIdOf(price) !== target;
 
-  if (ok || !sync) {
+  if ((ok && !split) || !sync) {
     if (ok && (row.stripe_price_id !== price.id || row.stripe_product_id !== productIdOf(price))) {
       await admin.from("stripe_catalogue").update({
         stripe_price_id: price.id, stripe_product_id: productIdOf(price), synced_at: new Date().toISOString(),
       }).eq("key", row.key);
     }
-    if (ok) siblings.set(row.product_key, productIdOf(price)!);
+    if (ok && !split) {
+      siblings.set(row.product_key, productIdOf(price)!);
+      if (sync) await pushName(row, productIdOf(price)!);
+    }
     return {
       ...base,
-      status: ok ? "ok" : price ? "price_differs" : "missing",
+      status: split ? "split" : ok ? "ok" : price ? "price_differs" : "missing",
       stripeProductId: productIdOf(price),
       stripePriceId: price?.id ?? null,
       livemode: price?.livemode ?? null,
@@ -154,7 +185,8 @@ async function catalogueItem(row: any, sync: boolean, siblings: Map<string, stri
 
   // Create: reuse the product this row (or a sibling price) already has;
   // otherwise a new one with a stable id, so running twice never doubles up.
-  let productId = productIdOf(price) ?? siblings.get(row.product_key) ?? row.stripe_product_id ?? null;
+  const stray = split ? productIdOf(price) : null;
+  let productId = target ?? productIdOf(price) ?? row.stripe_product_id ?? null;
   if (productId && !(await productExists(productId))) productId = null;
   if (!productId) {
     productId = `mh_${row.product_key}`;
@@ -190,10 +222,12 @@ async function catalogueItem(row: any, sync: boolean, siblings: Map<string, stri
   if (price?.id && price.id !== created.id && price.active && price.id !== legacySecret) {
     await stripe("POST", `prices/${price.id}`, { active: "false" }).catch(() => {});
   }
+  if (stray && stray !== productId) await archiveIfEmpty(stray);
   await admin.from("stripe_catalogue").update({
     stripe_product_id: productId, stripe_price_id: created.id, synced_at: new Date().toISOString(),
   }).eq("key", row.key);
   siblings.set(row.product_key, productId);
+  await pushName(row, productId);
   return { ...base, status: "ok", stripeProductId: productId, stripePriceId: created.id, livemode: created.livemode };
 }
 
@@ -310,7 +344,7 @@ Deno.serve(async (req) => {
 
     const catalogue = await each(rows ?? [], (r) => catalogueItem(r, sync, siblings),
       // deno-lint-ignore no-explicit-any
-      (r: any) => missing(r.product_key.startsWith("visibility") ? "Visibility Plan" : "Add-on packs", r.key, r.product_name, r.amount_pence, r.billing_interval));
+      (r: any) => missing(groupOf(r), r.key, r.product_name, r.amount_pence, r.billing_interval));
 
     // deno-lint-ignore no-explicit-any
     const paidTiers = (tiers ?? []).filter((t: any) => Number(t.monthly_price) > 0 || Number(t.yearly_price) > 0);
