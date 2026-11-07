@@ -196,10 +196,22 @@ Deno.serve(async (req) => {
         kind: "placement", business_id: businessId, placement_id: hold.id,
         slot_type: slotType, package_id: packageId ?? "", duration_days: String(days),
       };
+      // The package's Stripe price is used only while it charges what the
+      // business was shown (the amount on the hold). If admin changed the
+      // price and Stripe wasn't updated, the stored price is still the old
+      // one, so the amount is sent directly instead.
+      const storedPrice = pkg?.stripe_price_id
+        ? await stripe.prices.retrieve(pkg.stripe_price_id).catch(() => null)
+        : null;
+      const priceIsCurrent = !!storedPrice && storedPrice.active && storedPrice.currency === "gbp"
+        && storedPrice.unit_amount === hold.amount_pence;
+      if (pkg?.stripe_price_id && !priceIsCurrent) {
+        console.warn("Homepage package price out of step with Stripe; charging the hold amount", packageId);
+      }
       // Stripe won't take a description alongside a catalogue price, so the
       // dates ride in the session's custom text instead.
-      const lineItem = pkg?.stripe_price_id
-        ? { quantity: 1, price: pkg.stripe_price_id }
+      const lineItem = priceIsCurrent
+        ? { quantity: 1, price: storedPrice!.id }
         : {
             quantity: 1,
             price_data: {
