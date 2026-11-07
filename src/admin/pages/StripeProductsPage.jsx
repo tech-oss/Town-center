@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import { getStripeCatalogueStatus, syncStripeCatalogue } from "../../api/admin/stripeCatalogue";
+import { Link } from "react-router-dom";
+import { getStripeCatalogueStatus, setStripePrice, syncStripeCatalogue } from "../../api/admin/stripeCatalogue";
+import { addLog } from "../../api/admin/users";
 import { BLUE, BORDER, CARD, MUTED, NAVY } from "../theme";
 
 const GROUP_ORDER = ["Visibility Plan", "Hotel Packages", "Add-on packs", "Accommodation plans", "Homepage packages"];
@@ -20,6 +22,81 @@ const STATUS = {
 
 const money = (pence) => `£${(pence / 100).toFixed(2).replace(/\.00$/, "")}`;
 const billing = (interval) => (interval === "month" ? "Monthly" : interval === "year" ? "Yearly" : "One-off");
+
+// A product's price, with Edit. Saving makes the new price in Stripe first;
+// the site only switches to it once Stripe has it. Homepage packages are
+// priced on Home Page Featured, alongside their length.
+function PriceCell({ row, onSaved }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  if (row.group === "Homepage packages") {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <span className="font-semibold" style={{ color: NAVY }}>{money(row.amountPence)}</span>
+        <Link to="/admin/homepage-slots" className="text-xs font-semibold" style={{ color: BLUE }}>Edit on Home Page Featured</Link>
+      </span>
+    );
+  }
+
+  if (!editing) {
+    return (
+      <span className="inline-flex items-center gap-2">
+        <span className="font-semibold" style={{ color: NAVY }}>{money(row.amountPence)}</span>
+        <button type="button" className="text-xs font-semibold" style={{ color: BLUE }}
+          onClick={() => { setValue((row.amountPence / 100).toFixed(2)); setError(""); setEditing(true); }}>
+          Edit
+        </button>
+      </span>
+    );
+  }
+
+  async function save() {
+    const pence = Math.round(Number(String(value).replace(/[£,\s]/g, "")) * 100);
+    if (!Number.isFinite(pence) || pence < 50 || pence > 1_000_000) {
+      setError("Enter a price between £0.50 and £10,000.");
+      return;
+    }
+    if (pence === row.amountPence) { setEditing(false); return; }
+    const recurring = row.interval === "month" || row.interval === "year";
+    const ok = window.confirm(
+      `Change "${row.name}" (${billing(row.interval)}) from ${money(row.amountPence)} to ${money(pence)}?\n\n` +
+      `New purchases will be charged ${money(pence)}` +
+      (recurring ? `. Businesses already subscribed stay on ${money(row.amountPence)}.` : "."),
+    );
+    if (!ok) return;
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await setStripePrice(row, pence);
+      addLog("Price changed", { id: row.key, name: row.name }, `${money(row.amountPence)} → ${money(pence)} · ${billing(row.interval)}`);
+      onSaved(updated);
+      setEditing(false);
+    } catch (e) {
+      setError(e.message || "The price couldn't be changed. Nothing was changed.");
+    }
+    setSaving(false);
+  }
+
+  return (
+    <span className="inline-flex flex-col gap-1">
+      <span className="inline-flex items-center gap-2">
+        <span style={{ color: MUTED }}>£</span>
+        <input value={value} onChange={(e) => setValue(e.target.value)} inputMode="decimal" autoFocus
+          onKeyDown={(e) => { if (e.key === "Enter") save(); if (e.key === "Escape") setEditing(false); }}
+          className="w-24 rounded-lg px-2 py-1 text-sm outline-none" style={{ border: `1.5px solid ${BORDER}`, color: NAVY }} />
+        <button type="button" onClick={save} disabled={saving}
+          className="text-xs font-semibold px-2.5 py-1 rounded-lg text-white disabled:opacity-50" style={{ backgroundColor: BLUE }}>
+          {saving ? "Saving…" : "Save"}
+        </button>
+        <button type="button" onClick={() => setEditing(false)} disabled={saving} className="text-xs" style={{ color: MUTED }}>Cancel</button>
+      </span>
+      {error && <span className="text-xs" style={{ color: "#DC2626" }}>{error}</span>}
+    </span>
+  );
+}
 
 // Every payable product on Maidenhead and whether Stripe has it. Stripe only
 // takes a payment for something it has as a product, and its reports, tax
@@ -64,7 +141,7 @@ export default function StripeProductsPage() {
         <div>
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Stripe Products</h1>
           <p className="text-sm mt-1 max-w-2xl" style={{ color: MUTED }}>
-            Everything a business can pay for, and whether it exists as a product in Stripe. Checkout sells these
+            Everything a business can pay for, its price, and whether it exists as a product in Stripe. Checkout sells these
             products, so every payment, receipt and report in Stripe names what was bought.
           </p>
           {data?.livemode === false && (
@@ -108,7 +185,11 @@ export default function StripeProductsPage() {
                           {r.name}
                           {r.error && <span className="block text-xs" style={{ color: "#DC2626" }}>{r.error}</span>}
                         </td>
-                        <td className="py-2.5 pr-3 font-semibold" style={{ color: NAVY }}>{money(r.amountPence)}</td>
+                        <td className="py-2.5 pr-3">
+                          <PriceCell row={r} onSaved={(updated) => setData((d) => ({
+                            ...d, items: d.items.map((i) => (i === r ? { ...i, ...updated } : i)),
+                          }))} />
+                        </td>
                         <td className="py-2.5 pr-3" style={{ color: MUTED }}>{billing(r.interval)}</td>
                         <td className="py-2.5 pr-3">
                           <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: st.bg, color: st.fg }}>{st.label}</span>
@@ -129,8 +210,11 @@ export default function StripeProductsPage() {
 
       {data && (
         <div className="rounded-2xl p-5 text-sm flex flex-col gap-2" style={{ border: `1.5px dashed ${BORDER}`, color: MUTED }}>
+          <p><strong style={{ color: NAVY }}>Changing a price.</strong> Use Edit here. The new price is created in Stripe first, then the
+            business portal and checkout switch to it. Businesses already subscribed keep the price they signed up at; new purchases pay
+            the new one. Changing a price inside Stripe itself doesn't change what businesses are charged.</p>
           <p><strong style={{ color: NAVY }}>Editing in Stripe.</strong> Names, descriptions and tax settings can be changed in Stripe and are
-            never overwritten from here. Prices are set by Maidenhead: changing a price inside Stripe doesn't change what businesses are charged.</p>
+            never overwritten from here.</p>
           <p><strong style={{ color: NAVY }}>Tax.</strong> Each product can be given a tax code in Stripe (or one default for the account
             in Stripe Tax settings) when the accountant sets up tax reporting.</p>
         </div>

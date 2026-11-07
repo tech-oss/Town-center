@@ -117,6 +117,8 @@ type Item = {
   stripeProductId: string | null;
   stripePriceId: string | null;
   livemode: boolean | null;
+  // Accommodation plans: which plan, for changing its price.
+  tierKey?: string;
   error?: string;
 };
 
@@ -219,12 +221,15 @@ async function catalogueItem(row: any, sync: boolean, siblings: Map<string, stri
   // A one-price product shows that price first in Stripe.
   if (!row.billing_interval) await stripe("POST", `products/${productId}`, { default_price: created.id }).catch(() => {});
   // The old price stays for what was already sold, but can't be bought.
-  if (price?.id && price.id !== created.id && price.active && price.id !== legacySecret) {
+  if (price?.id && price.id !== created.id && price.active) {
     await stripe("POST", `prices/${price.id}`, { active: "false" }).catch(() => {});
   }
   if (stray && stray !== productId) await archiveIfEmpty(stray);
+  // The amount goes in with the new price, so the table never names a price
+  // Stripe doesn't have (a price change is only saved once Stripe has it).
   await admin.from("stripe_catalogue").update({
-    stripe_product_id: productId, stripe_price_id: created.id, synced_at: new Date().toISOString(),
+    amount_pence: row.amount_pence, stripe_product_id: productId, stripe_price_id: created.id,
+    synced_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   }).eq("key", row.key);
   siblings.set(row.product_key, productId);
   await pushName(row, productId);
@@ -237,7 +242,7 @@ async function accommodationItem(tier: any, interval: "month" | "year", sync: bo
   const amount = Math.round(Number(interval === "year" ? tier.yearly_price : tier.monthly_price) * 100);
   const lookupKey = `${tier.key}_${interval}_${amount}`;
   const productId = `accommodation_${String(tier.key).replace(/[^a-z0-9_]/gi, "_")}`;
-  const base = { group: "Accommodation plans", key: lookupKey, name: `Maidenhead Accommodation — ${tier.name}`, amountPence: amount, interval };
+  const base = { group: "Accommodation plans", key: lookupKey, tierKey: tier.key, name: `Maidenhead Accommodation — ${tier.name}`, amountPence: amount, interval };
 
   let price = await priceByLookup(lookupKey);
   if (!matches(price, amount, interval) && sync) {
@@ -304,6 +309,43 @@ async function homepageItem(pkg: any, sync: boolean): Promise<Item> {
   };
 }
 
+// ── Changing a price (admin → Stripe Products) ──────────────────────────────
+// The new Stripe price is made first; the table only takes the new amount
+// once Stripe has it. Subscribers already on the old price stay on it (an
+// archived price keeps billing); new purchases get the new one.
+const MIN_PENCE = 50, MAX_PENCE = 1_000_000;
+
+async function setCataloguePrice(key: string, amountPence: number): Promise<Item> {
+  const { data: row, error } = await admin.from("stripe_catalogue").select("*").eq("key", key).maybeSingle();
+  if (error) throw error;
+  if (!row) throw new Error("That product isn't in the catalogue.");
+  const siblings = new Map<string, string>();
+  if (row.stripe_product_id) siblings.set(row.product_key, row.stripe_product_id);
+  if (row.amount_pence === amountPence) return await catalogueItem(row, true, siblings);
+  return await catalogueItem({ ...row, amount_pence: amountPence }, true, siblings);
+}
+
+async function setAccommodationPrice(tierKey: string, interval: "month" | "year", amountPence: number): Promise<Item> {
+  const { data: tier, error } = await admin.from("accommodation_plan_tiers").select("*").eq("key", tierKey).maybeSingle();
+  if (error) throw error;
+  if (!tier) throw new Error("That accommodation plan doesn't exist.");
+  const priceCol = interval === "year" ? "yearly_price" : "monthly_price";
+  const oldPence = Math.round(Number(tier[priceCol]) * 100);
+  const item = await accommodationItem({ ...tier, [priceCol]: amountPence / 100 }, interval, true);
+  if (item.status !== "ok") throw new Error("Stripe didn't take the new price. Nothing was changed.");
+  const stripeCol = interval === "year" ? "stripe_price_yearly" : "stripe_price_monthly";
+  const { error: saveError } = await admin.from("accommodation_plan_tiers")
+    .update({ [priceCol]: amountPence / 100, [stripeCol]: item.stripePriceId, updated_at: new Date().toISOString() })
+    .eq("key", tierKey);
+  if (saveError) throw saveError;
+  // The old price can't be bought any more; existing subscribers keep it.
+  if (oldPence !== amountPence && oldPence > 0) {
+    const old = await priceByLookup(`${tierKey}_${interval}_${oldPence}`);
+    if (old?.id && old.id !== item.stripePriceId) await stripe("POST", `prices/${old.id}`, { active: "false" }).catch(() => {});
+  }
+  return item;
+}
+
 // Runs one at a time per group: catalogue rows sharing a product must see
 // each other's product, and Stripe rate-limits bursts anyway.
 async function each<T>(list: T[], fn: (x: T) => Promise<Item>, fallback: (x: T) => Item): Promise<Item[]> {
@@ -328,8 +370,25 @@ Deno.serve(async (req) => {
     const { data: isAdmin } = await caller.rpc("is_admin");
     if (!isAdmin) return json({ error: "Admins only." }, 403);
 
-    const { action } = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}));
+    const { action } = body;
     const sync = action === "sync";
+
+    if (action === "set_price") {
+      const amountPence = Number(body.amountPence);
+      if (!Number.isInteger(amountPence) || amountPence < MIN_PENCE || amountPence > MAX_PENCE) {
+        return json({ error: "Enter a price between £0.50 and £10,000." }, 400);
+      }
+      if (body.group === "Accommodation plans") {
+        const interval = body.interval === "year" ? "year" : body.interval === "month" ? "month" : null;
+        if (!interval || !body.tierKey) return json({ error: "Missing plan." }, 400);
+        return json({ ok: true, item: await setAccommodationPrice(String(body.tierKey), interval, amountPence) });
+      }
+      if (!body.key) return json({ error: "Missing product." }, 400);
+      const item = await setCataloguePrice(String(body.key), amountPence);
+      if (item.status !== "ok") return json({ error: item.error ?? "Stripe didn't take the new price. Nothing was changed." }, 502);
+      return json({ ok: true, item });
+    }
 
     const [{ data: rows, error: e1 }, { data: tiers, error: e2 }, { data: packages, error: e3 }] = await Promise.all([
       admin.from("stripe_catalogue").select("*").eq("active", true).order("sort_order"),
@@ -354,8 +413,8 @@ Deno.serve(async (req) => {
       .filter(([t, i]: any) => Number(i === "year" ? t.yearly_price : t.monthly_price) > 0);
     const accommodation = await each(tierJobs, ([t, i]) => accommodationItem(t, i, sync),
       // deno-lint-ignore no-explicit-any
-      ([t, i]: any) => missing("Accommodation plans", `${t.key}_${i}`, `Maidenhead Accommodation — ${t.name}`,
-        Math.round(Number(i === "year" ? t.yearly_price : t.monthly_price) * 100), i));
+      ([t, i]: any) => ({ ...missing("Accommodation plans", `${t.key}_${i}`, `Maidenhead Accommodation — ${t.name}`,
+        Math.round(Number(i === "year" ? t.yearly_price : t.monthly_price) * 100), i), tierKey: t.key }));
 
     const homepage = await each(packages ?? [], (p) => homepageItem(p, sync),
       // deno-lint-ignore no-explicit-any
