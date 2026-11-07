@@ -71,6 +71,11 @@ Deno.serve(async (req) => {
     return json({ url: session.url });
   } catch (e) {
     console.error("stripe-portal failed:", e);
+    // The customer was deleted in Stripe: nothing to manage until the
+    // business subscribes again (checkout then makes a new one).
+    if ((e as { code?: string })?.code === "resource_missing") {
+      return json({ error: "There's no billing account yet — subscribe to the Visibility Plan first." }, 404);
+    }
     return json({ error: "Could not open billing. Please try again." }, 500);
   }
 });

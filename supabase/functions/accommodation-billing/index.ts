@@ -230,6 +230,16 @@ Deno.serve(async (req) => {
         return json({ error: `Your complimentary ${complimentary.name} plan already includes this.` }, 409);
       }
       let customerId = sub?.stripe_customer_id;
+      // A customer deleted in Stripe can't be reused; a new one is made.
+      if (customerId) {
+        try {
+          const existing = await stripe("GET", `customers/${customerId}`);
+          if (existing?.deleted) customerId = null;
+        } catch (e) {
+          if ((e as { status?: number }).status !== 404) throw e;
+          customerId = null;
+        }
+      }
       if (!customerId) {
         const customer = await stripe("POST", "customers", {
           email: user.email ?? undefined, name: biz?.name ?? undefined, metadata: { business_id: businessId },

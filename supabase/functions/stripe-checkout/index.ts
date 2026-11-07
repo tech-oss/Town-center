@@ -151,8 +151,22 @@ Deno.serve(async (req) => {
       .eq("business_id", businessId)
       .maybeSingle();
 
-    // One Stripe customer per business, reused across every payment.
+    // One Stripe customer per business, reused across every payment — unless
+    // it no longer exists in Stripe (deleted there, say). Reusing a deleted
+    // customer made every checkout for that business fail with "Could not
+    // start checkout", so a new one is made in its place.
     let customerId = sub?.stripe_customer_id;
+    if (customerId) {
+      const existing = await stripe.customers.retrieve(customerId).catch((e: { code?: string; statusCode?: number }) => {
+        if (e?.code === "resource_missing" || e?.statusCode === 404) return null;
+        throw e;
+      });
+      // deno-lint-ignore no-explicit-any
+      if (!existing || (existing as any).deleted) {
+        console.warn("Stripe customer gone; making a new one", businessId, customerId);
+        customerId = null;
+      }
+    }
     if (!customerId) {
       const customer = await stripe.customers.create({
         email: user.email ?? undefined,
@@ -395,6 +409,10 @@ Deno.serve(async (req) => {
     return json({ url: session.url });
   } catch (e) {
     console.error("stripe-checkout failed:", e);
-    return json({ error: "Could not start checkout. Please try again." }, 500);
+    // Stripe's own reason, when it gave one, so the next problem can be read
+    // off the screen rather than guessed at.
+    // deno-lint-ignore no-explicit-any
+    const reason = (e as any)?.type === "StripeInvalidRequestError" ? ` (${(e as Error).message})` : "";
+    return json({ error: `Could not start checkout. Please try again.${reason}` }, 500);
   }
 });
