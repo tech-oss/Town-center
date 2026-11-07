@@ -427,7 +427,7 @@ export async function sendPush(form) {
   }).select().single();
   if (error) throw error;
 
-  let delivery = null;
+  let delivery;
   try {
     // Tried twice: the push service can fail on its first start after a quiet spell.
     let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {

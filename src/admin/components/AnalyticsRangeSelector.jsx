@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NAVY, BORDER, MUTED, BLUE } from "../theme";
+import { NAVY, BORDER, MUTED } from "../theme";
 import UKDateInput from "./UKDateInput";
 import { RANGE_PRESETS } from "../../lib/analyticsRanges";
 

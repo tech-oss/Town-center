@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { cropStyle } from "../../lib/focalPoint";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
-import SmartImage from "../../components/SmartImage";
 import { featuredHotels, featuredAccommodations } from "../../Data/featuredStay";
 
 // Same 4 properties spotlighted on the web Hotels/Accommodation listing

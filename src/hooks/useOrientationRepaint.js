@@ -15,7 +15,6 @@ export default function useOrientationRepaint() {
       const el = document.documentElement;
       const prevTransform = el.style.transform;
       el.style.transform = "translateZ(0)";
-      // eslint-disable-next-line no-unused-expressions
       el.offsetHeight; // read layout to force the reflow before undoing
       el.style.transform = prevTransform;
       // A same-position scroll nudge additionally forces Safari to

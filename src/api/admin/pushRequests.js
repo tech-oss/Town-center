@@ -80,7 +80,7 @@ export async function approvePushRequest(request) {
     .single();
   if (sendError) throw sendError;
 
-  let delivery = null;
+  let delivery;
   try {
     // Tried twice: the push service can fail on its first start after a quiet spell.
     let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {

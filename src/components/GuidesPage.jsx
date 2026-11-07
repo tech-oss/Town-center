@@ -1,6 +1,5 @@
 import HeaderImage from "./HeaderImage";
 import { Link, useSearchParams } from "react-router-dom";
-import SmartImage from "./SmartImage";
 import { useEffect, useMemo } from "react";
 import { getGuides, getGuidesIndex } from "../api";
 import useFetch from "../hooks/useFetch";

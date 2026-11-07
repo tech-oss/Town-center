@@ -56,7 +56,6 @@ const ADHOC_COLOURS = {
   "Featured Article slots": "#DB2777",
   "Push Notifications": "#EA580C",
 };
-const SECTION_COLOURS = ["#2563EB", "#60A5FA", "#F59E0B"];
 
 const RANGES = [
   { key: "30d", label: "Last 30 days" },
@@ -292,7 +291,7 @@ export default function ReportingPage() {
         <Card title="Listings by Status" subtitle="Health of the business directory" info="Breakdown of directory listings by status — active, pending and lapsed — to gauge the overall health of the business directory.">
 
           <div className="flex flex-col gap-3">
-            {Object.entries(s.listingsByStatus ?? {}).map(([status, count], i) => {
+            {Object.entries(s.listingsByStatus ?? {}).map(([status, count]) => {
               const total = Object.values(s.listingsByStatus ?? {}).reduce((a, b) => a + b, 0) || 1;
               const colour = status === "Active" ? "#1E293B" : status === "Pending" ? "#E8A33D" : "#991B1B";
               return (

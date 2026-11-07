@@ -17,9 +17,7 @@ import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
 // ─── Theme tokens ─────────────────────────────────────────────────────────────
 const BRASS   = "#2563EB";   // (legacy alias) accent → blue
-const BRASS2  = "#60A5FA";   // lighter blue
 const BRASS3  = "#2563EB";   // accent text → blue
-const BRASS4  = "#3B82F6";   // mid blue
 const OFF     = "#F5F7FB";
 const CINZEL  = "'Inter', system-ui, -apple-system, sans-serif";
 
@@ -28,16 +26,6 @@ const CINZEL  = "'Inter', system-ui, -apple-system, sans-serif";
 const PIE_COLOURS  = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
 // Top-categories bars
 const CAT_COLOURS_LIST = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#06B6D4"];
-// Platform Overview line colours (one per plan tier)
-const PLAN_COLOURS_MAP = {
-  Free:     "#2563EB",  // blue
-  Basic:    "#10B981",  // emerald
-  Standard: "#F59E0B",  // amber
-  Premium:  "#8B5CF6",  // purple
-  Agent:    "#EF4444",  // red
-};
-// kept for any remaining references
-const PASTELS = ["#2563EB", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function timeAgo(iso) {

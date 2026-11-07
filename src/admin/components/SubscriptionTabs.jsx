@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BLUE, BORDER, MUTED, NAVY } from "../theme";
+import { BLUE, BORDER, MUTED } from "../theme";
 
 export default function SubscriptionTabs({ id, active }) {
   const tabs = [

@@ -123,7 +123,6 @@ function AccommodationPlanOverride({ sub, onDone }) {
 
 export function SubscriptionDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { data: sub, loading } = useFetch(() => getSubscriptionById(id), [id]);
   const [message, setMessage] = useState(null);
   const [toast, setToast] = useState(null);

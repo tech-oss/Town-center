@@ -17,5 +17,9 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // `const { key, ...rest } = row` drops `key` on purpose.
+      'no-unused-vars': ['error', { ignoreRestSiblings: true }],
+    },
   },
 ])

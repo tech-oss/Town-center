@@ -1,22 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import useSiteSection from "../hooks/useSiteSection";
-import { Link } from "react-router-dom";
-import { hero } from "../Data/content";
-import SmartLink from "./SmartLink";
 
 // Per-device hero media — a native 16:9 cut for landscape screens and a 9:16
 // cut for portrait phones, so object-cover fills each with almost no crop.
 const DESKTOP_MEDIA = { src: "/videos/hero.mp4", poster: "/images/hero-poster.jpg" };
 const MOBILE_MEDIA = { src: "/videos/hero-mobile.mp4", poster: "/images/hero-poster-mobile.jpg" };
 const DESKTOP_QUERY = "(min-width: 768px)";
-
-// Feature-card wrapper: SPA <Link> for internal routes (cta.to), <a> for hash anchors
-function CardLink({ cta, className, children }) {
-  if (cta.to) return <Link to={cta.to} className={className}>{children}</Link>;
-  return <a href={cta.href} className={className}>{children}</a>;
-}
-
-const s = hero.slides[0];
 
 // Honour reduced-motion: skip video autoplay (poster stays) for users who ask
 // for less motion. Evaluated once at load — this is a CSR (Vite) app.

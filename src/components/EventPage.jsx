@@ -1,6 +1,6 @@
 import { useParams, useSearchParams, Link, Navigate, useLocation } from "react-router-dom";
 import { useTrackView, businessView, eventView } from "../lib/trackView";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { categoryColors } from "../Data/events";
 import { categoryTitles } from "../Data/pages";
 import { toSeeDoSlugs } from "../lib/eventCategories";

@@ -11,7 +11,7 @@ import useTapReveal from "../hooks/useTapReveal";
 import CategoryFilterBar from "./CategoryFilterBar";
 import Loading from "./ui/Loading";
 import { featuredHotels, featuredAccommodations } from "../Data/featuredStay";
-import { RADIUS_OPTIONS, milesBetween, lookupPostcode, isValidPostcode } from "../lib/postcodeDistance";
+import { RADIUS_OPTIONS, milesBetween, lookupPostcode, isValidPostcode, outwardOf } from "../lib/postcodeDistance";
 
 // ── Featured Hotels / Featured Accommodation — the same "In the Spotlight"
 // hover-reveal card, alternating layout, and typography as the homepage's
@@ -425,7 +425,7 @@ export default function StayListingPage({ kind }) {
                 style={{ borderColor: "rgba(28,46,56,0.15)", color: "#000000", backgroundColor: appliedLocation ? "var(--sand)" : "#fff" }}
               >
                 <PinIcon />
-                {appliedLocation ? `Within ${appliedLocation.radius} mi of ${outwardCode}` : "Near a postcode"}
+                {appliedLocation ? `Within ${appliedLocation.radius} mi of ${outwardOf(postcode) || "you"}` : "Near a postcode"}
                 <ChevronIcon />
               </button>
               {locationOpen && (

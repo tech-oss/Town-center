@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import {
   getBusinesses, registerBusiness, approveBusiness, rejectBusiness, setBusinessLogo,
-  suspendBusiness, reinstateBusiness, deleteBusiness, setFeatured, setBusinessVisible, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
+  suspendBusiness, deleteBusiness, setFeatured, setBusinessVisible, FEATURED_LIMIT, FEATURED_GROUP_LABELS, featuredGroup, setBusinessPlan,
 } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
 import CoordsNotice from "../components/CoordsNotice";

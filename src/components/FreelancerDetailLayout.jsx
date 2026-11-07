@@ -75,6 +75,18 @@ const TABS = ["Overview", "Portfolio", "Reviews", "FAQ"];
 // opening hours, address/map) that don't apply to an individual working
 // remotely or on a project basis, in favour of skills, a portfolio, and
 // practical info a client actually wants to know before reaching out. ──
+// A white card with an optional heading. Defined once, outside the page
+// layout, so React keeps its contents between renders instead of rebuilding
+// them on every update (it used to be redefined inside the layout).
+function Section({ heading, children, className = "", id }) {
+  return (
+    <div id={id} className={`bg-white p-6 md:p-7 ${className}`} style={id ? { boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)", scrollMarginTop: "96px" } : { boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+      {heading && <h3 className="text-lg font-bold mb-4" style={{ color: "#000000" }}>{heading}</h3>}
+      {children}
+    </div>
+  );
+}
+
 export default function FreelancerDetailLayout({
   breadcrumbs,
   categoryLabel,
@@ -91,8 +103,6 @@ export default function FreelancerDetailLayout({
   email,
   website,
   social,
-  rating,
-  reviewCount,
   aboutHeading,
   aboutText,
   skills = [],
@@ -101,7 +111,6 @@ export default function FreelancerDetailLayout({
   workMode,
   responseTime,
   experience,
-  reviewsBreakdown = [],
   reviewsList = [],
   faq = [],
   afterGrid,
@@ -208,12 +217,6 @@ export default function FreelancerDetailLayout({
     return null;
   };
 
-  const Section = ({ heading, children, className = "", id }) => (
-    <div id={id} className={`bg-white p-6 md:p-7 ${className}`} style={id ? { boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)", scrollMarginTop: "96px" } : { boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-      {heading && <h3 className="text-lg font-bold mb-4" style={{ color: "#000000" }}>{heading}</h3>}
-      {children}
-    </div>
-  );
 
 
   const infoRows = [

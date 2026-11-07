@@ -8,7 +8,6 @@ import { sections } from "../Data/pages";
 import { categoryColor } from "../lib/categoryColors";
 import { TYPE_COLORS } from "../lib/typeColors";
 import OfferTag from "./OfferTag";
-import SmartImage from "./SmartImage";
 import useFetch from "../hooks/useFetch";
 import AppBadges from "./AppBadges";
 import { card, pill } from "../utils/design";

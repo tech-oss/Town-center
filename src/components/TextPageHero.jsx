@@ -1,5 +1,4 @@
 import HeaderImage from "./HeaderImage";
-import SmartImage from "./SmartImage";
 
 // The dark header band shared by Our Story, Our Traders and Work With Us.
 // Everything in it comes from Site Content; the picture is optional — without

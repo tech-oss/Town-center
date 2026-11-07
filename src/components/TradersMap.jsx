@@ -236,7 +236,7 @@ const PinIcon = (props) => (
 );
 
 // ── One directory row — thumbnail, name, category · distance, address ─────────
-function TraderRow({ b, isActive, distance, onSelect, onDirections }) {
+function TraderRow({ b, isActive, onSelect, onDirections }) {
   const thumb = b.image ?? b.logo;
   return (
     <li>
@@ -380,7 +380,7 @@ const IconPhone = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" st
 const IconMapPin = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21z" strokeLinejoin="round" /><circle cx="12" cy="9.5" r="2.3" /></svg>;
 
 // ── Selected-trader card — replaces the list while a business is active ──────
-function TraderDetail({ b, place, distance, index, total, onBack, onPrev, onNext, onDirections }) {
+function TraderDetail({ b, place, index, total, onBack, onPrev, onNext, onDirections }) {
   const [hoursOpen, setHoursOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 

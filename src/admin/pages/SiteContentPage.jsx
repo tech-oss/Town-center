@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { uploadImage } from "../../lib/uploadImage";
 import { uploadVideo } from "../../lib/uploadVideo";
-import { SITE_SECTIONS, withDefaults } from "../../Data/siteSections";
+import { SITE_SECTIONS } from "../../Data/siteSections";
 import { GETTING_HERE_DEFAULTS } from "../../Data/adminMissingScreensMock";
 import { getSiteContent, saveSiteSection } from "../../api/admin";
 import GettingHereEditor from "./siteContent/GettingHereEditor";

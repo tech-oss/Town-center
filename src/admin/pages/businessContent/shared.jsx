@@ -101,7 +101,7 @@ export function StatusDot({ status }) {
   return <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} title={status} />;
 }
 
-export function SectionBadge({ section, label }) {
+export function SectionBadge({ label }) {
   return (
     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
       style={{ backgroundColor: "rgba(37,99,235,0.1)", color: BLUE }}>

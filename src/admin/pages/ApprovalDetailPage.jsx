@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
 import { getApprovalById, approveItem, rejectItem } from "../../api/admin";
 import StatusTag from "../components/StatusTag";
@@ -312,7 +312,6 @@ const TYPE_ICON = {
 
 export default function ApprovalDetailPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { data: item, loading } = useFetch(() => getApprovalById(id), [id]);
   const [localStatus, setLocalStatus] = useState(null);
   const [rejecting, setRejecting] = useState(false);

@@ -2,7 +2,7 @@ import { fetchAll } from "../../lib/fetchAll";
 import { supabase } from "../../lib/supabaseClient";
 import { getBusinesses as getSiteBusinesses } from "../businesses";
 import { getHotels, getAccommodations } from "../stay";
-import { isPayingSubscription, isAdminGrantedSubscription, monthlyRevenue, planBucket } from "../../lib/subscriptionStatus";
+import { isPayingSubscription, isAdminGrantedSubscription, monthlyRevenue } from "../../lib/subscriptionStatus";
 
 // Reporting has no tables of its own — every figure is derived from
 // businesses, business_subscriptions, business_users, business_listings and
@@ -18,8 +18,6 @@ import { isPayingSubscription, isAdminGrantedSubscription, monthlyRevenue, planB
 const RANGE_MONTHS = { "30d": 1, "3m": 3, "6m": 6, "12m": 12 };
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-const PLAN_LABELS = { free: "Free", basic: "Basic", standard: "Standard", premium: "Premium", agent: "Agent" };
-const label = (plan) => PLAN_LABELS[String(plan ?? "").toLowerCase()] ?? (plan || "Basic");
 
 // `range` is either a preset key string ("6m") or { type: "custom", from, to }
 // (from/to as "YYYY-MM-DD"). Resolves both to a concrete [since, until] pair
@@ -529,10 +527,6 @@ export async function getSignupTrend({ days = 30 } = {}) {
 
 // ─── Breakdowns ────────────────────────────────────────────────────────────
 
-const SECTION_LABELS = {
-  "eat-drink": "Eat & Drink", "see-do": "See & Do", shop: "Shop",
-  services: "Services", live: "Live", hotel: "Live & Stay",
-};
 const SECTION_ICONS = {
   "Eat & Drink": "🍽", Shop: "🛍", "See & Do": "🎭", Services: "🔧", Live: "🏠", "Live & Stay": "🛏",
 };

@@ -151,11 +151,6 @@ export default function CategoryPage() {
   const heroBg = undefined;
   // Desktop picture when one is set; the mobile one otherwise.
   const heroDesktopSrc = copy.heroDesktop;
-  // Services' desktop photo has its subject (a tradesperson up a ladder)
-  // near the top of the frame — cover-cropping from dead center at wide
-  // viewports (container aspect ~2:1 vs. the photo's own ~1.8:1) sliced
-  // straight through it, so bias the crop toward the top instead.
-  const heroDesktopPosition = section === "services" ? "center 20%" : "center";
 
   return (
     <div>

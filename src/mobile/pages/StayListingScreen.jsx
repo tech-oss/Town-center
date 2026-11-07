@@ -1,5 +1,4 @@
 import MobileHero from "../components/MobileHero";
-import { cropStyle } from "../../lib/focalPoint";
 import { useEffect, useMemo, useState } from "react";
 import useSiteSection from "../../hooks/useSiteSection";
 import { FACILITIES, ROOM_FACILITIES, TRAVEL_GROUP, MEALS } from "../../lib/amenityCategories";

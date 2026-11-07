@@ -5,7 +5,6 @@ import { appSectionLabel } from "../lib/sectionLabels";
 import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
-import SmartImage from "../../components/SmartImage";
 import FilterSheet from "../components/FilterSheet";
 import useFetch from "../../hooks/useFetch";
 import { getOffersFeed } from "../../api";

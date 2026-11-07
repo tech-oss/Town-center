@@ -67,8 +67,6 @@ const NAV = [
 // ─── Theme ────────────────────────────────────────────────────────────────────
 const NAVY      = "#13213B";              // dark navy-blue sidebar / dark text
 const BRASS     = "#2563EB";              // primary blue accent / active
-const BRASS_BG  = "rgba(37,99,235,0.16)"; // soft blue tint
-const BRASS_BDR = "rgba(37,99,235,0.3)";
 const TEXT_ON   = "rgba(255,255,255,0.75)";
 const TEXT_DIM  = "rgba(255,255,255,0.45)";
 const DIVIDER   = "rgba(255,255,255,0.10)";

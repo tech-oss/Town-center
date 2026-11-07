@@ -204,7 +204,6 @@ export default function CategoryFilterBar({ basePath, categories, activeCategory
     if (!barWidth) return;
 
     const widths = [...gauge.children].map((el) => el.getBoundingClientRect().width);
-    const total = widths.reduce((a, b) => a + b, 0);
     const room = barWidth - chip.getBoundingClientRect().width - BAR_PADDING;
     const maxWidth = widths.length ? Math.max(...widths) : 0;
 

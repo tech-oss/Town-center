@@ -1,5 +1,4 @@
 import MobileHero from "../components/MobileHero";
-import { cropStyle } from "../../lib/focalPoint";
 import { useState, useMemo } from "react";
 import { appSectionLabel } from "../lib/sectionLabels";
 import ListingCard from "../../components/ListingCard";

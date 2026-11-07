@@ -62,6 +62,18 @@ const TABS = ["Overview", "Services", "Reviews", "Photos", "Areas Covered", "FAQ
 // sidebar sits alongside the header, gallery, tabs and overview content
 // from the very top of the page, not just below them. Does not affect
 // See & Do / Eat & Drink / Shop, which keep PlaceDetailLayout. ──
+// A white card with an optional heading. Defined once, outside the page
+// layout, so React keeps its contents between renders instead of rebuilding
+// them on every update (it used to be redefined inside the layout).
+function Section({ heading, children, className = "" }) {
+  return (
+    <div className={`bg-white p-6 md:p-7 ${className}`} style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
+      {heading && <h3 className="text-lg font-bold mb-4" style={{ color: "#000000" }}>{heading}</h3>}
+      {children}
+    </div>
+  );
+}
+
 export default function ServicesDetailLayout({
   breadcrumbs,
   categoryLabel,
@@ -81,8 +93,6 @@ export default function ServicesDetailLayout({
   website,
   social,
   directionsQuery,
-  rating,
-  reviewCount,
   badges = [],
   aboutHeading,
   aboutText,
@@ -90,7 +100,6 @@ export default function ServicesDetailLayout({
   servicesOffered = [],
   whyChooseUs = [],
   areasCovered = [],
-  reviewsBreakdown = [],
   reviewsList = [],
   accreditations = [],
   faq = [],
@@ -131,12 +140,6 @@ export default function ServicesDetailLayout({
 
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${title} reviews`)}`;
 
-  const Section = ({ heading, children, className = "" }) => (
-    <div className={`bg-white p-6 md:p-7 ${className}`} style={{ boxShadow: "0 2px 18px -8px rgba(28,46,56,0.18), 0 0 0 1px rgba(28,46,56,0.07)" }}>
-      {heading && <h3 className="text-lg font-bold mb-4" style={{ color: "#000000" }}>{heading}</h3>}
-      {children}
-    </div>
-  );
 
   return (
     <div style={{ backgroundColor: "#ffffff" }}>
