@@ -20,7 +20,7 @@ import ProfileBenefits from "../components/ProfileBenefits";
 import AccommodationBenefits from "../components/AccommodationBenefits";
 import { REGISTRATION_TYPES, REGISTRATION_NOTICE } from "../../Data/accommodation";
 
-const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
+const FOREST = "#1E293B", SAGE = "#2563EB";
 const MUTED = "#64748B", BORDER = "rgba(16,24,40,0.14)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
 

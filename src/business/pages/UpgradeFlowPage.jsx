@@ -77,7 +77,7 @@ export default function UpgradeFlowPage() {
   const [confirming, setConfirming] = useState(checkout === "success");
   const [timedOut, setTimedOut] = useState(false);
   const [welcome, setWelcome] = useState(null);
-  const [notice, setNotice] = useState(checkout === "cancelled" ? "Checkout was cancelled — you haven't been charged." : "");
+  const [notice] = useState(checkout === "cancelled" ? "Checkout was cancelled — you haven't been charged." : "");
 
   const premium = isPremium(user.plan);
 

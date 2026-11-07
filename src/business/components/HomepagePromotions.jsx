@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { FOREST, SAGE, MUTED, BORDER, CARD, Field, Inp, TextArea, SingleImageUpload } from "./FormKit";
-import UKDateInput from "./UKDateInput";
+import { FOREST, SAGE, MUTED, BORDER, CARD } from "./FormKit";
 import useNow from "../../hooks/useNow";
 import useLiveTick from "../hooks/useLiveTick";
 import { formatUKDateTime, formatCountdown } from "../../lib/ukDateTime";
@@ -204,7 +203,7 @@ function SlotCard({ slot, hasContent, premium, busy, onBook, activeBooking, isOw
 }
 
 // ─── One of this business's bookings ───────────────────────────────────────
-function BookingRow({ booking: b, label, options, premium, businessId, onChoose }) {
+function BookingRow({ booking: b, label, options, onChoose }) {
   const needs = SLOT_CONTENT[b.slotType];
   const isPostSlot = needs.kind === "business_article";
   // A slot shows something the business already has. Writing a new piece

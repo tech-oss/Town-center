@@ -10,7 +10,7 @@ import { countOwnerDrafts } from "../api/pushRequests";
 import { isAccommodationCompany, tierLabel } from "../../Data/accommodation";
 import PublicPageLink from "./PublicPageLink";
 
-const FOREST = "#1E293B", SAGE = "#2563EB", LEAF = "#3B82F6";
+const FOREST = "#1E293B", SAGE = "#2563EB";
 const SIDEBAR_NAVY = "#13213B"; // matches the admin panel's sidebar exactly (distinct from FOREST body text)
 const TEXT_ON  = "rgba(255,255,255,0.75)";
 const TEXT_DIM = "rgba(255,255,255,0.45)";

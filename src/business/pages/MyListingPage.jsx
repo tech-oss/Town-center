@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import BusinessLayout from "../components/BusinessLayout";
 import {
-  Field, Inp, TextArea, CheckGroup, EditorSection, SaveBar, ApprovalBadge,
+  Field, Inp, TextArea, CheckGroup, EditorSection, SaveBar,
   SingleImageUpload, GalleryGrid, HoursEditor, SocialFields, LocationFields,
   RepeatableList, FaqListEditor, StatsEditor, PortfolioEditor, Toast, useToast,
   CARD, BORDER, MUTED, FOREST, SAGE,
@@ -131,9 +131,6 @@ export default function MyListingPage() {
   }, [user.id]);
 
   function set(k, v) { setListing((l) => ({ ...l, [k]: v })); }
-  function setStatus(tabKey, status) {
-    setListing((l) => ({ ...l, approvalStatus: { ...l.approvalStatus, [tabKey]: status } }));
-  }
 
   async function handleSave(tabKey) {
     setSaving(true);

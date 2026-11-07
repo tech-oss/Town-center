@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { formatUK } from "../../lib/ukDate";
-import { ADDON_KINDS, ADDON_SMALLPRINT, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
+import { ADDON_KINDS, getAddonAllowance, buyAddonSlots } from "../api/addonSlots";
 import { raisePurchaseRequest } from "../api/purchaseRequests";
 import PurchasedSlots from "../components/PurchasedSlots";
 import AddonSlotsCard from "../components/AddonSlotsCard";

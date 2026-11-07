@@ -6,7 +6,7 @@ import useAnalyticsScope from "../hooks/useAnalyticsScope";
 import BusinessLayout from "../components/BusinessLayout";
 import AnalyticsChart from "../components/AnalyticsChart";
 import RangeSelector from "../components/RangeSelector";
-import { EditorSection, CARD, FOREST, MUTED, BORDER, SAGE } from "../components/FormKit";
+import { EditorSection, CARD, FOREST, MUTED, BORDER } from "../components/FormKit";
 import { DEFAULT_RANGE, resolveRange } from "../api/analyticsRanges";
 // Real views recorded by the website and app (see api/businessAnalytics.js).
 import { getProfileViewsSeries, getContentViewsSeries, getContentBreakdown } from "../api/businessAnalytics";
