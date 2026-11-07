@@ -51,7 +51,9 @@ async function saveNativeToken(token) {
   const previous = savedEndpoint();
   const { error } = await supabase.from("push_subscriptions").insert({ endpoint, platform: "ios", seen_at: new Date().toISOString() });
   if (error && !error.message.includes("duplicate")) throw error;
-  if (previous && previous !== endpoint) await supabase.from("push_subscriptions").delete().eq("endpoint", previous);
+  // Removing a subscription takes its exact address (push_unsubscribe), so
+  // only this device can drop its own.
+  if (previous && previous !== endpoint) await supabase.rpc("push_unsubscribe", { p_endpoint: previous });
   try { localStorage.setItem(ENDPOINT_KEY, endpoint); } catch { /* replaced next launch */ }
 }
 
@@ -161,7 +163,7 @@ export async function unsubscribeFromPush() {
   const subscription = await registration.pushManager.getSubscription();
   if (!subscription) return { ok: true };
 
-  await supabase.from("push_subscriptions").delete().eq("endpoint", subscription.endpoint);
+  await supabase.rpc("push_unsubscribe", { p_endpoint: subscription.endpoint });
   await subscription.unsubscribe();
   return { ok: true };
 }
