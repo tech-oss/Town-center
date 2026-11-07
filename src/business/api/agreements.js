@@ -90,3 +90,33 @@ export const formatAcceptedAt = (iso) => (iso
 
 // "28/09/2026"
 export const formatEffective = (ymd) => (ymd ? String(ymd).slice(0, 10).split("-").reverse().join("/") : "");
+
+// ── A Content Manager's own acceptance ──────────────────────────────────────
+// Each person on a business reads and accepts the current documents for
+// themselves (supabase/sql/content_manager_policies_2026_11.sql on the
+// admin-panel branch), apart from the business's own acceptance above.
+
+// The current versions the signed-in person hasn't accepted for this business.
+export async function getMyOutstandingDocuments(businessId) {
+  const { data, error } = await supabase.rpc("legal_documents_outstanding_for_me", { p_business_id: businessId });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    versionId: r.version_id,
+    key: r.document_key,
+    name: r.name,
+    version: r.version,
+    effectiveDate: r.effective_date,
+    fileUrl: r.file_url,
+  }));
+}
+
+// Records them; resolves to how many are still outstanding (0 = done, and
+// the person's own terms acceptance is then set by the database).
+export async function recordMyAgreements(businessId, email, accepted) {
+  const items = Object.entries(accepted ?? {}).map(([versionId, at]) => ({ version_id: versionId, accepted_at: at }));
+  const { data, error } = await supabase.rpc("legal_record_my_acceptances", {
+    p_business_id: businessId, p_email: email ?? null, p_items: items,
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, remaining: data ?? 0 };
+}

@@ -98,7 +98,10 @@ Deno.serve(async (req) => {
     // Only the approved Owner of an approved business can pay for it.
     const { data: member } = await admin
       .from("business_users")
-      .select("role, status, businesses(name, status, kind, business_type)")
+      // business_type lives on the listing, not on businesses. Asking for it
+      // on businesses made this whole read fail, so every owner was told
+      // "Only the business owner can do this" and nothing could be bought.
+      .select("role, status, businesses(name, status, kind)")
       .eq("business_id", businessId)
       .eq("auth_user_id", user.id)
       .maybeSingle();
@@ -282,7 +285,9 @@ Deno.serve(async (req) => {
     // Monthly or annual Visibility Plan. Only these two Stripe prices can be
     // bought — the price is chosen here, never supplied by the browser.
     // deno-lint-ignore no-explicit-any
-    const hotel = (member as any).businesses?.business_type === "hotel";
+    const { data: listing } = await admin
+      .from("business_listings").select("business_type").eq("business_id", businessId).maybeSingle();
+    const hotel = listing?.business_type === "hotel";
     const priceId = hotel
       ? await hotelPriceId(interval === "year" ? "year" : "month")
       : interval === "year"
