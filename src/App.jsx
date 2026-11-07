@@ -1,45 +1,48 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useLayoutEffect, useRef, useState } from 'react'
+import Loading from './components/ui/Loading'
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom'
-import MobileApp from './mobile/MobileApp'
-import AdminApp from './admin/AdminApp'
-import BusinessApp from './business/BusinessApp'
+// Each part of the platform (app, admin, business portal) and every page but
+// the homepage loads when it's first visited, instead of one 2.7 MB script.
+const MobileApp = lazy(() => import('./mobile/MobileApp'))
+const AdminApp = lazy(() => import('./admin/AdminApp'))
+const BusinessApp = lazy(() => import('./business/BusinessApp'))
 import Header from './components/Header'
 import ScrollToTop from './components/ScrollToTop'
 import HomePage from './components/HomePage'
-import CategoryPage from './components/CategoryPage'
-import DetailPage from './components/DetailPage'
-import ServicesDetailPage from './components/ServicesDetailPage'
-import ArticlePage from './components/ArticlePage'
-import LivePage from './components/LivePage'
+const CategoryPage = lazy(() => import('./components/CategoryPage'))
+const DetailPage = lazy(() => import('./components/DetailPage'))
+const ServicesDetailPage = lazy(() => import('./components/ServicesDetailPage'))
+const ArticlePage = lazy(() => import('./components/ArticlePage'))
+const LivePage = lazy(() => import('./components/LivePage'))
 // Property search platform (for sale / for rent) — paused for now, kept for
 // a future relaunch. See the commented-out routes below.
 // import PropertySearch from './components/PropertySearch'
 // import PropertyPage from './components/PropertyPage'
-import StayListingPage from './components/StayListingPage'
-import StayDetailPage from './components/StayDetailPage'
-import BuildingPage from './components/BuildingPage'
-import EnquirePage from './components/EnquirePage'
-import AttractionPage from './components/AttractionPage'
-import WorkPage from './components/WorkPage'
-import WorkCategoryPage from './components/WorkCategoryPage'
-import WorkplaceDevelopmentsPage from './components/WorkplaceDevelopmentsPage'
-import ExploreFuturePage from './components/ExploreFuturePage'
-import GuidesPage from './components/GuidesPage'
-import GuideDetailPage from './components/GuideDetailPage'
-import OurStoryPage from './components/OurStoryPage'
-import GettingHerePage from './components/GettingHerePage'
-import NewsIndexPage from './components/NewsIndexPage'
-import OffersPage from './components/OffersPage'
-import PressPage from './components/PressPage'
-import TradersPage from './components/TradersPage'
-import FeatureArticlePage from './components/FeatureArticlePage'
-import EventPage from './components/EventPage'
-import GetAppPage from './components/GetAppPage'
-import EventsCalendarPage from './components/EventsCalendarPage'
-import EventsListPage from './components/EventsListPage'
+const StayListingPage = lazy(() => import('./components/StayListingPage'))
+const StayDetailPage = lazy(() => import('./components/StayDetailPage'))
+const BuildingPage = lazy(() => import('./components/BuildingPage'))
+const EnquirePage = lazy(() => import('./components/EnquirePage'))
+const AttractionPage = lazy(() => import('./components/AttractionPage'))
+const WorkPage = lazy(() => import('./components/WorkPage'))
+const WorkCategoryPage = lazy(() => import('./components/WorkCategoryPage'))
+const WorkplaceDevelopmentsPage = lazy(() => import('./components/WorkplaceDevelopmentsPage'))
+const ExploreFuturePage = lazy(() => import('./components/ExploreFuturePage'))
+const GuidesPage = lazy(() => import('./components/GuidesPage'))
+const GuideDetailPage = lazy(() => import('./components/GuideDetailPage'))
+const OurStoryPage = lazy(() => import('./components/OurStoryPage'))
+const GettingHerePage = lazy(() => import('./components/GettingHerePage'))
+const NewsIndexPage = lazy(() => import('./components/NewsIndexPage'))
+const OffersPage = lazy(() => import('./components/OffersPage'))
+const PressPage = lazy(() => import('./components/PressPage'))
+const TradersPage = lazy(() => import('./components/TradersPage'))
+const FeatureArticlePage = lazy(() => import('./components/FeatureArticlePage'))
+const EventPage = lazy(() => import('./components/EventPage'))
+const GetAppPage = lazy(() => import('./components/GetAppPage'))
+const EventsCalendarPage = lazy(() => import('./components/EventsCalendarPage'))
+const EventsListPage = lazy(() => import('./components/EventsListPage'))
 import Footer from './components/Footer'
 import ChatWidget from './components/ChatWidget'
-import LogoAnimation from './components/LogoAnimation/LogoAnimation'
+const LogoAnimation = lazy(() => import('./components/LogoAnimation/LogoAnimation'))
 import ExternalLinkModal from './components/ExternalLinkModal'
 import useOrientationRepaint from './hooks/useOrientationRepaint'
 import useExternalLinkGuard from './hooks/useExternalLinkGuard'
@@ -92,6 +95,7 @@ function PublicSite() {
           fixed corner bubble either way. */}
       <ChatWidget />
       <main style={{ paddingTop: isHome ? 0 : headerHeight || undefined }}>
+        <Suspense fallback={<Loading minHeight="70vh" />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           {/* Plan your visit / info pages */}
@@ -144,6 +148,7 @@ function PublicSite() {
           <Route path="/:section/category/:category" element={<SectionCategoryRedirect />} />
           <Route path="/:section/place/:slug" element={<DetailPage />} />
         </Routes>
+        </Suspense>
       </main>
       <Footer />
     </>
@@ -164,13 +169,15 @@ function App() {
   const { pathname } = useLocation()
   return (
     <>
-      <Routes>
-        <Route path="/mobile/*" element={<MobileApp />} />
-        <Route path="/admin/*" element={<AdminApp />} />
-        <Route path="/business/*" element={<BusinessApp />} />
-        <Route path="/logo-animation" element={<LogoAnimationDemo />} />
-        <Route path="*" element={<PublicSite />} />
-      </Routes>
+      <Suspense fallback={<Loading minHeight="100vh" />}>
+        <Routes>
+          <Route path="/mobile/*" element={<MobileApp />} />
+          <Route path="/admin/*" element={<AdminApp />} />
+          <Route path="/business/*" element={<BusinessApp />} />
+          <Route path="/logo-animation" element={<LogoAnimationDemo />} />
+          <Route path="*" element={<PublicSite />} />
+        </Routes>
+      </Suspense>
       <ExternalLinkModal
         open={!!pendingHref}
         onConfirm={confirm}
