@@ -9,6 +9,7 @@ import BusinessLayout from "./components/BusinessLayout";
 import { PlanContext, PremiumFeatureGate } from "./components/FormKit";
 import { isPremium } from "../Data/plans";
 import useBusinessAuth from "./hooks/useBusinessAuth";
+import useLivePrices from "./api/livePrices";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterUserPage from "./pages/RegisterUserPage";
@@ -179,12 +180,14 @@ function RequireTermsAcceptance({ children }) {
 
 export default function BusinessApp() {
   const { isLoggedIn, restored } = useBusinessAuth();
+  // The prices admin set (Stripe Products), in place before any page shows one.
+  const pricesReady = useLivePrices();
   const location = useLocation();
   // Where to send someone who is already signed in when they land on login.
   const from = location.state?.from;
   const afterLogin = from ? `${from.pathname}${from.search ?? ""}` : "/business/dashboard";
 
-  if (!restored) return <SessionLoading />;
+  if (!restored || !pricesReady) return <SessionLoading />;
 
   return (
     <Routes>

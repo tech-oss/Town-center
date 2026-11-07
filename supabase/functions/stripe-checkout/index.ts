@@ -346,12 +346,31 @@ Deno.serve(async (req) => {
     // The catalogue's product first; then the older ways of finding the
     // same price, so nothing stops selling before the catalogue is synced.
     const planRow = await catalogueRow(`visibility_${hotel ? "hotel_" : ""}${yearly ? "yearly" : "monthly"}`);
-    const priceId = (planRow ? await catalogueStripePrice(planRow) : null) ?? (hotel
+    const catalogPrice = planRow ? await catalogueStripePrice(planRow) : null;
+    // Admin sets this price on Stripe Products. With a catalogue row, its
+    // amount is what's charged — even if its Stripe price is missing, so a
+    // price admin changed is never undercut by an older fixed price.
+    const priceId = catalogPrice ?? (planRow ? null : hotel
       ? await hotelPriceId(yearly ? "year" : "month")
       : yearly
         ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
         : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM")));
-    if (!priceId) {
+    const planLine = priceId
+      ? { price: priceId, quantity: 1 }
+      : planRow
+        ? {
+            quantity: 1,
+            price_data: {
+              currency: "gbp",
+              unit_amount: planRow.amount_pence,
+              recurring: { interval: yearly ? "year" : "month" },
+              ...(planRow.stripe_product_id
+                ? { product: planRow.stripe_product_id }
+                : { product_data: { name: planRow.product_name } }),
+            },
+          }
+        : null;
+    if (!planLine) {
       console.error("Missing Stripe price secret for interval", interval);
       return json({ error: "This billing option isn't available yet." }, 503);
     }
@@ -363,7 +382,8 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
-      line_items: [{ price: priceId, quantity: 1 }],
+      // deno-lint-ignore no-explicit-any
+      line_items: [planLine as any],
       client_reference_id: businessId,
       metadata: { business_id: businessId },
       subscription_data: { metadata: { business_id: businessId } },
