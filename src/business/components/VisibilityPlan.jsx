@@ -92,13 +92,14 @@ export function BillingOption({ option, selected, onSelect }) {
         style={{ border: `2px solid ${selected ? SAGE : "#CBD5E1"}` }}>
         {selected && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: SAGE }} />}
       </span>
+      {/* The daily figure leads, the price it adds up to sits underneath. */}
       <span className="flex-1 min-w-0">
-        <span className="flex items-baseline gap-1 flex-wrap">
-          <span className="vp-price text-2xl tracking-tight" style={{ color: INK }}>{formatPrice(option.price)}</span>
-          <span className="text-sm font-medium" style={{ color: MUTED }}>{option.label}</span>
-        </span>
-        <span className="block text-sm mt-0.5" style={{ color: selected ? SAGE : MUTED, fontWeight: selected ? 600 : 400 }}>
+        <span className="vp-price block text-xl sm:text-2xl tracking-tight" style={{ color: INK, fontWeight: 800 }}>
           {option.perDayText ?? `Just ${option.perDay} a day`}
+        </span>
+        <span className="flex items-baseline gap-1 flex-wrap mt-0.5">
+          <span className="vp-strong text-base" style={{ color: selected ? SAGE : MUTED }}>{formatPrice(option.price)}</span>
+          <span className="text-sm font-medium" style={{ color: MUTED }}>{option.label}</span>
         </span>
       </span>
       {isYear && option.saving > 0 && (
@@ -107,6 +108,22 @@ export function BillingOption({ option, selected, onSelect }) {
         </span>
       )}
     </button>
+  );
+}
+
+// ─── Tax note, between the prices and the upgrade button ────────────────────
+export function TaxNote() {
+  return (
+    <div className="mt-5 rounded-2xl px-4 sm:px-5 py-4" style={{ backgroundColor: "#F0FDF4", border: "1px solid #BBF7D0" }}>
+      <p className="vp-strong text-base" style={{ color: INK }}>A tax-deductible business expense</p>
+      <p className="text-sm leading-relaxed mt-1" style={{ color: INK }}>
+        Your Maidenhead business subscription and any additional promotional services may qualify as allowable business
+        expenses for tax purposes, helping you promote your business while reducing your taxable profits.
+      </p>
+      <p className="text-xs leading-relaxed mt-2" style={{ color: MUTED }}>
+        Subject to your individual business circumstances and HMRC rules. Please consult your accountant for advice.
+      </p>
+    </div>
   );
 }
 
@@ -221,6 +238,8 @@ export function VisibilityPlanCard({ checkout }) {
       </div>
 
       <BillingChoice checkout={checkout} className="mt-6" />
+
+      <TaxNote />
 
       <div className="mt-5">
         <CtaButton checkout={checkout} full />
