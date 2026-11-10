@@ -388,6 +388,8 @@ function pushFromRow(r) {
       ? { id: r.article_id, title: r.article_title, thumbnail: r.article_image, link: r.article_link }
       : null,
     reach: r.reach,
+    // How many devices it was sent to; reach is how many confirmed it.
+    tried: r.tried ?? null,
     sentAt: (r.sent_at ?? "").slice(0, 16).replace("T", " "),
   };
 }

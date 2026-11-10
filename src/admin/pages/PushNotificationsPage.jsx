@@ -248,7 +248,9 @@ function ComposeTab() {
                       unguarded, which threw and blanked the whole page the
                       moment the history had a single row in it. */}
                   <span className="text-[11px]" style={{ color: "#9CA3AF" }}>
-                    · {n.audience}{typeof n.reach === "number" ? ` · ${n.reach.toLocaleString()} reached` : ""}
+                    · {n.audience}{typeof n.reach === "number"
+                      ? ` · ${n.reach.toLocaleString()}${typeof n.tried === "number" && n.tried > n.reach ? ` of ${n.tried.toLocaleString()}` : ""} reached`
+                      : ""}
                   </span>
                 </div>
               </div>

@@ -183,11 +183,14 @@ async function sendWeb(sub: { endpoint: string; p256dh: string; auth: string }, 
     return { ok: true, attempts: 1 };
   } catch (err) {
     const status = (err as { statusCode?: number }).statusCode;
+    const reason = String((err as Error)?.message ?? err).slice(0, 120);
     return {
-      ok: false, status, attempts: 1,
-      reason: String((err as Error)?.message ?? err).slice(0, 120),
-      // 410 Gone / 404: the browser has unsubscribed on its end.
-      gone: status === 410 || status === 404,
+      ok: false, status, attempts: 1, reason,
+      // 410 Gone / 404: the browser has unsubscribed on its end. A
+      // subscription whose keys are malformed ("p256dh value should be 65
+      // bytes long") can never be delivered to either — one has failed every
+      // send since it was saved — so it's removed the same way.
+      gone: status === 410 || status === 404 || /should be \d+ bytes long|p256dh|auth secret/i.test(reason),
     };
   }
 }
@@ -348,7 +351,7 @@ Deno.serve(async (req) => {
     }));
     // The admin's list of sent notifications shows how many devices it reached.
     if (!check && notificationId) {
-      await supabase.from("push_notifications").update({ reach: sent }).eq("id", notificationId);
+      await supabase.from("push_notifications").update({ reach: sent, tried: targets.length }).eq("id", notificationId);
     }
     return { sent, outcomes, removed: goneIds.length };
   };
