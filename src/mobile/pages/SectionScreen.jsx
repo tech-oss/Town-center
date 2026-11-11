@@ -155,7 +155,7 @@ export default function SectionScreen({ sectionKey }) {
           ))}
           {items.length === 0 && stillLoading && Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="rounded-xl overflow-hidden animate-pulse" style={{ boxShadow: "0 2px 12px rgba(28,46,56,0.08)" }}>
-              <div className="aspect-[4/3]" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />
+              <div className="ratio-box [--ratio:75%]" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />
               <div className="p-2.5 flex flex-col gap-2">
                 <div className="h-2.5 w-16 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />
                 <div className="h-3 w-3/4 rounded-full" style={{ backgroundColor: "rgba(28,46,56,0.08)" }} />

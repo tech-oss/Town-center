@@ -8,7 +8,7 @@ import useFetch from "../../hooks/useFetch";
 function FeatureImage({ image, alt }) {
   const { revealed, onImageClick } = useTapReveal();
   return (
-    <div onClick={onImageClick} className={`spotlight-card relative overflow-hidden aspect-[4/3] ${revealed ? "is-revealed" : ""}`}>
+    <div onClick={onImageClick} className={`spotlight-card ratio-box [--ratio:75%] overflow-hidden ${revealed ? "is-revealed" : ""}`}>
       <img src={image} alt="" aria-hidden="true" loading="lazy" className="spotlight-photo-bg absolute inset-0 w-full h-full object-cover" />
       <img src={image} alt={alt} loading="lazy" className="spotlight-photo absolute inset-0 w-full h-full object-cover" />
     </div>

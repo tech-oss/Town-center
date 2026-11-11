@@ -42,14 +42,14 @@ export default function ListingCard({
       style={{ borderRadius: radius, boxShadow: card.shadow }}
     >
       <div
-        className="relative aspect-[4/3] sm:aspect-square overflow-hidden"
+        className="ratio-box [--ratio:75%] sm:[--ratio:100%] overflow-hidden"
         style={{ borderRadius: `${radius} ${radius} 0 0`, backgroundColor: logoTile(it) ? "var(--mint)" : undefined }}
       >
         {it.featured && <FeaturedTag overlay />}
         {logoTile(it) ? (
-          <img src={it.logo} alt={it.name} loading="lazy" className="w-full h-full object-contain p-5 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
+          <img src={it.logo} alt={it.name} loading="lazy" className="absolute inset-0 w-full h-full object-contain p-5 sm:p-8 transition-transform duration-500 group-hover:scale-105" />
         ) : (
-          <img src={it.image} alt={it.name} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(it.image, "card")} />
+          <img src={it.image} alt={it.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" style={cropStyle(it.image, "card")} />
         )}
       </div>
       <div className="flex flex-col gap-1 sm:gap-0.5 p-2.5">

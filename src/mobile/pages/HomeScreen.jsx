@@ -285,7 +285,7 @@ export default function HomeScreen() {
             <div className="grid grid-cols-3 gap-3">
               {homeCategories.map((c) => (
                 <Link key={c.id} to={c.to} className="flex flex-col items-center gap-2 active:opacity-70">
-                  <div className="relative w-full aspect-square rounded-2xl overflow-hidden">
+                  <div className="ratio-box [--ratio:100%] w-full rounded-2xl overflow-hidden">
                     <img src={c.image} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" style={cropStyle(c.image, "card")} />
                     {/* Bottom-weighted tint so a light photo still reads as a
                         crisp tile, matching the tab bar's dark-teal accent. */}

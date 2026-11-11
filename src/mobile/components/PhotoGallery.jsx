@@ -43,8 +43,8 @@ export default function PhotoGallery({ images = [], title, max = 12 }) {
       <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Photos</p>
       <div className="grid grid-cols-2 gap-2">
         {shown.map((src, i) => (
-          <button key={i} type="button" onClick={() => setIndex(i)} className="aspect-square overflow-hidden rounded-xl">
-            <img src={src} alt={`${title ?? ""} ${i + 1}`} loading="lazy" className="w-full h-full object-cover" style={cropStyle(src, "gallery")} />
+          <button key={i} type="button" onClick={() => setIndex(i)} className="ratio-box [--ratio:100%] block w-full overflow-hidden rounded-xl">
+            <img src={src} alt={`${title ?? ""} ${i + 1}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover" style={cropStyle(src, "gallery")} />
           </button>
         ))}
       </div>

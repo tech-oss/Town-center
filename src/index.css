@@ -414,6 +414,15 @@ button, .btn, a[class*="rounded-full"] { font-weight: 500 !important; }
   background-color: #ffffff;
   font-family: var(--font-body);
 }
+/* A box of fixed shape: an invisible spacer whose height is a share of the
+   width (--ratio, e.g. 75% for 4:3), with the picture laid over it (give the
+   children absolute positioning). aspect-ratio alone collapsed to nothing on
+   older iPads (iPadOS 15, Safari before 16) when the box sat in a stretched
+   flex column, so card pictures vanished there; percentage padding has
+   sized boxes this way in every browser for years. */
+.ratio-box { position: relative; }
+.ratio-box::before { content: ""; display: block; padding-top: var(--ratio, 75%); }
+
 .mobile-frame {
   height: 100%;
   width: 100%;

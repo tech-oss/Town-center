@@ -118,8 +118,8 @@ export default function OffersScreen() {
                 className="group relative bg-white overflow-hidden flex flex-col active:opacity-90"
                 style={{ borderRadius: 14, boxShadow: "0 8px 24px -8px rgba(0,0,0,0.15)" }}
               >
-                <div className="relative aspect-square overflow-hidden">
-                  <img src={it.image} alt={it.title} loading="lazy" className="w-full h-full object-cover" style={cropStyle(it.image, "card")} />
+                <div className="ratio-box [--ratio:100%] overflow-hidden">
+                  <img src={it.image} alt={it.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" style={cropStyle(it.image, "card")} />
                   {it.homepage && (
                     <span className="absolute top-2 right-2 text-[8px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--forest)", color: "#fff" }}>
                       On Homepage
