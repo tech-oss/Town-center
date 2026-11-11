@@ -11,6 +11,9 @@ import { installNativeShare } from './mobile/lib/nativeShare'
 // The App Store app is only the /mobile app: it opens there, whatever
 // address the app's web view starts on.
 installNativeShare()
+// Marks the App Store app, so the desktop "phone frame" preview (index.css)
+// never shows inside it — on iPad its screen is wide enough to trigger it.
+if (Capacitor.isNativePlatform()) document.documentElement.classList.add('native-app')
 if (Capacitor.isNativePlatform() && !window.location.pathname.startsWith('/mobile')) {
   window.history.replaceState(null, '', '/mobile')
 }
