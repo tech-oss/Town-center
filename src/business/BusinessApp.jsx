@@ -12,6 +12,8 @@ import useBusinessAuth from "./hooks/useBusinessAuth";
 import useLivePrices from "./api/livePrices";
 import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import RegisterUserPage from "./pages/RegisterUserPage";
 import ClaimBusinessPage from "./pages/ClaimBusinessPage";
 import ClaimOnboardingPage from "./pages/ClaimOnboardingPage";
@@ -194,6 +196,9 @@ export default function BusinessApp() {
       <Route path="/" element={<Navigate to={isLoggedIn ? "/business/dashboard" : "/business/login"} replace />} />
       <Route path="signup" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <SignUpPage />} />
       <Route path="login" element={isLoggedIn ? <Navigate to={afterLogin} replace /> : <LoginPage />} />
+      <Route path="forgot-password" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <ForgotPasswordPage />} />
+      {/* No guard: the emailed link signs the person in just to set a password. */}
+      <Route path="reset-password" element={<ResetPasswordPage />} />
       <Route path="register-user" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <RegisterUserPage />} />
       <Route path="claim-business" element={isLoggedIn ? <Navigate to="/business/dashboard" replace /> : <ClaimBusinessPage />} />
 

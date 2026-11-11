@@ -45,10 +45,13 @@ export default function LoginPage() {
           <Field label="Email"><Inp type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@business.co.uk" /></Field>
           <Field label="Password"><Inp type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" /></Field>
 
+          {location.state?.notice && !error && (
+            <p className="text-xs font-medium rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(22,163,74,0.1)", color: "#15803D" }}>{location.state.notice}</p>
+          )}
           {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
 
           <div className="flex justify-end -mt-1">
-            <a href="#" onClick={(e) => e.preventDefault()} className="text-xs font-semibold" style={{ color: "#2563EB" }}>Forgot password?</a>
+            <Link to="/business/forgot-password" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Forgot password?</Link>
           </div>
 
           <button type="submit" disabled={submitting} className="mt-1 px-6 py-3 rounded-xl text-sm font-semibold text-white disabled:opacity-60 transition-opacity hover:opacity-90" style={{ backgroundColor: SAGE }}>
