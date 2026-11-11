@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { sendEmail } from "./emails";
 
 // Support tickets raised by businesses from their own dashboard. The
 // conversation is a jsonb array on the row (same pattern the business portal
@@ -59,7 +60,9 @@ export async function replyToTicket(id, { body, author = "Admin", status, attach
   if (status) patch.status = status;
   const { error } = await supabase.from("business_tickets").update(patch).eq("id", id);
   if (error) throw error;
-  return { ok: true };
+  // The business hears about the reply by email, not only when it next signs in.
+  const email = await sendEmail("ticket_reply", { ticketId: id });
+  return { ok: true, email };
 }
 
 export async function setTicketStatus(id, status) {
@@ -85,5 +88,6 @@ export async function createTicketForBusiness(businessId, { subject, category, m
     .select("*, businesses(name)")
     .single();
   if (error) throw error;
-  return fromRow(data);
+  const email = await sendEmail("ticket_new", { ticketId: data.id });
+  return { ...fromRow(data), email };
 }

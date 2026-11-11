@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TICKET_CATEGORIES } from "../../Data/adminMissingScreensMock";
-import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness, deleteTicket } from "../../api/admin";
+import { getBusinesses, getTickets, replyToTicket, setTicketStatus, createTicketForBusiness, deleteTicket, emailNote } from "../../api/admin";
 import useFetch from "../../hooks/useFetch";
 import StatusTag from "../components/StatusTag";
 import { uploadImage } from "../../lib/uploadImage";
@@ -43,11 +43,10 @@ function TicketDetail({ ticket, onBack, onUpdate, notify, onDelete }) {
     try {
       const attachments = [];
       for (const file of replyFiles) attachments.push(await uploadImage(file, "support"));
-      // TODO: trigger Resend email notification to business on reply
-      await replyToTicket(ticket.id, { body: reply.trim(), author: "Admin Support", attachments });
+      const res = await replyToTicket(ticket.id, { body: reply.trim(), author: "Admin Support", attachments });
       setReply("");
       setReplyFiles([]);
-      notify("Reply sent.");
+      notify(`Reply sent.${emailNote(res.email)}`);
       onUpdate();
     } catch (e) {
       notify(e.message || "Could not send that reply.");
@@ -166,10 +165,9 @@ function NewMessageTab({ businesses, notify, onSent }) {
   async function handleSend() {
     if (!selected || !subject.trim() || !message.trim()) return;
     setSending(true);
-    // TODO: trigger Resend email notification to the business
-    await createTicketForBusiness(selected.id, { subject: subject.trim(), category, message: message.trim() });
+    const created = await createTicketForBusiness(selected.id, { subject: subject.trim(), category, message: message.trim() });
     setSending(false);
-    notify(`Message sent to ${selected.name}`);
+    notify(`Message sent to ${selected.name}.${emailNote(created.email, "they")}`);
     setSelected(null); setQuery(""); setSubject(""); setMessage(""); setCategory(TICKET_CATEGORIES[0]);
     onSent?.();
   }

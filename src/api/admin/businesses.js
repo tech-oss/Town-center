@@ -1,4 +1,5 @@
 import { fetchAll } from "../../lib/fetchAll";
+import { sendEmail } from "./emails";
 import { supabase } from "../../lib/supabaseClient";
 import { listingHasContent } from "./businessListingContent";
 import { assertNoDataUrls } from "../../lib/noDataUrls";
@@ -639,7 +640,12 @@ async function setStatus(id, status, note, logLabel) {
   if (ACTIVITY[logLabel]) {
     await logBusinessActivity(id, { action: ACTIVITY[logLabel], entityType: "business", entityId: id, title: biz?.name ?? id, detail: note || null });
   }
-  return { ok: true };
+  // The owner is told by email: approved (once their own account is approved
+  // too — the email waits until both are), or rejected with the reason.
+  const email = status === "Approved" && logLabel === "Business Approved" ? await sendEmail("account_approved", { businessId: id })
+    : status === "Rejected" ? await sendEmail("registration_rejected", { businessId: id })
+    : null;
+  return { ok: true, email };
 }
 
 export function approveBusiness(id) {

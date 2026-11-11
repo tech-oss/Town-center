@@ -9,6 +9,7 @@ export * from "./adminProperties";
 export * from "./eventApprovals";
 export * from "./contentModeration";
 export * from "./supportTickets";
+export * from "./emails";
 export * from "./siteContent";
 export * from "./subscriptions";
 export * from "./reporting";

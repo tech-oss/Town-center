@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess, grantedLabel, grantAccommodationTier, ACCOMMODATION_TIERS } from "../../api/admin";
+import { sendEmail, getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess, grantedLabel, grantAccommodationTier, ACCOMMODATION_TIERS } from "../../api/admin";
 import {
   TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS,
   SUBSCRIPTION_BILLING_HISTORY, resolveTierFeatures,
@@ -155,9 +155,11 @@ export function SubscriptionDetailPage() {
     setCancelled(true);
     notify("Subscription cancelled.");
   }
-  function handleSendReminder() {
-    // TODO: trigger Resend email on backend integration
-    notify(`Renewal reminder sent to ${sub.owner}.`);
+  async function handleSendReminder() {
+    const res = await sendEmail("renewal_reminder", { businessId: sub.id });
+    if (res.ok && res.sent) notify(`Renewal reminder emailed to ${sub.owner}.`);
+    else if (res.ok) notify(`No reminder sent: ${res.skipped}.`);
+    else notify(`Reminder not sent: ${res.error}`);
   }
   function scrollToBillingHistory() {
     billingHistoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });

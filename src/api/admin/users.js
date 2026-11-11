@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { sendEmail } from "./emails";
 import { getCurrentAdmin } from "../../admin/hooks/useAdminAuth";
 
 // Portal users are business_users rows — the people who sign in to the business
@@ -119,8 +120,13 @@ async function setUserStatus(id, status, action, note = "") {
   return { ok: true };
 }
 
-export function approveUser(id) {
-  return setUserStatus(id, "approved", "Approved");
+// Approving the person emails them that they can sign in — provided their
+// business is approved too (the email waits until both are).
+export async function approveUser(id) {
+  const result = await setUserStatus(id, "approved", "Approved");
+  const { data: row } = await supabase.from("business_users").select("business_id").eq("id", id).maybeSingle();
+  const email = row?.business_id ? await sendEmail("account_approved", { businessId: row.business_id, businessUserId: id }) : null;
+  return { ...result, email };
 }
 
 export function rejectUser(id, note = "") {
@@ -168,8 +174,11 @@ export async function registerUser(data) {
   const { data: row } = await supabase
     .from("business_users").select(SELECT).eq("auth_user_id", result.userId).maybeSingle();
   const user = row ? fromRow(row) : { id: result.userId, name: `${data.firstName} ${data.lastName}` };
-  await addLog("Registered by admin", user, data.sendInvite ? "Login details to be shared with the user" : "");
-  return { ok: true, user, password: data.autoPassword ? password : null };
+  // "Send invitation email": a link to choose their own password, sent
+  // through Resend — no password goes by email.
+  const email = data.sendInvite && row?.id ? await sendEmail("account_invite", { businessUserId: row.id }) : null;
+  await addLog("Registered by admin", user, data.sendInvite ? (email?.ok ? "Invitation emailed" : `Invitation not emailed: ${email?.error ?? "unknown"}`) : "");
+  return { ok: true, user, password: data.autoPassword ? password : null, email };
 }
 
 export async function deleteUser(id) {

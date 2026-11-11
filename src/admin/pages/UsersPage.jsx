@@ -112,7 +112,7 @@ function RegisterUserModal({ onClose, onRegistered }) {
     setError("");
     try {
       const res = await registerUser(form);
-      setDone({ name: `${form.firstName} ${form.lastName}`, email: form.email.trim(), password: res.password });
+      setDone({ name: `${form.firstName} ${form.lastName}`, email: form.email.trim(), password: res.password, emailed: res.email });
     } catch (e) {
       const msg = e?.message ?? "Could not register this user.";
       setError(/already been registered|already exists/i.test(msg)
@@ -132,6 +132,15 @@ function RegisterUserModal({ onClose, onRegistered }) {
             <p className="text-base font-bold" style={{ color: NAVY }}>{done.name} is registered</p>
             <p className="text-xs mt-1" style={{ color: MUTED }}>Their login is active and they can sign in to the business portal now.</p>
           </div>
+          {done.emailed && (
+            <p className="text-xs rounded-xl px-3 py-2" style={done.emailed.ok && done.emailed.sent
+              ? { backgroundColor: "rgba(22,163,74,0.1)", color: "#15803D" }
+              : { backgroundColor: "rgba(217,119,6,0.12)", color: "#92400E" }}>
+              {done.emailed.ok && done.emailed.sent
+                ? `An invitation to choose their own password has been emailed to ${done.email}.`
+                : `The invitation email couldn't be sent (${done.emailed.error ?? done.emailed.skipped}). Share the details below instead.`}
+            </p>
+          )}
           {done.password && (
             <div className="rounded-xl p-3 text-left text-sm" style={{ backgroundColor: "#f8fafc", border: `1px solid ${BORDER}` }}>
               <p className="text-[11px] font-semibold uppercase tracking-wide mb-1.5" style={{ color: "#9CA3AF" }}>Login details to share</p>
