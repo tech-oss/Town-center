@@ -12,7 +12,10 @@ android {
     namespace = "com.maidenheadapp.maidenheadapp"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.maidenheadapp.maidenheadapp"
+        // The Play Store package name — fixed for good by the Play Console app
+        // "The Maidenhead App". (The iPhone app is com.maidenheadapp.maidenheadapp;
+        // the two stores don't need to match.)
+        applicationId "com.themaidenheadapp.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // scripts/android-release.sh passes -PversionCode=N (each upload to
