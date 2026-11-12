@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import useAdminAuth from "../hooks/useAdminAuth";
 import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
+import { sendEmail } from "../../api/admin/emails";
 
 // Admin account settings: who you're signed in as, your password, and your
 // session. Laid out as a profile column beside the settings panels on wide
@@ -24,6 +25,7 @@ const Icon = {
   eye: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
   eyeOff: <><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22" /></>,
   check: <path d="M20 6L9 17l-5-5" />,
+  mail: <><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 6l-10 7L2 6" /></>,
 };
 function Svg({ children, size = 18 }) {
   return (
@@ -246,6 +248,35 @@ function SessionPanel({ session, onSignOutEverywhere, busy }) {
   );
 }
 
+// Emails Maidenhead sends (Resend): a test to the signed-in admin, to check
+// the set-up. Nothing goes to anyone else.
+function EmailPanel({ email }) {
+  const [state, setState] = useState(null);
+  async function sendTest() {
+    setState({ busy: true });
+    const res = await sendEmail("test");
+    setState(res.ok && res.sent
+      ? { ok: true, text: `Test email sent to ${email}. Check your inbox (and spam folder).` }
+      : { ok: false, text: res.error || res.skipped || "The test email couldn't be sent." });
+  }
+  return (
+    <Panel icon={Icon.mail} title="Email" description="Notification emails to businesses are sent through Resend.">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <p className="text-xs max-w-md" style={{ color: MUTED }}>Send a test to your own address ({email ?? "your email"}) to check emails are reaching inboxes.</p>
+        <button onClick={sendTest} disabled={state?.busy}
+          className="px-4 py-2 rounded-xl text-xs font-semibold text-white disabled:opacity-50" style={{ backgroundColor: BLUE }}>
+          {state?.busy ? "Sending…" : "Send a test email"}
+        </button>
+      </div>
+      {state?.text && (
+        <p className="text-xs mt-4 rounded-xl px-3 py-2" style={state.ok
+          ? { backgroundColor: "rgba(22,163,74,0.1)", color: "#15803D" }
+          : { backgroundColor: "rgba(220,38,38,0.08)", color: "#991B1B" }}>{state.text}</p>
+      )}
+    </Panel>
+  );
+}
+
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { admin, logout } = useAdminAuth();
@@ -286,6 +317,7 @@ export default function SettingsPage() {
         <div className="flex flex-col gap-6 min-w-0">
           <PasswordPanel />
           <SessionPanel session={session} onSignOutEverywhere={() => signOut("global")} busy={signingOut} />
+          <EmailPanel email={admin?.email ?? session?.user?.email} />
         </div>
       </div>
     </div>

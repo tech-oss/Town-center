@@ -13,6 +13,8 @@
 //   registration_rejected{ businessId }      with admin's reason
 //   account_invite       { businessUserId }  "set your password" link for a
 //                        login admin created
+//   test                 {}                  a test to the admin who asked
+//                        (Settings → Email), to check Resend is set up
 //
 // Supabase's own emails (sign-up confirmation, password reset, Content
 // Manager invites) are not sent from here: they go through Resend as
@@ -120,6 +122,17 @@ type Body = Record<string, any>;
 type Result = { sent: number; skipped?: string };
 
 const EVENTS: Record<string, (b: Body) => Promise<Result>> = {
+  // Goes only to the signed-in admin's own address (set by the caller below).
+  async test({ callerEmail }) {
+    if (!callerEmail) return { sent: 0, skipped: "your admin account has no email address" };
+    await send("test", [callerEmail], {
+      subject: "Maidenhead test email",
+      heading: "Email is working",
+      paragraphs: ["This is a test from Maidenhead admin → Settings → Email.", "If you're reading this, emails sent through Resend are reaching inboxes."],
+    }, null);
+    return { sent: 1 };
+  },
+
   async ticket_reply({ ticketId }) {
     const { data: t } = await admin.from("business_tickets").select("id, business_id, subject, thread").eq("id", ticketId).maybeSingle();
     if (!t) return { sent: 0, skipped: "ticket not found" };
@@ -244,7 +257,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const handler = EVENTS[String(body.event ?? "")];
     if (!handler) return json({ error: "Unknown email." }, 400);
-    return json({ ok: true, ...(await handler(body)) });
+    // callerEmail is only ever the signed-in admin's own, never from the request.
+    return json({ ok: true, ...(await handler({ ...body, callerEmail: user.email })) });
   } catch (e) {
     console.error("send-email failed:", e);
     return json({ error: (e as Error).message ?? "The email couldn't be sent." }, 500);
