@@ -23,7 +23,10 @@ const ITEMS = [
 
 // The App Store app leaves out the placeholders (and "Get the App" — it is
 // the app). Apple turns away apps that show unfinished features.
-const VISIBLE_ITEMS = Capacitor.isNativePlatform() ? ITEMS.filter((i) => !i.soon) : ITEMS;
+// "Enable Notifications" only where notifications work (not the Android app
+// until Firebase is set up).
+const VISIBLE_ITEMS = (Capacitor.isNativePlatform() ? ITEMS.filter((i) => !i.soon) : ITEMS)
+  .filter((i) => i.key !== "push" || pushSupported());
 
 function Icon({ name }) {
   const p = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "var(--forest)", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" };

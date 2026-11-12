@@ -20,7 +20,13 @@ function urlBase64ToUint8Array(base64) {
 // In the App Store app, notifications go through Apple's push service: the
 // device token is saved as an 'ios' row in the same table (see
 // supabase/sql/push_ios_2026_10.sql), and send-push delivers it via APNs.
-const native = Capacitor.isNativePlatform();
+// Notifications in the App Store app go through Apple (APNs). The Android app
+// has none yet: they need Firebase, which isn't set up, and asking the plugin
+// to register without it crashes the app — so on Android every function here
+// reports notifications as unavailable and never touches the plugin.
+const platform = Capacitor.getPlatform();
+const native = platform === "ios";
+const androidApp = platform === "android";
 
 // Resolves with the device token once iOS hands it over.
 function registerNative() {
@@ -108,22 +114,26 @@ export function onNativePushOpened(go) {
 }
 
 export async function nativePushPermission() {
+  if (androidApp) return "unsupported";
   if (!native) return pushPermission();
   const p = await PushNotifications.checkPermissions();
   return p.receive === "granted" ? "granted" : p.receive === "denied" ? "denied" : "default";
 }
 
 export function pushSupported() {
+  if (androidApp) return false;
   if (native) return true;
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
 export function pushPermission() {
+  if (androidApp) return "unsupported";
   if (native) return nativePermission;
   return pushSupported() ? Notification.permission : "unsupported";
 }
 
 export async function subscribeToPush() {
+  if (androidApp) return { ok: false, error: "Notifications aren't available on Android yet." };
   if (native) {
     try {
       let p = await PushNotifications.checkPermissions();
@@ -165,7 +175,7 @@ export async function subscribeToPush() {
 }
 
 export async function unsubscribeFromPush() {
-  if (native) return { ok: true };
+  if (native || androidApp) return { ok: true };
   if (!pushSupported()) return { ok: true };
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.getSubscription();

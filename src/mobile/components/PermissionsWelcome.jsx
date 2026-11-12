@@ -4,7 +4,7 @@
 // prompt. Shown once per install; "Continue" always closes it, whatever was
 // chosen — Apple requires the app to work without either permission.
 import { useState } from "react";
-import { subscribeToPush } from "../lib/pushSubscribe";
+import { subscribeToPush, pushSupported } from "../lib/pushSubscribe";
 import { markPermissionsWelcomeSeen } from "../lib/permissionsWelcome";
 
 function askLocation() {
@@ -90,15 +90,17 @@ export default function PermissionsWelcome({ onClose }) {
         <img src="/logo-mark.svg" alt="" className="w-12 h-auto mb-3" />
         <h2 id="perm-title" className="text-[22px] font-bold leading-tight" style={{ color: "#1C2E38" }}>Welcome to Maidenhead</h2>
         <p className="text-[14px] leading-snug mt-1.5 mb-4" style={{ color: "rgba(28,46,56,0.7)" }}>
-          Get the most out of the app by turning these on. You can change them any time in your iPhone's Settings.
+          Get the most out of the app by turning these on. You can change them any time in your phone's Settings.
         </p>
 
         <Row icon={<PinIcon />} title="Location"
           text="Shows where you are on the town map and what's nearby. Only used while the app is open."
           status={location} onEnable={enableLocation} />
-        <Row icon={<BellIcon />} title="Notifications"
-          text="News, events and offers from around town."
-          status={push} onEnable={enablePush} />
+        {pushSupported() && (
+          <Row icon={<BellIcon />} title="Notifications"
+            text="News, events and offers from around town."
+            status={push} onEnable={enablePush} />
+        )}
 
         {note && <p className="text-[12px] mt-1 mb-2" style={{ color: "rgba(28,46,56,0.6)" }}>{note}</p>}
 

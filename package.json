@@ -10,9 +10,12 @@
     "preview": "vite preview",
     "build:ios": "vite build --outDir dist-ios --emptyOutDir && cap sync ios",
     "icons:ios": "node scripts/ios-assets.mjs",
-    "release:ios": "sh scripts/ios-release.sh"
+    "release:ios": "sh scripts/ios-release.sh",
+    "release:android": "sh scripts/android-release.sh",
+    "icons:android": "node scripts/android-assets.mjs"
   },
   "dependencies": {
+    "@capacitor/android": "^8.6.0",
     "@capacitor/app": "^8.1.2",
     "@capacitor/core": "^8.6.0",
     "@capacitor/ios": "^8.6.0",

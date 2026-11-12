@@ -5,6 +5,7 @@ import PermissionsWelcome from "./components/PermissionsWelcome";
 import CookieBanner from "../components/CookieBanner";
 import { shouldShowPermissionsWelcome } from "./lib/permissionsWelcome";
 import { Capacitor } from "@capacitor/core";
+import { App as CapApp } from "@capacitor/app";
 import SplashScreen from "./pages/SplashScreen";
 import HomeScreen from "./pages/HomeScreen";
 import WhatsOnScreen from "./pages/WhatsOnScreen";
@@ -53,6 +54,21 @@ export default function MobileApp() {
   useEffect(() => {
     refreshNativePush();
     return onNativePushOpened((path) => navigate(path));
+  }, [navigate]);
+
+  // Android's back button (or back gesture): one screen back, like the app's
+  // own back arrow. From Home it sends the app to the background, the way
+  // Android apps do, rather than closing it. Without this, back closed the
+  // app from any screen.
+  useEffect(() => {
+    if (Capacitor.getPlatform() !== "android") return undefined;
+    const handle = CapApp.addListener("backButton", ({ canGoBack }) => {
+      const path = window.location.pathname.replace(/\/+$/, "");
+      if (path === "/mobile/home" || path === "/mobile") CapApp.minimizeApp();
+      else if (canGoBack) navigate(-1);
+      else navigate("/mobile/home", { replace: true });
+    });
+    return () => { handle.then((h) => h.remove()); };
   }, [navigate]);
 
   // Service worker scoped to /mobile/ only — never touches the rest of the
