@@ -390,8 +390,19 @@ function pushFromRow(r) {
     reach: r.reach,
     // How many devices it was sent to; reach is how many confirmed it.
     tried: r.tried ?? null,
+    // Of the devices reached, how many had opened the app in the last 30 days.
+    activeReach: r.active_reach ?? null,
     sentAt: (r.sent_at ?? "").slice(0, 16).replace("T", " "),
   };
+}
+
+// Devices signed up for notifications, and how many someone has opened the
+// app on recently (push_device_summary, supabase/sql/push_active_devices_2026_11.sql).
+export async function getPushDeviceSummary() {
+  const { data, error } = await supabase.rpc("push_device_summary");
+  if (error) return null;
+  const r = Array.isArray(data) ? data[0] : data;
+  return r ? { registered: r.registered, active30: r.active_30d, active7: r.active_7d, ios: r.ios, web: r.web } : null;
 }
 
 export async function getPushHistory() {

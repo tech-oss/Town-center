@@ -148,7 +148,8 @@ function toRow(listing) {
     other_amenities: listing.otherAmenities || null,
     star_rating: listing.starRating,
     why_choose_us: listing.whyChooseUs,
-    stats: listing.stats,
+    // Empty stat tiles (the editor always shows four) aren't saved.
+    stats: (listing.stats ?? []).filter((s) => String(s?.value ?? "").trim() || String(s?.label ?? "").trim()),
     skills: listing.skills ?? [],
     portfolio: listing.portfolio ?? [],
     working_with_me: listing.workingWithMe ?? {},

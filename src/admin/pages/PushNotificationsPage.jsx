@@ -3,7 +3,7 @@ import useFetch from "../../hooks/useFetch";
 import {
   getPushHistory, sendPush, warmPushService,
   getPushRequests, approvePushRequest, rejectPushRequest, countPendingPushRequests,
-  getPushNotificationStats,
+  getPushNotificationStats, getPushDeviceSummary,
 } from "../../api/admin";
 import ArticleTypeahead from "../components/ArticleTypeahead";
 import LoadingState from "../components/LoadingState";
@@ -59,6 +59,7 @@ function ComposeTab() {
   const [form, setForm] = useState({ title: "", body: "", url: "", audience: "all", web: true, mobile: true, notifType: "simple", attachedArticle: null });
   const [nonce, setNonce] = useState(0);
   const { data: fetchedHistory } = useFetch(getPushHistory, [nonce]);
+  const { data: devices } = useFetch(getPushDeviceSummary, [nonce]);
   const history = fetchedHistory ?? [];
   const [toast, setToast] = useState(null);
   const [confirm, setConfirm] = useState(false);
@@ -103,7 +104,7 @@ function ComposeTab() {
     if (result.delivery?.error) {
       notify(`Recorded — delivery isn't live yet (${result.delivery.error}).`);
     } else if (result.delivery?.queued) {
-      notify(`Sending to ${result.delivery.total} subscribed device(s) — it goes out within a minute or two.`);
+      notify(`Sending now${typeof result.delivery.active === "number" ? ` — ${result.delivery.active} active device(s)` : ""} (${result.delivery.total} signed up). It goes out within a minute or two.`);
     } else if (result.delivery) {
       notify(`Sent to ${result.delivery.sent}/${result.delivery.total} subscribed device(s).`);
     } else {
@@ -121,6 +122,13 @@ function ComposeTab() {
         {/* Compose form */}
         <div className="bg-white rounded-2xl p-6 flex flex-col gap-5" style={{ boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)", border: "1px solid rgba(16,24,40,0.08)" }}>
           <h2 className="font-bold text-base" style={{ color: "#1E293B" }}>Compose Notification</h2>
+          {devices && (
+            <p className="text-xs -mt-3" style={{ color: "#6B7280" }}>
+              <strong style={{ color: "#1E293B" }}>{devices.active30}</strong> device{devices.active30 === 1 ? "" : "s"} used the app in the last 30 days
+              {" "}({devices.active7} in the last 7). {devices.registered} signed up in all — the rest are mostly
+              older installs of the app on phones that now have a newer one, which Apple removes over time.
+            </p>
+          )}
 
           {/* Notification type */}
           <div className="flex flex-col gap-2">
@@ -248,9 +256,11 @@ function ComposeTab() {
                       unguarded, which threw and blanked the whole page the
                       moment the history had a single row in it. */}
                   <span className="text-[11px]" style={{ color: "#9CA3AF" }}>
-                    · {n.audience}{typeof n.reach === "number"
-                      ? ` · ${n.reach.toLocaleString()}${typeof n.tried === "number" && n.tried > n.reach ? ` of ${n.tried.toLocaleString()}` : ""} reached`
-                      : ""}
+                    · {n.audience}{typeof n.activeReach === "number"
+                      ? ` · reached ${n.activeReach.toLocaleString()} active device${n.activeReach === 1 ? "" : "s"} (${n.reach.toLocaleString()} of ${n.tried.toLocaleString()} signed up)`
+                      : typeof n.reach === "number"
+                        ? ` · ${n.reach.toLocaleString()}${typeof n.tried === "number" && n.tried > n.reach ? ` of ${n.tried.toLocaleString()}` : ""} reached`
+                        : ""}
                   </span>
                 </div>
               </div>
@@ -298,7 +308,7 @@ function RequestsTab({ notify, onCountChange }) {
       if (delivery?.error) {
         notify(`Approved and recorded — delivery isn't live yet (${delivery.error}).`);
       } else if (delivery?.queued) {
-        notify(`Approved — sending to ${delivery.total} subscribed device(s) within a minute or two.`);
+        notify(`Approved — sending to ${typeof delivery.active === "number" ? `${delivery.active} active device(s) (${delivery.total} signed up)` : `${delivery.total} device(s)`} within a minute or two.`);
       } else if (delivery) {
         notify(`Approved — sent to ${delivery.sent}/${delivery.total} subscribed device(s).`);
       } else {

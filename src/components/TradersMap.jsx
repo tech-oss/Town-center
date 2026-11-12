@@ -222,7 +222,7 @@ function MapLayer({ brands, activeBrand, onSelectBrand, onReadMore, onNavigate, 
 const FILTERS = [
   { key: "all",       label: "All",              sections: null },
   { key: "eat-drink", label: "Eat & Drink",      sections: ["food-drink"] },
-  { key: "shop",      label: "Shop",             sections: ["shopping"] },
+  { key: "shop",      label: "Shops & Local Services", sections: ["shopping"] },
   { key: "services",  label: "Trades & Professionals", sections: ["services", "health-beauty"] },
   { key: "see-do",    label: "See & Do",         sections: ["see-do"] },
   { key: "stay",      label: "Stay",             sections: ["stay"] },

@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { announcePushFeedChange } from "./pushFeed";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { App } from "@capacitor/app";
 import { linkTarget } from "./appLinks";
@@ -67,7 +68,14 @@ export async function markNativePushSeen() {
   try { await supabase.rpc("push_mark_seen", { p_endpoint: endpoint }); } catch { /* recounted next send */ }
 }
 if (native) {
-  App.addListener("appStateChange", ({ isActive }) => { if (isActive) markNativePushSeen(); });
+  App.addListener("appStateChange", ({ isActive }) => {
+    if (!isActive) return;
+    markNativePushSeen();
+    // Back from the background: a notification may have come in meanwhile.
+    announcePushFeedChange();
+  });
+  // Arrived while the app was open: the bell's number goes up straight away.
+  PushNotifications.addListener("pushNotificationReceived", () => announcePushFeedChange());
 }
 
 let nativePermission = "default";

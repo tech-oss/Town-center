@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import MobileShell from "../components/MobileShell";
 import useSiteSection from "../../hooks/useSiteSection";
 import NotificationTray from "../components/NotificationTray";
-import { getPushFeed, markPushFeedSeen, clearPushFeedItems } from "../lib/pushFeed";
+import { getPushFeed, markPushFeedSeen, clearPushFeedItems, PUSH_FEED_EVENT } from "../lib/pushFeed";
 import useTapReveal from "../../hooks/useTapReveal";
 import useFetch from "../../hooks/useFetch";
 import { getHomepageEvents, getHomepageStories, getSpotlightPosts } from "../../api";
@@ -74,11 +74,28 @@ export default function HomeScreen() {
   // What admin has sent to phones. Fetched again whenever the bell is
   // opened, so a notification that just arrived is in the list.
   const [pushFeed, setPushFeed] = useState(null);
+  // Read again when the app comes back to the front, when a notification
+  // arrives while it's open, when the page becomes visible, and every two
+  // minutes while it's showing. It used to be read only when this screen
+  // opened, so a notification that came in meanwhile showed no number.
+  const [feedTick, setFeedTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setFeedTick((t) => t + 1);
+    const onVisible = () => { if (document.visibilityState === "visible") bump(); };
+    window.addEventListener(PUSH_FEED_EVENT, bump);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = setInterval(() => { if (document.visibilityState === "visible") bump(); }, 120_000);
+    return () => {
+      window.removeEventListener(PUSH_FEED_EVENT, bump);
+      document.removeEventListener("visibilitychange", onVisible);
+      clearInterval(timer);
+    };
+  }, []);
   useEffect(() => {
     let cancelled = false;
-    getPushFeed().then((f) => { if (!cancelled) setPushFeed(f); }).catch(() => { if (!cancelled) setPushFeed([]); });
+    getPushFeed().then((f) => { if (!cancelled) setPushFeed(f); }).catch(() => { if (!cancelled) setPushFeed((prev) => prev ?? []); });
     return () => { cancelled = true; };
-  }, [notificationsOpen]);
+  }, [notificationsOpen, feedTick]);
   const unreadCount = notificationsOpen ? 0 : (pushFeed ?? []).filter((n) => n.unread).length;
   // Only true once the video is actually playing. It used to start true, so
   // when iOS blocked autoplay (Low Power Mode does) the button showed

@@ -468,11 +468,17 @@ export function ProgressSteps({ steps }) {
 }
 
 // ─── Stat tile editor (4 value/label pairs) ───────────────────────────────────
+// Always four slots — the profile shows four tiles. It used to list only the
+// tiles a business already had, so one with none had nowhere to type. Empty
+// slots are dropped when the listing is saved (toRow), so clearing a tile
+// removes it.
+const STAT_SLOTS = 4;
 export function StatTilesEditor({ stats, onChange }) {
-  function set(i, key, v) { onChange(stats.map((s, idx) => (idx === i ? { ...s, [key]: v } : s))); }
+  const slots = Array.from({ length: STAT_SLOTS }, (_, i) => stats?.[i] ?? { value: "", label: "" });
+  function set(i, key, v) { onChange(slots.map((s, idx) => (idx === i ? { ...s, [key]: v } : s))); }
   return (
     <div className="grid sm:grid-cols-2 gap-3">
-      {stats.map((s, i) => (
+      {slots.map((s, i) => (
         <div key={i} className="rounded-xl p-3 flex gap-2" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc" }}>
           <input value={s.value} onChange={(e) => set(i, "value", e.target.value)} placeholder="e.g. 10+"
             className="w-20 rounded-lg px-2 py-2 text-xs outline-none text-center font-bold" style={INPUT} />

@@ -126,6 +126,13 @@ type Outcome = { ok: boolean; status?: number; reason?: string; host?: string; a
 
 // The address no longer reaches the app: deleted, reinstalled, or made for
 // an earlier build of the app (a different bundle ID).
+// A device someone opened the app on in the last 30 days (seen_at is set on
+// launch). Older ones are usually an earlier install of the app on a phone
+// that now has a new address.
+const ACTIVE_MS = 30 * 86_400_000;
+// deno-lint-ignore no-explicit-any
+const isActive = (sub: any) => !!sub?.seen_at && Date.now() - new Date(sub.seen_at).getTime() < ACTIVE_MS;
+
 const GONE_REASONS = new Set(["Unregistered", "BadDeviceToken", "DeviceTokenNotForTopic"]);
 // Worth one more try a moment later.
 const TRANSIENT_STATUS = new Set([429, 500, 502, 503, 504]);
@@ -342,6 +349,9 @@ Deno.serve(async (req) => {
     })));
 
     const sent = results.filter((r) => r.ok).length;
+    // Of those, devices someone has opened the app on in the last 30 days —
+    // an old install's address is still accepted by Apple for a while.
+    const activeReach = results.filter((r, i) => r.ok && isActive(targets[i])).length;
     // Per device, without its address: what Apple / the browser push service said.
     const outcomes = results.map((r, i) => ({
       platform: targets[i].platform ?? "web",
@@ -351,7 +361,7 @@ Deno.serve(async (req) => {
     }));
     // The admin's list of sent notifications shows how many devices it reached.
     if (!check && notificationId) {
-      await supabase.from("push_notifications").update({ reach: sent, tried: targets.length }).eq("id", notificationId);
+      await supabase.from("push_notifications").update({ reach: sent, tried: targets.length, active_reach: activeReach }).eq("id", notificationId);
     }
     return { sent, outcomes, removed: goneIds.length };
   };
@@ -361,7 +371,7 @@ Deno.serve(async (req) => {
   // the background (reach is filled in when it's done).
   if (hasIos && Date.now() - apnsJwtAt < 3 * 60 * 1000) {
     runAfterReply(deliver());
-    return json({ queued: true, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length });
+    return json({ queued: true, total: targets.length, active: targets.filter(isActive).length, iosSkipped: (subs?.length ?? 0) - targets.length });
   }
   const { sent, outcomes, removed } = await deliver();
   return json({ sent, total: targets.length, iosSkipped: (subs?.length ?? 0) - targets.length, removed, outcomes });

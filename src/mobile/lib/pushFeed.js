@@ -10,6 +10,14 @@ function lastSeen() {
   try { return Number(localStorage.getItem(SEEN_KEY)) || 0; } catch { return 0; }
 }
 
+// "Something may be new — read the list again." Sent when the app comes back
+// to the front or a notification arrives while it's open (pushSubscribe.js);
+// the home screen's bell listens, so its number never sits stale.
+export const PUSH_FEED_EVENT = "mh:push-feed";
+export function announcePushFeedChange() {
+  try { window.dispatchEvent(new Event(PUSH_FEED_EVENT)); } catch { /* next open re-reads */ }
+}
+
 export function markPushFeedSeen() {
   try { localStorage.setItem(SEEN_KEY, String(Date.now())); } catch { /* badge shows again */ }
 }
