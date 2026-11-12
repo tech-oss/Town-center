@@ -102,7 +102,13 @@ async function applyListingIdentity(user) {
     .eq("business_id", user.id)
     .maybeSingle();
   if (!data) return user;
-  return { ...user, businessName: data.name ?? user.businessName, businessType: data.business_type ?? user.businessType };
+  // Admin's Register Business form saves Services as "freelancer" (the portal's
+  // own sign-up saves "services"); they're the same type. Every page here
+  // checks for "services", so a tradesperson admin had registered got the
+  // cut-down listing editor — no Services, Areas Covered, Stats or Why
+  // Choose Us.
+  const businessType = data.business_type === "freelancer" ? "services" : data.business_type;
+  return { ...user, businessName: data.name ?? user.businessName, businessType: businessType ?? user.businessType };
 }
 
 // Billing fields (plan, planStatus, renewalDate, monthlyFee, isMultiSite,

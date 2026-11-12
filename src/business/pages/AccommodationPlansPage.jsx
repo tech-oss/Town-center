@@ -26,6 +26,15 @@ import {
 
 // "£49", "£1,290", "£29.99".
 const money = (n) => `£${Number(n).toLocaleString("en-GB", { minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2, maximumFractionDigits: 2 })}`;
+// What a plan costs per property per day: the year's price (12 months, or the
+// yearly price) over 365 days and the plan's properties, rounded up to the
+// penny — £49/month for 5 properties is "33p", £490/year "27p".
+function perPropertyPerDay(tier, interval) {
+  const yearly = interval === "year" ? Number(tier.yearly_price) : Number(tier.monthly_price) * 12;
+  if (!(yearly > 0) || !(tier.max_properties > 0)) return null;
+  const pence = Math.ceil((yearly * 100) / 365 / tier.max_properties);
+  return pence < 100 ? `${pence}p` : `£${(pence / 100).toFixed(2)}`;
+}
 const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "the end of your billing period");
 const USING_SLOT = new Set(["live", "pending", "rejected"]);
 
@@ -283,7 +292,13 @@ export default function AccommodationPlansPage() {
             return (
               <div key={t.key} className="bg-white rounded-2xl p-5 flex flex-col gap-3" style={{ ...CARD, border: isCurrent ? `2px solid ${SAGE}` : CARD.border }}>
                 <p className="text-base font-bold" style={{ color: FOREST }}>{t.name}</p>
-                <p className="text-2xl font-bold" style={{ color: FOREST }}>
+                {!free && perPropertyPerDay(t, interval) && (
+                  <p className="text-2xl font-bold -mt-1" style={{ color: SAGE }}>
+                    {perPropertyPerDay(t, interval)}
+                    <span className="text-sm font-semibold" style={{ color: MUTED }}> per property / day</span>
+                  </p>
+                )}
+                <p className={free ? "text-2xl font-bold" : "text-lg font-bold -mt-1"} style={{ color: FOREST }}>
                   {free ? "£0" : money(interval === "year" ? t.yearly_price : t.monthly_price)}
                   <span className="text-xs font-semibold" style={{ color: MUTED }}>{free ? "" : interval === "year" ? " / year" : " / month"}</span>
                 </p>
