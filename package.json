@@ -8,11 +8,13 @@
     "build": "vite build && node scripts/seo-template.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:ios": "vite build --outDir dist-ios --emptyOutDir && cap sync ios",
+    "build:native-web": "vite build --outDir dist-ios --emptyOutDir && node scripts/native-prune.mjs",
+    "build:ios": "npm run build:native-web && cap sync ios",
     "icons:ios": "node scripts/ios-assets.mjs",
     "release:ios": "sh scripts/ios-release.sh",
     "release:android": "sh scripts/android-release.sh",
-    "icons:android": "node scripts/android-assets.mjs"
+    "icons:android": "node scripts/android-assets.mjs",
+    "media:compress": "node scripts/compress-media.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.0",

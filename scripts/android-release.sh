@@ -18,7 +18,7 @@ if [ ! -f "$HOME/maidenhead-android-signing/key.properties" ] && [ -z "$MH_ANDRO
 fi
 
 # The same web build the iPhone app uses.
-npx vite build --outDir dist-ios --emptyOutDir
+npm run build:native-web
 npx cap sync android
 
 cd android

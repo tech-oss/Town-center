@@ -53,9 +53,11 @@ function SectionHead({ eyebrow, to, linkLabel = "See all" }) {
 
 export default function HomeScreen() {
   // Same header video as the website — Site Content → Homepage (the mobile
-  // cut, else the desktop one).
+  // cut, else the desktop one). The built-in desktop video isn't shipped in
+  // the store apps (scripts/native-prune.mjs), so its portrait cut stands in.
   const homeCopy = useSiteSection("homepage");
-  const heroVideo = homeCopy.heroVideoMobile || homeCopy.heroVideo;
+  const desktopVideo = homeCopy.heroVideo === "/videos/hero.mp4" ? "/videos/hero-mobile.mp4" : homeCopy.heroVideo;
+  const heroVideo = homeCopy.heroVideoMobile || desktopVideo;
   const { data: guideList } = useFetch(getHomepageGuides, []);
   const videoRef = useRef(null);
   const { data: events } = useFetch(getHomepageEvents, []);
