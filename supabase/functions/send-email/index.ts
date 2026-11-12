@@ -23,8 +23,9 @@
 // Every send is written to email_log (supabase/sql/email_log_2026_11.sql).
 //
 // Deploy:  supabase functions deploy send-email --project-ref vnnmzppjswiazzrnkjtq
-// Secrets: RESEND_API_KEY, EMAIL_FROM (e.g. "Maidenhead <hello@your-domain>"),
-//          optional EMAIL_REPLY_TO, PORTAL_URL (the business portal's address)
+// Secrets: RESEND_API_KEY, EMAIL_FROM (the no-reply sender, "Maidenhead
+//          <no-reply@mail.maidenhead.com>"), EMAIL_REPLY_TO (where replies go;
+//          hello@maidenhead.com if unset), optional PORTAL_URL
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -38,6 +39,9 @@ const json = (body: unknown, status = 200) =>
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+// Where every reply goes: the one inbox Maidenhead reads. Emails come from
+// the no-reply sender (EMAIL_FROM); "Reply" goes here instead.
+const CONTACT = Deno.env.get("EMAIL_REPLY_TO") || "hello@maidenhead.com";
 const PORTAL = (Deno.env.get("PORTAL_URL") ?? "https://town-center-git-business-d-3e69dd-muhammad-abuzar-s46-projects1.vercel.app").replace(/\/+$/, "");
 
 // ── The email itself ────────────────────────────────────────────────────────
@@ -66,13 +70,15 @@ function html(m: Mail) {
 ${p}${quote}${button}
 </td></tr>
 <tr><td style="padding:16px 26px 22px;border-top:1px solid #EEF1F6;font-size:12px;line-height:1.5;color:#64748B">
+Questions? Reply to this email or write to <a href="mailto:${esc(CONTACT)}" style="color:#1C2E38;font-weight:600">${esc(CONTACT)}</a>.<br>
 You're receiving this because you have a business account on Maidenhead.com.
 </td></tr>
 </table></td></tr></table></body></html>`;
 }
 
 function text(m: Mail) {
-  return [m.heading, "", ...m.paragraphs, ...(m.quote ? ["", m.quote] : []), ...(m.button ? ["", `${m.button.label}: ${m.button.url}`] : [])].join("\n");
+  return [m.heading, "", ...m.paragraphs, ...(m.quote ? ["", m.quote] : []), ...(m.button ? ["", `${m.button.label}: ${m.button.url}`] : []),
+    "", `Questions? Reply to this email or write to ${CONTACT}.`].join("\n");
 }
 
 async function send(event: string, to: string[], m: Mail, ref: string | null) {
@@ -84,7 +90,7 @@ async function send(event: string, to: string[], m: Mail, ref: string | null) {
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from, to, subject: m.subject, html: html(m), text: text(m),
-      ...(Deno.env.get("EMAIL_REPLY_TO") ? { reply_to: Deno.env.get("EMAIL_REPLY_TO") } : {}),
+      reply_to: CONTACT,
     }),
   });
   const body = await res.json().catch(() => ({}));
@@ -216,7 +222,7 @@ const EVENTS: Record<string, (b: Body) => Promise<Result>> = {
       subject: `Your Maidenhead registration for ${biz.name}`,
       heading: "We couldn't approve your registration",
       paragraphs: [firstName(to[0]), `We weren't able to approve ${biz.name} on Maidenhead.com at this time.`,
-        "If you think this is a mistake, reply to this email and we'll take another look."],
+        `If you think this is a mistake, reply to this email or write to ${CONTACT} and we'll take another look.`],
       quote: biz.admin_note || undefined,
     }, businessId);
     return { sent: to.length };
