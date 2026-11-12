@@ -1,5 +1,6 @@
 // Sends a notification to every subscribed device matching the requested
-// audience: Web Push for browsers, APNs for the iPhone app. Called by the
+// audience: Web Push for browsers, APNs for the iPhone app, Firebase Cloud
+// Messaging (FCM) for the Android app. Called by the
 // admin panel (src/api/admin/siteContent.js sendPush, pushRequests.js) right
 // after it records the send in push_notifications.
 //
@@ -7,7 +8,7 @@
 // silent device check ({ check: true }), which a script can also run with
 // the PUSH_CHECK_SECRET function secret in an x-push-check header.
 //
-// What Apple / the browser answered for each device is kept in
+// What Apple / Google / the browser answered for each device is kept in
 // push_delivery_log (supabase/sql/push_delivery_log_2026_11.sql).
 //
 // Uses the service-role key to read push_subscriptions (RLS on that table
@@ -32,6 +33,23 @@ const APNS_KEY_ID = Deno.env.get("APNS_KEY_ID");
 const APNS_TEAM_ID = Deno.env.get("APNS_TEAM_ID") ?? "8J8BUZX9GS";
 const APNS_PRIVATE_KEY = Deno.env.get("APNS_PRIVATE_KEY")?.replace(/\\n/g, "\n");
 const APNS_BUNDLE_ID = Deno.env.get("APNS_BUNDLE_ID") ?? "com.maidenheadapp.maidenheadapp";
+
+// Android app (FCM). FCM_SERVICE_ACCOUNT is the whole JSON key of the Firebase
+// project's service account (Firebase console → Project settings → Service
+// accounts → Generate new private key), set with `supabase secrets set`.
+// Until it's set, Android phones are skipped.
+type ServiceAccount = { project_id: string; client_email: string; private_key: string };
+let FCM: ServiceAccount | null = null;
+try {
+  const raw = Deno.env.get("FCM_SERVICE_ACCOUNT");
+  if (raw) {
+    const parsed = JSON.parse(raw);
+    if (parsed?.project_id && parsed?.client_email && parsed?.private_key) FCM = parsed;
+    else console.error("FCM_SERVICE_ACCOUNT is missing project_id, client_email or private_key");
+  }
+} catch {
+  console.error("FCM_SERVICE_ACCOUNT isn't valid JSON");
+}
 
 const PUSH_CHECK_SECRET = Deno.env.get("PUSH_CHECK_SECRET");
 
@@ -184,6 +202,77 @@ async function sendApns(deviceToken: string, payload: string, check: boolean): P
   return { ...last, gone: last.status === 410 || GONE_REASONS.has(last.reason ?? "") };
 }
 
+// FCM takes a Google access token, swapped for a token signed with the
+// service account's key. It lasts an hour; a new one is fetched after 50
+// minutes, or straight away if Google refuses the old one.
+let fcmAuth: { token: Promise<string>; at: number } | null = null;
+function fcmAccessToken(fresh = false): Promise<string> {
+  if (!fresh && fcmAuth && Date.now() - fcmAuth.at < 50 * 60 * 1000) return fcmAuth.token;
+  const token = (async () => {
+    const key = await importPKCS8(FCM!.private_key, "RS256");
+    const assertion = await new SignJWT({ scope: "https://www.googleapis.com/auth/firebase.messaging" })
+      .setProtectedHeader({ alg: "RS256", typ: "JWT" })
+      .setIssuer(FCM!.client_email)
+      .setAudience("https://oauth2.googleapis.com/token")
+      .setIssuedAt()
+      .setExpirationTime("1h")
+      .sign(key);
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.access_token) throw new Error(`Google refused the service account: ${data.error_description ?? data.error ?? res.status}`);
+    return data.access_token as string;
+  })();
+  const entry = { token, at: Date.now() };
+  fcmAuth = entry;
+  token.catch(() => { if (fcmAuth === entry) fcmAuth = null; });
+  return token;
+}
+
+// The token no longer reaches the app (uninstalled, or its data cleared), or
+// belongs to a different Firebase project.
+const FCM_GONE = new Set(["UNREGISTERED", "SENDER_ID_MISMATCH"]);
+
+async function sendFcm(deviceToken: string, message: Record<string, unknown>): Promise<Outcome> {
+  const host = "fcm.googleapis.com";
+  let attempts = 0;
+  let last: Outcome = { ok: false, attempts: 0 };
+  let detail = "";
+  for (let tryNo = 0; tryNo < 3; tryNo++) {
+    attempts++;
+    let res: Response;
+    try {
+      res = await fetch(`https://${host}/v1/projects/${FCM!.project_id}/messages:send`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${await fcmAccessToken()}`, "content-type": "application/json" },
+        body: JSON.stringify({ message: { ...message, token: deviceToken } }),
+        signal: AbortSignal.timeout(10000),
+      });
+    } catch (e) {
+      last = { ok: false, reason: `network: ${String((e as Error)?.message ?? e).slice(0, 80)}`, host, attempts };
+      if (tryNo < 2) { await wait(400 * (tryNo + 1)); continue; }
+      return last;
+    }
+    if (res.ok) return { ok: true, status: res.status, host, attempts };
+    // deno-lint-ignore no-explicit-any
+    const err: any = (await res.json().catch(() => ({})))?.error ?? {};
+    // deno-lint-ignore no-explicit-any
+    const code = err.details?.find((d: any) => d?.errorCode)?.errorCode ?? err.status ?? String(res.status);
+    detail = String(err.message ?? "");
+    last = { ok: false, status: res.status, reason: `${code}${detail ? `: ${detail.slice(0, 100)}` : ""}`, host, attempts };
+    if (res.status === 401 && tryNo === 0) { await fcmAccessToken(true).catch(() => {}); continue; }
+    if (TRANSIENT_STATUS.has(res.status) && tryNo < 2) { await wait(500 * (tryNo + 1)); continue; }
+    break;
+  }
+  const code = String(last.reason ?? "").split(":")[0];
+  const gone = FCM_GONE.has(code) || (code === "INVALID_ARGUMENT" && /registration token/i.test(detail));
+  return { ...last, gone };
+}
+
 async function sendWeb(sub: { endpoint: string; p256dh: string; auth: string }, payload: string): Promise<Outcome> {
   try {
     await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
@@ -267,6 +356,7 @@ Deno.serve(async (req) => {
   }
 
   const apnsReady = !!(APNS_KEY_ID && APNS_PRIVATE_KEY);
+  const fcmReady = !!FCM;
 
   // Opening the admin Push page renews the token if it's over 35 minutes
   // old, so it has settled with Apple by the time Send is pressed.
@@ -297,7 +387,12 @@ Deno.serve(async (req) => {
   const { data: subs, error } = await query;
   if (error) return json({ error: error.message }, 500);
 
-  const targets = (subs ?? []).filter((sub) => (sub.platform ?? "web") === "ios" ? apnsReady : !check);
+  // A check only goes to phones (a browser can't be sent a silent one), and
+  // each kind of phone only once its push service is set up.
+  const targets = (subs ?? []).filter((sub) => {
+    const kind = sub.platform ?? "web";
+    return kind === "ios" ? apnsReady : kind === "android" ? fcmReady : !check;
+  });
 
   // The number on each iPhone's app icon: notifications sent to phones since
   // that device last opened the app's notification list (this one included).
@@ -320,6 +415,19 @@ Deno.serve(async (req) => {
     if (hasIos) await warmApnsToken(75000);
 
     const webPayload = JSON.stringify({ title, body, url });
+    // Android: shown in the app's "news" channel with its white Maidenhead
+    // icon (android/app/src/main/AndroidManifest.xml); url opens the linked
+    // screen when it's tapped. A check is data only: nothing is shown.
+    const fcmMessage = check
+      ? { data: { check: "1" }, android: { priority: "normal" } }
+      : {
+        notification: { title, body: body ?? "" },
+        ...(url ? { data: { url: String(url) } } : {}),
+        android: {
+          priority: "high",
+          notification: { channel_id: "news", icon: "ic_stat_maidenhead", color: "#1F9BB5", sound: "default" },
+        },
+      };
     const results = await mapLimited(targets, 5, (sub) => sub.platform === "ios"
       ? sendApns(
         sub.endpoint.replace(/^apns:/, ""),
@@ -328,6 +436,8 @@ Deno.serve(async (req) => {
           : JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default", badge: badgeFor(sub) }, url }),
         check,
       )
+      : sub.platform === "android"
+      ? sendFcm(sub.endpoint.replace(/^fcm:/, ""), fcmMessage)
       : sendWeb(sub, webPayload));
 
     // Addresses that no longer reach the app are removed.
@@ -352,7 +462,7 @@ Deno.serve(async (req) => {
     // Of those, devices someone has opened the app on in the last 30 days —
     // an old install's address is still accepted by Apple for a while.
     const activeReach = results.filter((r, i) => r.ok && isActive(targets[i])).length;
-    // Per device, without its address: what Apple / the browser push service said.
+    // Per device, without its address: what Apple / Google / the browser push service said.
     const outcomes = results.map((r, i) => ({
       platform: targets[i].platform ?? "web",
       ok: r.ok,
@@ -379,4 +489,5 @@ Deno.serve(async (req) => {
 
 // Deploy: supabase functions deploy send-push --project-ref vnnmzppjswiazzrnkjtq
 // Secrets (set once): VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT,
-// APNS_KEY_ID, APNS_PRIVATE_KEY, and optionally PUSH_CHECK_SECRET.
+// APNS_KEY_ID, APNS_PRIVATE_KEY, FCM_SERVICE_ACCOUNT, and optionally
+// PUSH_CHECK_SECRET.

@@ -125,8 +125,9 @@ function ComposeTab() {
           {devices && (
             <p className="text-xs -mt-3" style={{ color: "#6B7280" }}>
               <strong style={{ color: "#1E293B" }}>{devices.active30}</strong> device{devices.active30 === 1 ? "" : "s"} used the app in the last 30 days
-              {" "}({devices.active7} in the last 7). {devices.registered} signed up in all — the rest are mostly
-              older installs of the app on phones that now have a newer one, which Apple removes over time.
+              {" "}({devices.active7} in the last 7). {devices.registered} signed up in all
+              {" "}({devices.ios} iPhone, {devices.android} Android, {devices.web} browser) — the rest are mostly
+              older installs of the app on phones that now have a newer one, which Apple and Google remove over time.
             </p>
           )}
 

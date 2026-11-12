@@ -24,3 +24,4 @@ copyFileSync(SPLASH, `${OUT}/splash-dark.png`);
 
 execSync(`npx capacitor-assets generate --android --assetPath ${OUT} --androidProject android`, { stdio: "inherit" });
 console.log("Android icon and splash screen written.");
+await import("./android-notification-icon.mjs");

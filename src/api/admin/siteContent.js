@@ -402,7 +402,7 @@ export async function getPushDeviceSummary() {
   const { data, error } = await supabase.rpc("push_device_summary");
   if (error) return null;
   const r = Array.isArray(data) ? data[0] : data;
-  return r ? { registered: r.registered, active30: r.active_30d, active7: r.active_7d, ios: r.ios, web: r.web } : null;
+  return r ? { registered: r.registered, active30: r.active_30d, active7: r.active_7d, ios: r.ios, android: r.android ?? 0, web: r.web } : null;
 }
 
 export async function getPushHistory() {

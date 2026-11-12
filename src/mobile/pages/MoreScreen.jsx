@@ -23,8 +23,7 @@ const ITEMS = [
 
 // The App Store app leaves out the placeholders (and "Get the App" — it is
 // the app). Apple turns away apps that show unfinished features.
-// "Enable Notifications" only where notifications work (not the Android app
-// until Firebase is set up).
+// "Enable Notifications" only where notifications work (not every browser).
 const VISIBLE_ITEMS = (Capacitor.isNativePlatform() ? ITEMS.filter((i) => !i.soon) : ITEMS)
   .filter((i) => i.key !== "push" || pushSupported());
 

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tint of the Maidenhead mark on notifications (brand teal). -->
+    <color name="notification_accent">#1F9BB5</color>
+    <!-- Android's channel for Maidenhead notifications; the app makes it
+         (src/mobile/lib/pushSubscribe.js) and send-push names it. -->
+    <string name="default_notification_channel_id" translatable="false">news</string>
+</resources>

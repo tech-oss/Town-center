@@ -17,18 +17,33 @@ function urlBase64ToUint8Array(base64) {
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
 }
 
-// In the App Store app, notifications go through Apple's push service: the
-// device token is saved as an 'ios' row in the same table (see
-// supabase/sql/push_ios_2026_10.sql), and send-push delivers it via APNs.
-// Notifications in the App Store app go through Apple (APNs). The Android app
-// has none yet: they need Firebase, which isn't set up, and asking the plugin
-// to register without it crashes the app — so on Android every function here
-// reports notifications as unavailable and never touches the plugin.
+// In the store apps, notifications go through the phone maker's push
+// service instead: Apple's (APNs) on iPhone, Google's (Firebase Cloud
+// Messaging) on Android. The device token is saved in the same table as an
+// 'ios' or 'android' row (supabase/sql/push_ios_2026_10.sql,
+// push_android_2026_11.sql), and send-push delivers to every kind at once.
+// The Android app is built with Firebase's google-services.json
+// (scripts/android-release.sh refuses to build without it: registering for
+// notifications without Firebase crashes the app).
 const platform = Capacitor.getPlatform();
-const native = platform === "ios";
-const androidApp = platform === "android";
+const ios = platform === "ios";
+const android = platform === "android";
+const native = ios || android;
 
-// Resolves with the device token once iOS hands it over.
+// Android shows notifications in a "channel" the person can turn off on its
+// own in the phone's settings; this one is Maidenhead's. Making it again is
+// harmless, so it's done on every launch. send-push names the same id.
+if (android) {
+  PushNotifications.createChannel({
+    id: "news",
+    name: "News & offers",
+    description: "Offers, events and news from Maidenhead",
+    importance: 4, // pops up on screen, with sound
+    visibility: 1,
+  }).catch(() => {});
+}
+
+// Resolves with the device token once the phone hands it over.
 function registerNative() {
   return new Promise((resolve, reject) => {
     let done = false;
@@ -47,16 +62,16 @@ function registerNative() {
 }
 
 // This phone's own entry, remembered so it can be marked as caught up (the
-// number on the app icon) and replaced when iOS issues a new token.
+// number on the app icon) and replaced when the phone issues a new token.
 const ENDPOINT_KEY = "mh_push_endpoint";
 function savedEndpoint() {
   try { return localStorage.getItem(ENDPOINT_KEY); } catch { return null; }
 }
 
 async function saveNativeToken(token) {
-  const endpoint = `apns:${token}`;
+  const endpoint = ios ? `apns:${token}` : `fcm:${token}`;
   const previous = savedEndpoint();
-  const { error } = await supabase.from("push_subscriptions").insert({ endpoint, platform: "ios", seen_at: new Date().toISOString() });
+  const { error } = await supabase.from("push_subscriptions").insert({ endpoint, platform, seen_at: new Date().toISOString() });
   if (error && !error.message.includes("duplicate")) throw error;
   // Removing a subscription takes its exact address (push_unsubscribe), so
   // only this device can drop its own.
@@ -66,7 +81,8 @@ async function saveNativeToken(token) {
 
 // The app being opened clears the number on its icon (SceneDelegate.swift),
 // so the push service is told this phone has seen everything so far and the
-// next notification's number starts again from 1.
+// next notification's number starts again from 1. On both phones it also
+// marks the device as in use (the admin's "used in the last 30 days").
 export async function markNativePushSeen() {
   if (!native) return;
   const endpoint = savedEndpoint();
@@ -91,7 +107,7 @@ if (native) {
     .catch(() => {});
 }
 
-// Already allowed: re-register on every launch, since iOS can issue a new token.
+// Already allowed: re-register on every launch, since the phone can issue a new token.
 export async function refreshNativePush() {
   if (!native) return;
   const p = await PushNotifications.checkPermissions();
@@ -114,32 +130,33 @@ export function onNativePushOpened(go) {
 }
 
 export async function nativePushPermission() {
-  if (androidApp) return "unsupported";
   if (!native) return pushPermission();
   const p = await PushNotifications.checkPermissions();
   return p.receive === "granted" ? "granted" : p.receive === "denied" ? "denied" : "default";
 }
 
 export function pushSupported() {
-  if (androidApp) return false;
   if (native) return true;
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
 export function pushPermission() {
-  if (androidApp) return "unsupported";
   if (native) return nativePermission;
   return pushSupported() ? Notification.permission : "unsupported";
 }
 
 export async function subscribeToPush() {
-  if (androidApp) return { ok: false, error: "Notifications aren't available on Android yet." };
   if (native) {
     try {
       let p = await PushNotifications.checkPermissions();
       if (p.receive === "prompt" || p.receive === "prompt-with-rationale") p = await PushNotifications.requestPermissions();
       if (p.receive !== "granted") {
-        return { ok: false, error: "Notifications are turned off for Maidenhead. You can turn them on in the iPhone's Settings app." };
+        return {
+          ok: false,
+          error: ios
+            ? "Notifications are turned off for Maidenhead. You can turn them on in the iPhone's Settings app."
+            : "Notifications are turned off for Maidenhead. You can turn them on in the phone's Settings → Apps → Maidenhead → Notifications.",
+        };
       }
       nativePermission = "granted";
       await saveNativeToken(await registerNative());
@@ -175,7 +192,7 @@ export async function subscribeToPush() {
 }
 
 export async function unsubscribeFromPush() {
-  if (native || androidApp) return { ok: true };
+  if (native) return { ok: true };
   if (!pushSupported()) return { ok: true };
   const registration = await navigator.serviceWorker.ready;
   const subscription = await registration.pushManager.getSubscription();

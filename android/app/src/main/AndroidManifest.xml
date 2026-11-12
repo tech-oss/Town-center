@@ -20,6 +20,18 @@
             </intent-filter>
         </activity>
 
+        <!-- Notifications (Firebase Cloud Messaging): the white Maidenhead mark
+             in teal, in the "news" channel, unless a message says otherwise. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_maidenhead" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/notification_accent" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="@string/default_notification_channel_id" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -32,6 +44,8 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+ asks before an app may show notifications. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- The town map shows where you are, only while the app is open. -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />

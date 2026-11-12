@@ -17,6 +17,13 @@ if [ ! -f "$HOME/maidenhead-android-signing/key.properties" ] && [ -z "$MH_ANDRO
   echo "The Google Play upload key isn't on this Mac (~/maidenhead-android-signing)."; exit 1
 fi
 
+# Firebase's config for this app (Firebase console → Project settings → Your
+# apps → Android, package com.themaidenheadapp.app). Without it the app crashes
+# when someone turns notifications on.
+if [ ! -s android/app/google-services.json ]; then
+  echo "android/app/google-services.json is missing (download it from the Firebase console)."; exit 1
+fi
+
 # The same web build the iPhone app uses.
 npm run build:native-web
 npx cap sync android
