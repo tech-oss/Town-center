@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "616818703710",
+    "project_id": "maidenhead-3bca7",
+    "storage_bucket": "maidenhead-3bca7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616818703710:android:e35f93fccf8c081a36e3cf",
+        "android_client_info": {
+          "package_name": "com.themaidenheadapp.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDE55yZoQC3OgCKhTrusKyNyIdb2C0zHxs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
