@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { cleanPushLink } from "./pushLink";
 
 // Site-owned content: the town's own events and news, projects, homepage
 // spotlight and featured stories, editorial articles and area guides, plus the
@@ -425,11 +426,12 @@ export function warmPushService() {
 
 export async function sendPush(form) {
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
+  const url = cleanPushLink(form.url);
   const article = form.attachedArticle;
   const { data, error } = await supabase.from("push_notifications").insert({
     title: form.title,
     body: form.body ?? null,
-    url: form.url || null,
+    url,
     audience: form.audience ?? "all",
     channels,
     notif_type: form.notifType === "attach" ? "rich" : "simple",
@@ -444,10 +446,10 @@ export async function sendPush(form) {
   try {
     // Tried twice: the push service can fail on its first start after a quiet spell.
     let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all", notificationId: data.id },
+      body: { title: form.title, body: form.body, url, audience: form.audience ?? "all", notificationId: data.id },
     });
     if (fnError) ({ data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: form.title, body: form.body, url: form.url, audience: form.audience ?? "all", notificationId: data.id },
+      body: { title: form.title, body: form.body, url, audience: form.audience ?? "all", notificationId: data.id },
     }));
     delivery = fnError ? { error: fnError.message } : result;
   } catch (e) {

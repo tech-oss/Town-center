@@ -1,4 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
+import { cleanPushLink } from "./pushLink";
 import { logBusinessActivity } from "./businessActivity";
 
 // Push notifications a business has asked Maidenhead to send.
@@ -67,7 +68,7 @@ export async function approvePushRequest(request) {
     .insert({
       title: request.title,
       body: request.body || null,
-      url: request.url || null,
+      url: cleanPushLink(request.url),
       audience: request.audience ?? "all",
       channels: request.channels ?? [],
       notif_type: request.notifType ?? "simple",
@@ -84,10 +85,10 @@ export async function approvePushRequest(request) {
   try {
     // Tried twice: the push service can fail on its first start after a quiet spell.
     let { data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all", notificationId: sent.id },
+      body: { title: request.title, body: request.body, url: cleanPushLink(request.url), audience: request.audience ?? "all", notificationId: sent.id },
     });
     if (fnError) ({ data: result, error: fnError } = await supabase.functions.invoke("send-push", {
-      body: { title: request.title, body: request.body, url: request.url, audience: request.audience ?? "all", notificationId: sent.id },
+      body: { title: request.title, body: request.body, url: cleanPushLink(request.url), audience: request.audience ?? "all", notificationId: sent.id },
     }));
     delivery = fnError ? { error: fnError.message } : result;
   } catch (e) {

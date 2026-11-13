@@ -182,7 +182,9 @@ function ComposeTab() {
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Link / deep link (optional)</span>
             <input value={form.url} onChange={(e) => set("url", e.target.value)} placeholder="/news or https://…" className="rounded-xl px-3 py-2.5 text-sm outline-none font-mono" style={field} />
-            <span className="text-[11px]" style={{ color: "#9CA3AF" }}>Where users land when they tap the notification. {form.attachedArticle ? "Auto-filled from the attached article — still editable." : ""}</span>
+            <span className="text-[11px]" style={{ color: "#9CA3AF" }}>{form.attachedArticle
+                ? "Auto-filled from the attached article — still editable."
+                : "A Maidenhead page (e.g. /offers or a business's page) opens that screen in the app; another website opens in the phone's browser. Leave empty and tapping opens the message itself."}</span>
           </label>
 
           {/* Channels */}
