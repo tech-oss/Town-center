@@ -11,16 +11,29 @@ self.addEventListener("push", (event) => {
   let data = {};
   try { data = event.data?.json() ?? {}; } catch { data = { body: event.data?.text() }; }
   const title = data.title || "Maidenhead";
+  const own = data.id ? `/mobile/notifications/${data.id}` : "/mobile/";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body,
       icon: "/mobile-icons/icon-192.png",
       badge: "/mobile-icons/icon-192.png",
-      // No link: open the notification itself in the app, to read in full.
-      data: { url: data.url || (data.id ? `/mobile/notifications/${data.id}` : "/mobile/") },
+      // No link, or one to the website's front page: open the notification
+      // itself in the app, to read in full (as the iPhone and Android apps do).
+      data: { url: data.url && !isFrontPage(data.url) ? data.url : own },
     })
   );
 });
+
+// www.maidenhead.com (or this site's own front page), typed as the link.
+function isFrontPage(url) {
+  try {
+    const u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("/") ? url : `https://${url}`, self.location.origin);
+    const ours = u.origin === self.location.origin || /(^|\.)maidenhead\.com$/i.test(u.hostname);
+    return ours && (u.pathname === "/" || u.pathname === "");
+  } catch {
+    return false;
+  }
+}
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
