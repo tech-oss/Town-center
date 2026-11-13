@@ -297,7 +297,7 @@ async function storyMeta(slug, origin) {
 }
 
 async function guideMeta(slug, origin) {
-  const g = await one(`neighbourhood_guides?slug=eq.${enc(slug)}&status=eq.Published&select=slug,title,area,body,hero_image,thumbnail,created_at,updated_at&limit=1`);
+  const g = await one(`neighbourhood_guides?slug=eq.${enc(slug)}&status=eq.Published&show_on_platform=eq.true&select=slug,title,area,body,hero_image,thumbnail,created_at,updated_at&limit=1`);
   if (!g) return null;
   return {
     path: `/guides/${g.slug}`,

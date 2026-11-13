@@ -32,7 +32,7 @@ export default async function handler() {
     all("public_business_articles", "select=id,date&order=id"),
     all("news_offers", "status=eq.Published&select=slug,updated_at&order=slug"),
     all("feature_articles", "status=eq.Live&select=slug,updated_at&order=slug"),
-    all("neighbourhood_guides", "status=eq.Published&select=slug,updated_at&order=slug"),
+    all("neighbourhood_guides", "status=eq.Published&show_on_platform=eq.true&select=slug,updated_at&order=slug"),
   ]);
   const [biz, events, articles, news, stories, guides] = settled.map((r) => (r.status === "fulfilled" ? r.value : []));
 

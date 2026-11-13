@@ -21,11 +21,14 @@ function fromRow(r) {
   };
 }
 
+// What the website and app show: published guides that admin hasn't turned
+// "Show on Platform" off for (Neighbourhood Guides in admin).
 export async function getGuides() {
   const { data, error } = await supabase
     .from("neighbourhood_guides")
     .select("*")
     .eq("status", "Published")
+    .eq("show_on_platform", true)
     .order("sort_order");
   if (error) throw error;
   return (data ?? []).map(fromRow);
@@ -48,6 +51,7 @@ export async function getGuideBySlug(slug) {
     .select("*")
     .eq("slug", slug)
     .eq("status", "Published")
+    .eq("show_on_platform", true)
     .maybeSingle();
   if (error) throw error;
   return data ? fromRow(data) : null;
