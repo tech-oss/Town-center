@@ -414,7 +414,9 @@ Deno.serve(async (req) => {
   const deliver = async () => {
     if (hasIos) await warmApnsToken(75000);
 
-    const webPayload = JSON.stringify({ title, body, url });
+    // id: which notification this is, so tapping one with no link opens it
+    // in the app (/mobile/notifications/:id) to be read in full.
+    const webPayload = JSON.stringify({ title, body, url, id: notificationId });
     // Android: shown in the app's "news" channel with its white Maidenhead
     // icon (android/app/src/main/AndroidManifest.xml); url opens the linked
     // screen when it's tapped. A check is data only: nothing is shown.
@@ -422,7 +424,10 @@ Deno.serve(async (req) => {
       ? { data: { check: "1" }, android: { priority: "normal" } }
       : {
         notification: { title, body: body ?? "" },
-        ...(url ? { data: { url: String(url) } } : {}),
+        data: {
+          ...(url ? { url: String(url) } : {}),
+          ...(notificationId ? { id: String(notificationId) } : {}),
+        },
         android: {
           priority: "high",
           notification: { channel_id: "news", icon: "ic_stat_maidenhead", color: "#1F9BB5", sound: "default" },
@@ -433,7 +438,7 @@ Deno.serve(async (req) => {
         sub.endpoint.replace(/^apns:/, ""),
         check
           ? JSON.stringify({ aps: { "content-available": 1 } })
-          : JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default", badge: badgeFor(sub) }, url }),
+          : JSON.stringify({ aps: { alert: { title, body: body ?? "" }, sound: "default", badge: badgeFor(sub) }, url, id: notificationId }),
         check,
       )
       : sub.platform === "android"

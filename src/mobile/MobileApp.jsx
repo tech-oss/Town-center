@@ -25,6 +25,7 @@ import StayListingScreen from "./pages/StayListingScreen";
 import WorkScreen from "./pages/WorkScreen";
 import WorkplaceDevelopmentScreen from "./pages/WorkplaceDevelopmentScreen";
 import StoryDetailScreen from "./pages/StoryDetailScreen";
+import NotificationScreen from "./pages/NotificationScreen";
 import EventDetailScreen from "./pages/EventDetailScreen";
 import NewsDetailScreen from "./pages/NewsDetailScreen";
 import StayDetailScreen from "./pages/StayDetailScreen";
@@ -141,6 +142,7 @@ export default function MobileApp() {
       <Route path="work" element={<WorkScreen />} />
       <Route path="work/developments/:slug" element={<WorkplaceDevelopmentScreen />} />
       <Route path="story/:slug" element={<StoryDetailScreen />} />
+      <Route path="notifications/:id" element={<NotificationScreen />} />
       <Route path="event/:slug" element={<EventDetailScreen />} />
       <Route path="news/:slug" element={<NewsDetailScreen />} />
       <Route path="stay/:kind/:slug" element={<StayDetailScreen />} />

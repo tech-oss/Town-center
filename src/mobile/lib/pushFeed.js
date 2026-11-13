@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabaseClient";
-import { linkTarget } from "./appLinks";
+import { notificationLink } from "./appLinks";
 
 // The notifications admin has sent to phones (public_push_feed view), shaped
 // for the bell list on the home screen. "Unread" means sent since the list
@@ -46,6 +46,21 @@ export function clearPushFeedItems(ids) {
   try { localStorage.setItem(CLEARED_KEY, JSON.stringify([...all].slice(-300))); } catch { /* shows again */ }
 }
 
+function fromRow(r, since = 0) {
+  return {
+    id: r.id,
+    business: "Maidenhead",
+    category: r.notif_type === "rich" ? "News & Offers" : null,
+    title: r.title,
+    body: r.body ?? "",
+    when: timeAgo(r.sent_at),
+    sentAt: r.sent_at,
+    image: r.article_image || null,
+    link: notificationLink(r.url),
+    unread: new Date(r.sent_at).getTime() > since,
+  };
+}
+
 export async function getPushFeed() {
   const { data, error } = await supabase.from("public_push_feed").select("*");
   if (error) throw error;
@@ -53,15 +68,13 @@ export async function getPushFeed() {
   // Before the list has ever been opened, only the last three days count as new.
   const since = seen || Date.now() - 3 * 24 * 60 * 60 * 1000;
   const cleared = clearedIds();
-  return (data ?? []).filter((r) => !cleared.has(r.id)).map((r) => ({
-    id: r.id,
-    business: "Maidenhead",
-    category: r.notif_type === "rich" ? "News & Offers" : null,
-    title: r.title,
-    body: r.body ?? "",
-    when: timeAgo(r.sent_at),
-    image: r.article_image || null,
-    link: linkTarget(r.url),
-    unread: new Date(r.sent_at).getTime() > since,
-  }));
+  return (data ?? []).filter((r) => !cleared.has(r.id)).map((r) => fromRow(r, since));
+}
+
+// One notification, for its own screen (/mobile/notifications/:id). null once
+// it has left the feed (older than 60 days).
+export async function getPushNotification(id) {
+  const { data, error } = await supabase.from("public_push_feed").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? fromRow(data) : null;
 }

@@ -30,10 +30,11 @@ export default function NotificationTray({ open, onClose, items, loading, onClea
 
   if (!open) return null;
 
+  // A link opens what it links to; a plain message opens on its own screen.
   const openItem = (item) => {
-    if (!item.link) return;
     onClose();
-    openLink(item.link, navigate);
+    if (item.link) openLink(item.link, navigate);
+    else navigate(`/mobile/notifications/${item.id}`);
   };
   const list = items ?? [];
 
@@ -113,13 +114,13 @@ export default function NotificationTray({ open, onClose, items, loading, onClea
                   {n.unread && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(n.category) }} />}
                 </div>
                 <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{n.title}</p>
-                <p className="text-xs leading-snug mt-1" style={{ color: "#000000" }}>{n.body}</p>
+                <p className="text-xs leading-snug mt-1 line-clamp-3" style={{ color: "#000000" }}>{n.body}</p>
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span className="text-[10px] font-medium" style={{ color: "#000000" }}>{n.when}</span>
-                  {n.link && <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>
-                    {n.link?.external ? "Open website" : "Read more"}
+                  <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>
+                    {n.link?.external ? "Open website" : n.link ? "Read more" : "Open"}
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-                  </span>}
+                  </span>
                 </div>
               </div>
             </button>

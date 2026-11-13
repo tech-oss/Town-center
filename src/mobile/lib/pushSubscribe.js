@@ -2,7 +2,7 @@ import { Capacitor, registerPlugin } from "@capacitor/core";
 import { announcePushFeedChange } from "./pushFeed";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { App } from "@capacitor/app";
-import { linkTarget } from "./appLinks";
+import { notificationLink } from "./appLinks";
 import { supabase } from "../../lib/supabaseClient";
 
 // Web Push subscription capture. The actual sending lives in the send-push
@@ -142,10 +142,14 @@ export async function refreshNativePush() {
 export function onNativePushOpened(go) {
   if (!native) return () => {};
   const handle = PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
-    // Tapped from outside the app: open its link, or the home screen.
-    const target = linkTarget(action.notification?.data?.url);
+    // Tapped from outside the app: open its link; with no link, the
+    // notification itself, to read in full; failing both, the home screen.
+    const data = action.notification?.data ?? {};
+    const target = notificationLink(data.url);
     if (target?.external) { window.open(target.external, "_blank", "noopener"); go("/mobile/home"); }
-    else go(target?.path ?? "/mobile/home");
+    else if (target?.path) go(target.path);
+    else if (data.id) go(`/mobile/notifications/${data.id}`);
+    else go("/mobile/home");
   });
   return () => { handle.then((h) => h.remove()); };
 }

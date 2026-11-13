@@ -16,7 +16,8 @@ self.addEventListener("push", (event) => {
       body: data.body,
       icon: "/mobile-icons/icon-192.png",
       badge: "/mobile-icons/icon-192.png",
-      data: { url: data.url || "/mobile/" },
+      // No link: open the notification itself in the app, to read in full.
+      data: { url: data.url || (data.id ? `/mobile/notifications/${data.id}` : "/mobile/") },
     })
   );
 });

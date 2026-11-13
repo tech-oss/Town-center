@@ -44,6 +44,16 @@ export function linkTarget(url) {
   return null;
 }
 
+// A notification's link, unless all it does is open the app's home screen —
+// the website's front page (www.maidenhead.com), or a page the app has no
+// screen for. Following one of those from a notification looked like the
+// tap did nothing, so the message itself opens instead
+// (/mobile/notifications/:id) and no "Read more" is offered.
+export function notificationLink(url) {
+  const target = linkTarget(url);
+  return target?.path && /^\/mobile(\/home)?\/?$/.test(target.path) ? null : target;
+}
+
 // Opens a link: app screens with the router's navigate, other websites in
 // the phone's browser (Safari, outside the app).
 export function openLink(target, navigate) {
