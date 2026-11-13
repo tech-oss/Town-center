@@ -2,6 +2,8 @@ import { fetchAll } from "../../lib/fetchAll";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { checkEmail } from "../../lib/emailCheck";
+import { signUpPending, clearPendingSignup } from "../api/pendingSignup";
+import { recordAgreements } from "../api/agreements";
 
 // ─── Supabase-backed business_users registry ───────────────────────────────
 // business_users is the single source of truth for portal logins (Owner +
@@ -88,11 +90,20 @@ export async function submitUserRegistration({ businessId, firstName, lastName, 
   const emailProblem = await checkEmail(email);
   if (emailProblem) return { ok: false, error: emailProblem };
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
-  if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
+  // The request itself is made once the email is confirmed (pendingSignup.js).
+  const details = { businessId, firstName, lastName, email };
+  const res = await signUpPending(email, password, "content_manager", details);
+  if (res.error) return { ok: false, error: readableSignUpError(res.error) };
+  if (!res.session) return { ok: true, confirmEmail: true };
+  const done = await createContentManagerRequest(details, res.user);
+  if (done.ok) await clearPendingSignup();
+  return done;
+}
 
+// Signed in as the new login: the request the business owner then approves.
+export async function createContentManagerRequest({ businessId, firstName, lastName, email }, user) {
   const { error: insertError } = await supabase.from("business_users").insert({
-    auth_user_id: signUpData.user.id,
+    auth_user_id: user.id,
     business_id: businessId,
     role: "Content Manager",
     first_name: firstName,
@@ -106,6 +117,7 @@ export async function submitUserRegistration({ businessId, firstName, lastName, 
 
   if (insertError) {
     if (insertError.code === "23505") {
+      if (await ownRowExists(user.id, businessId)) return { ok: true };
       return { ok: false, error: "This business already has a content manager registered or awaiting approval." };
     }
     return { ok: false, error: insertError.message };
@@ -113,12 +125,19 @@ export async function submitUserRegistration({ businessId, firstName, lastName, 
   return { ok: true };
 }
 
+// Made already, by an earlier attempt for this same sign-up?
+async function ownRowExists(authUserId, businessId) {
+  const { data } = await supabase.from("business_users").select("id")
+    .eq("auth_user_id", authUserId).eq("business_id", businessId).maybeSingle();
+  return !!data;
+}
+
 // Claiming a business — registers the person as its Owner, pending admin
 // approval. Same shape as submitUserRegistration; the only real difference is
 // the role and the RLS policy it goes through (see
 // supabase/sql/fix_owner_self_register_policy.sql — "self-register as pending
 // owner" already allows exactly this insert, so no new migration is needed).
-export async function submitBusinessClaim({ businessId, firstName, lastName, email, phone, password }) {
+export async function submitBusinessClaim({ businessId, firstName, lastName, email, phone, password }, accepted = {}) {
   if (await hasOwnerSlotTaken(businessId)) {
     return { ok: false, error: "This business has already been claimed, or has a claim awaiting approval." };
   }
@@ -128,11 +147,21 @@ export async function submitBusinessClaim({ businessId, firstName, lastName, ema
   const emailProblem = await checkEmail(email);
   if (emailProblem) return { ok: false, error: emailProblem };
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email: email.trim(), password });
-  if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
+  // The claim itself is made once the email is confirmed (pendingSignup.js).
+  const details = { businessId, firstName, lastName, email, phone: phone || null, accepted };
+  const res = await signUpPending(email, password, "claim", details);
+  if (res.error) return { ok: false, error: readableSignUpError(res.error) };
+  if (!res.session) return { ok: true, confirmEmail: true };
+  const done = await createClaimRequest(details, res.user);
+  if (done.ok) await clearPendingSignup();
+  return done;
+}
 
+// Signed in as the new login: the claim Maidenhead admin then approves, and
+// the agreements ticked on the claim form.
+export async function createClaimRequest({ businessId, firstName, lastName, email, phone, accepted }, user) {
   const { error: insertError } = await supabase.from("business_users").insert({
-    auth_user_id: signUpData.user.id,
+    auth_user_id: user.id,
     business_id: businessId,
     role: "Owner",
     first_name: firstName,
@@ -149,11 +178,12 @@ export async function submitBusinessClaim({ businessId, firstName, lastName, ema
   });
 
   if (insertError) {
-    if (insertError.code === "23505") {
+    if (insertError.code !== "23505") return { ok: false, error: insertError.message };
+    if (!(await ownRowExists(user.id, businessId))) {
       return { ok: false, error: "This business has already been claimed, or has a claim awaiting approval." };
     }
-    return { ok: false, error: insertError.message };
   }
+  await recordAgreements(businessId, email, "claim", accepted);
   return { ok: true };
 }
 

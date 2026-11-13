@@ -1,6 +1,7 @@
 import AgreementChecklist from "../components/AgreementChecklist";
+import CheckEmailCard from "../components/CheckEmailCard";
 import PrivacyPolicyBox from "../components/PrivacyPolicyBox";
-import { allAgreed, recordAgreements } from "../api/agreements";
+import { allAgreed } from "../api/agreements";
 import useLegalDocuments from "../hooks/useLegalDocuments";
 import { useState, useRef, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -76,6 +77,8 @@ export default function ClaimBusinessPage() {
   const [form, setForm] = useState(() => ({ ...EMPTY, businessId: params.get("business") ?? "" }));
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  // The confirmation email has been sent (pendingSignup.js).
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -95,11 +98,16 @@ export default function ClaimBusinessPage() {
     if (!detailsValid) { setError("Please fill in all fields — passwords must match."); return; }
     if (!allAgreed(documents, agreements.accepted)) { setError("Please view, read and agree to each document."); return; }
     setSubmitting(true);
-    const res = await submitBusinessClaim(form);
-    if (res.ok) await recordAgreements(form.businessId, form.email, "claim", agreements.accepted);
+    // The agreements are recorded with the claim, once the email is confirmed.
+    const res = await submitBusinessClaim(form, agreements.accepted);
     setSubmitting(false);
     if (!res.ok) { setError(res.error); return; }
+    if (res.confirmEmail) { setAwaitingConfirm(true); return; }
     setSubmitted(true);
+  }
+
+  if (awaitingConfirm) {
+    return <CheckEmailCard email={form.email.trim()} next="Once it's confirmed, your claim goes to the Maidenhead team for review, and we'll email you when it's approved." />;
   }
 
   if (submitted) {

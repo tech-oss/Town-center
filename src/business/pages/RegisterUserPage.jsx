@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import CheckEmailCard from "../components/CheckEmailCard";
 import { Link } from "react-router-dom";
 import { submitUserRegistration, listBusinesses } from "../hooks/useUserRegistry";
 import { Field, Inp } from "../components/FormKit";
@@ -64,6 +65,8 @@ export default function RegisterUserPage() {
   const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  // The confirmation email has been sent (pendingSignup.js).
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
 
   function set(k, v) { setForm((f) => ({ ...f, [k]: v })); }
 
@@ -80,7 +83,12 @@ export default function RegisterUserPage() {
     const res = await submitUserRegistration(form);
     setSubmitting(false);
     if (!res.ok) { setError(res.error); return; }
+    if (res.confirmEmail) { setAwaitingConfirm(true); return; }
     setSubmitted(true);
+  }
+
+  if (awaitingConfirm) {
+    return <CheckEmailCard email={form.email.trim()} next="Once it's confirmed, your request goes to the business owner to approve." />;
   }
 
   if (submitted) {

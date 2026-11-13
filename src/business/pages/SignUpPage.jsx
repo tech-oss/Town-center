@@ -1,4 +1,5 @@
 import AgreementChecklist from "../components/AgreementChecklist";
+import CheckEmailCard from "../components/CheckEmailCard";
 import PrivacyPolicyBox from "../components/PrivacyPolicyBox";
 import { allAgreed, formatAcceptedAt } from "../api/agreements";
 import useLegalDocuments from "../hooks/useLegalDocuments";
@@ -171,6 +172,8 @@ export default function SignUpPage() {
   const [form, setForm] = useState(EMPTY);
   const { documents } = useLegalDocuments();
   const [submitted, setSubmitted] = useState(false);
+  // The confirmation email has been sent (pendingSignup.js).
+  const [awaitingConfirm, setAwaitingConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [showAccommodationNotice, setShowAccommodationNotice] = useState(false);
@@ -207,7 +210,12 @@ export default function SignUpPage() {
     const res = await registerBusiness(form);
     setSubmitting(false);
     if (!res.ok) { setError(res.error); return; }
+    if (res.confirmEmail) { setAwaitingConfirm(true); return; }
     setSubmitted(true);
+  }
+
+  if (awaitingConfirm) {
+    return <CheckEmailCard email={form.email.trim()} next="Once it's confirmed, your registration goes to the Maidenhead team for review, and we'll email you when it's approved." />;
   }
 
   if (submitted) {

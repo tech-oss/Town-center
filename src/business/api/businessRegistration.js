@@ -2,6 +2,7 @@ import { recordAgreements } from "./agreements";
 import { supabase } from "../../lib/supabaseClient";
 import { checkEmail } from "../../lib/emailCheck";
 import { FREE_PLAN } from "../../Data/plans";
+import { signUpPending, clearPendingSignup } from "./pendingSignup";
 
 function slugify(name) {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -33,19 +34,51 @@ function readableBusinessNameError(error, name) {
   return message;
 }
 
+// Taken already? Asked before the account is made, so a clash is caught now
+// rather than after the person has confirmed their email. (No answer — the
+// check isn't installed — just lets the database decide later, as before.)
+async function nameTaken(name) {
+  const { data, error } = await supabase.rpc("business_name_available", { p_name: name });
+  return !error && data === false;
+}
+
+// Step 1, from the sign-up form: the login is made and the person is asked
+// to confirm their email (pendingSignup.js). Their answers wait with the
+// login; createRegisteredBusiness makes the business once they're signed in.
+// Resolves { ok, confirmEmail } — confirmEmail when the email has been sent.
 export async function registerBusiness(form) {
   // Checked before Supabase is asked to email it — a bounce counts against
   // the whole project's sending (lib/emailCheck).
   const emailProblem = await checkEmail(form.email);
   if (emailProblem) return { ok: false, error: emailProblem };
+  if (await nameTaken(form.businessName)) {
+    return { ok: false, error: readableBusinessNameError({ code: "23505" }, form.businessName) };
+  }
 
-  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-    email: form.email.trim(),
-    password: form.password,
-  });
-  if (signUpError) return { ok: false, error: readableSignUpError(signUpError) };
+  // Everything but the password; the id is fixed now so that making the
+  // business twice (two tabs, say) finds the first one instead of a second.
+  const details = Object.fromEntries(Object.entries(form)
+    .filter(([k]) => !["password", "confirmPassword", "confirmFinal", "agreements"].includes(k)));
+  details.accepted = form.agreements?.accepted ?? {};
+  details.businessId = newBusinessId(form.businessName);
 
-  const businessId = newBusinessId(form.businessName);
+  const res = await signUpPending(form.email, form.password, "business", details);
+  if (res.error) return { ok: false, error: readableSignUpError(res.error) };
+  if (!res.session) return { ok: true, confirmEmail: true };
+
+  // Email confirmation is switched off: already signed in, so make it now.
+  const done = await createRegisteredBusiness(details, res.user);
+  if (done.ok) await clearPendingSignup();
+  return done;
+}
+
+// A row the same attempt already made (the id is fixed per registration).
+const alreadyThere = (error, constraint) => error?.code === "23505" && (!constraint || String(error.message).includes(constraint));
+
+// Step 2, signed in as the new login: the business, its owner, listing, free
+// plan and the agreements ticked during sign-up.
+export async function createRegisteredBusiness(form, user) {
+  const businessId = form.businessId;
   const isHotel = form.businessType === "hotel";
   // An accommodation management company: its own account, which then adds
   // properties. It never appears on the public site itself (the database's
@@ -60,13 +93,15 @@ export async function registerBusiness(form) {
   const { error: businessError } = await supabase
     .from("businesses")
     .insert({ id: businessId, name: form.businessName, ...(isAccommodation ? { kind: "accommodation_company" } : {}) });
-  if (businessError) return { ok: false, error: readableBusinessNameError(businessError, form.businessName) };
+  if (businessError && !alreadyThere(businessError, "businesses_pkey")) {
+    return { ok: false, error: readableBusinessNameError(businessError, form.businessName) };
+  }
 
   // Pending until admin approves the registration — the owner's first sign-in
   // attempt is what surfaces this to them (useBusinessAuth only builds a
   // session for an "approved" row).
   const { error: ownerError } = await supabase.from("business_users").insert({
-    auth_user_id: signUpData.user.id,
+    auth_user_id: user.id,
     business_id: businessId,
     role: "Owner",
     status: "pending",
@@ -79,7 +114,7 @@ export async function registerBusiness(form) {
     // step after approval (that's only for claims).
     onboarding_completed_at: new Date().toISOString(),
   });
-  if (ownerError) return { ok: false, error: ownerError.message };
+  if (ownerError && !alreadyThere(ownerError)) return { ok: false, error: ownerError.message };
 
   // A new business is reviewed as a whole in Business Registrations, so its
   // sections start Up to Date; the approval queue only shows sections the
@@ -104,7 +139,7 @@ export async function registerBusiness(form) {
     website: form.website,
     approval_status: approvalStatus,
   });
-  if (listingError) return { ok: false, error: listingError.message };
+  if (listingError && !alreadyThere(listingError)) return { ok: false, error: listingError.message };
 
   // Registration no longer sells anything: every new business starts on the
   // free listing and subscribes later from their dashboard.
@@ -122,9 +157,9 @@ export async function registerBusiness(form) {
     upgrade_plan_key: "basic",
     terms_accepted_at: new Date().toISOString(),
   });
-  if (subError) return { ok: false, error: subError.message };
+  if (subError && !alreadyThere(subError)) return { ok: false, error: subError.message };
 
   // Each of the four agreements, with the moment it was ticked.
-  await recordAgreements(businessId, form.email, "registration", form.agreements?.accepted);
+  await recordAgreements(businessId, form.email, "registration", form.accepted);
   return { ok: true };
 }

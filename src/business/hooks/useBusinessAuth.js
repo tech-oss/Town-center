@@ -5,6 +5,8 @@ import { supabase } from "../../lib/supabaseClient";
 import { coppaMockUser, hotelMockUser } from "../../Data/businessPortalMock";
 import { businessName } from "./useUserRegistry";
 import { getSubscription } from "../api/businessSubscription";
+import { completePendingSignup } from "../api/completeSignup";
+import { isUnconfirmedError, pendingSignupOf } from "../api/pendingSignup";
 
 // ─── Supabase-backed auth store ────────────────────────────────────────────
 // A single "logged in user" derived from the Supabase Auth session, shared
@@ -200,13 +202,28 @@ export async function login(email, password) {
 
 async function doLogin(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    if (isUnconfirmedError(error)) {
+      return { ok: false, unconfirmed: true, error: "Please confirm your email address first, using the link we emailed you when you signed up." };
+    }
+    return { ok: false, error: error.message };
+  }
 
   // Checked here (not just left to refreshFromSession) so a denied login can
   // say *why* — "your account" vs. "this business" — rather than one generic
   // message, and so credentials that are correct but not yet approved don't
   // leave a signed-in Supabase Auth session sitting in the browser.
-  const row = await fetchOwnRow(data.session.user.id);
+  let row = await fetchOwnRow(data.session.user.id);
+  // Confirmed their email, but the link opened in another browser, so what
+  // they signed up for wasn't made yet (completeSignup.js): make it now.
+  if (!row && pendingSignupOf(data.session.user)) {
+    const done = await completePendingSignup(data.session.user);
+    if (!done.ok) {
+      await supabase.auth.signOut();
+      return { ok: false, error: done.error };
+    }
+    row = await fetchOwnRow(data.session.user.id);
+  }
   if (!row) {
     await supabase.auth.signOut();
     return { ok: false, error: "No business account found for this login." };

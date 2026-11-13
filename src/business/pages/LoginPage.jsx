@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import useBusinessAuth from "../hooks/useBusinessAuth";
 import { Field, Inp } from "../components/FormKit";
+import { resendConfirmation } from "../api/pendingSignup";
 
 const FOREST = "#1E293B", SAGE = "#2563EB", MUTED = "#64748B", BORDER = "rgba(16,24,40,0.1)";
 const CARD = { backgroundColor: "#fff", border: "1px solid rgba(16,24,40,0.08)", boxShadow: "0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06)" };
@@ -16,13 +17,18 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  // Signed up but hasn't clicked the confirmation link yet.
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [resent, setResent] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+    setResent("");
     setSubmitting(true);
-    const { ok, error: err } = await login(email, password);
+    const { ok, error: err, unconfirmed: needsConfirm } = await login(email, password);
     setSubmitting(false);
+    setUnconfirmed(!!needsConfirm);
     if (!ok) { setError(err); return; }
     navigate(from ? `${from.pathname}${from.search ?? ""}` : "/business/dashboard", { replace: true });
   }
@@ -49,6 +55,18 @@ export default function LoginPage() {
             <p className="text-xs font-medium rounded-lg px-3 py-2" style={{ backgroundColor: "rgba(22,163,74,0.1)", color: "#15803D" }}>{location.state.notice}</p>
           )}
           {error && <p className="text-xs font-medium" style={{ color: "#DC2626" }}>{error}</p>}
+          {unconfirmed && (
+            resent ? (
+              <p className="text-xs font-medium" style={{ color: resent === "sent" ? "#15803D" : "#DC2626" }}>
+                {resent === "sent" ? "We've sent the link again. Check your inbox and spam folder." : resent}
+              </p>
+            ) : (
+              <button type="button" className="text-xs font-semibold text-left -mt-2" style={{ color: "#2563EB" }}
+                onClick={async () => { const r = await resendConfirmation(email); setResent(r.ok ? "sent" : r.error); }}>
+                Send the confirmation email again
+              </button>
+            )
+          )}
 
           <div className="flex justify-end -mt-1">
             <Link to="/business/forgot-password" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Forgot password?</Link>
