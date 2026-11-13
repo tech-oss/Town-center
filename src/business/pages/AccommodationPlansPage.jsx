@@ -35,6 +35,15 @@ function perPropertyPerDay(tier, interval) {
   const pence = Math.ceil((yearly * 100) / 365 / tier.max_properties);
   return pence < 100 ? `${pence}p` : `£${(pence / 100).toFixed(2)}`;
 }
+// What a paid plan's property page includes (each plan card).
+const FULL_PROFILE = [
+  "Header image and up to 12 photographs per property.",
+  "Property descriptions and amenities.",
+  "Room and accommodation details.",
+  "Booking information and direct booking links.",
+  "FAQs and customer reviews per property.",
+];
+
 const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "the end of your billing period");
 const USING_SLOT = new Set(["live", "pending", "rejected"]);
 
@@ -272,6 +281,11 @@ export default function AccommodationPlansPage() {
             </button>
           ))}
         </div>
+        {/* A year costs about ten months (e.g. £490/year against £49/month). */}
+        <div className="rounded-xl px-4 py-3 -mt-2" style={{ backgroundColor: "rgba(22,163,74,0.08)", border: "1px solid rgba(22,163,74,0.25)" }}>
+          <p className="text-sm font-bold" style={{ color: "#15803D" }}>Save up to 2 months when you pay annually</p>
+          <p className="text-xs mt-0.5" style={{ color: MUTED }}>Get 12 months of visibility for the price of approximately 10 months.</p>
+        </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {tiers.map((t) => {
@@ -304,7 +318,14 @@ export default function AccommodationPlansPage() {
                 </p>
                 <ul className="flex flex-col gap-1.5 text-xs flex-1" style={{ color: MUTED }}>
                   <li>✓ {free ? "1 property" : `Up to ${t.max_properties} properties`}</li>
-                  <li>✓ {free ? "Name, address, map pin and company details" : "Full property profiles: header + 12 photos, amenities, rooms, booking, FAQs and reviews"}</li>
+                  {free ? <li>✓ Name, address, map pin and company details</li> : (
+                    <li>
+                      ✓ Full property profiles:
+                      <ul className="flex flex-col gap-1 mt-1 pl-4 list-disc">
+                        {FULL_PROFILE.map((f) => <li key={f}>{f}</li>)}
+                      </ul>
+                    </li>
+                  )}
                   <li>✓ {t.article_allowance ? `${t.article_allowance} articles included` : "No articles included"}</li>
                   {!free && <li>✓ Property and company-wide analytics</li>}
                 </ul>
