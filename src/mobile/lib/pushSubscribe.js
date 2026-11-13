@@ -1,4 +1,4 @@
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { announcePushFeedChange } from "./pushFeed";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { App } from "@capacitor/app";
@@ -68,14 +68,35 @@ function savedEndpoint() {
   try { return localStorage.getItem(ENDPOINT_KEY); } catch { return null; }
 }
 
+// A lasting id for this phone, from the app's own native plugin
+// (DeviceIdPlugin: ios/App/App/SceneDelegate.swift, android/.../DeviceIdPlugin.java).
+// It survives the app being deleted and reinstalled, which gives the phone a
+// new notification address — so the push list replaces the old address
+// instead of counting the phone twice. null if it can't be had.
+const DeviceId = registerPlugin("DeviceId");
+async function nativeDeviceId() {
+  try { return (await DeviceId.get())?.id || null; } catch { return null; }
+}
+
 async function saveNativeToken(token) {
   const endpoint = ios ? `apns:${token}` : `fcm:${token}`;
   const previous = savedEndpoint();
-  const { error } = await supabase.from("push_subscriptions").insert({ endpoint, platform, seen_at: new Date().toISOString() });
-  if (error && !error.message.includes("duplicate")) throw error;
-  // Removing a subscription takes its exact address (push_unsubscribe), so
-  // only this device can drop its own.
-  if (previous && previous !== endpoint) await supabase.rpc("push_unsubscribe", { p_endpoint: previous });
+  // Saves the address with the phone's id, and drops the phone's earlier
+  // addresses (supabase/sql/push_device_ids_2026_11.sql).
+  const { error: rpcError } = await supabase.rpc("push_register_device", {
+    p_endpoint: endpoint,
+    p_platform: platform,
+    p_device_id: await nativeDeviceId(),
+    p_previous: previous && previous !== endpoint ? previous : null,
+  });
+  if (rpcError) {
+    // Not set up on the database yet: the way it was done before.
+    const { error } = await supabase.from("push_subscriptions").insert({ endpoint, platform, seen_at: new Date().toISOString() });
+    if (error && !error.message.includes("duplicate")) throw error;
+    // Removing a subscription takes its exact address (push_unsubscribe), so
+    // only this device can drop its own.
+    if (previous && previous !== endpoint) await supabase.rpc("push_unsubscribe", { p_endpoint: previous });
+  }
   try { localStorage.setItem(ENDPOINT_KEY, endpoint); } catch { /* replaced next launch */ }
 }
 
