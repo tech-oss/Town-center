@@ -182,20 +182,46 @@ function money(amountMinor: number, currency: string) {
   return `${symbol}${(amountMinor / 100).toFixed(2)}`;
 }
 
-async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed") {
+// Puts the Stripe customer on the business if it has none yet, so Manage
+// Billing works and the next checkout reuses it instead of making another.
+// Never replaces one already on file.
+async function rememberCustomer(businessId: string, customer: string) {
+  const { error } = await admin.from("business_subscriptions")
+    .update({ stripe_customer_id: customer })
+    .eq("business_id", businessId)
+    .is("stripe_customer_id", null);
+  // 23505: that customer is already another business's — leave both alone.
+  if (error && error.code !== "23505") console.warn("Could not save Stripe customer", businessId, error.message);
+}
+
+// knownBusinessId: the business a one-off purchase (add-on, homepage slot)
+// was made for, from the checkout's own metadata. Without it an invoice was
+// matched only by its Stripe customer — and a business on a plan admin gave
+// had no customer on file, so its add-on payments never reached billing
+// history (the event failed on every retry).
+async function recordInvoice(invoice: Stripe.Invoice, status: "Paid" | "Failed", knownBusinessId?: string) {
   const subId = typeof invoice.subscription === "string" ? invoice.subscription : invoice.subscription?.id;
   // Newer Stripe API versions moved the subscription details under `parent`.
   // deno-lint-ignore no-explicit-any
   const parentDetails = (invoice as any).parent?.subscription_details;
+  const customer = typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id ?? null;
   let businessId = invoice.subscription_details?.metadata?.business_id
     ?? parentDetails?.metadata?.business_id
+    // One-off checkouts copy their metadata onto the invoice they create.
+    ?? invoice.metadata?.business_id
+    ?? knownBusinessId
     ?? null;
-  if (!businessId && invoice.customer) {
-    const customer = typeof invoice.customer === "string" ? invoice.customer : invoice.customer.id;
+  if (!businessId && customer) {
     const { data } = await admin
       .from("business_subscriptions").select("business_id").eq("stripe_customer_id", customer).maybeSingle();
     businessId = data?.business_id ?? null;
   }
+  if (!businessId && customer) {
+    // Every customer stripe-checkout makes carries its business.
+    const stripeCustomer = await stripeGet(`customers/${customer}`).catch(() => null);
+    businessId = stripeCustomer?.metadata?.business_id ?? null;
+  }
+  if (businessId && customer) await rememberCustomer(businessId, customer);
   if (!businessId) {
     // Throwing makes Stripe retry later, by which time the subscription (and
     // its customer) is on file — rather than silently losing the payment.
@@ -272,7 +298,7 @@ async function settleAddonSlots(session: any) {
 
   const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
   if (invoiceId) {
-    await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid");
+    await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid", meta.business_id);
   } else {
     const { error: payError } = await admin.from("business_payments").upsert({
       business_id: meta.business_id,
@@ -320,7 +346,7 @@ async function settlePlacement(session: any) {
   const label = type?.label ?? "Homepage slot";
   const invoiceId = typeof session.invoice === "string" ? session.invoice : session.invoice?.id;
   if (invoiceId) {
-    await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid");
+    await recordInvoice(await stripeGet(`invoices/${invoiceId}`), "Paid", meta.business_id);
   } else {
     const { error: payError } = await admin.from("business_payments").upsert({
       business_id: meta.business_id,

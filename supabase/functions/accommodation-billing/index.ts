@@ -245,8 +245,13 @@ Deno.serve(async (req) => {
           email: user.email ?? undefined, name: biz?.name ?? undefined, metadata: { business_id: businessId },
         });
         customerId = customer.id;
-        await admin.from("business_subscriptions")
-          .upsert({ business_id: businessId, stripe_customer_id: customerId }, { onConflict: "business_id" });
+        // Not an upsert of just these two columns: Postgres checks the insert
+        // half's NOT NULL `plan` even when the row exists, so it always failed
+        // silently (stripe-checkout had the same fault).
+        const { error: saveError } = sub
+          ? await admin.from("business_subscriptions").update({ stripe_customer_id: customerId }).eq("business_id", businessId)
+          : await admin.from("business_subscriptions").insert({ business_id: businessId, plan: "free", stripe_customer_id: customerId });
+        if (saveError) console.error("Could not save Stripe customer", businessId, saveError.message);
       }
       const base = returnBase(req);
       const metadata = { business_id: businessId, accommodation_tier: target.key };
