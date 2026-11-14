@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { getSubscriptionById } from "../../api/admin";
+import { getSubscriptionById, getBusinessPayments } from "../../api/admin";
 import {
-  SUBSCRIPTION_INVOICES, SUBSCRIPTION_RECEIPTS, SUBSCRIPTION_TERMS_ACCEPTANCE,
+  SUBSCRIPTION_RECEIPTS, SUBSCRIPTION_TERMS_ACCEPTANCE,
 } from "../../Data/adminSubscriptionMock";
 import SubscriptionTabs from "../components/SubscriptionTabs";
 import StatusTag from "../components/StatusTag";
@@ -33,7 +33,11 @@ function DocsTable({ rows, numberLabel }) {
             <td className="px-3 py-2.5" style={{ color: MUTED }}>{r.number}</td>
             <td className="px-3 py-2.5 font-medium" style={{ color: NAVY }}>{r.amount}</td>
             <td className="px-3 py-2.5"><StatusTag status={r.status} /></td>
-            <td className="px-3 py-2.5"><span className="text-xs font-semibold cursor-pointer" style={{ color: "#2563EB" }}>Download</span></td>
+            <td className="px-3 py-2.5">
+              {r.href ? (
+                <a href={r.href} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>Download</a>
+              ) : <span className="text-xs" style={{ color: "#9CA3AF" }}>—</span>}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -99,12 +103,16 @@ function TermsAcceptanceTab({ record, business }) {
 export default function SubscriptionDocumentsPage() {
   const { id } = useParams();
   const { data: sub, loading } = useFetch(() => getSubscriptionById(id), [id]);
+  const { data: payments } = useFetch(() => getBusinessPayments(id), [id]);
   const [tab, setTab] = useState("Invoices");
 
   if (loading) return <LoadingState />;
   if (!sub) return <EmptyState title="Not found" />;
 
-  const invoices = SUBSCRIPTION_INVOICES[id] ?? [];
+  // Stripe's invoice for each payment the webhook recorded.
+  const invoices = (payments ?? [])
+    .filter((p) => p.invoice_pdf || p.invoice_url)
+    .map((p) => ({ date: p.date, number: p.description, amount: p.amount, status: p.status, href: p.invoice_pdf || p.invoice_url }));
   const receipts = SUBSCRIPTION_RECEIPTS[id] ?? [];
   const termsRecord = SUBSCRIPTION_TERMS_ACCEPTANCE[id];
 
@@ -130,7 +138,7 @@ export default function SubscriptionDocumentsPage() {
       </div>
 
       <div className="bg-white rounded-2xl p-6" style={CARD}>
-        {tab === "Invoices" && <DocsTable rows={invoices} numberLabel="Invoice Number" />}
+        {tab === "Invoices" && <DocsTable rows={invoices} numberLabel="Description" />}
         {tab === "Receipts" && <DocsTable rows={receipts} numberLabel="Receipt Number" />}
         {tab === "Terms Acceptance" && <TermsAcceptanceTab record={termsRecord} business={sub} />}
       </div>

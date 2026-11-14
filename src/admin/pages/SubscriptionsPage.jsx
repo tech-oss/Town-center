@@ -1,10 +1,9 @@
 import { useState, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import useFetch from "../../hooks/useFetch";
-import { sendEmail, getSubscriptions, getSubscriptionById, grantTrial, resolveDispute, grantFullAccess, grantedLabel, grantAccommodationTier, ACCOMMODATION_TIERS } from "../../api/admin";
+import { sendEmail, getSubscriptions, getSubscriptionById, getBusinessPayments, grantTrial, resolveDispute, grantFullAccess, grantedLabel, grantAccommodationTier, ACCOMMODATION_TIERS } from "../../api/admin";
 import {
-  TIER_ICONS, ALL_PLAN_FEATURES, SUBSCRIPTION_STRIPE_IDS,
-  SUBSCRIPTION_BILLING_HISTORY, resolveTierFeatures,
+  TIER_ICONS, ALL_PLAN_FEATURES, resolveTierFeatures,
 } from "../../Data/adminSubscriptionMock";
 import SubscriptionTabs from "../components/SubscriptionTabs";
 import DataTable, { TableAction } from "../components/DataTable";
@@ -124,6 +123,8 @@ function AccommodationPlanOverride({ sub, onDone }) {
 export function SubscriptionDetailPage() {
   const { id } = useParams();
   const { data: sub, loading } = useFetch(() => getSubscriptionById(id), [id]);
+  const { data: paymentRows } = useFetch(() => getBusinessPayments(id), [id]);
+  const payments = paymentRows ?? [];
   const [message, setMessage] = useState(null);
   const [toast, setToast] = useState(null);
   const [newTier, setNewTier] = useState(null);
@@ -165,9 +166,8 @@ export function SubscriptionDetailPage() {
     billingHistoryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  const payments = SUBSCRIPTION_BILLING_HISTORY[id] ?? [];
   const features = resolveTierFeatures(sub.tier);
-  const stripeId = SUBSCRIPTION_STRIPE_IDS[id] ?? `sub_${id}`;
+  const stripeId = sub.stripeSubscriptionId ?? "—";
   const isTrial = sub.grantedByAdmin === "trial";
   const isFullAccess = sub.grantedByAdmin === "full";
 
@@ -201,7 +201,7 @@ export function SubscriptionDetailPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-xl font-bold" style={{ color: "#1E293B" }}>{sub.business}</h1>
-            <p className="text-sm" style={{ color: "#6B7280" }}>{sub.owner} · {sub.owner.toLowerCase().replace(/\s+/g, ".")}@{sub.business.toLowerCase().replace(/[^a-z0-9]+/g, "")}.co.uk</p>
+            <p className="text-sm" style={{ color: "#6B7280" }}>{sub.owner}{sub.ownerEmail ? ` · ${sub.ownerEmail}` : ""}</p>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg">{TIER_ICONS[sub.tier] ?? "✈️"}</span>
@@ -294,12 +294,18 @@ export function SubscriptionDetailPage() {
             </thead>
             <tbody>
               {payments.map((p, i) => (
-                <tr key={i} style={{ borderBottom: i < payments.length - 1 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
+                <tr key={p.id ?? i} style={{ borderBottom: i < payments.length - 1 ? "1px solid rgba(16,24,40,0.07)" : "none" }}>
                   <td className="px-3 py-2.5" style={{ color: "#1E293B" }}>{formatUK(p.date)}</td>
                   <td className="px-3 py-2.5" style={{ color: "#6B7280" }}>{p.description}</td>
                   <td className="px-3 py-2.5 font-medium" style={{ color: "#1E293B" }}>{p.amount}</td>
                   <td className="px-3 py-2.5"><StatusTag status={p.status} /></td>
-                  <td className="px-3 py-2.5"><span className="text-xs font-semibold cursor-pointer" style={{ color: "#2563EB" }}>Download PDF</span></td>
+                  <td className="px-3 py-2.5">
+                    {p.invoice_pdf || p.invoice_url ? (
+                      <a href={p.invoice_pdf || p.invoice_url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: "#2563EB" }}>
+                        {p.invoice_pdf ? "Download PDF" : "View invoice"}
+                      </a>
+                    ) : <span className="text-xs" style={{ color: "#9CA3AF" }}>—</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>

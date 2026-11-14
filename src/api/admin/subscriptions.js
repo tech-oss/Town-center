@@ -39,6 +39,8 @@ function fromRow(row, owner) {
     id: row.business_id,
     business: row.businesses?.name ?? row.business_id,
     owner: owner ? [owner.first_name, owner.last_name].filter(Boolean).join(" ") || owner.email : "—",
+    ownerEmail: owner?.email ?? null,
+    stripeSubscriptionId: row.stripe_subscription_id ?? null,
     tier,
     status: row.cancelled ? "Lapsed" : (row.plan_status ?? "Active"),
     startDate: (row.terms_accepted_at ?? "").slice(0, 10),
@@ -113,6 +115,20 @@ export async function getSubscriptionById(id) {
   if (!data) return null;
   const owners = await ownersByBusiness([id]);
   return fromRow(data, owners[id]);
+}
+
+// What the business has actually paid: every Stripe payment the
+// stripe-webhook function recorded (plan invoices, add-ons, homepage slots),
+// newest first, with links to Stripe's invoice where there is one.
+export async function getBusinessPayments(businessId) {
+  const { data, error } = await supabase
+    .from("business_payments")
+    .select("id, date, description, amount, status, invoice_url, invoice_pdf")
+    .eq("business_id", businessId)
+    .order("date", { ascending: false })
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function grantTrial(id) {
