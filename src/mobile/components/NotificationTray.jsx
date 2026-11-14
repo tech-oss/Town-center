@@ -114,7 +114,7 @@ export default function NotificationTray({ open, onClose, items, loading, onClea
                   {n.unread && <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: typeColor(n.category) }} />}
                 </div>
                 <p className="text-sm font-bold leading-snug mt-0.5" style={{ color: "#000000" }}>{n.title}</p>
-                <p className="text-xs leading-snug mt-1 line-clamp-3" style={{ color: "#000000" }}>{n.body}</p>
+                <p className="text-xs leading-snug mt-1" style={{ color: "#000000" }}>{n.body}</p>
                 <div className="flex items-center justify-between gap-2 mt-1.5">
                   <span className="text-[10px] font-medium" style={{ color: "#000000" }}>{n.when}</span>
                   <span className="inline-flex items-center gap-0.5 text-[10px] font-bold shrink-0" style={{ color: "var(--leaf)" }}>

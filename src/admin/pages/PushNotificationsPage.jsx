@@ -11,6 +11,10 @@ import EmptyState from "../components/EmptyState";
 import { formatUK } from "../../lib/ukDate";
 import { NAVY, BLUE, MUTED, BORDER, CARD } from "../theme";
 
+// The message is kept to 150 characters so phones show it in full, on the
+// lock screen and in the app's notification list.
+const BODY_LIMIT = 150;
+
 function Toast({ message, onDismiss }) {
   if (!message) return null;
   return (
@@ -76,7 +80,7 @@ function ComposeTab() {
     }));
   }
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
-  const isValid = form.title.trim() && form.body.trim() && channels.length > 0;
+  const isValid = form.title.trim() && form.body.trim() && form.body.length <= BODY_LIMIT && channels.length > 0;
 
   function notify(msg) {
     setToast(msg);
@@ -175,8 +179,8 @@ function ComposeTab() {
 
           <label className="flex flex-col gap-1">
             <span className="text-xs font-semibold" style={{ color: "#6B7280" }}>Message *</span>
-            <textarea value={form.body} onChange={(e) => set("body", e.target.value)} maxLength={180} rows={3} placeholder="The body text shown in the notification…" className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={field} />
-            <span className="text-[11px] self-end" style={{ color: "#9CA3AF" }}>{form.body.length}/180</span>
+            <textarea value={form.body} onChange={(e) => set("body", e.target.value)} maxLength={BODY_LIMIT} rows={3} placeholder="The body text shown in the notification…" className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={field} />
+            <span className="text-[11px] self-end" style={{ color: "#9CA3AF" }}>{form.body.length}/{BODY_LIMIT}</span>
           </label>
 
           <label className="flex flex-col gap-1">

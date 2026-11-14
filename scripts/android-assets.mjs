@@ -5,7 +5,11 @@ import { execSync } from "node:child_process";
 // The Android app's icon and splash screen, from the same artwork as the iPhone
 // app (scripts/ios-assets.mjs makes those first). Android icons are adaptive —
 // a background and a foreground the phone masks into its own shape — so the
-// Maidenhead mark sits in the middle 60%, the part every mask keeps.
+// generated icon (mipmap-anydpi-v26) insets the foreground by 16.7%, which
+// makes the foreground image exactly the visible tile — so it's the iPhone
+// icon as it is, and the M fills the tile as much as on iPhone while staying
+// inside the safe circle every mask keeps. (It was scaled to 60% on top of
+// the inset before, which left the M at about 40% of the tile.)
 // Run: node scripts/ios-assets.mjs && node scripts/android-assets.mjs
 
 const OUT = "resources/android";
@@ -16,9 +20,7 @@ mkdirSync(OUT, { recursive: true });
 
 copyFileSync(ICON, `${OUT}/icon-only.png`);
 await sharp({ create: { width: 1024, height: 1024, channels: 3, background: BG } }).png().toFile(`${OUT}/icon-background.png`);
-const mark = await sharp(ICON).resize(620, 620).toBuffer();
-await sharp({ create: { width: 1024, height: 1024, channels: 4, background: { ...BG, alpha: 1 } } })
-  .composite([{ input: mark, gravity: "center" }]).png().toFile(`${OUT}/icon-foreground.png`);
+copyFileSync(ICON, `${OUT}/icon-foreground.png`);
 copyFileSync(SPLASH, `${OUT}/splash.png`);
 copyFileSync(SPLASH, `${OUT}/splash-dark.png`);
 
