@@ -11,6 +11,10 @@ import AddonSlotsCard from "../components/AddonSlotsCard";
 import PurchasedSlots from "../components/PurchasedSlots";
 import { publicSiteLink } from "../../lib/publicSite";
 
+// The message is kept to 150 characters so phones show it in full, on the
+// lock screen and in the app's notification list.
+const BODY_LIMIT = 150;
+
 // Requesting a push notification. The composer is the same one admin uses —
 // same fields, same limits, same live preview — because what the business
 // writes here is what admin sends, verbatim, on approval. A business never
@@ -203,7 +207,7 @@ export default function PushNotificationsPage() {
   }
 
   const channels = [form.web && "Web", form.mobile && "Mobile"].filter(Boolean);
-  const isValid = form.title.trim() && form.body.trim() && channels.length > 0;
+  const isValid = form.title.trim() && form.body.trim() && form.body.length <= BODY_LIMIT && channels.length > 0;
   const pendingCount = requests.filter((r) => r.status === "pending").length;
   const draftCount = requests.filter((r) => r.status === "draft").length;
   const remaining = balance?.remaining ?? 0;
@@ -360,10 +364,10 @@ export default function PushNotificationsPage() {
 
             <label className="flex flex-col gap-1">
               <span className="text-xs font-semibold" style={{ color: MUTED }}>Message *</span>
-              <textarea value={form.body} onChange={(e) => set("body", e.target.value)} maxLength={180} rows={3}
+              <textarea value={form.body} onChange={(e) => set("body", e.target.value)} maxLength={BODY_LIMIT} rows={3}
                 placeholder="The body text shown in the notification…"
                 className="rounded-xl px-3 py-2.5 text-sm outline-none resize-none" style={field} />
-              <span className="text-[11px] self-end" style={{ color: "#9CA3AF" }}>{form.body.length}/180</span>
+              <span className="text-[11px] self-end" style={{ color: "#9CA3AF" }}>{form.body.length}/{BODY_LIMIT}</span>
             </label>
 
             <label className="flex flex-col gap-1">

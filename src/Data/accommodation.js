@@ -20,7 +20,10 @@ export const isAccommodationCompany = (user) => user?.kind === COMPANY_KIND;
 // as a management company.
 export const ACCOMMODATION_TYPE = { value: "accommodation", label: "Accommodation (management company or agency)" };
 export const REGISTRATION_TYPES = [
-  ...BUSINESS_TYPES.map((t) => (t.value === "hotel" ? { ...t, label: "Hotel" } : t)),
+  // "Services" reads as Shop & Local Services' neighbour; on the form it's
+  // spelt out as the three kinds it covers.
+  ...BUSINESS_TYPES.map((t) => (t.value === "hotel" ? { ...t, label: "Hotel" }
+    : t.value === "freelancer" ? { ...t, label: "Trades/Professionals/Freelancers" } : t)),
   ACCOMMODATION_TYPE,
 ];
 
