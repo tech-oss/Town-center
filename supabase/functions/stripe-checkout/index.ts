@@ -8,16 +8,15 @@
 // Stripe confirms payment to stripe-webhook, never from this function or the
 // browser.
 //
-// Prices: the stripe_catalogue table (admin → Stripe Products), falling back
-// to the secrets below for the Visibility Plan.
+// Prices: the stripe_catalogue table (admin → Stripe Products). The standard
+// Visibility Plan falls back to the secrets below; the hotel plan is sold
+// only from the catalogue (Hotel Packages, mh_visibility_hotel), so checkout
+// never makes a second hotel product in Stripe.
 //
 // Deploy:  supabase functions deploy stripe-checkout
 // Secrets: STRIPE_SECRET_KEY, SITE_URL,
 //          STRIPE_PRICE_VISIBILITY_MONTHLY (£29.99/month),
 //          STRIPE_PRICE_VISIBILITY_YEARLY (£329/year)
-//          optional STRIPE_PRICE_HOTEL_MONTHLY (£39.99/month) and
-//          STRIPE_PRICE_HOTEL_YEARLY (£399/year) — without them the hotel
-//          prices are found in Stripe by lookup key, and made the first time
 //          (optional ALLOWED_ORIGIN_REGEX)
 
 import Stripe from "https://esm.sh/stripe@14.25.0?target=deno";
@@ -43,41 +42,6 @@ const admin = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY
 const ORIGIN_RE = new RegExp(
   Deno.env.get("ALLOWED_ORIGIN_REGEX") ?? "^(https://town-center-[a-z0-9-]+\\.vercel\\.app|http://localhost:\\d+)$",
 );
-// Hotels and accommodation (business type "hotel") pay more for the
-// Visibility Plan (Data/plans.js → HOTEL_BILLING_OPTIONS). Their Stripe
-// prices come from the secrets when set; otherwise they're found by lookup
-// key, and created — under one "Visibility Plan — Hotels & Accommodation"
-// product — the first time a hotel subscribes.
-const HOTEL_PRICES = {
-  month: { pence: 3999, key: "visibility_hotel_monthly", secret: "STRIPE_PRICE_HOTEL_MONTHLY" },
-  year: { pence: 39900, key: "visibility_hotel_yearly", secret: "STRIPE_PRICE_HOTEL_YEARLY" },
-} as const;
-
-async function hotelPriceId(interval: "month" | "year") {
-  const spec = HOTEL_PRICES[interval];
-  const fromSecret = Deno.env.get(spec.secret);
-  if (fromSecret) return fromSecret;
-  const { data: existing } = await stripe.prices.list({
-    lookup_keys: [HOTEL_PRICES.month.key, HOTEL_PRICES.year.key], active: true, limit: 10,
-  });
-  const match = existing.find((p: Stripe.Price) => p.lookup_key === spec.key && p.unit_amount === spec.pence && p.currency === "gbp");
-  if (match) return match.id;
-  const sibling = existing.find((p: Stripe.Price) => p.lookup_key !== spec.key);
-  const product = typeof sibling?.product === "string" ? sibling.product : sibling?.product?.id;
-  const price = await stripe.prices.create({
-    currency: "gbp",
-    unit_amount: spec.pence,
-    recurring: { interval },
-    lookup_key: spec.key,
-    transfer_lookup_key: true,
-    metadata: { plan: "premium", audience: "hotel" },
-    ...(product
-      ? { product }
-      : { product_data: { name: "Visibility Plan — Hotels & Accommodation", metadata: { plan: "premium" } } }),
-  });
-  return price.id;
-}
-
 // Everything sold at a fixed price is a product in Stripe, listed in
 // stripe_catalogue (admin → Stripe Products creates them). Checkout sells
 // that product, so Stripe's reports, receipts and tax settings name what was
@@ -363,18 +327,17 @@ Deno.serve(async (req) => {
       .from("business_listings").select("business_type").eq("business_id", businessId).maybeSingle();
     const hotel = listing?.business_type === "hotel";
     const yearly = interval === "year";
-    // The catalogue's product first; then the older ways of finding the
-    // same price, so nothing stops selling before the catalogue is synced.
+    // The catalogue's product first. The standard plan still falls back to
+    // its price secrets; the hotel plan has no fallback, so a missing
+    // catalogue row stops the sale rather than making a duplicate product.
     const planRow = await catalogueRow(`visibility_${hotel ? "hotel_" : ""}${yearly ? "yearly" : "monthly"}`);
     const catalogPrice = planRow ? await catalogueStripePrice(planRow) : null;
     // Admin sets this price on Stripe Products. With a catalogue row, its
     // amount is what's charged — even if its Stripe price is missing, so a
     // price admin changed is never undercut by an older fixed price.
-    const priceId = catalogPrice ?? (planRow ? null : hotel
-      ? await hotelPriceId(yearly ? "year" : "month")
-      : yearly
-        ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
-        : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM")));
+    const priceId = catalogPrice ?? (planRow || hotel ? null : yearly
+      ? Deno.env.get("STRIPE_PRICE_VISIBILITY_YEARLY")
+      : (Deno.env.get("STRIPE_PRICE_VISIBILITY_MONTHLY") ?? Deno.env.get("STRIPE_PRICE_PREMIUM")));
     const planLine = priceId
       ? { price: priceId, quantity: 1 }
       : planRow
@@ -391,7 +354,7 @@ Deno.serve(async (req) => {
           }
         : null;
     if (!planLine) {
-      console.error("Missing Stripe price secret for interval", interval);
+      console.error("No Stripe price for the Visibility Plan", hotel ? "hotel" : "standard", interval);
       return json({ error: "This billing option isn't available yet." }, 503);
     }
 

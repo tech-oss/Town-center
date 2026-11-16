@@ -74,7 +74,6 @@ export const HOTEL_BILLING_OPTIONS = {
     label: "/ year",
     perDay: "£1.09",
     saving: 80, // vs 12 × £39.99 (£479.88), rounded down
-    stripePriceSecret: "STRIPE_PRICE_HOTEL_YEARLY",
   },
   month: {
     key: "month",
@@ -83,7 +82,6 @@ export const HOTEL_BILLING_OPTIONS = {
     perDay: "£1.40",
     perDayText: "Less than £1.40 a day",
     saving: 0,
-    stripePriceSecret: "STRIPE_PRICE_HOTEL_MONTHLY",
   },
 };
 
