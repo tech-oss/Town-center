@@ -254,7 +254,7 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
 
         <EditorSection title="Find Us">
           <div className="grid sm:grid-cols-2 gap-4 mb-4">
-            <Field label="Location" span2>
+            <Field label="Location" span2 hint="Shown as words under Find Us. It does not put the event on the map — fill in the Location Pin below for that.">
               <Inp value={form.location ?? ""} onChange={(e) => set("location", e.target.value)} placeholder="Venue and address" />
             </Field>
             <Field label="Phone" hint="Renders as a clickable tel: link on the public page">
@@ -278,7 +278,7 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
           <GalleryGrid images={form.gallery ?? []} onChange={(v) => set("gallery", v)} max={6} />
         </EditorSection>
 
-        <EditorSection title="Location Pin">
+        <EditorSection title="Location Pin" hint="The event page shows a map and Get Directions only when both latitude and longitude are filled in. Leave both blank for no map.">
           <LocationFields lat={form.lat} lng={form.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
         </EditorSection>
 

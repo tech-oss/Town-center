@@ -8,6 +8,7 @@ import {
   PlanContext, Locked, CARD, MUTED, NAVY, BLUE,
 } from "./shared";
 import { CheckInEditor, AmenitiesEditor, RoomsEditor, FaqListEditor } from "./StayEditors";
+import ReviewsEditor from "./ReviewsEditor";
 import { StateChip } from "./AccommodationCompanyEditor";
 import { ACCOMMODATION_AMENITY_CATEGORIES, ROOM_AMENITIES, ROOMS_MAX, PROPERTY_GALLERY_MAX } from "../../../Data/accommodationAmenities";
 import { getBusinessListingContent, saveBusinessListingContent } from "../../../api/admin/businessListingContent";
@@ -181,6 +182,12 @@ export default function PropertyEditor({ propertyId, onBack, onToast }) {
           </EditorSection>
 
           <SaveBar onSave={save} saving={saving} />
+        </div>
+        {/* Reviews belong to the property itself, as on the company's own
+            property editor (business portal → Reviews tab). */}
+        <div className="mt-6">
+          <ReviewsEditor key={propertyId} businessId={propertyId}
+            hint="Reviews on this property's page. Each one saves on its own and goes live straight away; only the 6 most recent live reviews show at once." />
         </div>
       </PlanContext.Provider>
     </div>

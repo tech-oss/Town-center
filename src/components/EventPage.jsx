@@ -25,28 +25,21 @@ import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 // real What's On events only have date/time/tickets/location.
 function asEvent(rawEvent, it) {
   if (rawEvent) {
-    // Where to pin the map: the event's own coordinates, else its own place,
-    // else the host business. A bare place name ("Market place") is looked up
-    // within Maidenhead, not anywhere in the world.
+    // An event's map and Get Directions come only from the latitude and
+    // longitude saved on the event. The Location words are shown under Find
+    // Us and never looked up on a map, and the host business's address is
+    // never used: an event can be somewhere else entirely, and looking up a
+    // name like "A Hall" put the pin somewhere random.
     const ownLat = rawEvent.lat != null && rawEvent.lat !== "" ? Number(rawEvent.lat) : null;
     const ownLng = rawEvent.lng != null && rawEvent.lng !== "" ? Number(rawEvent.lng) : null;
-    const place = rawEvent.location?.trim();
-    const hasOwnPin = ownLat != null && ownLng != null;
-    const useHost = !hasOwnPin && !place;
+    const hasOwnPin = Number.isFinite(ownLat) && Number.isFinite(ownLng);
     return {
       ...rawEvent,
       isBusiness: false,
-      lat: hasOwnPin ? ownLat : (useHost ? rawEvent.businessLat : null),
-      lng: hasOwnPin ? ownLng : (useHost ? rawEvent.businessLng : null),
-      // The words shown beside the map are only ever the address of the spot
-      // pinned. An event with its own pin shows its own place name (or none) —
-      // never the host's address, which sits somewhere else.
-      location: hasOwnPin ? (place || null) : (place || rawEvent.businessAddress || null),
-      mapQuery: hasOwnPin
-        ? `${ownLat},${ownLng}`
-        : place
-          ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`)
-          : rawEvent.businessAddress || null,
+      lat: hasOwnPin ? ownLat : null,
+      lng: hasOwnPin ? ownLng : null,
+      location: rawEvent.location?.trim() || null,
+      mapQuery: hasOwnPin ? `${ownLat},${ownLng}` : null,
     };
   }
   if (!it || it.section !== "see-do") return null;
@@ -213,7 +206,9 @@ export default function EventPage() {
       email={event.email}
       website={free ? null : event.website}
       social={free ? null : buildSocial(event.social)}
-      directionsQuery={free ? null : (event.mapQuery || event.location || (event.lat != null ? event.title : null))}
+      directionsQuery={free ? null : event.isBusiness
+        ? (event.mapQuery || event.location || (event.lat != null ? event.title : null))
+        : event.mapQuery}
       // Saved coordinates put the pin straight on the map, with no address
       // lookup that can fail.
       hideMapNote={!event.isBusiness}

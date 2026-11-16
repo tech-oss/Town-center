@@ -11,6 +11,7 @@ import { PlanContext } from "./businessContent/shared";
 import { isPremium } from "../../Data/plans";
 import TypeBEditor from "./businessContent/TypeBEditor";
 import TypeCEditor from "./businessContent/TypeCEditor";
+import ReviewsEditor from "./businessContent/ReviewsEditor";
 import AccommodationCompanyEditor from "./businessContent/AccommodationCompanyEditor";
 import PropertyEditor from "./businessContent/PropertyEditor";
 
@@ -212,6 +213,13 @@ export default function BusinessContentPage() {
             )}
             {selectedBusiness?.section === "hotel" && (
               <TypeCEditor form={listing} set={set} onSave={handleSave} saving={saving} />
+            )}
+            {/* Reviews save one at a time, apart from the content form above —
+                the same list the business manages on its own Reviews tab. */}
+            {["see-do", "eat-drink", "shop", "services", "hotel"].includes(selectedBusiness?.section) && (
+              <div className="mt-6">
+                <ReviewsEditor key={selectedId} businessId={selectedId} />
+              </div>
             )}
             </PlanContext.Provider>
             {!["see-do", "eat-drink", "shop", "services", "hotel"].includes(selectedBusiness?.section) && (

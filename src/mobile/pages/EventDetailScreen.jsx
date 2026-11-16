@@ -31,21 +31,18 @@ export default function EventDetailScreen() {
   const websiteUrl = externalUrl(event.bookingUrl);
   // Every category the event is filed under.
   const categoryNames = toSeeDoSlugs(event.categories ?? event.category).map((c) => eventCategoryLabel(c));
-  // Where it is: the event's own place, else its host's — the same address the
-  // website's "Find us" shows and its map pins.
+  // The same rule as the website: the map and Get Directions come only from
+  // the latitude and longitude saved on the event. The Location words are
+  // shown as text and never looked up on a map, and the host business's
+  // address is never used in their place.
   const num = (v) => (v != null && v !== "" ? Number(v) : null);
-  const place = event.location?.trim();
+  const address = event.location?.trim() || null;
   const ownLat = num(event.lat);
   const ownLng = num(event.lng);
-  const hasOwnPin = ownLat != null && ownLng != null;
-  // Words beside the map are only ever the address of the spot pinned: an
-  // event with its own pin shows its own place name (or none), never the
-  // host's address, which sits somewhere else.
-  const address = hasOwnPin ? (place || null) : (place || event.businessAddress || null);
-  const lat = hasOwnPin ? ownLat : (place ? null : event.businessLat);
-  const lng = hasOwnPin ? ownLng : (place ? null : event.businessLng);
-  const mapQuery = place ? (/maidenhead|SL6/i.test(place) ? place : `${place}, Maidenhead`) : event.businessAddress;
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(lat != null && lng != null ? `${lat},${lng}` : (mapQuery ?? ""))}`;
+  const hasPin = Number.isFinite(ownLat) && Number.isFinite(ownLng);
+  const lat = hasPin ? ownLat : null;
+  const lng = hasPin ? ownLng : null;
+  const mapsUrl = hasPin ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${lat},${lng}`)}` : null;
   const more = (events ?? []).filter((e) => e.slug !== event.slug).slice(0, 3);
 
   return (
@@ -124,14 +121,14 @@ export default function EventDetailScreen() {
 
           {/* Same order as the website: details, then Book / Directions, then
               the photos, then the map. */}
-          {(websiteUrl || address || lat != null) && (
+          {(websiteUrl || hasPin) && (
             <div className="grid grid-cols-2 gap-3">
               {websiteUrl && (
                 <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "var(--teal-deep)", color: "#ffffff" }}>
                   {event.paid ? "Buy Tickets" : "Book Your Place"}
                 </a>
               )}
-              {(address || lat != null) && (
+              {hasPin && (
                 <a href={mapsUrl} target="_blank" rel="noopener noreferrer" data-skip-external-confirm className="text-center py-3 rounded-2xl text-sm font-bold active:opacity-80" style={{ backgroundColor: "rgba(28,46,56,0.06)", color: "#000000" }}>
                   Get Directions
                 </a>
@@ -150,7 +147,7 @@ export default function EventDetailScreen() {
           )}
 
 
-          {(lat != null || mapQuery) && <MiniMap query={mapQuery} lat={lat ?? undefined} lng={lng ?? undefined} />}
+          {hasPin && <MiniMap query={`${lat},${lng}`} lat={lat} lng={lng} />}
 
           {more.length > 0 && (
             <div className="mt-2">

@@ -13,9 +13,11 @@ export const ORDINAL_OPTIONS = [
   { value: -1, label: "Last" },
 ];
 
+// null for a missing or malformed date, so nothing downstream loops on NaN.
 function parseDateOnly(str) {
-  const [y, m, d] = str.split("-").map(Number);
-  return { y, m, d };
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(str ?? ""));
+  if (!match) return null;
+  return { y: Number(match[1]), m: Number(match[2]), d: Number(match[3]) };
 }
 function toDate({ y, m, d }) {
   return new Date(y, m - 1, d);
@@ -54,10 +56,17 @@ function weekdaysInMonth(y, m, weekdayIndex) {
  * }
  */
 export function expandRecurrence(rule, { from, to }) {
-  const start = parseDateOnly(rule.startDate);
-  const rangeFrom = maxDate(parseDateOnly(from), start);
+  const rangeStart = parseDateOnly(from);
   let rangeTo = parseDateOnly(to);
-  if (rule.endDate) rangeTo = minDate(rangeTo, parseDateOnly(rule.endDate));
+  if (!rangeStart || !rangeTo) return [];
+  // A repeating event saved without a first date ("every Sunday", no start)
+  // runs from now on. Reading the missing date used to throw, and that one
+  // event took the whole What's On calendar down, on the website and in
+  // the app.
+  const start = parseDateOnly(rule.startDate) ?? rangeStart;
+  const rangeFrom = maxDate(rangeStart, start);
+  const end = parseDateOnly(rule.endDate);
+  if (end) rangeTo = minDate(rangeTo, end);
   if (compareDate(rangeFrom, rangeTo) > 0) return [];
 
   const dates = [];

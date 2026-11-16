@@ -1,4 +1,5 @@
 // Type C — Hotel & Accommodation.
+import { FaqListEditor } from "./StayEditors";
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
   SingleImageUpload, PlanImageNote, GalleryGrid, SocialFields, LocationFields, RepeatableList,
@@ -100,6 +101,12 @@ export default function TypeCEditor({ form, set, onSave, saving }) {
         <EditorSection title="Feature Highlights" hint="Up to 4 selling points shown on the listing card (amenities).">
           <Locked field="amenities">
           <RepeatableList items={(form.amenities ?? []).slice(0, 4)} onChange={(v) => set("amenities", v.slice(0, 4))} placeholder="e.g. Free Wi-Fi throughout" />
+          </Locked>
+        </EditorSection>
+
+        <EditorSection title="FAQs" hint="Questions and answers on the business page's FAQs — the same list the business edits on its own FAQs tab.">
+          <Locked field="faqs">
+          <FaqListEditor items={form.faqs ?? []} onChange={(v) => set("faqs", v)} />
           </Locked>
         </EditorSection>
 

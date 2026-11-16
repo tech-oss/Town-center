@@ -399,6 +399,69 @@ export async function deleteReview(id) {
   if (error) throw error;
 }
 
+// ─── One business's reviews, for admin → Business Content ──────────────────
+// The same reviews the business manages on its own Reviews tab. Admin's go
+// live straight away: the require-approval trigger keeps the status admin
+// sets, while a business's own additions and edits still wait for approval.
+function businessReviewFromRow(row) {
+  return {
+    id: row.id,
+    reviewer: row.reviewer,
+    rating: row.rating,
+    date: row.date,
+    text: row.text,
+    verificationLink: row.verification_link,
+    status: row.status ?? "Pending Approval",
+    moderationNote: row.moderation_note ?? null,
+  };
+}
+
+export async function getBusinessReviews(businessId) {
+  const { data, error } = await supabase
+    .from("business_reviews")
+    .select("id, reviewer, rating, date, text, verification_link, status, moderation_note")
+    .eq("business_id", businessId)
+    .order("date", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(businessReviewFromRow);
+}
+
+export async function addBusinessReview(businessId, form) {
+  const { data, error } = await supabase
+    .from("business_reviews")
+    .insert({
+      business_id: businessId,
+      reviewer: form.reviewer.trim(),
+      rating: form.rating,
+      date: form.date,
+      text: form.text.trim(),
+      verification_link: form.verificationLink?.trim() || null,
+      status: "Visible",
+    })
+    .select("id, reviewer, rating, date, text, verification_link, status, moderation_note")
+    .single();
+  if (error) throw error;
+  await logBusinessActivity(businessId, { action: "review.received", entityType: "review", entityId: data.id, title: data.reviewer });
+  return businessReviewFromRow(data);
+}
+
+export async function updateBusinessReview(id, form) {
+  const { data, error } = await supabase
+    .from("business_reviews")
+    .update({
+      reviewer: form.reviewer.trim(),
+      rating: form.rating,
+      date: form.date,
+      text: form.text.trim(),
+      verification_link: form.verificationLink?.trim() || null,
+    })
+    .eq("id", id)
+    .select("id, reviewer, rating, date, text, verification_link, status, moderation_note")
+    .single();
+  if (error) throw error;
+  return businessReviewFromRow(data);
+}
+
 // ─── Taking an already-published post down ────────────────────────────────
 // Approval isn't infallible: something can get through that shouldn't have.
 // Admin can pull any business post off the site, or delete it outright, and

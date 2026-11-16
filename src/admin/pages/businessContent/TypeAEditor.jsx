@@ -1,4 +1,5 @@
 // Type A — See & Do / Eat & Drink / Shop (shared public page layout).
+import { FaqListEditor } from "./StayEditors";
 import {
   Field, Inp, TextArea, EditorSection, SaveBar,
   SingleImageUpload, PlanImageNote, GalleryGrid, HoursEditor, SocialFields, LocationFields,
@@ -72,6 +73,12 @@ export default function TypeAEditor({ form, set, onSave, saving }) {
         <EditorSection title="Location Pin">
           <Locked field="lat">
           <LocationFields lat={form.lat} lng={form.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
+          </Locked>
+        </EditorSection>
+
+        <EditorSection title="FAQs" hint="Questions and answers on the business page's FAQs — the same list the business edits on its own FAQs tab.">
+          <Locked field="faqs">
+          <FaqListEditor items={form.faqs ?? []} onChange={(v) => set("faqs", v)} />
           </Locked>
         </EditorSection>
 
