@@ -14,8 +14,8 @@ import { WEEKDAYS, ORDINAL_OPTIONS, describeRecurrence } from "../api/eventRecur
 const EMPTY = {
   title: "", subtitle: "", description: "",
   category: [], // event sub-category, max 2 — from SEE_DO_CATEGORIES
-  eventDate: "", eventTime: "", entryType: "Free",
-  location: "", lat: "", lng: "",
+  eventDate: "", dateLabel: "", eventTime: "", entryType: "Free", tickets: "",
+  location: "", phone: "", email: "", lat: "", lng: "",
   social: {}, website: "", bookingUrl: "",
   gallery: [], status: "Draft",
   isRecurring: false, recurrenceType: "weekly", recurrenceDays: [], recurrenceOrdinals: [1], recurrenceEndDate: "",
@@ -126,7 +126,18 @@ export default function EventEditorPage() {
 
   async function handleSave(submit) {
     if (!form.category?.length) { setToast("Please select at least one event category."); return; }
-    if (form.isRecurring && !(form.recurrenceDays ?? []).length) { setToast("Please select at least one day for the recurring event."); return; }
+    if (form.isRecurring) {
+      // A repeating event with no first date used to be accepted, and it
+      // took the whole What's On calendar down on the website and the app.
+      if (!form.eventDate) { setToast("Please choose the first date of the repeating event."); return; }
+      if (!(form.recurrenceDays ?? []).length) { setToast("Please select at least one day for the recurring event."); return; }
+      if (form.recurrenceType === "monthly_by_weekday" && !(form.recurrenceOrdinals ?? []).length) { setToast("Please choose which week(s) of the month it repeats."); return; }
+      if (form.recurrenceEndDate && form.recurrenceEndDate < form.eventDate) { setToast("The end date is before the first date."); return; }
+    }
+    // The map needs both halves of the pin, or neither.
+    const hasLat = String(form.lat ?? "").trim() !== "";
+    const hasLng = String(form.lng ?? "").trim() !== "";
+    if (hasLat !== hasLng) { setToast("Fill in both latitude and longitude for a map, or leave both blank for no map."); return; }
     setSaving(true);
     const status = submit ? "Pending Approval" : "Draft";
     const next = { ...form, status };
@@ -169,14 +180,15 @@ export default function EventEditorPage() {
               <Field label="Event Title" required span2><Inp value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Event title…" /></Field>
               <Field label="Subtitle" span2 hint={`Shown under the title on the event page and the calendar · ${(form.subtitle ?? "").length}/160`}><Inp value={form.subtitle ?? ""} maxLength={160} onChange={(e) => set("subtitle", e.target.value)} placeholder="One line about the event…" /></Field>
               <Field label="Event Description" span2><TextArea rows={5} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the event…" /></Field>
-              <Field label={form.isRecurring ? "First Occurrence Date" : "Event Date"}><UKDateInput value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
+              <Field label={form.isRecurring ? "First Occurrence Date" : "Event Date"} required={!!form.isRecurring}><UKDateInput value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} /></Field>
+              <Field label="Date label" hint="Optional wording shown instead of the date, e.g. “Every Sunday morning”"><Inp value={form.dateLabel ?? ""} onChange={(e) => set("dateLabel", e.target.value)} /></Field>
               <Field label="Event Time" hint="e.g. 7:00 PM or 10am - 4pm"><Inp value={form.eventTime ?? ""} onChange={(e) => set("eventTime", e.target.value)} /></Field>
-              <Field label="Entry">
+              <Field label="Entry type" hint="Shown on the event page when the ticket details below are left blank">
                 <Select value={form.entryType} onChange={(e) => set("entryType", e.target.value)}>
                   <option>Free</option><option>Paid</option>
                 </Select>
               </Field>
-              <Field label="Location"><Inp value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="e.g. Maidenhead Town Hall" /></Field>
+              <Field label="Ticket / entry details" span2 hint="Printed on the event page beside the ticket icon, e.g. “Free entry, no booking needed” or “£12 — book online”. Leave blank to show the entry type instead."><Inp value={form.tickets ?? ""} onChange={(e) => set("tickets", e.target.value)} /></Field>
             </div>
 
             <div className="mt-5 pt-4" style={{ borderTop: `1px solid ${BORDER}` }}>
@@ -192,17 +204,22 @@ export default function EventEditorPage() {
             </div>
           </EditorSection>
 
-          <EditorSection title="Location Coordinates" hint="Optional — used to show the event on the map">
-            <LocationFields lat={form.lat} lng={form.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
-          </EditorSection>
-
-          <EditorSection title="Links">
+          <EditorSection title="Find Us">
             <div className="grid sm:grid-cols-2 gap-4 mb-4">
-              <Field label="Website URL"><Inp value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
-              <Field label="Booking URL"><Inp value={form.bookingUrl} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" /></Field>
+              <Field label="Location" span2 hint="Shown as words under Find Us on the event page. It does not put the event on the map — fill in the Location Pin below for that.">
+                <Inp value={form.location ?? ""} onChange={(e) => set("location", e.target.value)} placeholder="e.g. Maidenhead Town Hall" />
+              </Field>
+              <Field label="Phone" hint="Shown as a tap-to-call link"><Inp value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} /></Field>
+              <Field label="Email" hint="Shown as a tap-to-email link"><Inp value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} /></Field>
+              <Field label="Website URL"><Inp value={form.website ?? ""} onChange={(e) => set("website", e.target.value)} placeholder="https://…" /></Field>
+              <Field label="Booking / Tickets URL"><Inp value={form.bookingUrl ?? ""} onChange={(e) => set("bookingUrl", e.target.value)} placeholder="https://…" /></Field>
             </div>
             <p className="text-xs font-semibold mb-2" style={{ color: MUTED }}>Social Links (optional)</p>
             <SocialFields links={form.social} onChange={(v) => set("social", v)} />
+          </EditorSection>
+
+          <EditorSection title="Location Pin" hint="Optional. The event page shows a map and Get Directions only when both latitude and longitude are filled in. Leave both blank for no map — even if your business has an address, it isn't used for the event.">
+            <LocationFields lat={form.lat} lng={form.lng} onChange={({ lat, lng }) => { set("lat", lat); set("lng", lng); }} />
           </EditorSection>
 
           <EditorSection title="Hero Image" hint="The main picture at the top of your event page and on its calendar card">
