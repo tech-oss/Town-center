@@ -13,6 +13,7 @@ import ClaimBusinessBox from "./ClaimBusinessBox";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 import useViewedCategory from "../lib/viewedCategory";
 import { FREELANCER_CATEGORIES } from "../mobile/lib/freelancerCategories";
+import { parseCoords } from "../lib/geo";
 
 // A freelancer gets the portfolio-first profile rather than the
 // tradesperson layout (services offered, why choose us, areas covered).
@@ -65,7 +66,9 @@ export default function ServicesDetailPage() {
 
   // Free plan: name, hero image, address, phone and email only — see DetailPage.
   const free = isFreeListing(item);
-  const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
+  // Map and directions only from the saved pin — see DetailPage.
+  const pin = item.mapQuery ? parseCoords(item.lat, item.lng) : null;
+  const mapQuery = pin ? `${pin.lat},${pin.lng}` : null;
   const gallery = (item.gallery?.length ? item.gallery : [item.image].filter(Boolean)).slice(0, 8); // cap at 8 pictures per business
   const heroImage = gallery[0];
   const extraImages = gallery.slice(1);

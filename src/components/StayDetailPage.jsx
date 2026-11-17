@@ -11,6 +11,7 @@ import ClaimBusinessBox from "./ClaimBusinessBox";
 import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 import { RoomsSection, ManagedBySection } from "./AccommodationSections";
+import { parseCoords } from "../lib/geo";
 
 // Gold star row — 4 of 5 → "★★★★☆". Rendered as its own badge alongside the
 // category pill, same pill styling as the rest of the layout.
@@ -267,7 +268,8 @@ export default function StayDetailPage({ kind }) {
       email={item.email}
       social={free ? null : buildSocial(item)}
       website={free ? null : item.website}
-      directionsQuery={free && !isProperty ? null : item.mapQuery}
+      // Only the saved latitude/longitude makes a map — see DetailPage.
+      directionsQuery={free && !isProperty ? null : (item.mapQuery && parseCoords(item.lat, item.lng) ? `${Number(item.lat)},${Number(item.lng)}` : null)}
       shareInActions
       // In the info card's button row, and floating once that is scrolled past.
       extraButtonLabel={!free && item.bookingUrl?.trim() ? "Book Now" : undefined}

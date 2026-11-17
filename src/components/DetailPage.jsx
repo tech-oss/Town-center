@@ -12,6 +12,7 @@ import PlaceDetailLayout from "./PlaceDetailLayout";
 import BusinessReviews from "./BusinessReviews";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
 import useViewedCategory from "../lib/viewedCategory";
+import { parseCoords } from "../lib/geo";
 
 // Business social profiles → the shared layout's { icon, href, label } shape.
 function buildSocial(item) {
@@ -51,8 +52,11 @@ export default function DetailPage() {
   const others = sectionItems.filter((i) => i.category !== item.category && i.slug !== item.slug);
   const related = [...sameCat, ...others].slice(0, 3);
 
-  // Map / directions target — prefer an explicit query, else the business name + town
-  const mapQuery = item.mapQuery || `${item.name}, Maidenhead`;
+  // Map and directions only from the business's saved latitude/longitude
+  // (item.mapQuery is that pin). Without one there's no map: the name or
+  // address is never looked up in its place.
+  const pin = item.mapQuery ? parseCoords(item.lat, item.lng) : null;
+  const mapQuery = pin ? `${pin.lat},${pin.lng}` : null;
 
   // Free plan: name, hero image, address, phone and email only. Description,
   // hours and photos show a "coming soon" line; socials, website/booking

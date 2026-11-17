@@ -29,6 +29,15 @@ export function isValidCoords(lat, lng) {
   return parseCoords(lat, lng) !== null;
 }
 
+// Google Maps directions to a saved pin, or null without one. A business or
+// event is only ever put on a map from the latitude and longitude it saved:
+// the address it typed is text for its page, never looked up — "Big Ben"
+// typed as an address used to put a pin on Westminster.
+export function directionsUrl(lat, lng) {
+  const c = parseCoords(lat, lng);
+  return c ? `https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}` : null;
+}
+
 function distanceKm(a, b) {
   const rad = (d) => (d * Math.PI) / 180;
   const dLat = rad(b.lat - a.lat);

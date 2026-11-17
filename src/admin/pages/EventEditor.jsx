@@ -217,8 +217,13 @@ export default function EventEditor({ initial, onSaved, onCancel }) {
           <div className="grid sm:grid-cols-2 gap-4 mt-4">
             <Field label={form.isRecurring ? "First date" : "Date"}>
               <UKDateInput value={form.eventDate ?? ""} onChange={(e) => set("eventDate", e.target.value)} />
+              {/* An event with only a Date label (free text) has no date to
+                  put on the calendar, so it never appears there. */}
+              <span className="text-[11px] font-semibold leading-snug" style={{ color: NAVY }}>
+                To have your event shown on the calendar, please input the date of the event. If this is a repeating event, please put the date of the 1st event and then indicate how often the event repeats in the below option.
+              </span>
             </Field>
-            <Field label="Date label" hint="Optional wording shown instead of the date, e.g. “Every Sunday morning”">
+            <Field label="Date label" hint="Optional wording shown instead of the date, e.g. “Every Sunday morning”. It doesn't put the event on the calendar — the date does.">
               <Inp value={form.dateLabel ?? ""} onChange={(e) => set("dateLabel", e.target.value)} />
             </Field>
             <Field label="Time" hint="Free text, e.g. “12pm – 5pm”">

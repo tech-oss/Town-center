@@ -3,6 +3,7 @@ import MapBase from "../../components/MapBase";
 import { MapContainer, Marker } from "react-leaflet";
 import L from "leaflet";
 import { geocodePlace } from "../../lib/geocode";
+import { parseCoords } from "../../lib/geo";
 
 
 const PIN_ICON = L.divIcon({
@@ -25,7 +26,16 @@ const geocode = geocodePlace;
 // this geocodes on the fly rather than requiring lat/lng on every listing.
 // Fully interactive (drag/pinch-zoom/zoom buttons) rather than a static
 // picture, so the user can explore the area around the pin.
-export default function MiniMap({ query, lat, lng, height = 180 }) {
+// A saved pin passed as the query ("51.52,-0.72") is the position itself.
+function pinFromQuery(query) {
+  const m = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/.exec(String(query ?? ""));
+  return m ? parseCoords(m[1], m[2]) : null;
+}
+
+export default function MiniMap({ query, lat: latProp, lng: lngProp, height = 180 }) {
+  const queryPin = latProp && lngProp ? null : pinFromQuery(query);
+  const lat = latProp || queryPin?.lat;
+  const lng = lngProp || queryPin?.lng;
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);
   const [failed, setFailed] = useState(false);
 

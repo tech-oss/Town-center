@@ -12,6 +12,7 @@ import MobileCard from "../components/MobileCard";
 import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
+import { parseCoords, directionsUrl } from "../../lib/geo";
 import useFetch from "../../hooks/useFetch";
 import { getHotelBySlug, getAccommodationBySlug, getStayDiscover, getPropertyRelated } from "../../api";
 import { typeColor } from "../lib/typeColors";
@@ -175,9 +176,10 @@ export default function StayDetailScreen() {
   if (!loading && !place) return <Navigate to="/mobile/live" replace />;
   if (loading || !place) return null;
 
-  const mapsUrl = place.mapQuery
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery)}`
-    : `https://www.google.com/maps/dir/?api=1&destination=${place.lat},${place.lng}`;
+  // Map and directions only from the saved latitude/longitude, never the
+  // address text — see PlaceDetailScreen.
+  const pin = place.mapQuery ? parseCoords(place.lat, place.lng) : null;
+  const mapsUrl = pin ? directionsUrl(pin.lat, pin.lng) : null;
   // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
   const free = isFreeListing(place);
   // A property of an accommodation management company: a free one is
@@ -286,7 +288,7 @@ export default function StayDetailScreen() {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              {(!free || isProperty) && (
+              {(!free || isProperty) && mapsUrl && (
                 <ActionButton
                   href={mapsUrl}
                   label="Get Directions"
@@ -402,10 +404,10 @@ export default function StayDetailScreen() {
 
           {!free && isProperty && <MobileRooms rooms={place.rooms} />}
 
-          {(!free || isProperty) && (
+          {(!free || isProperty) && pin && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
-              <MiniMap query={place.mapQuery || place.address || place.area} lat={place.lat} lng={place.lng} />
+              <MiniMap lat={pin.lat} lng={pin.lng} />
             </div>
           )}
 

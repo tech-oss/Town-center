@@ -343,7 +343,8 @@ export function LocationFields({ lat, lng, onChange }) {
       </div>
       <CoordsNotice lat={lat} lng={lng} />
       <p className="text-[11px] mb-3" style={{ color: "#9CA3AF" }}>
-        Enter the precise coordinates for this business. You can find these from Google Maps by right-clicking the location.
+        Enter the precise coordinates. You can find these from Google Maps by right-clicking the location.
+        The map, Get Directions and the homepage map only appear when both are filled in — the address is shown as text and is never used to place a pin. Leave both blank for no map.
       </p>
       <div className="rounded-xl overflow-hidden max-w-md" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc", minHeight: 120 }}>
         {mapSrc ? (

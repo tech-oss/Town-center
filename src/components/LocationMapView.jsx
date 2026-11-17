@@ -3,6 +3,7 @@ import MapBase from "./MapBase";
 import { MapContainer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { geocodePlace } from "../lib/geocode";
+import { parseCoords } from "../lib/geo";
 
 
 // Custom pin matching TradersMap brand colours
@@ -20,7 +21,17 @@ const PIN_ICON = L.divIcon({
 // Postcode first, then the address text (lib/geocode.js).
 const geocode = geocodePlace;
 
-export default function LocationMap({ query, lat, lng, heading = "Location", note, rounded = true, width = "100%", widthClassName, aspectClassName = "aspect-[16/9] md:aspect-[21/9]" }) {
+// "51.52,-0.72" — a saved pin passed as the query. It is the position
+// itself, so it is used directly rather than sent to the address lookup.
+function pinFromQuery(query) {
+  const m = /^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/.exec(String(query ?? ""));
+  return m ? parseCoords(m[1], m[2]) : null;
+}
+
+export default function LocationMap({ query, lat: latProp, lng: lngProp, heading = "Location", note, rounded = true, width = "100%", widthClassName, aspectClassName = "aspect-[16/9] md:aspect-[21/9]" }) {
+  const queryPin = latProp && lngProp ? null : pinFromQuery(query);
+  const lat = latProp || queryPin?.lat;
+  const lng = lngProp || queryPin?.lng;
   const [pos, setPos] = useState(lat && lng ? { lat, lng } : null);
   const [error, setError] = useState(false);
   const markerRef = useRef(null);

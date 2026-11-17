@@ -316,8 +316,11 @@ function toItem(row, articles, reviews = {}, newsOffers = {}, featuredIds = new 
     lat: coords?.lat ?? null,
     lng: coords?.lng ?? null,
     // A Free accommodation property still shows its map pin and directions —
-    // its location is part of the basic listing.
-    mapQuery: (premium || isProperty) && coords ? `${coords.lat},${coords.lng}` : (premium ? address : null),
+    // its location is part of the basic listing. Only the saved latitude and
+    // longitude ever make a map: with none, the page shows the address as
+    // text and no map or directions. The address used to be looked up when
+    // the pin was blank, which put a pin wherever the words led.
+    mapQuery: (premium || isProperty) && coords ? `${coords.lat},${coords.lng}` : null,
     // Layout props default to [] only when undefined, never when null, so an
     // empty column must arrive as undefined or the page throws on .slice().
     faq: listOrUndefined((row.faqs ?? [])

@@ -12,6 +12,7 @@ import MobileCard from "../components/MobileCard";
 import ActionButton from "../components/ActionButton";
 import PhotoGallery from "../components/PhotoGallery";
 import MiniMap from "../components/MiniMap";
+import { parseCoords, directionsUrl } from "../../lib/geo";
 import { sections } from "../../Data/pages";
 import { typeColor } from "../lib/typeColors";
 import { postPath } from "../../lib/postPath";
@@ -101,7 +102,10 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
   const [openFaq, setOpenFaq] = useState(0);
   const section = sections[place.section];
   const defaultReviewSourceUrl = `https://www.google.com/search?q=${encodeURIComponent(`${place.name} reviews`)}`;
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
+  // Map and directions only from the saved latitude/longitude, never the
+  // address text — see PlaceDetailScreen.
+  const pin = place.mapQuery ? parseCoords(place.lat, place.lng) : null;
+  const mapsUrl = pin ? directionsUrl(pin.lat, pin.lng) : null;
   // Free plan: name, hero, address, phone and email only — see PlaceDetailScreen.
   const free = isFreeListing(place);
   // A business can sit in several categories; the breadcrumb follows the one
@@ -200,7 +204,7 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              {!free && (
+              {!free && mapsUrl && (
                 <ActionButton
                   href={mapsUrl}
                   label="Get Directions"
@@ -308,10 +312,10 @@ export default function ServicesBusinessDetailScreen({ place, goBack }) {
             </MobileCard>
           )}
 
-          {!free && (
+          {!free && pin && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
-              <MiniMap query={place.mapQuery || place.address} lat={place.lat} lng={place.lng} />
+              <MiniMap lat={pin.lat} lng={pin.lng} />
             </div>
           )}
 

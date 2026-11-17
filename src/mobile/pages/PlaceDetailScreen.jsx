@@ -15,6 +15,7 @@ import ComingSoonCard from "../components/ComingSoonCard";
 import PhotoGallery from "../components/PhotoGallery";
 import ActionButton from "../components/ActionButton";
 import MiniMap from "../components/MiniMap";
+import { parseCoords, directionsUrl } from "../../lib/geo";
 import { itemBySlug, sections } from "../../Data/pages";
 import StickyCta, { TicketIcon } from "../components/StickyCta";
 import useMobileBack from "../hooks/useMobileBack";
@@ -53,7 +54,10 @@ function BusinessDetailScreen({ place, goBack }) {
   const viewed = useViewedCategory(place);
 
   const section = sections[place.section];
-  const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(place.mapQuery || place.address)}`;
+  // Map and directions only from the saved latitude/longitude, never the
+  // address text (lib/geo.js → directionsUrl).
+  const pin = place.mapQuery ? parseCoords(place.lat, place.lng) : null;
+  const mapsUrl = pin ? directionsUrl(pin.lat, pin.lng) : null;
   const websiteUrl = !free ? externalUrl(place.website) : null;
   // The booking button opens the business's booking link, falling back to its
   // website — the same rule as the website's page.
@@ -172,7 +176,7 @@ function BusinessDetailScreen({ place, goBack }) {
                   icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" /></svg>}
                 />
               )}
-              {!free && (
+              {!free && mapsUrl && (
                 <ActionButton
                   href={mapsUrl}
                   label="Get Directions"
@@ -212,13 +216,12 @@ function BusinessDetailScreen({ place, goBack }) {
             ? <ComingSoonCard heading="Photos" text={FREE_PLACEHOLDERS.gallery} />
             : <PhotoGallery images={gallery} title={place.name} />}
 
-          {/* Location map — the website embeds one on every detail page;
-              geocoded from the address since not every listing has stored
-              coordinates. Hidden on a free listing. */}
-          {!free && (
+          {/* Location map — only when the business saved a latitude and
+              longitude, as on the website. Hidden on a free listing. */}
+          {!free && pin && (
             <div>
               <p className="section-eyebrow mb-2.5" style={{ color: "var(--teal-deep)" }}>Location</p>
-              <MiniMap query={place.mapQuery || place.address} lat={place.lat} lng={place.lng} />
+              <MiniMap lat={pin.lat} lng={pin.lng} />
             </div>
           )}
 

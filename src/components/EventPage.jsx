@@ -13,6 +13,7 @@ import NewsOffers from "./NewsOffers";
 import BusinessReviews from "./BusinessReviews";
 import ClaimBusinessBox from "./ClaimBusinessBox";
 import { isFreeListing, FREE_PLACEHOLDERS } from "../lib/planPresentation";
+import { parseCoords } from "../lib/geo";
 
 // What's On events carry their own category system (Music, Family, Market,
 // Festive, Theatre, Sport, Community) — map each onto the nearest See & Do
@@ -69,7 +70,8 @@ function asEvent(rawEvent, it) {
     phone: it.phone,
     email: it.email,
     social: it.social,
-    mapQuery: it.mapQuery,
+    // Only a saved latitude/longitude makes a map, never the address.
+    mapQuery: it.mapQuery && parseCoords(it.lat, it.lng) ? `${Number(it.lat)},${Number(it.lng)}` : null,
     lat: it.lat != null && it.lat !== "" ? Number(it.lat) : null,
     lng: it.lng != null && it.lng !== "" ? Number(it.lng) : null,
   };
@@ -206,9 +208,8 @@ export default function EventPage() {
       email={event.email}
       website={free ? null : event.website}
       social={free ? null : buildSocial(event.social)}
-      directionsQuery={free ? null : event.isBusiness
-        ? (event.mapQuery || event.location || (event.lat != null ? event.title : null))
-        : event.mapQuery}
+      // Only a saved pin makes a map, for a See & Do business as for an event.
+      directionsQuery={free ? null : event.mapQuery}
       // Saved coordinates put the pin straight on the map, with no address
       // lookup that can fail.
       hideMapNote={!event.isBusiness}
