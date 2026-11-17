@@ -472,7 +472,9 @@ export function LocationFields({ lat, lng, onChange }) {
         <Field label="Latitude"><Inp type="number" step="0.000001" value={lat ?? ""} onChange={(e) => onChange({ lat: e.target.value, lng })} placeholder="e.g. 51.5225" /></Field>
         <Field label="Longitude"><Inp type="number" step="0.000001" value={lng ?? ""} onChange={(e) => onChange({ lat, lng: e.target.value })} placeholder="e.g. -0.7234" /></Field>
       </div>
-      <p className="text-[11px] mb-3" style={{ color: "#9CA3AF" }}>Right-click your location in Google Maps to copy coordinates.</p>
+      <p className="text-[11px] mb-3" style={{ color: "#9CA3AF" }}>
+        Right-click your location in Google Maps to copy coordinates. The map, Get Directions and the homepage map only appear when both are filled in — your address is shown as text and is never used to place a pin. Leave both blank for no map.
+      </p>
       <div className="rounded-xl overflow-hidden max-w-md" style={{ border: `1.5px solid ${BORDER}`, backgroundColor: "#f8fafc", minHeight: 120 }}>
         {mapSrc ? <iframe src={mapSrc} title="Map preview" loading="lazy" className="w-full block" style={{ height: 200, border: 0 }} /> : (
           <div className="h-[120px] flex items-center justify-center text-xs" style={{ color: "#9CA3AF" }}>Enter coordinates to preview the map pin</div>
